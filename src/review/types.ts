@@ -5,17 +5,27 @@ export type ReviewKind = 'delete' | 'comment' | 'choice' | 'stow';
 /** The board's lanes, in the order a note is cycled through them. 'parked'
  *  is the honest answer to most triage — not "this never happened", which is
  *  what deleting the note would say, but "I am not looking at this now". */
-export type ReviewLane = 'open' | 'commented' | 'doing' | 'done' | 'parked';
+export type ReviewLane = 'open' | 'commented' | 'second' | 'done' | 'parked';
 
-export const LANES: ReviewLane[] = ['open', 'commented', 'doing', 'done', 'parked'];
+export const LANES: ReviewLane[] = ['open', 'commented', 'second', 'done', 'parked'];
 
 export const LANE_NAME: Record<ReviewLane, string> = {
   open: 'To do',
   commented: 'Commented',
-  doing: 'Doing',
+  second: 'Second look',
   done: 'Done',
   parked: 'Not now'
 };
+
+/** Lanes still asking for something. Work left, as opposed to work filed. */
+export const LANE_OPEN: ReviewLane[] = ['open', 'commented', 'second'];
+
+/** Both sides write this field, and one of them is a text editor. A value
+ *  the app does not know must not make a note vanish off the board — it
+ *  lands back in To do, where it can be seen and moved. */
+export function laneOf(note: { status?: string }): ReviewLane {
+  return LANES.includes(note.status as ReviewLane) ? note.status as ReviewLane : 'open';
+}
 
 /** What the user decided about something the audit proposed. 'rejected' is
  *  worth storing too — it stops the same section being proposed again. */
@@ -125,8 +135,8 @@ export interface ReviewNote {
   /** Set when the element was restored by dropping it somewhere new. */
   placement?: ReviewPlacement;
   /** Which lane of the board this sits in. Not an inbox to be cleared — a
-   *  to-do that gets moved: 'open' is said-but-not-started, 'doing' is
-   *  picked up, 'done' is acted on in the code. Either side can move it. */
+   *  to-do that gets moved: said, answered, worth another look, done, or
+   *  deliberately not now. Either side can move it. */
   status: ReviewLane;
   anchor: ReviewAnchor;
   createdAt: string;

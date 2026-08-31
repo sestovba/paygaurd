@@ -4489,3 +4489,304 @@ body.review-picking * {
 .review-reply-destroy:hover {
   background: rgb(220 38 38 / 0.1);
 }
+
+/* --- Read, per note --------------------------------------------------------
+ * One timestamp for the whole journal marks a dozen things read because a
+ * drawer opened. A dot per note survives the scan: what is still lit is what
+ * has not been gone through.
+ */
+
+.review-note-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: none;
+  border-radius: 9999px;
+  background: var(--review-blue);
+}
+
+.review-note-dot[data-reply] {
+  background: var(--review-red);
+}
+
+.review-panel-list li[data-unread] .review-note-label {
+  font-weight: 700;
+}
+
+/* Read is the quiet state, not the invisible one. */
+.review-panel-list li:not([data-unread]) .review-note-label {
+  color: rgb(15 23 42 / 0.72);
+  font-weight: 600;
+}
+
+/* Filed somewhere else and found again: the row it became pulses in its new
+   lane, so moving a card is never the same as losing it. */
+.review-panel-list li[data-moved] {
+  animation: review-moved 1.3s ease-out;
+}
+
+@keyframes review-moved {
+  0% { background: rgb(37 99 235 / 0.3); }
+  100% { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-panel-list li[data-moved] { animation: none; background: rgb(37 99 235 / 0.12); }
+}
+
+/* --- Going through them ---------------------------------------------------- */
+
+.review-panel-tools {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+
+.review-panel-go {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  background: var(--review-blue);
+  padding: 0.5rem 0.6rem;
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-panel-go:disabled {
+  background: rgb(15 23 42 / 0.08);
+  color: rgb(15 23 42 / 0.45);
+  cursor: default;
+}
+
+.review-panel-readall {
+  border-radius: 0.5rem;
+  background: rgb(15 23 42 / 0.06);
+  padding: 0.5rem 0.6rem;
+  color: rgb(15 23 42 / 0.7);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.review-panel-readall:hover {
+  background: rgb(15 23 42 / 0.1);
+}
+
+/* --- One card at a time ---------------------------------------------------- */
+
+.review-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.review-queue-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-queue-count {
+  color: rgb(15 23 42 / 0.55);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.review-queue-bar {
+  display: block;
+  overflow: hidden;
+  height: 0.25rem;
+  flex: 1;
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.08);
+}
+
+.review-queue-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--review-blue);
+  transition: width 220ms;
+}
+
+.review-queue-exit {
+  display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  place-items: center;
+  border-radius: 0.4rem;
+  color: rgb(15 23 42 / 0.5);
+  cursor: pointer;
+}
+
+.review-queue-exit:hover {
+  background: rgb(15 23 42 / 0.07);
+}
+
+.review-queue-card {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid rgb(15 23 42 / 0.1);
+  border-radius: 0.6rem;
+  background: white;
+  padding: 0.7rem;
+  box-shadow: 0 1px 2px rgb(2 6 23 / 0.06);
+}
+
+.review-queue-label {
+  color: var(--review-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.review-queue-reason {
+  border-left: 2px solid rgb(15 23 42 / 0.12);
+  padding-left: 0.5rem;
+  color: rgb(15 23 42 / 0.6);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.review-queue-peek {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+  border-top: 1px solid rgb(15 23 42 / 0.08);
+  padding-top: 0.5rem;
+}
+
+.review-queue-peek button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 0.4rem;
+  background: rgb(15 23 42 / 0.05);
+  padding: 0.4rem 0.3rem;
+  color: rgb(15 23 42 / 0.72);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-queue-peek button:hover,
+.review-queue-peek button[data-on] {
+  background: rgb(37 99 235 / 0.12);
+  color: var(--review-blue);
+}
+
+/* Pinned: a card long enough to scroll can never push the only useful
+   controls below the fold. */
+.review-queue-foot {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-top: 1px solid rgb(15 23 42 / 0.08);
+  background: rgb(248 250 252 / 0.94);
+  padding-top: 0.35rem;
+  backdrop-filter: blur(8px);
+}
+
+/* The three answers, sized to be pressed without looking. */
+.review-queue-acts {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.review-queue-acts button {
+  display: flex;
+  min-height: 2.75rem;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border-radius: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.review-queue-did {
+  background: #16a34a;
+  color: white;
+}
+
+.review-queue-again {
+  background: rgb(37 99 235 / 0.14);
+  color: var(--review-blue);
+}
+
+.review-queue-later {
+  background: rgb(100 116 139 / 0.16);
+  color: #475569;
+}
+
+.review-queue-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-queue-hint {
+  color: rgb(15 23 42 / 0.38);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+}
+
+.review-queue-nav button {
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  color: rgb(15 23 42 / 0.55);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-queue-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.review-queue-nav button:not(:disabled):hover {
+  background: rgb(15 23 42 / 0.06);
+}
+
+.review-queue-end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.6rem 1rem;
+  color: #15803d;
+  text-align: center;
+}
+
+.review-queue-end strong {
+  color: var(--review-ink);
+  font-size: 0.9375rem;
+}
+
+.review-queue-end span {
+  color: rgb(15 23 42 / 0.55);
+  font-size: 0.75rem;
+}
+
+.review-queue-end button {
+  margin-top: 0.4rem;
+}

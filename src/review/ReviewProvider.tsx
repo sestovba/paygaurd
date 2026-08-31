@@ -14,7 +14,7 @@ import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal } from './sto
 import type {
   ReviewAnchor, ReviewLane, ReviewNote, ReviewNotes, ReviewVerdict, TrayEdge, TraySettings
 } from './types';
-import { LANE_NAME, LANES } from './types';
+import { LANE_NAME, LANE_OPEN, LANES, laneOf } from './types';
 import { ReviewContext } from './context';
 import type { ReviewContextValue, ReviewMode, SuggestedTarget } from './context';
 import { EdgeTrays } from './EdgeTrays';
@@ -108,28 +108,59 @@ interface WindowBox {
 
 const WINDOW_KEY = 'pg-review-window-v1';
 const DOCK_KEY = 'pg-review-dock-v1';
-/** When the journal was last read. Replies written into review-notes.json by
- *  a code pass arrive while the app is closed, so "new since you last looked"
- *  is the only way the console can tell you something came back. */
-const SEEN_KEY = 'pg-review-seen-v1';
+/** What has been looked at, per note: the note's `updatedAt` as it stood the
+ *  last time it was read. One timestamp for the whole journal marks a dozen
+ *  things read because you opened a drawer, which is how you lose track of
+ *  which ones you actually went through.
+ *
+ *  Local to the browser on purpose. Which of these you have read is yours,
+ *  not part of the record both sides write. */
+const READ_KEY = 'pg-review-read-v1';
 
-function loadSeen(): string {
+type ReadMarks = Record<string, string>;
+
+function loadRead(): ReadMarks {
   try {
-    return localStorage.getItem(SEEN_KEY) ?? '';
+    const raw = localStorage.getItem(READ_KEY);
+    return raw ? JSON.parse(raw) as ReadMarks : {};
   } catch {
-    return '';
+    return {};
   }
 }
 
-/** Notes whose last word is Claude's, and newer than the last read. This is
- *  the console's whole notification model: the reply is the news. */
-function unreadIds(notes: ReviewNotes, seen: string): string[] {
-  return Object.values(notes)
-    .filter((note) => {
-      const last = note.thread?.[note.thread.length - 1];
-      return last?.from === 'claude' && last.at > seen;
-    })
-    .map((note) => note.id);
+/** Lanes come and go, and the file outlives any one version of them: it is
+ *  edited by hand, written by a code pass, and read back months later. A
+ *  status the app no longer knows lands back in To do on the way in, with no
+ *  timestamp bumped — so it is visible immediately and written back clean the
+ *  next time that note is touched, rather than silently vanishing. */
+function normalizeLanes(notes: ReviewNotes): ReviewNotes {
+  let changed = false;
+  const out: ReviewNotes = {};
+  for (const [id, note] of Object.entries(notes)) {
+    const lane = laneOf(note);
+    if (lane === note.status) {
+      out[id] = note;
+      continue;
+    }
+    changed = true;
+    out[id] = { ...note, status: lane };
+  }
+  return changed ? out : notes;
+}
+
+/** Unread until it has been looked at since it last changed — so a note you
+ *  read a week ago comes back the moment an answer lands on it. */
+function isUnread(note: ReviewNote, read: ReadMarks): boolean {
+  const at = read[note.id];
+  return !at || note.updatedAt > at;
+}
+
+/** Unread, and the last word on it is mine. Worth saying louder than the
+ *  rest: it is the half of the conversation that arrives while the app is
+ *  shut, written straight into the file. */
+function isReply(note: ReviewNote, read: ReadMarks): boolean {
+  const last = note.thread?.[note.thread.length - 1];
+  return last?.from === 'claude' && isUnread(note, read);
 }
 
 /** The toolbar is a palette, not a fixture: it remembers where it was put and
@@ -268,12 +299,19 @@ function ReviewConsole({
 }) {
   const [mode, setMode] = useState<ReviewMode>('off');
   const [open, setOpen] = useState(false);
-  const [notes, setNotes] = useState<ReviewNotes>(loadLocal);
+  const [notes, setNotes] = useState<ReviewNotes>(() => normalizeLanes(loadLocal()));
   const [panelOpen, setPanelOpen] = useState(false);
   /** The journal opens on the screen you are looking at. Everything ever
    *  said is a tab away, but it is not the thing you are handed first. */
   const [journalScope, setJournalScope] = useState<'screen' | 'all'>('screen');
-  const [seen, setSeen] = useState(loadSeen);
+  const [read, setRead] = useState<ReadMarks>(loadRead);
+  /** The row that just changed lane, so it can be found again in its new
+   *  home instead of being hunted for. */
+  const [moved, setMoved] = useState<string | null>(null);
+  /** Going through them one at a time: the queue, and where you are in it.
+   *  A list you scan is where you lose your place; a queue hands you the
+   *  next one and remembers which ones it already handed you. */
+  const [triage, setTriage] = useState<{ ids: string[]; at: number } | null>(null);
   const [hovered, setHovered] = useState<Element | null>(null);
   const [picked, setPicked] = useState<Element | null>(null);
   const [, setTick] = useState(0); // scroll/resize nudge so overlays follow
@@ -316,12 +354,14 @@ function ReviewConsole({
   /** Set once the notes file has been read, successfully or not. Nothing is
    *  written back before then. */
   const readFile = useRef(false);
-  /** Which notes were unread when the journal was opened, so the rows can
-   *  stay marked while the badge that counted them clears. */
-  const wasNew = useRef<Set<string>>(new Set());
-  const seenRef = useRef('');
+  /** False until the read marks have been seeded. A browser that has never
+   *  opened the console has read nothing and everything by the same token —
+   *  starting it on "all read" is the honest reading of "nothing has changed
+   *  since you last looked", and every later change stands out properly. */
+  const seeded = useRef(Object.keys(loadRead()).length > 0);
   const suggestedRef = useRef<Record<string, { label: string; reason: string }>>({});
   const notesRef = useRef<ReviewNotes>({});
+  const readRef = useRef<ReadMarks>({});
   const dragStart = useRef<{ x: number; y: number; el: HTMLElement } | null>(null);
   const draggedJustNow = useRef(false);
   const advanceRef = useRef<(() => void) | null>(null);
@@ -345,7 +385,7 @@ function ReviewConsole({
   useEffect(() => {
     fetchRemote().then((remote) => {
       if (remote && Object.keys(remote).length) {
-        setNotes((current) => mergeNotes(current, remote));
+        setNotes((current) => mergeNotes(current, normalizeLanes(remote)));
       }
     }).finally(() => { readFile.current = true; });
   }, []);
@@ -398,6 +438,9 @@ function ReviewConsole({
       };
       return { ...current, [patch.id]: { ...base, ...patch, updatedAt: now } };
     });
+    // Written from this browser, so it is read from this browser. Only the
+    // other side's writes — merged in from the file — arrive unread.
+    setRead((current) => ({ ...current, [patch.id]: now }));
   }, [layout]);
 
   const remove = useCallback((id: string) => {
@@ -413,7 +456,7 @@ function ReviewConsole({
   // screen mounts or unmounts one more proposal, or whenever a note changes.
   suggestedRef.current = suggested;
   notesRef.current = notes;
-  seenRef.current = seen;
+  readRef.current = read;
   pickedRef.current = picked;
   rearrangingRef.current = rearranging;
 
@@ -620,24 +663,56 @@ function ReviewConsole({
   }, []);
 
   useEffect(() => {
+    if (!moved) return;
+    const timer = window.setTimeout(() => {
+      const row = document.querySelector(`[data-note-id="${moved}"]`);
+      row?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 30);
+    const clear = window.setTimeout(() => setMoved(null), 1400);
+    return () => { clearTimeout(timer); clearTimeout(clear); };
+  }, [moved]);
+
+  useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(null), 1900);
     return () => clearTimeout(timer);
   }, [toast]);
 
-  /** Opening the journal is the acknowledgement: the badge clears, and the
-   *  rows that were new stay marked until it is closed again. */
+  /* First run in this browser: everything that already exists counts as
+     read. "Nothing has changed since you last looked" is true — there was no
+     last look — and it means the marks that appear later mean something. */
   useEffect(() => {
-    if (!panelOpen) return;
-    wasNew.current = new Set(unreadIds(notesRef.current, seenRef.current));
-    const now = new Date().toISOString();
-    setSeen(now);
+    if (seeded.current || !readFile.current) return;
+    const ids = Object.keys(notes);
+    if (!ids.length) return;
+    seeded.current = true;
+    setRead((current) => {
+      const next = { ...current };
+      for (const note of Object.values(notes)) next[note.id] ??= note.updatedAt;
+      return next;
+    });
+  }, [notes]);
+
+  useEffect(() => {
     try {
-      localStorage.setItem(SEEN_KEY, now);
+      localStorage.setItem(READ_KEY, JSON.stringify(read));
     } catch {
-      // Private mode; every reply simply reads as new each session.
+      // Private mode; everything simply reads as new next session.
     }
-  }, [panelOpen]);
+  }, [read]);
+
+  /** Looked at, as of how it stands now. */
+  const markRead = useCallback((id: string, at?: string) => {
+    setRead((current) => ({ ...current, [id]: at ?? notesRef.current[id]?.updatedAt ?? new Date().toISOString() }));
+  }, []);
+
+  const markAllRead = useCallback(() => {
+    setRead(() => {
+      const next: ReadMarks = {};
+      for (const note of Object.values(notesRef.current)) next[note.id] = note.updatedAt;
+      return next;
+    });
+  }, []);
 
   /** One step back through the notes. Not a page undo: the app's own data is
    *  never touched by this console, so this only ever rewinds judgements. */
@@ -1329,12 +1404,11 @@ function ReviewConsole({
   // findings — they should never inflate the badge or the report.
   const findings = all.filter(actionable);
 
-  const openCount = findings
-    .filter((note) => note.status === 'open' || note.status === 'doing').length;
+  const openCount = findings.filter((note) => LANE_OPEN.includes(laneOf(note))).length;
   /** What came back since the journal was last read. The console is a
    *  two-way channel, so an answer arriving is worth saying out loud —
    *  otherwise a reply written into the file sits there unseen. */
-  const unread = unreadIds(notes, seen);
+  const unread = findings.filter((note) => isUnread(note, read));
   const onThisScreen = findings.filter((note) => note.anchor.layout === layout);
   const journalNotes = journalScope === 'screen' ? onThisScreen : findings;
   const suggestedIds = Object.keys(suggested);
@@ -1377,9 +1451,9 @@ function ReviewConsole({
         : { kind: 'comment' as const, origin: 'user' as const }),
       // Said out loud, so it is filed under said — the board's whole job is
       // to show which of these have been dealt with and how.
-      status: (notes[composer.id]?.status ?? 'open') === 'open'
+      status: !notes[composer.id] || laneOf(notes[composer.id]) === 'open'
         ? 'commented' as ReviewLane
-        : notes[composer.id].status,
+        : laneOf(notes[composer.id]),
       anchor: composer.anchor
     });
     setComposer(null);
@@ -1390,6 +1464,38 @@ function ReviewConsole({
   /** The journal itself — what has been said, and by whom. It is the same
    *  thing in both docks: a window on a desktop, a fold in the phone's dock.
    *  Only its frame changes. */
+  const triageNote = triage ? notes[triage.ids[triage.at]] : undefined;
+  const queue = journalNotes.filter((note) => LANE_OPEN.includes(laneOf(note)));
+
+  /** Hand them over one at a time, unread first, oldest first. Scanning a
+   *  list is where the place gets lost — this remembers which ones it has
+   *  already handed you and how many are left. */
+  function startTriage() {
+    if (!queue.length) {
+      say('Nothing left to go through', 'good');
+      return;
+    }
+    const ids = [...queue]
+      .sort((a, b) => (
+        Number(!isUnread(a, read)) - Number(!isUnread(b, read))
+        || a.createdAt.localeCompare(b.createdAt)
+      ))
+      .map((note) => note.id);
+    setTriage({ ids, at: 0 });
+  }
+
+  function triageStep(delta: number) {
+    setTriage((current) => (current
+      ? { ...current, at: Math.max(0, Math.min(current.at + delta, current.ids.length)) }
+      : current));
+  }
+
+  /** Answer the card in front of you, and be handed the next one. */
+  function triageFile(lane: ReviewLane) {
+    if (triageNote) setLane(triageNote, lane);
+    triageStep(1);
+  }
+
   const journalBody = (
     <>
             <p className="review-panel-sync">
@@ -1399,6 +1505,7 @@ function ReviewConsole({
                   ? 'This device only — dev server is not writing'
                   : 'Saved on this device'}
             </p>
+
             {/* Two scopes, contextual first. A journal that opens on every
                 note ever written about six layouts is an archive; what you
                 want when you tap it is what you just said about this screen. */}
@@ -1425,36 +1532,175 @@ function ReviewConsole({
               </button>
             </div>
 
-            <ul className="review-panel-list">
-              {journalNotes.length === 0 ? (
-                <li className="review-panel-empty">
-                  {journalScope === 'screen'
-                    ? findings.length
-                      ? 'Nothing marked on this screen yet — the other screens are under Everywhere.'
-                      : 'Nothing marked yet. Select something on the page to start.'
-                    : 'Nothing marked yet. Select something on the page to start.'}
-                </li>
-              ) : null}
-
-              {/* A board, not an inbox. The lanes are the sections and a note
-                is moved between them by either side — the point is where a
-                thing has got to, not whether it has been read. */}
-            {LANES.map((lane) => {
-              const inLane = journalNotes
-                .filter((note) => note.status === lane)
-                .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-              if (!inLane.length) return null;
-              return (
-                <li key={lane} className="review-panel-lane" data-lane={lane}>
-                  <span className="review-panel-lane-head">
-                    {LANE_NAME[lane]}
-                    <span>{inLane.length}</span>
+            {triage ? (
+              /* One at a time. Every answer files the card and hands over the
+                 next, so the work is a sequence rather than a search. */
+              <div className="review-queue">
+                <div className="review-queue-head">
+                  <span className="review-queue-count">
+                    {Math.min(triage.at + 1, triage.ids.length)} of {triage.ids.length}
                   </span>
-                  <ul>{inLane.map(noteRow)}</ul>
-                </li>
-              );
-            })}
-          </ul>
+                  <span className="review-queue-bar" aria-hidden="true">
+                    <i style={{ width: `${(triage.at / triage.ids.length) * 100}%` }} />
+                  </span>
+                  <button
+                    type="button"
+                    className="review-queue-exit"
+                    onClick={() => setTriage(null)}
+                    aria-label="Back to the board"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+
+                {triageNote ? (
+                  <>
+                    <div className="review-queue-card">
+                      <span className="review-note-kind">
+                        {verdictLabel(triageNote)}
+                        <span className="review-note-where">{triageNote.anchor.layout}</span>
+                      </span>
+                      <strong className="review-queue-label">{triageNote.label}</strong>
+                      {triageNote.comment
+                        ? <span className="review-note-text">“{triageNote.comment}”</span>
+                        : null}
+                      {triageNote.reason
+                        ? <span className="review-queue-reason">I proposed cutting it: {triageNote.reason}</span>
+                        : null}
+                      {triageNote.anchor.source
+                        ? <span className="review-note-source">{triageNote.anchor.source}</span>
+                        : null}
+                      {triageNote.thread?.length ? (
+                        <span className="review-note-thread">
+                          {triageNote.thread.map((reply, index) => (
+                            <span key={index} data-from={reply.from}>
+                              <b>{reply.from === 'claude' ? 'Claude' : 'You'}:</b> {reply.text}
+                            </span>
+                          ))}
+                        </span>
+                      ) : null}
+
+                      <div className="review-queue-peek">
+                        <button type="button" onClick={() => pointAtNote(triageNote)}>
+                          <Eye className="size-4" /> Show me
+                        </button>
+                        <button
+                          type="button"
+                          data-on={triageNote.stow ? true : undefined}
+                          onClick={() => toggleHidden(triageNote)}
+                        >
+                          {triageNote.stow ? <EyeOff className="size-4" /> : <EyeOff className="size-4" />}
+                          {triageNote.stow ? 'Unhide' : 'Hide it'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { markRead(triageNote.id); setReplyTo(triageNote.id); }}
+                        >
+                          <MessageSquarePlus className="size-4" /> Reply
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Pinned together: the three answers and the way past
+                        them. A card long enough to scroll must never push the
+                        only useful controls off the bottom. */}
+                    <div className="review-queue-foot">
+                      <div className="review-queue-nav">
+                        <button
+                          type="button"
+                          disabled={triage.at === 0}
+                          onClick={() => triageStep(-1)}
+                        >
+                          ‹ Back
+                        </button>
+                        <span className="review-queue-hint">files it and moves on</span>
+                        <button type="button" onClick={() => triageStep(1)}>Skip ›</button>
+                      </div>
+                      <div className="review-queue-acts">
+                        <button
+                          type="button"
+                          className="review-queue-did"
+                          onClick={() => triageFile('done')}
+                        >
+                          <Check className="size-4" /> Did it
+                        </button>
+                        <button
+                          type="button"
+                          className="review-queue-again"
+                          onClick={() => triageFile('second')}
+                        >
+                          <Eye className="size-4" /> Second look
+                        </button>
+                        <button
+                          type="button"
+                          className="review-queue-later"
+                          onClick={() => triageFile('parked')}
+                        >
+                          <Minus className="size-4" /> Not now
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="review-queue-end">
+                    <Check className="size-5" />
+                    <strong>That is all of them</strong>
+                    <span>{triage.ids.length} gone through on this pass.</span>
+                    <button type="button" className="review-primary" onClick={() => setTriage(null)}>
+                      Back to the board
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="review-panel-tools">
+                  <button
+                    type="button"
+                    className="review-panel-go"
+                    disabled={!queue.length}
+                    onClick={startTriage}
+                  >
+                    <ArrowRight className="size-4" />
+                    {queue.length ? `Go through ${queue.length}` : 'Nothing to go through'}
+                  </button>
+                  {unread.length ? (
+                    <button type="button" className="review-panel-readall" onClick={markAllRead}>
+                      Mark {unread.length} read
+                    </button>
+                  ) : null}
+                </div>
+
+                <ul className="review-panel-list">
+                  {journalNotes.length === 0 ? (
+                    <li className="review-panel-empty">
+                      {journalScope === 'screen' && findings.length
+                        ? 'Nothing marked on this screen yet — the other screens are under Everywhere.'
+                        : 'Nothing marked yet. Select something on the page to start.'}
+                    </li>
+                  ) : null}
+
+                  {/* A board, not an inbox. The lanes are the sections and a
+                      note is moved between them by either side — the point is
+                      where a thing has got to, not whether it has been read. */}
+                  {LANES.map((lane) => {
+                    const inLane = journalNotes
+                      .filter((note) => laneOf(note) === lane)
+                      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+                    if (!inLane.length) return null;
+                    return (
+                      <li key={lane} className="review-panel-lane" data-lane={lane}>
+                        <span className="review-panel-lane-head">
+                          {LANE_NAME[lane]}
+                          <span>{inLane.length}</span>
+                        </span>
+                        <ul>{inLane.map(noteRow)}</ul>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
 
             {replyTo && notes[replyTo] ? (
               <form
@@ -1468,7 +1714,7 @@ function ReviewConsole({
                     id: replyTo,
                     // Saying something about a thing is doing something about
                     // it, so the card moves to say so.
-                    ...(note.status === 'open' ? { status: 'commented' as ReviewLane } : {}),
+                    ...(laneOf(note) === 'open' ? { status: 'commented' as ReviewLane } : {}),
                     thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
                   });
                   setReplyDraft('');
@@ -1510,17 +1756,23 @@ function ReviewConsole({
               </form>
             ) : null}
 
-            <div className="review-panel-foot">
-              <button type="button" onClick={() => navigator.clipboard?.writeText(notesToMarkdown(notes))}>
-                <Copy className="size-4" /> Copy for AI
-              </button>
-              <button
-                type="button"
-                onClick={() => { if (confirm('Clear every review note?')) changeNotes(() => ({})); }}
-              >
-                Clear all
-              </button>
-            </div>
+            {/* Not while going through them: mid-pass the only things worth
+                pressing are the three answers, and this was competing with
+                them for the bottom of the sheet. */}
+            {triage ? null : (
+              <div className="review-panel-foot">
+                <button type="button" onClick={() => navigator.clipboard?.writeText(notesToMarkdown(notes))}>
+                  <Copy className="size-4" /> Copy for AI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { if (confirm('Clear every review note?')) changeNotes(() => ({})); }}
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+
     </>
   );
 
@@ -1528,10 +1780,19 @@ function ReviewConsole({
    *  a code pass moves the same field in review-notes.json — so this is a
    *  message as much as a state change. */
   function moveLane(note: ReviewNote) {
-    const at = LANES.indexOf(note.status);
-    const next = LANES[(at + 1) % LANES.length];
-    upsert({ id: note.id, status: next });
-    say(`${note.label} → ${LANE_NAME[next]}`, next === 'done' ? 'good' : 'info');
+    const at = LANES.indexOf(laneOf(note));
+    setLane(note, LANES[(at + 1) % LANES.length]);
+  }
+
+  /** File a note, and do not lose the reader while doing it. Moving lanes
+   *  moves the row to another part of the board, which on a phone means it
+   *  vanishes from under the thumb that just pressed it — so the row it
+   *  became is scrolled to and pulsed in its new home. */
+  function setLane(note: ReviewNote, lane: ReviewLane) {
+    if (laneOf(note) === lane) return;
+    upsert({ id: note.id, status: lane });
+    say(`${note.label} → ${LANE_NAME[lane]}`, lane === 'done' ? 'good' : 'info');
+    setMoved(note.id);
   }
 
   /** Hide or show the element this note is about. This is the stow the edge
@@ -1548,15 +1809,26 @@ function ReviewConsole({
   }
 
   /** One note in the journal. Both scopes draw the same row: the only
-   *  difference between them is whether the rows are grouped. */
+   *  difference between them is how the rows are grouped. */
   function noteRow(note: ReviewNote) {
-    const fresh = wasNew.current.has(note.id);
+    const fresh = isUnread(note, read);
+    const answered = isReply(note, read);
     return (
-      <li key={note.id} data-kind={note.kind} data-verdict={note.verdict} data-new={fresh || undefined}>
+      <li
+        key={note.id}
+        data-note-id={note.id}
+        data-kind={note.kind}
+        data-verdict={note.verdict}
+        data-unread={fresh || undefined}
+        data-moved={moved === note.id || undefined}
+      >
         <button type="button" className="review-note-body" onClick={() => pointAtNote(note)}>
           <span className="review-note-kind">
+            {/* Read is the quiet state and unread is the loud one, per note,
+                so going through them one at a time actually leaves a trace. */}
+            {fresh ? <i className="review-note-dot" data-reply={answered || undefined} /> : null}
             {verdictLabel(note)}
-            {fresh ? <span className="review-note-new">reply</span> : null}
+            {answered ? <span className="review-note-new">replied</span> : null}
           </span>
           <span className="review-note-label">{note.label}</span>
           {journalScope === 'all'
@@ -1595,17 +1867,17 @@ function ReviewConsole({
         <button
           type="button"
           className="review-note-lane"
-          data-lane={note.status}
+          data-lane={laneOf(note)}
           onClick={() => moveLane(note)}
-          aria-label={`${note.label} is ${LANE_NAME[note.status]} — move it on`}
-          title={`${LANE_NAME[note.status]} — tap to move it on`}
+          aria-label={`${note.label} is ${LANE_NAME[laneOf(note)]} — move it on`}
+          title={`${LANE_NAME[laneOf(note)]} — tap to move it on`}
         >
-          {LANE_NAME[note.status]}
+          {LANE_NAME[laneOf(note)]}
         </button>
         <button
           type="button"
           className="review-note-remove"
-          onClick={() => setReplyTo(replyTo === note.id ? null : note.id)}
+          onClick={() => { markRead(note.id); setReplyTo(replyTo === note.id ? null : note.id); }}
           aria-label={`Reply to ${note.label}`}
           title="Reply"
         >

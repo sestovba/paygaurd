@@ -63,11 +63,13 @@ export function ReviewTarget({
     event.stopPropagation();
   }
 
-  // Stowed means out of the page, not gone: nothing renders while the console
-  // is closed, and a slot stands in its place while reviewing so it can be
-  // dropped back or dragged somewhere else.
+  // Hidden means hidden. The whole point of taking something off the page is
+  // to see whether the page is better without it, and a placeholder sitting
+  // in the gap answers a different question. Only the audit puts the slot
+  // back — that is the one mode whose job is showing what was proposed for
+  // cutting, and it is where stowed elements are revealed on the page too.
   if (stowed) {
-    if (!review || review.mode === 'off') return null;
+    if (!review || review.mode !== 'audit') return null;
     return (
       <div className={`review-slot ${className}`} data-review-id={id} data-review-ui>
         <Archive className="size-3.5 shrink-0" />

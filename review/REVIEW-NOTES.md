@@ -2,8 +2,11 @@
 
 Written by the in-app review console (dev/localhost only — ⌘R, or the
 button bottom right). Do not hand-edit while the app is open: the app
-overwrites this file. Tick a box by setting `"status": "done"` in
-review-notes.json once a note has been acted on in the code.
+overwrites this file. Every note sits in a lane, and either side can
+move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),
+`"commented"` (`[!]` — the reviewer has said what they want and it is
+your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`
+— acted on) or `"parked"` (`[-]` — deliberately not now).
 
 STOWED means parked out of the page in the app; the code is untouched and
 it can be dragged back. DELETE/KEEP/MOVE are the decisions to act on.
@@ -17,7 +20,7 @@ To answer a note, append to its `thread` array in review-notes.json with
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
 11 note(s) · 4 to delete · 3 parked · 1 A/B pick(s)
-Updated 2026-08-31 04:40
+Updated 2026-08-31 15:56
 
 ## Layout: ledger
 
@@ -75,6 +78,8 @@ Updated 2026-08-31 04:40
   - DOM: div#pg-job-xim6tp16ktmtg4qacf > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)
   - Origin: picked by the user
   - Noted: 2026-08-31 03:03
+  - Reviewer replied: "Test"
+  - Reviewer replied: "ssd"
 - [ ] **DELETE — YTD total in current status**
   - I proposed cutting it because: The active monthly TWP or SGA gap matters here; a year-to-date total does not.
   - Source: src/components/payguard/TrackerPayGuard.tsx:301

@@ -2,6 +2,7 @@
 // same text to review/REVIEW-NOTES.md so a code pass can just read the file.
 
 import type { ReviewNote, ReviewNotes } from './types';
+import { laneOf } from './types';
 
 /** A note a code pass can act on. The console also keeps housekeeping notes —
  *  a stash's name, colour and folded state — and those are settings, not
@@ -28,10 +29,11 @@ function headline(note: ReviewNote): string {
 }
 
 function renderNote(note: ReviewNote): string {
-  const box = note.status === 'done' ? '[x]'
-    : note.status === 'doing' ? '[~]'
-      : note.status === 'parked' ? '[-]'
-        : note.status === 'commented' ? '[!]' : '[ ]';
+  const lane = laneOf(note);
+  const box = lane === 'done' ? '[x]'
+    : lane === 'second' ? '[~]'
+      : lane === 'parked' ? '[-]'
+        : lane === 'commented' ? '[!]' : '[ ]';
   const move = note.placement
     ? `place it ${note.placement.position} ${note.placement.anchorLabel ?? note.placement.anchor}`
       + `${note.placement.applied ? ' (the running app already shows it there)' : ' (not satisfiable at runtime — needs a code change)'}`
@@ -88,9 +90,9 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     'button bottom right). Do not hand-edit while the app is open: the app',
     'overwrites this file. Every note sits in a lane, and either side can',
     'move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),',
-    '`"doing"` (picked up, `[~]`), `"done"` (acted on in the code, `[x]`)',
-    '`"parked"` (deliberately not now, `[-]`) or `"commented"` (`[!]`,',
-    'the reviewer has said what they want and it is your move).',
+    '`"commented"` (`[!]` — the reviewer has said what they want and it is',
+    'your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`',
+    '— acted on) or `"parked"` (`[-]` — deliberately not now).',
     '',
     'STOWED means parked out of the page in the app; the code is untouched and',
     'it can be dragged back. DELETE/KEEP/MOVE are the decisions to act on.',
