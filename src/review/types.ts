@@ -2,6 +2,21 @@ import type { LayoutMode } from '../state/storage';
 
 export type ReviewKind = 'delete' | 'comment' | 'choice' | 'stow';
 
+/** The board's lanes, in the order a note is cycled through them. 'parked'
+ *  is the honest answer to most triage — not "this never happened", which is
+ *  what deleting the note would say, but "I am not looking at this now". */
+export type ReviewLane = 'open' | 'commented' | 'doing' | 'done' | 'parked';
+
+export const LANES: ReviewLane[] = ['open', 'commented', 'doing', 'done', 'parked'];
+
+export const LANE_NAME: Record<ReviewLane, string> = {
+  open: 'To do',
+  commented: 'Commented',
+  doing: 'Doing',
+  done: 'Done',
+  parked: 'Not now'
+};
+
 /** What the user decided about something the audit proposed. 'rejected' is
  *  worth storing too — it stops the same section being proposed again. */
 export type ReviewVerdict = 'approved' | 'rejected' | 'revise';
@@ -109,8 +124,10 @@ export interface ReviewNote {
   thread?: ReviewReply[];
   /** Set when the element was restored by dropping it somewhere new. */
   placement?: ReviewPlacement;
-  /** Flipped to 'done' after a code pass acts on it. */
-  status: 'open' | 'done';
+  /** Which lane of the board this sits in. Not an inbox to be cleared — a
+   *  to-do that gets moved: 'open' is said-but-not-started, 'doing' is
+   *  picked up, 'done' is acted on in the code. Either side can move it. */
+  status: ReviewLane;
   anchor: ReviewAnchor;
   createdAt: string;
   updatedAt: string;

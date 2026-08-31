@@ -11,8 +11,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 import {
-  Archive, ChevronDown, ChevronUp, Columns2, MousePointerSquareDashed,
-  NotebookPen, SlidersHorizontal, Trash2, Undo2, X
+  Archive, ChevronDown, ChevronUp, Columns2, Maximize2, Minimize2,
+  MousePointerSquareDashed, NotebookPen, SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 
@@ -51,9 +51,9 @@ function Tool({
   );
 }
 
-/** One room of the console, folded into the dock. The header is the whole
- *  hit area and always says how much is inside, so a shut fold is still a
- *  reading of the thing it holds. */
+/** One room of the console, folded into the dock. The header is the hit area
+ *  and always says how much is inside, so a shut fold is still a reading of
+ *  the thing it holds. */
 function Fold({
   icon: Icon,
   name,
@@ -63,6 +63,8 @@ function Fold({
   tone,
   open,
   onToggle,
+  big,
+  onBig,
   children
 }: {
   icon: ComponentType<{ className?: string }>;
@@ -76,23 +78,60 @@ function Fold({
   tone: 'paper' | 'glass';
   open: boolean;
   onToggle: () => void;
+  /** Folds that hold something worth reading can take the dock's whole
+   *  height. Absent, the fold has no such button and keeps its share. */
+  big?: boolean;
+  onBig?: () => void;
   children: ReactNode;
 }) {
   return (
-    <section className="review-mdock-fold" data-tone={tone} data-open={open || undefined}>
-      <button
-        type="button"
-        className="review-mdock-fold-head"
-        aria-expanded={open}
-        onClick={onToggle}
-      >
-        <Icon className="size-4" />
-        <span className="review-mdock-fold-name">{name}</span>
-        {hint ? <span className="review-mdock-fold-hint">{hint}</span> : null}
-        {news ? <span className="review-mdock-fold-new">{news} new</span> : null}
-        {count ? <span className="review-mdock-fold-count">{count}</span> : null}
-        <ChevronDown className="size-4 review-mdock-fold-caret" />
-      </button>
+    <section
+      className="review-mdock-fold"
+      data-tone={tone}
+      data-open={open || undefined}
+      data-big={(open && big) || undefined}
+    >
+      {/* A band, not one big button: it has controls of its own in it, and a
+          button cannot hold another button. */}
+      <div className="review-mdock-fold-head">
+        <button
+          type="button"
+          className="review-mdock-fold-face"
+          aria-expanded={open}
+          onClick={onToggle}
+        >
+          <Icon className="size-4" />
+          <span className="review-mdock-fold-name">{name}</span>
+          {hint ? <span className="review-mdock-fold-hint">{hint}</span> : null}
+          {news ? <span className="review-mdock-fold-new">{news} new</span> : null}
+          {count ? <span className="review-mdock-fold-count">{count}</span> : null}
+        </button>
+
+        {/* Only while it is open: a control that grows something folded away
+            is a control for a thing you cannot see. */}
+        {onBig && open ? (
+          <button
+            type="button"
+            className="review-mdock-fold-big"
+            aria-pressed={big}
+            aria-label={big ? `Shrink ${name}` : `Give ${name} the whole dock`}
+            title={big ? 'Back to its share' : 'Fill the dock'}
+            onClick={onBig}
+          >
+            {big ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          className="review-mdock-fold-toggle"
+          aria-expanded={open}
+          aria-label={open ? `Fold ${name} away` : `Open ${name}`}
+          onClick={onToggle}
+        >
+          <ChevronDown className="size-4 review-mdock-fold-caret" />
+        </button>
+      </div>
       {open ? <div className="review-mdock-fold-body">{children}</div> : null}
     </section>
   );
@@ -153,6 +192,9 @@ export function MobileDock({
   /** The Review section — the verbs — starts open: you opened the dock to
    *  do something with them. It folds away like every other section. */
   const [toolsOpen, setToolsOpen] = useState(true);
+  /** The journal filling the dock. Reading a thread in a 42vh slot on a
+   *  phone is reading through a letterbox. */
+  const [journalBig, setJournalBig] = useState(false);
   const shown = open && !min;
 
   // A console that was shut and reopened starts on its feet, not folded.
@@ -194,6 +236,7 @@ export function MobileDock({
             setToolsOpen(false);
             onJournal(false);
             onStash(false);
+            setJournalBig(false);
             setMin(true);
           }}
         >
@@ -263,6 +306,8 @@ export function MobileDock({
             news={journalNew}
             open={journalOpen}
             onToggle={() => onJournal(!journalOpen)}
+            big={journalBig}
+            onBig={() => setJournalBig((current) => !current)}
           >
             {journal}
           </Fold>

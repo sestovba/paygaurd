@@ -538,6 +538,16 @@ body.review-picking * {
   color: var(--review-red);
 }
 
+/* Sticky, with the list running under it. */
+.review-mdock-fold-body .review-panel-foot {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  border-top: 1px solid rgb(15 23 42 / 0.1);
+  background: rgb(248 250 252 / 0.92);
+  backdrop-filter: blur(8px);
+}
+
 .review-panel-foot {
   display: flex;
   gap: 0.4rem;
@@ -3914,6 +3924,10 @@ body.review-picking * {
   background: var(--review-glass-strong);
   box-shadow: 0 -14px 34px rgb(2 6 23 / 0.34);
   backdrop-filter: var(--review-blur);
+  /* Never taller than the screen it is reviewing, whatever is open inside
+     it — and always a strip of that screen left showing above. */
+  max-height: calc(100vh - 2.25rem);
+  max-height: calc(100dvh - 2.25rem);
 }
 
 /* --- The tab -------------------------------------------------------------
@@ -3925,6 +3939,16 @@ body.review-picking * {
 /* Lifted out of the flow: the tab hangs off the top edge of the dock rather
    than standing on it, so it costs the dock no height at all. Folded right
    down, the dock is nothing but this chevron on the bottom edge. */
+/* The folds' container has to flex too, or the dock's cap stops at it and
+   the folds inside lay themselves out at full content height — pushing the
+   last band clean off the bottom of the screen. */
+.review-mdock-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
 .review-mdock-tab {
   position: absolute;
   right: 0;
@@ -4042,6 +4066,14 @@ body.review-picking * {
 .review-mdock-fold-head {
   display: flex;
   width: 100%;
+  flex: none;
+  align-items: stretch;
+}
+
+.review-mdock-fold-face {
+  display: flex;
+  flex: 1;
+  min-width: 0;
   min-height: 2.15rem;
   align-items: center;
   gap: 0.45rem;
@@ -4052,6 +4084,27 @@ body.review-picking * {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
+}
+
+/* Both chevrons in the dock hang in the same 2.6rem box, flush to the edge,
+   so every one of them sits on one vertical line. */
+.review-mdock-fold-toggle {
+  display: grid;
+  width: 2.6rem;
+  place-items: center;
+  cursor: pointer;
+}
+
+.review-mdock-fold-big {
+  display: grid;
+  width: 2.2rem;
+  place-items: center;
+  color: rgb(255 255 255 / 0.6);
+  cursor: pointer;
+}
+
+.review-mdock-fold-big[aria-pressed='true'] {
+  color: white;
 }
 
 .review-mdock-fold-name {
@@ -4078,12 +4131,6 @@ body.review-picking * {
 }
 
 .review-mdock-fold-caret {
-  /* 0.8rem either side of a 1rem icon puts its centre 1.3rem in from the
-     edge — the same place the tab's chevron sits in its 2.6rem box. The
-     icon carries a width from its own class, so the padding has to sit
-     outside it rather than eat it. */
-  box-sizing: content-box;
-  padding: 0 0.8rem;
   color: rgb(255 255 255 / 0.6);
   transition: transform 160ms;
 }
@@ -4093,7 +4140,10 @@ body.review-picking * {
 }
 
 .review-mdock-fold-body {
+  /* Shrinkable: two folds open at once share what the dock has rather than
+     pushing it off the top of the screen. */
   min-height: 0;
+  flex: 1 1 auto;
   max-height: 42vh;
   overflow-y: auto;
   border-top: 1px solid var(--review-glass-line);
@@ -4214,4 +4264,228 @@ body.review-picking * {
 /* Inside a fold the verbs have the fold's own border above them already. */
 .review-mdock-fold-body .review-mdock-bar {
   border-top: 0;
+}
+
+/* Maximised: the fold takes everything the capped dock has left after the
+   other folds' own bands. Reading a thread through a 42vh letterbox is the
+   reason this button exists. */
+.review-mdock-fold[data-big] {
+  flex: 1 1 auto;
+}
+
+.review-mdock-fold[data-big] .review-mdock-fold-body {
+  max-height: none;
+}
+
+.review-mdock-bar {
+  flex: none;
+}
+
+/* --- Touch: the row's own buttons ------------------------------------------
+ * Reply and remove sit at 0 opacity until the row is hovered, which on a
+ * phone means never. In the dock they are simply there, and thumb-sized.
+ */
+
+.review-mdock-fold-body .review-note-remove {
+  width: 2rem;
+  height: 2rem;
+  opacity: 1;
+}
+
+.review-mdock-fold-body .review-panel-list li {
+  gap: 0.15rem;
+  padding: 0.15rem 0.25rem;
+}
+
+/* Where the note itself is not on screen, the container that holds it says
+ * so — a slower, dashed pulse, so it never reads as "here it is". */
+.review-flash-near {
+  animation: review-flash-near 2.4s ease-out;
+  outline-offset: 3px;
+}
+
+@keyframes review-flash-near {
+  0%, 100% { outline: 2px dashed rgb(37 99 235 / 0); }
+  12% { outline: 2px dashed rgb(37 99 235 / 0.95); }
+  38% { outline: 2px dashed rgb(37 99 235 / 0.25); }
+  62% { outline: 2px dashed rgb(37 99 235 / 0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-flash-near {
+    animation: none;
+    outline: 2px dashed rgb(37 99 235 / 0.9);
+    outline-offset: 3px;
+  }
+}
+
+/* --- The board -------------------------------------------------------------
+ *
+ * The journal is a to-do, not an inbox: what matters is which lane a note has
+ * got to, and moving it there is the action. Both sides move the same field —
+ * a code pass writes "status" into review-notes.json — so a lane change is a
+ * message as much as a state.
+ */
+
+/* `.review-panel-list li` makes every row a flex row, and it outranks a bare
+   class — the lane is a section, not a row, so it has to say so louder. */
+.review-panel-list li.review-panel-lane {
+  display: block;
+  padding: 0;
+}
+
+.review-panel-lane > ul {
+  display: block;
+  width: 100%;
+}
+
+.review-panel-lane .review-panel-lane-head {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: 1px solid rgb(15 23 42 / 0.08);
+  background: rgb(248 250 252 / 0.94);
+  padding: 0.35rem 0.6rem;
+  color: rgb(15 23 42 / 0.55);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.review-panel-lane-head::before {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: currentColor;
+  content: '';
+}
+
+.review-panel-lane[data-lane='open'] .review-panel-lane-head { color: #b45309; }
+.review-panel-lane[data-lane='doing'] .review-panel-lane-head { color: var(--review-blue); }
+.review-panel-lane[data-lane='done'] .review-panel-lane-head { color: #15803d; }
+
+.review-panel-lane-head span {
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.08);
+  padding: 0 0.35rem;
+  color: rgb(15 23 42 / 0.6);
+  font-size: 0.6875rem;
+  letter-spacing: 0;
+}
+
+.review-panel-lane[data-lane='done'] .review-note-body .review-note-label {
+  color: rgb(15 23 42 / 0.5);
+  text-decoration: line-through;
+}
+
+/* One tap moves it on. Three lanes is short enough that stepping through
+   them beats opening a menu to choose. */
+.review-note-lane {
+  display: grid;
+  min-width: 3.4rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 0 0.45rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.review-note-lane[data-lane='open'] {
+  border-color: rgb(180 83 9 / 0.3);
+  background: rgb(245 158 11 / 0.14);
+  color: #b45309;
+}
+
+.review-note-lane[data-lane='doing'] {
+  border-color: rgb(37 99 235 / 0.3);
+  background: rgb(37 99 235 / 0.14);
+  color: var(--review-blue);
+}
+
+.review-note-lane[data-lane='done'] {
+  border-color: rgb(21 128 61 / 0.3);
+  background: rgb(34 197 94 / 0.16);
+  color: #15803d;
+}
+
+/* Which screen a note is about, once the board is showing all of them. */
+.review-note-where {
+  align-self: flex-start;
+  border-radius: 0.3rem;
+  background: rgb(15 23 42 / 0.07);
+  padding: 0 0.3rem;
+  color: rgb(15 23 42 / 0.55);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+}
+
+/* --- Show / hide, from the board -------------------------------------------
+ * The same stow the edge shelves use, reached from the row: an eye, because
+ * that is what every layer list in every tool uses for exactly this.
+ */
+
+.review-note-eye {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.4rem;
+  color: rgb(15 23 42 / 0.4);
+  cursor: pointer;
+}
+
+.review-note-eye[data-hidden] {
+  background: rgb(37 99 235 / 0.12);
+  color: var(--review-blue);
+}
+
+.review-note-eye:hover {
+  background: rgb(15 23 42 / 0.06);
+  color: rgb(15 23 42 / 0.75);
+}
+
+/* A note whose element is hidden reads as hidden. */
+.review-panel-list li:has(.review-note-eye[data-hidden]) .review-note-label {
+  opacity: 0.65;
+}
+
+.review-note-lane[data-lane='parked'] {
+  border-color: rgb(100 116 139 / 0.3);
+  background: rgb(100 116 139 / 0.14);
+  color: #475569;
+}
+
+.review-panel-lane[data-lane='parked'] .review-panel-lane-head { color: #64748b; }
+
+.review-panel-lane[data-lane='parked'] .review-note-label {
+  color: rgb(15 23 42 / 0.55);
+}
+
+.review-reply-destroy {
+  display: flex;
+  margin-right: auto;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 0.45rem;
+  padding: 0.4rem 0.6rem;
+  color: var(--review-red);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-reply-destroy:hover {
+  background: rgb(220 38 38 / 0.1);
 }

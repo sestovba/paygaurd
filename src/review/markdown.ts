@@ -28,7 +28,10 @@ function headline(note: ReviewNote): string {
 }
 
 function renderNote(note: ReviewNote): string {
-  const box = note.status === 'done' ? '[x]' : '[ ]';
+  const box = note.status === 'done' ? '[x]'
+    : note.status === 'doing' ? '[~]'
+      : note.status === 'parked' ? '[-]'
+        : note.status === 'commented' ? '[!]' : '[ ]';
   const move = note.placement
     ? `place it ${note.placement.position} ${note.placement.anchorLabel ?? note.placement.anchor}`
       + `${note.placement.applied ? ' (the running app already shows it there)' : ' (not satisfiable at runtime — needs a code change)'}`
@@ -83,8 +86,11 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     '',
     'Written by the in-app review console (dev/localhost only — ⌘R, or the',
     'button bottom right). Do not hand-edit while the app is open: the app',
-    'overwrites this file. Tick a box by setting `"status": "done"` in',
-    'review-notes.json once a note has been acted on in the code.',
+    'overwrites this file. Every note sits in a lane, and either side can',
+    'move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),',
+    '`"doing"` (picked up, `[~]`), `"done"` (acted on in the code, `[x]`)',
+    '`"parked"` (deliberately not now, `[-]`) or `"commented"` (`[!]`,',
+    'the reviewer has said what they want and it is your move).',
     '',
     'STOWED means parked out of the page in the app; the code is untouched and',
     'it can be dragged back. DELETE/KEEP/MOVE are the decisions to act on.',

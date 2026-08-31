@@ -51,6 +51,24 @@ function withResolvedSources(root: string, notes: ReviewNotes): ReviewNotes {
 
 const JSON_PATH = 'review/review-notes.json';
 const MD_PATH = 'review/REVIEW-NOTES.md';
+const BACKUP_PATH = 'review/review-notes.backup.json';
+
+/** The app is the only writer, so a post that arrives holding fewer notes
+ *  than the file already has is either a real deletion or a browser whose
+ *  storage was cleared — and from here the two look identical. Keep the last
+ *  larger version either way: a reply written into this file from the other
+ *  side exists nowhere else. */
+function keepShrinkingCopy(jsonFile: string, backupFile: string, incoming: ReviewNotes): void {
+  let previous: ReviewNotes;
+  try {
+    previous = JSON.parse(readFileSync(jsonFile, 'utf8')) as ReviewNotes;
+  } catch {
+    return;
+  }
+  const lost = Object.keys(previous).filter((id) => !(id in incoming));
+  if (!lost.length) return;
+  writeFileSync(backupFile, `${JSON.stringify(previous, null, 2)}\n`);
+}
 
 /**
  * Dev-only bridge for the in-app review console: the browser POSTs its notes
@@ -106,6 +124,7 @@ export function reviewNotes(): Plugin {
             }
             if (json !== previous) {
               mkdirSync(dirname(jsonFile), { recursive: true });
+              keepShrinkingCopy(jsonFile, resolve(server.config.root, BACKUP_PATH), notes);
               writeFileSync(jsonFile, json);
               writeFileSync(mdFile, notesToMarkdown(notes));
             }

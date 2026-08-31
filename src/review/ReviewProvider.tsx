@@ -2,17 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown,
-  ChevronUp, Columns2, Copy, Expand, GripVertical, Keyboard, Link2,
-  List, MessageSquarePlus, Minus, MousePointerSquareDashed, NotebookPen,
-  Sparkles, StretchHorizontal, StretchVertical, Trash2, Undo2, Unlink, X
+  ChevronUp, Columns2, Copy, Expand, Eye, EyeOff, GripVertical, Keyboard,
+  Link2, List, MessageSquarePlus, Minus, MousePointerSquareDashed,
+  NotebookPen, Sparkles, StretchHorizontal, StretchVertical, Trash2, Undo2,
+  Unlink, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
 import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
 import { actionable, notesToMarkdown } from './markdown';
 import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal } from './store';
 import type {
-  ReviewAnchor, ReviewNote, ReviewNotes, ReviewVerdict, TrayEdge, TraySettings
+  ReviewAnchor, ReviewLane, ReviewNote, ReviewNotes, ReviewVerdict, TrayEdge, TraySettings
 } from './types';
+import { LANE_NAME, LANES } from './types';
 import { ReviewContext } from './context';
 import type { ReviewContextValue, ReviewMode, SuggestedTarget } from './context';
 import { EdgeTrays } from './EdgeTrays';
@@ -311,6 +313,9 @@ function ReviewConsole({
    *  a thing you did a second ago, not a decision about the product. */
   const [hiddenTrays, setHiddenTrays] = useState<TrayEdge[]>(DEFAULT_HIDDEN);
   const firstSync = useRef(true);
+  /** Set once the notes file has been read, successfully or not. Nothing is
+   *  written back before then. */
+  const readFile = useRef(false);
   /** Which notes were unread when the journal was opened, so the rows can
    *  stay marked while the badge that counted them clears. */
   const wasNew = useRef<Set<string>>(new Set());
@@ -342,7 +347,7 @@ function ReviewConsole({
       if (remote && Object.keys(remote).length) {
         setNotes((current) => mergeNotes(current, remote));
       }
-    });
+    }).finally(() => { readFile.current = true; });
   }, []);
 
   useEffect(() => {
@@ -352,6 +357,9 @@ function ReviewConsole({
       return;
     }
     const timer = setTimeout(() => {
+      // The file is the other half of the conversation. Writing to it before
+      // reading it would drop whatever came back while the app was closed.
+      if (!readFile.current) return;
       pushRemote(notes).then((ok) => setSynced(ok ? 'file' : 'local'));
     }, 500);
     return () => clearTimeout(timer);
@@ -1321,7 +1329,8 @@ function ReviewConsole({
   // findings — they should never inflate the badge or the report.
   const findings = all.filter(actionable);
 
-  const openCount = findings.filter((note) => note.status === 'open').length;
+  const openCount = findings
+    .filter((note) => note.status === 'open' || note.status === 'doing').length;
   /** What came back since the journal was last read. The console is a
    *  two-way channel, so an answer arriving is worth saying out loud —
    *  otherwise a reply written into the file sits there unseen. */
@@ -1366,7 +1375,11 @@ function ReviewConsole({
       ...(!composer.members && (composer.reason || notes[composer.id]?.origin === 'suggested')
         ? { verdict: 'revise' as ReviewVerdict }
         : { kind: 'comment' as const, origin: 'user' as const }),
-      status: 'open',
+      // Said out loud, so it is filed under said — the board's whole job is
+      // to show which of these have been dealt with and how.
+      status: (notes[composer.id]?.status ?? 'open') === 'open'
+        ? 'commented' as ReviewLane
+        : notes[composer.id].status,
       anchor: composer.anchor
     });
     setComposer(null);
@@ -1423,33 +1436,25 @@ function ReviewConsole({
                 </li>
               ) : null}
 
-              {/* On one screen the layout name is on every row and says nothing.
-                  Across all of them it is the only thing telling two notes about
-                  "the hero" apart, so the grouping comes back with the scope. */}
-              {journalScope === 'screen'
-                ? journalNotes
-                  .slice()
-                  .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-                  .map(noteRow)
-                : Array.from(new Set(journalNotes.map((note) => note.anchor.layout)))
-                  // The screen you are on first; the rest are still listed,
-                  // because a comment is about the product, not about this tab.
-                  .sort((a, b) => (a === layout ? -1 : b === layout ? 1 : a.localeCompare(b)))
-                  .map((noteLayout) => (
-                    <li key={noteLayout} className="review-panel-group">
-                      <span className="review-panel-group-head">
-                        {noteLayout}
-                        {noteLayout === layout ? ' · on screen' : ''}
-                      </span>
-                      <ul>
-                        {journalNotes
-                          .filter((note) => note.anchor.layout === noteLayout)
-                          .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-                          .map(noteRow)}
-                      </ul>
-                    </li>
-                  ))}
-            </ul>
+              {/* A board, not an inbox. The lanes are the sections and a note
+                is moved between them by either side — the point is where a
+                thing has got to, not whether it has been read. */}
+            {LANES.map((lane) => {
+              const inLane = journalNotes
+                .filter((note) => note.status === lane)
+                .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+              if (!inLane.length) return null;
+              return (
+                <li key={lane} className="review-panel-lane" data-lane={lane}>
+                  <span className="review-panel-lane-head">
+                    {LANE_NAME[lane]}
+                    <span>{inLane.length}</span>
+                  </span>
+                  <ul>{inLane.map(noteRow)}</ul>
+                </li>
+              );
+            })}
+          </ul>
 
             {replyTo && notes[replyTo] ? (
               <form
@@ -1461,6 +1466,9 @@ function ReviewConsole({
                   const note = notes[replyTo];
                   upsert({
                     id: replyTo,
+                    // Saying something about a thing is doing something about
+                    // it, so the card moves to say so.
+                    ...(note.status === 'open' ? { status: 'commented' as ReviewLane } : {}),
                     thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
                   });
                   setReplyDraft('');
@@ -1479,6 +1487,23 @@ function ReviewConsole({
                   }}
                 />
                 <div className="review-composer-row">
+                  {/* Destroying the record lives here, spelled out, and not
+                      on the row: there it read as "I am not looking at this",
+                      which is what the Not now lane is for — and it threw the
+                      thread away instead of parking the item. */}
+                  <button
+                    type="button"
+                    className="review-reply-destroy"
+                    onClick={() => {
+                      const note = notes[replyTo];
+                      if (note && confirm(`Delete the note "${note.label}" and its thread?`)) {
+                        remove(replyTo);
+                        setReplyTo(null);
+                      }
+                    }}
+                  >
+                    <Trash2 className="size-4" /> Delete note
+                  </button>
                   <button type="button" className="review-ghost" onClick={() => setReplyTo(null)}>Cancel</button>
                   <button type="submit" className="review-primary">Send</button>
                 </div>
@@ -1499,6 +1524,29 @@ function ReviewConsole({
     </>
   );
 
+  /** Move a note to the next lane, wrapping round. The board is shared —
+   *  a code pass moves the same field in review-notes.json — so this is a
+   *  message as much as a state change. */
+  function moveLane(note: ReviewNote) {
+    const at = LANES.indexOf(note.status);
+    const next = LANES[(at + 1) % LANES.length];
+    upsert({ id: note.id, status: next });
+    say(`${note.label} → ${LANE_NAME[next]}`, next === 'done' ? 'good' : 'info');
+  }
+
+  /** Hide or show the element this note is about. This is the stow the edge
+   *  shelves use — one field on the note — so a thing hidden from the board
+   *  is the same thing as a thing dragged off the page, sticks to the layout
+   *  it was hidden in, and travels in the file like everything else. */
+  function toggleHidden(note: ReviewNote) {
+    if (note.stow) {
+      restore(note.id);
+      return;
+    }
+    upsert({ id: note.id, stow: { edge: 'right', at: new Date().toISOString() } });
+    say(`${note.label} hidden`, 'info');
+  }
+
   /** One note in the journal. Both scopes draw the same row: the only
    *  difference between them is whether the rows are grouped. */
   function noteRow(note: ReviewNote) {
@@ -1511,6 +1559,9 @@ function ReviewConsole({
             {fresh ? <span className="review-note-new">reply</span> : null}
           </span>
           <span className="review-note-label">{note.label}</span>
+          {journalScope === 'all'
+            ? <span className="review-note-where">{note.anchor.layout}</span>
+            : null}
           {note.tags?.length ? (
             <span className="review-note-tags">
               {note.tags.map((tag) => <span key={tag}>{tag}</span>)}
@@ -1532,20 +1583,33 @@ function ReviewConsole({
         </button>
         <button
           type="button"
+          className="review-note-eye"
+          data-hidden={note.stow ? true : undefined}
+          onClick={() => toggleHidden(note)}
+          aria-pressed={Boolean(note.stow)}
+          aria-label={note.stow ? `Show ${note.label} again` : `Hide ${note.label}`}
+          title={note.stow ? 'Hidden on this screen — tap to show it' : 'Hide it on this screen'}
+        >
+          {note.stow ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+        <button
+          type="button"
+          className="review-note-lane"
+          data-lane={note.status}
+          onClick={() => moveLane(note)}
+          aria-label={`${note.label} is ${LANE_NAME[note.status]} — move it on`}
+          title={`${LANE_NAME[note.status]} — tap to move it on`}
+        >
+          {LANE_NAME[note.status]}
+        </button>
+        <button
+          type="button"
           className="review-note-remove"
           onClick={() => setReplyTo(replyTo === note.id ? null : note.id)}
           aria-label={`Reply to ${note.label}`}
           title="Reply"
         >
           <MessageSquarePlus className="size-4" />
-        </button>
-        <button
-          type="button"
-          className="review-note-remove"
-          onClick={() => remove(note.id)}
-          aria-label="Remove note"
-        >
-          <X className="size-4" />
         </button>
       </li>
     );
@@ -1593,7 +1657,56 @@ function ReviewConsole({
       ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
       : document.querySelector(`[data-review-id="${note.id}"]`);
     const found = byId ?? safeQuery(note.anchor.domPath);
-    return found instanceof HTMLElement ? found : null;
+    if (!(found instanceof HTMLElement)) return null;
+    // In the tree but not on the screen — inside a shut accordion, on a tab
+    // that is not showing — is the same as absent for the purpose of
+    // pointing at it, and flashing it would flash nothing.
+    return found.getClientRects().length ? found : null;
+  }
+
+  /** The tab or nav item lit up right now, so "is it even on this page?"
+   *  can be answered before deciding whether to travel anywhere. */
+  function currentPageName(): string | undefined {
+    const marker = Array.from(document.querySelectorAll('[aria-current="page"]'))
+      .find((el) => el.getClientRects().length);
+    const text = (marker?.getAttribute('aria-label') ?? marker?.textContent ?? '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return text ? text.slice(0, 40) : undefined;
+  }
+
+  /** The visible part of where a note lives. When the thing itself is not
+   *  showing, the container that holds it usually is, and pointing at that
+   *  is the difference between a click that does nothing and a click that
+   *  says "in here". Walks up the recorded DOM path, shortest hop first. */
+  function nearestVisible(note: ReviewNote): HTMLElement | null {
+    const exact = note.anchor.reviewId
+      ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
+      : safeQuery(note.anchor.domPath);
+    // Found but hidden: its own ancestors are the best answer there is.
+    if (exact instanceof HTMLElement) {
+      let node: HTMLElement | null = exact.parentElement;
+      while (node && node !== document.body) {
+        if (node.getClientRects().length && !node.closest('[data-review-ui]')) return node;
+        node = node.parentElement;
+      }
+    }
+    // Not in the tree at all: shorten the recorded path a step at a time.
+    const parts = (note.anchor.domPath ?? '').split(' > ');
+    for (let take = parts.length - 1; take > 0; take -= 1) {
+      const found = safeQuery(parts.slice(0, take).join(' > '));
+      if (found && found.getClientRects().length) return found;
+    }
+    return null;
+  }
+
+  /** Point at the container instead of the thing, and say so. */
+  function flashNearest(note: ReviewNote): boolean {
+    const near = nearestVisible(note);
+    if (!near) return false;
+    flashElement(near, 'near');
+    say('Not on screen — flashing what holds it', 'warn');
+    return true;
   }
 
   /** Layouts keep their own page state, so the only honest way in from here is
@@ -1621,12 +1734,15 @@ function ReviewConsole({
 
   /** Clicking a note should say "this one" out loud: scroll to it and flash
    *  it, every time, even if it is already on screen. */
-  function flashElement(target: HTMLElement) {
+  function flashElement(target: HTMLElement, tone: 'exact' | 'near' = 'exact') {
+    const mark = tone === 'near' ? 'review-flash-near' : 'review-flash';
     target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    target.classList.remove('review-flash');
+    target.classList.remove(mark);
     void target.offsetWidth; // restart the animation on a repeat click
-    target.classList.add('review-flash');
-    window.setTimeout(() => target.classList.remove('review-flash'), 1600);
+    target.classList.add(mark);
+    // The near miss holds longer: it is asking you to look for something
+    // inside it, which takes longer than being shown the thing itself.
+    window.setTimeout(() => target.classList.remove(mark), tone === 'near' ? 2600 : 1600);
   }
 
   /** Clicking a note takes you to it — switching layout, palette and page if
@@ -1651,8 +1767,15 @@ function ReviewConsole({
 
     const needsLayout = note.anchor.layout !== layout;
     if (needsLayout && !onNavigate) {
+      if (flashNearest(note)) return;
       say(`Lives in the ${note.anchor.layout} layout`, 'info');
       return;
+    }
+
+    // Already on the right screen and it still is not showing: there is
+    // nowhere to travel to, so point at the part of it that is visible.
+    if (!needsLayout && (!note.anchor.page || note.anchor.page === currentPageName())) {
+      if (flashNearest(note)) return;
     }
 
     say(needsLayout ? `Going to ${note.anchor.layout}…` : `Opening ${note.anchor.page}…`, 'info');
@@ -1676,7 +1799,7 @@ function ReviewConsole({
       }
       if (tries === 1 && note.anchor.page) openPage(note.anchor.page);
       if (tries >= 8) {
-        say('Could not find it on that screen', 'warn');
+        if (!flashNearest(note)) say('Could not find it on that screen', 'warn');
         setTravelling(null);
         return;
       }
