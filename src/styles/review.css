@@ -1969,12 +1969,12 @@ body.review-picking * {
     display: none;
   }
 
-  /* The picker's toolbar stops chasing the selection and sits above the
-   * dock, where a thumb is already resting. */
+  /* The picker's toolbar stops chasing the selection and sits just above
+   * the dock, whatever height the dock happens to be. */
   .review-actions {
     top: auto !important;
     right: 0.5rem;
-    bottom: calc(9rem + env(safe-area-inset-bottom)) !important;
+    bottom: calc(var(--review-mdock-h, 3rem) + 0.5rem) !important;
     left: 0.5rem !important;
     max-width: none;
   }
@@ -1997,7 +1997,7 @@ body.review-picking * {
   .review-composer {
     top: auto !important;
     right: 0 !important;
-    bottom: 0 !important;
+    bottom: var(--review-mdock-h, 0px) !important;
     left: 0 !important;
     width: auto !important;
     max-height: 82vh;
@@ -3875,4 +3875,343 @@ body.review-picking * {
 .review-dock[data-side='left'] .review-help {
   right: auto;
   left: 0;
+}
+
+
+/* --- The phone's dock ------------------------------------------------------
+ *
+ * One object, welded to the bottom edge. Shut it is a tab in the corner, so
+ * the app's own bottom furniture stays visible and usable underneath it.
+ * Open it grows into a footer: a row of verbs, then the console's two rooms
+ * — the journal and the archive — as folds that open in place.
+ *
+ * Everything is fixed and full width. There is no drag, no floating panel and
+ * no compound to take apart, because all three fight the browser for the same
+ * touch and all three cover the screen being reviewed.
+ */
+
+.review-mdock {
+  position: fixed;
+  z-index: 120;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: column;
+  /* Shut, only the tab is really there — the strip either side of it must
+     not swallow taps meant for the app underneath. */
+  pointer-events: none;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.review-mdock > * {
+  pointer-events: auto;
+}
+
+.review-mdock[data-open] {
+  border-top: 1px solid var(--review-glass-line);
+  background: var(--review-glass-strong);
+  box-shadow: 0 -14px 34px rgb(2 6 23 / 0.34);
+  backdrop-filter: var(--review-blur);
+}
+
+/* --- The tab -------------------------------------------------------------
+ *
+ * A phone dock is furniture in a room that is already small: every row here
+ * is sized to a thumb and not one pixel past it.
+ */
+
+/* Lifted out of the flow: the tab hangs off the top edge of the dock rather
+   than standing on it, so it costs the dock no height at all. Folded right
+   down, the dock is nothing but this chevron on the bottom edge. */
+.review-mdock-tab {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  display: flex;
+  align-items: stretch;
+  /* Flush into the corner: a tab held off the edge is a floating button, and
+     the one thing this dock does not do is float. */
+  border: 1px solid var(--review-glass-line);
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0.6rem 0 0 0;
+  background: var(--review-glass-strong);
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+}
+
+.review-mdock-tab[data-band] {
+  box-shadow: none;
+}
+
+.review-mdock-min {
+  position: relative;
+  display: grid;
+  width: 2.6rem;
+  height: 1.9rem;
+  place-items: center;
+  color: rgb(255 255 255 / 0.82);
+  cursor: pointer;
+}
+
+.review-mdock-dot {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.55rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--review-red);
+}
+
+.review-mdock-caret {
+  transition: transform 160ms;
+}
+
+.review-mdock[data-open] .review-mdock-caret {
+  transform: rotate(180deg);
+}
+
+
+/* --- The verbs ------------------------------------------------------------ */
+
+.review-mdock-bar {
+  display: flex;
+  gap: 0.2rem;
+  border-top: 1px solid var(--review-glass-line);
+  padding: 0.25rem 0.35rem;
+}
+
+.review-mdock-tool {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 2.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  border-radius: 0.45rem;
+  padding: 0.2rem 0.1rem;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 140ms, color 140ms;
+}
+
+.review-mdock-tool[data-on='true'] {
+  background: var(--review-blue);
+  color: white;
+}
+
+/* Audit is the destructive one, and says so wherever it is lit. */
+.review-mdock-tool:first-child[data-on='true'] {
+  background: var(--review-red);
+}
+
+.review-mdock-tool:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.review-mdock-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.review-mdock-name {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- The folds ------------------------------------------------------------ */
+
+.review-mdock-fold {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  border-top: 1px solid var(--review-glass-line);
+}
+
+.review-mdock-fold-head {
+  display: flex;
+  width: 100%;
+  min-height: 2.15rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0 0.25rem 0.65rem;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.review-mdock-fold-name {
+  flex: 1;
+  text-align: left;
+}
+
+.review-mdock-fold-count {
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.review-mdock-fold-new {
+  border-radius: 9999px;
+  background: var(--review-red);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.625rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.review-mdock-fold-caret {
+  /* 0.8rem either side of a 1rem icon puts its centre 1.3rem in from the
+     edge — the same place the tab's chevron sits in its 2.6rem box. The
+     icon carries a width from its own class, so the padding has to sit
+     outside it rather than eat it. */
+  box-sizing: content-box;
+  padding: 0 0.8rem;
+  color: rgb(255 255 255 / 0.6);
+  transition: transform 160ms;
+}
+
+.review-mdock-fold[data-open] .review-mdock-fold-caret {
+  transform: rotate(180deg);
+}
+
+.review-mdock-fold-body {
+  min-height: 0;
+  max-height: 42vh;
+  overflow-y: auto;
+  border-top: 1px solid var(--review-glass-line);
+  overscroll-behavior: contain;
+}
+
+/* The journal is a document: it keeps the paper it has in the desktop
+   window, because dark glass is for furniture and this is something to read. */
+.review-mdock-fold[data-tone='paper'] .review-mdock-fold-body {
+  background: rgb(255 255 255 / 0.94);
+  color: var(--review-ink);
+}
+
+.review-mdock-fold[data-tone='glass'] .review-mdock-fold-body {
+  background: rgb(15 23 42 / 0.4);
+}
+
+/* The shelves are a fixed panel of their own out on the page. Inside a fold
+   they are just content. */
+.review-mdock-fold-body .review-stack {
+  position: static;
+  width: auto;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.review-mdock-fold-body .review-stack-body {
+  max-height: none;
+  border-top: 0;
+}
+
+/* --- The journal's two scopes --------------------------------------------- */
+
+.review-panel-scope {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.4rem 0.5rem 0;
+}
+
+.review-panel-scope button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid rgb(15 23 42 / 0.12);
+  border-radius: 0.45rem;
+  background: rgb(15 23 42 / 0.04);
+  padding: 0.3rem 0.5rem;
+  color: rgb(15 23 42 / 0.62);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-panel-scope button[data-on='true'] {
+  border-color: var(--review-blue);
+  background: var(--review-blue);
+  color: white;
+}
+
+.review-panel-scope button span {
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.1);
+  padding: 0 0.35rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-panel-scope button[data-on='true'] span {
+  background: rgb(255 255 255 / 0.24);
+}
+
+/* --- What came back ------------------------------------------------------- */
+
+.review-panel-new {
+  margin-left: 0.4rem;
+  border-radius: 9999px;
+  background: var(--review-red);
+  padding: 0.05rem 0.4rem;
+  color: white;
+  font-size: 0.6875rem;
+}
+
+.review-panel-list li[data-new] {
+  background: rgb(37 99 235 / 0.07);
+}
+
+.review-note-new {
+  margin-left: 0.35rem;
+  border-radius: 9999px;
+  background: var(--review-red);
+  padding: 0 0.35rem;
+  color: white;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.review-badge[data-new] {
+  background: var(--review-red);
+  color: white;
+}
+
+/* What a shut fold is doing, said in one word beside its name. */
+.review-mdock-fold-hint {
+  border-radius: 9999px;
+  background: var(--review-blue);
+  padding: 0.05rem 0.4rem;
+  color: white;
+  font-size: 0.5625rem;
+  letter-spacing: 0.04em;
+}
+
+/* Inside a fold the verbs have the fold's own border above them already. */
+.review-mdock-fold-body .review-mdock-bar {
+  border-top: 0;
 }

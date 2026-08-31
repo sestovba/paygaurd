@@ -16,6 +16,7 @@ import type {
 import { ReviewContext } from './context';
 import type { ReviewContextValue, ReviewMode, SuggestedTarget } from './context';
 import { EdgeTrays } from './EdgeTrays';
+import { MobileDock } from './MobileDock';
 import {
   applyPlacements, applyStowAttributes, dropTargetAt, isStowed, safeQuery
 } from './stow';
@@ -105,6 +106,29 @@ interface WindowBox {
 
 const WINDOW_KEY = 'pg-review-window-v1';
 const DOCK_KEY = 'pg-review-dock-v1';
+/** When the journal was last read. Replies written into review-notes.json by
+ *  a code pass arrive while the app is closed, so "new since you last looked"
+ *  is the only way the console can tell you something came back. */
+const SEEN_KEY = 'pg-review-seen-v1';
+
+function loadSeen(): string {
+  try {
+    return localStorage.getItem(SEEN_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** Notes whose last word is Claude's, and newer than the last read. This is
+ *  the console's whole notification model: the reply is the news. */
+function unreadIds(notes: ReviewNotes, seen: string): string[] {
+  return Object.values(notes)
+    .filter((note) => {
+      const last = note.thread?.[note.thread.length - 1];
+      return last?.from === 'claude' && last.at > seen;
+    })
+    .map((note) => note.id);
+}
 
 /** The toolbar is a palette, not a fixture: it remembers where it was put and
  *  whether it was rolled up. Undefined coordinates mean "never moved" — it
@@ -134,6 +158,10 @@ interface DockBox {
   /** The order of the compound's three parts, top to bottom. Rearranged by
    *  long-pressing one of them and dragging it past its neighbour. */
   order?: DockPart[];
+  /** Where the phone's button was dragged to. Kept apart from x/y: the two
+   *  docks are different objects and must not inherit each other's corner. */
+  mx?: number;
+  my?: number;
 }
 
 export type DockPart = 'fab' | 'tools' | 'stash';
@@ -240,6 +268,10 @@ function ReviewConsole({
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<ReviewNotes>(loadLocal);
   const [panelOpen, setPanelOpen] = useState(false);
+  /** The journal opens on the screen you are looking at. Everything ever
+   *  said is a tab away, but it is not the thing you are handed first. */
+  const [journalScope, setJournalScope] = useState<'screen' | 'all'>('screen');
+  const [seen, setSeen] = useState(loadSeen);
   const [hovered, setHovered] = useState<Element | null>(null);
   const [picked, setPicked] = useState<Element | null>(null);
   const [, setTick] = useState(0); // scroll/resize nudge so overlays follow
@@ -279,6 +311,10 @@ function ReviewConsole({
    *  a thing you did a second ago, not a decision about the product. */
   const [hiddenTrays, setHiddenTrays] = useState<TrayEdge[]>(DEFAULT_HIDDEN);
   const firstSync = useRef(true);
+  /** Which notes were unread when the journal was opened, so the rows can
+   *  stay marked while the badge that counted them clears. */
+  const wasNew = useRef<Set<string>>(new Set());
+  const seenRef = useRef('');
   const suggestedRef = useRef<Record<string, { label: string; reason: string }>>({});
   const notesRef = useRef<ReviewNotes>({});
   const dragStart = useRef<{ x: number; y: number; el: HTMLElement } | null>(null);
@@ -369,6 +405,7 @@ function ReviewConsole({
   // screen mounts or unmounts one more proposal, or whenever a note changes.
   suggestedRef.current = suggested;
   notesRef.current = notes;
+  seenRef.current = seen;
   pickedRef.current = picked;
   rearrangingRef.current = rearranging;
 
@@ -544,9 +581,14 @@ function ReviewConsole({
     };
     window.addEventListener('pointermove', onMove, true);
     window.addEventListener('pointerup', onUp, true);
+    // A gesture the browser claims for itself — a scroll, a system swipe —
+    // ends as a cancel, never an up. Without this the compound stays lifted
+    // and the next tap is swallowed as the end of a drag that is not running.
+    window.addEventListener('pointercancel', onUp, true);
     return () => {
       window.removeEventListener('pointermove', onMove, true);
       window.removeEventListener('pointerup', onUp, true);
+      window.removeEventListener('pointercancel', onUp, true);
     };
   }, [startDockDrag, reorderAt]);
 
@@ -574,6 +616,20 @@ function ReviewConsole({
     const timer = setTimeout(() => setToast(null), 1900);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  /** Opening the journal is the acknowledgement: the badge clears, and the
+   *  rows that were new stay marked until it is closed again. */
+  useEffect(() => {
+    if (!panelOpen) return;
+    wasNew.current = new Set(unreadIds(notesRef.current, seenRef.current));
+    const now = new Date().toISOString();
+    setSeen(now);
+    try {
+      localStorage.setItem(SEEN_KEY, now);
+    } catch {
+      // Private mode; every reply simply reads as new each session.
+    }
+  }, [panelOpen]);
 
   /** One step back through the notes. Not a page undo: the app's own data is
    *  never touched by this console, so this only ever rewinds judgements. */
@@ -1218,7 +1274,8 @@ function ReviewConsole({
       notes={notes}
       layout={layout}
       shape={attached === 'edges' ? 'edges' : 'stack'}
-      stackOpen={stashOpen}
+      embedded={compact}
+      stackOpen={compact ? true : stashOpen}
       onStackToggle={() => setStashOpen((current) => !current)}
       onGripDown={(event) => {
         if (attached === 'free') {
@@ -1265,6 +1322,12 @@ function ReviewConsole({
   const findings = all.filter(actionable);
 
   const openCount = findings.filter((note) => note.status === 'open').length;
+  /** What came back since the journal was last read. The console is a
+   *  two-way channel, so an answer arriving is worth saying out loud —
+   *  otherwise a reply written into the file sits there unseen. */
+  const unread = unreadIds(notes, seen);
+  const onThisScreen = findings.filter((note) => note.anchor.layout === layout);
+  const journalNotes = journalScope === 'screen' ? onThisScreen : findings;
   const suggestedIds = Object.keys(suggested);
   const settled = suggestedIds.filter((id) => notes[id]?.verdict).length;
   const hoverRect = mode === 'pick' && hovered && hovered !== picked
@@ -1309,6 +1372,183 @@ function ReviewConsole({
     setComposer(null);
     setPicked(null);
     say('Comment saved', 'good');
+  }
+
+  /** The journal itself — what has been said, and by whom. It is the same
+   *  thing in both docks: a window on a desktop, a fold in the phone's dock.
+   *  Only its frame changes. */
+  const journalBody = (
+    <>
+            <p className="review-panel-sync">
+              {synced === 'file'
+                ? 'Written to review/REVIEW-NOTES.md'
+                : synced === 'local'
+                  ? 'This device only — dev server is not writing'
+                  : 'Saved on this device'}
+            </p>
+            {/* Two scopes, contextual first. A journal that opens on every
+                note ever written about six layouts is an archive; what you
+                want when you tap it is what you just said about this screen. */}
+            <div className="review-panel-scope" role="tablist" aria-label="Which notes to show">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={journalScope === 'screen'}
+                data-on={journalScope === 'screen' || undefined}
+                onClick={() => setJournalScope('screen')}
+              >
+                This screen
+                {onThisScreen.length ? <span>{onThisScreen.length}</span> : null}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={journalScope === 'all'}
+                data-on={journalScope === 'all' || undefined}
+                onClick={() => setJournalScope('all')}
+              >
+                Everywhere
+                {findings.length ? <span>{findings.length}</span> : null}
+              </button>
+            </div>
+
+            <ul className="review-panel-list">
+              {journalNotes.length === 0 ? (
+                <li className="review-panel-empty">
+                  {journalScope === 'screen'
+                    ? findings.length
+                      ? 'Nothing marked on this screen yet — the other screens are under Everywhere.'
+                      : 'Nothing marked yet. Select something on the page to start.'
+                    : 'Nothing marked yet. Select something on the page to start.'}
+                </li>
+              ) : null}
+
+              {/* On one screen the layout name is on every row and says nothing.
+                  Across all of them it is the only thing telling two notes about
+                  "the hero" apart, so the grouping comes back with the scope. */}
+              {journalScope === 'screen'
+                ? journalNotes
+                  .slice()
+                  .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+                  .map(noteRow)
+                : Array.from(new Set(journalNotes.map((note) => note.anchor.layout)))
+                  // The screen you are on first; the rest are still listed,
+                  // because a comment is about the product, not about this tab.
+                  .sort((a, b) => (a === layout ? -1 : b === layout ? 1 : a.localeCompare(b)))
+                  .map((noteLayout) => (
+                    <li key={noteLayout} className="review-panel-group">
+                      <span className="review-panel-group-head">
+                        {noteLayout}
+                        {noteLayout === layout ? ' · on screen' : ''}
+                      </span>
+                      <ul>
+                        {journalNotes
+                          .filter((note) => note.anchor.layout === noteLayout)
+                          .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+                          .map(noteRow)}
+                      </ul>
+                    </li>
+                  ))}
+            </ul>
+
+            {replyTo && notes[replyTo] ? (
+              <form
+                className="review-reply"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const text = replyDraft.trim();
+                  if (!text) return;
+                  const note = notes[replyTo];
+                  upsert({
+                    id: replyTo,
+                    thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
+                  });
+                  setReplyDraft('');
+                  setReplyTo(null);
+                }}
+              >
+                <span className="review-reply-target">Reply · {notes[replyTo].label}</span>
+                <textarea
+                  autoFocus
+                  rows={2}
+                  value={replyDraft}
+                  placeholder="Add to this thread…"
+                  onChange={(event) => setReplyDraft(event.currentTarget.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') setReplyTo(null);
+                  }}
+                />
+                <div className="review-composer-row">
+                  <button type="button" className="review-ghost" onClick={() => setReplyTo(null)}>Cancel</button>
+                  <button type="submit" className="review-primary">Send</button>
+                </div>
+              </form>
+            ) : null}
+
+            <div className="review-panel-foot">
+              <button type="button" onClick={() => navigator.clipboard?.writeText(notesToMarkdown(notes))}>
+                <Copy className="size-4" /> Copy for AI
+              </button>
+              <button
+                type="button"
+                onClick={() => { if (confirm('Clear every review note?')) changeNotes(() => ({})); }}
+              >
+                Clear all
+              </button>
+            </div>
+    </>
+  );
+
+  /** One note in the journal. Both scopes draw the same row: the only
+   *  difference between them is whether the rows are grouped. */
+  function noteRow(note: ReviewNote) {
+    const fresh = wasNew.current.has(note.id);
+    return (
+      <li key={note.id} data-kind={note.kind} data-verdict={note.verdict} data-new={fresh || undefined}>
+        <button type="button" className="review-note-body" onClick={() => pointAtNote(note)}>
+          <span className="review-note-kind">
+            {verdictLabel(note)}
+            {fresh ? <span className="review-note-new">reply</span> : null}
+          </span>
+          <span className="review-note-label">{note.label}</span>
+          {note.tags?.length ? (
+            <span className="review-note-tags">
+              {note.tags.map((tag) => <span key={tag}>{tag}</span>)}
+            </span>
+          ) : null}
+          {note.comment ? <span className="review-note-text">“{note.comment}”</span> : null}
+          {note.anchor.source
+            ? <span className="review-note-source">{fileOf(note.anchor.source)}</span>
+            : null}
+          {note.thread?.length ? (
+            <span className="review-note-thread">
+              {note.thread.map((reply, index) => (
+                <span key={index} data-from={reply.from}>
+                  <b>{reply.from === 'claude' ? 'Claude' : 'You'}:</b> {reply.text}
+                </span>
+              ))}
+            </span>
+          ) : null}
+        </button>
+        <button
+          type="button"
+          className="review-note-remove"
+          onClick={() => setReplyTo(replyTo === note.id ? null : note.id)}
+          aria-label={`Reply to ${note.label}`}
+          title="Reply"
+        >
+          <MessageSquarePlus className="size-4" />
+        </button>
+        <button
+          type="button"
+          className="review-note-remove"
+          onClick={() => remove(note.id)}
+          aria-label="Remove note"
+        >
+          <X className="size-4" />
+        </button>
+      </li>
+    );
   }
 
   /** Proposals in the order the reader meets them, not the order they mounted. */
@@ -1644,7 +1884,7 @@ function ReviewConsole({
         </div>
       ) : null}
 
-      {panelOpen ? (
+      {panelOpen && !compact ? (
         <div
           data-review-ui
           className="review-panel"
@@ -1658,7 +1898,10 @@ function ReviewConsole({
               winDrag.current = { mode: 'move', x: event.clientX, y: event.clientY, box: win };
             }}
           >
-            <span>Log · {openCount} open</span>
+            <span>
+              Journal · {openCount} open
+              {unread.length ? <b className="review-panel-new">{unread.length} new</b> : null}
+            </span>
             <span className="review-panel-buttons">
               <button
                 type="button"
@@ -1673,126 +1916,7 @@ function ReviewConsole({
               </button>
             </span>
           </header>
-          <p className="review-panel-sync">
-            {synced === 'file'
-              ? 'Written to review/REVIEW-NOTES.md'
-              : synced === 'local'
-                ? 'This device only — dev server is not writing'
-                : 'Saved on this device'}
-          </p>
-          <ul className="review-panel-list">
-            {findings.length === 0 ? (
-              <li className="review-panel-empty">
-                Nothing marked yet. Every layout's notes land here, not just this one's.
-              </li>
-            ) : null}
-            {Array.from(new Set(findings.map((note) => note.anchor.layout)))
-              // The screen you are on first; the rest are still listed, because
-              // a comment is about the product, not about this tab.
-              .sort((a, b) => (a === layout ? -1 : b === layout ? 1 : a.localeCompare(b)))
-              .map((noteLayout) => (
-                <li key={noteLayout} className="review-panel-group">
-                  <span className="review-panel-group-head">
-                    {noteLayout}
-                    {noteLayout === layout ? ' · on screen' : ''}
-                  </span>
-                  <ul>
-                    {findings
-                      .filter((note) => note.anchor.layout === noteLayout)
-                      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-                      .map((note) => (
-                        <li key={note.id} data-kind={note.kind} data-verdict={note.verdict}>
-                          <button type="button" className="review-note-body" onClick={() => pointAtNote(note)}>
-                            <span className="review-note-kind">{verdictLabel(note)}</span>
-                            <span className="review-note-label">{note.label}</span>
-                            {note.tags?.length ? (
-                              <span className="review-note-tags">
-                                {note.tags.map((tag) => <span key={tag}>{tag}</span>)}
-                              </span>
-                            ) : null}
-                            {note.comment ? <span className="review-note-text">“{note.comment}”</span> : null}
-                            {note.anchor.source
-                              ? <span className="review-note-source">{fileOf(note.anchor.source)}</span>
-                              : null}
-                            {note.thread?.length ? (
-                              <span className="review-note-thread">
-                                {note.thread.map((reply, index) => (
-                                  <span key={index} data-from={reply.from}>
-                                    <b>{reply.from === 'claude' ? 'Claude' : 'You'}:</b> {reply.text}
-                                  </span>
-                                ))}
-                              </span>
-                            ) : null}
-                          </button>
-                          <button
-                            type="button"
-                            className="review-note-remove"
-                            onClick={() => setReplyTo(replyTo === note.id ? null : note.id)}
-                            aria-label={`Reply to ${note.label}`}
-                            title="Reply"
-                          >
-                            <MessageSquarePlus className="size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            className="review-note-remove"
-                            onClick={() => remove(note.id)}
-                            aria-label="Remove note"
-                          >
-                            <X className="size-4" />
-                          </button>
-                        </li>
-                      ))}
-                  </ul>
-                </li>
-              ))}
-          </ul>
-
-          {replyTo && notes[replyTo] ? (
-            <form
-              className="review-reply"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const text = replyDraft.trim();
-                if (!text) return;
-                const note = notes[replyTo];
-                upsert({
-                  id: replyTo,
-                  thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
-                });
-                setReplyDraft('');
-                setReplyTo(null);
-              }}
-            >
-              <span className="review-reply-target">Reply · {notes[replyTo].label}</span>
-              <textarea
-                autoFocus
-                rows={2}
-                value={replyDraft}
-                placeholder="Add to this thread…"
-                onChange={(event) => setReplyDraft(event.currentTarget.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Escape') setReplyTo(null);
-                }}
-              />
-              <div className="review-composer-row">
-                <button type="button" className="review-ghost" onClick={() => setReplyTo(null)}>Cancel</button>
-                <button type="submit" className="review-primary">Send</button>
-              </div>
-            </form>
-          ) : null}
-
-          <div className="review-panel-foot">
-            <button type="button" onClick={() => navigator.clipboard?.writeText(notesToMarkdown(notes))}>
-              <Copy className="size-4" /> Copy for AI
-            </button>
-            <button
-              type="button"
-              onClick={() => { if (confirm('Clear every review note?')) changeNotes(() => ({})); }}
-            >
-              Clear all
-            </button>
-          </div>
+          {journalBody}
           <span
             className="review-panel-grip"
             onPointerDown={(event) => {
@@ -1849,390 +1973,423 @@ function ReviewConsole({
         </div>
       ) : null}
 
-      <div
-        ref={dockRef}
-        data-review-ui
-        className="review-dock"
-        data-placed={dock.x !== undefined || undefined}
-        data-side={dragSide ?? (dock.x !== undefined && dock.x < window.innerWidth / 2 ? 'left' : 'right')}
-        /* Parked low — including its home in the bottom corner — the drawer
-           has nowhere to go but up, and the toolbar stays where it was put. */
-        data-drop={dock.y === undefined || dock.y > window.innerHeight * 0.55 ? 'up' : 'down'}
-        onPointerDown={armDockDrag}
-        data-lifted={lifted || undefined}
-        data-sorting={rearranging || undefined}
-        style={{
-          // Anchored to whichever edge it is nearest: on the right that is the
-          // right edge, so anything that opens inside it grows inwards.
-          ...(dock.x !== undefined
-            ? dock.x < window.innerWidth / 2
-              ? { left: dock.x, top: dock.y, right: 'auto', bottom: 'auto' }
-              : { right: dock.rx ?? 8, top: dock.y, left: 'auto', bottom: 'auto' }
-            : {}),
-          ...Object.fromEntries((dock.order ?? DEFAULT_ORDER).map((part, index) => (
-            [`--order-${part}`, index]
-          )))
-        }}
+      {compact ? (
+        <MobileDock
+          open={open}
+          onToggle={() => {
+            const next = !open;
+            setOpen(next);
+            if (!next) { setMode('off'); setPicked(null); }
+          }}
+          onClose={() => { setOpen(false); setMode('off'); setPicked(null); }}
+          mode={mode}
+          onMode={(next) => {
+            setMode(next);
+            setPicked(null);
+            if (next === 'audit') setTimeout(() => stepProposal(1), 60);
+            else setFocusId(null);
+          }}
+          auditTotal={suggestedIds.length}
+          auditSettled={settled}
+          variants={variantSets.length}
+          undoDepth={undoDepth}
+          onUndo={undo}
+          journalOpen={panelOpen}
+          onJournal={setPanelOpen}
+          journalCount={findings.length}
+          journalNew={unread.length}
+          journal={journalBody}
+          stashOpen={stashOpen}
+          onStash={setStashOpen}
+          stashCount={stashCount}
+          shelves={shelves}
+        />
+      ) : (
+        <div
+          ref={dockRef}
+          data-review-ui
+          className="review-dock"
+          data-placed={dock.x !== undefined || undefined}
+          data-side={dragSide ?? (dock.x !== undefined && dock.x < window.innerWidth / 2 ? 'left' : 'right')}
+          /* Parked low — including its home in the bottom corner — the drawer
+             has nowhere to go but up, and the toolbar stays where it was put. */
+          data-drop={dock.y === undefined || dock.y > window.innerHeight * 0.55 ? 'up' : 'down'}
+          onPointerDown={armDockDrag}
+          data-lifted={lifted || undefined}
+          data-sorting={rearranging || undefined}
+          style={{
+            // Anchored to whichever edge it is nearest: on the right that is the
+            // right edge, so anything that opens inside it grows inwards.
+            ...(dock.x !== undefined
+              ? dock.x < window.innerWidth / 2
+                ? { left: dock.x, top: dock.y, right: 'auto', bottom: 'auto' }
+                : { right: dock.rx ?? 8, top: dock.y, left: 'auto', bottom: 'auto' }
+              : {}),
+            ...Object.fromEntries((dock.order ?? DEFAULT_ORDER).map((part, index) => (
+              [`--order-${part}`, index]
+            )))
+          }}
 
-      >
-        {open ? (
-          <div
-            className="review-dock-tools"
-            data-min={dock.min || undefined}
-            data-dir={dock.dir ?? 'v'}
-            style={dock.dir === 'wide' && dock.w ? { width: dock.w } : undefined}
-          >
-            {/* Title band: the handle, and the way out. */}
-            {/* Each object is dragged by its own top band — this one for the
-                toolbar, the stash panel's own header for the stashes. When
-                they are clipped together, either band moves the pair. */}
+        >
+          {open ? (
             <div
-              className="review-hud-head"
-              /* Double-click rolls it up and down — the gesture every title
-                 bar has had for thirty years. A button for it only ever said
-                 "minus" to anyone who had not already guessed. Sending it home
-                 lives on Tidy up, where the rest of the arranging is. */
-              onDoubleClick={(event) => {
-                if ((event.target as HTMLElement).closest('button')) return;
-                setDock((current) => ({ ...current, min: !current.min }));
-              }}
-              title="Drag the grip to reorder · drag to move · double-click to roll it up"
+              className="review-dock-tools"
+              data-min={dock.min || undefined}
+              data-dir={dock.dir ?? 'v'}
+              style={dock.dir === 'wide' && dock.w ? { width: dock.w } : undefined}
             >
+              {/* Title band: the handle, and the way out. */}
+              {/* Each object is dragged by its own top band — this one for the
+                  toolbar, the stash panel's own header for the stashes. When
+                  they are clipped together, either band moves the pair. */}
+              <div
+                className="review-hud-head"
+                /* Double-click rolls it up and down — the gesture every title
+                   bar has had for thirty years. A button for it only ever said
+                   "minus" to anyone who had not already guessed. Sending it home
+                   lives on Tidy up, where the rest of the arranging is. */
+                onDoubleClick={(event) => {
+                  if ((event.target as HTMLElement).closest('button')) return;
+                  setDock((current) => ({ ...current, min: !current.min }));
+                }}
+                title="Drag the grip to reorder · drag to move · double-click to roll it up"
+              >
+                <span
+                  className="review-hud-grip review-part-grip"
+                  onPointerDown={(event) => startRearrange('tools', event)}
+                  title="Drag to reorder the toolbar within the console"
+                >
+                  <GripVertical className="size-3.5" />
+                </span>
+                {/* Window controls belong in the window's own title band. */}
+                <span className="review-hud-window">
+                  {/* One button, cycling. It wears the shape it is about to
+                      give you, not the one you are already looking at — the
+                      current shape is on screen, so showing it again tells you
+                      nothing you cannot see. */}
+                  {(() => {
+                    const shapes = [
+                      { id: 'v' as const, Icon: StretchVertical, name: 'Upright' },
+                      { id: 'h' as const, Icon: StretchHorizontal, name: 'Flat' },
+                      { id: 'wide' as const, Icon: List, name: 'Wide' }
+                    ];
+                    const at = Math.max(0, shapes.findIndex((item) => item.id === (dock.dir ?? 'v')));
+                    const next = shapes[(at + 1) % shapes.length];
+                    const Icon = next.Icon;
+                    return (
+                      <button
+                        type="button"
+                        title={`Switch to ${next.name.toLowerCase()}`}
+                        aria-label={`Switch the toolbar to ${next.name.toLowerCase()}`}
+                        onClick={() => setDock((current) => ({ ...current, dir: next.id }))}
+                      >
+                        <Icon className="size-[18px]" />
+                      </button>
+                    );
+                  })()}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                data-on={mode === 'audit' || undefined}
+                data-label="Audit"
+                data-key="a"
+                title="Audit · a"
+                aria-label="Audit"
+                onClick={() => {
+                  const next = mode === 'audit' ? 'off' : 'audit';
+                  setMode(next);
+                  setPicked(null);
+                  if (next === 'audit') setTimeout(() => stepProposal(1), 60);
+                  else setFocusId(null);
+                }}
+              >
+                <Trash2 className="size-[18px]" />
+                {suggestedIds.length ? (
+                  // How many are still waiting, not how many exist — and a tick
+                  // once the screen is fully answered. A fraction would not fit
+                  // the corner of a 36px icon anyway.
+                  <span
+                    className="review-badge"
+                    data-done={settled === suggestedIds.length || undefined}
+                    title={`${settled} of ${suggestedIds.length} answered on this screen`}
+                  >
+                    {settled === suggestedIds.length
+                      ? <Check className="size-2.5" strokeWidth={4} />
+                      : suggestedIds.length - settled}
+                  </span>
+                ) : null}
+              </button>
+
+              <button
+                type="button"
+                data-on={mode === 'pick' || undefined}
+                data-label="Pick"
+                data-key="p"
+                title="Pick · p"
+                aria-label="Pick"
+                onClick={() => { setMode(mode === 'pick' ? 'off' : 'pick'); setPicked(null); }}
+              >
+                <MousePointerSquareDashed className="size-[18px]" />
+              </button>
+
+              {variantSets.length ? (
+                <button
+                  type="button"
+                  data-on={mode === 'variants' || undefined}
+                  data-label="A / B"
+                  data-key="v"
+                  title="Compare alternatives · v"
+                  aria-label="Compare alternatives"
+                  onClick={() => { setMode(mode === 'variants' ? 'off' : 'variants'); setPicked(null); }}
+                >
+                  <Columns2 className="size-[18px]" />
+                  <span className="review-badge">{variantSets.length}</span>
+                </button>
+              ) : null}
+
+              <span className="review-tools-rule" />
+
+              <button
+                type="button"
+                disabled={!undoDepth}
+                data-label="Undo"
+                data-key="u"
+                title="Undo · u"
+                aria-label="Undo the last decision"
+                onClick={undo}
+              >
+                <Undo2 className="size-[18px]" />
+                {undoDepth ? <span className="review-badge">{undoDepth}</span> : null}
+              </button>
+
+              <button
+                type="button"
+                data-on={panelOpen || undefined}
+                data-label="Log"
+                data-key="4"
+                title="Notes log · 4"
+                aria-label="Notes log"
+                onClick={() => setPanelOpen(!panelOpen)}
+              >
+                <NotebookPen className="size-[18px]" />
+                {findings.length ? <span className="review-badge">{findings.length}</span> : null}
+              </button>
+
+              {attached === 'edges' ? null : (
+                <button
+                  type="button"
+                  data-on={stashOpen || undefined}
+                  data-label="Stash"
+                  data-key="what you set aside"
+                  title="Stashes"
+                  aria-label="Stashes"
+                  aria-expanded={stashOpen}
+                  onClick={() => setStashOpen(!stashOpen)}
+                >
+                  <Archive className="size-[18px]" />
+                  {stashCount ? <span className="review-badge">{stashCount}</span> : null}
+                </button>
+              )}
+
+              <span className="review-tools-rule" />
+
+              <button
+                type="button"
+                className="review-tools-more"
+                data-on={moreOpen || undefined}
+                /* No hover label: a chevron under a toolbar explains itself, and
+                   a tooltip that says "Arrange" says nothing the arrow did not. */
+                aria-label="More controls"
+                aria-expanded={moreOpen}
+                onClick={() => setMoreOpen(!moreOpen)}
+              >
+                {/* A chevron, not an ellipsis: it opens a floor downward, and
+                    the arrow says which way. */}
+                <ChevronDown className="size-[18px] review-more-caret" />
+              </button>
+
+
+              {/* The flat bar has width to spend, so it spends it on whatever
+                  tool is running — answering the focused proposal here means the
+                  buttons stay put instead of moving with every outline. */}
+              {dock.dir === 'h' && mode === 'audit' && focusId && suggested[focusId] ? (
+                <span className="review-bar-context">
+                  <button
+                    type="button"
+                    className="review-bar-step"
+                    onClick={() => stepProposal(-1)}
+                    aria-label="Previous proposal"
+                  >‹</button>
+                  <span className="review-bar-name">{suggested[focusId].label}</span>
+                  <button
+                    type="button"
+                    className="review-bar-step"
+                    onClick={() => stepProposal(1)}
+                    aria-label="Next proposal"
+                  >›</button>
+                  {([
+                    ['approved', Trash2, 'Cut it'],
+                    ['rejected', X, 'Keep it'],
+                    ['revise', MessageSquarePlus, 'Say what is wrong']
+                  ] as const).map(([verdict, Icon, label]) => (
+                    <button
+                      key={verdict}
+                      type="button"
+                      className={`review-bar-verdict review-${
+                        verdict === 'approved' ? 'yes' : verdict === 'rejected' ? 'no' : 'maybe'
+                      }`}
+                      data-on={notes[focusId]?.verdict === verdict || undefined}
+                      title={label}
+                      aria-label={`${label} — ${suggested[focusId].label}`}
+                      onClick={() => decide(
+                        {
+                          id: focusId,
+                          label: suggested[focusId].label,
+                          reason: suggested[focusId].reason,
+                          layout
+                        },
+                        verdict,
+                        document.querySelector(`[data-review-id="${focusId}"]`)
+                      )}
+                    >
+                      <Icon className="size-3.5" />
+                    </button>
+                  ))}
+                </span>
+              ) : null}
+
+              {dock.dir === 'wide' ? (
+                <span
+                  className="review-tools-grip"
+                  aria-hidden="true"
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
+                    const rect = dockRef.current?.getBoundingClientRect();
+                    if (!rect) return;
+                    sizeDrag.current = { x: event.clientX, from: rect.width };
+                  }}
+                />
+              ) : null}
+
+            </div>
+          ) : null}
+
+          {/* A second floor rather than a longer bar: the extras drop below the
+              toolbar, in their own strip, so the bar itself never changes
+              length and nothing has to scroll to reach them. */}
+          <div className="review-tools-tray" data-open={moreOpen || undefined}>
+              <button
+                type="button"
+                data-label="Tidy up"
+                data-key="layout"
+                title="Tidy up — everything back to its default place"
+                aria-label="Put the console furniture back in its default places"
+                onClick={tidy}
+              >
+                <Sparkles className="size-[18px]" />
+              </button>
+
+              <button
+                type="button"
+                data-on={dock.help || undefined}
+                data-label="Keys"
+                data-key="?"
+                title="Show the key card"
+                aria-label="Show or hide the key card"
+                onClick={() => setDock((current) => ({ ...current, help: !current.help }))}
+              >
+                <Keyboard className="size-[18px]" />
+              </button>
+
+              <button
+                type="button"
+                data-on={attached === 'with' || undefined}
+                data-label={attached === 'with' ? 'Unclip stashes' : 'Clip stashes on'}
+                data-key={attached === 'with' ? 'move together' : 'move apart'}
+                aria-label="Clip the stashes to the toolbar, or set them loose"
+                title={attached === 'with' ? 'Unclip the stashes' : 'Clip the stashes to the toolbar'}
+                onClick={() => setDock((current) => ({
+                  ...current,
+                  stash: attached === 'with' ? 'free' : 'with'
+                }))}
+              >
+                {attached === 'with'
+                  ? <Unlink className="size-[18px]" />
+                  : <Link2 className="size-[18px]" />}
+              </button>
+
+              </div>
+
+          {/* Clipped on: the shelves are part of the same object as the toolbar,
+              and the drag on the dock moves the pair. */}
+          {open && attached === 'with' ? (
+            <div className="review-dock-stash">{shelves}</div>
+          ) : null}
+
+          {/* Its own object, not a tool: this is the way in and the way out of
+              the console, so it never sits among the things the console does. */}
+          <span className="review-fab-wrap">
+          <button
+            type="button"
+            className="review-fab"
+            data-open={open || undefined}
+            aria-expanded={open}
+            onClick={() => { setOpen(!open); if (open) { setMode('off'); setPicked(null); } }}
+          >
+            {/* The handle lives inside the capsule rather than beside it: two
+                chips for one object was one chip too many. */}
+            {open ? (
               <span
-                className="review-hud-grip review-part-grip"
-                onPointerDown={(event) => startRearrange('tools', event)}
-                title="Drag to reorder the toolbar within the console"
+                className="review-part-grip review-fab-grip"
+                onPointerDown={(event) => startRearrange('fab', event)}
+                title="Drag to reorder"
               >
                 <GripVertical className="size-3.5" />
               </span>
-              {/* Window controls belong in the window's own title band. */}
-              <span className="review-hud-window">
-                {/* One button, cycling. It wears the shape it is about to
-                    give you, not the one you are already looking at — the
-                    current shape is on screen, so showing it again tells you
-                    nothing you cannot see. */}
-                {(() => {
-                  const shapes = [
-                    { id: 'v' as const, Icon: StretchVertical, name: 'Upright' },
-                    { id: 'h' as const, Icon: StretchHorizontal, name: 'Flat' },
-                    { id: 'wide' as const, Icon: List, name: 'Wide' }
-                  ];
-                  const at = Math.max(0, shapes.findIndex((item) => item.id === (dock.dir ?? 'v')));
-                  const next = shapes[(at + 1) % shapes.length];
-                  const Icon = next.Icon;
-                  return (
-                    <button
-                      type="button"
-                      title={`Switch to ${next.name.toLowerCase()}`}
-                      aria-label={`Switch the toolbar to ${next.name.toLowerCase()}`}
-                      onClick={() => setDock((current) => ({ ...current, dir: next.id }))}
-                    >
-                      <Icon className="size-[18px]" />
-                    </button>
-                  );
-                })()}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              data-on={mode === 'audit' || undefined}
-              data-label="Audit"
-              data-key="a"
-              title="Audit · a"
-              aria-label="Audit"
-              onClick={() => {
-                const next = mode === 'audit' ? 'off' : 'audit';
-                setMode(next);
-                setPicked(null);
-                if (next === 'audit') setTimeout(() => stepProposal(1), 60);
-                else setFocusId(null);
-              }}
-            >
-              <Trash2 className="size-[18px]" />
-              {suggestedIds.length ? (
-                // How many are still waiting, not how many exist — and a tick
-                // once the screen is fully answered. A fraction would not fit
-                // the corner of a 36px icon anyway.
-                <span
-                  className="review-badge"
-                  data-done={settled === suggestedIds.length || undefined}
-                  title={`${settled} of ${suggestedIds.length} answered on this screen`}
-                >
-                  {settled === suggestedIds.length
-                    ? <Check className="size-2.5" strokeWidth={4} />
-                    : suggestedIds.length - settled}
-                </span>
-              ) : null}
-            </button>
-
-            <button
-              type="button"
-              data-on={mode === 'pick' || undefined}
-              data-label="Pick"
-              data-key="p"
-              title="Pick · p"
-              aria-label="Pick"
-              onClick={() => { setMode(mode === 'pick' ? 'off' : 'pick'); setPicked(null); }}
-            >
-              <MousePointerSquareDashed className="size-[18px]" />
-            </button>
-
-            {variantSets.length ? (
-              <button
-                type="button"
-                data-on={mode === 'variants' || undefined}
-                data-label="A / B"
-                data-key="v"
-                title="Compare alternatives · v"
-                aria-label="Compare alternatives"
-                onClick={() => { setMode(mode === 'variants' ? 'off' : 'variants'); setPicked(null); }}
-              >
-                <Columns2 className="size-[18px]" />
-                <span className="review-badge">{variantSets.length}</span>
-              </button>
             ) : null}
-
-            <span className="review-tools-rule" />
-
-            <button
-              type="button"
-              disabled={!undoDepth}
-              data-label="Undo"
-              data-key="u"
-              title="Undo · u"
-              aria-label="Undo the last decision"
-              onClick={undo}
-            >
-              <Undo2 className="size-[18px]" />
-              {undoDepth ? <span className="review-badge">{undoDepth}</span> : null}
-            </button>
-
-            <button
-              type="button"
-              data-on={panelOpen || undefined}
-              data-label="Log"
-              data-key="4"
-              title="Notes log · 4"
-              aria-label="Notes log"
-              onClick={() => setPanelOpen(!panelOpen)}
-            >
-              <NotebookPen className="size-[18px]" />
-              {findings.length ? <span className="review-badge">{findings.length}</span> : null}
-            </button>
-
-            {attached === 'edges' ? null : (
-              <button
-                type="button"
-                data-on={stashOpen || undefined}
-                data-label="Stash"
-                data-key="what you set aside"
-                title="Stashes"
-                aria-label="Stashes"
-                aria-expanded={stashOpen}
-                onClick={() => setStashOpen(!stashOpen)}
-              >
-                <Archive className="size-[18px]" />
-                {stashCount ? <span className="review-badge">{stashCount}</span> : null}
-              </button>
-            )}
-
-            <span className="review-tools-rule" />
-
-            <button
-              type="button"
-              className="review-tools-more"
-              data-on={moreOpen || undefined}
-              /* No hover label: a chevron under a toolbar explains itself, and
-                 a tooltip that says "Arrange" says nothing the arrow did not. */
-              aria-label="More controls"
-              aria-expanded={moreOpen}
-              onClick={() => setMoreOpen(!moreOpen)}
-            >
-              {/* A chevron, not an ellipsis: it opens a floor downward, and
-                  the arrow says which way. */}
-              <ChevronDown className="size-[18px] review-more-caret" />
-            </button>
-
-
-            {/* The flat bar has width to spend, so it spends it on whatever
-                tool is running — answering the focused proposal here means the
-                buttons stay put instead of moving with every outline. */}
-            {dock.dir === 'h' && mode === 'audit' && focusId && suggested[focusId] ? (
-              <span className="review-bar-context">
-                <button
-                  type="button"
-                  className="review-bar-step"
-                  onClick={() => stepProposal(-1)}
-                  aria-label="Previous proposal"
-                >‹</button>
-                <span className="review-bar-name">{suggested[focusId].label}</span>
-                <button
-                  type="button"
-                  className="review-bar-step"
-                  onClick={() => stepProposal(1)}
-                  aria-label="Next proposal"
-                >›</button>
-                {([
-                  ['approved', Trash2, 'Cut it'],
-                  ['rejected', X, 'Keep it'],
-                  ['revise', MessageSquarePlus, 'Say what is wrong']
-                ] as const).map(([verdict, Icon, label]) => (
-                  <button
-                    key={verdict}
-                    type="button"
-                    className={`review-bar-verdict review-${
-                      verdict === 'approved' ? 'yes' : verdict === 'rejected' ? 'no' : 'maybe'
-                    }`}
-                    data-on={notes[focusId]?.verdict === verdict || undefined}
-                    title={label}
-                    aria-label={`${label} — ${suggested[focusId].label}`}
-                    onClick={() => decide(
-                      {
-                        id: focusId,
-                        label: suggested[focusId].label,
-                        reason: suggested[focusId].reason,
-                        layout
-                      },
-                      verdict,
-                      document.querySelector(`[data-review-id="${focusId}"]`)
-                    )}
-                  >
-                    <Icon className="size-3.5" />
-                  </button>
-                ))}
-              </span>
-            ) : null}
-
-            {dock.dir === 'wide' ? (
-              <span
-                className="review-tools-grip"
-                aria-hidden="true"
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                  const rect = dockRef.current?.getBoundingClientRect();
-                  if (!rect) return;
-                  sizeDrag.current = { x: event.clientX, from: rect.width };
-                }}
-              />
-            ) : null}
-
-          </div>
-        ) : null}
-
-        {/* A second floor rather than a longer bar: the extras drop below the
-            toolbar, in their own strip, so the bar itself never changes
-            length and nothing has to scroll to reach them. */}
-        <div className="review-tools-tray" data-open={moreOpen || undefined}>
-            <button
-              type="button"
-              data-label="Tidy up"
-              data-key="layout"
-              title="Tidy up — everything back to its default place"
-              aria-label="Put the console furniture back in its default places"
-              onClick={tidy}
-            >
-              <Sparkles className="size-[18px]" />
-            </button>
-
-            <button
-              type="button"
-              data-on={dock.help || undefined}
-              data-label="Keys"
-              data-key="?"
-              title="Show the key card"
-              aria-label="Show or hide the key card"
-              onClick={() => setDock((current) => ({ ...current, help: !current.help }))}
-            >
-              <Keyboard className="size-[18px]" />
-            </button>
-
-            <button
-              type="button"
-              data-on={attached === 'with' || undefined}
-              data-label={attached === 'with' ? 'Unclip stashes' : 'Clip stashes on'}
-              data-key={attached === 'with' ? 'move together' : 'move apart'}
-              aria-label="Clip the stashes to the toolbar, or set them loose"
-              title={attached === 'with' ? 'Unclip the stashes' : 'Clip the stashes to the toolbar'}
-              onClick={() => setDock((current) => ({
-                ...current,
-                stash: attached === 'with' ? 'free' : 'with'
-              }))}
-            >
-              {attached === 'with'
-                ? <Unlink className="size-[18px]" />
-                : <Link2 className="size-[18px]" />}
-            </button>
-
-            </div>
-
-        {/* Clipped on: the shelves are part of the same object as the toolbar,
-            and the drag on the dock moves the pair. */}
-        {open && attached === 'with' ? (
-          <div className="review-dock-stash">{shelves}</div>
-        ) : null}
-
-        {/* Its own object, not a tool: this is the way in and the way out of
-            the console, so it never sits among the things the console does. */}
-        <span className="review-fab-wrap">
-        <button
-          type="button"
-          className="review-fab"
-          data-open={open || undefined}
-          aria-expanded={open}
-          onClick={() => { setOpen(!open); if (open) { setMode('off'); setPicked(null); } }}
-        >
-          {/* The handle lives inside the capsule rather than beside it: two
-              chips for one object was one chip too many. */}
-          {open ? (
-            <span
-              className="review-part-grip review-fab-grip"
-              onPointerDown={(event) => startRearrange('fab', event)}
-              title="Drag to reorder"
-            >
-              <GripVertical className="size-3.5" />
+            {open ? <Check className="size-4" /> : <NotebookPen className="size-5" />}
+            <span>
+              {open ? 'Done' : 'Review'}
+              {!open && openCount ? ` · ${openCount}` : ''}
+              <kbd>{open ? 'esc' : '⌘R'}</kbd>
             </span>
-          ) : null}
-          {open ? <Check className="size-4" /> : <NotebookPen className="size-5" />}
-          <span>
-            {open ? 'Done' : 'Review'}
-            {!open && openCount ? ` · ${openCount}` : ''}
-            <kbd>{open ? 'esc' : '⌘R'}</kbd>
+          </button>
           </span>
-        </button>
-        </span>
 
-        {/* Silent by default. The tools carry their own names on hover and the
-            badge carries the count, so prose here would only be repeating
-            them — the card is opt-in, from the ? in the title bar. */}
-        {open && dock.help ? (
-          <div className="review-help" data-review-ui>
-            <p className="review-help-now">
-              {mode === 'pick'
-                ? picked
-                  ? '↑ wider · ↓ narrower · ←/→ along the row · shift+arrow stashes'
-                  : 'Click anything on the page, or drag it to an edge to stash it'
-                : mode === 'audit'
-                  ? '✓ cut it · ✗ keep it · 💬 say what is wrong'
-                  : mode === 'variants'
-                    ? 'Flip between the alternatives, then keep one'
-                    : 'Pick works on anything · Audit walks the cuts I proposed'}
-            </p>
-            <span><kbd>⌘R</kbd> console</span>
-            <span><kbd>a</kbd> audit</span>
-            <span><kbd>p</kbd> pick</span>
-            <span><kbd>n</kbd> note</span>
-            <span><kbd>f</kbd> flag</span>
-            <span><kbd>u</kbd> undo</span>
-            <span><kbd>[</kbd><kbd>]</kbd> step</span>
-            <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shelves</span>
-            <span data-on={hiddenTrays.length ? true : undefined}>
-              <kbd>h</kbd> {hiddenTrays.length ? `${hiddenTrays.length} hidden` : 'all shelves'}
-            </span>
-          </div>
-        ) : null}
+          {/* Silent by default. The tools carry their own names on hover and the
+              badge carries the count, so prose here would only be repeating
+              them — the card is opt-in, from the ? in the title bar. */}
+          {open && dock.help ? (
+            <div className="review-help" data-review-ui>
+              <p className="review-help-now">
+                {mode === 'pick'
+                  ? picked
+                    ? '↑ wider · ↓ narrower · ←/→ along the row · shift+arrow stashes'
+                    : 'Click anything on the page, or drag it to an edge to stash it'
+                  : mode === 'audit'
+                    ? '✓ cut it · ✗ keep it · 💬 say what is wrong'
+                    : mode === 'variants'
+                      ? 'Flip between the alternatives, then keep one'
+                      : 'Pick works on anything · Audit walks the cuts I proposed'}
+              </p>
+              <span><kbd>⌘R</kbd> console</span>
+              <span><kbd>a</kbd> audit</span>
+              <span><kbd>p</kbd> pick</span>
+              <span><kbd>n</kbd> note</span>
+              <span><kbd>f</kbd> flag</span>
+              <span><kbd>u</kbd> undo</span>
+              <span><kbd>[</kbd><kbd>]</kbd> step</span>
+              <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shelves</span>
+              <span data-on={hiddenTrays.length ? true : undefined}>
+                <kbd>h</kbd> {hiddenTrays.length ? `${hiddenTrays.length} hidden` : 'all shelves'}
+              </span>
+            </div>
+          ) : null}
 
-      </div>
+        </div>
+      )}
     </ReviewContext.Provider>
   );
 }
