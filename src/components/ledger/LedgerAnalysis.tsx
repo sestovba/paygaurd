@@ -1,0 +1,274 @@
+import { useMemo, useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
+import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
+import { longMonthName, monthsOfYear, todayMonth } from '../../domain/months';
+import { rulesFor } from '../../domain/rules';
+import { paycheckContextForMonth } from '../../domain/paySchedule';
+import { benefitPhase, trialWorkStatus } from '../../domain/trialWork';
+import type { BenefitPhase } from '../../domain/trialWork';
+import type { MonthStatus, TrackerData } from '../../domain/types';
+import { SafeWorkSimulator } from '../SafeWorkSimulator';
+import { money0, money2 } from './ledgerFormat';
+import { ReviewTarget } from '../../review/ReviewTarget';
+
+type StatusKind = 'none' | 'review' | 'safe' | 'warn' | 'twp' | 'over';
+
+function statusKind(status: MonthStatus, phase: BenefitPhase): StatusKind {
+  if (phase === 'unknown' || phase === 'verifyComplete') {
+    return status.countable > 0 || status.isServiceMonth ? 'review' : 'none';
+  }
+  if (phase === 'sga') {
+    if (status.countable <= 0) return 'none';
+    if (status.overSga) return 'over';
+    if (nearLimit(status, phase)) return 'warn';
+    return 'safe';
+  }
+  if (status.isServiceMonth) return 'twp';
+  if (status.countable <= 0) return 'none';
+  if (nearLimit(status, phase)) return 'warn';
+  return 'safe';
+}
+
+function remainingLabel(status: MonthStatus, phase: BenefitPhase): string {
+  if (status.countable <= 0 && !status.isServiceMonth) return '';
+  if (phase === 'unknown' || phase === 'verifyComplete') return 'Confirm TWP status';
+  if (phase === 'sga') {
+    return status.overSga ? 'Over SGA' : status.roomToSga != null ? `${money0(status.roomToSga)} to SGA` : '';
+  }
+  if (status.isServiceMonth) return 'TWP month used';
+  return status.roomToTrialWork != null ? `${money0(status.roomToTrialWork)} to TWP` : '';
+}
+
+const KIND_LABEL: Record<StatusKind, string> = {
+  none: 'No Income', review: 'Status Pending', safe: 'Safe', warn: 'Near Limit', twp: 'TWP Used', over: 'Over SGA'
+};
+
+function statusColor(kind: StatusKind): string {
+  return kind === 'none' ? 'var(--lg-border)'
+    : kind === 'review' ? 'var(--lg-muted)'
+      : `var(--lg-${kind})`;
+}
+
+function deltaToLimit(value: number, limit: number): string {
+  if (value <= 0) return '—';
+  const delta = value - limit;
+  if (Math.abs(delta) < 0.005) return 'At limit';
+  return delta > 0 ? `${money0(delta)} over` : `${money0(Math.abs(delta))} below`;
+}
+
+type Mode = 'cards' | 'table' | 'activeOnly';
+
+export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number }) {
+  const [mode, setMode] = useState<Mode>('cards');
+  const [simulatorOpen, setSimulatorOpen] = useState(false);
+  const view = mode === 'table' ? 'table' : 'cards';
+  const onlyIncome = mode === 'activeOnly';
+  const rules = rulesFor(year);
+  const now = todayMonth();
+  const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
+  const analysisPhase = benefitPhase(data, asOf);
+
+  const cards = useMemo(() => monthsOfYear(year).map((month) => {
+    const status = monthStatus(data, month);
+    const phase = benefitPhase(data, month);
+    const w2 = data.streams.filter((s) => s.type === 'w2').reduce((sum, s) => sum + countableFor(s, month), 0);
+    const se = data.streams.filter((s) => s.type === 'ten99').reduce((sum, s) => sum + countableFor(s, month), 0);
+    const kind = statusKind(status, phase);
+    const context = paycheckContextForMonth(data.streams, month);
+    const threshold = phase === 'trialWork' ? rules.trialWork : rules.sga;
+    const pct = threshold ? Math.min(100, (status.countable / threshold) * 100) : 0;
+    return { month, status, kind, w2, se, context, pct, label: remainingLabel(status, phase) };
+  }), [data, year, rules]);
+
+  const visible = onlyIncome ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth) : cards;
+
+  const elapsedCards = cards.filter((card) => card.month <= asOf);
+  const yearTotalCountable = elapsedCards.reduce((sum, card) => sum + card.status.countable, 0);
+  const w2Year = elapsedCards.reduce((sum, c) => sum + c.w2, 0);
+  const seYear = elapsedCards.reduce((sum, c) => sum + c.se, 0);
+  const twp = trialWorkStatus(data, asOf);
+  const overSgaMonths = elapsedCards.filter((c) => c.status.overSga).length;
+
+  return (
+    <div className="lg-analysis">
+      <div className="lg-analysis-pad flex flex-wrap items-center gap-2.5 pb-3 pt-5">
+        <span className="lg-sans text-lg font-semibold">Monthly SSDI Analysis</span>
+        <span className="lg-label">All streams combined</span>
+        <ReviewTarget
+          id="ledger-analysis-view-modes"
+          label="Three views of one table"
+          reason="Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question."
+          layout="ledger"
+          className="ml-auto w-full sm:w-auto"
+        >
+          <div className="lg-seg w-full sm:w-auto">
+            <button type="button" data-on={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</button>
+            <button type="button" data-on={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</button>
+            <button type="button" data-on={mode === 'activeOnly'} className="lg-seg-item" onClick={() => setMode('activeOnly')}>Active Only</button>
+          </div>
+        </ReviewTarget>
+      </div>
+
+      <div className="lg-analysis-pad flex flex-wrap gap-x-5 gap-y-1.5 pb-1">
+        {analysisPhase === 'unknown' || analysisPhase === 'verifyComplete' ? (
+          <span className="lg-legend-item">
+            <span className="lg-swatch lg-swatch-muted" /> Confirm TWP status to turn limit warnings on
+          </span>
+        ) : (
+          <>
+            <span className="lg-legend-item">
+              <span className="lg-swatch lg-swatch-safe" /> Safe &lt;{money2(rules.trialWork)}
+            </span>
+            <span className="lg-legend-item">
+              <span className="lg-swatch lg-swatch-warn" /> Near Limit
+            </span>
+            <span className="lg-legend-item">
+              <span className="lg-swatch lg-swatch-twp" /> TWP Used
+            </span>
+            <span className="lg-legend-item">
+              <span className="lg-swatch lg-swatch-over" /> Exceeded SGA &ge;{money2(rules.sga)}
+            </span>
+          </>
+        )}
+      </div>
+
+      {view === 'cards' ? (
+        <div className="lg-analysis-grid">
+          {visible.map((c) => (
+            <div key={c.month} className="lg-status-card" data-status={c.kind}>
+              <div className="flex items-center gap-2 px-3 py-3 sm:px-4 lg-border-b-soft">
+                <span className="text-[0.75rem] font-semibold uppercase tracking-wider">{longMonthName(c.month)}</span>
+                <span
+                  className="ml-auto lg-status-dot"
+                  style={{ background: statusColor(c.kind) }}
+                />
+              </div>
+              {c.kind === 'none' ? (
+                <div className="flex flex-col gap-1 p-3">
+                  <span className="text-2xl font-semibold lg-text-muted">–</span>
+                  <span className="text-[0.8125rem] lg-text-muted">No income</span>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 p-3">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-semibold">{money2(c.status.countable)}</span>
+                    <span className="text-[0.6875rem] uppercase tracking-wider lg-text-muted">countable</span>
+                  </div>
+                  <div className="relative h-1.5 lg-bg-border-soft">
+                    <div className="absolute inset-y-0 left-0" style={{ width: c.pct + '%', background: statusColor(c.kind) }} />
+                  </div>
+                  {c.context.length ? (
+                    <div className="text-[0.625rem] font-medium uppercase tracking-wider lg-text-warn">
+                      {c.context.map((ctx) => `${ctx.count} paychecks · ${ctx.streamName}`).join(' · ')}
+                    </div>
+                  ) : null}
+                  <div className="flex items-center justify-between gap-2 text-[0.75rem] lg-text-muted">
+                    <span>
+                      <span className="lg-text-w2">W2 {money0(c.w2)}</span>
+                      {' · '}
+                      <span className="lg-text-se">SE {money0(c.se)}</span>
+                    </span>
+                    <span>{c.label}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+          {!visible.length ? (
+            <p className="w-full px-4 py-10 text-center text-sm lg-text-muted">
+              No months with income yet — enter figures in the ledger above.
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <div className="overflow-x-auto" >
+          <table className="w-full lg-analysis-table">
+            <thead>
+              <tr>
+                {['Month', 'Combined', 'Status', 'vs SGA', 'vs TWP'].map((h, i) => (
+                  <th key={h} className={`lg-label border-b px-3 py-3 sm:px-4 lg-label-border ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
+                ))}
+            </tr>
+            </thead>
+            <tbody>
+              {visible.map((c) => (
+                <tr key={c.month} className="lg-border-b-soft">
+                  <td className="px-3 py-3.5 sm:px-4 text-base font-medium">{longMonthName(c.month)}</td>
+                  <td className={`px-3 py-3.5 sm:px-4 text-right text-base font-semibold${c.kind === 'none' ? ' lg-text-muted' : ''}`}>
+                    {c.kind === 'none' ? '–' : money2(c.status.countable)}
+                  </td>
+                  <td className="px-3 py-3.5 sm:px-4 text-right">
+                    {c.kind === 'none' ? (
+                      <span className="lg-text-muted">–</span>
+                    ) : (
+                      <span className="lg-status-badge" style={{ color: statusColor(c.kind) }}>{KIND_LABEL[c.kind]}</span>
+                    )}
+                  </td>
+                  <td className={`px-3 py-3.5 sm:px-4 text-right text-base ${c.status.overSga ? 'lg-text-over' : 'lg-text-muted'}`}>
+                    {deltaToLimit(c.status.countable, rules.sga)}
+                  </td>
+                  <td className={`px-3 py-3.5 sm:px-4 text-right text-base ${c.status.isServiceMonth ? 'lg-text-twp' : 'lg-text-muted'}`}>
+                    {c.status.isServiceMonth && c.status.countable <= rules.trialWork
+                      ? 'Used by hours'
+                      : deltaToLimit(c.status.countable, rules.trialWork)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <ReviewTarget
+        id="ledger-analysis-summary"
+        label="Repeated summary strip"
+        reason="All four tiles repeat the header stats a screen above — same YTD, same TWP count, same SGA count."
+        layout="ledger"
+      >
+      <div className="flex flex-wrap lg-analysis-summary">
+        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
+          <span className="lg-label">YTD Total Countable</span>
+          <span className="text-xl font-semibold sm:text-2xl">{money2(yearTotalCountable)}</span>
+        </div>
+        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
+          <span className="lg-label">W2 / Self-Emp Split</span>
+          <span className="text-xl font-semibold sm:text-2xl">
+            <span className="lg-text-w2">{money2(w2Year)}</span>
+            <span className="lg-text-muted"> · </span>
+            <span className="lg-text-se">{money2(seYear)}</span>
+          </span>
+        </div>
+        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
+          <span className="lg-label">Trial Work Period</span>
+          <span className="text-xl font-semibold sm:text-2xl lg-text-twp">{twp.used} of 9 months used</span>
+        </div>
+        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
+          <span className="lg-label">Months at or over SGA</span>
+          <span className={`text-xl font-semibold sm:text-2xl ${overSgaMonths ? 'lg-text-over' : 'lg-text-safe'}`}>{overSgaMonths} months</span>
+        </div>
+      </div>
+      </ReviewTarget>
+
+      <div className="lg-analysis-pad py-3 lg-border-t">
+        <button
+          type="button"
+          onClick={() => setSimulatorOpen((v) => !v)}
+          className="lg-btn flex items-center gap-2"
+        >
+          <ShieldCheck className="size-4 lg-text-safe" />
+          {simulatorOpen ? 'Hide Safe Work Simulator' : 'Open Safe Work Simulator'}
+        </button>
+      </div>
+
+      {simulatorOpen ? (
+        <div className="lg-analysis-pad pb-4">
+          <SafeWorkSimulator />
+        </div>
+      ) : null}
+
+      <p className="lg-analysis-pad py-3.5 text-[0.8125rem] leading-relaxed lg-disclaimer">
+        Thresholds are planning estimates. Confirm figures with SSA before acting on them. Data is stored in this browser only — use Export for a backup.
+      </p>
+    </div>
+  );
+}

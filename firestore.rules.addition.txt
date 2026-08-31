@@ -1,0 +1,35 @@
+Add this match block to the existing firestore.rules for the ssdi-d12f0
+project (Firebase Console > Firestore Database > Rules), alongside the
+existing `users/{userId}` block used by sga_calc20. Do not replace the
+existing block — just add this one beside it so both apps keep working:
+
+    match /paycheckGuardUsers/{userId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId
+        && request.auth.token.email in ['sergystovba@gmail.com'];
+    }
+
+Full file would then read:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId
+        && request.auth.token.email in ['sergystovba@gmail.com'];
+    }
+    match /paycheckGuardUsers/{userId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId
+        && request.auth.token.email in ['sergystovba@gmail.com'];
+    }
+  }
+}
+
+Until this is deployed, cloud sync will fail (falls back to local-only
+automatically — see TrackerProvider's cloudSyncStatus 'error' state).
+
+Also confirm under Authentication > Settings > Authorized domains that
+whatever domain you deploy paycheck-guard to is listed (localhost is exempt
+via the dev bypass in src/auth/session.ts and never needs it).

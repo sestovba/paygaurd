@@ -1,0 +1,2507 @@
+/*
+ * PayGuard layout — a card-based financial analytics dashboard design system.
+ * Everything is scoped under .pg-payguard.
+ *
+ * Structure of this file:
+ *   1. Tokens          — one palette per sub-theme, plus derived tokens
+ *   2. Primitives      — button, icon button, segmented, input, badge
+ *   3. Composites      — card, stat, tile grid, section header, tabs, table
+ *   4. Chrome          — bottom navigation
+ *   5. Popover bridge  — maps app-wide tokens so shared sheets inherit the theme
+ *
+ * Rules of the road for this layout:
+ *   - No raw hex or Tailwind palette colours in the components. Every colour
+ *     comes from a token here so all four sub-themes stay in sync.
+ *   - Every interactive control lines up on the --pg-h-* height scale, so a
+ *     <select>, a date input and a button sitting in one row are the same size.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1. Tokens                                                          */
+/* ------------------------------------------------------------------ */
+
+.pg-payguard {
+  color-scheme: light;
+  /* Radii */
+  --pg-radius-xl: 1rem;
+  --pg-radius: 0.75rem;
+  --pg-radius-md: 0.5rem;
+  --pg-radius-sm: 0.375rem;
+  --pg-radius-xs: 0.25rem;
+
+  /* Sticky chrome. The header is --pg-header-h tall plus its 1px bottom
+   * border, and the tab strip parks directly beneath it. */
+  --pg-header-h: 3.5rem;
+
+  /* Tab strip. Two values: the row's height, and the weight of the accent
+   * stroke that outlines the active tab and edges the panel. */
+  /* Set in rem rather than off --pg-h: tabs want more presence than a
+   * toolbar control, and rem still scales with the larger root font on
+   * phones, so the touch target grows there without compounding. */
+  --pg-tab-h: 2.5rem;
+  --pg-tab-stroke: 2px;
+  /*
+   * The tab's corner radius, and the radius the flare sweeps through. They are
+   * the same value on purpose: a hovered tab's extension has to reach far
+   * enough to cover the wedge its neighbour's rounded corner leaves, and that
+   * wedge is exactly one corner radius wide. Sized to anything smaller — the
+   * flare radius, say — it comes up short and the join stays open.
+   */
+  --pg-tab-radius: calc(var(--pg-radius) - 1px);
+  --pg-tab-turn: var(--pg-tab-radius);
+  /*
+   * Extra rise for the LEFT-reaching extension only. Tabs are laid out by a
+   * flex row and their box tops land on fractional pixels, so the two sides of
+   * a join do not round to the same device row — the left side needs one more
+   * pixel to clear its neighbour's border, the right side does not. Dialled in
+   * against the rendered result, not derived.
+   */
+  --pg-tab-lift: 1px;
+  /*
+   * How far the active tab carries on beneath the panel's top edge — the part
+   * of the tab you never see. It only has to exceed --pg-tab-stroke to hide
+   * the border, but sitting exactly on that minimum is fragile: at fractional
+   * DPI or under browser zoom a 2px lap can round down and open a hairline
+   * seam at the join. The extra depth is free, because the lap is painted by
+   * a shadow rather than by the tab's box — there are no borders to leak out
+   * the bottom.
+   */
+  --pg-tab-lap: 0.5rem;
+
+  /* Control height scale. Every control in a row picks one of these so
+   * selects, date inputs and buttons never disagree by a few pixels. */
+  --pg-h-sm: 1.75rem;
+  --pg-h: 2rem;
+  --pg-h-lg: 2.25rem;
+
+  /* Spacing rhythm for the dashboard sections */
+  --pg-gap: 0.75rem;
+  --pg-gap-lg: 1rem;
+  --pg-pad: 0.875rem;
+  --pg-pad-lg: 1.25rem;
+
+  /* "Paper" — high-contrast warm white with emerald and slate accents */
+  --pg-bg: #f8fafc;
+  --pg-surface: #ffffff;
+  --pg-surface-2: #f1f5f9;
+  --pg-surface-3: #e2e8f0;
+  --pg-head: #064e3b;
+  --pg-head-fg: #ffffff;
+  --pg-fg: #0f172a;
+  --pg-fg-muted: #526071;
+  --pg-fg-dim: #64748b;
+  --pg-border: #e2e8f0;
+  --pg-border-soft: #f1f5f9;
+  --pg-border-strong: #cbd5e1;
+  --pg-ring: #059669;
+  --pg-w2: #059669;
+  --pg-se: #ea580c;
+  --pg-safe: #059669;
+  --pg-warn: #d97706;
+  --pg-twp: #7c3aed;
+  --pg-over: #dc2626;
+  --pg-info: #0284c7;
+
+  /*
+   * Topbar. Broken out as its own tokens because a sub-theme may want the
+   * header to be a plate in its own right rather than just more surface —
+   * see the calc20 theme, whose whole identity is a dark ink bar under a
+   * sky rule. Defaults reproduce the plain translucent-surface header.
+   */
+  --pg-topbar: color-mix(in oklab, var(--pg-surface) 90%, transparent);
+  --pg-topbar-fg: var(--pg-fg);
+  --pg-topbar-accent: var(--pg-border);
+  --pg-topbar-accent-w: 1px;
+
+  /* Tooltips and other inverted surfaces */
+  --pg-invert: #0f172a;
+  --pg-invert-fg: #f8fafc;
+  --pg-invert-border: #334155;
+
+  --pg-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --pg-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --pg-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --pg-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+
+  --shadow-input: none;
+
+  background: var(--pg-bg);
+  color: var(--pg-fg);
+  font-family: 'DM Sans', 'Inter Tight', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* "Slate" — cool steel with a blue accent */
+.pg-payguard[data-payguard-theme='slate'] {
+  --pg-bg: #f1f5f9;
+  --pg-surface: #ffffff;
+  --pg-surface-2: #e8eef5;
+  --pg-surface-3: #cbd5e1;
+  --pg-head: #0f172a;
+  --pg-head-fg: #ffffff;
+  --pg-fg: #0f172a;
+  --pg-fg-muted: #475569;
+  --pg-fg-dim: #64748b;
+  --pg-border: #d5dee8;
+  --pg-border-soft: #e6ecf3;
+  --pg-border-strong: #94a3b8;
+  --pg-ring: #2563eb;
+  --pg-w2: #0284c7;
+  --pg-se: #ea580c;
+  --pg-info: #2563eb;
+}
+
+/* "Ledger" — accounting cream and parchment with dark forest green */
+.pg-payguard[data-payguard-theme='ledger'] {
+  --pg-bg: #faf7ed;
+  --pg-surface: #ffffff;
+  --pg-surface-2: #f6f1e5;
+  --pg-surface-3: #e8e0cc;
+  --pg-head: #14532d;
+  --pg-head-fg: #ffffff;
+  --pg-fg: #1c1917;
+  --pg-fg-muted: #57534e;
+  --pg-fg-dim: #6f675c;
+  --pg-border: #e6ddc8;
+  --pg-border-soft: #f0e9d9;
+  --pg-border-strong: #c8bd9e;
+  --pg-ring: #15803d;
+  --pg-w2: #15803d;
+  --pg-se: #c2410c;
+  --pg-safe: #15803d;
+  --pg-warn: #b45309;
+  --pg-over: #b91c1c;
+  --pg-info: #0369a1;
+}
+
+/* "Carbon" — obsidian dark with vivid status colours */
+.pg-payguard[data-payguard-theme='carbon'] {
+  color-scheme: dark;
+  --pg-bg: #090d16;
+  --pg-surface: #111827;
+  --pg-surface-2: #182031;
+  --pg-surface-3: #26334a;
+  --pg-head: #059669;
+  --pg-head-fg: #04150f;
+  --pg-fg: #f8fafc;
+  --pg-fg-muted: #cbd5e1;
+  --pg-fg-dim: #94a3b8;
+  --pg-border: #22304a;
+  --pg-border-soft: #18233a;
+  --pg-border-strong: #3a4a68;
+  --pg-ring: #10b981;
+  --pg-w2: #10b981;
+  --pg-se: #f97316;
+  --pg-safe: #10b981;
+  --pg-warn: #fbbf24;
+  --pg-twp: #a855f7;
+  --pg-over: #f43f5e;
+  --pg-info: #38bdf8;
+
+  --pg-invert: #f8fafc;
+  --pg-invert-fg: #0f172a;
+  --pg-invert-border: #cbd5e1;
+
+  --pg-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --pg-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --pg-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --pg-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+}
+
+/*
+ * "calc20" — ported from the sibling sga_calc20 project's "2026 Work Record"
+ * design, expressed entirely in this layout's token contract.
+ *
+ * Its identity: a cool blue-grey desk, white cards, a dark ink topbar under a
+ * sky-blue rule, blue as the primary and a rounder radius scale. Status
+ * colours keep that project's semantics — green kept, amber trial month spent,
+ * red over SGA — and 1099 work stays purple, as it is there.
+ */
+.pg-payguard[data-payguard-theme='calc20'] {
+  --pg-radius-xl: 1.5rem;
+  --pg-radius: 0.75rem;
+  --pg-radius-md: 0.625rem;
+  --pg-radius-sm: 0.5rem;
+  --pg-radius-xs: 0.375rem;
+
+  --pg-bg: oklch(96.5% 0.008 240);
+  --pg-surface: oklch(100% 0 0);
+  --pg-surface-2: oklch(94.5% 0.015 240);
+  --pg-surface-3: oklch(90% 0.016 242);
+  --pg-head: oklch(55% 0.17 255);
+  --pg-head-fg: oklch(98.5% 0.005 250);
+  --pg-fg: oklch(22% 0.045 258);
+  --pg-fg-muted: oklch(52% 0.035 252);
+  --pg-fg-dim: oklch(52% 0.035 250);
+  --pg-border: oklch(91.5% 0.012 245);
+  --pg-border-soft: oklch(94.5% 0.012 245);
+  --pg-border-strong: oklch(78% 0.022 248);
+  --pg-ring: oklch(55% 0.17 255);
+
+  --pg-w2: oklch(55% 0.17 255);
+  --pg-se: oklch(45% 0.15 310);
+  --pg-safe: oklch(45% 0.11 148);
+  --pg-warn: oklch(58% 0.13 78);
+  --pg-twp: oklch(45% 0.11 62);
+  --pg-over: oklch(45% 0.16 26);
+  --pg-info: oklch(52% 0.13 232);
+
+  /* The dark plate and its sky rule — the most recognisable thing about it */
+  --pg-topbar: oklch(22% 0.045 258);
+  --pg-topbar-fg: oklch(98.5% 0.005 250);
+  --pg-topbar-accent: oklch(78% 0.12 230);
+  --pg-topbar-accent-w: 2px;
+
+  --pg-invert: oklch(22% 0.045 258);
+  --pg-invert-fg: oklch(98.5% 0.005 250);
+  --pg-invert-border: oklch(42% 0.05 255);
+}
+
+/*
+ * Controls sitting ON an inverted topbar. Rather than restyling each button,
+ * the surface/ink/border tokens are re-pointed at translucent tints of the
+ * bar's own foreground, so .pg-btn, .pg-field and .pg-icon-btn come out as
+ * light-on-dark automatically.
+ *
+ * Add any future dark-topbar theme to this selector list.
+ */
+.pg-payguard[data-payguard-theme='calc20'] .pg-topbar {
+  --pg-fg: var(--pg-topbar-fg);
+  --pg-fg-muted: color-mix(in oklab, var(--pg-topbar-fg) 74%, transparent);
+  --pg-fg-dim: color-mix(in oklab, var(--pg-topbar-fg) 55%, transparent);
+  --pg-surface: color-mix(in oklab, var(--pg-topbar-fg) 8%, transparent);
+  --pg-surface-2: color-mix(in oklab, var(--pg-topbar-fg) 13%, transparent);
+  --pg-border: color-mix(in oklab, var(--pg-topbar-fg) 20%, transparent);
+  --pg-border-strong: color-mix(in oklab, var(--pg-topbar-fg) 34%, transparent);
+  --pg-ring: var(--pg-topbar-accent);
+  --pg-head: var(--pg-topbar-accent);
+  --pg-head-fg: oklch(22% 0.045 258);
+
+  /* Status hues are tuned for dark text on a light card; on the plate they
+   * have to come up several steps in lightness to stay readable. */
+  --pg-safe: oklch(80% 0.15 155);
+  --pg-warn: oklch(84% 0.14 82);
+  --pg-twp: oklch(80% 0.12 62);
+  --pg-over: oklch(75% 0.15 22);
+  --pg-info: var(--pg-topbar-accent);
+}
+
+/* Appearance mode now applies to every light palette. Accent and status hues
+ * stay palette-specific while shared surfaces move onto a readable dark desk. */
+.dark .pg-payguard:not([data-payguard-theme='carbon']) {
+  color-scheme: dark;
+  --pg-bg: #0b1117;
+  --pg-surface: #111a24;
+  --pg-surface-2: #172330;
+  --pg-surface-3: #263748;
+  --pg-fg: #f8fafc;
+  --pg-fg-muted: #cbd5e1;
+  --pg-fg-dim: #94a3b8;
+  --pg-border: #2a3a4b;
+  --pg-border-soft: #1b2a38;
+  --pg-border-strong: #496075;
+  --pg-invert: #f8fafc;
+  --pg-invert-fg: #0f172a;
+  --pg-invert-border: #cbd5e1;
+  --pg-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --pg-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.42), 0 1px 2px -1px rgb(0 0 0 / 0.38);
+  --pg-shadow-md: 0 8px 24px -12px rgb(0 0 0 / 0.72);
+  --pg-shadow-lg: 0 18px 40px -18px rgb(0 0 0 / 0.82);
+}
+
+.dark .pg-payguard[data-payguard-theme='ledger'] {
+  --pg-bg: #13110d;
+  --pg-surface: #1c1914;
+  --pg-surface-2: #272219;
+  --pg-surface-3: #3b3325;
+  --pg-border: #403727;
+  --pg-border-soft: #2b251b;
+  --pg-border-strong: #6e5f43;
+}
+
+.dark .pg-payguard[data-payguard-theme='slate'],
+.dark .pg-payguard[data-payguard-theme='calc20'] {
+  --pg-bg: #0d121c;
+  --pg-surface: #141c29;
+  --pg-surface-2: #1b2737;
+  --pg-surface-3: #2a3b50;
+  --pg-border: #2c3d52;
+  --pg-border-soft: #1c2a3b;
+  --pg-border-strong: #4d657f;
+}
+
+/*
+ * Derived tokens. These are declared once and resolve against whichever
+ * palette above won on the element, so adding a sub-theme means picking six
+ * base colours — never restating the soft/border/hover variants by hand.
+ */
+.pg-payguard {
+  /* Soft fills and hairline borders per status colour */
+  --pg-w2-bg: color-mix(in oklab, var(--pg-w2) 10%, transparent);
+  --pg-w2-border: color-mix(in oklab, var(--pg-w2) 32%, transparent);
+  --pg-se-bg: color-mix(in oklab, var(--pg-se) 10%, transparent);
+  --pg-se-border: color-mix(in oklab, var(--pg-se) 32%, transparent);
+  --pg-safe-bg: color-mix(in oklab, var(--pg-safe) 10%, transparent);
+  --pg-safe-border: color-mix(in oklab, var(--pg-safe) 30%, transparent);
+  --pg-warn-bg: color-mix(in oklab, var(--pg-warn) 12%, transparent);
+  --pg-warn-border: color-mix(in oklab, var(--pg-warn) 32%, transparent);
+  --pg-twp-bg: color-mix(in oklab, var(--pg-twp) 10%, transparent);
+  --pg-twp-border: color-mix(in oklab, var(--pg-twp) 30%, transparent);
+  --pg-over-bg: color-mix(in oklab, var(--pg-over) 10%, transparent);
+  --pg-over-border: color-mix(in oklab, var(--pg-over) 30%, transparent);
+  --pg-info-bg: color-mix(in oklab, var(--pg-info) 10%, transparent);
+  --pg-info-border: color-mix(in oklab, var(--pg-info) 30%, transparent);
+
+  /* Vivid colors remain available for chart fills. These foreground variants
+   * mix toward the current ink color so small labels meet contrast in both
+   * light and dark appearance modes. */
+  --pg-w2-text: color-mix(in oklab, var(--pg-w2) 70%, var(--pg-fg));
+  --pg-se-text: color-mix(in oklab, var(--pg-se) 70%, var(--pg-fg));
+  --pg-safe-text: color-mix(in oklab, var(--pg-safe) 70%, var(--pg-fg));
+  --pg-warn-text: color-mix(in oklab, var(--pg-warn) 68%, var(--pg-fg));
+  --pg-twp-text: color-mix(in oklab, var(--pg-twp) 72%, var(--pg-fg));
+  --pg-over-text: color-mix(in oklab, var(--pg-over) 72%, var(--pg-fg));
+  --pg-info-text: color-mix(in oklab, var(--pg-info) 70%, var(--pg-fg));
+
+  /*
+   * Hover. A translucent wash of the theme's accent rather than a flat grey,
+   * so hovering reads as "this is interactive" in every sub-theme and never
+   * fights the striped table backgrounds it sits on top of.
+   */
+  --pg-hover: color-mix(in oklab, var(--pg-ring) 8%, transparent);
+  --pg-hover-strong: color-mix(in oklab, var(--pg-ring) 14%, transparent);
+  --pg-focus-ring: color-mix(in oklab, var(--pg-ring) 52%, transparent);
+
+  /*
+   * Rules. Internal grid lines are deliberately lighter than the card
+   * outline — a dense table drawn entirely in --pg-border reads as a cage.
+   */
+  --pg-rule: color-mix(in oklab, var(--pg-border) 55%, transparent);
+  --pg-rule-strong: var(--pg-border);
+}
+
+.pg-payguard * {
+  box-sizing: border-box;
+}
+
+/*
+ * Touch targets. 32px is right for a mouse and too small for a thumb, so the
+ * height scale steps up wherever the primary input is coarse. Everything is
+ * expressed once, here, rather than as `sm:` variants sprinkled per control.
+ */
+@media (pointer: coarse) {
+  .pg-payguard {
+    --pg-h-sm: 2rem;
+    --pg-h: 2.5rem;
+    --pg-h-lg: 2.75rem;
+  }
+
+  .pg-payguard .pg-touch-target {
+    min-width: var(--pg-h) !important;
+    min-height: var(--pg-h) !important;
+  }
+}
+
+/* index.css puts a resting shadow on every native control; this layout
+ * draws its own borders instead. */
+.pg-payguard input,
+.pg-payguard select,
+.pg-payguard textarea {
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Primitives                                                      */
+/* ------------------------------------------------------------------ */
+
+.pg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: var(--pg-h);
+  padding: 0 0.7rem;
+  border-radius: var(--pg-radius-md);
+  border: 1px solid var(--pg-border);
+  background: var(--pg-surface);
+  color: var(--pg-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.pg-btn:hover {
+  background: var(--pg-hover);
+  border-color: var(--pg-border-strong);
+}
+
+.pg-btn:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: 2px;
+}
+
+.pg-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.pg-btn-lg {
+  height: var(--pg-h-lg);
+  padding: 0 0.9rem;
+  font-size: 0.8125rem;
+}
+
+.pg-btn-sm {
+  height: var(--pg-h-sm);
+  padding: 0 0.5rem;
+  font-size: 0.6875rem;
+}
+
+.pg-btn-solid,
+.pg-btn-solid:hover {
+  background: var(--pg-head);
+  color: var(--pg-head-fg);
+  border-color: var(--pg-head);
+}
+
+.pg-btn-solid:hover {
+  filter: brightness(1.12);
+}
+
+.pg-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--pg-fg-muted);
+}
+
+.pg-btn-ghost:hover {
+  background: var(--pg-hover);
+  border-color: transparent;
+  color: var(--pg-fg);
+}
+
+.pg-btn-danger:hover {
+  background: var(--pg-over-bg);
+  border-color: var(--pg-over-border);
+  color: var(--pg-over);
+}
+
+/* Square icon-only button. Used for the settings gear, the collapse chevron
+ * and the lock — anything whose whole label is its icon. */
+.pg-icon-btn {
+  display: grid;
+  place-items: center;
+  width: var(--pg-h);
+  height: var(--pg-h);
+  flex-shrink: 0;
+  border-radius: var(--pg-radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--pg-fg-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pg-icon-btn:hover {
+  background: var(--pg-hover);
+  color: var(--pg-fg);
+}
+
+.pg-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.pg-icon-btn:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: 2px;
+}
+
+.pg-icon-btn:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.pg-icon-btn-bordered {
+  border-color: var(--pg-border);
+  background: var(--pg-surface);
+  box-shadow: var(--pg-shadow-sm);
+}
+
+.pg-icon-btn-bordered:hover {
+  border-color: var(--pg-border-strong);
+  background: var(--pg-hover);
+  box-shadow: var(--pg-shadow);
+}
+
+/* Segmented control — a set of mutually exclusive options */
+.pg-seg {
+  display: inline-flex;
+  height: var(--pg-h);
+  align-items: stretch;
+  background: var(--pg-surface-2);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.pg-seg-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.6rem;
+  border-radius: calc(var(--pg-radius-md) - 3px);
+  border: none;
+  background: transparent;
+  color: var(--pg-fg-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+}
+
+.pg-seg-item:hover {
+  background: var(--pg-hover);
+  color: var(--pg-fg);
+}
+
+.pg-seg-item[data-on='true'],
+.pg-seg-item[data-on='true']:hover {
+  background: var(--pg-head);
+  color: var(--pg-head-fg);
+}
+
+/* Wrapper that makes any native <select> / date input match .pg-btn */
+.pg-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: var(--pg-h);
+  padding: 0 0.55rem;
+  border-radius: var(--pg-radius-md);
+  border: 1px solid var(--pg-border);
+  background: var(--pg-surface);
+  color: var(--pg-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pg-field:focus-within {
+  border-color: var(--pg-ring);
+  box-shadow: 0 0 0 2px var(--pg-focus-ring);
+}
+
+.pg-field > label,
+.pg-field > .pg-field-label {
+  color: var(--pg-fg-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* The control inside a .pg-field draws no chrome of its own */
+.pg-field input,
+.pg-field select {
+  height: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+  padding: 0;
+}
+
+/* Standalone control that is its own field */
+.pg-select,
+.pg-input {
+  height: var(--pg-h);
+  padding: 0 0.55rem;
+  border-radius: var(--pg-radius-md);
+  border: 1px solid var(--pg-border);
+  background: var(--pg-surface);
+  color: var(--pg-fg);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pg-select:focus,
+.pg-input:focus {
+  border-color: var(--pg-ring);
+  box-shadow: 0 0 0 2px var(--pg-focus-ring);
+}
+
+.pg-select:disabled,
+.pg-input:disabled,
+.pg-field:has(:disabled) {
+  opacity: 0.5;
+}
+
+/* Labels and figures */
+.pg-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pg-fg-muted);
+  line-height: 1.2;
+}
+
+.pg-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/*
+ * Figure scale. Three sizes, and none of them are display-poster sized —
+ * these are dashboard readouts sitting four-to-a-row, not a hero number.
+ */
+.pg-figure {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--pg-fg);
+}
+
+.pg-figure-lg { font-size: 1.375rem; }
+.pg-figure-md { font-size: 1.125rem; }
+.pg-figure-sm { font-size: 1rem; }
+
+@media (min-width: 640px) {
+  .pg-figure-lg { font-size: 1.5rem; }
+  .pg-figure-md { font-size: 1.1875rem; }
+}
+
+/* Badges */
+.pg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--pg-radius-xs);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.pg-badge-w2 { color: var(--pg-w2-text); background: var(--pg-w2-bg); border-color: var(--pg-w2-border); }
+.pg-badge-se { color: var(--pg-se-text); background: var(--pg-se-bg); border-color: var(--pg-se-border); }
+.pg-badge-safe { color: var(--pg-safe-text); background: var(--pg-safe-bg); border-color: var(--pg-safe-border); }
+.pg-badge-warn { color: var(--pg-warn-text); background: var(--pg-warn-bg); border-color: var(--pg-warn-border); }
+.pg-badge-twp { color: var(--pg-twp-text); background: var(--pg-twp-bg); border-color: var(--pg-twp-border); }
+.pg-badge-over { color: var(--pg-over-text); background: var(--pg-over-bg); border-color: var(--pg-over-border); }
+.pg-badge-info { color: var(--pg-info-text); background: var(--pg-info-bg); border-color: var(--pg-info-border); }
+.pg-badge-muted { color: var(--pg-fg-muted); background: var(--pg-surface-2); border-color: var(--pg-border); }
+
+/*
+ * Semantic utilities.
+ *
+ * The standard for this layout: colour, borders and surfaces come from these
+ * classes; Tailwind is used only for layout (flex/grid/spacing/sizing); and
+ * inline `style` is reserved for values that can only be computed at runtime
+ * (a bar's height, a meter's width, a status colour picked from a map).
+ * Mixing all three for the same property is what made this hard to retheme.
+ */
+.pg-surface { background: var(--pg-surface); }
+.pg-surface-2 { background: var(--pg-surface-2); }
+.pg-surface-quiet { background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface)); }
+.pg-surface-inset { background: color-mix(in oklab, var(--pg-surface-2) 60%, transparent); }
+
+.pg-fg { color: var(--pg-fg); }
+.pg-text-w2 { color: var(--pg-w2-text); }
+.pg-text-se { color: var(--pg-se-text); }
+.pg-text-safe { color: var(--pg-safe-text); }
+.pg-text-warn { color: var(--pg-warn-text); }
+.pg-text-twp { color: var(--pg-twp-text); }
+.pg-text-over { color: var(--pg-over-text); }
+.pg-text-info { color: var(--pg-info-text); }
+.pg-border-over { border-color: var(--pg-over-border); }
+.pg-border-twp { border-color: var(--pg-twp-border); }
+.pg-callout-warn {
+  background: var(--pg-warn-bg);
+  border-color: var(--pg-warn-border);
+  color: var(--pg-warn-text);
+}
+.pg-fill-w2 { background: var(--pg-w2); }
+.pg-fill-se { background: var(--pg-se); }
+.pg-fill-over { background: var(--pg-over-bg); }
+.pg-hover-bg { background: var(--pg-hover); }
+.pg-rule-fill { background: var(--pg-border); }
+
+/* One-offs that would otherwise be arbitrary utilities in JSX */
+.pg-tooltip-rule { border-color: var(--pg-invert-border); }
+.pg-gridline { border-color: var(--pg-rule-strong); }
+.pg-ring-selected { box-shadow: 0 0 0 2px var(--pg-ring); }
+.pg-focus-underline {
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+.pg-focus-underline:focus-visible {
+  border-bottom-color: var(--pg-ring);
+  outline: 2px solid var(--pg-ring);
+  outline-offset: 2px;
+}
+
+/* Brand chip / anything painted in the theme's header colour */
+.pg-mark {
+  background: var(--pg-head);
+  color: var(--pg-head-fg);
+}
+
+/* Translucent sticky chrome. -page sits over the page background, -surface
+ * over a card. */
+.pg-sticky-page { background: color-mix(in oklab, var(--pg-bg) 90%, transparent); }
+.pg-sticky-surface { background: color-mix(in oklab, var(--pg-surface) 90%, transparent); }
+.pg-muted { color: var(--pg-fg-muted); }
+.pg-dim { color: var(--pg-fg-dim); }
+.pg-accent { color: var(--pg-ring); }
+
+/* Hairline rules. Always single — never put a -b on one element and a -t on
+ * the element directly below it. */
+.pg-rule-t { border-top: 1px solid var(--pg-rule); }
+.pg-rule-b { border-bottom: 1px solid var(--pg-rule); }
+.pg-rule-r { border-right: 1px solid var(--pg-rule); }
+.pg-rule-l { border-left: 1px solid var(--pg-rule); }
+.pg-rule-all { border: 1px solid var(--pg-rule); }
+.pg-border-all { border: 1px solid var(--pg-border); }
+
+/* Divide a stack with single hairlines and no leading/trailing edge. */
+.pg-divide-y > * + * { border-top: 1px solid var(--pg-rule); }
+.pg-divide-x > * + * { border-left: 1px solid var(--pg-rule); }
+
+/* ------------------------------------------------------------------ */
+/* 3. Composites                                                      */
+/* ------------------------------------------------------------------ */
+
+.pg-card {
+  background: var(--pg-surface);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius);
+  box-shadow: var(--pg-shadow);
+  color: var(--pg-fg);
+}
+
+/* Current-month status: the one decision-oriented readout above the denser
+ * chart and editor surfaces. It uses a split instrument-card layout on wide
+ * screens and becomes a calm two-part stack on phones. */
+.pg-status-hero {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius-xl);
+  background: var(--pg-surface);
+  color: var(--pg-fg);
+  box-shadow: var(--pg-shadow-md);
+}
+
+.pg-status-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pg-head), var(--pg-ring), var(--pg-w2));
+}
+
+.pg-status-hero-main {
+  min-width: 0;
+  padding: 1rem 1.125rem 1.125rem;
+  background:
+    radial-gradient(circle at 85% 15%, color-mix(in oklab, var(--pg-ring) 10%, transparent), transparent 36%),
+    var(--pg-surface);
+}
+
+.pg-status-hero-side {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.7rem;
+  border-left: 1px solid var(--pg-rule);
+  padding: 1rem 1.125rem;
+  background: color-mix(in oklab, var(--pg-surface-2) 58%, var(--pg-surface));
+}
+
+.pg-status-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--pg-fg-muted);
+}
+
+.pg-status-amount {
+  min-width: 0;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-size: clamp(1.8rem, 4vw, 2.45rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  color: var(--pg-fg);
+}
+
+.pg-status-ytd {
+  display: flex;
+  min-width: 10rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  text-align: right;
+}
+
+.pg-status-track {
+  height: 0.5rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--pg-border) 75%, transparent);
+  border-radius: 999px;
+  background: var(--pg-surface-3);
+}
+
+.pg-status-track > span {
+  display: block;
+  height: 100%;
+  min-width: 0.2rem;
+  border-radius: inherit;
+  transition: width 220ms ease;
+}
+
+.pg-status-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--pg-ring) 45%, transparent);
+  background: transparent;
+  padding: 0.15rem 0;
+  color: var(--pg-info-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pg-status-link:hover { border-bottom-color: var(--pg-ring); }
+
+@media (max-width: 767.98px) {
+  .pg-status-hero { grid-template-columns: minmax(0, 1fr); }
+  .pg-status-hero-side {
+    border-top: 1px solid var(--pg-rule);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 419.98px) {
+  .pg-status-hero-main,
+  .pg-status-hero-side { padding-inline: 0.875rem; }
+  .pg-status-ytd {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.pg-card-quiet {
+  background: color-mix(in oklab, var(--pg-surface-2) 55%, var(--pg-surface));
+}
+
+/*
+ * Stat grid. One bordered container with hairline dividers instead of N
+ * floating cards — it reads as a single instrument panel and drops the
+ * gap-induced raggedness when the row wraps.
+ */
+/*
+ * Ruled grids (stats, tiles, months).
+ *
+ * Every cell carries a top and left hairline; the first row drops its top and
+ * the first column drops its left, so no rule ever doubles against the card's
+ * own border. The column count changes per breakpoint, and the nth-child
+ * selectors are MORE specific than the plain `> cell` rule — so each range is
+ * bounded on both sides. An open-ended `min-width` here leaks the previous
+ * breakpoint's nth-child maths into the next one and puts a top rule where a
+ * left rule belongs (which is exactly what it used to do to the middle cards).
+ */
+.pg-stat-grid { display: grid; overflow: hidden; }
+
+@media (max-width: 639.98px) {
+  .pg-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pg-stat-grid > .pg-stat { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:nth-child(-n + 2) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:nth-child(2n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:first-child { box-shadow: none; }
+  .pg-stat-grid > .pg-stat:last-child:nth-child(odd) { grid-column: span 2; }
+}
+
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .pg-stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pg-stat-grid > .pg-stat { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:nth-child(-n + 3) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:nth-child(3n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:first-child { box-shadow: none; }
+}
+
+@media (min-width: 1024px) {
+  .pg-stat-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .pg-stat-grid > .pg-stat { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:nth-child(-n + 5) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:nth-child(5n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-stat-grid > .pg-stat:first-child { box-shadow: none; }
+}
+
+.pg-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem 0.875rem;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .pg-stat { padding: 0.875rem 1rem; }
+}
+
+.pg-stat-sub {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--pg-fg-muted);
+  font-weight: 500;
+}
+
+/*
+ * Section header inside a card (e.g. "Settings & date range").
+ * Fixed height so a header carrying a button is exactly as tall as one that
+ * doesn't — the two used to differ by the button's own min-height.
+ */
+.pg-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  border-bottom: 1px solid var(--pg-rule);
+  background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
+  text-align: left;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .pg-section-head { padding: 0 1rem; }
+}
+
+.pg-section-head-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+  align-self: stretch;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--pg-fg);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pg-section-head-toggle:hover { color: var(--pg-fg); }
+.pg-section-head:hover { background: var(--pg-hover); }
+
+.pg-seg-item:focus-visible,
+.pg-section-head-toggle:focus-visible,
+.pg-tab:focus-visible,
+.pg-bottom-nav-item:focus-visible,
+.pg-status-link:focus-visible,
+.pg-chart-bar-trigger:focus-visible,
+.pg-notice-trigger:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: 2px;
+}
+
+.pg-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pg-section-meta {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--pg-fg-muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tab group                                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * TAB GROUP — read this before changing anything below.
+ *
+ * ===================================================================
+ * WHAT IT LOOKS LIKE
+ * ===================================================================
+ *
+ *        ┌───────┐                          ← active tab, accent outline,
+ *   ─────┘       └──────────────────────      square-cornered neighbours
+ *   ┃                                  ┃
+ *   ┃            panel                 ┃    ← the card: surface, border,
+ *   ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛      radius, shadow
+ *
+ * The active tab reads as an opening into the panel below it. An accent
+ * stroke in the job's type colour (green W-2 / orange 1099) outlines that tab
+ * and edges the panel.
+ *
+ * ===================================================================
+ * THE ONE RULE: ONE MECHANISM PER JOB
+ * ===================================================================
+ *
+ * Three things get drawn in this strip. Each owns a DIFFERENT mechanism, and
+ * they must never be made to share:
+ *
+ *     ::before / ::after   the ACTIVE tab's shoulders (its corner flare)
+ *     .pg-tab-join         the HOVER join (a real <span> inside the button)
+ *     background sliver    the separator hairline between inactive tabs
+ *
+ * This is not style preference — it is load-bearing. These three were once
+ * crammed onto two pseudo-elements, switched by state with :not() guards, and
+ * every bug in this component came from one job leaking into another:
+ *
+ *   · hovering the ACTIVE tab set `top` from the hover rule; with top, height
+ *     and bottom all set CSS drops `bottom`, and its shoulders teleported to
+ *     the tab's top edge as two detached arcs
+ *   · the separator rule outranked the shoulder rule and erased it
+ *   · the rule hiding the separator beside the active tab silently killed the
+ *     right neighbour's join
+ *
+ * If you need a fourth thing drawn, add a fourth element. Do not reuse these.
+ *
+ * ===================================================================
+ * HOW THE ACCENT STROKE IS BUILT
+ * ===================================================================
+ *
+ * The horizontal run belongs to the PANEL — its border-top, with border-left
+ * for the vertical run and one border-radius for the corner between them.
+ *
+ * It was once assembled from each tab's bottom border, and every boundary
+ * between those segments (flex gaps, margins, a rounded corner fading into a
+ * transparent neighbour) was somewhere the line could break. As one border on
+ * one element it cannot have a seam.
+ *
+ * The active tab interrupts that line by sitting ON it, not by leaving a hole:
+ *
+ *     box-shadow: 0 var(--pg-tab-lap) 0 0 var(--pg-surface)
+ *
+ * — an offset shadow painting the tab's own silhouette --pg-tab-lap lower in
+ * the panel's colour, erasing exactly its width of the panel's border. That
+ * gap is what makes it read as an opening.
+ *
+ * Do NOT reimplement the lap with box geometry (taller box + negative margin
+ * + compensating padding). That needs three declarations that must agree, and
+ * any drift between them moves the label — it is how the "text shifts when I
+ * click a tab" bug got in. The shadow leaves the box identical to every other
+ * tab's, so nothing can shift.
+ *
+ * ===================================================================
+ * STACKING — explicit, and it matters
+ * ===================================================================
+ *
+ *     active tab    z-index 1    in front of the panel: cuts the line,
+ *                                carries the shoulders
+ *     panel         z-index 0    above the inactive tabs: clips their hover
+ *                                to its own edge, corner radius included
+ *     inactive      z auto       behind the panel
+ *
+ * The panel MUST be positioned. Tabs are `position: relative` (they anchor the
+ * join), and a positioned element paints above a static one regardless of DOM
+ * order — leave the panel static and a hovered tab's tint spills across it.
+ *
+ * ===================================================================
+ * THE HOVER JOIN
+ * ===================================================================
+ *
+ * A hovered tab next to the active one grows .pg-tab-join on the side FACING
+ * it: full tab height, hanging past the edge, with the flare arc in its bottom
+ * --pg-tab-turn. It passes BEHIND the active tab, so that tab's shape clips it
+ * and the tint ends exactly on its curve.
+ *
+ * Only on the facing side. Given to both sides of every hovered tab, the one
+ * facing away has nothing to join and dangles into open strip. Adjacency lives
+ * in the selector (`:has(+ [data-active])` / `[data-active] + &`) so it follows
+ * the selection with no bookkeeping in React.
+ *
+ * ===================================================================
+ * VALUES THAT WERE MEASURED, NOT DERIVED — do not "simplify" these
+ * ===================================================================
+ *
+ * Tab widths come from their text, so tabs start on fractional pixels (25,
+ * 174.75, 350.125 …) and the two sides of a boundary round to different device
+ * rows. Two consequences that look like inconsistencies but are not:
+ *
+ *   · the join reaches --pg-tab-turn PLUS a stroke. The turn alone is the
+ *     geometric answer (the wedge is one corner radius wide) but rounds a
+ *     pixel short somewhere. The surplus is harmless — it passes behind the
+ *     active tab, which clips it.
+ *   · --pg-tab-lift raises the LEFT-reaching join one extra pixel. The right
+ *     one does not need it. Symmetrising this reopens a hairline.
+ *
+ * ===================================================================
+ * TOKENS
+ * ===================================================================
+ *
+ *     --pg-tab-h        strip height; every tab and the Add Job control take
+ *                       it, so selecting a tab cannot resize the row
+ *     --pg-tab-radius   tab corner radius; ALSO the join's reach, because the
+ *                       wedge to cover is exactly one corner radius wide
+ *     --pg-tab-turn     radius the flare sweeps through (= --pg-tab-radius)
+ *     --pg-tab-stroke   accent weight, and the unit for the small offsets
+ *     --pg-tab-lap      how far the active tab laps the panel's border
+ *     --pg-tab-lift     see above
+ *     --pg-tab-accent   the type colour; set once per data-type on the group
+ *                       and read by the panel, the active tab and every join
+ *
+ * ===================================================================
+ * CONTAINERS ARE EMPTY ON PURPOSE
+ * ===================================================================
+ *
+ * .pg-tabgroup and .pg-tabbar carry layout only — no surface, border, radius,
+ * shadow or padding. Anything painted on a container sits BEHIND every tab and
+ * becomes another edge each join has to reconcile. Everything you can see in
+ * the strip belongs to a tab.
+ *
+ * .pg-tabgroup's `overflow: visible` is structural, not decorative: the active
+ * tab laps past the strip and the joins reach past their tabs.
+ *
+ * ===================================================================
+ * WHY THE SHOULDERS ARE GRADIENTS AND NOT BORDERS
+ * ===================================================================
+ *
+ * A shoulder flares OUTWARD — the tab widening where it meets the panel.
+ * `border-radius` can only round a corner inward, which narrows the tab: the
+ * opposite shape. And the wedge between the arc and the tab must be FILLED
+ * with the tab's surface (it covers the panel's border running underneath);
+ * a border can only draw the stroke, never fill the far side of its own curve.
+ * Hence a radial-gradient with three bands: transparent inside the arc, the
+ * stroke on it, surface outside.
+ *
+ * ===================================================================
+ * HOW TO VERIFY A CHANGE HERE
+ * ===================================================================
+ *
+ * getComputedStyle proves a rule applies. It does NOT prove anything is
+ * visible — several bugs here computed perfectly while being painted over, or
+ * were drawn in a 6% tint nobody could see. Screenshot the region twice (rest
+ * vs hover, or before vs after) and diff the pixels.
+ *
+ * ------------------------------------------------------------------
+ *
+ * Tabs and the panel they control are one object.
+ *
+ * Two ideas carry the whole thing:
+ *
+ *   1. The accent stroke is drawn by the PANEL — its top and left borders,
+ *      sharing one corner radius. Nothing is stitched together from per-tab
+ *      segments, so there is no seam to align and none to break.
+ *
+ *   2. The active tab laps over that top border by exactly the stroke width.
+ *      Its own surface erases its share of the line, which is what makes it
+ *      read as an opening into the panel rather than a chip sitting on a rule.
+ *
+ * Every tab is the SAME height with the SAME padding — the active one differs
+ * only in colour and in that 2px lap. Nothing resizes and no text moves when
+ * you click, which is what a lift or a per-state height could not give.
+ */
+
+/*
+ * Structural only — no surface, border, radius, shadow or padding.
+ *
+ * The card is the PANEL. This element exists to group the strip with it and to
+ * scope the accent variable, nothing more. Anything painted here sits behind
+ * every tab and becomes another edge each join has to reconcile.
+ *
+ * `overflow: visible` is required, not decoration: the active tab laps past
+ * the strip and the hover joins reach past their tabs.
+ */
+/*
+ * Structural only — no surface, border, radius, shadow or padding.
+ *
+ * The card is the PANEL. This element exists to group the strip with it and to
+ * scope the accent variable, nothing more.
+ *
+ *  is required on desktop so the active tab laps past
+ * the strip and the hover joins reach past their tabs.
+ */
+.pg-tabgroup {
+  overflow: visible;
+}
+
+/* One variable drives every accented edge, so the stroke cannot go out of
+ * sync with itself. Only these two rules know which colour a type maps to. */
+.pg-tabgroup { --pg-tab-accent: var(--pg-border-strong); }
+.pg-tabgroup[data-type='w2'] { --pg-tab-accent: var(--pg-w2); }
+.pg-tabgroup[data-type='ten99'] { --pg-tab-accent: var(--pg-se); }
+
+/* ---- shared tab primitives ---- */
+
+.pg-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  position: relative;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.pg-tab .pg-badge {
+  border-color: transparent;
+  padding-inline: 0.3rem;
+}
+.pg-tab[data-active='true'] .pg-badge {
+  border-color: currentColor;
+}
+
+.pg-tab-amount {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--pg-fg-dim);
+  background: var(--pg-surface-2);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--pg-radius-xs);
+  border: 1px solid var(--pg-border-soft);
+  line-height: 1.2;
+}
+
+.pg-tab[data-active='true'] .pg-tab-amount {
+  background: color-mix(in oklab, var(--pg-tab-accent) 12%, var(--pg-surface));
+  color: var(--pg-fg);
+  border-color: color-mix(in oklab, var(--pg-tab-accent) 24%, transparent);
+}
+
+.pg-tab-rename {
+  min-width: 4ch;
+  border: 0;
+  border-bottom: 1px solid var(--pg-ring);
+  background: transparent;
+  color: var(--pg-fg);
+  font: inherit;
+  font-weight: 700;
+  outline: none;
+  padding: 0;
+}
+
+/* =================================================================== */
+/* DESKTOP (>= 640px): Connected Folder Tabs & Outlined Panel          */
+/* =================================================================== */
+
+@media (min-width: 640px) {
+  .pg-tabbar {
+    display: flex;
+    align-items: flex-end;
+    height: var(--pg-tab-h);
+  }
+
+  .pg-tabbar-actions {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    flex-shrink: 0;
+    gap: 0.375rem;
+    padding-inline: 0.625rem;
+  }
+
+  .pg-tabs {
+    display: flex;
+    align-items: stretch;
+    align-self: stretch;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    /* Lap compensation so horizontal scroller doesn't clip the 2px lap */
+    padding-bottom: var(--pg-tab-lap);
+    margin-bottom: calc(var(--pg-tab-lap) * -1);
+  }
+
+  .pg-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pg-tab {
+    height: var(--pg-tab-h);
+    padding: 0 0.75rem var(--pg-tab-stroke);
+    border: var(--pg-tab-stroke) solid transparent;
+    border-bottom: 0;
+    border-radius: var(--pg-tab-radius) var(--pg-tab-radius) 0 0;
+    background: transparent;
+    color: var(--pg-fg-muted);
+    font-weight: 600;
+    --pg-tab-hover: color-mix(in oklab, var(--pg-ring) 14%, transparent);
+  }
+
+  /* Content tab hover: tint + panel lap shadow */
+  .pg-tab:hover:not([data-active='true']):not(.pg-tab-action) {
+    background: var(--pg-tab-hover);
+    color: var(--pg-fg);
+    box-shadow: 0 var(--pg-tab-lap) 0 0 var(--pg-tab-hover);
+  }
+
+  /* Facing corner square join for content tabs next to the active tab */
+  .pg-tab:not(.pg-tab-action):has(+ .pg-tab[data-active='true']) {
+    border-top-right-radius: 0;
+  }
+  .pg-tab[data-active='true'] + .pg-tab:not(.pg-tab-action) {
+    border-top-left-radius: 0;
+  }
+
+  /* Hover join flare */
+  .pg-tab > .pg-tab-join {
+    display: none;
+    position: absolute;
+    top: calc(var(--pg-tab-stroke) * -1);
+    bottom: 0;
+    width: var(--pg-tab-turn);
+    pointer-events: none;
+  }
+
+  /* Reaching right into active tab */
+  .pg-tab:not(.pg-tab-action):has(+ .pg-tab[data-active='true']):hover > .pg-tab-join {
+    display: block;
+    right: calc((var(--pg-tab-turn) + var(--pg-tab-stroke)) * -1);
+    background:
+      radial-gradient(
+        circle at top right,
+        transparent var(--pg-tab-turn),
+        var(--pg-tab-hover) var(--pg-tab-turn)
+      ) right bottom / var(--pg-tab-turn) var(--pg-tab-turn) no-repeat,
+      linear-gradient(var(--pg-tab-hover), var(--pg-tab-hover))
+        right top / var(--pg-tab-turn) calc(100% - var(--pg-tab-turn)) no-repeat;
+  }
+
+  /* Reaching left into active tab */
+  .pg-tab[data-active='true'] + .pg-tab:not(.pg-tab-action):hover > .pg-tab-join {
+    display: block;
+    left: calc((var(--pg-tab-turn) + var(--pg-tab-stroke)) * -1);
+    top: calc(var(--pg-tab-stroke) * -1 - var(--pg-tab-lift));
+    background:
+      radial-gradient(
+        circle at top left,
+        transparent var(--pg-tab-turn),
+        var(--pg-tab-hover) var(--pg-tab-turn)
+      ) left bottom / var(--pg-tab-turn) var(--pg-tab-turn) no-repeat,
+      linear-gradient(var(--pg-tab-hover), var(--pg-tab-hover))
+        left top / var(--pg-tab-turn) calc(100% - var(--pg-tab-turn)) no-repeat;
+  }
+
+  /* Hairline separator between inactive content tabs */
+  .pg-tab:not(.pg-tab-action) + .pg-tab:not(.pg-tab-action) {
+    background-image: linear-gradient(var(--pg-rule), var(--pg-rule));
+    background-size: 1px 50%;
+    background-position: left center;
+    background-repeat: no-repeat;
+  }
+  .pg-tab[data-active='true'] + .pg-tab,
+  .pg-tab-action,
+  .pg-tab + .pg-tab-action {
+    background-image: none;
+  }
+
+  /* Active tab on desktop */
+  .pg-tab[data-active='true'] {
+    color: var(--pg-fg);
+    font-weight: 700;
+    background: var(--pg-surface);
+    border-color: var(--pg-tab-accent);
+    box-shadow: 0 var(--pg-tab-lap) 0 0 var(--pg-surface);
+    z-index: 1;
+  }
+
+  .pg-tab[data-active='true']:hover {
+    background: var(--pg-surface);
+  }
+
+  /* Active tab shoulders */
+  .pg-tab[data-active='true']::before,
+  .pg-tab[data-active='true']::after {
+    content: '';
+    position: absolute;
+    top: auto;
+    bottom: calc(var(--pg-tab-stroke) * -1);
+    width: var(--pg-tab-turn);
+    height: var(--pg-tab-turn);
+    pointer-events: none;
+    --pg-turn-stops:
+      transparent calc(var(--pg-tab-turn) - var(--pg-tab-stroke)),
+      var(--pg-tab-accent) calc(var(--pg-tab-turn) - var(--pg-tab-stroke)),
+      var(--pg-tab-accent) var(--pg-tab-turn),
+      var(--pg-surface) var(--pg-tab-turn);
+  }
+
+  .pg-tab[data-active='true']::before {
+    left: calc(var(--pg-tab-turn) * -1);
+    background: radial-gradient(circle at top left, var(--pg-turn-stops));
+  }
+
+  .pg-tab[data-active='true']::after {
+    right: calc(var(--pg-tab-turn) * -1);
+    background: radial-gradient(circle at top right, var(--pg-turn-stops));
+  }
+
+  .pg-tabs > .pg-tab:first-child::before {
+    display: none;
+  }
+
+  .pg-tabs > .pg-tab:first-child[data-active='true'] {
+    box-shadow: var(--pg-tab-stroke) var(--pg-tab-lap) 0 0 var(--pg-surface);
+  }
+
+  /* Add Job button on desktop */
+  .pg-tab-action {
+    color: var(--pg-ring);
+    font-weight: 700;
+    padding-inline: 0.875rem;
+    border-radius: var(--pg-tab-radius) var(--pg-tab-radius) 0 0;
+  }
+
+  .pg-tab-action:hover {
+    background: var(--pg-hover);
+    color: var(--pg-ring);
+  }
+
+  /* Inline add row on desktop */
+  .pg-tab-add {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.375rem;
+    height: var(--pg-tab-h);
+    padding-inline: 0.75rem;
+  }
+
+  /* Panel on desktop */
+  .pg-tabgroup .pg-card {
+    background: var(--pg-surface);
+    box-shadow: var(--pg-shadow);
+    border: 1px solid var(--pg-border);
+    border-top: var(--pg-tab-stroke) solid var(--pg-tab-accent);
+    border-left: var(--pg-tab-stroke) solid var(--pg-tab-accent);
+    border-radius: var(--pg-tab-turn) var(--pg-tab-turn)
+                   var(--pg-radius) var(--pg-radius);
+    overflow: clip;
+    position: relative;
+    z-index: 0;
+  }
+
+  .pg-tabgroup:has(.pg-tabs > .pg-tab:first-child[data-active='true']) .pg-card {
+    border-top-left-radius: 0;
+  }
+}
+
+/* =================================================================== */
+/* MOBILE (< 640px): Detached Pills & Standard Card                   */
+/* =================================================================== */
+
+@media (max-width: 639.98px) {
+  .pg-tabbar {
+    height: auto;
+    align-items: center;
+    padding-bottom: 0.5rem;
+  }
+
+  .pg-tabbar-actions {
+    display: none;
+  }
+
+  .pg-tabs {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent 100%);
+  }
+
+  .pg-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pg-tab {
+    height: var(--pg-h);
+    margin: 0;
+    padding: 0 0.75rem;
+    border: 1px solid var(--pg-border);
+    border-radius: 999px;
+    background: var(--pg-surface);
+    color: var(--pg-fg-muted);
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  .pg-tab:hover {
+    background: var(--pg-surface-2);
+    color: var(--pg-fg);
+    box-shadow: none;
+  }
+
+  .pg-tab[data-active='true'] {
+    border-color: var(--pg-tab-accent);
+    background: color-mix(in oklab, var(--pg-tab-accent) 12%, var(--pg-surface));
+    color: var(--pg-fg);
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .pg-tab[data-active='true']:hover {
+    background: color-mix(in oklab, var(--pg-tab-accent) 16%, var(--pg-surface));
+    color: var(--pg-fg);
+    box-shadow: none;
+  }
+
+  .pg-tab::before,
+  .pg-tab::after,
+  .pg-tab > .pg-tab-join {
+    display: none !important;
+  }
+
+  .pg-tab + .pg-tab {
+    background-image: none;
+  }
+
+  /* Add Job pill button on mobile */
+  .pg-tab-action {
+    color: var(--pg-ring);
+    font-weight: 700;
+    border-color: var(--pg-border);
+    background: var(--pg-surface);
+    border-radius: 999px;
+    padding: 0 0.75rem;
+    height: var(--pg-h);
+  }
+
+  .pg-tab-action:hover {
+    background: var(--pg-hover);
+    color: var(--pg-ring);
+    box-shadow: none;
+  }
+
+  /* Inline add menu on mobile formatted as a matching pill container */
+  .pg-tab-add {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.25rem;
+    height: var(--pg-h);
+    padding: 0 0.375rem;
+    border-radius: 999px;
+    border: 1px solid var(--pg-border);
+    background: var(--pg-surface);
+  }
+
+  .pg-tab-add .pg-label {
+    font-size: 0.625rem;
+    padding-inline: 0.25rem;
+  }
+
+  .pg-tab-add .pg-btn {
+    height: calc(var(--pg-h) - 8px);
+    padding: 0 0.5rem;
+    font-size: 0.6875rem;
+    border-radius: 999px;
+  }
+
+  .pg-tab-add .pg-icon-btn {
+    width: calc(var(--pg-h) - 8px);
+    height: calc(var(--pg-h) - 8px);
+    border-radius: 999px;
+  }
+
+  /* Panel on mobile */
+  .pg-tabgroup .pg-card {
+    border-radius: var(--pg-radius);
+    border: 1px solid var(--pg-border);
+    border-left: var(--pg-tab-stroke) solid var(--pg-tab-accent);
+    border-top: 1px solid var(--pg-border);
+  }
+}
+
+
+
+/*
+ * Dense data table (the monthly ledger, the analysis table).
+ *
+ * Every row tint is translucent rather than a solid colour, so stripes,
+ * the over-limit tint and hover compose against whatever is behind them
+ * instead of each needing its own opaque variant per sub-theme.
+ */
+.pg-table-row {
+  border-bottom: 1px solid var(--pg-rule);
+  transition: background-color 0.1s ease;
+}
+
+.pg-table-row:last-child { border-bottom: 0; }
+.pg-table-row[data-stripe='true'] { background: color-mix(in oklab, var(--pg-surface-2) 45%, transparent); }
+.pg-table-row[data-over='true'] { background: var(--pg-over-bg); }
+.pg-table-row:hover { background: var(--pg-hover); }
+
+/*
+ * Frozen first column.
+ *
+ * A sticky column normally needs an opaque fill to hide the cells sliding
+ * under it, which makes it look pasted on. A translucent fill plus a backdrop
+ * blur keeps it legible while the rest of the row is still visibly moving
+ * behind it, and the edge shadow says it is floating above the scroll.
+ */
+.pg-frozen {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: color-mix(in oklab, var(--pg-surface) 70%, transparent);
+  backdrop-filter: blur(10px) saturate(1.6);
+  -webkit-backdrop-filter: blur(10px) saturate(1.6);
+}
+
+.pg-frozen[data-stripe='true'] { background: color-mix(in oklab, var(--pg-surface-2) 62%, transparent); }
+.pg-frozen[data-over='true'] { background: color-mix(in oklab, var(--pg-over) 12%, transparent); }
+
+/* Only cast the edge shadow once the content has actually scrolled under it. */
+.pg-frozen::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  right: -0.75rem;
+  width: 0.75rem;
+  pointer-events: none;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.06), transparent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.pg-scrolled .pg-frozen::after { opacity: 1; }
+
+/* Browsers without backdrop-filter get an opaque column rather than an
+ * unreadable one. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pg-frozen { background: var(--pg-surface); }
+  .pg-frozen[data-stripe='true'] { background: var(--pg-surface-2); }
+}
+
+.pg-table-cell {
+  border-right: 1px solid var(--pg-rule);
+}
+
+.pg-table-cell:last-child { border-right: 0; }
+
+.pg-table-head {
+  background: color-mix(in oklab, var(--pg-surface-2) 70%, var(--pg-surface));
+  border-bottom: 1px solid var(--pg-rule-strong);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pg-fg-muted);
+}
+
+/*
+ * The monthly ledger grid. Header and every row share this class so the
+ * columns cannot drift apart, and the mobile track list is genuinely narrower
+ * rather than the desktop one forced through a scroller.
+ */
+.pg-ledger-grid {
+  display: grid;
+  grid-template-columns:
+    4rem minmax(2.75rem, 1fr) minmax(4.25rem, 1.3fr) minmax(4.25rem, 1.3fr) 2.75rem 2.25rem;
+  /* Narrow enough that a 375px phone shows the whole row without scrolling */
+  min-width: 20.25rem;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .pg-ledger-grid {
+    grid-template-columns: 8.5rem 1fr 1.3fr 1.3fr 6rem 4.5rem;
+    min-width: 0;
+  }
+}
+
+/* Spreadsheet-style cell input */
+.pg-excel-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  outline: none;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: right;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--pg-radius-xs);
+  box-shadow: none;
+  color: var(--pg-fg);
+}
+
+.pg-excel-input:focus {
+  background: var(--pg-surface);
+  border-color: var(--pg-ring);
+  box-shadow: 0 0 0 2px var(--pg-focus-ring);
+}
+
+.pg-excel-input:disabled { opacity: 0.4; }
+
+/*
+ * Tile row for the summary deck at the bottom of the analysis. Same divider
+ * treatment as .pg-stat-grid: one panel, hairline splits, no gaps.
+ */
+.pg-tile-grid { display: grid; }
+
+@media (max-width: 639.98px) {
+  .pg-tile-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .pg-tile-grid > .pg-tile { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:nth-child(-n + 1) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:nth-child(1n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:first-child { box-shadow: none; }
+}
+
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .pg-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pg-tile-grid > .pg-tile { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:nth-child(-n + 2) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:nth-child(2n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:first-child { box-shadow: none; }
+}
+
+@media (min-width: 1024px) {
+  .pg-tile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pg-tile-grid > .pg-tile { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:nth-child(-n + 4) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:nth-child(4n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-tile-grid > .pg-tile:first-child { box-shadow: none; }
+}
+
+.pg-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.875rem 1rem;
+  min-width: 0;
+}
+
+.pg-tile-note {
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--pg-fg-muted);
+}
+
+/*
+ * Month grid — the Cards view of the monthly analysis.
+ *
+ * Full bleed inside its card, split by hairlines rather than by gaps and
+ * per-cell borders. A bordered box inside a bordered card was drawing two
+ * outlines a few pixels apart; this draws exactly one line between any two
+ * neighbours and none against the card's own edge.
+ *
+ * Each cell carries a top and left inset; the first row drops its top and the
+ * first column drops its left, so no rule ever doubles up with the card
+ * border. The column count changes per breakpoint, so the nth-child maths is
+ * restated for each one.
+ */
+.pg-month-grid { display: grid; }
+
+@media (max-width: 639.98px) {
+  .pg-month-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pg-month-grid > * { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(-n + 2) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(2n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:first-child { box-shadow: none; }
+}
+
+@media (min-width: 640px) and (max-width: 767.98px) {
+  .pg-month-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pg-month-grid > * { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(-n + 3) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(3n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:first-child { box-shadow: none; }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .pg-month-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pg-month-grid > * { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(-n + 4) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(4n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:first-child { box-shadow: none; }
+}
+
+@media (min-width: 1024px) {
+  .pg-month-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .pg-month-grid > * { box-shadow: inset 1px 0 0 0 var(--pg-rule), inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(-n + 6) { box-shadow: inset 1px 0 0 0 var(--pg-rule); }
+  .pg-month-grid > *:nth-child(6n + 1) { box-shadow: inset 0 1px 0 0 var(--pg-rule); }
+  .pg-month-grid > *:first-child { box-shadow: none; }
+}
+
+/*
+ * A month with nothing in it sits at the same tone as the header band above,
+ * so the grid reads as mostly-empty chrome until real figures fill it in.
+ * The moment a month has countable income it lifts to the card surface and
+ * carries its status colour.
+ */
+.pg-month-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.75rem 0.875rem;
+  background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
+  transition: background-color 0.12s ease;
+}
+
+.pg-month-cell[data-filled='true'] { background: var(--pg-surface); }
+.pg-month-cell:hover { background: var(--pg-hover); }
+
+/* Empty state for a filtered view that matched nothing */
+.pg-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  color: var(--pg-fg-muted);
+}
+
+.pg-empty-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--pg-fg);
+}
+
+.pg-empty-body {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  max-width: 26rem;
+}
+
+/* Thin proportion / progress bar */
+.pg-meter {
+  display: flex;
+  height: 0.3125rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--pg-surface-3);
+}
+
+.pg-meter-seg { height: 100%; }
+
+/* Nine-segment TWP pips */
+.pg-pips {
+  display: flex;
+  gap: 0.1875rem;
+  height: 0.3125rem;
+}
+
+.pg-pip {
+  flex: 1;
+  border-radius: 999px;
+  background: var(--pg-surface-3);
+}
+
+.pg-pip[data-state='used'] { background: var(--pg-twp); }
+.pg-pip[data-state='prior'] { background: color-mix(in oklab, var(--pg-fg-dim) 55%, transparent); }
+
+.pg-chart-bar-trigger {
+  appearance: none;
+  min-width: 1.25rem;
+  border: 0;
+  border-radius: var(--pg-radius-sm);
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pg-chart-bar-trigger:hover { background: var(--pg-hover); }
+
+/*
+ * Cursor crosshair. One hairline, drawn behind the bars, centred on the month
+ * section the pointer is over. Left at exactly 50% rather than nudged by
+ * translateX(-50%): half-pixel offsets make a 1px rule render grey and fuzzy.
+ */
+.pg-crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: color-mix(in oklab, var(--pg-fg-dim) 60%, transparent);
+}
+
+@media (max-width: 419.98px) {
+  .pg-chart-selection {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .pg-chart-selection > div {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}
+
+/* ---- Chart tooltip ---- */
+.pg-tooltip {
+  min-width: 12.5rem;
+  background: var(--pg-invert);
+  color: var(--pg-invert-fg);
+  border: 1px solid var(--pg-invert-border);
+  border-radius: var(--pg-radius-md);
+  box-shadow: var(--pg-shadow-lg);
+  overflow: hidden;
+}
+
+.pg-tip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.7rem;
+  background: color-mix(in oklab, var(--pg-invert-fg) 8%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--pg-invert-fg) 12%, transparent);
+}
+
+.pg-tip-month {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.pg-tip-total {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.pg-tip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.pg-tip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.pg-tip-key {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0.7;
+}
+
+.pg-tip-swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.pg-tip-val {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.pg-tip-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0.7rem;
+  border-top: 1px solid color-mix(in oklab, var(--pg-invert-fg) 12%, transparent);
+  background: color-mix(in oklab, var(--pg-invert-fg) 4%, transparent);
+}
+
+/* Caret pointing at the bar the tooltip describes */
+.pg-tooltip::after {
+  content: '';
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--pg-invert);
+  border-right: 1px solid var(--pg-invert-border);
+  border-bottom: 1px solid var(--pg-invert-border);
+  transform: rotate(45deg);
+}
+
+.pg-tooltip[data-caret='bottom']::after { bottom: -0.28rem; left: calc(50% - 0.25rem); }
+.pg-tooltip[data-caret='top']::after {
+  top: -0.28rem;
+  left: calc(50% - 0.25rem);
+  transform: rotate(225deg);
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Chrome                                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Mobile bottom navigation.
+ *
+ * Display is owned entirely by this media query rather than a `sm:hidden`
+ * utility: this stylesheet is imported after Tailwind, so a bare
+ * `display: flex` here silently beat the utility and the bar showed up on
+ * desktop. Gating it here means it cannot be switched on by accident.
+ */
+.pg-bottom-nav {
+  display: none;
+}
+
+.pg-notice-trigger {
+  position: relative;
+  display: inline-flex;
+  height: var(--pg-h);
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius-md);
+  background: var(--pg-surface);
+  padding: 0 0.55rem;
+  color: var(--pg-fg-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pg-notice-trigger:hover {
+  border-color: var(--pg-border-strong);
+  background: var(--pg-hover);
+  color: var(--pg-fg);
+}
+
+.pg-notice-trigger-active {
+  border-color: var(--pg-warn-border);
+  background: var(--pg-warn-bg);
+  color: var(--pg-warn-text);
+}
+
+@media (max-width: 639.98px) {
+  .pg-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    gap: 0.25rem;
+    /* Heavier blur than the header: content passes directly under this bar,
+     * and a light frost keeps the labels legible over anything. */
+    background: color-mix(in oklab, var(--pg-surface) 80%, transparent);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    border-top: 1px solid var(--pg-border);
+    padding: 0.375rem 0.5rem calc(0.375rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .pg-bottom-nav { background: var(--pg-surface); }
+  }
+}
+
+.pg-bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1875rem;
+  /* Comfortably past the 44px touch target minimum */
+  min-height: 3rem;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--pg-radius-md);
+  background: transparent;
+  color: var(--pg-fg-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.18s ease;
+}
+
+/*
+ * The active state is a pill behind the icon rather than a rule along the top
+ * edge — the indicator belongs to the item, and a full-width top border read
+ * as another divider stacked on the bar's own.
+ */
+.pg-bottom-nav-icon {
+  display: grid;
+  place-items: center;
+  height: 1.75rem;
+  width: 3.5rem;
+  max-width: 100%;
+  border-radius: 999px;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.pg-bottom-nav-item[data-active='true'] {
+  color: var(--pg-ring);
+  font-weight: 700;
+}
+
+.pg-bottom-nav-item[data-active='true'] .pg-bottom-nav-icon {
+  background: var(--pg-hover-strong);
+  color: var(--pg-ring);
+}
+
+.pg-bottom-nav-item:active .pg-bottom-nav-icon { transform: scale(0.92); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-bottom-nav-icon { transition: none; }
+  .pg-bottom-nav-item:active .pg-bottom-nav-icon { transform: none; }
+}
+
+/* The page reserves room for the bar only while the bar exists */
+.pg-page-pad { padding-bottom: 0; }
+
+@media (max-width: 639.98px) {
+  .pg-page-pad { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
+}
+
+/*
+ * Sticky application header.
+ *
+ * Its plate, ink and bottom rule all come from tokens, so a sub-theme can turn
+ * it into a solid coloured bar without this rule or the component changing.
+ */
+.pg-topbar {
+  background: var(--pg-topbar);
+  color: var(--pg-topbar-fg);
+  border-bottom: var(--pg-topbar-accent-w) solid var(--pg-topbar-accent);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+.pg-skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 80;
+  transform: translateY(-180%);
+  border: 2px solid var(--pg-ring);
+  border-radius: var(--pg-radius-md);
+  background: var(--pg-surface);
+  padding: 0.5rem 0.75rem;
+  color: var(--pg-fg);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  box-shadow: var(--pg-shadow-md);
+}
+
+.pg-skip-link:focus { transform: translateY(0); }
+
+@media (max-width: 359.98px) {
+  .pg-brand { display: none; }
+  .pg-topbar > div {
+    gap: 0.25rem;
+    padding-inline: 0.5rem;
+  }
+  .pg-topbar .pg-field { margin-left: 0; }
+  .pg-topbar .pg-notice-trigger {
+    width: var(--pg-h);
+    padding-inline: 0;
+  }
+}
+
+/* Horizontal scroller that bleeds to the screen edge on mobile so a wide
+ * table doesn't look clipped inside a padded card. */
+.pg-scroll-x {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/*
+ * The chart plot must not become an overflow context on desktop: `overflow-x:
+ * auto` established one, and it cropped the hover tooltip. Phones still scroll
+ * (they use the tap banner, not the tooltip, so nothing gets clipped there).
+ */
+.pg-chart-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+  .pg-chart-scroll { overflow: visible; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Popover bridge                                                  */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The settings sheet, help spread and simulator are shared across every
+ * layout and are written against the app-wide token names in index.css.
+ * Re-pointing those names at the PayGuard palette makes them inherit this
+ * layout's sub-theme instead of arriving in the default lime-on-paper skin.
+ */
+.pg-payguard {
+  --background: var(--pg-bg);
+  --foreground: var(--pg-fg);
+  --surface: var(--pg-surface);
+  --surface-2: var(--pg-surface-2);
+  --card: var(--pg-surface);
+  --card-foreground: var(--pg-fg);
+  --popover: var(--pg-surface);
+  --popover-foreground: var(--pg-fg);
+
+  --primary: var(--pg-head);
+  --primary-foreground: var(--pg-head-fg);
+  --secondary: var(--pg-surface-2);
+  --secondary-foreground: var(--pg-fg);
+  --muted: var(--pg-surface-2);
+  --muted-foreground: var(--pg-fg-muted);
+  --accent: var(--pg-surface-2);
+  --accent-foreground: var(--pg-head);
+
+  --destructive: var(--pg-over-text);
+  --destructive-foreground: var(--pg-surface);
+  --warn: var(--pg-warn-text);
+  --warn-foreground: var(--pg-warn-text);
+  --warn-soft: var(--pg-warn-bg);
+  --good: var(--pg-safe-text);
+  --good-soft: var(--pg-safe-bg);
+  --info: var(--pg-info-text);
+  --info-foreground: var(--pg-surface);
+  --info-soft: var(--pg-info-bg);
+
+  --border: var(--pg-border);
+  --input: var(--pg-border);
+  --ring: var(--pg-ring);
+
+  --shadow-input: none;
+  --shadow-card: var(--pg-shadow);
+  --shadow-lift: var(--pg-shadow-md);
+
+  --radius-sm: var(--pg-radius-sm);
+  --radius-md: var(--pg-radius-md);
+  --radius-lg: var(--pg-radius);
+  --radius-xl: var(--pg-radius-xl);
+
+  --font-display: 'DM Sans', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'DM Sans', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Shared components (the settings sheet, the safe-work simulator, the terms
+ * gate, the sign-in screen) are written against index.css's utilities and are
+ * used by all five layouts. Rather than teaching each of them that PayGuard
+ * exists, this re-skins those utilities inside .pg-payguard: same markup,
+ * this layout's type scale, radii and control heights.
+ */
+.pg-payguard .display-figure {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.375rem;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.pg-payguard .label-caps {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pg-fg-muted);
+}
+
+.pg-payguard .field-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pg-fg-muted);
+}
+
+.pg-payguard .type-muted,
+.pg-payguard .type-body {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.pg-payguard .panel {
+  background: var(--pg-surface);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius);
+  box-shadow: var(--pg-shadow);
+}
+
+/* A .panel nested inside a .pg-card would draw a second outline a few pixels
+ * inside the first. The inner one gives up its chrome. */
+.pg-payguard .pg-card .panel,
+.pg-payguard [role='dialog'] .panel {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.pg-payguard .field-input {
+  height: var(--pg-h-lg);
+  border-radius: var(--pg-radius-md);
+  border: 1px solid var(--pg-border);
+  background: var(--pg-surface);
+  padding-inline: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pg-payguard .field-input:focus,
+.pg-payguard .field-input:focus-visible {
+  border-color: var(--pg-ring);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pg-focus-ring);
+}
+
+.pg-payguard .btn-primary {
+  min-height: var(--pg-h-lg);
+  border-radius: var(--pg-radius-md);
+  background: var(--pg-head);
+  color: var(--pg-head-fg);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.pg-payguard .icon-btn {
+  width: var(--pg-h-lg);
+  height: var(--pg-h-lg);
+  border-radius: var(--pg-radius-md);
+}
+
+/* Settings-sheet controls */
+.pg-payguard .seg {
+  border-radius: var(--pg-radius-md);
+  border-color: var(--pg-border);
+  background: var(--pg-surface-2);
+  padding: 3px;
+  gap: 3px;
+}
+
+.pg-payguard .seg-item {
+  border-radius: calc(var(--pg-radius-md) - 3px);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pg-payguard .seg-item-on {
+  background: var(--pg-head);
+  border-color: var(--pg-head);
+  color: var(--pg-head-fg);
+}
+
+.pg-payguard .option-list,
+.pg-payguard .swatch,
+.pg-payguard .swatch-strip {
+  border-radius: var(--pg-radius-md);
+  border-color: var(--pg-border);
+}
+
+.pg-payguard .option-row {
+  border-top-color: var(--pg-rule);
+}
+
+.pg-payguard .option-row[data-selected='true'] {
+  background: var(--pg-hover);
+}
+
+.pg-payguard .option-mark {
+  border-color: var(--pg-border);
+}
+
+.pg-payguard .option-row[data-selected='true'] .option-mark {
+  background: var(--pg-head);
+  border-color: var(--pg-head);
+  color: var(--pg-head-fg);
+}
+
+.pg-payguard .chip {
+  border-radius: var(--pg-radius-xs);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+}
+
+.pg-payguard .switch[data-state='checked'] {
+  background: var(--pg-head);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-payguard *,
+  .pg-payguard *::before,
+  .pg-payguard *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

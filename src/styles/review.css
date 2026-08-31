@@ -1,0 +1,3878 @@
+/* Product-review console. Deliberately theme-independent — the same red and
+ * blue read the same way in all six layouts and every sub-palette, and none
+ * of it inherits from the layout it is inspecting. */
+
+:root {
+  --review-red: #dc2626;
+  --review-blue: #2563eb;
+  --review-ink: #0f172a;
+
+  /* The console floats over someone else's screen, so its own furniture is
+   * glass: enough body to read against any of the six layouts, never enough
+   * to hide what is behind it. Idle surfaces sit lighter than active ones. */
+  --review-glass: rgb(15 23 42 / 0.62);
+  --review-glass-strong: rgb(15 23 42 / 0.88);
+  --review-glass-line: rgb(255 255 255 / 0.14);
+  --review-blur: blur(14px) saturate(1.4);
+  --review-lift: 0 12px 30px rgb(2 6 23 / 0.28);
+}
+
+/* --- Suggested cuts ------------------------------------------------------ */
+
+.review-target {
+  position: relative;
+  min-width: 0;
+}
+
+.review-target[data-review-transparent]:not([data-review-on='true']) {
+  display: contents;
+}
+
+.review-target[data-review-on='true'] {
+  outline: 3px solid var(--review-red);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+  isolation: isolate;
+}
+
+.review-target[data-review-marked='true'] {
+  outline-width: 5px;
+  background-image: linear-gradient(rgb(220 38 38 / 0.08), rgb(220 38 38 / 0.08));
+}
+
+.review-target-tag {
+  position: absolute;
+  z-index: 80;
+  top: -0.75rem;
+  left: 0.75rem;
+  max-width: calc(100% - 7rem);
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--review-red);
+  padding: 0.2rem 0.55rem;
+  color: white;
+  font: 700 0.6875rem/1.2 ui-sans-serif, system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgb(127 29 29 / 0.28);
+}
+
+.review-target-tools {
+  position: absolute;
+  z-index: 81;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.375rem;
+}
+
+.review-target-btn {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 9999px;
+  background: var(--review-red);
+  color: white;
+  box-shadow: 0 4px 12px rgb(127 29 29 / 0.35);
+  cursor: pointer;
+}
+
+.review-target-btn:hover,
+.review-target-btn:focus-visible {
+  background: #991b1b;
+  transform: scale(1.06);
+}
+
+.review-target-btn[data-marked='true'] {
+  background: #7f1d1d;
+}
+
+/* --- Select mode --------------------------------------------------------- */
+
+body.review-picking,
+body.review-picking * {
+  cursor: crosshair !important;
+}
+
+.review-outline {
+  position: fixed;
+  z-index: 90;
+  pointer-events: none;
+  border-radius: 0.375rem;
+}
+
+.review-outline-hover {
+  outline: 2px dashed var(--review-blue);
+  background: rgb(37 99 235 / 0.08);
+}
+
+.review-outline-picked {
+  outline: 3px solid var(--review-blue);
+  background: rgb(37 99 235 / 0.12);
+}
+
+.review-outline-tag {
+  position: absolute;
+  top: -1.35rem;
+  left: 0;
+  max-width: 18rem;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background: var(--review-blue);
+  padding: 0.1rem 0.4rem;
+  color: white;
+  font: 600 0.6875rem/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-actions {
+  position: fixed;
+  z-index: 95;
+  display: flex;
+  max-width: min(23rem, calc(100vw - 1rem));
+  flex-direction: column;
+  gap: 0.2rem;
+  border-radius: 0.625rem;
+  background: rgb(15 23 42 / 0.94);
+  padding: 0.3rem;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.35);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  backdrop-filter: blur(8px);
+}
+
+.review-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* The path from the audited card down to what is selected. Clicking a step
+ * widens the aim to it, so a flag lands on the stat and not on the card. */
+.review-aim {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  overflow-x: auto;
+  border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  padding: 0 0.15rem 0.25rem;
+}
+
+.review-aim button {
+  flex: none;
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.3rem;
+  color: rgb(255 255 255 / 0.5);
+  font: 600 0.6875rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  cursor: pointer;
+}
+
+.review-aim button + button::before {
+  margin-right: 0.25rem;
+  content: '›';
+  opacity: 0.45;
+}
+
+.review-aim button:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: white;
+}
+
+.review-aim button[data-on='true'] {
+  background: var(--review-blue);
+  color: white;
+}
+
+.review-aim-size {
+  margin-left: auto;
+  padding-left: 0.4rem;
+  color: rgb(255 255 255 / 0.4);
+  font: 500 0.625rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.review-actions kbd {
+  border-radius: 0.2rem;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0 0.25rem;
+  color: rgb(255 255 255 / 0.75);
+  font: 600 0.625rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.review-actions-wide {
+  color: #93c5fd !important;
+}
+
+.review-actions button {
+  display: flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.45rem;
+  background: transparent;
+  padding: 0 0.6rem;
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-actions button:hover,
+.review-actions button:focus-visible {
+  background: rgb(255 255 255 / 0.16);
+}
+
+/* --- Comment composer ---------------------------------------------------- */
+
+.review-composer-scrim {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(15 23 42 / 0.45);
+  padding: 1rem;
+}
+
+/* Anchored to an element: barely a scrim at all. A comment is about something
+ * you are looking at, so the page stays legible underneath and the composer
+ * sits beside the thing rather than on top of it. */
+.review-composer-scrim[data-anchored] {
+  display: block;
+  background: rgb(15 23 42 / 0.14);
+  padding: 0;
+}
+
+.review-composer-scrim[data-anchored] .review-composer {
+  position: fixed;
+  width: 21rem;
+}
+
+/* The element keeps its own light while it is being described. */
+.review-composer-halo {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 0.4rem;
+  outline: 3px solid var(--review-blue);
+  outline-offset: 3px;
+  background: rgb(37 99 235 / 0.1);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.6), 0 0 26px rgb(37 99 235 / 0.45);
+}
+
+.review-composer {
+  width: min(28rem, 100%);
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 0.9rem;
+  background: rgb(255 255 255 / 0.86);
+  padding: 0.85rem;
+  color: var(--review-ink);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  box-shadow: 0 24px 60px rgb(15 23 42 / 0.28);
+  backdrop-filter: blur(16px) saturate(1.5);
+}
+
+.review-composer-target {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.review-composer-source {
+  margin-top: 0.15rem;
+  overflow: hidden;
+  color: #64748b;
+  font: 500 0.6875rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-composer textarea {
+  margin-top: 0.6rem;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  padding: 0.6rem;
+  color: inherit;
+  font: 400 0.9375rem/1.45 inherit;
+  resize: vertical;
+}
+
+.review-composer textarea:focus {
+  outline: 2px solid var(--review-blue);
+  outline-offset: 1px;
+}
+
+.review-composer-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.review-composer-keys {
+  margin-right: auto;
+  color: #94a3b8;
+  font: 500 0.6875rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* What was already said about this, so a follow-up has its context. */
+.review-composer-thread {
+  display: flex;
+  max-height: 7rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  margin-top: 0.6rem;
+  border-left: 2px solid #cbd5e1;
+  padding-left: 0.5rem;
+}
+
+.review-composer-thread p {
+  color: #475569;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.review-composer-thread p[data-from='claude'] {
+  color: #1d4ed8;
+}
+
+.review-composer-thread b {
+  font-weight: 700;
+}
+
+/* Intent, one tap: prose says what to do, these say what kind of change. */
+.review-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.review-tag-row button {
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.7);
+  padding: 0.15rem 0.5rem;
+  color: #475569;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-tag-row button:hover {
+  border-color: var(--review-blue);
+  color: var(--review-blue);
+}
+
+.review-tag-row button[data-on='true'] {
+  border-color: var(--review-blue);
+  background: var(--review-blue);
+  color: white;
+}
+
+.review-composer-row button {
+  min-height: 2.5rem;
+  border-radius: 0.5rem;
+  padding: 0 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-ghost {
+  background: #e2e8f0;
+  color: var(--review-ink);
+}
+
+.review-primary {
+  background: var(--review-blue);
+  color: white;
+}
+
+/* --- Notes panel --------------------------------------------------------- */
+
+.review-panel {
+  position: fixed;
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 0.9);
+  color: var(--review-ink);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  box-shadow: 0 20px 50px rgb(2 6 23 / 0.28);
+  backdrop-filter: var(--review-blur);
+}
+
+.review-panel[data-min='true'] > *:not(.review-panel-head) {
+  display: none;
+}
+
+.review-panel-head {
+  display: flex;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.review-panel-head button {
+  color: #64748b;
+  cursor: pointer;
+}
+
+.review-panel-head:active {
+  cursor: grabbing;
+}
+
+.review-panel-buttons {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.review-panel-grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1rem;
+  height: 1rem;
+  cursor: nwse-resize;
+  touch-action: none;
+  background: linear-gradient(135deg, transparent 50%, #94a3b8 50%, #94a3b8 60%, transparent 60%, transparent 70%, #94a3b8 70%, #94a3b8 80%, transparent 80%);
+}
+
+.review-panel-sync {
+  padding: 0.45rem 0.85rem;
+  background: #f1f5f9;
+  color: #475569;
+  font: 500 0.6875rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.review-panel-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.35rem;
+}
+
+.review-panel-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  border-radius: 0.5rem;
+  padding: 0.15rem;
+}
+
+.review-panel-list li:hover {
+  background: #f8fafc;
+}
+
+.review-panel-list li[data-kind='delete'] .review-note-kind {
+  color: var(--review-red);
+}
+
+.review-panel-list li[data-kind='comment'] .review-note-kind {
+  color: var(--review-blue);
+}
+
+.review-panel-empty {
+  padding: 1rem 0.75rem;
+  color: #64748b;
+  font-size: 0.8125rem;
+}
+
+.review-note-body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.45rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.review-note-kind {
+  font: 700 0.625rem/1.3 inherit;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.review-note-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.review-note-text {
+  color: #334155;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.review-note-source {
+  overflow: hidden;
+  color: #64748b;
+  font: 500 0.625rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-note-remove {
+  padding: 0.4rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.review-note-remove:hover {
+  color: var(--review-red);
+}
+
+.review-panel-foot {
+  display: flex;
+  gap: 0.4rem;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.5rem;
+}
+
+.review-panel-foot button {
+  display: flex;
+  min-height: 2.25rem;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  background: #e2e8f0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-panel-foot button:hover {
+  background: #cbd5e1;
+}
+
+/* --- Floating dock ------------------------------------------------------- */
+
+.review-dock {
+  position: fixed;
+  z-index: 100;
+  /* The hint and the key legend hang off this box, so it must be the thing
+     they are positioned against. */
+  width: max-content;
+  right: max(1rem, env(safe-area-inset-right));
+  /* Clears PayGuard's bottom nav, which is the tallest of the six layouts. */
+  bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  display: flex;
+  max-width: min(19rem, calc(100vw - 2rem));
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.review-dock-tools {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid var(--review-glass-line);
+  border-radius: 0.75rem;
+  background: var(--review-glass-strong);
+  padding: 0.35rem;
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+}
+
+/* A tool palette, not a menu: square icon buttons, a hair of padding, and a
+ * hairline between the groups. Upright by default, flat or wide on request. */
+.review-hud-head {
+  cursor: grab;
+  touch-action: none;
+}
+
+.review-hud-head:active {
+  cursor: grabbing;
+}
+
+.review-dock-tools > button {
+  position: relative;
+  cursor: pointer;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.5rem;
+  color: rgb(255 255 255 / 0.86);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-dock-tools > button:hover,
+.review-dock-tools > button:focus-visible {
+  background: rgb(255 255 255 / 0.16);
+  color: white;
+}
+
+/* The lit tool, the way a selected tool reads in any image editor. */
+.review-dock-tools > button[data-on='true'] {
+  background: var(--review-blue);
+  color: white;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+}
+
+.review-dock-tools > button:nth-of-type(1)[data-on='true'] {
+  background: var(--review-red);
+}
+
+.review-hud-close {
+  display: grid;
+  width: 1.3rem;
+  height: 1.3rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.3rem;
+  color: #4ade80;
+  cursor: pointer;
+}
+
+.review-hud-close:hover {
+  background: rgb(74 222 128 / 0.2);
+}
+
+/* Minimised, the title band is all there is — and it still closes. */
+.review-dock-tools[data-min='true'] {
+  padding: 0.15rem;
+}
+
+.review-tools-rule {
+  height: 1px;
+  margin: 0.15rem 0.25rem;
+  background: var(--review-glass-line);
+}
+
+/* Counts ride the corner of their icon. */
+.review-badge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.15rem;
+  min-width: 1rem;
+  border: 1px solid rgb(15 23 42 / 0.85);
+  border-radius: 9999px;
+  background: #38bdf8;
+  padding: 0 0.2rem;
+  color: #04121f;
+  font: 700 0.5625rem/1.05rem ui-sans-serif, system-ui, sans-serif;
+  text-align: center;
+}
+
+/* Answered everything on this screen: the count becomes a tick. */
+.review-badge[data-done] {
+  display: grid;
+  height: 1rem;
+  place-items: center;
+  background: #4ade80;
+  color: #052e16;
+}
+
+.review-dock-tools > button[data-on='true'] .review-badge {
+  background: white;
+  color: var(--review-ink);
+}
+
+/* Hover label, Photoshop-style: the name and its key, beside the strip. */
+.review-dock-tools > button[data-label]::after {
+  position: absolute;
+  z-index: 2;
+  right: calc(100% + 0.45rem);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  background: rgb(2 6 23 / 0.95);
+  color: white;
+  content: attr(data-label) ' · ' attr(data-key);
+  font: 600 0.6875rem/1.4 ui-sans-serif, system-ui, sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.review-dock-tools > button[data-label]:hover::after,
+.review-dock-tools > button[data-label]:focus-visible::after {
+  opacity: 1;
+}
+
+/* Flat: the same strip lying on its side. */
+/* A palette taller (or wider) than the window wraps into a second bank, the
+ * way a two-column tool strip does — it never runs off the screen. */
+.review-dock-tools[data-dir='v'] {
+  max-height: calc(100vh - 5rem);
+  flex-wrap: wrap;
+}
+
+.review-dock-tools[data-dir='h'] {
+  max-width: calc(100vw - 2rem);
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.review-dock-tools[data-dir='h'] .review-hud-head {
+  flex: none;
+  flex-direction: column;
+  gap: 0.1rem;
+  border-right: 1px solid var(--review-glass-line);
+  border-bottom: 0;
+  padding: 0.2rem 0.25rem 0.2rem 0.1rem;
+}
+
+/* Head buttons are furniture, not tools: they stay small in every shape. */
+.review-hud-head button {
+  flex: none;
+}
+
+.review-dock-tools[data-dir='h'] .review-tools-rule {
+  width: 1px;
+  height: 1.4rem;
+  margin: 0 0.15rem;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label]::after {
+  top: calc(100% + 0.4rem);
+  right: auto;
+}
+
+/* Wide: icons keep their place, names come along — and the palette can be
+ * dragged narrow until the names clip away and only the icons are left. */
+.review-dock-tools[data-dir='wide'] {
+  min-width: 3rem;
+  overflow: hidden;
+}
+
+.review-dock-tools[data-dir='wide'] > button {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  padding: 0 0.55rem;
+}
+
+.review-dock-tools[data-dir='wide'] > button svg {
+  flex: none;
+}
+
+.review-tools-grip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 0.4rem;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.review-tools-grip:hover {
+  background: rgb(255 255 255 / 0.18);
+}
+
+/* Wide: the icon leads and the name follows it, so the column of icons still
+ * reads as a column of icons. The hover label becomes the inline one. */
+.review-dock-tools[data-dir='wide'] > button::after {
+  position: static;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  content: attr(data-label);
+  font: 600 0.8125rem/1 ui-sans-serif, system-ui, sans-serif;
+  opacity: 1;
+  box-shadow: none;
+}
+
+.review-dock-tools[data-dir='wide'] .review-badge {
+  position: static;
+  order: 2;
+  border: 0;
+}
+
+/* Name against the icon, count out at the end of the row. Both clip rather
+ * than push the palette wider than it was dragged. */
+.review-dock-tools[data-dir='wide'] > button::after {
+  order: 1;
+  overflow: hidden;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.review-count {
+  margin-left: auto;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.22);
+  padding: 0 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.review-fab {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--review-glass-line);
+  border-radius: 9999px;
+  /* See-through while it waits: it sits on top of the app's own bottom-right
+   * corner, and a review tool has no business hiding the thing under review. */
+  background: var(--review-glass);
+  padding: 0.65rem 1rem;
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgb(2 6 23 / 0.6);
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+  cursor: pointer;
+  transition: background-color 160ms, box-shadow 160ms;
+}
+
+.review-fab:hover,
+.review-fab:focus-visible {
+  background: var(--review-glass-strong);
+}
+
+.review-fab[data-open='true'] {
+  background: rgb(220 38 38 / 0.86);
+  border-color: rgb(255 255 255 / 0.34);
+}
+
+.review-fab[data-open='true']:hover {
+  background: var(--review-red);
+}
+
+/* The key card hangs off the palette rather than sitting inside it: a tool
+ * strip that grows to the width of its own advice is not a tool strip. */
+.review-help {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  display: flex;
+  width: max-content;
+  max-width: min(15rem, 62vw);
+  flex-wrap: wrap;
+  gap: 0.2rem 0.5rem;
+  border: 1px solid var(--review-glass-line);
+  border-radius: 0.55rem;
+  background: var(--review-glass-strong);
+  padding: 0.4rem 0.5rem;
+  color: rgb(255 255 255 / 0.7);
+  font: 500 0.625rem/1.5 ui-sans-serif, system-ui, sans-serif;
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+}
+
+.review-dock[data-side='left'] .review-help {
+  right: auto;
+  left: 0;
+}
+
+.review-help-now {
+  width: 100%;
+  border-bottom: 1px solid var(--review-glass-line);
+  padding-bottom: 0.3rem;
+  color: white;
+  font-weight: 600;
+}
+
+.review-help span {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.review-help span[data-on='true'] {
+  color: #fbbf24;
+}
+
+.review-help kbd {
+  border-radius: 0.2rem;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0 0.2rem;
+  color: white;
+  font: 700 0.625rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.review-hint {
+  max-width: min(17rem, 60vw);
+  border-radius: 0.5rem;
+  background: var(--review-glass-strong);
+  padding: 0.4rem 0.55rem;
+  color: white;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  text-align: right;
+  backdrop-filter: var(--review-blur);
+}
+
+@media (min-width: 48rem) {
+  .review-dock {
+    right: max(1.25rem, env(safe-area-inset-right));
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .review-target-btn,
+  .review-fab,
+  .review-dock-tools > button {
+    transition: background-color 150ms, transform 150ms;
+  }
+}
+
+/* --- Verdicts on proposed cuts ------------------------------------------ */
+
+.review-target[data-review-verdict='approved'] {
+  outline-width: 5px;
+  background-image: linear-gradient(rgb(220 38 38 / 0.1), rgb(220 38 38 / 0.1));
+}
+
+.review-target[data-review-verdict='rejected'] {
+  outline-color: #16a34a;
+}
+
+.review-target[data-review-verdict='rejected'] .review-target-tag {
+  background: #16a34a;
+}
+
+.review-target[data-review-verdict='revise'] {
+  outline-color: #d97706;
+}
+
+.review-target[data-review-verdict='revise'] .review-target-tag {
+  background: #d97706;
+}
+
+.review-no {
+  background: #16a34a;
+}
+
+.review-no:hover,
+.review-no:focus-visible {
+  background: #15803d;
+}
+
+.review-maybe {
+  background: #d97706;
+}
+
+.review-maybe:hover,
+.review-maybe:focus-visible {
+  background: #b45309;
+}
+
+.review-target-btn[data-on='true'] {
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.9), 0 4px 12px rgb(0 0 0 / 0.35);
+}
+
+.review-composer-reason {
+  margin-top: 0.6rem;
+  border-radius: 0.45rem;
+  background: #fef2f2;
+  padding: 0.45rem 0.55rem;
+  color: #991b1b;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* --- A/B variants -------------------------------------------------------- */
+
+.review-variants {
+  position: relative;
+  min-width: 0;
+}
+
+.review-variants[data-review-on='true'] {
+  outline: 2px dashed var(--review-blue);
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+}
+
+.review-variant-bar {
+  position: absolute;
+  z-index: 82;
+  top: -1.15rem;
+  left: 0.5rem;
+  display: flex;
+  max-width: calc(100% - 1rem);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.5rem;
+  background: var(--review-ink);
+  padding: 0.2rem 0.3rem;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.3);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.review-variant-name {
+  padding: 0 0.3rem;
+  color: rgb(255 255 255 / 0.7);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.review-variant-bar button {
+  display: flex;
+  min-height: 1.65rem;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 0.35rem;
+  padding: 0 0.45rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-variant-bar button:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.review-variant-bar button[data-on='true'] {
+  background: var(--review-blue);
+}
+
+.review-variant-keep {
+  background: #16a34a;
+}
+
+.review-variant-keep:hover {
+  background: #15803d !important;
+}
+
+/* --- Storage: the four edge trays ---------------------------------------- */
+
+.review-tray {
+  position: fixed;
+  z-index: 96;
+  display: flex;
+  gap: 0.3rem;
+  border: 1px dashed rgb(148 163 184 / 0.5);
+  background: var(--review-glass-strong);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.review-tray[data-edge='left'],
+.review-tray[data-edge='right'] {
+  top: 18vh;
+  bottom: auto;
+  /* Height comes from the contents; this is only the ceiling, so a full shelf
+   * scrolls inside itself instead of running off the screen. */
+  max-height: 64vh;
+  width: 9.5rem;
+  flex-direction: column;
+  padding: 0.4rem 0.3rem;
+}
+
+/* Dragged low, a shelf grows up from its handle. */
+.review-tray[data-up] {
+  flex-direction: column-reverse;
+}
+
+.review-tray[data-up] .review-tray-items {
+  flex-direction: column-reverse;
+}
+
+.review-tray[data-edge='left'] { left: 0; border-radius: 0 0.6rem 0.6rem 0; }
+.review-tray[data-edge='right'] { right: 0; border-radius: 0.6rem 0 0 0.6rem; }
+
+.review-tray[data-edge='top'],
+.review-tray[data-edge='bottom'] {
+  left: 22vw;
+  right: 22vw;
+  height: 3.4rem;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+}
+
+.review-tray[data-edge='top'] { top: 0; border-radius: 0 0 0.6rem 0.6rem; }
+.review-tray[data-edge='bottom'] { bottom: 0; border-radius: 0.6rem 0.6rem 0 0; }
+
+.review-tray[data-active='true'] {
+  border-color: #38bdf8;
+  border-style: solid;
+  background: rgb(2 132 199 / 0.92);
+}
+
+.review-tray:not([data-filled='true']):not([data-active='true']) {
+  border-style: dashed;
+  background: var(--review-glass);
+}
+
+.review-tray-name {
+  display: flex;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  align-items: center;
+  gap: 0.3rem;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-tray-name:active {
+  cursor: grabbing;
+}
+
+.review-tray-count {
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.22);
+  padding: 0 0.35rem;
+  color: white;
+}
+
+.review-tray-items {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  overflow: auto;
+}
+
+.review-tray[data-edge='left'] .review-tray-items,
+.review-tray[data-edge='right'] .review-tray-items {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.review-tray-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: rgb(255 255 255 / 0.45);
+  font-size: 0.625rem;
+}
+
+.review-chip {
+  display: flex;
+  max-width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+  border-radius: 0.4rem;
+  background: rgb(255 255 255 / 0.14);
+  padding: 0.3rem 0.4rem;
+  color: white;
+  cursor: grab;
+  touch-action: none;
+}
+
+.review-chip[data-flagged='approved'] {
+  background: rgb(220 38 38 / 0.85);
+}
+
+.review-chip-label {
+  overflow: hidden;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-chip-note {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 0.625rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-chip-tools {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.review-chip-tools button {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.16);
+  color: white;
+  cursor: pointer;
+}
+
+.review-chip-tools button:hover,
+.review-chip-tools button[data-on='true'] {
+  background: rgb(255 255 255 / 0.34);
+}
+
+/* --- Dragging ------------------------------------------------------------ */
+
+.review-drag-chip {
+  position: fixed;
+  z-index: 130;
+  max-width: 14rem;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  background: var(--review-blue);
+  padding: 0.25rem 0.5rem;
+  color: white;
+  font: 700 0.6875rem/1.3 ui-sans-serif, system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.35);
+}
+
+.review-drop-line {
+  position: fixed;
+  z-index: 129;
+  border-radius: 2px;
+  background: var(--review-blue);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.6);
+  pointer-events: none;
+}
+
+/* --- Stowed elements ----------------------------------------------------- */
+
+[data-review-stowed='true'] {
+  display: none !important;
+}
+
+[data-review-stowed='preview'] {
+  outline: 2px dashed var(--review-red);
+  outline-offset: 2px;
+  opacity: 0.4;
+}
+
+.review-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 2px dashed rgb(148 163 184 / 0.8);
+  border-radius: 0.6rem;
+  background: rgb(148 163 184 / 0.12);
+  padding: 0.4rem 0.6rem;
+  color: #475569;
+  font: 600 0.75rem/1.3 ui-sans-serif, system-ui, sans-serif;
+}
+
+.review-slot-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-slot button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.35rem;
+  background: var(--review-ink);
+  padding: 0.25rem 0.5rem;
+  color: white;
+  cursor: pointer;
+}
+
+.review-tray-comment {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.18);
+  color: white;
+  cursor: pointer;
+}
+
+.review-tray-comment:hover {
+  background: rgb(255 255 255 / 0.34);
+}
+
+.review-tray-note {
+  max-width: 100%;
+  max-height: 2.6rem;
+  overflow: hidden;
+  border-left: 2px solid var(--review-blue);
+  padding: 0.1rem 0.35rem;
+  color: rgb(255 255 255 / 0.85);
+  font-size: 0.625rem;
+  line-height: 1.3;
+}
+
+.review-composer-members {
+  margin-top: 0.5rem;
+  border-radius: 0.45rem;
+  background: #eff6ff;
+  padding: 0.4rem 0.55rem;
+  color: #1e40af;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+/* --- Pointing at a note's element ---------------------------------------- */
+
+@keyframes review-flash {
+  0% { outline-color: rgb(37 99 235 / 0); background-color: rgb(37 99 235 / 0); }
+  12% { outline-color: rgb(37 99 235 / 0.95); background-color: rgb(37 99 235 / 0.16); }
+  40% { outline-color: rgb(37 99 235 / 0.2); background-color: rgb(37 99 235 / 0.03); }
+  64% { outline-color: rgb(37 99 235 / 0.9); background-color: rgb(37 99 235 / 0.14); }
+  100% { outline-color: rgb(37 99 235 / 0); background-color: rgb(37 99 235 / 0); }
+}
+
+/* Two pulses on the element's own edge — an outline traces the boundary the
+ * note is about, which a drop shadow does not. */
+.review-flash {
+  outline: 3px solid transparent;
+  outline-offset: 3px;
+  border-radius: 0.6rem;
+  animation: review-flash 1.5s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-flash {
+    animation: none;
+    outline-color: var(--review-blue);
+  }
+}
+
+/* --- Threads ------------------------------------------------------------- */
+
+.review-note-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.2rem;
+  border-left: 2px solid #cbd5e1;
+  padding-left: 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.review-note-thread span[data-from='claude'] {
+  color: #1d4ed8;
+}
+
+.review-reply {
+  border-top: 1px solid #e2e8f0;
+  padding: 0.5rem;
+}
+
+.review-reply-target {
+  display: block;
+  color: #64748b;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.review-reply textarea {
+  margin-top: 0.3rem;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+  background: #f8fafc;
+  padding: 0.4rem;
+  font: 400 0.8125rem/1.4 inherit;
+  resize: vertical;
+}
+
+/* --- HUD ----------------------------------------------------------------- */
+
+.review-hud-head {
+  display: flex;
+  user-select: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--review-glass-line);
+  padding: 0.3rem 0.35rem 0.4rem;
+  color: rgb(255 255 255 / 0.65);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.review-hud-head:active {
+  cursor: grabbing;
+}
+
+.review-hud-grip {
+  flex: none;
+  margin-right: -0.25rem;
+  color: rgb(255 255 255 / 0.35);
+}
+
+.review-hud-min {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.3rem;
+  color: rgb(255 255 255 / 0.55);
+  cursor: pointer;
+}
+
+.review-hud-min:hover {
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+}
+
+.review-hud-min[data-on='true'] {
+  color: rgb(255 255 255 / 0.9);
+}
+
+.review-hud-help {
+  font: 800 0.6875rem/1 ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Rolled up: the palette keeps its title bar and nothing else, exactly like
+ * a docked tool palette that has been collapsed. */
+/* Minimised: the title band and nothing else — and the band always carries
+ * the way back out, so this can never be a dead end. */
+.review-dock-tools[data-min='true'] > *:not(.review-hud-head) {
+  display: none;
+}
+
+.review-dock-tools[data-min='true'] .review-hud-head {
+  border-bottom: 0;
+  padding-bottom: 0.2rem;
+}
+
+/* Once dragged, the inline position takes over from the corner defaults.
+ * Alignment is decided by which edge it ended up nearest, not by the mere
+ * fact of having been moved — see the block at the end of this file. */
+
+.review-hud-objectives {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: white;
+}
+
+.review-hud-bar {
+  display: block;
+  width: 3.5rem;
+  height: 0.3rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.review-hud-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: #4ade80;
+  transition: width 220ms ease-out;
+}
+
+.review-dock-tools kbd,
+.review-fab kbd {
+  margin-left: auto;
+  min-width: 1.15rem;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-bottom-width: 2px;
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.12);
+  padding: 0 0.25rem;
+  font: 700 0.625rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+}
+
+.review-fab kbd {
+  margin-left: 0.35rem;
+}
+
+/* --- Toasts -------------------------------------------------------------- */
+
+@keyframes review-toast-in {
+  from { opacity: 0; transform: translate(-50%, 0.75rem); }
+  12% { opacity: 1; transform: translate(-50%, 0); }
+  82% { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -0.4rem); }
+}
+
+.review-toast {
+  position: fixed;
+  z-index: 140;
+  bottom: calc(2.5rem + env(safe-area-inset-bottom));
+  left: 50%;
+  max-width: min(24rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 9999px;
+  background: var(--review-glass-strong);
+  padding: 0.45rem 0.9rem;
+  color: white;
+  font: 700 0.75rem/1.3 ui-sans-serif, system-ui, sans-serif;
+  backdrop-filter: var(--review-blur);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.35);
+  animation: review-toast-in 1.9s ease-out forwards;
+}
+
+.review-toast[data-tone='good'] { border-color: #4ade80; }
+.review-toast[data-tone='warn'] { border-color: #f87171; }
+
+@media (prefers-reduced-motion: reduce) {
+  .review-toast { animation: none; }
+}
+
+/* Chips read as inventory slots rather than list rows. */
+.review-chip {
+  border: 1px solid rgb(255 255 255 / 0.18);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+
+.review-chip:active {
+  cursor: grabbing;
+}
+
+/* One proposal at a time: the others stay visible but stop competing. */
+.review-target[data-review-dim='true'] {
+  outline-color: rgb(220 38 38 / 0.3);
+  opacity: 0.6;
+}
+
+.review-target[data-review-dim='true'] .review-target-tools,
+.review-target[data-review-dim='true'] .review-target-tag {
+  opacity: 0.5;
+}
+
+.review-target[data-review-focus='true'] {
+  outline-width: 4px;
+}
+
+.review-hud-objectives button {
+  border-radius: 0.2rem;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0 0.3rem;
+  color: white;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.review-hud-objectives button:hover {
+  background: rgb(255 255 255 / 0.34);
+}
+
+/* A tray with nothing in it shrinks to a handle on its edge. */
+.review-tray[data-collapsed='true'] {
+  background: rgb(15 23 42 / 0.72);
+  padding: 0.2rem 0.4rem;
+  opacity: 0.65;
+}
+
+.review-tray[data-collapsed='true']:hover {
+  opacity: 1;
+}
+
+.review-tray[data-edge='left'][data-collapsed='true'],
+.review-tray[data-edge='right'][data-collapsed='true'] {
+  top: 50%;
+  bottom: auto;
+  width: auto;
+  transform: translateY(-50%);
+}
+
+.review-tray[data-edge='left'][data-collapsed='true'] .review-tray-name,
+.review-tray[data-edge='right'][data-collapsed='true'] .review-tray-name {
+  writing-mode: vertical-rl;
+}
+
+.review-tray[data-edge='top'][data-collapsed='true'],
+.review-tray[data-edge='bottom'][data-collapsed='true'] {
+  left: 50%;
+  right: auto;
+  height: auto;
+  transform: translateX(-50%);
+}
+
+.review-stow-group {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: 0.45rem;
+  background: rgb(255 255 255 / 0.1);
+  padding: 0 0.35rem;
+  color: white;
+}
+
+.review-stow-group button {
+  display: grid;
+  width: 1.5rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 0.3rem;
+  color: white;
+  cursor: pointer;
+}
+
+.review-stow-group button:hover {
+  background: rgb(255 255 255 / 0.22);
+}
+
+/* Long labels get clipped, never widen their tray. */
+.review-chip-note,
+.review-tray-note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* --- Stash settings ------------------------------------------------------ */
+
+.review-tray {
+  --tray-accent: #38bdf8;
+}
+
+.review-tray[data-filled='true'] {
+  border-color: color-mix(in srgb, var(--tray-accent) 65%, transparent);
+  border-style: solid;
+}
+
+.review-tray[data-filled='true'] .review-tray-name {
+  color: var(--tray-accent);
+}
+
+.review-tray[data-filled='true'] .review-chip {
+  border-color: color-mix(in srgb, var(--tray-accent) 45%, transparent);
+}
+
+.review-tray-note {
+  border-left-color: var(--tray-accent);
+}
+
+.review-tray-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: 0.4rem;
+  background: rgb(255 255 255 / 0.1);
+  padding: 0.4rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.review-tray-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: rgb(255 255 255 / 0.7);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-tray-settings input {
+  width: 100%;
+  border: 1px solid rgb(255 255 255 / 0.25);
+  border-radius: 0.3rem;
+  background: rgb(15 23 42 / 0.6);
+  padding: 0.2rem 0.35rem;
+  color: white;
+  font-size: 0.75rem;
+}
+
+.review-tray-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.review-tray-swatches button {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.review-tray-swatches button[data-on='true'] {
+  box-shadow: 0 0 0 2px white;
+}
+
+.review-tray-sorts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.review-tray-sorts button {
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.14);
+  padding: 0.1rem 0.3rem;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-tray-sorts button[data-on='true'] {
+  background: var(--tray-accent);
+  color: #0f172a;
+}
+
+.review-tray-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border-radius: 0.3rem;
+  background: rgb(255 255 255 / 0.2);
+  padding: 0.2rem;
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-tray[data-collapsed='true'][data-filled='true'] {
+  border-style: solid;
+  opacity: 1;
+}
+
+/* The log is global; each group says which screen its notes live on. */
+.review-panel-group {
+  display: block;
+  padding: 0;
+}
+
+.review-panel-group:hover {
+  background: transparent;
+}
+
+.review-panel-group-head {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fafc;
+  padding: 0.25rem 0.5rem;
+  color: #64748b;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-panel-group > ul > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  border-radius: 0.5rem;
+  padding: 0.15rem;
+}
+
+.review-panel-group > ul > li:hover {
+  background: #f8fafc;
+}
+
+
+/* --- Shelf hotkeys, note tags, and the rest of the console furniture ------ */
+
+/* Written on the shelf itself: a hotkey nobody can see is a hotkey nobody
+ * uses. Sits at the far end of the header, out of the label's way. */
+.review-tray-key {
+  margin-left: auto;
+  border-radius: 0.2rem;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0 0.25rem;
+  color: rgb(255 255 255 / 0.7);
+  font: 700 0.625rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: none;
+}
+
+.review-tray[data-edge='left'][data-collapsed='true'] .review-tray-key,
+.review-tray[data-edge='right'][data-collapsed='true'] .review-tray-key {
+  margin: 0.3rem 0 0;
+}
+
+/* The key legend under the dock — the console's own controls, always visible
+ * while it is open so nothing has to be remembered. */
+.review-keys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.15rem 0.5rem;
+  max-width: min(17rem, 60vw);
+  border-radius: 0.5rem;
+  background: var(--review-glass-strong);
+  padding: 0.3rem 0.5rem;
+  color: rgb(255 255 255 / 0.72);
+  font-size: 0.625rem;
+  line-height: 1.5;
+  backdrop-filter: var(--review-blur);
+}
+
+.review-keys span {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.review-keys span[data-on='true'] {
+  color: #fbbf24;
+}
+
+.review-keys kbd {
+  border-radius: 0.2rem;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0 0.2rem;
+  color: white;
+  font: 700 0.625rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Intent tags, echoed on the note in the log. */
+.review-note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: 0.15rem;
+}
+
+.review-note-tags span {
+  border-radius: 9999px;
+  background: #e0e7ff;
+  padding: 0 0.35rem;
+  color: #3730a3;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+/* Agreeing to a cut is the destructive answer, so it keeps the red the rest
+ * of the audit uses; its two siblings are already green and amber. */
+.review-yes {
+  background: var(--review-red);
+}
+
+.review-yes:hover,
+.review-yes:focus-visible {
+  background: #b91c1c;
+}
+
+.review-variant-note {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 0.35rem;
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+  cursor: pointer;
+}
+
+.review-variant-note:hover {
+  background: rgb(255 255 255 / 0.26);
+}
+
+.review-dock-tools > button:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.review-dock-tools > button:disabled:hover {
+  background: transparent;
+}
+
+/* A section too small to hold its own controls hands them out below, so the
+ * thing being judged stays readable while it is judged. */
+.review-target[data-review-size='tiny'] .review-target-tools {
+  top: calc(100% + 0.3rem);
+  right: 0;
+  gap: 0.2rem;
+}
+
+.review-target[data-review-size='tiny'] .review-target-btn {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-width: 1.5px;
+}
+
+.review-target[data-review-size='tiny'] .review-target-btn svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.review-target[data-review-size='tiny'] .review-target-tag {
+  top: auto;
+  bottom: calc(100% + 0.2rem);
+  left: 0;
+  max-width: 14rem;
+}
+
+
+/* --- Phone ---------------------------------------------------------------
+ * A review happens wherever the app is being used, and this app is used on a
+ * phone. Nothing here is a shrunken desktop: the floating panels become
+ * sheets, the shelves get out of the thumb's way, and every control that was
+ * a 24px icon becomes something a thumb can actually hit. The `!important`
+ * marks below override inline positions the desktop code sets in JS — on a
+ * phone there is nowhere to float to, so the layout wins over the geometry.
+ */
+
+@media (max-width: 40rem) {
+  /* Keys are a desktop affordance; a phone has no keyboard to show off. */
+  .review-keys {
+    display: none;
+  }
+
+  .review-hint {
+    max-width: min(15rem, 60vw);
+    font-size: 0.625rem;
+  }
+
+  .review-dock {
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .review-dock-tools > button {
+    min-height: 2.75rem;
+  }
+
+  .review-dock-tools kbd {
+    display: none;
+  }
+
+  /* The picker's toolbar stops chasing the selection and sits above the
+   * dock, where a thumb is already resting. */
+  .review-actions {
+    top: auto !important;
+    right: 0.5rem;
+    bottom: calc(9rem + env(safe-area-inset-bottom)) !important;
+    left: 0.5rem !important;
+    max-width: none;
+  }
+
+  .review-actions button {
+    min-height: 2.75rem;
+  }
+
+  .review-actions kbd {
+    display: none;
+  }
+
+  .review-stow-group button {
+    width: 2.25rem;
+    height: 2.5rem;
+  }
+
+  /* Composer and log become bottom sheets. */
+  .review-composer-scrim[data-anchored] .review-composer,
+  .review-composer {
+    top: auto !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    max-height: 82vh;
+    overflow-y: auto;
+    border-radius: 1rem 1rem 0 0;
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom));
+  }
+
+  .review-composer textarea {
+    font-size: 1rem; /* iOS zooms into anything smaller */
+  }
+
+  .review-tag-row button {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .review-panel {
+    top: auto !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    height: min(70vh, 32rem) !important;
+    border-radius: 1rem 1rem 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .review-panel[data-min='true'] {
+    height: auto !important;
+  }
+
+  /* Dragging a window by its title bar is a mouse idea; the grip goes away
+   * and the head keeps its buttons. */
+  .review-panel-grip {
+    display: none;
+  }
+
+  .review-panel-head {
+    cursor: default;
+    padding: 0.85rem;
+  }
+
+  .review-panel-head button {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+
+  /* Shelves: narrow enough to leave the page readable, tall enough to hold
+   * a thumb-sized chip. */
+  .review-tray[data-edge='left'],
+  .review-tray[data-edge='right'] {
+    top: 12vh;
+    max-height: 62vh;
+    width: min(9rem, 46vw);
+  }
+
+  .review-tray[data-edge='top'],
+  .review-tray[data-edge='bottom'] {
+    left: 6vw;
+    right: 6vw;
+  }
+
+  .review-tray[data-edge='bottom'] {
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+
+  .review-chip-tools button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .review-tray-comment {
+    min-width: 1.9rem;
+    min-height: 1.9rem;
+  }
+
+  /* Audited sections: the three answers have to be tappable, and on a narrow
+   * screen almost every section is "tiny", so they sit below it. */
+  .review-target-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .review-target[data-review-size='tiny'] .review-target-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .review-outline-tag,
+  .review-target-tag {
+    max-width: min(12rem, 55vw);
+  }
+
+  /* A finger cannot hover, so the aim path is the only way to widen a
+   * selection: give it room to be tapped. */
+  .review-aim button {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}
+
+
+/* --- Phone: the four shelves as one dropdown ------------------------------
+ * Four edge shelves on a 375px screen leave a sliver of app between them, so
+ * on a phone they become one accordion hanging from the top: a header with
+ * the total, then a row per shelf that opens to its chips.
+ */
+
+.review-stack {
+  position: fixed;
+  z-index: 96;
+  top: max(0.4rem, env(safe-area-inset-top));
+  left: 50%;
+  width: min(21rem, calc(100vw - 1rem));
+  transform: translateX(-50%);
+  overflow: hidden;
+  border: 1px solid var(--review-glass-line);
+  border-radius: 0.7rem;
+  background: var(--review-glass);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+}
+
+.review-stack[data-open] {
+  background: var(--review-glass-strong);
+}
+
+.review-stack-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.review-stack-toggle {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-stack-toggle > span:first-of-type {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.review-stack-caret {
+  margin-left: auto;
+  color: rgb(255 255 255 / 0.6);
+  transition: transform 160ms;
+}
+
+.review-stack[data-open] .review-stack-caret {
+  transform: rotate(180deg);
+}
+
+.review-stack-body {
+  max-height: 62vh;
+  overflow-y: auto;
+  border-top: 1px solid var(--review-glass-line);
+}
+
+.review-stack-shelf {
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  border-left: 3px solid var(--tray-accent, #38bdf8);
+}
+
+.review-stack-shelf[data-active='true'] {
+  background: rgb(2 132 199 / 0.35);
+}
+
+.review-stack-row {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  color: rgb(255 255 255 / 0.9);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.review-stack-open {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 0.45rem;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.review-stack-edge {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.3rem;
+  background: rgb(255 255 255 / 0.14);
+  font-size: 0.75rem;
+}
+
+.review-stack-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-stack-open .review-tray-count {
+  margin-left: auto;
+}
+
+.review-stack-shelf .review-tray-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0 0.6rem 0.55rem;
+}
+
+.review-stack-shelf .review-tray-note {
+  margin: 0 0.6rem 0.4rem;
+}
+
+.review-stack-shelf .review-tray-settings {
+  position: static;
+  margin: 0 0.6rem 0.5rem;
+}
+
+
+/* --- Toolbar and stashes as one object -----------------------------------
+ * Clipped on, the stash accordion is not a floating panel any more: it hangs
+ * off the toolbar inside the same box, so one drag moves the pair and the
+ * two read as one tool rather than two things that happen to be near
+ * each other.
+ */
+
+/* Out of flow, so the toolbar's own box never changes size as the drawer
+ * opens — the bar stays exactly where it was dragged. */
+/* Out of flow, so the toolbar's own box never changes size as the drawer
+ * opens — the bar stays exactly where it was dragged. Shut, it is only as
+ * wide as its own header. */
+.review-dock-stash {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: max-content;
+  margin-top: -1px;
+}
+
+.review-dock[data-side='left'] .review-dock-stash {
+  right: auto;
+  left: 0;
+}
+
+/* Low on the screen: the drawer opens upwards out of the top of the bar, and
+ * its own header flips to the bottom so it stays against the bar. */
+.review-dock[data-drop='up'] .review-dock-stash {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: -1px;
+}
+
+.review-dock[data-drop='up'] .review-stack {
+  flex-direction: column-reverse;
+  border-radius: 0.7rem 0.7rem 0 0;
+}
+
+.review-dock[data-drop='up'] .review-stack-body {
+  border-top: 0;
+  border-bottom: 1px solid var(--review-glass-line);
+}
+
+.review-dock[data-drop='up'] .review-stack[data-open] .review-stack-caret {
+  transform: none;
+}
+
+.review-dock[data-drop='up'] .review-stack-caret {
+  transform: rotate(180deg);
+}
+
+.review-dock-stash .review-stack {
+  position: static;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  transform: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* The flat bar is the one shape with a natural shelf under it: square off the
+ * corner they share so the join reads as a seam, not a gap. */
+.review-dock-tools[data-dir='h'] {
+  flex-wrap: nowrap;
+}
+
+.review-dock[data-side='left'] .review-dock-stash {
+  margin-right: auto;
+}
+
+
+/* --- The flat bar's options segment --------------------------------------
+ * Photoshop's options bar: the tool that is running gets the width, so the
+ * answer buttons stay in one place while the proposals move under them.
+ */
+
+.review-bar-context {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.2rem;
+  border-left: 1px solid var(--review-glass-line);
+  padding-left: 0.35rem;
+  margin-left: 0.15rem;
+}
+
+.review-bar-name {
+  overflow: hidden;
+  max-width: 11rem;
+  color: rgb(255 255 255 / 0.85);
+  font: 600 0.75rem/1 ui-sans-serif, system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-bar-step {
+  display: grid;
+  width: 1.4rem;
+  height: 1.75rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.3rem;
+  color: rgb(255 255 255 / 0.7);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.review-bar-step:hover {
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+}
+
+.review-bar-verdict {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.35rem;
+  color: white;
+  cursor: pointer;
+}
+
+.review-bar-verdict[data-on='true'] {
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.85);
+}
+
+/* Flat: the grip and the way out sit side by side at the head of the bar. */
+.review-dock-tools[data-dir='h'] .review-hud-head {
+  flex-direction: row;
+  gap: 0.15rem;
+}
+
+
+/* --- The stashes as a second, separately dragged object ------------------ */
+
+.review-stash-float {
+  position: fixed;
+  z-index: 97;
+  width: max-content;
+}
+
+/* Shut, a stash panel is a chip: it takes the width of its own header and no
+ * more. Open, it takes the width its chips need, capped by the window. */
+.review-dock-stash .review-stack,
+.review-stash-float .review-stack {
+  width: max-content;
+  min-width: 8.5rem;
+  max-width: min(19rem, calc(100vw - 2rem));
+}
+
+.review-dock-stash .review-stack[data-open],
+.review-stash-float .review-stack[data-open] {
+  width: min(19rem, calc(100vw - 2rem));
+}
+
+.review-stash-float .review-stack {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.7rem;
+  transform: none;
+}
+
+.review-stash-float[data-drop='up'] .review-stack {
+  flex-direction: column-reverse;
+}
+
+.review-stash-float[data-drop='up'] .review-stack-body {
+  border-top: 0;
+  border-bottom: 1px solid var(--review-glass-line);
+}
+
+/* In the header's own row: something to drag the panel by that is not the
+ * button that opens it. */
+.review-stack-grip {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 0.5rem 0 0.5rem 0.4rem;
+  color: rgb(255 255 255 / 0.35);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.review-stack-grip:hover {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.review-stack-grip:active {
+  cursor: grabbing;
+}
+
+
+/* ==========================================================================
+ * Design pass
+ *
+ * The console grew a piece at a time and started to look it: a tool strip, a
+ * stash pill and an options segment, each with its own control size, radius
+ * and rhythm. Everything below is one system applied over the top — no
+ * behaviour changes, no features dropped, just one card, one control, one
+ * spacing step, and a clear order of loudness:
+ *
+ *   tools      what you are doing   — full size, full contrast
+ *   options    what the tool needs  — same size, behind a hairline
+ *   furniture  how it is arranged   — smaller, quieter until hovered
+ *
+ * Colour earns its place: blue is "this tool is on", red only ever means cut,
+ * green only ever means keep or done. Everything else is glass.
+ * ========================================================================== */
+
+:root {
+  --rv-tool: 1.75rem;      /* a tool button */
+  --rv-furniture: 1.375rem;/* an arrangement button */
+  --rv-card: 0.625rem;     /* every floating surface */
+  --rv-control: 0.375rem;  /* every control inside one */
+  --rv-pad: 0.25rem;
+  --rv-gap: 0.125rem;
+}
+
+/* --- One card ------------------------------------------------------------ */
+
+.review-dock-tools,
+.review-stash-float .review-stack,
+.review-dock-stash .review-stack {
+  border-radius: var(--rv-card);
+  padding: var(--rv-pad);
+  gap: var(--rv-gap);
+}
+
+.review-dock-stash .review-stack,
+.review-stash-float .review-stack {
+  padding: 0;
+}
+
+/* --- One control --------------------------------------------------------- */
+
+.review-dock-tools > button {
+  width: var(--rv-tool);
+  height: var(--rv-tool);
+  border-radius: var(--rv-control);
+  color: rgb(255 255 255 / 0.82);
+}
+
+.review-dock-tools > button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Furniture is quieter than the tools it arranges, and only comes forward
+ * when it is being reached for. */
+.review-dock-tools > button[data-label='Tidy up'],
+.review-dock-tools > button[data-label='Keys'],
+.review-dock-tools > button[data-label='Shape'],
+.review-dock-tools > button[data-label='Minimise'],
+.review-dock-tools > button[data-label='Expand'],
+.review-dock-tools > button[data-label^='Unclip'],
+.review-dock-tools > button[data-label^='Clip'] {
+  width: var(--rv-furniture);
+  height: var(--rv-furniture);
+  color: rgb(255 255 255 / 0.45);
+}
+
+.review-dock-tools > button[data-label='Tidy up'] svg,
+.review-dock-tools > button[data-label='Keys'] svg,
+.review-dock-tools > button[data-label='Shape'] svg,
+.review-dock-tools > button[data-label='Minimise'] svg,
+.review-dock-tools > button[data-label='Expand'] svg,
+.review-dock-tools > button[data-label^='Unclip'] svg,
+.review-dock-tools > button[data-label^='Clip'] svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+.review-dock-tools > button:hover {
+  color: white;
+}
+
+/* Only three things are ever coloured. */
+.review-dock-tools > button[data-on='true'] {
+  background: rgb(37 99 235 / 0.9);
+  color: white;
+  box-shadow: none;
+}
+
+.review-dock-tools > button:nth-of-type(1)[data-on='true'] {
+  background: rgb(220 38 38 / 0.9);
+}
+
+.review-hud-close {
+  width: var(--rv-furniture);
+  height: var(--rv-furniture);
+  border-radius: var(--rv-control);
+}
+
+/* --- The title band ------------------------------------------------------ */
+
+.review-hud-head {
+  padding: 0.15rem 0.1rem 0.25rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-hud-head {
+  padding: 0.1rem 0.25rem 0.1rem 0.1rem;
+}
+
+.review-tools-rule {
+  margin: 0.1rem 0.3rem;
+  background: rgb(255 255 255 / 0.1);
+}
+
+.review-dock-tools[data-dir='h'] .review-tools-rule {
+  height: 1.1rem;
+  margin: 0 0.2rem;
+}
+
+/* --- Options: same controls, one hairline in from the tools --------------- */
+
+.review-bar-context {
+  gap: var(--rv-gap);
+  margin-left: 0.2rem;
+  border-left: 1px solid rgb(255 255 255 / 0.1);
+  padding-left: 0.4rem;
+}
+
+.review-bar-step,
+.review-bar-verdict {
+  width: var(--rv-tool);
+  height: var(--rv-tool);
+  border-radius: var(--rv-control);
+}
+
+.review-bar-verdict svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.review-bar-name {
+  padding: 0 0.3rem;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+/* The verdicts read as verdicts: cut is red, keep is green, tell-me is amber,
+ * and none of them shouts until it is the answer that was given. */
+.review-bar-verdict.review-yes { background: rgb(220 38 38 / 0.22); color: #fca5a5; }
+.review-bar-verdict.review-no { background: rgb(22 163 74 / 0.22); color: #86efac; }
+.review-bar-verdict.review-maybe { background: rgb(217 119 6 / 0.22); color: #fcd34d; }
+
+.review-bar-verdict.review-yes:hover { background: rgb(220 38 38 / 0.9); color: white; }
+.review-bar-verdict.review-no:hover { background: rgb(22 163 74 / 0.9); color: white; }
+.review-bar-verdict.review-maybe:hover { background: rgb(217 119 6 / 0.9); color: white; }
+
+.review-bar-verdict[data-on='true'] {
+  color: white;
+  box-shadow: none;
+}
+
+.review-bar-verdict.review-yes[data-on='true'] { background: var(--review-red); }
+.review-bar-verdict.review-no[data-on='true'] { background: #16a34a; }
+.review-bar-verdict.review-maybe[data-on='true'] { background: #d97706; }
+
+/* --- Badges: one shape, on the corner ------------------------------------ */
+
+.review-badge {
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 0.9rem;
+  border-color: rgb(15 23 42 / 0.9);
+  background: #38bdf8;
+  font-size: 0.5rem;
+  line-height: 0.9rem;
+}
+
+/* --- The stash panel, on the same system --------------------------------- */
+
+.review-stack-toggle {
+  padding: 0.4rem 0.55rem;
+  font-size: 0.6875rem;
+}
+
+.review-stack-grip {
+  padding: 0.4rem 0 0.4rem 0.35rem;
+}
+
+.review-stack-row {
+  min-height: 2.25rem;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.review-stack-open {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.review-stack-edge {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--rv-control);
+  background: rgb(255 255 255 / 0.1);
+  font-size: 0.6875rem;
+}
+
+.review-stack-shelf {
+  border-bottom-color: rgb(255 255 255 / 0.06);
+  border-left-width: 2px;
+}
+
+.review-stack-shelf:last-child {
+  border-bottom: 0;
+}
+
+.review-tray-comment {
+  width: 1.375rem;
+  height: 1.375rem;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--rv-control);
+  color: rgb(255 255 255 / 0.45);
+}
+
+.review-tray-comment:hover {
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+}
+
+.review-tray-count {
+  min-width: 1rem;
+  padding: 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.05rem;
+  text-align: center;
+}
+
+/* --- Chips ---------------------------------------------------------------- */
+
+.review-chip {
+  border-radius: var(--rv-control);
+}
+
+.review-chip-tools button {
+  border-radius: 0.25rem;
+}
+
+/* --- The pieces that are not the toolbar keep the same card and radius ---- */
+
+.review-actions,
+.review-help,
+.review-toast,
+.review-tray {
+  border-radius: var(--rv-card);
+}
+
+.review-actions {
+  gap: var(--rv-gap);
+  padding: var(--rv-pad);
+}
+
+
+/* --- Two verbs and a drawer ----------------------------------------------
+ * The fresh look at this: there are not nine tools here. There is Audit,
+ * there is Pick, and there is a drawer of things set aside. Those get names
+ * and room; everything about how the console is *arranged* folds behind one
+ * button, because arranging is not reviewing.
+ */
+
+/* The two verbs carry their names in the flat bar, which has the room. */
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'],
+.review-dock-tools[data-dir='h'] > button[data-label='Pick'],
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] {
+  display: flex;
+  width: auto;
+  gap: 0.35rem;
+  padding: 0 0.5rem 0 0.4rem;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit']::after,
+.review-dock-tools[data-dir='h'] > button[data-label='Pick']::after,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B']::after {
+  position: static;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  content: attr(data-label);
+  font: 600 0.75rem/1 ui-sans-serif, system-ui, sans-serif;
+  opacity: 1;
+  box-shadow: none;
+}
+
+/* Their counts sit after the name rather than on the corner — there is room
+ * for the honest version here. */
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'] .review-badge,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] .review-badge {
+  position: static;
+  border: 0;
+  background: rgb(255 255 255 / 0.22);
+  color: white;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-on='true'] .review-badge {
+  background: rgb(255 255 255 / 0.9);
+  color: var(--review-ink);
+}
+
+/* The arrangement drawer: closed, it is one button; open, the same controls
+ * as before, unfolded in place. */
+
+.review-tools-more[data-on='true'] {
+  background: rgb(255 255 255 / 0.18) !important;
+  color: white !important;
+}
+
+.review-tools-more svg {
+  width: 0.9rem !important;
+  height: 0.9rem !important;
+}
+
+
+/* The arrangement buttons live inside the tray wrapper now, which is
+ * display:contents — they lay out as part of the strip but no longer match
+ * its `> button` rules, so they take them here. */
+.review-tools-tray > button {
+  position: relative;
+  display: grid;
+  width: var(--rv-furniture);
+  height: var(--rv-furniture);
+  flex: none;
+  place-items: center;
+  border-radius: var(--rv-control);
+  color: rgb(255 255 255 / 0.45);
+  cursor: pointer;
+}
+
+.review-tools-tray > button svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+.review-tools-tray > button:hover,
+.review-tools-tray > button:focus-visible {
+  background: rgb(255 255 255 / 0.16);
+  color: white;
+}
+
+.review-tools-tray > button[data-on='true'] {
+  background: rgb(37 99 235 / 0.9);
+  color: white;
+}
+
+.review-tools-tray > button[data-label]::after {
+  position: absolute;
+  z-index: 2;
+  right: calc(100% + 0.45rem);
+  border-radius: 0.35rem;
+  background: rgb(2 6 23 / 0.95);
+  padding: 0.15rem 0.4rem;
+  color: white;
+  content: attr(data-label) ' · ' attr(data-key);
+  font: 600 0.6875rem/1.4 ui-sans-serif, system-ui, sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.review-tools-tray > button[data-label]:hover::after {
+  opacity: 1;
+}
+
+.review-dock-tools[data-dir='h'] .review-tools-tray > button[data-label]::after {
+  top: calc(100% + 0.4rem);
+  right: auto;
+}
+
+/* Wide keeps its names on the arrangement rows too. */
+.review-dock-tools[data-dir='wide'] .review-tools-tray > button {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  padding: 0 0.55rem;
+  height: var(--rv-tool);
+}
+
+.review-dock-tools[data-dir='wide'] .review-tools-tray > button::after {
+  position: static;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  content: attr(data-label);
+  font: 600 0.8125rem/1 ui-sans-serif, system-ui, sans-serif;
+  opacity: 1;
+}
+
+
+/* The way out is not a tool: it keeps its own capsule below the toolbar,
+ * smaller while the console is open so the tools stay the loud thing. */
+.review-fab[data-open='true'] {
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+}
+
+.review-dock[data-side='left'] .review-fab {
+  align-self: flex-start;
+}
+
+
+/* Done is last in the compound, whichever way the drawer opens.
+ *
+ * Opening downwards the drawer joins the flow between the toolbar and the
+ * Done capsule, so top to bottom reads toolbar → stashes → Done. Opening
+ * upwards it lifts out of the flow above the toolbar, which leaves the same
+ * reading order — and, either way, the toolbar itself never shifts under the
+ * cursor as the drawer opens.
+ */
+
+.review-dock-tools { order: 1; }
+.review-fab { order: 3; }
+
+.review-dock[data-drop='down'] .review-dock-stash {
+  position: static;
+  order: 2;
+  margin-top: -1px;
+}
+
+.review-dock[data-drop='up'] .review-dock-stash {
+  order: 0;
+}
+
+
+/* --- Grouping -------------------------------------------------------------
+ * Three groups, each one kind of thing, a hairline between them:
+ *
+ *   mark    Audit · Pick · A/B      what you are doing to the page
+ *   record  Undo · Log · Stash      what you have said about it
+ *   arrange ⋯                       how the console itself sits
+ *
+ * Inside a group the buttons sit tight against each other; between groups
+ * they get air and a rule. That is the whole reason it reads as three things
+ * instead of nine.
+ */
+
+.review-dock-tools {
+  gap: 0;
+}
+
+.review-dock-tools[data-dir='h'] {
+  padding: 0.1875rem;
+}
+
+.review-dock-tools > button {
+  margin: 0 1px;
+}
+
+.review-tools-rule {
+  align-self: center;
+  margin: 0.2rem 0.3rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-tools-rule {
+  height: 1rem;
+  margin: 0 0.3rem;
+}
+
+/* A flat bar has no business being taller than the controls it holds. */
+.review-dock-tools[data-dir='h'] > button {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'],
+.review-dock-tools[data-dir='h'] > button[data-label='Pick'],
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] {
+  width: auto;
+  height: 1.625rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-hud-head {
+  padding: 0 0.2rem 0 0.05rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-hud-min,
+.review-dock-tools[data-dir='h'] .review-hud-close {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-bar-step,
+.review-dock-tools[data-dir='h'] .review-bar-verdict {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+
+/* A long press has taken hold: the compound lifts off the page so it is
+ * obvious the next move will carry it, not press what is under the finger. */
+.review-dock[data-lifted] .review-dock-tools,
+.review-dock[data-lifted] .review-dock-stash .review-stack,
+.review-dock[data-lifted] .review-fab {
+  box-shadow: 0 18px 40px rgb(2 6 23 / 0.45);
+  transform: scale(1.03);
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.review-dock[data-lifted] {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-dock[data-lifted] .review-dock-tools,
+  .review-dock[data-lifted] .review-dock-stash .review-stack,
+  .review-dock[data-lifted] .review-fab {
+    transform: none;
+  }
+}
+
+
+/* The way out is the same material as everything else.
+ *
+ * It had gone red, which broke the one rule the console's colour follows:
+ * red means cut, green means keep or done, and everything else is glass.
+ * Finishing a review is not a destructive act, so it gets the glass and a
+ * green tick — the same capsule as the toolbar, just shorter.
+ */
+
+.review-fab[data-open='true'] {
+  border: 1px solid var(--review-glass-line);
+  border-radius: var(--rv-card);
+  background: var(--review-glass-strong);
+  color: white;
+  gap: 0.35rem;
+}
+
+.review-fab[data-open='true']:hover,
+.review-fab[data-open='true']:focus-visible {
+  background: rgb(15 23 42 / 0.96);
+}
+
+.review-fab[data-open='true'] svg {
+  color: #4ade80;
+}
+
+.review-fab kbd {
+  border-radius: 0.2rem;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0 0.25rem;
+  margin-left: 0.35rem;
+  font: 700 0.5625rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Closed, it is the one thing on screen, so it keeps a little more presence
+ * — same material, fuller radius. */
+.review-fab:not([data-open]) {
+  border-radius: 9999px;
+}
+
+
+/* --- Opening ---------------------------------------------------------------
+ * Done leads the compound, then the toolbar, then the drawer — the way out is
+ * the first thing your eye lands on, and the tools read downward from it.
+ *
+ * Pressing Review fans the tools out rather than snapping them into place: a
+ * short stagger from the head outwards, so it is obvious the strip belongs to
+ * the button that was just pressed and did not simply appear on top of the
+ * page.
+ */
+
+.review-fab { order: 0; }
+.review-dock-tools { order: 1; }
+
+.review-dock[data-drop='down'] .review-dock-stash { order: 2; }
+.review-dock[data-drop='up'] .review-dock-stash { order: 0; }
+
+@keyframes review-fan-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes review-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.review-dock-tools {
+  animation: review-card-in 160ms ease-out;
+  transform-origin: top right;
+}
+
+.review-dock[data-side='left'] .review-dock-tools {
+  transform-origin: top left;
+}
+
+.review-dock-tools > button,
+.review-dock-tools > .review-tools-rule {
+  animation: review-fan-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1.25) backwards;
+}
+
+/* The stagger runs from the head outwards, so the fan has a direction. */
+.review-dock-tools > *:nth-child(2) { animation-delay: 30ms; }
+.review-dock-tools > *:nth-child(3) { animation-delay: 55ms; }
+.review-dock-tools > *:nth-child(4) { animation-delay: 75ms; }
+.review-dock-tools > *:nth-child(5) { animation-delay: 95ms; }
+.review-dock-tools > *:nth-child(6) { animation-delay: 110ms; }
+.review-dock-tools > *:nth-child(7) { animation-delay: 125ms; }
+.review-dock-tools > *:nth-child(8) { animation-delay: 140ms; }
+.review-dock-tools > *:nth-child(9) { animation-delay: 150ms; }
+.review-dock-tools > *:nth-child(10) { animation-delay: 160ms; }
+
+.review-dock-stash {
+  animation: review-card-in 200ms 120ms ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-dock-tools,
+  .review-dock-tools > button,
+  .review-dock-tools > .review-tools-rule,
+  .review-dock-stash {
+    animation: none;
+  }
+}
+
+
+/* --- Rearranging the compound, and letting the bar overflow ---------------
+ * Each of the three parts carries a grip. Drag a grip and that piece sorts
+ * itself against its neighbours; drag anywhere else and the whole compound
+ * moves. A long press does the same as the grip, for anyone who reaches for
+ * that instead.
+ */
+
+.review-fab-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  order: var(--order-fab, 0);
+}
+
+.review-dock-tools {
+  order: var(--order-tools, 1);
+}
+
+.review-dock[data-drop='down'] .review-dock-stash {
+  order: var(--order-stash, 2);
+}
+
+.review-part-grip {
+  display: grid;
+  place-items: center;
+  padding: 0.2rem 0.1rem;
+  border-radius: 0.3rem;
+  color: rgb(255 255 255 / 0.3);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.review-part-grip:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: rgb(255 255 255 / 0.8);
+}
+
+.review-part-grip:active {
+  cursor: grabbing;
+}
+
+/* The Done capsule's grip only exists while the console is open, so give it
+ * the same dark chip to sit on as the rest of the console's furniture. */
+.review-fab-grip {
+  margin: 0 -0.15rem 0 -0.35rem;
+  padding: 0.2rem 0.05rem;
+  color: rgb(255 255 255 / 0.35);
+}
+
+.review-fab-grip:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+/* The piece being sorted reads as picked up; the rest sit back. */
+.review-dock[data-sorting] > * {
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.review-dock[data-sorting='fab'] .review-dock-tools,
+.review-dock[data-sorting='fab'] .review-dock-stash,
+.review-dock[data-sorting='tools'] .review-fab-wrap,
+.review-dock[data-sorting='tools'] .review-dock-stash,
+.review-dock[data-sorting='stash'] .review-fab-wrap,
+.review-dock[data-sorting='stash'] .review-dock-tools {
+  opacity: 0.55;
+}
+
+/* A flat bar is allowed to run past the edge of its own box: the tools that
+ * matter are at the head, and the arrangement controls and the options
+ * segment can scroll out of sight rather than making the bar wrap or the
+ * window feel small. */
+.review-dock-tools[data-dir='h'] {
+  max-width: min(46rem, calc(100vw - 2rem));
+  overflow-x: auto;
+  overflow-y: visible;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+}
+
+.review-dock-tools[data-dir='h']::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tooltips would be clipped by that scroller, so in the flat bar they hang
+ * below the button on their own layer instead. */
+.review-dock-tools[data-dir='h'] > button[data-label]::after,
+.review-dock-tools[data-dir='h'] .review-tools-tray > button[data-label]::after {
+  position: fixed;
+  top: auto;
+  right: auto;
+  transform: translate(-50%, 0.4rem);
+}
+
+
+/* --- Bar height ------------------------------------------------------------
+ * A flat bar should be about as tall as one control. It was not, for two
+ * reasons: the padding was doing more work than it needed to, and the badges
+ * hung outside the buttons — which, in a horizontal scroller, grows the box
+ * rather than spilling out of it.
+ *
+ * So the badge tucks into the corner of its button with about a quarter of
+ * itself over the edge, entirely inside the bar's own padding. Nothing has to
+ * grow to contain it.
+ */
+
+.review-dock-tools[data-dir='h'] {
+  padding: 0.125rem;
+}
+
+.review-dock-tools[data-dir='h'] > button,
+.review-dock-tools[data-dir='h'] .review-bar-step,
+.review-dock-tools[data-dir='h'] .review-bar-verdict {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'],
+.review-dock-tools[data-dir='h'] > button[data-label='Pick'],
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] {
+  width: auto;
+  height: 1.5rem;
+}
+
+.review-dock-tools[data-dir='h'] > button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-tools-rule {
+  height: 0.875rem;
+}
+
+.review-dock-tools[data-dir='h'] .review-hud-min,
+.review-dock-tools[data-dir='h'] .review-hud-close {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* A quarter over the corner, three quarters inside it. */
+.review-badge {
+  top: 0;
+  right: 0;
+  min-width: 0.85rem;
+  border-width: 1px;
+  font-size: 0.5rem;
+  line-height: 0.8rem;
+  transform: translate(28%, -28%);
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'] .review-badge,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] .review-badge,
+.review-dock-tools[data-dir='wide'] .review-badge {
+  transform: none;
+}
+
+
+/* Icons only in the flat bar. The names were breaking its rhythm — different
+ * button widths, a bar that changed length as the counts changed — and the
+ * hover label already says what each one is. Names stay in the wide shape,
+ * which exists precisely to have them. */
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'],
+.review-dock-tools[data-dir='h'] > button[data-label='Pick'],
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] {
+  display: grid;
+  width: 1.5rem;
+  padding: 0;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit']::after,
+.review-dock-tools[data-dir='h'] > button[data-label='Pick']::after,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B']::after {
+  position: fixed;
+  border-radius: 0.35rem;
+  background: rgb(2 6 23 / 0.95);
+  padding: 0.15rem 0.4rem;
+  color: white;
+  font: 600 0.6875rem/1.4 ui-sans-serif, system-ui, sans-serif;
+  opacity: 0;
+  transform: translate(-50%, 0.4rem);
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit']:hover::after,
+.review-dock-tools[data-dir='h'] > button[data-label='Pick']:hover::after,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B']:hover::after {
+  opacity: 1;
+}
+
+/* With the names gone the counts go back to the corner, a quarter over. */
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'] .review-badge,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] .review-badge {
+  position: absolute;
+  transform: translate(28%, -28%);
+}
+
+
+/* --- The second floor -----------------------------------------------------
+ * The extras drop into their own strip under the toolbar rather than making
+ * the toolbar longer. The bar keeps one length forever, and the chevron says
+ * which way the floor opens.
+ */
+
+.review-tools-tray {
+  display: none;
+  order: var(--order-tools, 1);
+  align-items: center;
+  gap: var(--rv-gap);
+  border: 1px solid var(--review-glass-line);
+  border-radius: var(--rv-card);
+  background: var(--review-glass-strong);
+  padding: 0.125rem;
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+  animation: review-card-in 150ms ease-out;
+}
+
+.review-tools-tray[data-open] {
+  display: flex;
+}
+
+.review-tools-tray > button {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.review-tools-tray > button svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+.review-more-caret {
+  transition: transform 160ms ease;
+}
+
+.review-tools-more[data-on='true'] .review-more-caret {
+  transform: rotate(180deg);
+}
+
+/* Upright, the floor becomes a column beside the strip rather than under it. */
+.review-dock-tools[data-dir='v'] ~ .review-tools-tray[data-open],
+.review-dock[data-placed] .review-dock-tools[data-dir='v'] ~ .review-tools-tray[data-open] {
+  flex-direction: column;
+}
+
+
+/* ==========================================================================
+ * Independence from the app underneath
+ *
+ * This was the real reason the toolbar kept coming out too tall. The app sets
+ * its own root font size and a 2.75rem minimum height on buttons for touch
+ * targets — sensible for the app, wrong for a workshop tool floating over it.
+ * Every `rem` here was silently 12.5% bigger than written, and every control
+ * had a 49px floor under it.
+ *
+ * So the console sizes itself in pixels and clears the inherited minimums. It
+ * is the same size in every layout and every sub-palette, which is what a tool
+ * that inspects six different designs has to be.
+ * ========================================================================== */
+
+:root {
+  --rv-tool: 28px;
+  --rv-furniture: 22px;
+  --rv-card: 10px;
+  --rv-control: 6px;
+  --rv-pad: 4px;
+  --rv-gap: 2px;
+}
+
+.review-dock-tools > button,
+.review-tools-tray > button,
+.review-hud-head button,
+.review-hud-min,
+.review-hud-close,
+.review-bar-step,
+.review-bar-verdict,
+.review-part-grip,
+.review-stack-grip,
+.review-stack-toggle,
+.review-stack-row button,
+.review-chip-tools button,
+.review-tray-comment,
+.review-actions button,
+.review-aim button,
+.review-tag-row button,
+.review-target-btn {
+  min-width: 0;
+  min-height: 0;
+}
+
+.review-dock-tools[data-dir='h'] > button,
+.review-dock-tools[data-dir='h'] .review-bar-step,
+.review-dock-tools[data-dir='h'] .review-bar-verdict,
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'],
+.review-dock-tools[data-dir='h'] > button[data-label='Pick'],
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] {
+  width: 24px;
+  height: 24px;
+}
+
+.review-dock-tools[data-dir='h'] > button svg,
+.review-tools-tray > button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.review-dock-tools[data-dir='h'] .review-hud-close {
+  width: 18px;
+  height: 18px;
+}
+
+.review-dock-tools[data-dir='h'] .review-tools-rule {
+  height: 14px;
+}
+
+.review-tools-tray > button {
+  width: 24px;
+  height: 24px;
+}
+
+.review-part-grip {
+  padding: 2px 1px;
+}
+
+.review-badge {
+  min-width: 13px;
+  font-size: 8px;
+  line-height: 13px;
+}
+
+
+/* --- Tooltips and counts, in a bar that scrolls --------------------------
+ * A CSS tooltip inside a horizontal scroller is a bad idea: it is either
+ * clipped by the scroller or, pinned to the viewport, it lands nowhere near
+ * the button. The flat bar uses the browser's own tooltip instead — the
+ * upright and wide shapes, which do not scroll, keep the styled one.
+ */
+
+.review-dock-tools[data-dir='h'] > button::after,
+.review-dock-tools[data-dir='h'] .review-tools-tray > button::after,
+.review-tools-tray > button::after {
+  content: none;
+}
+
+/* Counts sit inside the corner of their button. A count that hangs outside
+ * lands on whatever button is next to it, which in a 2px-gap strip is always
+ * something. */
+.review-badge {
+  top: -1px;
+  right: -1px;
+  transform: none;
+  padding: 0 2px;
+  border-width: 1px;
+}
+
+.review-dock-tools[data-dir='h'] > button[data-label='Audit'] .review-badge,
+.review-dock-tools[data-dir='h'] > button[data-label='A / B'] .review-badge {
+  transform: none;
+}
+
+/* The options segment keeps the same 24px controls as the tools it follows. */
+.review-dock-tools[data-dir='h'] .review-bar-context {
+  gap: 2px;
+  padding-left: 4px;
+  margin-left: 2px;
+}
+
+.review-dock-tools[data-dir='h'] .review-bar-verdict svg,
+.review-dock-tools[data-dir='h'] .review-bar-step svg {
+  width: 13px;
+  height: 13px;
+}
+
+.review-bar-name {
+  max-width: 9rem;
+  font-size: 11px;
+}
+
+
+/* ==========================================================================
+ * The log, designed
+ *
+ * This is where the review is read back, so it is mostly a typography and
+ * spacing problem: one scale, one rhythm, nothing overflowing sideways. Like
+ * the toolbar it sizes itself in pixels rather than inheriting the app's own
+ * larger root, which is what had it bursting its own panel.
+ * ========================================================================== */
+
+.review-panel {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.review-panel * {
+  min-width: 0;
+}
+
+.review-panel-head {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.review-panel-head button {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 5px;
+  min-height: 0;
+}
+
+.review-panel-head button:hover {
+  background: rgb(15 23 42 / 0.06);
+}
+
+.review-panel-head button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.review-panel-sync {
+  padding: 6px 12px;
+  font-size: 10px;
+}
+
+.review-panel-list {
+  padding: 6px;
+}
+
+/* One row per group, full width — it was taking a column of its own and
+ * squeezing every note beside it. */
+.review-panel-group {
+  display: block;
+  width: 100%;
+}
+
+.review-panel-group > ul {
+  display: block;
+  width: 100%;
+}
+
+.review-panel-group-head {
+  width: 100%;
+  padding: 6px 6px 4px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.review-panel-group > ul > li {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 4px;
+}
+
+/* The note itself: a stack, not a paragraph. Kind, then name, then what was
+ * said, then where it lives — each on its own line with room to breathe. */
+.review-note-body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  border-radius: 6px;
+  padding: 4px 6px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.review-note-body:hover {
+  background: rgb(15 23 42 / 0.05);
+}
+
+.review-note-kind {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-note-label {
+  overflow: hidden;
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-note-text {
+  color: #475569;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.review-note-source {
+  overflow: hidden;
+  color: #94a3b8;
+  font: 500 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  direction: rtl;          /* keep the filename, drop the front of the path */
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-note-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 2px solid #cbd5e1;
+  padding-left: 6px;
+  color: #475569;
+  font-size: 11px;
+}
+
+.review-note-tags span {
+  padding: 0 5px;
+  font-size: 9px;
+  line-height: 15px;
+}
+
+/* The row's own buttons stay out of the way until the row is under the
+ * cursor, so a list of notes reads as a list of notes. */
+.review-note-remove {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  place-items: center;
+  border-radius: 5px;
+  color: #94a3b8;
+  opacity: 0;
+  cursor: pointer;
+  min-height: 0;
+}
+
+.review-panel-group > ul > li:hover .review-note-remove,
+.review-note-remove:focus-visible {
+  opacity: 1;
+}
+
+.review-note-remove:hover {
+  background: rgb(15 23 42 / 0.08);
+  color: var(--review-ink);
+}
+
+.review-note-remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.review-panel-foot {
+  gap: 6px;
+  padding: 8px;
+}
+
+.review-panel-foot button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 11.5px;
+  font-weight: 650;
+  min-height: 0;
+}
+
+.review-panel-foot button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.review-panel-empty {
+  padding: 14px 10px;
+  color: #94a3b8;
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.review-reply {
+  padding: 8px;
+}
+
+.review-reply textarea {
+  font-size: 12px;
+}
+
+
+/* `.review-panel-list li` makes every list item a flex row — right for a
+ * note, wrong for the group that holds them, which was laying its heading out
+ * as a column beside its own notes. The group is a block; only its notes are
+ * rows. */
+.review-panel-list > li.review-panel-group {
+  display: block;
+  padding: 0;
+}
+
+.review-panel-list > li.review-panel-group:hover {
+  background: transparent;
+}
+
+.review-panel-list > li.review-panel-group > .review-panel-group-head {
+  display: block;
+  width: auto;
+}
+
+.review-panel-list > li.review-panel-group > ul {
+  display: block;
+  width: auto;
+}
+
+
+/* The wide shape is the one that shows names, and that includes the second
+ * floor — an unlabelled row of four icons is a puzzle, not a control. */
+.review-dock-tools[data-dir='wide'] ~ .review-tools-tray {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.review-dock-tools[data-dir='wide'] ~ .review-tools-tray > button {
+  display: flex;
+  width: 100%;
+  height: 28px;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 0 9px;
+}
+
+.review-dock-tools[data-dir='wide'] ~ .review-tools-tray > button::after {
+  position: static;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  content: attr(data-label);
+  font: 600 12px/1 ui-sans-serif, system-ui, sans-serif;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+}
+
+
+/* --- Window controls in the title band -----------------------------------
+ * What shape the window takes is a property of the window, so it lives in the
+ * window's own title band rather than in the drawer of extras. Three states,
+ * three buttons, the current one lit — nothing to cycle through and guess at.
+ */
+
+.review-hud-window {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: auto;
+}
+
+.review-hud-window button {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border-radius: 4px;
+  color: rgb(255 255 255 / 0.3);
+  cursor: pointer;
+  min-height: 0;
+}
+
+.review-hud-window button svg {
+  width: 11px;
+  height: 11px;
+}
+
+.review-hud-window button:hover {
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+}
+
+.review-hud-window button[data-on='true'] {
+  background: rgb(255 255 255 / 0.2);
+  color: white;
+}
+
+/* No hover labels up here: the band is small and the browser tooltip already
+ * names each one. */
+.review-hud-window button::after {
+  content: none;
+}
+
+/* Upright, the band stacks its controls under the grip rather than running
+ * the strip wide. */
+.review-dock-tools[data-dir='v'] .review-hud-head {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-dock-tools[data-dir='v'] .review-hud-window {
+  margin: 0;
+}
+
+
+/* Upright, the grip and the window control share one row rather than stacking
+ * into two — the strip is 28px across, which is room enough for both if they
+ * are sized for it. Two rows of furniture above two rows of tools was the
+ * title band taking more of the strip than the tools it titles. */
+.review-dock-tools[data-dir='v'] .review-hud-head {
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0;
+  padding: 0 0 3px;
+}
+
+.review-dock-tools[data-dir='v'] .review-hud-grip {
+  padding: 2px 0;
+}
+
+.review-dock-tools[data-dir='v'] .review-hud-grip svg {
+  width: 11px;
+  height: 11px;
+}
+
+.review-dock-tools[data-dir='v'] .review-hud-window button {
+  width: 15px;
+  height: 15px;
+}
+
+.review-dock-tools[data-dir='v'] .review-hud-window button svg {
+  width: 10px;
+  height: 10px;
+}
+
+
+/* --- How the compound's parts line up ------------------------------------
+ * The three parts are different widths — a thin strip, a wide drawer, a
+ * capsule — so they have to agree on something. They agree on their centre.
+ *
+ * Flushing them to an edge was worse in both directions: it left a ragged
+ * column, and where a part was wider than the stack it hung off the side of
+ * the screen instead of pushing the stack over. Centred, the compound reads
+ * as one object whatever is open inside it, and the drag clamp keeps the
+ * widest part on screen.
+ */
+
+.review-dock {
+  /* As wide as its widest part. The 19rem cap was the real fault: a drawer
+     wider than the cap hung off the side of the screen instead of pushing the
+     stack over, which is what made every alignment look broken. */
+  max-width: calc(100vw - 1rem);
+}
+
+/* Centred looked worse, not better: a thin strip between two wide blocks is
+ * an hourglass. They share the edge nearest the screen edge instead, which
+ * gives the compound one clean vertical line and grows it inwards. */
+.review-dock[data-side='right'] {
+  align-items: flex-end;
+}
+
+.review-dock[data-side='left'] {
+  align-items: flex-start;
+}
+
+.review-dock[data-side='right'] .review-fab-wrap,
+.review-dock[data-side='right'] .review-tools-tray,
+.review-dock[data-side='right'] .review-dock-tools,
+.review-dock[data-side='right'] .review-dock-stash {
+  align-self: flex-end;
+}
+
+.review-dock[data-side='left'] .review-fab-wrap,
+.review-dock[data-side='left'] .review-tools-tray,
+.review-dock[data-side='left'] .review-dock-tools,
+.review-dock[data-side='left'] .review-dock-stash {
+  align-self: flex-start;
+}
+
+/* Lifted out of flow (opening upwards) the drawer still has to be told which
+ * way to hang, and it hangs the way the compound faces. */
+.review-dock[data-drop='up'][data-side='right'] .review-dock-stash {
+  right: 0;
+  left: auto;
+}
+
+.review-dock[data-drop='up'][data-side='left'] .review-dock-stash {
+  right: auto;
+  left: 0;
+}
+
+/* And so does the key card, which is wider than the strip it belongs to. */
+.review-dock[data-side='right'] .review-help {
+  right: 0;
+  left: auto;
+}
+
+.review-dock[data-side='left'] .review-help {
+  right: auto;
+  left: 0;
+}

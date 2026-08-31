@@ -1,0 +1,441 @@
+/*
+ * Work Record layout — the sga_calc20 "work record" structure rebuilt on the
+ * PayGuard token contract. Everything is scoped under .pg-workrecord, which
+ * is always applied *alongside* .pg-payguard: the tokens, buttons, badges,
+ * cards and job editor all come from payguard.css, and this file only adds
+ * what that layout does differently.
+ *
+ * What is different:
+ *   1. Shell        — one centred sheet of paper rather than a full-bleed page
+ *   2. Headline     — the progressive "what does this month mean" band
+ *   3. Hotbar       — months that need attention, above everything collapsible
+ *   4. Slabs        — three stacked disclosure sections, the layout's spine
+ *   5. Month cells  — a fill says what happened; proximity is never a fill
+ *   6. Chips + rows — the small readouts inside the Status slab
+ *
+ * Same rules of the road as payguard.css: colour, borders and surfaces come
+ * from a class here or a --pg-* token; Tailwind is layout only; inline style
+ * is reserved for values that can only be computed at runtime.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1. Shell                                                           */
+/* ------------------------------------------------------------------ */
+
+.pg-workrecord {
+  --wr-pad: 0.875rem;
+}
+
+@media (min-width: 780px) {
+  .pg-workrecord { --wr-pad: 1.375rem; }
+}
+
+.wr-shell {
+  width: 100%;
+  max-width: 74rem;
+  margin: 0 auto;
+}
+
+/*
+ * On desktop the stack becomes a bordered sheet sitting on the desk, which is
+ * what makes this read as a record book rather than as loose cards. On a
+ * phone the border and radius are dropped so the content keeps full width.
+ */
+@media (min-width: 780px) {
+  .wr-sheet {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius-xl);
+    box-shadow: var(--pg-shadow-md);
+    overflow: hidden;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Headline                                                        */
+/* ------------------------------------------------------------------ */
+
+.wr-headline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 1.25rem;
+  align-items: end;
+  padding: 1.125rem var(--wr-pad);
+  border-bottom: 1px solid var(--pg-rule);
+  background: color-mix(in oklab, var(--pg-surface-2) 40%, var(--pg-surface));
+}
+
+@media (min-width: 780px) {
+  .wr-headline {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 1.375rem var(--wr-pad);
+  }
+}
+
+.wr-headline-figure {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-size: 2.125rem;
+  color: var(--pg-fg);
+}
+
+@media (min-width: 640px) {
+  .wr-headline-figure { font-size: 2.5rem; }
+}
+
+.wr-headline-figure[data-over='true'] { color: var(--pg-over-text); }
+
+/* The "of $1,690 SGA · $412 of room" line under the figure. */
+.wr-headline-of {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pg-fg-muted);
+}
+
+/*
+ * Standings. Two small readouts to the right of the figure, divided by rules
+ * rather than boxed — they are context for the headline, not cards of their
+ * own. They wrap under it on a phone.
+ */
+.wr-standings {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.wr-standing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding-left: 1rem;
+  border-left: 1px solid var(--pg-rule);
+}
+
+.wr-standing:first-child { padding-left: 0; border-left: 0; }
+
+@media (min-width: 780px) {
+  .wr-standing:first-child {
+    padding-left: 1rem;
+    border-left: 1px solid var(--pg-rule);
+  }
+}
+
+/* A phase banner that has to be read before the numbers are trusted. */
+.wr-phase-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.625rem var(--wr-pad);
+  border-bottom: 1px solid var(--pg-rule);
+  background: var(--pg-info-bg);
+  color: var(--pg-info-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.wr-phase-quiet {
+  padding: 0.5rem var(--wr-pad);
+  border-bottom: 1px solid var(--pg-rule);
+  color: var(--pg-fg-dim);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Hotbar                                                          */
+/* ------------------------------------------------------------------ */
+
+.wr-hotbar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem var(--wr-pad);
+  border-bottom: 1px solid var(--pg-rule);
+  background: var(--pg-surface);
+}
+
+.wr-hotbar-rail {
+  display: flex;
+  gap: 0.375rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.wr-hotbar-rail::-webkit-scrollbar { display: none; }
+
+.wr-hotbar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 0 0 auto;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--pg-radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.wr-hotbar-chip[data-kind='over'] {
+  color: var(--pg-over-text);
+  background: var(--pg-over-bg);
+  border-color: var(--pg-over-border);
+}
+
+.wr-hotbar-chip[data-kind='near'] {
+  color: var(--pg-warn-text);
+  background: var(--pg-warn-bg);
+  border-color: var(--pg-warn-border);
+}
+
+.wr-hotbar-chip[data-kind='pay'] {
+  color: var(--pg-info-text);
+  background: var(--pg-info-bg);
+  border-color: var(--pg-info-border);
+}
+
+.wr-hotbar-chip-month {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.wr-hotbar-chip:focus-visible,
+.wr-month-cell:focus-visible,
+.wr-slab-head-toggle:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: -2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Slabs                                                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A slab is a disclosure section, not a card: it has no border of its own and
+ * is separated from its neighbour by a single hairline. Stacked, they make
+ * one continuous sheet — which is the whole point of this layout.
+ */
+.wr-slab { border-bottom: 1px solid var(--pg-rule); }
+.wr-slab:last-child { border-bottom: 0; }
+
+.wr-slab-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding-right: var(--wr-pad);
+}
+
+.wr-slab-head-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 3.25rem;
+  padding: 0 0.5rem 0 var(--wr-pad);
+  margin: 0;
+  border: 0;
+  background: none;
+  color: var(--pg-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wr-slab-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--pg-fg);
+}
+
+/*
+ * The glance summary. Only ever rendered while the slab is closed — its job
+ * is to let someone tell what is inside without opening it.
+ */
+.wr-slab-aside {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--pg-fg-dim);
+}
+
+.wr-slab-chevron {
+  flex: 0 0 auto;
+  color: var(--pg-fg-dim);
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.wr-slab-chevron[data-open='false'] { transform: rotate(-90deg); }
+.wr-slab-head-toggle:hover .wr-slab-chevron { color: var(--pg-fg); }
+
+.wr-slab-body { padding: 0 var(--wr-pad) 1.25rem; }
+
+/* ------------------------------------------------------------------ */
+/* 5. Month cells                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Fills say what happened; proximity to a line is a small figure, never a
+ * fill. A month that nearly crossed must not look like one that did.
+ */
+.wr-month-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.625rem 0.75rem;
+  background: var(--pg-surface);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.wr-month-cell[data-fill='empty'] {
+  background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
+}
+
+.wr-month-cell[data-fill='keep'] { background: var(--pg-safe-bg); }
+.wr-month-cell[data-fill='spent'] { background: var(--pg-twp-bg); }
+.wr-month-cell[data-fill='over'] { background: var(--pg-over-bg); }
+.wr-month-cell[data-fill='unknown'] { background: var(--pg-surface-2); }
+
+.wr-month-cell[data-hover='true'] { background: var(--pg-hover); }
+.wr-month-cell:hover { background: var(--pg-hover); }
+
+/* Today is marked by a rule down its leading edge, not by another fill. */
+.wr-month-cell[data-now='true'] {
+  box-shadow: inset 2px 0 0 0 var(--pg-ring);
+}
+
+.wr-month-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pg-fg-muted);
+}
+
+.wr-month-value {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--pg-fg);
+}
+
+.wr-month-cell[data-fill='empty'] .wr-month-value { color: var(--pg-fg-dim); }
+
+.wr-month-note {
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.wr-month-note[data-kind='trial'] { color: var(--pg-twp-text); }
+.wr-month-note[data-kind='sga'] { color: var(--pg-warn-text); }
+.wr-month-note[data-kind='pay'] { color: var(--pg-info-text); }
+
+.wr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.625rem 0.875rem;
+  border-top: 1px solid var(--pg-rule);
+  background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--pg-fg-muted);
+}
+
+.wr-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.wr-legend-swatch {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--pg-radius-xs);
+  border: 1px solid transparent;
+}
+
+.wr-legend-swatch[data-fill='keep'] {
+  background: var(--pg-safe-bg);
+  border-color: var(--pg-safe-border);
+}
+
+.wr-legend-swatch[data-fill='spent'] {
+  background: var(--pg-twp-bg);
+  border-color: var(--pg-twp-border);
+}
+
+.wr-legend-swatch[data-fill='over'] {
+  background: var(--pg-over-bg);
+  border-color: var(--pg-over-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Chips and rows                                                  */
+/* ------------------------------------------------------------------ */
+
+.wr-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.wr-rows { display: flex; flex-direction: column; }
+
+.wr-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-top: 1px solid var(--pg-rule);
+}
+
+.wr-row:first-child { border-top: 0; }
+
+.wr-row-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pg-fg);
+}
+
+.wr-row-note {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--pg-fg-dim);
+}
+
+.wr-note {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--pg-fg-muted);
+}

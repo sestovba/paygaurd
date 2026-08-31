@@ -1,0 +1,841 @@
+/*
+ * Ledger layout — a monospace "paper ledger" design system, entirely scoped
+ * under .pg-ledger so it never touches the Classic/New/Responsive layouts,
+ * which share the ordinary Tailwind tokens in index.css.
+ *
+ * Four sub-themes (Paper/Slate/Ledger/Carbon) switch via
+ * [data-ledger-theme] on the root — independent of the app's own light/dark
+ * toggle, since this layout owns its own look end to end.
+ */
+
+.pg-ledger {
+  /* Ledger sub-themes own light/dark — ignore the app-wide .dark toggle. */
+  color-scheme: light;
+  --lg-radius: 0.375rem;
+  --lg-bg: oklch(0.985 0.004 106);
+  --lg-surface: oklch(1 0 0);
+  --lg-surface-2: oklch(0.965 0.005 240);
+  --lg-head: oklch(0.95 0.006 240);
+  --lg-fg: oklch(0.24 0.015 250);
+  --lg-muted: oklch(0.53 0.015 250);
+  --lg-border: oklch(0.9 0.006 250);
+  --lg-border-soft: oklch(0.9 0.006 250 / 45%);
+  --lg-ring: oklch(0.6 0.09 158);
+  --lg-w2: oklch(0.48 0.11 158);
+  --lg-se: oklch(0.55 0.13 40);
+  --lg-safe: oklch(0.55 0.13 158);
+  --lg-warn: oklch(0.68 0.15 70);
+  --lg-twp: oklch(0.55 0.18 295);
+  --lg-over: oklch(0.56 0.19 22);
+  --lg-shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 10px 24px -16px rgba(20, 20, 30, 0.16);
+
+  background: var(--lg-bg);
+  color: var(--lg-fg);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pg-ledger[data-ledger-theme='slate'],
+.pg-ledger[data-ledger-theme='ledger'] {
+  --lg-bg: oklch(0.975 0.006 250);
+  --lg-surface: #ffffff;
+  --lg-surface-2: oklch(0.955 0.008 250);
+  --lg-head: oklch(0.94 0.01 250);
+  --lg-fg: oklch(0.26 0.03 260);
+  --lg-muted: oklch(0.5 0.02 260);
+  --lg-border: oklch(0.87 0.012 250);
+  --lg-border-soft: oklch(0.87 0.012 250 / 55%);
+  --lg-ring: oklch(0.55 0.16 255);
+  --lg-w2: oklch(0.5 0.16 255);
+  --lg-se: oklch(0.58 0.14 30);
+  --lg-safe: oklch(0.5 0.13 165);
+  --lg-warn: oklch(0.65 0.14 65);
+  --lg-twp: oklch(0.52 0.17 295);
+  --lg-over: oklch(0.55 0.19 20);
+}
+
+.pg-ledger[data-ledger-theme='carbon'] {
+  color-scheme: dark;
+  --lg-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 28px -16px rgba(0, 0, 0, 0.7);
+  --lg-bg: #0a0a0c;
+  --lg-surface: #16161a;
+  --lg-surface-2: #1e1e24;
+  --lg-head: #26262e;
+  --lg-fg: #f3f3f0;
+  --lg-muted: #a7a7a1;
+  --lg-border: #3a3a42;
+  --lg-border-soft: rgba(255, 255, 255, 0.14);
+  --lg-ring: oklch(0.78 0.19 250);
+  --lg-w2: oklch(0.75 0.17 250);
+  --lg-se: oklch(0.78 0.18 330);
+  --lg-safe: oklch(0.82 0.19 150);
+  --lg-warn: oklch(0.85 0.18 80);
+  --lg-twp: oklch(0.8 0.2 300);
+  --lg-over: oklch(0.74 0.22 25);
+}
+
+.pg-ledger * {
+  box-sizing: border-box;
+}
+
+/* :where() keeps this reset at zero specificity so every component class
+ * below (.lg-btn-solid, .lg-tab, .lg-seg-item, ...) can win on color without
+ * a specificity fight against "class + element" selectors like this one. */
+:where(.pg-ledger) :where(button, input, select) {
+  font-family: inherit;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* index.css's global `input, select, textarea { box-shadow: var(--shadow-input) }`
+ * (a bare element selector) draws a soft drop shadow meant for the other
+ * three layouts' bordered fields. Every ledger field defines its own edge
+ * (a border, or nothing by design) so that shadow just reads as a stray
+ * underline here — kill it for the whole layout in one place instead of
+ * re-overriding it on every field class. */
+.pg-ledger input,
+.pg-ledger select {
+  box-shadow: none;
+}
+
+.pg-ledger input::placeholder {
+  color: var(--lg-muted);
+  opacity: 1;
+}
+
+.pg-ledger button:focus-visible,
+.pg-ledger input:focus-visible,
+.pg-ledger select:focus-visible {
+  outline: 2px solid var(--lg-ring);
+  outline-offset: 1px;
+}
+
+.lg-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+.lg-sans {
+  font-family: 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+.lg-label {
+  font: 500 0.75rem/1.2 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+}
+
+.lg-header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  background: var(--lg-surface);
+}
+
+.lg-header-title {
+  font: 700 1.25rem/1.2 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--lg-fg);
+}
+
+.lg-header-sub {
+  font: 500 0.75rem/1.3 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+}
+
+.lg-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.lg-header-tools {
+  overflow-x: auto;
+  border-top: 1px solid var(--lg-border-soft);
+  background: var(--lg-surface);
+}
+
+.lg-header-tools-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0.55rem 0.85rem;
+  white-space: nowrap;
+}
+
+.lg-year-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+}
+
+.lg-year-stepper button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+}
+
+.lg-year-stepper button:disabled {
+  opacity: 0.3;
+}
+
+.lg-type-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0.2rem 0.45rem;
+  font: 700 0.75rem/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lg-type-badge[data-type='w2'] {
+  color: var(--lg-w2);
+  border: 1px solid var(--lg-w2);
+  background: color-mix(in oklch, var(--lg-w2) 12%, var(--lg-surface));
+}
+
+.lg-type-badge[data-type='ten99'] {
+  color: var(--lg-se);
+  border: 1px solid var(--lg-se);
+  background: color-mix(in oklch, var(--lg-se) 12%, var(--lg-surface));
+}
+
+@media (min-width: 640px) {
+  .lg-header-bar,
+  .lg-header-tools-inner {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .lg-header-title {
+    font-size: 1.375rem;
+  }
+}
+
+.lg-surface {
+  background: var(--lg-surface);
+}
+
+.lg-border {
+  border: 1px solid var(--lg-border);
+}
+
+.lg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--lg-border);
+  background: var(--lg-surface);
+  border-radius: var(--lg-radius);
+  font: 500 0.75rem/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lg-fg);
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.lg-btn:hover {
+  background: var(--lg-surface-2);
+}
+
+.lg-btn-solid {
+  background: var(--lg-fg);
+  color: var(--lg-bg);
+  border-color: var(--lg-fg);
+}
+
+.lg-btn-solid:hover {
+  opacity: 0.88;
+  background: var(--lg-fg);
+}
+
+.lg-seg {
+  display: inline-flex;
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+  overflow: hidden;
+}
+
+.lg-seg-item {
+  padding: 0.55rem 0.75rem;
+  font: 500 0.75rem/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+  background: var(--lg-surface);
+  cursor: pointer;
+  border: none;
+  border-right: 1px solid var(--lg-border);
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.lg-seg-item:last-child {
+  border-right: none;
+}
+
+.lg-seg-item[data-on='true'] {
+  background: var(--lg-fg);
+  color: var(--lg-bg);
+}
+
+/* An editable name that reads as plain text until touched — no border at
+ * rest or on hover, just a focus ring, so it doesn't look like a form
+ * field until someone actually interacts with it. */
+.lg-name-input {
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  outline: none;
+  padding: 0;
+  border-radius: 2px;
+  transition: box-shadow 0.12s;
+}
+
+.lg-name-input:focus {
+  box-shadow: 0 0 0 2px var(--lg-ring);
+}
+
+.lg-name-input-visible {
+  outline: none;
+}
+
+.lg-field {
+  border: 1px solid var(--lg-border);
+  background: var(--lg-surface);
+  border-radius: var(--lg-radius);
+  padding: 0.6rem 0.6rem;
+  font: 500 0.8125rem/1.2 'JetBrains Mono', monospace;
+  min-height: 2.5rem;
+}
+
+.lg-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+/* ---- semantic utilities ---- */
+
+.lg-text-muted { color: var(--lg-muted); }
+.lg-text-w2 { color: var(--lg-w2); }
+.lg-text-se { color: var(--lg-se); }
+.lg-text-fg { color: var(--lg-fg); }
+.lg-text-safe { color: var(--lg-safe); }
+.lg-text-warn { color: var(--lg-warn); }
+.lg-text-twp { color: var(--lg-twp); }
+.lg-text-over { color: var(--lg-over); }
+
+.lg-fill-w2 { background: var(--lg-w2); }
+.lg-fill-se { background: var(--lg-se); }
+.lg-fill-muted { background: var(--lg-muted); }
+.lg-fill-safe { background: var(--lg-safe); }
+.lg-fill-warn { background: var(--lg-warn); }
+.lg-fill-twp { background: var(--lg-twp); }
+.lg-fill-over { background: var(--lg-over); }
+
+.lg-border-b { border-bottom: 1px solid var(--lg-border); }
+.lg-border-b-soft { border-bottom: 1px solid var(--lg-border-soft); }
+.lg-border-t { border-top: 1px solid var(--lg-border); }
+.lg-border-r { border-right: 1px solid var(--lg-border); }
+.lg-divider-v { background: var(--lg-border); }
+.lg-bg-surface { background: var(--lg-surface); }
+.lg-bg-surface-2 { background: var(--lg-surface-2); }
+.lg-bg-border-soft { background: var(--lg-border-soft); }
+
+.lg-stat-tile {
+  min-width: 9.5rem;
+  border-color: var(--lg-border);
+}
+
+.lg-summary-tile { min-width: 13rem; }
+
+.lg-field-compact {
+  min-height: auto;
+  padding: 0.25rem 0.4rem;
+}
+
+.lg-chevron {
+  color: var(--lg-muted);
+}
+
+.lg-chevron[data-collapsed='true'] {
+  transform: rotate(-90deg);
+}
+
+.lg-job-card {
+  border: 1px solid var(--lg-border);
+  border-left-width: 3px;
+}
+
+.lg-job-card[data-type='w2'] { border-left-color: var(--lg-w2); }
+.lg-job-card[data-type='ten99'] { border-left-color: var(--lg-se); }
+
+.lg-job-card-header[data-open='false'] { border-bottom: none; }
+.lg-job-card-header[data-open='true'] { border-bottom: 1px solid var(--lg-border-soft); }
+
+.lg-settings-grid {
+  background: var(--lg-border);
+  gap: 1px;
+  border-top: 1px solid var(--lg-border);
+  border-bottom: 1px solid var(--lg-border);
+}
+
+.lg-notice-badge {
+  background: var(--lg-warn);
+  color: var(--lg-bg);
+}
+
+.lg-analysis-summary {
+  background: var(--lg-surface);
+  border-top: 1px solid var(--lg-border);
+}
+
+.lg-analysis-table {
+  min-width: 42rem;
+  border-collapse: collapse;
+}
+
+.lg-ledger-scroll { min-width: 30rem; }
+
+.lg-tooltip-panel {
+  background: var(--lg-surface);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-shadow);
+  min-width: 8rem;
+}
+
+.lg-btn-w2 {
+  color: var(--lg-w2);
+  border-color: var(--lg-w2);
+}
+
+.lg-btn-se {
+  color: var(--lg-se);
+  border-color: var(--lg-se);
+}
+
+.lg-tab-static {
+  cursor: default;
+  gap: 0.5rem;
+}
+
+.lg-chart-bar-w2 { background: var(--lg-w2); }
+.lg-chart-bar-se { background: var(--lg-se); opacity: 0.85; }
+
+.lg-swatch-w2 { background: var(--lg-w2); }
+.lg-swatch-se { background: var(--lg-se); }
+.lg-swatch-muted { background: var(--lg-muted); }
+.lg-swatch-safe { background: var(--lg-safe); }
+.lg-swatch-warn { background: var(--lg-warn); }
+.lg-swatch-twp { background: var(--lg-twp); }
+.lg-swatch-over { background: var(--lg-over); }
+
+.lg-label-border { border-color: var(--lg-border); }
+
+.lg-warn-banner {
+  background: var(--lg-surface-2);
+  color: var(--lg-warn);
+}
+
+.lg-lock-btn {
+  background: var(--lg-surface);
+  color: var(--lg-muted);
+}
+
+.lg-disclaimer {
+  color: var(--lg-muted);
+  border-top: 1px solid var(--lg-border);
+}
+
+/* A grouped card — rounded, softly shadowed, with an internal grid of
+ * hairline dividers (via the background-color-as-gap trick) rather than the
+ * flush, sharp-cornered accounting-ledger look. This is the "base" style
+ * from the theme CSS, applied to every major panel. */
+.lg-card {
+  border-radius: var(--lg-radius);
+  box-shadow: var(--lg-shadow);
+  overflow: hidden;
+}
+
+/* ---- chart ---- */
+
+.lg-chart-rail {
+  position: relative;
+  border-bottom: 1px solid var(--lg-border);
+  border-left: 1px solid var(--lg-border-soft);
+}
+
+.lg-chart-threshold {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed currentColor;
+}
+
+.lg-chart-bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+@media (min-width: 640px) {
+  .lg-chart-bars {
+    gap: 7px;
+  }
+}
+
+.lg-chart-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 1px;
+  min-width: 4px;
+}
+
+/* ---- monthly ledger table (per-job editor) ---- */
+
+.lg-ledger-row {
+  display: flex;
+  border-bottom: 1px solid var(--lg-border-soft);
+}
+
+.lg-ledger-row:nth-child(even) {
+  background: var(--lg-surface-2);
+}
+
+@media (hover: hover) {
+  .lg-ledger-row:hover,
+  .lg-ledger-row:nth-child(even):hover {
+    background: color-mix(in oklch, var(--lg-ring) 12%, var(--lg-surface));
+  }
+}
+
+.lg-ledger-cell {
+  padding: 0.6rem 0.55rem;
+  border-right: 1px solid var(--lg-border-soft);
+  font: 500 0.8125rem/1.2 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+}
+
+/* A cell whose entire body is the input, Excel-style — no cell padding of
+ * its own, so the input's padding is the only inset and its hit/focus area
+ * spans the full cell edge to edge. */
+.lg-ledger-cell-field {
+  padding: 0;
+  align-items: stretch;
+}
+
+.lg-ledger-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font: 500 0.8125rem/1 'JetBrains Mono', monospace;
+  text-align: right;
+  outline: none;
+  padding: 0.6rem 0.55rem;
+}
+
+/* index.css defines a global input:focus-visible ring (0,1,1 specificity)
+ * for the other three layouts' bordered fields — higher specificity than a
+ * single class, so it wins over outline:none above regardless of source
+ * order. The whole cell is the field here, so focus belongs on the cell,
+ * not a mismatched ring boxing just the input inside it. */
+.lg-ledger-input:focus-visible {
+  outline: none;
+}
+
+.lg-ledger-cell:has(.lg-ledger-input:focus-visible) {
+  background: color-mix(in oklch, var(--lg-ring) 12%, var(--lg-surface));
+}
+
+/* ---- monthly analysis cards ---- */
+
+/* The analysis section reads as a recessed tray: a tinted ground with white
+ * cards and a white summary row floating on it, so the month cards separate
+ * from the page instead of dissolving into one flat white sheet. The section
+ * itself stays edge to edge — only its inner rows carry the gutter, so the
+ * summary row and table can bleed to the full width. */
+.lg-analysis {
+  background: var(--lg-head);
+  border-top: 1px solid var(--lg-border);
+}
+
+.lg-analysis-pad {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.lg-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 500 0.875rem/1.4 'JetBrains Mono', monospace;
+  color: var(--lg-fg);
+}
+
+.lg-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .lg-analysis-pad {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .lg-analysis-grid {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 480px) {
+  .lg-analysis-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 720px) {
+  .lg-analysis-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .lg-analysis-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.lg-status-card {
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+  background: var(--lg-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The one rounded thing on an otherwise square-cornered card. */
+.lg-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--lg-border);
+  flex: 0 0 auto;
+}
+
+.lg-status-badge {
+  font: 500 0.6875rem/1.3 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+
+/* Edge to edge at every width — no floating card, no page-margin backdrop. */
+.lg-app-card {
+  background: var(--lg-surface);
+}
+
+/* ---- job tabs ---- */
+
+/* The strip sits on the tinted ground so the selected tab — the only white
+ * one — reads as raised and connected to the card below it, instead of
+ * dissolving into the white chart panel above. */
+.lg-tabbar {
+  background: var(--lg-head);
+  border-bottom: 1px solid var(--lg-border);
+}
+
+.lg-ledger-head {
+  background: var(--lg-head);
+  border-bottom: 1px solid var(--lg-border);
+}
+
+.lg-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0 1rem;
+  min-height: 3.25rem;
+  height: 3.25rem;
+  border-right: 1px solid var(--lg-border);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  font: 600 1rem/1.2 'Inter Tight', sans-serif;
+  color: var(--lg-muted);
+  transition: background-color 0.12s;
+}
+
+.lg-tab[data-active='true'] {
+  color: var(--lg-fg);
+  background: var(--lg-surface);
+  box-shadow: inset 0 -2px 0 var(--lg-w2);
+}
+
+.lg-tab[data-active='true'][data-type='ten99'] {
+  box-shadow: inset 0 -2px 0 var(--lg-se);
+}
+
+.lg-tab:hover {
+  background: var(--lg-surface-2);
+}
+
+.lg-tab[data-active='true']:hover {
+  background: var(--lg-surface);
+}
+
+.lg-section-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 0.85rem;
+  text-align: left;
+  font: 600 1rem/1.25 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  color: var(--lg-fg);
+  background: var(--lg-surface);
+  border-bottom: 1px solid var(--lg-border-soft);
+}
+
+.lg-section-toggle[data-open='false'] {
+  border-bottom: none;
+}
+
+.lg-section-toggle-meta {
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 0.8125rem/1.3 'JetBrains Mono', monospace;
+  color: var(--lg-muted);
+}
+
+@media (min-width: 640px) {
+  .lg-section-toggle {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* ---- popups ---- */
+
+/*
+ * Every modal in this layout (Settings, and any Sheet opened from it) renders
+ * inside the .pg-ledger root, so remapping the app-wide design tokens here
+ * re-skins that shared chrome in ledger colors and type without forking
+ * Sheet/SettingsPanel/InfoNote — which all read these same raw variables,
+ * either directly in their @utility definitions or through Tailwind's
+ * `@theme inline` (which compiles bg-surface to `var(--surface)` rather than
+ * a second indirection, so overriding the raw token here reaches it).
+ */
+.pg-ledger {
+  --background: var(--lg-bg);
+  --foreground: var(--lg-fg);
+  --surface: var(--lg-surface);
+  --surface-2: var(--lg-surface-2);
+  --card: var(--lg-surface);
+  --card-foreground: var(--lg-fg);
+  --popover: var(--lg-surface);
+  --popover-foreground: var(--lg-fg);
+
+  /* The lime "primary" becomes the ledger's ink-on-paper solid button. */
+  --primary: var(--lg-fg);
+  --primary-foreground: var(--lg-bg);
+  --secondary: var(--lg-surface-2);
+  --secondary-foreground: var(--lg-fg);
+  --muted: var(--lg-surface-2);
+  --muted-foreground: var(--lg-muted);
+  --accent: var(--lg-surface-2);
+  --accent-foreground: var(--lg-muted);
+
+  --destructive: var(--lg-over);
+  --destructive-foreground: var(--lg-bg);
+  --warn: var(--lg-warn);
+  --warn-foreground: var(--lg-warn);
+  --warn-soft: color-mix(in oklch, var(--lg-warn) 12%, var(--lg-surface));
+  --good: var(--lg-safe);
+  --good-soft: color-mix(in oklch, var(--lg-safe) 12%, var(--lg-surface));
+  --info: var(--lg-w2);
+  --info-foreground: var(--lg-bg);
+  --info-soft: color-mix(in oklch, var(--lg-w2) 10%, var(--lg-surface));
+
+  --border: var(--lg-border);
+  --input: var(--lg-border);
+  --ring: var(--lg-ring);
+
+  --shadow-input: none;
+  --shadow-card: var(--lg-shadow);
+  --shadow-lift: var(--lg-shadow);
+
+  /* Serif display figures are the one thing the ledger never uses. */
+  --font-display: 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 2px;
+  --radius-md: var(--lg-radius);
+  --radius-lg: var(--lg-radius);
+  --radius-xl: var(--lg-radius);
+  --radius-2xl: var(--lg-radius);
+}
+
+/* Tailwind inlines `rounded-xl` as a literal length, so the --radius-* remap
+ * above cannot reach the Sheet card itself — square its corners directly. */
+.pg-ledger [role='dialog'] > div > div {
+  border-radius: var(--lg-radius);
+  border: 1px solid var(--lg-border);
+}
+
+/* The mobile drag handle reads as a stray bar against the ledger's flat
+ * surfaces; keep it, but at hairline weight. */
+.pg-ledger [role='dialog'] .bg-border {
+  background: var(--lg-border);
+}
+
+/* Sheet titles are set in the display face at 3xl/4xl — far larger than any
+ * heading this layout uses. Bring them down to the card-header scale. */
+.pg-ledger [role='dialog'] .display-figure {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-size: 1.375rem;
+}
+
+.pg-ledger [role='dialog'] .label-caps {
+  font: 500 0.6875rem/1.3 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  color: var(--lg-muted);
+}

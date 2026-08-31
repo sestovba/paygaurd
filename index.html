@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f9f9f7" />
+    <title>PayGuard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" />
+    <script>
+      (function () {
+        try {
+          var ui = JSON.parse(localStorage.getItem('pg-ui-v1') || '{}');
+          // Ledger layout owns its own palette via data-ledger-theme — the
+          // global light/dark toggle is for the other layouts only.
+          if (ui.layout === 'ledger') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = ui.ledgerTheme === 'carbon' ? 'dark' : 'light';
+            return;
+          }
+          var theme = ui.theme;
+          var dark = theme === 'dark' || ((theme === 'system' || !theme) && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

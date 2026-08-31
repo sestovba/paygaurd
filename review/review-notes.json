@@ -1,0 +1,270 @@
+{
+  "payguard-year-chart": {
+    "id": "payguard-year-chart",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Annual income chart",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "reviewId": "payguard-year-chart",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:401",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "div#pg-overview > div:nth-of-type(2)",
+      "text": "2026 COUNTABLE INCOME BY MONTH SGA threshold $1,690 per month. Trial Work Period threshold $1,210 per month. W-2 1099 Peak: $1,520 $2,000 $1"
+    },
+    "createdAt": "2026-08-31T02:44:31.813Z",
+    "updatedAt": "2026-08-31T02:44:31.813Z",
+    "placement": {
+      "anchor": "main#pg-main > section.pg-status-hero > div.pg-status-hero-main:nth-of-type(1)",
+      "anchorLabel": "August countable earnings",
+      "position": "before",
+      "applied": false
+    }
+  },
+  "el-oytqas": {
+    "id": "el-oytqas",
+    "kind": "comment",
+    "origin": "user",
+    "label": "August countable earnings",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:282",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "main#pg-main > section.pg-status-hero",
+      "hooks": "pg-status-hero",
+      "text": "AUGUST COUNTABLE EARNINGS BENEFIT PHASE NEEDS REVIEW Current countable income $2,090 this month YTD THROUGH AUGUST $15,685 BENEFIT PHASE Rev"
+    },
+    "createdAt": "2026-08-31T02:24:25.794Z",
+    "updatedAt": "2026-08-31T02:24:25.794Z",
+    "comment": "This whole hero says three things where one would do — show the month, the limit, and the room left."
+  },
+  "safety-hero-limit-row": {
+    "id": "safety-hero-limit-row",
+    "kind": "choice",
+    "origin": "suggested",
+    "label": "Limit readout",
+    "status": "open",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/SafetyHero.tsx:87",
+      "components": "SafetyHero › TrackerV2 › Root › TrackerProvider",
+      "domPath": "div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(2)",
+      "text": "LIMIT READOUT A · amount + percent B · money only C · one sentence Keep this $310 over the TWP limit this month"
+    },
+    "createdAt": "2026-08-31T02:28:44.897Z",
+    "updatedAt": "2026-08-31T02:28:44.897Z",
+    "verdict": "approved",
+    "choice": "C · one sentence",
+    "options": [
+      "A · amount + percent",
+      "B · money only",
+      "C · one sentence"
+    ]
+  },
+  "tray-payguard-right": {
+    "id": "tray-payguard-right",
+    "kind": "comment",
+    "origin": "user",
+    "label": "right tray · 2 items",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard"
+    },
+    "createdAt": "2026-08-31T02:44:17.907Z",
+    "updatedAt": "2026-08-31T03:56:56.664Z",
+    "comment": "Both of these are year-level summaries. Nothing here should be annual — the month is what matters.",
+    "members": [
+      "Annual income chart",
+      "Duplicate overview statistics"
+    ],
+    "tray": {}
+  },
+  "payguard-overview-stats": {
+    "id": "payguard-overview-stats",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "approved",
+    "label": "Duplicate overview statistics",
+    "reason": "YTD, TWP, and SGA repeat the status above; averages and source counts do not guide a monthly benefit decision.",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "payguard-overview-stats",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:339",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "div#pg-overview > div:nth-of-type(1)",
+      "text": "YTD COUNTABLE $13,515 W-2 $11,410 1099 $2,105 TRIAL WORK PERIOD 9/ 9 used TWP $1,210 / mo MONTHS OVER SGA 3/ 12 SGA limit $1,690 / mo ACTIVE"
+    },
+    "createdAt": "2026-08-31T03:13:15.825Z",
+    "updatedAt": "2026-08-31T03:14:43.992Z",
+    "stow": {
+      "edge": "left",
+      "at": "2026-08-31T03:14:43.992Z"
+    }
+  },
+  "ledger-stat-average": {
+    "id": "ledger-stat-average",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "approved",
+    "label": "Average active month",
+    "reason": "An average is safe-looking by construction — it averages away the 3- and 5-paycheck months that cause the problem.",
+    "status": "open",
+    "anchor": {
+      "layout": "ledger",
+      "reviewId": "ledger-stat-average",
+      "source": "src/components/ledger/TrackerLedger.tsx:329",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(4)",
+      "text": "AVG ACTIVE MONTH $1,054 TWP $1,210 / month Average active month"
+    },
+    "createdAt": "2026-08-31T02:55:39.808Z",
+    "updatedAt": "2026-08-31T02:55:39.808Z"
+  },
+  "ledger-header-subtitle": {
+    "id": "ledger-header-subtitle",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "rejected",
+    "label": "Header subtitle",
+    "reason": "\"Financial Analysis Ledger\" names the skin, not the user's TWP or SGA position.",
+    "status": "open",
+    "anchor": {
+      "layout": "ledger",
+      "reviewId": "ledger-header-subtitle",
+      "source": "src/components/ledger/TrackerLedger.tsx:165",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div:nth-of-type(1) > div",
+      "text": "FINANCIAL ANALYSIS LEDGER Header subtitle"
+    },
+    "createdAt": "2026-08-31T02:56:48.808Z",
+    "updatedAt": "2026-08-31T02:56:48.808Z"
+  },
+  "payguard-hero-ytd": {
+    "id": "payguard-hero-ytd",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "approved",
+    "label": "YTD total in current status",
+    "reason": "The active monthly TWP or SGA gap matters here; a year-to-date total does not.",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "payguard-hero-ytd",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:301",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "main#pg-main > section.pg-status-hero > div.pg-status-hero-main:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+      "text": "YTD THROUGH AUGUST $8,891 YTD total in current status"
+    },
+    "createdAt": "2026-08-31T03:03:38.933Z",
+    "updatedAt": "2026-08-31T03:03:38.933Z"
+  },
+  "el-1wez1p9": {
+    "id": "el-1wez1p9",
+    "kind": "stow",
+    "origin": "user",
+    "label": "Since",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:194",
+      "components": "PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider",
+      "domPath": "div#pg-job-xim6tp16ktmtg4qacf > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)",
+      "hooks": "pg-rule-b pg-surface-quiet",
+      "text": "ONGOING PAUSED ENDED Since"
+    },
+    "createdAt": "2026-08-31T03:03:17.675Z",
+    "updatedAt": "2026-08-31T03:03:17.675Z",
+    "stow": {
+      "edge": "right",
+      "at": "2026-08-31T03:03:17.675Z"
+    }
+  },
+  "tray-payguard-left": {
+    "id": "tray-payguard-left",
+    "kind": "comment",
+    "origin": "user",
+    "label": "left stash",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard"
+    },
+    "createdAt": "2026-08-31T03:07:01.811Z",
+    "updatedAt": "2026-08-31T03:56:56.664Z",
+    "tray": {
+      "name": "Year-level noise",
+      "color": "#f87171",
+      "sort": "label"
+    }
+  },
+  "el-ewyxtb": {
+    "id": "el-ewyxtb",
+    "kind": "stow",
+    "origin": "user",
+    "label": "August countable earnings",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "source": "src/components/payguard/TrackerPayGuard.tsx:282",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "main#pg-main > section.pg-status-hero",
+      "hooks": "pg-status-hero",
+      "text": "AUGUST COUNTABLE EARNINGS $310 ABOVE TWP Current countable income $1,520 this month YTD THROUGH AUGUST $8,891 TWP MONTHLY THRESHOLD $1,210 B"
+    },
+    "createdAt": "2026-08-31T03:04:45.811Z",
+    "updatedAt": "2026-08-31T03:04:45.811Z",
+    "stow": {
+      "edge": "left",
+      "at": "2026-08-31T03:04:45.811Z"
+    }
+  },
+  "payguard-header-transfer": {
+    "id": "payguard-header-transfer",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "rejected",
+    "label": "Header import / export",
+    "reason": "These maintenance actions already belong in Settings and compete with live benefit signals.",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Jobs",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "payguard-header-transfer",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:241",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-payguard.pg-page-pad:nth-of-type(1) > header.pg-topbar > div > div:nth-of-type(4) > div:nth-of-type(2)",
+      "text": "Import ExportHeader import / export"
+    },
+    "createdAt": "2026-08-31T04:40:11.814Z",
+    "updatedAt": "2026-08-31T04:40:11.814Z"
+  }
+}
