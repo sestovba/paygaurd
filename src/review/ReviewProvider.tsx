@@ -206,6 +206,11 @@ function ReviewConsole({
   /** The board spread into columns across the screen. Desktop only — it is
    *  the one thing here a phone genuinely cannot do. */
   const [journalWide, setJournalWide] = useState(false);
+  /** The row under the pointer, or under the keyboard cursor. On a desktop
+   *  the page is beside the console rather than behind it, so a row can point
+   *  at the thing it is about without anyone having to click anything. */
+  const [peek, setPeek] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
   const [read, setRead] = useState<ReadMarks>(loadRead);
   /** The row that just changed lane, so it can be found again in its new
    *  home instead of being hunted for. */
@@ -253,6 +258,8 @@ function ReviewConsole({
   const suggestedRef = useRef<Record<string, { label: string; reason: string }>>({});
   const notesRef = useRef<ReviewNotes>({});
   const readRef = useRef<ReadMarks>({});
+  /** The board in the order it is drawn, for the keys that walk it. */
+  const orderedRef = useRef<ReviewNote[]>([]);
   const dragStart = useRef<{ x: number; y: number; el: HTMLElement } | null>(null);
   const draggedJustNow = useRef(false);
   const advanceRef = useRef<(() => void) | null>(null);
@@ -359,6 +366,12 @@ function ReviewConsole({
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  // Hover and keyboard share one highlight: whichever moved last wins.
+  useEffect(() => {
+    showPeek(peek ?? cursor);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peek, cursor, notes, layout, mode]);
 
   useEffect(() => {
     if (!moved) return;
@@ -581,21 +594,6 @@ function ReviewConsole({
    *  view toggle, not a setting: shelves sit over the page and get in the way
    *  of choosing something underneath, so it lives in memory and is never
    *  written to the notes file. Dragging brings them back as drop targets. */
-  const toggleTray = useCallback((which: TrayEdge | 'all') => {
-    // From here on the shelves are yours: picking stops rearranging them.
-    shelvesTouched.current = true;
-    setHiddenTrays((current) => {
-      if (which === 'all') {
-        const next = current.length === EDGES.length ? [] : [...EDGES];
-        shelvesTouched.current = true;
-        say(next.length ? 'Shelves hidden — h brings them back' : 'Shelves back');
-        return next;
-      }
-      const hiding = !current.includes(which);
-      say(`${which} shelf ${hiding ? 'hidden' : 'back'}`);
-      return hiding ? [...current, which] : current.filter((edge) => edge !== which);
-    });
-  }, [say]);
 
   // A shelf standing over the thing you are aiming at makes it hard to pick,
   // so selecting starts with them out of the way. A default, not a rule: the
@@ -889,20 +887,11 @@ function ReviewConsole({
         else { setMode('pick'); say('Pick what the note is about'); }
       }
 
-      // Shelves. Arrows move them out of the way — but only when nothing is
-      // selected, because with a selection the arrows are how you aim it.
-      const byLetter = ({ l: 'left', r: 'right', t: 'top', b: 'bottom' } as const)[
-        event.key as 'l' | 'r' | 't' | 'b'
-      ];
-      const byArrow = ({
-        ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'top', ArrowDown: 'bottom'
-      } as const)[event.key as 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown'];
-      const shelf = byLetter ?? (pickedRef.current ? undefined : byArrow);
-      if (shelf) {
-        event.preventDefault();
-        toggleTray(shelf);
-      }
-      if (event.key === 'h') toggleTray('all');
+      // The board, driven from the keyboard. The letters that used to hide
+      // the four screen shelves are free: those shelves are the Archive
+      // section now, and a key that moves furniture nobody can see was
+      // costing the journal every good letter it needed.
+      if (journalKeys(event)) return;
 
       if (mode === 'audit' && event.key === ']') stepProposal(1);
       if (mode === 'audit' && event.key === '[') stepProposal(-1);
@@ -918,7 +907,7 @@ function ReviewConsole({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, mode, panelOpen, composer, variantSets.length, undo]);
+  }, [open, mode, panelOpen, composer, variantSets.length, undo, triage, cursor, notes]);
 
   // Dragging: out of the page into an edge tray, or out of a tray back on to
   // the page. Both run off pointer events so the same code works on a phone.
@@ -1097,6 +1086,17 @@ function ReviewConsole({
   /** The journal itself — what has been said, and by whom. It is the same
    *  thing in both docks: a window on a desktop, a fold in the phone's dock.
    *  Only its frame changes. */
+  const laneGroups = LANES
+    .map((lane) => ({
+      lane,
+      notes: journalNotes
+        .filter((note) => laneOf(note) === lane)
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    }))
+    .filter((group) => group.notes.length);
+  /** The board read top to bottom, which is what the arrow keys walk. */
+  const ordered = laneGroups.flatMap((group) => group.notes);
+  orderedRef.current = ordered;
   const triageNote = triage ? notes[triage.ids[triage.at]] : undefined;
   const queue = journalNotes.filter((note) => LANE_OPEN.includes(laneOf(note)));
 
@@ -1304,6 +1304,14 @@ function ReviewConsole({
                   ) : null}
                 </div>
 
+                {compact ? null : (
+                  <p className="review-panel-keys">
+                    <kbd>↑</kbd><kbd>↓</kbd> walk · <kbd>↵</kbd> show it ·
+                    {' '}<kbd>d</kbd> did it · <kbd>s</kbd> second look ·
+                    {' '}<kbd>l</kbd> not now · <kbd>h</kbd> hide · <kbd>r</kbd> reply
+                  </p>
+                )}
+
                 <div className="review-table-head" aria-hidden="true">
                   <span />
                   <span>Do</span>
@@ -1325,21 +1333,15 @@ function ReviewConsole({
                   {/* A board, not an inbox. The lanes are the sections and a
                       note is moved between them by either side — the point is
                       where a thing has got to, not whether it has been read. */}
-                  {LANES.map((lane) => {
-                    const inLane = journalNotes
-                      .filter((note) => laneOf(note) === lane)
-                      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-                    if (!inLane.length) return null;
-                    return (
-                      <li key={lane} className="review-panel-lane" data-lane={lane}>
-                        <span className="review-panel-lane-head">
-                          {LANE_NAME[lane]}
-                          <span>{inLane.length}</span>
-                        </span>
-                        <ul>{inLane.map(noteRow)}</ul>
-                      </li>
-                    );
-                  })}
+                  {laneGroups.map(({ lane, notes: inLane }) => (
+                    <li key={lane} className="review-panel-lane" data-lane={lane}>
+                      <span className="review-panel-lane-head">
+                        {LANE_NAME[lane]}
+                        <span>{inLane.length}</span>
+                      </span>
+                      <ul>{inLane.map(noteRow)}</ul>
+                    </li>
+                  ))}
                 </ul>
               </>
             )}
@@ -1418,6 +1420,64 @@ function ReviewConsole({
     </>
   );
 
+  /** The journal's own keys. Returns true when it has taken the press, so
+   *  the rest of the console leaves it alone.
+   *
+   *  Going through a screenful of notes is the tool's main verb, and on a
+   *  desktop it should never need the mouse: the arrows walk the board, the
+   *  page highlights whatever the cursor is on, and one letter files it. */
+  function journalKeys(event: KeyboardEvent): boolean {
+    if (compact || !panelOpen) return false;
+
+    // In the queue the keys act on the card in front of you.
+    if (triage) {
+      const acts: Record<string, ReviewLane> = { d: 'done', s: 'second', l: 'parked' };
+      if (acts[event.key]) { event.preventDefault(); triageFile(acts[event.key]); return true; }
+      if (event.key === 'ArrowRight') { event.preventDefault(); triageStep(1); return true; }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); triageStep(-1); return true; }
+      if (triageNote && event.key === 'h') { event.preventDefault(); toggleHidden(triageNote); return true; }
+      if (triageNote && event.key === 'Enter') { event.preventDefault(); pointAtNote(triageNote); return true; }
+      return false;
+    }
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (!orderedRef.current.length) return false;
+      event.preventDefault();
+      const board = orderedRef.current;
+      const at = board.findIndex((note) => note.id === cursor);
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      const next = at < 0
+        ? (step > 0 ? 0 : board.length - 1)
+        : Math.min(Math.max(at + step, 0), board.length - 1);
+      const id = board[next].id;
+      setCursor(id);
+      setPeek(null);
+      markRead(id);
+      document.querySelector(`[data-note-id="${id}"]`)?.scrollIntoView({ block: 'nearest' });
+      return true;
+    }
+
+    const note = cursor ? notes[cursor] : undefined;
+    if (!note) return false;
+
+    const lanes: Record<string, ReviewLane> = { d: 'done', s: 'second', l: 'parked' };
+    if (lanes[event.key]) {
+      event.preventDefault();
+      // Filing hands over the next row, the way the queue does. Working down
+      // a board one key at a time is the same job as going through them, and
+      // it must not leave the cursor sitting on something already dealt with.
+      const board = orderedRef.current;
+      const at = board.findIndex((item) => item.id === note.id);
+      setLane(note, lanes[event.key]);
+      setCursor(board[at + 1]?.id ?? board[at - 1]?.id ?? null);
+      return true;
+    }
+    if (event.key === 'h') { event.preventDefault(); toggleHidden(note); return true; }
+    if (event.key === 'r') { event.preventDefault(); markRead(note.id); setReplyTo(note.id); return true; }
+    if (event.key === 'Enter') { event.preventDefault(); pointAtNote(note); return true; }
+    return false;
+  }
+
   /** Move a note to the next lane, wrapping round. The board is shared —
    *  a code pass moves the same field in review-notes.json — so this is a
    *  message as much as a state change. */
@@ -1466,6 +1526,9 @@ function ReviewConsole({
         data-verdict={note.verdict}
         data-unread={fresh || undefined}
         data-moved={moved === note.id || undefined}
+        data-cursor={cursor === note.id || undefined}
+        onMouseEnter={compact ? undefined : () => setPeek(note.id)}
+        onMouseLeave={compact ? undefined : () => setPeek(null)}
       >
         <span className="review-cell-mark">
           {fresh ? <i className="review-note-dot" data-reply={answered || undefined} /> : null}
@@ -1611,6 +1674,21 @@ function ReviewConsole({
       if (found && found.getClientRects().length) return found;
     }
     return null;
+  }
+
+  /** Outline whatever a row is about, for as long as the row is under the
+   *  pointer. Not a flash: a flash answers "where is it" once, and this
+   *  answers "what am I looking at" continuously, which is the question you
+   *  have while sweeping a list of twelve. */
+  function showPeek(id: string | null) {
+    document.querySelectorAll('[data-review-peek]').forEach((el) => {
+      el.removeAttribute('data-review-peek');
+    });
+    const note = id ? notesRef.current[id] : undefined;
+    if (!note) return;
+    const exact = elementForNote(note);
+    const el = exact ?? nearestVisible(note);
+    if (el) el.setAttribute('data-review-peek', exact ? 'exact' : 'near');
   }
 
   /** Point at the container instead of the thing, and say so. */

@@ -5224,3 +5224,51 @@ body.review-picking * {
 .review-fold[data-tone='paper'] .review-fold-body {
   container-type: inline-size;
 }
+
+
+/* --- Desktop: the list points at the page ----------------------------------
+ *
+ * The one thing a wide screen has that a phone does not is the page sitting
+ * open beside the console. So the journal drives it: whatever row is under
+ * the pointer, or under the keyboard cursor, is outlined over there. Sweeping
+ * the list becomes a tour of the screen rather than a reading exercise.
+ */
+
+[data-review-peek='exact'] {
+  outline: 2px solid var(--review-blue) !important;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* The thing itself is not showing; this is what holds it. */
+[data-review-peek='near'] {
+  outline: 2px dashed rgb(37 99 235 / 0.6) !important;
+  outline-offset: 3px;
+}
+
+/* The row the keys are pointed at. Distinct from hover, because both can be
+   true at once and the cursor is the one the next keystroke acts on. */
+.review-panel-list li.review-row[data-cursor] {
+  background: rgb(37 99 235 / 0.1);
+  box-shadow: inset 3px 0 0 var(--review-blue);
+}
+
+.review-panel-keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0 0.6rem 0.35rem;
+  color: rgb(15 23 42 / 0.42);
+  font-size: 0.625rem;
+}
+
+.review-panel-keys kbd {
+  border: 1px solid rgb(15 23 42 / 0.14);
+  border-radius: 0.25rem;
+  background: rgb(15 23 42 / 0.04);
+  padding: 0 0.25rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 700;
+}
