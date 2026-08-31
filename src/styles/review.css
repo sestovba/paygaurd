@@ -539,7 +539,7 @@ body.review-picking * {
 }
 
 /* Sticky, with the list running under it. */
-.review-mdock-fold-body .review-panel-foot {
+.review-fold-body .review-panel-foot {
   position: sticky;
   z-index: 2;
   bottom: 0;
@@ -4001,14 +4001,14 @@ body.review-picking * {
 
 /* --- The verbs ------------------------------------------------------------ */
 
-.review-mdock-bar {
+.review-dock-bar {
   display: flex;
   gap: 0.2rem;
   border-top: 1px solid var(--review-glass-line);
   padding: 0.25rem 0.35rem;
 }
 
-.review-mdock-tool {
+.review-dock-tool {
   display: flex;
   flex: 1;
   min-width: 0;
@@ -4026,28 +4026,28 @@ body.review-picking * {
   transition: background-color 140ms, color 140ms;
 }
 
-.review-mdock-tool[data-on='true'] {
+.review-dock-tool[data-on='true'] {
   background: var(--review-blue);
   color: white;
 }
 
 /* Audit is the destructive one, and says so wherever it is lit. */
-.review-mdock-tool:first-child[data-on='true'] {
+.review-dock-tool:first-child[data-on='true'] {
   background: var(--review-red);
 }
 
-.review-mdock-tool:disabled {
+.review-dock-tool:disabled {
   opacity: 0.32;
   cursor: default;
 }
 
-.review-mdock-icon {
+.review-dock-icon {
   position: relative;
   display: grid;
   place-items: center;
 }
 
-.review-mdock-name {
+.review-dock-name {
   overflow: hidden;
   max-width: 100%;
   text-overflow: ellipsis;
@@ -4056,21 +4056,21 @@ body.review-picking * {
 
 /* --- The folds ------------------------------------------------------------ */
 
-.review-mdock-fold {
+.review-fold {
   display: flex;
   min-height: 0;
   flex-direction: column;
   border-top: 1px solid var(--review-glass-line);
 }
 
-.review-mdock-fold-head {
+.review-fold-head {
   display: flex;
   width: 100%;
   flex: none;
   align-items: stretch;
 }
 
-.review-mdock-fold-face {
+.review-fold-face {
   display: flex;
   flex: 1;
   min-width: 0;
@@ -4088,14 +4088,14 @@ body.review-picking * {
 
 /* Both chevrons in the dock hang in the same 2.6rem box, flush to the edge,
    so every one of them sits on one vertical line. */
-.review-mdock-fold-toggle {
+.review-fold-toggle {
   display: grid;
   width: 2.6rem;
   place-items: center;
   cursor: pointer;
 }
 
-.review-mdock-fold-big {
+.review-fold-big {
   display: grid;
   width: 2.2rem;
   place-items: center;
@@ -4103,16 +4103,16 @@ body.review-picking * {
   cursor: pointer;
 }
 
-.review-mdock-fold-big[aria-pressed='true'] {
+.review-fold-big[aria-pressed='true'] {
   color: white;
 }
 
-.review-mdock-fold-name {
+.review-fold-name {
   flex: 1;
   text-align: left;
 }
 
-.review-mdock-fold-count {
+.review-fold-count {
   border-radius: 9999px;
   background: rgb(255 255 255 / 0.16);
   padding: 0.1rem 0.45rem;
@@ -4121,7 +4121,7 @@ body.review-picking * {
   letter-spacing: 0;
 }
 
-.review-mdock-fold-new {
+.review-fold-new {
   border-radius: 9999px;
   background: var(--review-red);
   padding: 0.1rem 0.45rem;
@@ -4130,16 +4130,16 @@ body.review-picking * {
   text-transform: none;
 }
 
-.review-mdock-fold-caret {
+.review-fold-caret {
   color: rgb(255 255 255 / 0.6);
   transition: transform 160ms;
 }
 
-.review-mdock-fold[data-open] .review-mdock-fold-caret {
+.review-fold[data-open] .review-fold-caret {
   transform: rotate(180deg);
 }
 
-.review-mdock-fold-body {
+.review-fold-body {
   /* Shrinkable: two folds open at once share what the dock has rather than
      pushing it off the top of the screen. */
   min-height: 0;
@@ -4152,18 +4152,18 @@ body.review-picking * {
 
 /* The journal is a document: it keeps the paper it has in the desktop
    window, because dark glass is for furniture and this is something to read. */
-.review-mdock-fold[data-tone='paper'] .review-mdock-fold-body {
+.review-fold[data-tone='paper'] .review-fold-body {
   background: rgb(255 255 255 / 0.94);
   color: var(--review-ink);
 }
 
-.review-mdock-fold[data-tone='glass'] .review-mdock-fold-body {
+.review-fold[data-tone='glass'] .review-fold-body {
   background: rgb(15 23 42 / 0.4);
 }
 
 /* The shelves are a fixed panel of their own out on the page. Inside a fold
    they are just content. */
-.review-mdock-fold-body .review-stack {
+.review-fold-body .review-stack {
   position: static;
   width: auto;
   transform: none;
@@ -4174,7 +4174,7 @@ body.review-picking * {
   backdrop-filter: none;
 }
 
-.review-mdock-fold-body .review-stack-body {
+.review-fold-body .review-stack-body {
   max-height: none;
   border-top: 0;
 }
@@ -4252,7 +4252,7 @@ body.review-picking * {
 }
 
 /* What a shut fold is doing, said in one word beside its name. */
-.review-mdock-fold-hint {
+.review-fold-hint {
   border-radius: 9999px;
   background: var(--review-blue);
   padding: 0.05rem 0.4rem;
@@ -4262,22 +4262,22 @@ body.review-picking * {
 }
 
 /* Inside a fold the verbs have the fold's own border above them already. */
-.review-mdock-fold-body .review-mdock-bar {
+.review-fold-body .review-dock-bar {
   border-top: 0;
 }
 
 /* Maximised: the fold takes everything the capped dock has left after the
    other folds' own bands. Reading a thread through a 42vh letterbox is the
    reason this button exists. */
-.review-mdock-fold[data-big] {
+.review-fold[data-big] {
   flex: 1 1 auto;
 }
 
-.review-mdock-fold[data-big] .review-mdock-fold-body {
+.review-fold[data-big] .review-fold-body {
   max-height: none;
 }
 
-.review-mdock-bar {
+.review-dock-bar {
   flex: none;
 }
 
@@ -4286,13 +4286,13 @@ body.review-picking * {
  * phone means never. In the dock they are simply there, and thumb-sized.
  */
 
-.review-mdock-fold-body .review-note-remove {
+.review-fold-body .review-note-remove {
   width: 2rem;
   height: 2rem;
   opacity: 1;
 }
 
-.review-mdock-fold-body .review-panel-list li {
+.review-fold-body .review-panel-list li {
   gap: 0.15rem;
   padding: 0.15rem 0.25rem;
 }
@@ -4789,4 +4789,438 @@ body.review-picking * {
 
 .review-queue-end button {
   margin-top: 0.4rem;
+}
+
+
+/* --- The desktop rail ------------------------------------------------------
+ *
+ * What stood here before floated: a palette dragged around the page, split
+ * into three pieces, and four coloured shelves hanging off the four screen
+ * edges — all of it on top of the thing under review, which is the one place
+ * a review tool must not be.
+ *
+ * A rail instead. It takes a column of the screen and the page takes the
+ * rest, so the app is judged at the width it actually has. Same three
+ * sections a phone gets, because they are the same rooms; what the desktop
+ * adds is room — the board goes to columns when the journal is opened wide.
+ */
+
+/* The page's inset for the rail is set on the body from the dock itself, so
+   it beats whatever the app says about its own padding. Deliberately not
+   transitioned: a transition on this property holds the computed value at
+   its start for as long as the tab is in the background, which leaves the
+   page laid out for a rail that is not there.
+
+   (The rail's own width is dragged live, and an animation on the page behind
+   it would lag the grip anyway.) */
+
+.review-rail {
+  position: fixed;
+  z-index: 120;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--review-glass-line);
+  background: var(--review-glass-strong);
+  box-shadow: -18px 0 40px rgb(2 6 23 / 0.28);
+  backdrop-filter: var(--review-blur);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Opened wide the rail stops being a rail: the board needs the screen, and
+   a kanban read through a 380px slot is a list with extra steps. */
+.review-rail[data-wide] {
+  left: max(2vw, calc(100vw - 1400px));
+  border-radius: 0.8rem 0 0 0.8rem;
+}
+
+.review-rail-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 7px;
+  cursor: col-resize;
+}
+
+.review-rail-grip:hover {
+  background: rgb(37 99 235 / 0.5);
+}
+
+/* Folded away: a tab in the corner, flush to the edge, same as the phone. */
+.review-rail-tab {
+  position: fixed;
+  z-index: 120;
+  right: 0;
+  bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--review-glass-line);
+  border-right: 0;
+  border-radius: 0.6rem 0 0 0.6rem;
+  background: var(--review-glass-strong);
+  padding: 0.55rem 0.8rem;
+  color: white;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  box-shadow: var(--review-lift);
+  backdrop-filter: var(--review-blur);
+  cursor: pointer;
+}
+
+.review-rail-tab:hover {
+  padding-right: 1rem;
+}
+
+.review-rail-tab kbd {
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.14);
+  padding: 0.05rem 0.3rem;
+  font-family: inherit;
+  font-size: 0.625rem;
+}
+
+.review-rail-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--review-glass-line);
+  padding: 0.6rem 0.35rem 0.6rem 0.8rem;
+  color: white;
+}
+
+.review-rail-head strong {
+  flex: 1;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.review-rail-mode {
+  border-radius: 9999px;
+  background: var(--review-blue);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.review-rail-count {
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.16);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-rail-count[data-new] {
+  background: var(--review-red);
+}
+
+.review-rail-min {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.4rem;
+  color: rgb(255 255 255 / 0.7);
+  cursor: pointer;
+}
+
+.review-rail-min:hover {
+  background: rgb(255 255 255 / 0.1);
+  color: white;
+}
+
+.review-rail-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* In a rail there is height to spend, so the sections share it rather than
+   each keeping a slice of the viewport. */
+.review-rail .review-fold-body {
+  max-height: none;
+}
+
+.review-rail .review-fold[data-open] {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.review-rail .review-fold:not([data-open]) {
+  flex: none;
+}
+
+/* The verbs get names and their keys, side by side — a desktop has the width
+   and a keyboard to go with them. */
+/* Two to a row, not five: a verb squeezed to "Au…" is not a verb. */
+.review-rail .review-dock-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.25rem;
+  padding: 0.4rem;
+}
+
+.review-rail .review-dock-tool {
+  flex-direction: row;
+  min-height: 2.4rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.review-rail .review-dock-name {
+  flex: 1;
+  text-align: left;
+}
+
+.review-dock-key {
+  border-radius: 0.25rem;
+  background: rgb(255 255 255 / 0.12);
+  padding: 0 0.25rem;
+  color: rgb(255 255 255 / 0.6);
+  font-family: inherit;
+  font-size: 0.625rem;
+}
+
+.review-dock-tool[data-on='true'] .review-dock-key {
+  background: rgb(255 255 255 / 0.24);
+  color: white;
+}
+
+/* --- Wide -------------------------------------------------------------------
+ * Same table, more room for it: the columns stop truncating and the lane
+ * bands keep their job of saying which part of the board you are reading.
+ * Not lanes-as-columns — a table that rearranges itself into a different
+ * shape at a certain width is two designs to learn instead of one.
+ */
+
+.review-rail[data-wide] .review-panel-scope,
+.review-rail[data-wide] .review-panel-tools {
+  padding-inline: 0.5rem;
+}
+
+/* The queue gets the middle of the screen rather than the width of a rail. */
+.review-rail[data-wide] .review-queue {
+  width: min(40rem, 100%);
+  margin: 0 auto;
+}
+
+
+/* --- The journal as a table ------------------------------------------------
+ *
+ * Columns, in the order the questions get asked: what has to happen, to what,
+ * where in the code, and where it has got to. A screenful of notes is then
+ * read down one column rather than across twelve ragged lines, and the thing
+ * that needs doing is the first word on every row.
+ */
+
+.review-table-head,
+.review-panel-list li.review-row {
+  display: grid;
+  grid-template-columns:
+    0.85rem            /* unread */
+    4.25rem            /* what has to happen */
+    minmax(0, 1fr)     /* the item itself */
+    minmax(0, 7rem)    /* where in the code */
+    5.25rem            /* which lane */
+    4rem;              /* its own controls */
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.review-table-head {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  border-bottom: 1px solid rgb(15 23 42 / 0.1);
+  background: rgb(248 250 252 / 0.96);
+  padding: 0.3rem 0.5rem;
+  color: rgb(15 23 42 / 0.45);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.review-panel-list li.review-row {
+  border-bottom: 1px solid rgb(15 23 42 / 0.06);
+  border-radius: 0;
+  padding: 0.3rem 0.5rem;
+  cursor: default;
+}
+
+/* The whole row lights up, not the one cell the pointer happens to be over. */
+.review-panel-list li.review-row:hover {
+  background: rgb(37 99 235 / 0.06);
+}
+
+.review-panel-list li.review-row:last-child {
+  border-bottom: 0;
+}
+
+.review-cell-mark {
+  display: grid;
+  place-items: center;
+}
+
+/* One word, colour-coded by what it costs: cutting is red, keeping is green,
+   everything else is the console's blue. */
+.review-cell-what {
+  overflow: hidden;
+  color: rgb(15 23 42 / 0.6);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.review-cell-what[data-act='Cut'] { color: var(--review-red); }
+.review-cell-what[data-act='Keep'] { color: #15803d; }
+.review-cell-what[data-act='Revise'],
+.review-cell-what[data-act='Chose'],
+.review-cell-what[data-act='Move'] { color: #b45309; }
+.review-cell-what[data-act='Read'] { color: var(--review-blue); }
+.review-cell-what[data-act='Hidden'] { color: rgb(15 23 42 / 0.4); }
+
+.review-cell-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.25rem 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.review-cell-item .review-note-label {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* What was said sits under the name, clipped to one line: the row is a row.
+   The whole of it is in the queue, and in the file. */
+.review-cell-item .review-note-text {
+  overflow: hidden;
+  color: rgb(15 23 42 / 0.55);
+  font-size: 0.6875rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-cell-where {
+  overflow: hidden;
+  color: rgb(15 23 42 / 0.42);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-cell-where b {
+  display: block;
+  color: rgb(15 23 42 / 0.55);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.review-cell-lane {
+  min-width: 0;
+  width: 100%;
+  height: 1.6rem;
+  font-size: 0.5625rem;
+}
+
+.review-cell-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.1rem;
+}
+
+.review-cell-acts .review-note-eye,
+.review-cell-acts .review-note-remove {
+  width: 1.75rem;
+  height: 1.75rem;
+  opacity: 1;
+}
+
+/* Narrow rail: the file column goes first — the name and the verb are what
+   make a row scannable, and the file is in the note and in the queue. */
+@container (max-width: 30rem) {
+  .review-table-head,
+  .review-panel-list li.review-row {
+    grid-template-columns: 0.85rem 4rem minmax(0, 1fr) 5rem 3.75rem;
+  }
+
+  .review-cell-where,
+  .review-table-head span:nth-child(4) {
+    display: none;
+  }
+}
+
+/* A phone: five columns across 375px leaves the item column too narrow to
+   hold a name, so the row goes to two lines instead of shrinking further.
+   The verb and the lane keep the top line, the name gets a line of its own. */
+@container (max-width: 26rem) {
+  .review-table-head {
+    display: none;
+  }
+
+  .review-panel-list li.review-row {
+    grid-template-columns: 0.85rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "mark what lane"
+      "item item acts";
+    row-gap: 0.1rem;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .review-cell-mark { grid-area: mark; align-self: start; padding-top: 0.3rem; }
+  .review-cell-what { grid-area: what; }
+  .review-cell-item { grid-area: item; padding-top: 0; }
+  .review-cell-lane { grid-area: lane; width: auto; min-width: 4.75rem; }
+  .review-cell-acts { grid-area: acts; align-self: end; }
+
+  .review-cell-item .review-note-label {
+    white-space: normal;
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
+  .review-cell-item .review-note-text {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .review-cell-acts .review-note-eye,
+  .review-cell-acts .review-note-remove {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.review-fold[data-tone='paper'] .review-fold-body {
+  container-type: inline-size;
 }

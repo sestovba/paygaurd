@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown,
-  ChevronUp, Columns2, Copy, Expand, Eye, EyeOff, GripVertical, Keyboard,
-  Link2, List, MessageSquarePlus, Minus, MousePointerSquareDashed,
-  NotebookPen, Sparkles, StretchHorizontal, StretchVertical, Trash2, Undo2,
-  Unlink, X
+  Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Copy, Expand,
+  Eye, EyeOff, MessageSquarePlus, Minus, Trash2, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
 import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
@@ -19,6 +16,7 @@ import { ReviewContext } from './context';
 import type { ReviewContextValue, ReviewMode, SuggestedTarget } from './context';
 import { EdgeTrays } from './EdgeTrays';
 import { MobileDock } from './MobileDock';
+import { DesktopDock } from './DesktopDock';
 import {
   applyPlacements, applyStowAttributes, dropTargetAt, isStowed, safeQuery
 } from './stow';
@@ -98,16 +96,6 @@ function trayNoteId(layout: LayoutMode, edge: TrayEdge): string {
   return `tray-${layout}-${edge}`;
 }
 
-interface WindowBox {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  min: boolean;
-}
-
-const WINDOW_KEY = 'pg-review-window-v1';
-const DOCK_KEY = 'pg-review-dock-v1';
 /** What has been looked at, per note: the note's `updatedAt` as it stood the
  *  last time it was read. One timestamp for the whole journal marks a dozen
  *  things read because you opened a drawer, which is how you lose track of
@@ -163,95 +151,6 @@ function isReply(note: ReviewNote, read: ReadMarks): boolean {
   return last?.from === 'claude' && isUnread(note, read);
 }
 
-/** The toolbar is a palette, not a fixture: it remembers where it was put and
- *  whether it was rolled up. Undefined coordinates mean "never moved" — it
- *  stays in its corner until it is dragged out of it. */
-type DockDir = 'v' | 'h' | 'wide';
-
-interface DockBox {
-  x?: number;
-  y?: number;
-  min: boolean;
-  dir?: DockDir;
-  help?: boolean;
-  /** Wide shape only: drag it narrow and the names clip away until only the
-   *  icons are left, so the same palette covers both looks. */
-  w?: number;
-  /** 'with' clips the stashes onto the toolbar so the two move as one object.
-   *  'free' breaks them apart into a second panel with a grip of its own.
-   *  'edges' is the untouched default on a wide screen: four screen edges. */
-  stash?: 'with' | 'free' | 'edges';
-  /** Distance from the right edge, kept alongside x. Parked on the right the
-   *  compound is anchored by its right edge, so opening the drawer grows it
-   *  leftwards into the page instead of off the side of the screen. */
-  rx?: number;
-  /** Where the free-floating stash panel was left. */
-  sx?: number;
-  sy?: number;
-  /** The order of the compound's three parts, top to bottom. Rearranged by
-   *  long-pressing one of them and dragging it past its neighbour. */
-  order?: DockPart[];
-  /** Where the phone's button was dragged to. Kept apart from x/y: the two
-   *  docks are different objects and must not inherit each other's corner. */
-  mx?: number;
-  my?: number;
-}
-
-export type DockPart = 'fab' | 'tools' | 'stash';
-
-const DEFAULT_ORDER: DockPart[] = ['fab', 'tools', 'stash'];
-
-/** Thin upright strip, thin flat bar, or wide with names. Three buttons in
- *  the title band rather than one that cycles: a cycle never says what the
- *  next press will give you. */
-
-/** Inside the window, and never negative on a screen smaller than the thing
- *  being placed. */
-function clamp(value: number, max: number): number {
-  return Math.min(Math.max(8, value), Math.max(8, max));
-}
-
-function loadDockBox(): DockBox {
-  try {
-    const fallback: DockBox = { min: false, dir: 'v' };
-    const saved = localStorage.getItem(DOCK_KEY);
-    return saved ? { ...fallback, ...JSON.parse(saved) as Partial<DockBox> } : fallback;
-  } catch {
-    return { min: false, dir: 'v' };
-  }
-}
-
-function defaultWindowBox(): WindowBox {
-  return {
-    x: Math.max(12, window.innerWidth - 372),
-    y: Math.max(12, window.innerHeight - 520),
-    w: 344,
-    h: 380,
-    min: false
-  };
-}
-
-/** The log is a window, so it remembers where you left it. */
-function loadWindowBox(): WindowBox {
-  const fallback = defaultWindowBox();
-  try {
-    const saved = localStorage.getItem(WINDOW_KEY);
-    return saved ? { ...fallback, ...JSON.parse(saved) as Partial<WindowBox> } : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function clampWindow(box: WindowBox): WindowBox {
-  return {
-    ...box,
-    w: Math.min(Math.max(box.w, 260), window.innerWidth - 24),
-    h: Math.min(Math.max(box.h, 180), window.innerHeight - 24),
-    x: Math.min(Math.max(box.x, 8), Math.max(8, window.innerWidth - 120)),
-    y: Math.min(Math.max(box.y, 8), Math.max(8, window.innerHeight - 60))
-  };
-}
-
 /** Beside the element, never over it — clamped so the composer is always
  *  fully on screen even when the element is at a corner. */
 function composerAt(at: Box): { top: number; left: number } {
@@ -304,6 +203,9 @@ function ReviewConsole({
   /** The journal opens on the screen you are looking at. Everything ever
    *  said is a tab away, but it is not the thing you are handed first. */
   const [journalScope, setJournalScope] = useState<'screen' | 'all'>('screen');
+  /** The board spread into columns across the screen. Desktop only — it is
+   *  the one thing here a phone genuinely cannot do. */
+  const [journalWide, setJournalWide] = useState(false);
   const [read, setRead] = useState<ReadMarks>(loadRead);
   /** The row that just changed lane, so it can be found again in its new
    *  home instead of being hunted for. */
@@ -318,9 +220,7 @@ function ReviewConsole({
   const [composer, setComposer] = useState<ComposerState | null>(null);
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
-  const [win, setWin] = useState<WindowBox>(loadWindowBox);
   const [travelling, setTravelling] = useState<{ note: ReviewNote; tries: number } | null>(null);
-  const winDrag = useRef<{ mode: 'move' | 'size'; x: number; y: number; box: WindowBox } | null>(null);
   const [toast, setToast] = useState<{ text: string; tone: 'good' | 'warn' | 'info'; at: number } | null>(null);
   const [replyDraft, setReplyDraft] = useState('');
   const [synced, setSynced] = useState<'unknown' | 'file' | 'local'>('unknown');
@@ -332,21 +232,12 @@ function ReviewConsole({
   const [undoDepth, setUndoDepth] = useState(0);
   /** The arrangement controls — tidy, keys, shape, clip, minimise — live
    *  behind one button. There are two tools here, not nine. */
-  const [moreOpen, setMoreOpen] = useState(false);
   /** The stash drawer's open state lives up here because the toolbar carries
    *  the button that opens it — it belongs in the group with Undo and Log. */
   const [stashOpen, setStashOpen] = useState(false);
-  /** True while the compound is actually being carried, so it reads as
-   *  picked up rather than as a page element that happens to be moving. */
-  const [lifted, setLifted] = useState(false);
-  /** The part being carried within the compound, once a long press has taken
-   *  hold. Null means a plain drag, which moves the whole thing. */
-  const [rearranging, setRearranging] = useState<DockPart | null>(null);
-  /** The alignment held for the length of a drag; null when at rest, where
-   *  the compound's own position decides. */
-  const [dragSide, setDragSide] = useState<'left' | 'right' | null>(null);
+  /** Under this, the console is a bar on the bottom edge; over it, a rail
+   *  down the side. They are different objects, not one thing squeezed. */
   const [compact, setCompact] = useState(() => window.innerWidth < 640);
-  const [dock, setDock] = useState<DockBox>(loadDockBox);
   /** Shelves taken off the screen for now. Not persisted — a hidden shelf is
    *  a thing you did a second ago, not a decision about the product. */
   const [hiddenTrays, setHiddenTrays] = useState<TrayEdge[]>(DEFAULT_HIDDEN);
@@ -365,14 +256,6 @@ function ReviewConsole({
   const dragStart = useRef<{ x: number; y: number; el: HTMLElement } | null>(null);
   const draggedJustNow = useRef(false);
   const advanceRef = useRef<(() => void) | null>(null);
-  const rearrangingRef = useRef<DockPart | null>(null);
-  const dockRef = useRef<HTMLDivElement>(null);
-  const dockDrag = useRef<{ x: number; y: number; box: { x: number; y: number } } | null>(null);
-  const dockPress = useRef<{ x: number; y: number; moved: boolean; part: DockPart | null } | null>(null);
-  const holdTimer = useRef<number | undefined>(undefined);
-  const sizeDrag = useRef<{ x: number; from: number } | null>(null);
-  const stashRef = useRef<HTMLDivElement>(null);
-  const stashDrag = useRef<{ x: number; y: number; box: { x: number; y: number } } | null>(null);
   /** Read by the global key handler, which must not re-bind on every hover. */
   const pickedRef = useRef<Element | null>(null);
   /** Snapshots of the notes before each change, newest last. */
@@ -458,7 +341,6 @@ function ReviewConsole({
   notesRef.current = notes;
   readRef.current = read;
   pickedRef.current = picked;
-  rearrangingRef.current = rearranging;
 
   /** Every action says what it did, briefly, the way a game confirms a pickup
    *  instead of leaving you to check an inventory screen. */
@@ -466,197 +348,13 @@ function ReviewConsole({
     setToast({ text, tone, at: Date.now() });
   }, []);
 
-  const startDockDrag = useCallback((x: number, y: number) => {
-    const rect = dockRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    dockDrag.current = { x, y, box: { x: rect.left, y: rect.top } };
-    // Hold the current alignment for the length of the drag. The parts are
-    // different widths, so realigning them the moment the compound crosses
-    // the middle of the screen throws whichever one you are holding out from
-    // under the cursor. It settles the instant you let go.
-    setDragSide(rect.left < window.innerWidth / 2 ? 'left' : 'right');
-    setDock((current) => ({ ...current, x: rect.left, y: rect.top }));
-  }, []);
-
-  /** Everything is draggable, and nothing loses its click.
-   *
-   *  Press anywhere on the compound — the gaps, the title band, a button. A
-   *  press that goes nowhere is a click, and the button under it does its
-   *  job. A press that moves becomes a drag, and the click it would have
-   *  fired is swallowed on release. Movement is the whole signal; there is
-   *  nothing to hold down and nothing to learn. */
-  const armDockDrag = useCallback((event: React.PointerEvent) => {
-    const target = event.target as HTMLElement;
-    if (target.closest('.review-tools-grip')) return;
-    const part: DockPart | null = target.closest('.review-fab') ? 'fab'
-      : target.closest('.review-dock-stash') ? 'stash'
-        : target.closest('.review-dock-tools') ? 'tools' : null;
-    dockPress.current = { x: event.clientX, y: event.clientY, moved: false, part };
-
-    // Hold still for a moment and you are holding that piece, not the whole
-    // compound: moving now reorders it against its neighbours instead of
-    // carrying everything across the screen.
-    window.clearTimeout(holdTimer.current);
-    if (part) {
-      holdTimer.current = window.setTimeout(() => {
-        if (!dockPress.current || dockPress.current.moved) return;
-        setRearranging(part);
-        setLifted(true);
-      }, 400);
-    }
-  }, []);
-
-  /** Grab a part by its grip: that piece is being sorted from the first move,
-   *  with no hold needed. Dragging anywhere else still carries the whole
-   *  compound, so both gestures are available and neither blocks the other. */
-  const startRearrange = useCallback((part: DockPart, event: React.PointerEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    dockPress.current = { x: event.clientX, y: event.clientY, moved: false, part };
-    setRearranging(part);
-    setLifted(true);
-  }, []);
-
-  /** Slot the carried part into whichever slot the pointer is over. */
-  const reorderAt = useCallback((part: DockPart, y: number) => {
-    const dock = dockRef.current;
-    if (!dock) return;
-    const parts: { part: DockPart; mid: number }[] = [];
-    for (const [name, selector] of [
-      ['fab', '.review-fab'],
-      ['tools', '.review-dock-tools'],
-      ['stash', '.review-dock-stash']
-    ] as const) {
-      const el = dock.querySelector(selector);
-      if (!el) continue;
-      const box = el.getBoundingClientRect();
-      parts.push({ part: name, mid: box.top + box.height / 2 });
-    }
-    parts.sort((a, b) => a.mid - b.mid);
-    const over = parts.findIndex((item) => y < item.mid);
-    const target = over < 0 ? parts.length - 1 : over;
-    setDock((current) => {
-      const order = (current.order ?? DEFAULT_ORDER).filter((item) => item !== part);
-      const at = Math.min(Math.max(0, target), order.length);
-      order.splice(at, 0, part);
-      return { ...current, order };
-    });
-  }, []);
 
 
   useEffect(() => {
-    try {
-      localStorage.setItem(DOCK_KEY, JSON.stringify(dock));
-    } catch {
-      // Private mode; the palette just starts in its corner next time.
-    }
-  }, [dock]);
-
-  useEffect(() => {
-    const onMove = (event: PointerEvent) => {
-      // A press that has travelled far enough stops being a press and starts
-      // being a drag — from anywhere on the compound, buttons included. The
-      // click it would have fired is swallowed on release.
-      const press = dockPress.current;
-      // Holding a single piece: the move sorts it, it does not carry the rest.
-      if (rearrangingRef.current && press) {
-        event.preventDefault();
-        press.moved = true;
-        reorderAt(rearrangingRef.current, event.clientY);
-        return;
-      }
-      if (press && !press.moved && !dockDrag.current && !sizeDrag.current && !stashDrag.current) {
-        if (Math.hypot(event.clientX - press.x, event.clientY - press.y) < 5) return;
-        window.clearTimeout(holdTimer.current);
-        press.moved = true;
-        setLifted(true);
-        startDockDrag(press.x, press.y);
-      }
-      const sizing = sizeDrag.current;
-      if (sizing) {
-        event.preventDefault();
-        // 3rem is one icon plus its padding: past that there is nothing left
-        // to show but the icons, which is the point of dragging it in.
-        setDock((current) => ({
-          ...current,
-          w: Math.min(Math.max(48, sizing.from + event.clientX - sizing.x), 340)
-        }));
-        return;
-      }
-      const loose = stashDrag.current;
-      if (loose) {
-        event.preventDefault();
-        const box = stashRef.current?.getBoundingClientRect();
-        setDock((current) => ({
-          ...current,
-          sx: clamp(loose.box.x + event.clientX - loose.x, window.innerWidth - (box?.width ?? 240) - 8),
-          sy: clamp(loose.box.y + event.clientY - loose.y, window.innerHeight - 48)
-        }));
-        return;
-      }
-      const grip = dockDrag.current;
-      if (!grip) return;
-      event.preventDefault();
-      // Clamped by the whole palette, not just its title bar — dragging it
-      // low must not push the Done button off the bottom of the screen.
-      const box = dockRef.current?.getBoundingClientRect();
-      const width = box?.width ?? 200;
-      const height = box?.height ?? 220;
-      const x = clamp(grip.box.x + event.clientX - grip.x, window.innerWidth - width - 8);
-      setDock((current) => ({
-        ...current,
-        x,
-        rx: Math.max(8, window.innerWidth - (x + width)),
-        y: clamp(grip.box.y + event.clientY - grip.y, window.innerHeight - height - 8)
-      }));
-    };
-    const onUp = () => {
-      // The parts realign to wherever it came to rest.
-      setDragSide(null);
-      // A drag ate the click; a press that never moved leaves it alone.
-      if (dockPress.current?.moved) {
-        const swallow = (click: MouseEvent) => {
-          click.preventDefault();
-          click.stopPropagation();
-        };
-        window.addEventListener('click', swallow, true);
-        window.setTimeout(() => window.removeEventListener('click', swallow, true), 0);
-      }
-      window.clearTimeout(holdTimer.current);
-      setLifted(false);
-      setRearranging(null);
-      dockPress.current = null;
-      dockDrag.current = null;
-      sizeDrag.current = null;
-      stashDrag.current = null;
-    };
-    window.addEventListener('pointermove', onMove, true);
-    window.addEventListener('pointerup', onUp, true);
-    // A gesture the browser claims for itself — a scroll, a system swipe —
-    // ends as a cancel, never an up. Without this the compound stays lifted
-    // and the next tap is swallowed as the end of a drag that is not running.
-    window.addEventListener('pointercancel', onUp, true);
-    return () => {
-      window.removeEventListener('pointermove', onMove, true);
-      window.removeEventListener('pointerup', onUp, true);
-      window.removeEventListener('pointercancel', onUp, true);
-    };
-  }, [startDockDrag, reorderAt]);
-
-  useEffect(() => {
+    // Both docks are welded to an edge, so a resize only ever decides which
+    // of the two is the right object for the screen.
     const onResize = () => {
       setCompact(window.innerWidth < 640);
-      // A palette parked in a corner of a big window must not end up outside
-      // a small one.
-      setDock((current) => {
-        if (current.x === undefined) return current;
-        const box = dockRef.current?.getBoundingClientRect();
-        return {
-          ...current,
-          x: clamp(current.x, window.innerWidth - (box?.width ?? 200) - 8),
-          y: clamp(current.y ?? 8, window.innerHeight - (box?.height ?? 220) - 8)
-        };
-      });
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -907,27 +605,6 @@ function ReviewConsole({
     setHiddenTrays(mode === 'pick' ? [...EDGES] : [...DEFAULT_HIDDEN]);
   }, [mode]);
 
-  /** Put the furniture back. Everything the console lets you move — the
-   *  palette, the log window, where the shelves sit and whether they are
-   *  showing — goes home. Notes are decisions, not furniture: nothing here
-   *  touches them. */
-  const tidy = useCallback(() => {
-    setDock({ min: false, dir: 'h', help: false });
-    setWin(defaultWindowBox());
-    setMoreOpen(false);
-    shelvesTouched.current = false;
-    setHiddenTrays([...DEFAULT_HIDDEN]);
-    for (const edge of EDGES) {
-      // Only shelves that were actually moved: this must not mint a note for
-      // a shelf that has never been touched.
-      const settings = notesRef.current[trayNoteId(layout, edge)]?.tray;
-      if (settings && (settings.offset !== undefined || settings.open !== undefined)) {
-        setTray(edge, { offset: undefined, open: undefined });
-      }
-    }
-    say('Everything back in its place', 'good');
-  }, [layout, setTray, say]);
-
   const registerVariants = useCallback((id: string) => {
     setVariantSets((current) => (current.includes(id) ? current : [...current, id]));
     return () => setVariantSets((current) => current.filter((item) => item !== id));
@@ -1153,34 +830,6 @@ function ReviewConsole({
     };
   }, [notes, layout, mode]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(WINDOW_KEY, JSON.stringify(win));
-    } catch {
-      // Private mode; the window just starts in its default spot next time.
-    }
-  }, [win]);
-
-  useEffect(() => {
-    if (!winDrag.current && !panelOpen) return;
-    const onMove = (event: PointerEvent) => {
-      const grip = winDrag.current;
-      if (!grip) return;
-      event.preventDefault();
-      const dx = event.clientX - grip.x;
-      const dy = event.clientY - grip.y;
-      setWin(clampWindow(grip.mode === 'move'
-        ? { ...grip.box, x: grip.box.x + dx, y: grip.box.y + dy }
-        : { ...grip.box, w: grip.box.w + dx, h: grip.box.h + dy }));
-    };
-    const onUp = () => { winDrag.current = null; };
-    window.addEventListener('pointermove', onMove, true);
-    window.addEventListener('pointerup', onUp, true);
-    return () => {
-      window.removeEventListener('pointermove', onMove, true);
-      window.removeEventListener('pointerup', onUp, true);
-    };
-  }, [panelOpen]);
 
   // Entering the audit hands you the first proposal, however you got there.
   useEffect(() => {
@@ -1346,32 +995,16 @@ function ReviewConsole({
     isStowed: (id: string) => Boolean(notes[id] && isStowed(notes[id]))
   }), [mode, notes, focusId, register, registerVariants, decide, commentOn, chooseVariant, restore, stow]);
 
-  // A phone has no room for four shelves, and the flat bar has a natural
-  // shelf underneath it — both default to carrying them. Upright and wide
-  // leave them on the edges, where a tall strip is not in their way.
-  const attached = dock.stash ?? (compact || dock.dir === 'h' ? 'with' : 'edges');
   const stashCount = Object.values(notes)
     .filter((note) => note.stow && note.anchor.layout === layout).length;
   const shelves = (
     <EdgeTrays
       notes={notes}
       layout={layout}
-      shape={attached === 'edges' ? 'edges' : 'stack'}
-      embedded={compact}
-      stackOpen={compact ? true : stashOpen}
+      shape="stack"
+      embedded
+      stackOpen
       onStackToggle={() => setStashOpen((current) => !current)}
-      onGripDown={(event) => {
-        if (attached === 'free') {
-          // Loose, the grip moves the panel itself around the screen.
-          event.preventDefault();
-          const box = stashRef.current?.getBoundingClientRect();
-          if (!box) return;
-          stashDrag.current = { x: event.clientX, y: event.clientY, box: { x: box.left, y: box.top } };
-          setDock((current) => ({ ...current, sx: box.left, sy: box.top }));
-          return;
-        }
-        startRearrange('stash', event);
-      }}
       activeEdge={drag?.edge ?? null}
       dragging={Boolean(drag)}
       hidden={hiddenTrays}
@@ -1671,6 +1304,15 @@ function ReviewConsole({
                   ) : null}
                 </div>
 
+                <div className="review-table-head" aria-hidden="true">
+                  <span />
+                  <span>Do</span>
+                  <span>Item</span>
+                  <span>Where</span>
+                  <span>State</span>
+                  <span />
+                </div>
+
                 <ul className="review-panel-list">
                   {journalNotes.length === 0 ? (
                     <li className="review-panel-empty">
@@ -1808,65 +1450,50 @@ function ReviewConsole({
     say(`${note.label} hidden`, 'info');
   }
 
-  /** One note in the journal. Both scopes draw the same row: the only
-   *  difference between them is how the rows are grouped. */
+  /** One note in the journal — a table row, and the columns are the
+   *  questions in the order they get asked: what has to happen, to what,
+   *  where in the code, and where it has got to. */
   function noteRow(note: ReviewNote) {
     const fresh = isUnread(note, read);
     const answered = isReply(note, read);
+    const said = note.comment ?? note.reason;
     return (
       <li
         key={note.id}
+        className="review-row"
         data-note-id={note.id}
         data-kind={note.kind}
         data-verdict={note.verdict}
         data-unread={fresh || undefined}
         data-moved={moved === note.id || undefined}
       >
-        <button type="button" className="review-note-body" onClick={() => pointAtNote(note)}>
-          <span className="review-note-kind">
-            {/* Read is the quiet state and unread is the loud one, per note,
-                so going through them one at a time actually leaves a trace. */}
-            {fresh ? <i className="review-note-dot" data-reply={answered || undefined} /> : null}
-            {verdictLabel(note)}
-            {answered ? <span className="review-note-new">replied</span> : null}
-          </span>
+        <span className="review-cell-mark">
+          {fresh ? <i className="review-note-dot" data-reply={answered || undefined} /> : null}
+        </span>
+
+        {/* What has to happen, in one word, in its own column so a screenful
+            of notes can be read down rather than across. */}
+        <span className="review-cell-what" data-act={actOf(note)}>{actOf(note)}</span>
+
+        <button type="button" className="review-cell-item" onClick={() => pointAtNote(note)}>
           <span className="review-note-label">{note.label}</span>
-          {journalScope === 'all'
-            ? <span className="review-note-where">{note.anchor.layout}</span>
-            : null}
           {note.tags?.length ? (
             <span className="review-note-tags">
               {note.tags.map((tag) => <span key={tag}>{tag}</span>)}
             </span>
           ) : null}
-          {note.comment ? <span className="review-note-text">“{note.comment}”</span> : null}
-          {note.anchor.source
-            ? <span className="review-note-source">{fileOf(note.anchor.source)}</span>
-            : null}
-          {note.thread?.length ? (
-            <span className="review-note-thread">
-              {note.thread.map((reply, index) => (
-                <span key={index} data-from={reply.from}>
-                  <b>{reply.from === 'claude' ? 'Claude' : 'You'}:</b> {reply.text}
-                </span>
-              ))}
-            </span>
-          ) : null}
+          {said ? <span className="review-note-text">{said}</span> : null}
+          {answered ? <span className="review-note-new">Claude replied</span> : null}
         </button>
+
+        <span className="review-cell-where" title={note.anchor.source ?? note.anchor.layout}>
+          {journalScope === 'all' ? <b>{note.anchor.layout}</b> : null}
+          {fileOf(note.anchor.source)?.split('/').pop() ?? '—'}
+        </span>
+
         <button
           type="button"
-          className="review-note-eye"
-          data-hidden={note.stow ? true : undefined}
-          onClick={() => toggleHidden(note)}
-          aria-pressed={Boolean(note.stow)}
-          aria-label={note.stow ? `Show ${note.label} again` : `Hide ${note.label}`}
-          title={note.stow ? 'Hidden on this screen — tap to show it' : 'Hide it on this screen'}
-        >
-          {note.stow ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-        </button>
-        <button
-          type="button"
-          className="review-note-lane"
+          className="review-note-lane review-cell-lane"
           data-lane={laneOf(note)}
           onClick={() => moveLane(note)}
           aria-label={`${note.label} is ${LANE_NAME[laneOf(note)]} — move it on`}
@@ -1874,15 +1501,29 @@ function ReviewConsole({
         >
           {LANE_NAME[laneOf(note)]}
         </button>
-        <button
-          type="button"
-          className="review-note-remove"
-          onClick={() => { markRead(note.id); setReplyTo(replyTo === note.id ? null : note.id); }}
-          aria-label={`Reply to ${note.label}`}
-          title="Reply"
-        >
-          <MessageSquarePlus className="size-4" />
-        </button>
+
+        <span className="review-cell-acts">
+          <button
+            type="button"
+            className="review-note-eye"
+            data-hidden={note.stow ? true : undefined}
+            onClick={() => toggleHidden(note)}
+            aria-pressed={Boolean(note.stow)}
+            aria-label={note.stow ? `Show ${note.label} again` : `Hide ${note.label}`}
+            title={note.stow ? 'Hidden on this screen — click to show it' : 'Hide it on this screen'}
+          >
+            {note.stow ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+          <button
+            type="button"
+            className="review-note-remove"
+            onClick={() => { markRead(note.id); setReplyTo(replyTo === note.id ? null : note.id); }}
+            aria-label={`Reply to ${note.label}`}
+            title="Reply"
+          >
+            <MessageSquarePlus className="size-4" />
+          </button>
+        </span>
       </li>
     );
   }
@@ -2279,66 +1920,6 @@ function ReviewConsole({
         </div>
       ) : null}
 
-      {panelOpen && !compact ? (
-        <div
-          data-review-ui
-          className="review-panel"
-          data-min={win.min || undefined}
-          style={{ left: win.x, top: win.y, width: win.w, height: win.min ? undefined : win.h }}
-        >
-          <header
-            className="review-panel-head"
-            onPointerDown={(event) => {
-              if ((event.target as HTMLElement).closest('button')) return;
-              winDrag.current = { mode: 'move', x: event.clientX, y: event.clientY, box: win };
-            }}
-          >
-            <span>
-              Journal · {openCount} open
-              {unread.length ? <b className="review-panel-new">{unread.length} new</b> : null}
-            </span>
-            <span className="review-panel-buttons">
-              <button
-                type="button"
-                onClick={() => setWin({ ...win, min: !win.min })}
-                aria-label={win.min ? 'Expand log' : 'Minimise log'}
-                title={win.min ? 'Expand' : 'Minimise'}
-              >
-                {win.min ? <ChevronUp className="size-4" /> : <Minus className="size-4" />}
-              </button>
-              <button type="button" onClick={() => setPanelOpen(false)} aria-label="Close log">
-                <X className="size-4" />
-              </button>
-            </span>
-          </header>
-          {journalBody}
-          <span
-            className="review-panel-grip"
-            onPointerDown={(event) => {
-              winDrag.current = { mode: 'size', x: event.clientX, y: event.clientY, box: win };
-            }}
-            aria-hidden="true"
-          />
-        </div>
-      ) : null}
-
-      {open && attached === 'edges' ? shelves : null}
-
-      {open && attached === 'free' ? (
-        <div
-          ref={stashRef}
-          data-review-ui
-          className="review-stash-float"
-          data-drop={(dock.sy ?? window.innerHeight * 0.7) > window.innerHeight * 0.55 ? 'up' : 'down'}
-          style={{
-            left: dock.sx ?? Math.max(8, window.innerWidth - 340),
-            top: dock.sy ?? Math.max(8, window.innerHeight * 0.5)
-          }}
-        >
-          {shelves}
-        </div>
-      ) : null}
-
       {drag ? (
         <div
           data-review-ui
@@ -2400,393 +1981,56 @@ function ReviewConsole({
           shelves={shelves}
         />
       ) : (
-        <div
-          ref={dockRef}
-          data-review-ui
-          className="review-dock"
-          data-placed={dock.x !== undefined || undefined}
-          data-side={dragSide ?? (dock.x !== undefined && dock.x < window.innerWidth / 2 ? 'left' : 'right')}
-          /* Parked low — including its home in the bottom corner — the drawer
-             has nowhere to go but up, and the toolbar stays where it was put. */
-          data-drop={dock.y === undefined || dock.y > window.innerHeight * 0.55 ? 'up' : 'down'}
-          onPointerDown={armDockDrag}
-          data-lifted={lifted || undefined}
-          data-sorting={rearranging || undefined}
-          style={{
-            // Anchored to whichever edge it is nearest: on the right that is the
-            // right edge, so anything that opens inside it grows inwards.
-            ...(dock.x !== undefined
-              ? dock.x < window.innerWidth / 2
-                ? { left: dock.x, top: dock.y, right: 'auto', bottom: 'auto' }
-                : { right: dock.rx ?? 8, top: dock.y, left: 'auto', bottom: 'auto' }
-              : {}),
-            ...Object.fromEntries((dock.order ?? DEFAULT_ORDER).map((part, index) => (
-              [`--order-${part}`, index]
-            )))
+        <DesktopDock
+          open={open}
+          onToggle={() => {
+            const next = !open;
+            setOpen(next);
+            if (!next) { setMode('off'); setPicked(null); }
           }}
-
-        >
-          {open ? (
-            <div
-              className="review-dock-tools"
-              data-min={dock.min || undefined}
-              data-dir={dock.dir ?? 'v'}
-              style={dock.dir === 'wide' && dock.w ? { width: dock.w } : undefined}
-            >
-              {/* Title band: the handle, and the way out. */}
-              {/* Each object is dragged by its own top band — this one for the
-                  toolbar, the stash panel's own header for the stashes. When
-                  they are clipped together, either band moves the pair. */}
-              <div
-                className="review-hud-head"
-                /* Double-click rolls it up and down — the gesture every title
-                   bar has had for thirty years. A button for it only ever said
-                   "minus" to anyone who had not already guessed. Sending it home
-                   lives on Tidy up, where the rest of the arranging is. */
-                onDoubleClick={(event) => {
-                  if ((event.target as HTMLElement).closest('button')) return;
-                  setDock((current) => ({ ...current, min: !current.min }));
-                }}
-                title="Drag the grip to reorder · drag to move · double-click to roll it up"
-              >
-                <span
-                  className="review-hud-grip review-part-grip"
-                  onPointerDown={(event) => startRearrange('tools', event)}
-                  title="Drag to reorder the toolbar within the console"
-                >
-                  <GripVertical className="size-3.5" />
-                </span>
-                {/* Window controls belong in the window's own title band. */}
-                <span className="review-hud-window">
-                  {/* One button, cycling. It wears the shape it is about to
-                      give you, not the one you are already looking at — the
-                      current shape is on screen, so showing it again tells you
-                      nothing you cannot see. */}
-                  {(() => {
-                    const shapes = [
-                      { id: 'v' as const, Icon: StretchVertical, name: 'Upright' },
-                      { id: 'h' as const, Icon: StretchHorizontal, name: 'Flat' },
-                      { id: 'wide' as const, Icon: List, name: 'Wide' }
-                    ];
-                    const at = Math.max(0, shapes.findIndex((item) => item.id === (dock.dir ?? 'v')));
-                    const next = shapes[(at + 1) % shapes.length];
-                    const Icon = next.Icon;
-                    return (
-                      <button
-                        type="button"
-                        title={`Switch to ${next.name.toLowerCase()}`}
-                        aria-label={`Switch the toolbar to ${next.name.toLowerCase()}`}
-                        onClick={() => setDock((current) => ({ ...current, dir: next.id }))}
-                      >
-                        <Icon className="size-[18px]" />
-                      </button>
-                    );
-                  })()}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                data-on={mode === 'audit' || undefined}
-                data-label="Audit"
-                data-key="a"
-                title="Audit · a"
-                aria-label="Audit"
-                onClick={() => {
-                  const next = mode === 'audit' ? 'off' : 'audit';
-                  setMode(next);
-                  setPicked(null);
-                  if (next === 'audit') setTimeout(() => stepProposal(1), 60);
-                  else setFocusId(null);
-                }}
-              >
-                <Trash2 className="size-[18px]" />
-                {suggestedIds.length ? (
-                  // How many are still waiting, not how many exist — and a tick
-                  // once the screen is fully answered. A fraction would not fit
-                  // the corner of a 36px icon anyway.
-                  <span
-                    className="review-badge"
-                    data-done={settled === suggestedIds.length || undefined}
-                    title={`${settled} of ${suggestedIds.length} answered on this screen`}
-                  >
-                    {settled === suggestedIds.length
-                      ? <Check className="size-2.5" strokeWidth={4} />
-                      : suggestedIds.length - settled}
-                  </span>
-                ) : null}
-              </button>
-
-              <button
-                type="button"
-                data-on={mode === 'pick' || undefined}
-                data-label="Pick"
-                data-key="p"
-                title="Pick · p"
-                aria-label="Pick"
-                onClick={() => { setMode(mode === 'pick' ? 'off' : 'pick'); setPicked(null); }}
-              >
-                <MousePointerSquareDashed className="size-[18px]" />
-              </button>
-
-              {variantSets.length ? (
-                <button
-                  type="button"
-                  data-on={mode === 'variants' || undefined}
-                  data-label="A / B"
-                  data-key="v"
-                  title="Compare alternatives · v"
-                  aria-label="Compare alternatives"
-                  onClick={() => { setMode(mode === 'variants' ? 'off' : 'variants'); setPicked(null); }}
-                >
-                  <Columns2 className="size-[18px]" />
-                  <span className="review-badge">{variantSets.length}</span>
-                </button>
-              ) : null}
-
-              <span className="review-tools-rule" />
-
-              <button
-                type="button"
-                disabled={!undoDepth}
-                data-label="Undo"
-                data-key="u"
-                title="Undo · u"
-                aria-label="Undo the last decision"
-                onClick={undo}
-              >
-                <Undo2 className="size-[18px]" />
-                {undoDepth ? <span className="review-badge">{undoDepth}</span> : null}
-              </button>
-
-              <button
-                type="button"
-                data-on={panelOpen || undefined}
-                data-label="Log"
-                data-key="4"
-                title="Notes log · 4"
-                aria-label="Notes log"
-                onClick={() => setPanelOpen(!panelOpen)}
-              >
-                <NotebookPen className="size-[18px]" />
-                {findings.length ? <span className="review-badge">{findings.length}</span> : null}
-              </button>
-
-              {attached === 'edges' ? null : (
-                <button
-                  type="button"
-                  data-on={stashOpen || undefined}
-                  data-label="Stash"
-                  data-key="what you set aside"
-                  title="Stashes"
-                  aria-label="Stashes"
-                  aria-expanded={stashOpen}
-                  onClick={() => setStashOpen(!stashOpen)}
-                >
-                  <Archive className="size-[18px]" />
-                  {stashCount ? <span className="review-badge">{stashCount}</span> : null}
-                </button>
-              )}
-
-              <span className="review-tools-rule" />
-
-              <button
-                type="button"
-                className="review-tools-more"
-                data-on={moreOpen || undefined}
-                /* No hover label: a chevron under a toolbar explains itself, and
-                   a tooltip that says "Arrange" says nothing the arrow did not. */
-                aria-label="More controls"
-                aria-expanded={moreOpen}
-                onClick={() => setMoreOpen(!moreOpen)}
-              >
-                {/* A chevron, not an ellipsis: it opens a floor downward, and
-                    the arrow says which way. */}
-                <ChevronDown className="size-[18px] review-more-caret" />
-              </button>
-
-
-              {/* The flat bar has width to spend, so it spends it on whatever
-                  tool is running — answering the focused proposal here means the
-                  buttons stay put instead of moving with every outline. */}
-              {dock.dir === 'h' && mode === 'audit' && focusId && suggested[focusId] ? (
-                <span className="review-bar-context">
-                  <button
-                    type="button"
-                    className="review-bar-step"
-                    onClick={() => stepProposal(-1)}
-                    aria-label="Previous proposal"
-                  >‹</button>
-                  <span className="review-bar-name">{suggested[focusId].label}</span>
-                  <button
-                    type="button"
-                    className="review-bar-step"
-                    onClick={() => stepProposal(1)}
-                    aria-label="Next proposal"
-                  >›</button>
-                  {([
-                    ['approved', Trash2, 'Cut it'],
-                    ['rejected', X, 'Keep it'],
-                    ['revise', MessageSquarePlus, 'Say what is wrong']
-                  ] as const).map(([verdict, Icon, label]) => (
-                    <button
-                      key={verdict}
-                      type="button"
-                      className={`review-bar-verdict review-${
-                        verdict === 'approved' ? 'yes' : verdict === 'rejected' ? 'no' : 'maybe'
-                      }`}
-                      data-on={notes[focusId]?.verdict === verdict || undefined}
-                      title={label}
-                      aria-label={`${label} — ${suggested[focusId].label}`}
-                      onClick={() => decide(
-                        {
-                          id: focusId,
-                          label: suggested[focusId].label,
-                          reason: suggested[focusId].reason,
-                          layout
-                        },
-                        verdict,
-                        document.querySelector(`[data-review-id="${focusId}"]`)
-                      )}
-                    >
-                      <Icon className="size-3.5" />
-                    </button>
-                  ))}
-                </span>
-              ) : null}
-
-              {dock.dir === 'wide' ? (
-                <span
-                  className="review-tools-grip"
-                  aria-hidden="true"
-                  onPointerDown={(event) => {
-                    event.stopPropagation();
-                    const rect = dockRef.current?.getBoundingClientRect();
-                    if (!rect) return;
-                    sizeDrag.current = { x: event.clientX, from: rect.width };
-                  }}
-                />
-              ) : null}
-
-            </div>
-          ) : null}
-
-          {/* A second floor rather than a longer bar: the extras drop below the
-              toolbar, in their own strip, so the bar itself never changes
-              length and nothing has to scroll to reach them. */}
-          <div className="review-tools-tray" data-open={moreOpen || undefined}>
-              <button
-                type="button"
-                data-label="Tidy up"
-                data-key="layout"
-                title="Tidy up — everything back to its default place"
-                aria-label="Put the console furniture back in its default places"
-                onClick={tidy}
-              >
-                <Sparkles className="size-[18px]" />
-              </button>
-
-              <button
-                type="button"
-                data-on={dock.help || undefined}
-                data-label="Keys"
-                data-key="?"
-                title="Show the key card"
-                aria-label="Show or hide the key card"
-                onClick={() => setDock((current) => ({ ...current, help: !current.help }))}
-              >
-                <Keyboard className="size-[18px]" />
-              </button>
-
-              <button
-                type="button"
-                data-on={attached === 'with' || undefined}
-                data-label={attached === 'with' ? 'Unclip stashes' : 'Clip stashes on'}
-                data-key={attached === 'with' ? 'move together' : 'move apart'}
-                aria-label="Clip the stashes to the toolbar, or set them loose"
-                title={attached === 'with' ? 'Unclip the stashes' : 'Clip the stashes to the toolbar'}
-                onClick={() => setDock((current) => ({
-                  ...current,
-                  stash: attached === 'with' ? 'free' : 'with'
-                }))}
-              >
-                {attached === 'with'
-                  ? <Unlink className="size-[18px]" />
-                  : <Link2 className="size-[18px]" />}
-              </button>
-
-              </div>
-
-          {/* Clipped on: the shelves are part of the same object as the toolbar,
-              and the drag on the dock moves the pair. */}
-          {open && attached === 'with' ? (
-            <div className="review-dock-stash">{shelves}</div>
-          ) : null}
-
-          {/* Its own object, not a tool: this is the way in and the way out of
-              the console, so it never sits among the things the console does. */}
-          <span className="review-fab-wrap">
-          <button
-            type="button"
-            className="review-fab"
-            data-open={open || undefined}
-            aria-expanded={open}
-            onClick={() => { setOpen(!open); if (open) { setMode('off'); setPicked(null); } }}
-          >
-            {/* The handle lives inside the capsule rather than beside it: two
-                chips for one object was one chip too many. */}
-            {open ? (
-              <span
-                className="review-part-grip review-fab-grip"
-                onPointerDown={(event) => startRearrange('fab', event)}
-                title="Drag to reorder"
-              >
-                <GripVertical className="size-3.5" />
-              </span>
-            ) : null}
-            {open ? <Check className="size-4" /> : <NotebookPen className="size-5" />}
-            <span>
-              {open ? 'Done' : 'Review'}
-              {!open && openCount ? ` · ${openCount}` : ''}
-              <kbd>{open ? 'esc' : '⌘R'}</kbd>
-            </span>
-          </button>
-          </span>
-
-          {/* Silent by default. The tools carry their own names on hover and the
-              badge carries the count, so prose here would only be repeating
-              them — the card is opt-in, from the ? in the title bar. */}
-          {open && dock.help ? (
-            <div className="review-help" data-review-ui>
-              <p className="review-help-now">
-                {mode === 'pick'
-                  ? picked
-                    ? '↑ wider · ↓ narrower · ←/→ along the row · shift+arrow stashes'
-                    : 'Click anything on the page, or drag it to an edge to stash it'
-                  : mode === 'audit'
-                    ? '✓ cut it · ✗ keep it · 💬 say what is wrong'
-                    : mode === 'variants'
-                      ? 'Flip between the alternatives, then keep one'
-                      : 'Pick works on anything · Audit walks the cuts I proposed'}
-              </p>
-              <span><kbd>⌘R</kbd> console</span>
-              <span><kbd>a</kbd> audit</span>
-              <span><kbd>p</kbd> pick</span>
-              <span><kbd>n</kbd> note</span>
-              <span><kbd>f</kbd> flag</span>
-              <span><kbd>u</kbd> undo</span>
-              <span><kbd>[</kbd><kbd>]</kbd> step</span>
-              <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> shelves</span>
-              <span data-on={hiddenTrays.length ? true : undefined}>
-                <kbd>h</kbd> {hiddenTrays.length ? `${hiddenTrays.length} hidden` : 'all shelves'}
-              </span>
-            </div>
-          ) : null}
-
-        </div>
+          onClose={() => { setOpen(false); setMode('off'); setPicked(null); }}
+          openCount={openCount}
+          mode={mode}
+          onMode={(next) => {
+            setMode(next);
+            setPicked(null);
+            if (next === 'audit') setTimeout(() => stepProposal(1), 60);
+            else setFocusId(null);
+          }}
+          auditTotal={suggestedIds.length}
+          auditSettled={settled}
+          variants={variantSets.length}
+          undoDepth={undoDepth}
+          onUndo={undo}
+          journalOpen={panelOpen}
+          onJournal={setPanelOpen}
+          journalCount={findings.length}
+          journalNew={unread.length}
+          journalWide={journalWide}
+          onJournalWide={setJournalWide}
+          journal={journalBody}
+          stashOpen={stashOpen}
+          onStash={setStashOpen}
+          stashCount={stashCount}
+          shelves={shelves}
+        />
       )}
     </ReviewContext.Provider>
   );
+}
+
+/** What has to happen about this note, in one word. The old labels named
+ *  the note's own state — "Delete", "Approved" — which reads as a thing that
+ *  already happened; these name the move that is still owed. */
+function actOf(note: ReviewNote): string {
+  if (note.kind === 'choice') return 'Chose';
+  if (note.placement) return 'Move';
+  if (note.verdict === 'approved') return note.kind === 'delete' ? 'Cut' : 'Do';
+  if (note.verdict === 'rejected') return 'Keep';
+  if (note.verdict === 'revise') return 'Revise';
+  if (note.comment) return 'Read';
+  if (note.stow) return 'Hidden';
+  return 'Look';
 }
 
 function verdictLabel(note: ReviewNote): string {

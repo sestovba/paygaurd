@@ -9,133 +9,13 @@
 // that open in place instead of as windows that land on top of the page.
 
 import { useEffect, useRef, useState } from 'react';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
-  Archive, ChevronDown, ChevronUp, Columns2, Maximize2, Minimize2,
-  MousePointerSquareDashed, NotebookPen, SlidersHorizontal, Trash2, Undo2, X
+  Archive, ChevronUp, Columns2, MousePointerSquareDashed, NotebookPen,
+  SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
-
-function Tool({
-  icon: Icon,
-  label,
-  on,
-  badge,
-  badgeDone,
-  disabled,
-  onClick
-}: {
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  on?: boolean;
-  badge?: ReactNode;
-  badgeDone?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className="review-mdock-tool"
-      data-on={on || undefined}
-      disabled={disabled}
-      aria-pressed={on}
-      onClick={onClick}
-    >
-      <span className="review-mdock-icon">
-        <Icon className="size-[18px]" />
-        {badge ? <span className="review-badge" data-done={badgeDone || undefined}>{badge}</span> : null}
-      </span>
-      <span className="review-mdock-name">{label}</span>
-    </button>
-  );
-}
-
-/** One room of the console, folded into the dock. The header is the hit area
- *  and always says how much is inside, so a shut fold is still a reading of
- *  the thing it holds. */
-function Fold({
-  icon: Icon,
-  name,
-  count,
-  news,
-  hint,
-  tone,
-  open,
-  onToggle,
-  big,
-  onBig,
-  children
-}: {
-  icon: ComponentType<{ className?: string }>;
-  name: string;
-  count?: number;
-  news?: number;
-  /** A word about what is running inside, readable with the fold shut. */
-  hint?: ReactNode;
-  /** 'paper' for the journal, which is a document and is read; 'glass' for
-   *  the archive, which is console furniture and sits on the page. */
-  tone: 'paper' | 'glass';
-  open: boolean;
-  onToggle: () => void;
-  /** Folds that hold something worth reading can take the dock's whole
-   *  height. Absent, the fold has no such button and keeps its share. */
-  big?: boolean;
-  onBig?: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      className="review-mdock-fold"
-      data-tone={tone}
-      data-open={open || undefined}
-      data-big={(open && big) || undefined}
-    >
-      {/* A band, not one big button: it has controls of its own in it, and a
-          button cannot hold another button. */}
-      <div className="review-mdock-fold-head">
-        <button
-          type="button"
-          className="review-mdock-fold-face"
-          aria-expanded={open}
-          onClick={onToggle}
-        >
-          <Icon className="size-4" />
-          <span className="review-mdock-fold-name">{name}</span>
-          {hint ? <span className="review-mdock-fold-hint">{hint}</span> : null}
-          {news ? <span className="review-mdock-fold-new">{news} new</span> : null}
-          {count ? <span className="review-mdock-fold-count">{count}</span> : null}
-        </button>
-
-        {/* Only while it is open: a control that grows something folded away
-            is a control for a thing you cannot see. */}
-        {onBig && open ? (
-          <button
-            type="button"
-            className="review-mdock-fold-big"
-            aria-pressed={big}
-            aria-label={big ? `Shrink ${name}` : `Give ${name} the whole dock`}
-            title={big ? 'Back to its share' : 'Fill the dock'}
-            onClick={onBig}
-          >
-            {big ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-          </button>
-        ) : null}
-
-        <button
-          type="button"
-          className="review-mdock-fold-toggle"
-          aria-expanded={open}
-          aria-label={open ? `Fold ${name} away` : `Open ${name}`}
-          onClick={onToggle}
-        >
-          <ChevronDown className="size-4 review-mdock-fold-caret" />
-        </button>
-      </div>
-      {open ? <div className="review-mdock-fold-body">{children}</div> : null}
-    </section>
-  );
-}
+import { Fold, Tool } from './DockParts';
 
 export function MobileDock({
   open,
@@ -261,7 +141,7 @@ export function MobileDock({
             open={toolsOpen}
             onToggle={() => setToolsOpen((current) => !current)}
           >
-            <div className="review-mdock-bar">
+            <div className="review-dock-bar">
               <Tool
                 icon={Trash2}
                 label="Audit"
