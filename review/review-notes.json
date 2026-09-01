@@ -60,42 +60,6 @@
       }
     ]
   },
-  "ledger-header-subtitle": {
-    "id": "ledger-header-subtitle",
-    "kind": "delete",
-    "origin": "suggested",
-    "verdict": "approved",
-    "label": "Header subtitle",
-    "reason": "\"Financial Analysis Ledger\" names the skin, not the user's TWP or SGA position.",
-    "status": "done",
-    "anchor": {
-      "layout": "ledger",
-      "theme": {
-        "sub": "paper",
-        "dark": false
-      },
-      "reviewId": "ledger-header-subtitle",
-      "source": "src/components/ledger/TrackerLedger.tsx (near line 183, unverified)",
-      "components": "TrackerLedger › Root › TrackerProvider › App",
-      "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div:nth-of-type(1) > div",
-      "text": "FINANCIAL ANALYSIS LEDGER Header subtitle"
-    },
-    "createdAt": "2026-09-01T05:15:02.697Z",
-    "updatedAt": "2026-09-01T06:32:45.871Z",
-    "hidden": true,
-    "thread": [
-      {
-        "from": "you",
-        "text": "Remove it",
-        "at": "2026-09-01T05:42:19.741Z"
-      },
-      {
-        "from": "claude",
-        "text": "Removed \"Financial Analysis Ledger\" subtitle from header.",
-        "at": "2026-09-01T06:32:45.871Z"
-      }
-    ]
-  },
   "tray-payguard-left": {
     "id": "tray-payguard-left",
     "kind": "comment",
@@ -691,34 +655,6 @@
       }
     ]
   },
-  "v3-journey-trail": {
-    "id": "v3-journey-trail",
-    "kind": "comment",
-    "origin": "user",
-    "label": "Numbered workspace trail",
-    "status": "done",
-    "anchor": {
-      "layout": "responsive",
-      "page": "Overview",
-      "reviewId": "v3-journey-trail",
-      "source": "src/components/TrackerV3.tsx:169",
-      "components": "TrackerV3 › Root › TrackerProvider › App",
-      "domPath": "div#root > div:nth-of-type(1) > div > header > div:nth-of-type(1) > div:nth-of-type(2) > div",
-      "text": "1 Overview 2 3 Numbered workspace trail"
-    },
-    "createdAt": "2026-09-01T06:01:19.542Z",
-    "updatedAt": "2026-09-01T06:32:45.871Z",
-    "comment": "We need to redesign this as a breadcrumb trail only so the user can trace back their steps",
-    "reason": "The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.",
-    "verdict": "revise",
-    "thread": [
-      {
-        "from": "claude",
-        "text": "Redesigned numbered workspace trail into a clean breadcrumb navigation trail.",
-        "at": "2026-09-01T06:32:45.871Z"
-      }
-    ]
-  },
   "v3-workspace-progress": {
     "id": "v3-workspace-progress",
     "kind": "delete",
@@ -1153,6 +1089,42 @@
       }
     ]
   },
+  "ledger-header-subtitle": {
+    "id": "ledger-header-subtitle",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "approved",
+    "label": "Header subtitle",
+    "reason": "\"Financial Analysis Ledger\" names the skin, not the user's TWP or SGA position.",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-header-subtitle",
+      "source": "src/components/ledger/TrackerLedger.tsx (near line 183, unverified)",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div:nth-of-type(1) > div",
+      "text": "FINANCIAL ANALYSIS LEDGER Header subtitle"
+    },
+    "createdAt": "2026-09-01T05:15:02.697Z",
+    "updatedAt": "2026-09-01T06:32:45.871Z",
+    "hidden": true,
+    "thread": [
+      {
+        "from": "you",
+        "text": "Remove it",
+        "at": "2026-09-01T05:42:19.741Z"
+      },
+      {
+        "from": "claude",
+        "text": "Removed \"Financial Analysis Ledger\" subtitle from header.",
+        "at": "2026-09-01T06:32:45.871Z"
+      }
+    ]
+  },
   "ledger-year-chart": {
     "id": "ledger-year-chart",
     "kind": "delete",
@@ -1252,6 +1224,34 @@
     "createdAt": "2026-09-01T05:51:43.758Z",
     "updatedAt": "2026-09-01T06:13:57.056Z",
     "hidden": true
+  },
+  "v3-journey-trail": {
+    "id": "v3-journey-trail",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Numbered workspace trail",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Overview",
+      "reviewId": "v3-journey-trail",
+      "source": "src/components/TrackerV3.tsx:169",
+      "components": "TrackerV3 › Root › TrackerProvider › App",
+      "domPath": "div#root > div:nth-of-type(1) > div > header > div:nth-of-type(1) > div:nth-of-type(2) > div",
+      "text": "1 Overview 2 3 Numbered workspace trail"
+    },
+    "createdAt": "2026-09-01T06:01:19.542Z",
+    "updatedAt": "2026-09-01T06:32:45.871Z",
+    "comment": "We need to redesign this as a breadcrumb trail only so the user can trace back their steps",
+    "reason": "The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.",
+    "verdict": "revise",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Redesigned numbered workspace trail into a clean breadcrumb navigation trail.",
+        "at": "2026-09-01T06:32:45.871Z"
+      }
+    ]
   },
   "workrecord-header-transfer": {
     "id": "workrecord-header-transfer",

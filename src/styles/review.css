@@ -11674,3 +11674,194 @@ body.review-picking * {
   background: var(--review-blue);
 }
 
+/* --- Floating Walkthrough Zen Triage HUD -------------------------------- */
+
+.review-walkthrough-hud {
+  position: fixed;
+  z-index: 140;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.95);
+  border: 1px solid rgb(255 255 255 / 0.2);
+  box-shadow: 0 16px 36px rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(16px) saturate(1.4);
+  color: white;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  max-width: calc(100vw - 2rem);
+  animation: review-hud-appear 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes review-hud-appear {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.review-hud-progress-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.review-hud-step-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-hud-step-bar {
+  display: block;
+  width: 2.5rem;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.2);
+  overflow: hidden;
+}
+
+.review-hud-step-bar i {
+  display: block;
+  height: 100%;
+  background: var(--review-blue);
+  border-radius: 9999px;
+  transition: width 200ms ease;
+}
+
+.review-hud-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 14rem;
+  overflow: hidden;
+}
+
+.review-hud-target-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-hud-target-layout {
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.15);
+  color: rgb(255 255 255 / 0.8);
+  text-transform: uppercase;
+}
+
+.review-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.review-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform 120ms, background-color 120ms;
+}
+
+.review-hud-btn:hover {
+  transform: scale(1.04);
+}
+
+.review-hud-prev,
+.review-hud-next {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(255 255 255 / 0.12);
+  color: white;
+  font-size: 1rem;
+}
+
+.review-hud-prev:hover,
+.review-hud-next:hover {
+  background: rgb(255 255 255 / 0.25);
+}
+
+.review-hud-keep {
+  background: #16a34a;
+  color: white;
+}
+.review-hud-keep:hover {
+  background: #15803d;
+}
+
+.review-hud-remove {
+  background: var(--review-red);
+  color: white;
+}
+.review-hud-remove:hover {
+  background: #991b1b;
+}
+
+.review-hud-change {
+  background: var(--review-blue);
+  color: white;
+}
+.review-hud-change:hover {
+  background: #1d4ed8;
+}
+
+.review-hud-preview {
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+}
+.review-hud-preview:hover {
+  background: rgb(255 255 255 / 0.24);
+}
+
+.review-hud-preview[data-on='true'] {
+  background: #d97706;
+  color: white;
+}
+
+.review-hud-exit {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: rgb(255 255 255 / 0.6);
+}
+.review-hud-exit:hover {
+  background: rgb(255 255 255 / 0.15);
+  color: white;
+}
+
+/* On-target status badge tags */
+.review-target-tag[data-verdict='approved'] {
+  background: var(--review-red) !important;
+}
+.review-target-tag[data-verdict='rejected'] {
+  background: #16a34a !important;
+}
+.review-target-tag[data-verdict='revise'] {
+  background: var(--review-blue) !important;
+}
+.review-target-tag[data-verdict='unsure'] {
+  background: #d97706 !important;
+}
+
+

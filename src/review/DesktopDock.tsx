@@ -14,15 +14,25 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  AlignLeft, Archive, ChevronDown, Clock, Columns2, EyeOff, ListChecks,
+  AlignLeft, Archive, ChevronDown, Clock, Columns2, Copy, EyeOff, LayoutGrid, ListChecks,
   MessageSquarePlus, Monitor, Moon, MousePointerSquareDashed, PanelBottom,
   PanelLeft, PanelRight, ScanSearch, Sun, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool, useReorder } from './DockParts';
 import { useTracker } from '../state/TrackerProvider';
+import type { LayoutMode } from '../state/storage';
 
 const RAIL_KEY = 'pg-review-rail-v1';
+
+const LAYOUT_OPTIONS: { id: LayoutMode; name: string }[] = [
+  { id: 'classic', name: 'Classic' },
+  { id: 'v2', name: 'V2 (Split)' },
+  { id: 'responsive', name: 'V3 (Workspace)' },
+  { id: 'ledger', name: 'Ledger' },
+  { id: 'payguard', name: 'PayGuard' },
+  { id: 'workrecord', name: 'WorkRecord' }
+];
 
 /** Which edge the console is welded to. Not a floating panel: it takes a
  *  strip of the screen and the page takes the rest, whichever edge it is on,
@@ -124,7 +134,8 @@ export function DesktopDock({
   hiddenOpen,
   onHidden,
   hiddenCount,
-  hiddenList
+  hiddenList,
+  onCopyAiPrompt
 }: {
   open: boolean;
   onToggle: () => void;
@@ -139,6 +150,7 @@ export function DesktopDock({
   onComments: (next: boolean) => void;
   commentsCount: number;
   commentsList: ReactNode;
+  onCopyAiPrompt?: () => void;
   /** The sections, in the order they are stacked. Dragged by their grips and
    *  kept by the console, so the rail stays arranged the way you left it. */
   order: string[];
@@ -543,6 +555,17 @@ export function DesktopDock({
           {undoDepth ? <span>{undoDepth}</span> : null}
         </button>
 
+        {onCopyAiPrompt ? (
+          <button
+            type="button"
+            className="review-rail-undo"
+            onClick={onCopyAiPrompt}
+            title="Copy all open review notes as a ready prompt for AI"
+            aria-label="Copy review prompt for AI"
+          >
+            <Copy className="size-3.5" />
+          </button>
+        ) : null}
 
         {/* Which edge it lives on. A menu rather than a row of three: the
             trigger wears the edge it is on, so the band shows the current
@@ -554,8 +577,8 @@ export function DesktopDock({
             className="review-rail-side-now"
             aria-haspopup="menu"
             aria-expanded={sidesOpen}
-            aria-label={`Dock edge and theme — docked ${side === 'bottom' ? 'along the bottom' : `on the ${side}`}`}
-            title="Dock edge · theme"
+            aria-label={`Dock edge, layout and theme — docked ${side === 'bottom' ? 'along the bottom' : `on the ${side}`}`}
+            title="Dock edge · layout · theme"
             onClick={() => setSidesOpen((current) => !current)}
           >
             {(() => {
@@ -567,6 +590,24 @@ export function DesktopDock({
 
           {sidesOpen ? (
             <span className="review-rail-side-menu" role="menu">
+              <span className="review-rail-menu-label">Layout</span>
+              {LAYOUT_OPTIONS.map(({ id: layoutId, name }) => (
+                <button
+                  key={layoutId}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={ui.layout === layoutId}
+                  data-on={ui.layout === layoutId || undefined}
+                  onClick={() => {
+                    setSidesOpen(false);
+                    setUi({ layout: layoutId });
+                  }}
+                >
+                  <LayoutGrid className="size-3.5" />
+                  {name}
+                </button>
+              ))}
+
               <span className="review-rail-menu-label">Edge</span>
               {SIDES.map(([which, Icon, name]) => (
                 <button

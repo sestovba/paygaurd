@@ -1134,6 +1134,8 @@ function ReviewConsole({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
+  const triageNote = triage ? notes[triage.ids[triage.at]] : undefined;
+
   // Keyboard first, like any game HUD: one chord summons the console, single
   // letters switch tools, Escape backs out one step.
   useEffect(() => {
@@ -1161,6 +1163,51 @@ function ReviewConsole({
         return;
       }
       if (!open) return;
+
+      if (triage && triageNote && !composer) {
+        if (event.key === 'k' || event.key === '1') {
+          event.preventDefault();
+          decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'rejected', null);
+          triageStep(1);
+          return;
+        }
+        if (event.key === 'r' || event.key === '2') {
+          event.preventDefault();
+          decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'approved', null);
+          triageStep(1);
+          return;
+        }
+        if (event.key === 'c' || event.key === '3') {
+          event.preventDefault();
+          commentOnNote(triageNote.id);
+          return;
+        }
+        if (event.key === 'h' || event.key === ' ') {
+          event.preventDefault();
+          toggleHidden(triageNote);
+          return;
+        }
+        if (event.key === 'l') {
+          event.preventDefault();
+          triageFile('second');
+          return;
+        }
+        if (event.key === 'ArrowLeft' || event.key === 'p') {
+          event.preventDefault();
+          triageStep(-1);
+          return;
+        }
+        if (event.key === 'ArrowRight' || event.key === 'n') {
+          event.preventDefault();
+          triageStep(1);
+          return;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          setTriage(null);
+          return;
+        }
+      }
 
       if (event.key === 'a' || event.key === '1') {
         setCommentIntent(false);
@@ -1211,7 +1258,7 @@ function ReviewConsole({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, mode, panelOpen, composer, variantSets.length, undo, triage, cursor, notes]);
+  }, [open, mode, panelOpen, composer, variantSets.length, undo, triage, triageNote, cursor, notes]);
 
   // Dragging: out of the page into an edge tray, or out of a tray back on to
   // the page. Both run off pointer events so the same code works on a phone.
@@ -1497,7 +1544,6 @@ function ReviewConsole({
   /** The board read top to bottom, which is what the arrow keys walk. */
   const ordered = laneGroups.flatMap((group) => group.notes);
   orderedRef.current = ordered;
-  const triageNote = triage ? notes[triage.ids[triage.at]] : undefined;
   const queue = journalNotes.filter((note) => LANE_OPEN.includes(laneOf(note)));
 
   /** Hand them over one at a time, unread first, oldest first. Scanning a
@@ -1528,6 +1574,38 @@ function ReviewConsole({
     if (triageNote) setLane(triageNote, lane);
     triageStep(1);
   }
+
+  useEffect(() => {
+    if (triageNote) {
+      focusProposal(triageNote.id);
+    }
+  }, [triageNote?.id, focusProposal]);
+
+    const copyAiPrompt = useCallback(() => {
+    const allNotes = Object.values(notesRef.current);
+    const toDelete = allNotes.filter((n) => n.verdict === 'approved');
+    const toKeep = allNotes.filter((n) => n.verdict === 'rejected');
+    const commented = allNotes.filter((n) => Boolean(n.comment));
+    const parts: string[] = ['# Review Feedback & Action Items', ''];
+    if (toDelete.length) {
+      parts.push('## Approved Deletions (Remove from code):');
+      for (const n of toDelete) parts.push(`- **${n.label}** (${n.anchor.layout}): ${n.reason ?? "Remove"}`);
+      parts.push('');
+    }
+    if (commented.length) {
+      parts.push('## Requested Changes & Feedback:');
+      for (const n of commented) parts.push(`- **${n.label}** (${n.anchor.layout}): "${n.comment}"`);
+      parts.push('');
+    }
+    if (toKeep.length) {
+      parts.push('## Kept As-Is (Rejected Cuts):');
+      for (const n of toKeep) parts.push(`- **${n.label}** (${n.anchor.layout})`);
+      parts.push('');
+    }
+    parts.push('Please implement these changes across the codebase.');
+    navigator.clipboard.writeText(parts.join("\n"));
+    say('Copied review prompt to clipboard!', 'good');
+  }, [say]);
 
 /** Everything switched off on this screen, newest first. */
   const hiddenHere = Object.values(notes)
@@ -3259,8 +3337,99 @@ function ReviewConsole({
           onHidden={setHiddenOpen}
           hiddenCount={hiddenHere.length}
           hiddenList={hiddenList}
+          onCopyAiPrompt={copyAiPrompt}
         />
       )}
+
+      {/* Floating Walkthrough Zen Triage HUD */}
+      {triage && triageNote ? (
+        <aside data-review-ui className="review-walkthrough-hud" role="region" aria-label="Review Walkthrough">
+          <div className="review-hud-progress-pill">
+            <span className="review-hud-step-num">
+              {triage.at + 1} / {triage.ids.length}
+            </span>
+            <span className="review-hud-step-bar" aria-hidden="true">
+              <i style={{ width: `${((triage.at + 1) / triage.ids.length) * 100}%` }} />
+            </span>
+          </div>
+
+          <div className="review-hud-info">
+            <strong className="review-hud-target-name">{triageNote.label}</strong>
+            <span className="review-hud-target-layout">{triageNote.anchor.layout}</span>
+          </div>
+
+          <div className="review-hud-actions">
+            <button
+              type="button"
+              className="review-hud-btn review-hud-prev"
+              disabled={triage.at === 0}
+              onClick={() => triageStep(-1)}
+              title="Previous item (← or P)"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="review-hud-btn review-hud-keep"
+              title="Keep As-Is (K or 1) — reject proposal, keep in product"
+              onClick={() => {
+                decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'rejected', null);
+                triageStep(1);
+              }}
+            >
+              <X className="size-4" />
+              <span>Keep (K)</span>
+            </button>
+            <button
+              type="button"
+              className="review-hud-btn review-hud-remove"
+              title="Remove (R or 2) — agree to cut from code"
+              onClick={() => {
+                decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'approved', null);
+                triageStep(1);
+              }}
+            >
+              <Trash2 className="size-4" />
+              <span>Remove (R)</span>
+            </button>
+            <button
+              type="button"
+              className="review-hud-btn review-hud-change"
+              title="Change / Note (C or 3) — keep but request changes"
+              onClick={() => commentOnNote(triageNote.id)}
+            >
+              <MessageSquarePlus className="size-4" />
+              <span>Change (C)</span>
+            </button>
+            <button
+              type="button"
+              className="review-hud-btn review-hud-preview"
+              data-on={offPage(triageNote) || undefined}
+              title="Preview Cut (H or Space) — toggle visual preview on screen"
+              onClick={() => toggleHidden(triageNote)}
+            >
+              {offPage(triageNote) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              <span>{offPage(triageNote) ? 'Hidden' : 'Preview'}</span>
+            </button>
+            <button
+              type="button"
+              className="review-hud-btn review-hud-next"
+              onClick={() => triageStep(1)}
+              title="Next / Skip (→ or N)"
+            >
+              ›
+            </button>
+            <button
+              type="button"
+              className="review-hud-btn review-hud-exit"
+              onClick={() => setTriage(null)}
+              title="Exit Walkthrough (Esc)"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </aside>
+      ) : null}
     </ReviewContext.Provider>
   );
 }
