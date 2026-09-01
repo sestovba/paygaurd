@@ -40,10 +40,12 @@ const LIMITS: Record<Side, { min: number; max: number; start: number }> = {
   bottom: { min: 200, max: 640, start: 320 }
 };
 
+/* Left and right first — they are the two that read as the same choice, and
+   putting bottom between them made picking one a step past the other. */
 const SIDES = [
   ['left', PanelLeft, 'Left'],
-  ['bottom', PanelBottom, 'Bottom'],
-  ['right', PanelRight, 'Right']
+  ['right', PanelRight, 'Right'],
+  ['bottom', PanelBottom, 'Bottom']
 ] as const;
 
 function loadRail(): Rail {
