@@ -196,30 +196,21 @@ export function SettingsPanel({
         }}
       />
 
-      {/* Review note: "why is benefit status then layout then how income
-          works? ... benefit status has no icon? focus mode has no icon? ...
-          this one needs refactoring and cleanup", and separately, of the
-          layout row, "layout icon can be better".
-
-          Order is by what the reviewer said they reach for: the two things
-          that change what the app tells you, then the two that change how it
-          looks, then their data. "How income works" is reference reading —
-          "I am ignoring that section" — so it goes to the foot with the other
-          reference material rather than sitting third in the list of things
-          you came here to do. Every row carries an icon now; a list where
-          some rows have one and some do not reads as a list with something
-          missing. */}
+      {/* Benefit status and How income works are primary information links */}
       <div className="flex flex-col gap-2">
         <LinkRow
           icon={<ShieldCheck className="size-5 text-muted-foreground" />}
           label="Benefit status"
           onClick={onOpenStatus}
         />
+        <LinkRow
+          icon={<HelpCircle className="size-5 text-muted-foreground" />}
+          label="How income works"
+          onClick={() => setHelpSpreadOpen(true)}
+        />
       </div>
 
-      {/* Review note: "no need to be so descriptive, just explain the benefits
-          of this mode." It was listing what the mode removes, which is a
-          changelog. What it is for is the one line worth having. */}
+      {/* Focus mode switch */}
       <label className="flex items-start justify-between gap-3 rounded-lg border border-border bg-surface-2 px-4 py-3.5">
         <span className="flex min-w-0 gap-2">
           <Crosshair className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
@@ -237,14 +228,14 @@ export function SettingsPanel({
         />
       </label>
 
+      {/* Layout choice */}
       <LinkRow
         icon={<LayoutTemplate className="size-5 text-muted-foreground" />}
         label={`Layout · ${layoutName}`}
         onClick={() => setLayoutOpen(true)}
       />
 
-      {/* Unlabelled: three buttons reading System, Light and Dark do not need
-          a word above them saying Appearance. */}
+      {/* Appearance: theme and palette */}
       <Segmented
         value={theme}
         columns={3}
@@ -268,8 +259,7 @@ export function SettingsPanel({
         <AccountSection />
       </Section>
 
-      {/* This one keeps its heading: it is the only place in the sheet that
-          can destroy something, and the rows alone do not say so. */}
+      {/* Data export/import and clear actions */}
       <Section title="Your data">
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -295,22 +285,11 @@ export function SettingsPanel({
         >
           <Trash2 className="size-5" /> Clear all data on this device
         </button>
-      </Section>
 
-      {/* Review note: "labels need consolidation like the notification center
-          in apple, I don't need to see them always". The tinted callout was
-          permanent furniture stating a fact that never changes. It reads as a
-          quiet line at the foot with the other reference material. */}
-      <div className="flex flex-col gap-2">
-        <LinkRow
-          icon={<HelpCircle className="size-5 text-muted-foreground" />}
-          label="How income works"
-          onClick={() => setHelpSpreadOpen(true)}
-        />
-        <p className="type-muted px-1 text-sm">
+        <p className="type-muted mt-1 px-1 text-sm">
           Earnings stay on this device unless you turn on sync.
         </p>
-      </div>
+      </Section>
 
       {layoutOpen ? (
         <Sheet title="Layout" eyebrow="Appearance" onClose={() => setLayoutOpen(false)}>
