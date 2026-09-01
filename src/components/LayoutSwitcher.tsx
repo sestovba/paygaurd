@@ -12,26 +12,36 @@ export interface LayoutGroup {
   options: ReadonlyArray<LayoutOption>;
 }
 
+/**
+ * Grouped by the thing a person choosing actually cares about: how much of
+ * the year is in front of you at once.
+ *
+ * They used to be grouped by where they came from — two groups both titled
+ * "Variants", then "Calc20 (derivative)" and "Calc20 (as built)", with a
+ * sibling repository named in the description. That is the project's own
+ * history, and it is a heading only the person who wrote it can read.
+ */
 export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
   {
-    title: 'Variants',
+    title: 'All on one page',
     options: [
-      { id: 'classic', label: 'Classic', description: 'Single-page dashboard.' },
-      { id: 'responsive', label: 'Workspace', description: 'Edit details beside the overview.' },
-      { id: 'v2', label: 'Sidebar', description: 'Separate overview, income, and TWP / SGA pages.' }
+      { id: 'classic', label: 'Classic', description: 'The month, the year and your jobs, in one scroll.' },
+      { id: 'ledger', label: 'Ledger', description: 'Every month as a row. Fastest for typing amounts in.' }
     ]
   },
   {
-    title: 'Variants',
+    title: 'One section at a time',
     options: [
-      { id: 'ledger', label: 'Ledger', description: 'Dense income-entry layout.' },
-      { id: 'payguard', label: 'PayGuard', description: 'Cards with inline income editing.' }
+      { id: 'payguard', label: 'PayGuard', description: 'Cards you edit in place, with a bar to switch sections.' },
+      { id: 'v2', label: 'Sidebar', description: 'Overview, income and trial-work status as separate pages.' },
+      { id: 'responsive', label: 'Workspace', description: 'Open a job beside the overview instead of on top of it.' }
     ]
   },
   {
-    title: 'Calc20 (derivative)',
+    title: 'Compact',
     options: [
-      { id: 'workrecord', label: 'Work Record', description: 'Countable income with collapsible details.' }
+      { id: 'workrecord', label: 'Work Record', description: 'The year as a grid, with the months that need you on top.' },
+      { id: 'calc20', label: 'Calc20', description: 'Twelve squares and a running total. The least on screen.' }
     ]
   }
 ];

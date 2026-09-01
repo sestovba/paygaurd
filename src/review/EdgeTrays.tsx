@@ -64,7 +64,7 @@ function Chip({
           onPointerDown={(event) => event.stopPropagation()}
           onClick={() => onRestore(note.id)}
           aria-label={`Restore ${note.label}`}
-          title="Put it back where it came from"
+          title="Restore it to where it came from"
         >
           <Undo2 className="size-3.5" />
         </button>

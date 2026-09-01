@@ -45,6 +45,10 @@ export interface ReviewContextValue {
   isStowed: (id: string) => boolean;
   /** Switched off on the page — a layer eye, not the archive. */
   isHidden: (id: string) => boolean;
+  /** Switch it off, or back on, from wherever you are looking at it. The
+   *  same eye the journal row has: deciding whether a thing should go is
+   *  mostly a matter of seeing the page without it. */
+  setHidden: (target: SuggestedTarget, hidden: boolean, el: Element | null) => void;
   /** Park an element in an edge tray — storage only, no verdict. Stashes
    *  exactly what it is given; `section` widens to the audited card around
    *  it, which is always the reviewer's explicit choice. */

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { MonthKey } from '../../domain/types';
-import { TrackerProvider, useTracker } from './state';
-import { useAuth } from '../../auth/useAuth';
-import { SignInScreen } from './SignInScreen';
+import { Calc20Store, useTracker } from './state';
+import { useTracker as usePayGuard } from '../../state/TrackerProvider';
 import { Header } from './Header';
 import { StreamsSection, ArchivedStreams } from './StreamsSection';
 import { TotalsByMonth } from './TotalsByMonth';
@@ -32,15 +31,24 @@ import { canSync, saveConsentRecord } from '../../state/cloudSync';
 import { useSlabBounce } from './useSlabBounce';
 import { useAppearance } from './appearance';
 
-export default function App() {
-  const auth = useAuth();
-
-  if (auth.locked) return <SignInScreen auth={auth} />;
+/**
+ * Calc20 — the sga_calc20 layout, running on PayGuard's data.
+ *
+ * The structure below is that project's App.tsx, unchanged: a progressive
+ * header over three collapsible sections (Active / Months / Status), each
+ * carrying a glance summary while closed. What changed is underneath it.
+ * Sign-in and the auth session belong to PayGuard and arrive through its
+ * provider; every read and write goes to the one shared dataset via
+ * ./state, so the same jobs, months, paychecks and IRWE appear here and in
+ * every other layout.
+ */
+export function TrackerCalc20() {
+  const { session, signOut } = usePayGuard();
 
   return (
-    <TrackerProvider session={auth.session}>
-      <TrackerApp session={auth.session} onSignOut={auth.signOut} />
-    </TrackerProvider>
+    <Calc20Store>
+      <TrackerApp session={session} onSignOut={() => { void signOut(); }} />
+    </Calc20Store>
   );
 }
 

@@ -22,14 +22,29 @@ export const LANE_OPEN: ReviewLane[] = ['open', 'commented', 'second'];
 
 /** Both sides write this field, and one of them is a text editor. A value
  *  the app does not know must not make a note vanish off the board — it
- *  lands back in To do, where it can be seen and moved. */
-export function laneOf(note: { status?: string }): ReviewLane {
-  return LANES.includes(note.status as ReviewLane) ? note.status as ReviewLane : 'open';
+ *  lands back in To do, where it can be seen and moved.
+ *
+ *  Archiving is the exception, and it is not really an exception at all:
+ *  carrying an element onto a shelf is a thing you have finished doing, not
+ *  a thing you are going to do. Every archived note was landing in To do and
+ *  being dragged straight to Done, which is a step the board can take
+ *  itself. */
+export function laneOf(note: { status?: string; stow?: unknown }): ReviewLane {
+  const lane = LANES.includes(note.status as ReviewLane) ? note.status as ReviewLane : 'open';
+  return note.stow && lane === 'open' ? 'done' : lane;
 }
 
-/** What the user decided about something the audit proposed. 'rejected' is
- *  worth storing too — it stops the same section being proposed again. */
-export type ReviewVerdict = 'approved' | 'rejected' | 'revise';
+/** What the user decided about something the audit proposed.
+ *
+ *  'rejected' is a dismissal: the proposal is off the board. It is still
+ *  stored, because that is what stops the same section being proposed again
+ *  — but it is not a finding, so it does not sit in the journal as a row
+ *  asking for nothing.
+ *
+ *  'unsure' is the answer that was missing. Before it, a proposal you had
+ *  looked at and could not call had nowhere to go but back into the pile of
+ *  ones you had not looked at yet. */
+export type ReviewVerdict = 'approved' | 'rejected' | 'revise' | 'unsure';
 
 /** The palette a note was taken under, so returning to it looks the same. */
 export interface ReviewTheme {

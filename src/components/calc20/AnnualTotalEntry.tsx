@@ -1,16 +1,17 @@
 // A single number for the whole year, for 1099 work that doesn't break down
-// by month cleanly. Average spread already divides gross across every active
-// month — this just writes the full total into one month and clears the
-// rest, instead of asking for the same average entered twelve times.
+// by month cleanly. The figure is divided evenly across the stream's active
+// months as it is entered, rather than asking for the same average twelve
+// times. Splitting on entry — not on read — is what keeps this dataset
+// readable by every other layout: a month holds the amount it counts for.
 
 import { useEffect, useState } from 'react';
 import type { Stream } from '../../domain/types';
 import { useTracker } from './state';
-import { activeMonthsInYear } from '../../domain/earnings';
+import { activeMonthsInYear, evenSplit } from '../../domain/earnings';
 import { NumericExprInput } from './NumericExprInput';
 
 export function AnnualTotalEntry({ stream }: { stream: Stream }) {
-  const { ui, setMonthEntry } = useTracker();
+  const { ui, setMonthEntries } = useTracker();
   const active = activeMonthsInYear(stream, ui.year);
   const currentTotal = active.reduce((sum, m) => sum + (stream.months[m]?.gross ?? 0), 0);
 
@@ -23,11 +24,8 @@ export function AnnualTotalEntry({ stream }: { stream: Stream }) {
   if (!active.length) return null;
 
   const apply = (next: number | undefined) => {
-    const target = active[0];
-    active.forEach((month) => {
-      if (month === target) setMonthEntry(stream.id, month, { gross: next });
-      else if (stream.months[month]?.gross) setMonthEntry(stream.id, month, { gross: undefined });
-    });
+    setMonthEntries(stream.id, evenSplit(next ?? 0, active.length)
+      .map((gross, i) => ({ month: active[i], patch: { gross } })));
   };
 
   return (
@@ -43,9 +41,8 @@ export function AnnualTotalEntry({ stream }: { stream: Stream }) {
       <p className="help-note">
         One figure for the whole year, spread evenly across the {active.length}
         {' '}active month{active.length === 1 ? '' : 's'} — instead of entering
-        the same average twelve times. Still averaged the way SSA does when
-        income can't be tied to a month; switch to Per month below for exact
-        figures instead.
+        the same average twelve times. That is what SSA does when income
+        can't be tied to a month. Edit any month below for an exact figure.
       </p>
     </div>
   );

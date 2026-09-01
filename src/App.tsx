@@ -7,14 +7,17 @@ import { TrackerV3 } from './components/TrackerV3';
 import { TrackerLedger } from './components/ledger/TrackerLedger';
 import { TrackerPayGuard } from './components/payguard/TrackerPayGuard';
 import { TrackerWorkRecord } from './components/workrecord/TrackerWorkRecord';
+import { TrackerCalc20 } from './components/calc20/TrackerCalc20';
 import { PayGuardShell } from './components/payguard/PayGuardShell';
 import { useAuth } from './auth/useAuth';
 import { SignInScreen } from './components/SignInScreen';
+import { Calc20SignInScreen } from './components/calc20/SignInScreen';
 import { TermsGate } from './components/TermsGate';
 import { TERMS_VERSION } from './domain/legal';
 import { canSync, saveConsentRecord } from './state/cloudSync';
 import type { Session } from './auth/session';
 import type { LedgerTheme, UiState } from './state/storage';
+import { loadUi } from './state/storage';
 import type { ReviewAnchor } from './review/types';
 import { lazy, Suspense } from 'react';
 
@@ -32,8 +35,13 @@ export default function App() {
 
   // Bypassed on localhost/dev — see auth/session.ts. Everyone else sees the
   // sign-in screen once; earnings data itself never leaves the device unless
-  // cloud sync is separately turned on.
-  if (auth.locked) return <SignInScreen auth={auth} />;
+  // cloud sync is separately turned on. The saved layout is read from
+  // storage rather than context, since this sits above the provider.
+  if (auth.locked) {
+    return loadUi().layout === 'calc20'
+      ? <Calc20SignInScreen auth={auth} />
+      : <SignInScreen auth={auth} />;
+  }
 
   return (
     <TrackerProvider session={auth.session} onSignOut={auth.signOut}>
@@ -45,9 +53,15 @@ export default function App() {
 function Root({ session }: { session: Session | null }) {
   const { data, ui, setUi } = useTracker();
 
+  // Calc20 was ported with its own terms gate and its own empty state, both
+  // written in its visual language. It therefore takes the whole screen from
+  // here rather than being dropped inside this one's gates — the consent it
+  // records is the same version, against the same UiState fields.
+  const calc20 = ui.layout === 'calc20';
+
   // Signed-out / local-only use never sees this — there's no identity to
   // attach consent to, so the gate only ever appears once someone signs in.
-  if (session && ui.termsAcceptedVersion !== TERMS_VERSION) {
+  if (!calc20 && session && ui.termsAcceptedVersion !== TERMS_VERSION) {
     return (
       <TermsGate
         onAgree={() => {
@@ -63,7 +77,7 @@ function Root({ session }: { session: Session | null }) {
     );
   }
 
-  if (!ui.onboarded && !hasMeaningfulData(data)) {
+  if (!calc20 && !ui.onboarded && !hasMeaningfulData(data)) {
     // Both PayGuard-skinned layouts open onto the same palette they will
     // land in, rather than index.css's default.
     return ui.layout === 'payguard' || ui.layout === 'workrecord'
@@ -71,12 +85,13 @@ function Root({ session }: { session: Session | null }) {
       : <Onboarding />;
   }
 
-  const tracker = ui.layout === 'classic' ? <TrackerClassic />
-    : ui.layout === 'v2' ? <TrackerV2 />
-      : ui.layout === 'ledger' ? <TrackerLedger />
-        : ui.layout === 'payguard' ? <TrackerPayGuard />
-          : ui.layout === 'workrecord' ? <TrackerWorkRecord />
-            : <TrackerV3 />;
+  const tracker = calc20 ? <TrackerCalc20 />
+    : ui.layout === 'classic' ? <TrackerClassic />
+      : ui.layout === 'v2' ? <TrackerV2 />
+        : ui.layout === 'ledger' ? <TrackerLedger />
+          : ui.layout === 'payguard' ? <TrackerPayGuard />
+            : ui.layout === 'workrecord' ? <TrackerWorkRecord />
+              : <TrackerV3 />;
 
   if (!REVIEW_HOST) return tracker;
 

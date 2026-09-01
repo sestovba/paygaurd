@@ -5,6 +5,7 @@ import './index.css';
 import './styles/ledger.css';
 import './styles/payguard.css';
 import './styles/workrecord.css';
+import './styles/calc20.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

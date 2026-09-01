@@ -19,7 +19,9 @@ export type CloudSyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 interface TrackerContextValue {
   data: TrackerData;
   ui: UiState;
-  setUi: (patch: Partial<UiState>) => void;
+  /** Accepts an updater as well as a patch, so two preference writes in one
+   *  handler compose instead of the second overwriting the first. */
+  setUi: (patch: Partial<UiState> | ((current: UiState) => Partial<UiState>)) => void;
   addStream: (type: StreamType) => string;
   updateStream: (id: string, patch: Partial<Stream>) => void;
   removeStream: (id: string) => void;
@@ -113,8 +115,13 @@ export function TrackerProvider({ children, session, onSignOut }: {
   useEffect(() => { saveData(data); }, [data]);
   useEffect(() => { saveUi(ui); }, [ui]);
 
-  const setUi = useCallback((patch: Partial<UiState>) => {
-    setUiState((current) => ({ ...current, ...patch }));
+  const setUi = useCallback((
+    patch: Partial<UiState> | ((current: UiState) => Partial<UiState>)
+  ) => {
+    setUiState((current) => ({
+      ...current,
+      ...(typeof patch === 'function' ? patch(current) : patch)
+    }));
   }, []);
 
   // Cloud sync: off by default on every device, flagged accounts only, and

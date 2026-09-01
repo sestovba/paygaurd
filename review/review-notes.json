@@ -1,27 +1,110 @@
 {
+  "safety-hero-limit-row": {
+    "id": "safety-hero-limit-row",
+    "kind": "choice",
+    "origin": "suggested",
+    "label": "Limit readout",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/SafetyHero.tsx:100",
+      "components": "SafetyHero › TrackerV2 › Root › TrackerProvider",
+      "domPath": "div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(2)",
+      "text": "LIMIT READOUT A · amount + percent B · money only C · one sentence Keep this $310 over the TWP limit this month"
+    },
+    "createdAt": "2026-08-31T02:28:44.897Z",
+    "updatedAt": "2026-09-01T06:11:17.473Z",
+    "verdict": "approved",
+    "choice": "C · one sentence",
+    "options": [
+      "A · amount + percent",
+      "B · money only",
+      "C · one sentence"
+    ],
+    "thread": [
+      {
+        "from": "you",
+        "text": "Yes",
+        "at": "2026-09-01T05:49:58.842Z"
+      }
+    ]
+  },
+  "ledger-stat-average": {
+    "id": "ledger-stat-average",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Average active month",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "source": "src/components/ledger/TrackerLedger.tsx:329"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:03.540Z",
+    "reason": "An average is safe-looking by construction: it averages away the 3- and 5-paycheck months that cause the problem. This is the one stat on the screen that can actively mislead.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true
+  },
+  "tray-payguard-left": {
+    "id": "tray-payguard-left",
+    "kind": "comment",
+    "origin": "user",
+    "label": "left stash",
+    "status": "open",
+    "anchor": {
+      "layout": "payguard"
+    },
+    "createdAt": "2026-08-31T03:07:01.811Z",
+    "updatedAt": "2026-08-31T03:56:56.664Z",
+    "tray": {
+      "name": "Year-level noise",
+      "color": "#f87171",
+      "sort": "label"
+    }
+  },
+  "payguard-header-transfer": {
+    "id": "payguard-header-transfer",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Header import / export",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "payguard-header-transfer",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:241",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-payguard.pg-page-pad > header.pg-topbar > div > div:nth-of-type(4) > div:nth-of-type(2)",
+      "text": "Import Export Header import / export"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:59:01.691Z",
+    "comment": "Housekeeping in the highest-value strip on the screen. Settings already exists two icons along and is where anyone would look.",
+    "tags": [
+      "move"
+    ],
+    "reason": "These maintenance actions already belong in Settings and compete with live benefit signals.",
+    "verdict": "revise"
+  },
   "payguard-year-chart": {
     "id": "payguard-year-chart",
     "kind": "comment",
-    "origin": "user",
+    "origin": "suggested",
     "label": "Annual income chart",
-    "status": "open",
+    "status": "done",
     "anchor": {
       "layout": "payguard",
-      "page": "Jobs",
-      "reviewId": "payguard-year-chart",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:401",
-      "components": "TrackerPayGuard › Root › TrackerProvider › App",
-      "domPath": "div#pg-overview > div:nth-of-type(2)",
-      "text": "2026 COUNTABLE INCOME BY MONTH SGA threshold $1,690 per month. Trial Work Period threshold $1,210 per month. W-2 1099 Peak: $1,520 $2,000 $1"
+      "source": "src/components/payguard/TrackerPayGuard.tsx:401"
     },
-    "createdAt": "2026-08-31T02:44:31.813Z",
-    "updatedAt": "2026-08-31T02:44:31.813Z",
-    "placement": {
-      "anchor": "main#pg-main > section.pg-status-hero > div.pg-status-hero-main:nth-of-type(1)",
-      "anchorLabel": "August countable earnings",
-      "position": "before",
-      "applied": false
-    }
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:53:07.424Z",
+    "comment": "Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it."
   },
   "el-oytqas": {
     "id": "el-oytqas",
@@ -42,41 +125,17 @@
     "updatedAt": "2026-08-31T16:18:27.153Z",
     "comment": "This whole hero says three things where one would do — show the month, the limit, and the room left."
   },
-  "safety-hero-limit-row": {
-    "id": "safety-hero-limit-row",
-    "kind": "choice",
-    "origin": "suggested",
-    "label": "Limit readout",
-    "status": "open",
-    "anchor": {
-      "layout": "v2",
-      "page": "Overview",
-      "source": "src/components/SafetyHero.tsx:87",
-      "components": "SafetyHero › TrackerV2 › Root › TrackerProvider",
-      "domPath": "div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(2)",
-      "text": "LIMIT READOUT A · amount + percent B · money only C · one sentence Keep this $310 over the TWP limit this month"
-    },
-    "createdAt": "2026-08-31T02:28:44.897Z",
-    "updatedAt": "2026-08-31T02:28:44.897Z",
-    "verdict": "approved",
-    "choice": "C · one sentence",
-    "options": [
-      "A · amount + percent",
-      "B · money only",
-      "C · one sentence"
-    ]
-  },
   "tray-payguard-right": {
     "id": "tray-payguard-right",
     "kind": "comment",
     "origin": "user",
     "label": "right tray · 2 items",
-    "status": "open",
+    "status": "done",
     "anchor": {
       "layout": "payguard"
     },
     "createdAt": "2026-08-31T02:44:17.907Z",
-    "updatedAt": "2026-08-31T15:37:46.232Z",
+    "updatedAt": "2026-09-01T05:58:53.674Z",
     "comment": "Both of these are year-level summaries. Nothing here should be annual — the month is what matters.",
     "members": [
       "Annual income chart",
@@ -88,91 +147,37 @@
     "id": "payguard-overview-stats",
     "kind": "delete",
     "origin": "suggested",
-    "verdict": "approved",
     "label": "Duplicate overview statistics",
-    "reason": "YTD, TWP, and SGA repeat the status above; averages and source counts do not guide a monthly benefit decision.",
-    "status": "open",
+    "status": "done",
     "anchor": {
       "layout": "payguard",
-      "page": "Jobs",
-      "theme": {
-        "sub": "paper",
-        "dark": false
-      },
-      "reviewId": "payguard-overview-stats",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:339",
-      "components": "TrackerPayGuard › Root › TrackerProvider › App",
-      "domPath": "div#pg-overview > div:nth-of-type(1)",
-      "text": "YTD COUNTABLE $13,515 W-2 $11,410 1099 $2,105 TRIAL WORK PERIOD 9/ 9 used TWP $1,210 / mo MONTHS OVER SGA 3/ 12 SGA limit $1,690 / mo ACTIVE"
+      "source": "src/components/payguard/TrackerPayGuard.tsx:339"
     },
-    "createdAt": "2026-08-31T03:13:15.825Z",
-    "updatedAt": "2026-09-01T01:10:07.267Z",
-    "stow": {
-      "edge": "left",
-      "at": "2026-08-31T03:14:43.992Z"
-    }
-  },
-  "ledger-stat-average": {
-    "id": "ledger-stat-average",
-    "kind": "delete",
-    "origin": "suggested",
-    "verdict": "approved",
-    "label": "Average active month",
-    "reason": "An average is safe-looking by construction — it averages away the 3- and 5-paycheck months that cause the problem.",
-    "status": "open",
-    "anchor": {
-      "layout": "ledger",
-      "reviewId": "ledger-stat-average",
-      "source": "src/components/ledger/TrackerLedger.tsx:329",
-      "components": "TrackerLedger › Root › TrackerProvider › App",
-      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(4)",
-      "text": "AVG ACTIVE MONTH $1,054 TWP $1,210 / month Average active month"
-    },
-    "createdAt": "2026-08-31T02:55:39.808Z",
-    "updatedAt": "2026-08-31T02:55:39.808Z"
-  },
-  "ledger-header-subtitle": {
-    "id": "ledger-header-subtitle",
-    "kind": "delete",
-    "origin": "suggested",
-    "verdict": "rejected",
-    "label": "Header subtitle",
-    "reason": "\"Financial Analysis Ledger\" names the skin, not the user's TWP or SGA position.",
-    "status": "open",
-    "anchor": {
-      "layout": "ledger",
-      "reviewId": "ledger-header-subtitle",
-      "source": "src/components/ledger/TrackerLedger.tsx:165",
-      "components": "TrackerLedger › Root › TrackerProvider › App",
-      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div:nth-of-type(1) > div",
-      "text": "FINANCIAL ANALYSIS LEDGER Header subtitle"
-    },
-    "createdAt": "2026-08-31T02:56:48.808Z",
-    "updatedAt": "2026-08-31T02:56:48.808Z"
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:54:00.106Z",
+    "reason": "YTD Countable, Trial Work Period and Months Over SGA repeat the status block directly above them. Active Monthly Avg is worse than redundant: an average smooths away the 3- and 5-paycheck months, which is precisely the signal the product exists to raise.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true
   },
   "payguard-hero-ytd": {
     "id": "payguard-hero-ytd",
     "kind": "delete",
     "origin": "suggested",
-    "verdict": "approved",
-    "label": "YTD total in current status",
-    "reason": "The active monthly TWP or SGA gap matters here; a year-to-date total does not.",
-    "status": "open",
+    "label": "YTD total in the status hero",
+    "status": "done",
     "anchor": {
       "layout": "payguard",
-      "page": "Jobs",
-      "theme": {
-        "sub": "paper",
-        "dark": false
-      },
-      "reviewId": "payguard-hero-ytd",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:301",
-      "components": "TrackerPayGuard › Root › TrackerProvider › App",
-      "domPath": "main#pg-main > section.pg-status-hero > div.pg-status-hero-main:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
-      "text": "YTD THROUGH AUGUST $8,891 YTD total in current status"
+      "source": "src/components/payguard/TrackerPayGuard.tsx:301"
     },
-    "createdAt": "2026-08-31T03:03:38.933Z",
-    "updatedAt": "2026-09-01T01:38:57.157Z"
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:54:27.507Z",
+    "reason": "Both limits are monthly. A year-to-date total cannot be over or under $1,210 or $1,690 — it is a number with no threshold attached, sitting in the one place on the screen reserved for the answer to 'am I safe this month'.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true
   },
   "el-1wez1p9": {
     "id": "el-1wez1p9",
@@ -206,35 +211,36 @@
         "text": "ssd",
         "at": "2026-08-31T15:41:44.075Z"
       }
-    ],
-    "stow": {
-      "edge": "right",
-      "at": "2026-08-31T03:03:17.675Z"
-    }
+    ]
   },
-  "tray-payguard-left": {
-    "id": "tray-payguard-left",
-    "kind": "comment",
+  "el-747kjl": {
+    "id": "el-747kjl",
+    "kind": "delete",
     "origin": "user",
-    "label": "left stash",
-    "status": "open",
+    "label": "Income sources",
+    "status": "done",
     "anchor": {
-      "layout": "payguard"
+      "layout": "payguard",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "source": "src/components/payguard/TrackerPayGuard.tsx:466",
+      "components": "TrackerPayGuard › Root › TrackerProvider › App",
+      "domPath": "div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs",
+      "hooks": "pg-tabs",
+      "text": "Add Job"
     },
-    "createdAt": "2026-08-31T03:07:01.811Z",
-    "updatedAt": "2026-08-31T03:56:56.664Z",
-    "tray": {
-      "name": "Year-level noise",
-      "color": "#f87171",
-      "sort": "label"
-    }
+    "createdAt": "2026-09-01T01:08:48.638Z",
+    "updatedAt": "2026-09-01T05:58:55.523Z",
+    "verdict": "approved"
   },
   "el-ewyxtb": {
     "id": "el-ewyxtb",
     "kind": "stow",
     "origin": "user",
     "label": "August countable earnings",
-    "status": "open",
+    "status": "done",
     "anchor": {
       "layout": "payguard",
       "page": "Jobs",
@@ -255,50 +261,810 @@
       "at": "2026-08-31T03:04:45.811Z"
     }
   },
-  "payguard-header-transfer": {
-    "id": "payguard-header-transfer",
+  "payguard-monthly-analysis": {
+    "id": "payguard-monthly-analysis",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Full monthly analysis",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx (near line 219, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:55:07.640Z",
+    "comment": "This is the most useful thing on the layout — it has the month, the countable figure, the status and the by-hours column. It sits below a chart and two duplicate stat rows. It should be what you land on."
+  },
+  "audit-precision-gauge": {
+    "id": "audit-precision-gauge",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "No precision gauge anywhere",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/domain/paySchedule.ts (near line 51, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:59:05.124Z",
+    "comment": "The whole product is a promise about accuracy, and nothing on any screen says how accurate it is being. With a payday and a frequency the app can name the exact 3- and 5-paycheck months; without them it is dividing a year by twelve and hoping. Those two states look identical today. A gauge — what is known, what is missing, what each missing field would buy — turns 'add your payday' from a chore into the thing that upgrades the answer.",
+    "thread": [
+      {
+        "from": "you",
+        "text": "We have this more in the classic theme kind of as reference maybe even derivative of classic",
+        "at": "2026-09-01T05:56:26.075Z"
+      }
+    ]
+  },
+  "audit-pace-warning-unused": {
+    "id": "audit-pace-warning-unused",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Pace warnings computed and never shown",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/domain/paySchedule.ts (near line 235, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:57:05.190Z",
+    "comment": "paceWarning() works out that a stream is tracking to cross the threshold before the year ends, and the only place it surfaces is inside StreamSheet — a sheet you have to open, per source. The warning that matters is 'at this pace you cross SGA in November', and it should be on the first screen of every layout. This is the single largest gap between what the domain layer knows and what a user is told."
+  },
+  "audit-80-hour-rule-missing": {
+    "id": "audit-80-hour-rule-missing",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "No hour tracking on classic, v2 or v3",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/StreamSheet.tsx (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:05:51.007Z",
+    "comment": "TWP_SELF_EMPLOYMENT_HOURS is in the domain and wired into the ledger, payguard, workrecord and calc20 editors. StreamSheet — the source editor for classic, v2 and v3 — collects no hours at all. On those three layouts a 1099 user can work 100 hours in a month, stay under $1,210, and burn a TWP month with nothing on screen ever mentioning it. Either the editor gains hours for 1099 sources or those layouts should not offer a 1099 source."
+  },
+  "audit-radar-missing-ledger": {
+    "id": "audit-radar-missing-ledger",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "3- and 5-paycheck months are buried",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "source": "src/components/ledger/LedgerAnalysis.tsx (near line 99, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:11.923Z",
+    "comment": "PaycheckRadar is the surface that names the months to be on high alert, and classic, v2 and v3 all lead with it. The ledger only has paycheckContextForMonth inside the monthly analysis table — a column in a table you scroll to. The hazard the product exists to catch should not be a cell."
+  },
+  "audit-radar-missing-payguard": {
+    "id": "audit-radar-missing-payguard",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "3- and 5-paycheck months are buried",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx (near line 238, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:57:22.174Z",
+    "comment": "Same as the ledger: the extra-paycheck month is a column in the monthly analysis rather than an alert. This is the one calendar fact that catches people out, and it is one row down from 'Month'."
+  },
+  "payguard-job-view-controls": {
+    "id": "payguard-job-view-controls",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Job view controls",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:473"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:59:11.040Z",
+    "comment": "View arrangement is a preference, not a decision about your benefits. It belongs in Settings or behind the section's own menu.",
+    "tags": [
+      "move"
+    ],
+    "verdict": "unsure",
+    "thread": [
+      {
+        "from": "you",
+        "text": "ok",
+        "at": "2026-09-01T05:57:52.258Z"
+      }
+    ]
+  },
+  "ledger-palette-switcher": {
+    "id": "ledger-palette-switcher",
     "kind": "delete",
     "origin": "suggested",
-    "verdict": "rejected",
-    "label": "Header import / export",
-    "reason": "These maintenance actions already belong in Settings and compete with live benefit signals.",
-    "status": "open",
+    "label": "Four-palette switcher",
+    "status": "done",
     "anchor": {
-      "layout": "payguard",
-      "page": "Jobs",
+      "layout": "ledger",
       "theme": {
         "sub": "paper",
         "dark": false
       },
-      "reviewId": "payguard-header-transfer",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:241",
-      "components": "TrackerPayGuard › Root › TrackerProvider › App",
-      "domPath": "div#root > div.pg-payguard.pg-page-pad:nth-of-type(1) > header.pg-topbar > div > div:nth-of-type(4) > div:nth-of-type(2)",
-      "text": "Import ExportHeader import / export"
+      "reviewId": "ledger-palette-switcher",
+      "source": "src/components/ledger/TrackerLedger.tsx:256",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-tools:nth-of-type(2) > div.lg-header-tools-inner > div:nth-of-type(1) > div:nth-of-type(2)",
+      "text": "PAPER SLATE LEDGER CARBON Four-palette switcher"
     },
-    "createdAt": "2026-08-31T04:40:11.814Z",
-    "updatedAt": "2026-08-31T15:56:02.445Z"
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:13.524Z",
+    "comment": "Four palettes in the header of a benefits tracker. If they stay at all they belong in Settings — the header is where the year and the current phase should be.",
+    "tags": [
+      "move"
+    ],
+    "thread": [
+      {
+        "from": "you",
+        "text": "I agree do it AI",
+        "at": "2026-09-01T05:39:58.641Z"
+      }
+    ],
+    "reason": "Four colour schemes in the working toolbar; the same control already lives in Settings.",
+    "verdict": "unsure"
   },
-  "el-747kjl": {
-    "id": "el-747kjl",
+  "ledger-scroll-top": {
+    "id": "ledger-scroll-top",
     "kind": "delete",
-    "origin": "user",
-    "label": "Income sources",
+    "origin": "suggested",
+    "label": "Scroll-to-top button",
     "status": "open",
     "anchor": {
-      "layout": "payguard",
+      "layout": "ledger",
       "theme": {
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:466",
-      "components": "TrackerPayGuard › Root › TrackerProvider › App",
-      "domPath": "div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs",
-      "hooks": "pg-tabs",
-      "text": "Add Job"
+      "reviewId": "ledger-scroll-top",
+      "source": "src/components/ledger/TrackerLedger.tsx:198",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div.lg-header-actions:nth-of-type(2) > div:nth-of-type(2) > div",
+      "text": "TOP Scroll-to-top button"
     },
-    "createdAt": "2026-09-01T01:08:48.638Z",
-    "updatedAt": "2026-09-01T01:13:44.297Z",
-    "verdict": "approved"
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:21:52.143Z",
+    "reason": "Duplicates what the scrollbar and Home key already do.",
+    "comment": "on IOS I would agree that theres a shortcut to go up quickly on android there isn't I defend this choice, not sure about desktop there isn't much scrolling on desktop, but hiding for desktop why? So leave it.",
+    "verdict": "rejected"
+  },
+  "ledger-notice-count": {
+    "id": "ledger-notice-count",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Notice counter",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-notice-count",
+      "source": "src/components/ledger/TrackerLedger.tsx:176",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div.lg-header-actions:nth-of-type(2) > div:nth-of-type(1)",
+      "text": "1 NOTICE Notice counter"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:19.390Z",
+    "reason": "A count with no way to read the notices — it warns without saying what to do.",
+    "comment": "Honestly this fine, it's just incomplete this is a toast icon section where notifications hide. Lets me the real thing like in other layouts, we should standardize this find the most complete version and crosspolinate into here",
+    "verdict": "revise"
+  },
+  "ledger-stat-sources": {
+    "id": "ledger-stat-sources",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Income-source count",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-stat-sources",
+      "source": "src/components/ledger/TrackerLedger.tsx:341",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(5)",
+      "text": "INCOME SOURCES 1 1 W2 · 0 SE Income-source count"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:23.823Z",
+    "reason": "The job tabs directly below already show every source by name.",
+    "tags": [
+      "remove"
+    ],
+    "verdict": "unsure"
+  },
+  "ledger-stat-ytd": {
+    "id": "ledger-stat-ytd",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "YTD countable total",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-stat-ytd",
+      "source": "src/components/ledger/TrackerLedger.tsx:293",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(1)",
+      "text": "YTD COUNTABLE $0.00 ■ W2 $0 ■ SE $0 YTD countable total"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:25.340Z",
+    "comment": "True and useful at tax time, but neither limit is annual. Below the monthly picture, not above it.",
+    "tags": [
+      "move"
+    ],
+    "reason": "TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit.",
+    "verdict": "unsure",
+    "hidden": true
+  },
+  "ledger-repeated-summary": {
+    "id": "ledger-repeated-summary",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Repeated summary strip",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "source": "src/components/ledger/LedgerAnalysis.tsx (near line 224, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:27.306Z",
+    "reason": "YTD Total Countable, Trial Work Period and Months at or over SGA appear again at the foot of the analysis, having already been stated at the top of the page.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true
+  },
+  "ledger-three-views": {
+    "id": "ledger-three-views",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Three views of one table",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "source": "src/components/ledger/LedgerAnalysis.tsx (near line 99, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:43:32.890Z",
+    "comment": "Cards / Table / Active Only is three ways to read the same twelve rows. Pick the one that answers 'which months are a problem' and make the others a menu, not a segmented control competing with the data.",
+    "verdict": "unsure",
+    "thread": [
+      {
+        "from": "you",
+        "text": "OK do it",
+        "at": "2026-09-01T05:41:48.141Z"
+      }
+    ]
+  },
+  "v3-workspace-progress": {
+    "id": "v3-workspace-progress",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Workspace progress",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:588"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:11:36.607Z",
+    "reason": "Progress through the app's own screens, not progress against a limit. The only progress worth a bar here is 9 TWP months, and TrialMeter already draws it.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true,
+    "thread": [
+      {
+        "from": "you",
+        "text": "I dont know",
+        "at": "2026-09-01T06:06:41.373Z"
+      }
+    ]
+  },
+  "v3-context-help": {
+    "id": "v3-context-help",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Interface helper",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:615"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:02:41.874Z",
+    "comment": "Help about the interface, permanently on screen, next to help about the rules. If the layout needs a running explainer to be used, the layout is the thing to fix.",
+    "tags": [
+      "move"
+    ]
+  },
+  "v3-new-source-tutorial": {
+    "id": "v3-new-source-tutorial",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Three-step tutorial",
+    "status": "parked",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:865"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:11:55.957Z",
+    "reason": "Three steps to explain a form with four fields, shown every time. The payday and frequency fields are the ones that need explaining, and they need it in the field, not before it.",
+    "tags": [
+      "remove"
+    ],
+    "thread": [
+      {
+        "from": "you",
+        "text": "I cant see it, I am not sure what is being talked about. I cant take action on what I dont know",
+        "at": "2026-09-01T06:04:04.859Z"
+      }
+    ]
+  },
+  "v3-recent-activity": {
+    "id": "v3-recent-activity",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Recent activity log",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:975"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:04:27.924Z",
+    "comment": "What you changed is not what you owe. Useful for trusting the record — which matters — but it is a subpage, not a section on the screen where you check whether you are over.",
+    "tags": [
+      "move"
+    ]
+  },
+  "v3-overview-income-sources": {
+    "id": "v3-overview-income-sources",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Duplicate income sources",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:401"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:04:51.574Z",
+    "reason": "The sources list already has a page of its own. Two lists of the same thing means one of them is stale the moment you edit.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true
+  },
+  "v3-overview-year-total": {
+    "id": "v3-overview-year-total",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Annual total on the overview",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:410"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:05:24.541Z",
+    "comment": "Same as the ledger's: no limit is annual. Below the month grid.",
+    "tags": [
+      "move"
+    ]
+  },
+  "v3-overview-month-grid": {
+    "id": "v3-overview-month-grid",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Full-year month grid",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "source": "src/components/TrackerV3.tsx:392"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:05:37.841Z",
+    "comment": "The right thing in the right place. It would be the strongest surface in the product if each cell said which of the three states it is in — under TWP, TWP month used, at or over SGA — and marked the 3- and 5-paycheck months before they happen rather than after."
+  },
+  "v2-theme-toggle": {
+    "id": "v2-theme-toggle",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Theme toggle",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "reviewId": "v2-theme-toggle",
+      "source": "src/components/TrackerV2.tsx:145",
+      "components": "TrackerV2 › Root › TrackerProvider › App",
+      "domPath": "div#root > div > header > div > div:nth-of-type(2) > div:nth-of-type(3)",
+      "text": "Theme toggle"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:12:06.523Z",
+    "comment": "Appearance in the header of every layout. Settings.",
+    "tags": [
+      "move"
+    ],
+    "reason": "Light/dark already lives in Settings; in the header it takes space from the year and the alerts.",
+    "verdict": "unsure",
+    "hidden": true,
+    "thread": [
+      {
+        "from": "you",
+        "text": "yes",
+        "at": "2026-09-01T05:50:20.923Z"
+      }
+    ]
+  },
+  "classic-theme-toggle": {
+    "id": "classic-theme-toggle",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Theme toggle in the header",
+    "status": "done",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/components/TrackerClassic.tsx:77"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:12:17.907Z",
+    "comment": "Same as v2.",
+    "tags": [
+      "move"
+    ]
+  },
+  "v2-income-page-intro": {
+    "id": "v2-income-page-intro",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Income page intro",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "source": "src/components/TrackerV2.tsx:214"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:13:00.607Z",
+    "reason": "Prose above a list that explains what the list is. The heading already does that.",
+    "tags": [
+      "remove"
+    ],
+    "hidden": true
+  },
+  "v2-year-history": {
+    "id": "v2-year-history",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Full-year history",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "reviewId": "v2-year-history",
+      "source": "src/components/TrackerV2.tsx:199",
+      "components": "TrackerV2 › Root › TrackerProvider › App",
+      "domPath": "div#root > div > div > main > div > div:nth-of-type(2)",
+      "text": "FULL-YEAR HISTORY Monthly countable income Hide future AUG — JUL — JUN — MAY — APR — MAR — FEB — JAN — 2026 total, all sources 1 active sour"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:13:18.257Z",
+    "comment": "Worth keeping, but a year of history answers 'what happened'. The product's question is 'what is about to happen' — this needs the coming months in it, marked with their paycheck counts.",
+    "reason": "The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months.",
+    "verdict": "revise"
+  },
+  "classic-year-total": {
+    "id": "classic-year-total",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Annual total",
+    "status": "done",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/components/TrackerClassic.tsx:128"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:13:24.390Z",
+    "comment": "No limit is annual. Below the month grid.",
+    "tags": [
+      "move"
+    ]
+  },
+  "workrecord-phase-band-twp": {
+    "id": "workrecord-phase-band-twp",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Repeated TWP band",
+    "status": "done",
+    "anchor": {
+      "layout": "workrecord",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:308"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:10:59.091Z",
+    "reason": "The phase is stated in the status section and again in a band across the months. One of them is enough, and the one attached to the months is the more useful.",
+    "tags": [
+      "remove"
+    ],
+    "verdict": "unsure"
+  },
+  "workrecord-phase-band-sga": {
+    "id": "workrecord-phase-band-sga",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Repeated SGA band",
+    "status": "done",
+    "anchor": {
+      "layout": "workrecord",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:322"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:09:55.458Z",
+    "reason": "\"SGA applies · TWP complete\" appears twice on one screen.",
+    "tags": [
+      "remove"
+    ]
+  },
+  "workrecord-headline-year-total": {
+    "id": "workrecord-headline-year-total",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Annual total in the headline",
+    "status": "done",
+    "anchor": {
+      "layout": "workrecord",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:291"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:10:11.941Z",
+    "comment": "The headline slot should hold the month you are in and how much room is left in it.",
+    "tags": [
+      "move"
+    ]
+  },
+  "workrecord-hotbar": {
+    "id": "workrecord-hotbar",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Months that need attention",
+    "status": "done",
+    "anchor": {
+      "layout": "workrecord",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx (near line 545, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T06:10:29.239Z",
+    "comment": "The best idea in any of the seven layouts: a strip of exactly the months that need you. It should be the first thing on this layout and it should exist on all of them."
+  },
+  "onboarding-payday-first": {
+    "id": "onboarding-payday-first",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Onboarding does not ask for the payday",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/Onboarding.tsx (near line 23, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:58:04.940Z",
+    "comment": "Onboarding collects a job and an amount. Without a payday and a frequency the app cannot name a single 3- or 5-paycheck month, which is most of what it is for. Those two fields are the difference between general advice and a calendar, and they should be asked for in the first minute — with the reason attached."
+  },
+  "signin-subtitle": {
+    "id": "signin-subtitle",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Sign-in subtitle",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/SignInScreen.tsx (near line 43, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:58:18.357Z",
+    "comment": "\"Sign in to your work record\" is fine. What is missing is any statement that the data stays on the device unless cloud sync is on — which is the question anyone entering benefits income asks first.",
+    "verdict": "unsure"
+  },
+  "terms-gate-length": {
+    "id": "terms-gate-length",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Terms, privacy and liability gate",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/TermsGate.tsx (near line 18, unverified)"
+    },
+    "createdAt": "2026-09-01T04:41:28.742088Z",
+    "updatedAt": "2026-09-01T05:58:36.707Z",
+    "comment": "It has to be there and it has to be honest. Worth checking that the one line that actually matters — this is not legal or benefits advice, and SSA's determination is the one that counts — is readable without opening anything.",
+    "verdict": "unsure"
+  },
+  "ledger-header-subtitle": {
+    "id": "ledger-header-subtitle",
+    "kind": "delete",
+    "origin": "suggested",
+    "verdict": "approved",
+    "label": "Header subtitle",
+    "reason": "\"Financial Analysis Ledger\" names the skin, not the user's TWP or SGA position.",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-header-subtitle",
+      "source": "src/components/ledger/TrackerLedger.tsx:165",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div:nth-of-type(1) > div",
+      "text": "FINANCIAL ANALYSIS LEDGER Header subtitle"
+    },
+    "createdAt": "2026-09-01T05:15:02.697Z",
+    "updatedAt": "2026-09-01T05:42:19.741Z",
+    "hidden": true,
+    "thread": [
+      {
+        "from": "you",
+        "text": "Remove it",
+        "at": "2026-09-01T05:42:19.741Z"
+      }
+    ]
+  },
+  "ledger-year-chart": {
+    "id": "ledger-year-chart",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Annual income chart",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-year-chart",
+      "source": "src/components/ledger/TrackerLedger.tsx:356",
+      "components": "TrackerLedger › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(2)",
+      "hooks": "lg-border-b",
+      "text": "2026 COUNTABLE INCOME BY MONTH W2 Self-Emp ceiling $2,113 SGA $1,690 TWP $1,210 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC Annual incom"
+    },
+    "createdAt": "2026-09-01T05:29:02.774Z",
+    "updatedAt": "2026-09-01T05:43:39.389Z",
+    "comment": "Do what you think is best I trust your judgement",
+    "tags": [
+      "confusing"
+    ],
+    "reason": "Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.",
+    "verdict": "unsure"
+  },
+  "ledger-analysis-summary": {
+    "id": "ledger-analysis-summary",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Repeated summary strip",
+    "reason": "All four tiles repeat the header stats a screen above — same YTD, same TWP count, same SGA count.",
+    "status": "done",
+    "hidden": true,
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-analysis-summary",
+      "source": "src/components/ledger/LedgerAnalysis.tsx:223",
+      "components": "LedgerAnalysis › TrackerLedger › Root › TrackerProvider",
+      "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-analysis:nth-of-type(4) > div:nth-of-type(4)",
+      "text": "YTD TOTAL COUNTABLE $0.00 W2 / SELF-EMP SPLIT $0.00 · $0.00 TRIAL WORK PERIOD 0 of 9 months used MONTHS AT OR OVER SGA 0 months Repeated sum"
+    },
+    "createdAt": "2026-09-01T05:30:56.990Z",
+    "updatedAt": "2026-09-01T05:43:41.707Z"
+  },
+  "el-1oeaejz": {
+    "id": "el-1oeaejz",
+    "kind": "stow",
+    "origin": "user",
+    "label": "Income Sources",
+    "status": "done",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-stat-sources",
+      "source": "src/components/ledger/TrackerLedger.tsx:347",
+      "components": "StatTile › TrackerLedger › Root › TrackerProvider",
+      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(5) > div.lg-stat-tile",
+      "hooks": "lg-stat-tile",
+      "text": "INCOME SOURCES 1 1 W2 · 0 SE"
+    },
+    "createdAt": "2026-09-01T05:34:38.957Z",
+    "updatedAt": "2026-09-01T05:43:43.307Z",
+    "hidden": true
+  },
+  "el-1eggpcy": {
+    "id": "el-1eggpcy",
+    "kind": "stow",
+    "origin": "user",
+    "label": "Add or edit W-2 and 1099 income.",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "page": "Income",
+      "reviewId": "v2-income-page-intro",
+      "source": "src/components/TrackerV2.tsx:221",
+      "components": "TrackerV2 › Root › TrackerProvider › App",
+      "domPath": "div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div > p",
+      "text": "Add or edit W-2 and 1099 income."
+    },
+    "createdAt": "2026-09-01T05:51:43.758Z",
+    "updatedAt": "2026-09-01T06:13:57.056Z",
+    "hidden": true
+  },
+  "v3-journey-trail": {
+    "id": "v3-journey-trail",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Numbered workspace trail",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Overview",
+      "reviewId": "v3-journey-trail",
+      "source": "src/components/TrackerV3.tsx:171",
+      "components": "TrackerV3 › Root › TrackerProvider › App",
+      "domPath": "div#root > div:nth-of-type(1) > div > header > div:nth-of-type(1) > div:nth-of-type(2) > div",
+      "text": "1 Overview 2 3 Numbered workspace trail"
+    },
+    "createdAt": "2026-09-01T06:01:19.542Z",
+    "updatedAt": "2026-09-01T06:14:22.524Z",
+    "comment": "We need to redesign this as a breadcrumb trail only so the user can trace back their steps",
+    "reason": "The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.",
+    "verdict": "revise"
+  },
+  "workrecord-header-transfer": {
+    "id": "workrecord-header-transfer",
+    "kind": "delete",
+    "origin": "suggested",
+    "label": "Header import / export",
+    "reason": "These maintenance actions belong in Settings and compete with live benefit signals.",
+    "status": "done",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "reviewId": "workrecord-header-transfer",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:210",
+      "components": "TrackerWorkRecord › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-payguard.pg-workrecord > header.pg-topbar > div > div:nth-of-type(3) > div:nth-of-type(2)",
+      "text": "Import Export Header import / export"
+    },
+    "createdAt": "2026-09-01T06:09:11.058Z",
+    "updatedAt": "2026-09-01T06:10:53.241Z"
   }
 }

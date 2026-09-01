@@ -577,3 +577,67 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+
+/* --- How much the figure above is worth ------------------------------------
+ *
+ * A line under the headline number saying what the app can actually promise
+ * about it, and the one thing that would improve it. Not a panel: precision
+ * is a property of an answer, not a room in the app, and a data-quality card
+ * would be one more section competing with the month.
+ *
+ * It sits back on purpose. This is a footnote on a number until you want it,
+ * and then it is a button that opens the field it is asking for.
+ */
+.precision-line {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 0.4rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  margin-top: 0.75rem;
+  background: transparent;
+  padding: 0.25rem 0;
+  color: var(--color-muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.precision-line > svg {
+  position: relative;
+  top: 0.15rem;
+}
+
+.precision-level {
+  flex: none;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.precision-why {
+  min-width: 0;
+}
+
+/* Estimated is the one worth acting on, so it is the one that carries any
+   colour at all. The other two are statements of fact. */
+.precision-line[data-level='estimated'] .precision-level {
+  color: var(--color-warn);
+}
+
+.precision-line[data-level='exact'] .precision-level {
+  color: var(--color-good);
+}
+
+/* Pressable, where there is a source editor to open. */
+.precision-line[data-fix] {
+  padding-inline: 0.5rem;
+  margin-inline: -0.5rem;
+  cursor: pointer;
+  transition: background-color 140ms, color 140ms;
+}
+
+.precision-line[data-fix]:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: var(--color-foreground);
+}

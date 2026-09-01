@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import {
-  ArrowRight, Cloud, CloudOff, Download, FileText, HelpCircle, LogOut, Trash2, Upload
+  ArrowRight, Cloud, CloudOff, Download, FileText, HelpCircle, LayoutGrid, LogOut,
+  Trash2, Upload
 } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { displayNameFor, initialsFor } from '../auth/session';
@@ -10,7 +11,7 @@ import { Sheet } from './Sheet';
 import { Segmented, SwatchPicker, Switch } from './ui';
 import { TermsContent } from './TermsContent';
 import { HelpSpread } from './HelpSpread';
-import { LayoutSwitcher } from './LayoutSwitcher';
+import { LAYOUTS, LayoutSwitcher } from './LayoutSwitcher';
 
 /** Three representative colours per sub-theme: surface, accent, secondary. */
 const SUB_THEMES: { id: LedgerTheme; label: string; colors: [string, string, string] }[] = [
@@ -137,6 +138,12 @@ export function SettingsPanel({
 }) {
   const { data, ui, replaceAll } = useTracker();
   const [helpSpreadOpen, setHelpSpreadOpen] = useState(false);
+  /* The layout list is seven options with a line of prose each — a screenful
+     inside a sheet you opened to do something else. It is a choice you make
+     once, so it gets a row that names the current one and a page of its
+     own. */
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const layoutName = LAYOUTS.find((option) => option.id === layout)?.label ?? 'Choose';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function exportJson() {
@@ -190,10 +197,20 @@ export function SettingsPanel({
         }}
       />
 
+      {/* First, because it is the only thing in here that changes the
+          numbers: which limit applies to you — $1,210 a month against your
+          nine trial months, or $1,690 once they are gone — is decided by
+          this and nothing else on the page. */}
+      <Section title="Benefit status">
+        <LinkRow label="Trial work period, SGA, and the simulator" onClick={onOpenStatus} />
+      </Section>
+
       <Section title="Account">
         <AccountSection />
       </Section>
 
+      {/* Theme, palette and layout were three headings for one question:
+          how this should look. */}
       <Section title="Appearance">
         <Segmented
           value={theme}
@@ -205,24 +222,22 @@ export function SettingsPanel({
             { id: 'dark', label: 'Dark' }
           ]}
         />
-      </Section>
-
-      {subTheme && onSubThemeChange ? (
-        <Section title="Palette">
+        {subTheme && onSubThemeChange ? (
           <SwatchPicker
-            label="Layout palette"
+            label="Colour"
             value={subTheme}
             onChange={onSubThemeChange}
             options={SUB_THEMES}
           />
-        </Section>
-      ) : null}
-
-      <Section title="Layout">
-        <LayoutSwitcher value={layout} onChange={onLayoutChange} />
+        ) : null}
+        <LinkRow
+          icon={<LayoutGrid className="size-5 text-muted-foreground" />}
+          label={`Layout · ${layoutName}`}
+          onClick={() => setLayoutOpen(true)}
+        />
       </Section>
 
-      <Section title="Data & backups">
+      <Section title="Your data">
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -239,28 +254,34 @@ export function SettingsPanel({
             <Upload className="size-4 text-muted-foreground" /> Import JSON
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={onReset}
+          className="mt-1 flex items-center justify-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3.5 text-base font-semibold text-destructive hover:bg-destructive/15"
+        >
+          <Trash2 className="size-5" /> Clear all data on this device
+        </button>
       </Section>
 
-      <div className="flex flex-col gap-2.5">
-        <LinkRow label="Review benefit status & simulator" onClick={onOpenStatus} />
+      <Section title="Help">
         <LinkRow
           icon={<HelpCircle className="size-5 text-muted-foreground" />}
           label="How income spreads & mileage"
           onClick={() => setHelpSpreadOpen(true)}
         />
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex items-center justify-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3.5 text-base font-semibold text-destructive hover:bg-destructive/15"
-        >
-          <Trash2 className="size-5" /> Clear all data on this device
-        </button>
-      </div>
+      </Section>
 
       <InfoNote>
         Earnings data is stored only on this device. Turning on sync above copies it to your signed-in
         account so your other devices can see it too.
       </InfoNote>
+
+      {layoutOpen ? (
+        <Sheet title="Layout" eyebrow="Appearance" onClose={() => setLayoutOpen(false)}>
+          <LayoutSwitcher value={layout} onChange={onLayoutChange} />
+        </Sheet>
+      ) : null}
 
       {helpSpreadOpen ? <HelpSpread onClose={() => setHelpSpreadOpen(false)} /> : null}
     </Sheet>

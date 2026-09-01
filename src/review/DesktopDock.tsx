@@ -14,12 +14,13 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronDown, ChevronLeft, ChevronRight, Columns2, EyeOff, ListChecks,
-  MessageSquarePlus, MousePointerSquareDashed, PanelBottom, PanelLeft, PanelRight, ScanSearch,
-  SlidersHorizontal, Trash2, Undo2, X
+  AlignLeft, Archive, ChevronDown, Clock, Columns2, EyeOff, ListChecks,
+  MessageSquarePlus, Monitor, Moon, MousePointerSquareDashed, PanelBottom,
+  PanelLeft, PanelRight, ScanSearch, Sun, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool, useReorder } from './DockParts';
+import { useTracker } from '../state/TrackerProvider';
 
 const RAIL_KEY = 'pg-review-rail-v1';
 
@@ -58,6 +59,16 @@ const SIDES = [
   ['left', PanelLeft, 'Left'],
   ['right', PanelRight, 'Right'],
   ['bottom', PanelBottom, 'Bottom']
+] as const;
+
+/* The console's own furniture never changes colour, on purpose — but the
+   thing under review does, and light and dark are two different reviews.
+   It shares the edge menu because both answer the same question, "how am I
+   looking at this", and neither earns a control of its own in the bar. */
+const THEMES = [
+  ['system', Monitor, 'System'],
+  ['light', Sun, 'Light'],
+  ['dark', Moon, 'Dark']
 ] as const;
 
 function loadRail(): Rail {
@@ -113,7 +124,9 @@ export function DesktopDock({
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
-  /** Kept by the console so it survives a reload, like every other panel. */
+  /** The verbs fold like every other room. They are never far — the keys
+   *  still work with the column shut — but nothing in the console is fixed
+   *  furniture you cannot get out of the way. */
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
   /** The sections, in the order they are stacked. Dragged by their grips and
@@ -153,6 +166,7 @@ export function DesktopDock({
   hiddenCount: number;
   hiddenList: ReactNode;
 }) {
+  const { ui, setUi } = useTracker();
   const [rail, setRail] = useState(loadRail);
   const [room, setRoom] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
   const { side } = rail;
@@ -173,7 +187,11 @@ export function DesktopDock({
   const [sidesOpen, setSidesOpen] = useState(false);
   // Down a side the sections stack, so they are sorted top to bottom; along
   // the bottom they sit in a row, and the same drag has to read left to right.
-  const sort = useReorder(order, onOrder, flat ? 'x' : 'y');
+  /* The verbs are a room again — a column at the head of the row rather than
+     a band across the top of it — so they are in the stack with the rest,
+     dragged by the same grip and folded by the same chevron. */
+  const panelOrder = order;
+  const sort = useReorder(panelOrder, onOrder, flat ? 'x' : 'y');
   /** The split being dragged: which section is growing or shrinking, and how
    *  wide it was when the drag started. */
   const split = useRef<{ key: string; at: number; from: number } | null>(null);
@@ -273,7 +291,7 @@ export function DesktopDock({
    *  of its own — and the row always adds up however the others are dragged. */
   const colStyle = (key: string) => {
     if (!flat || !isOpen(key)) return undefined;
-    const openKeys = order.filter(isOpen);
+    const openKeys = panelOrder.filter(isOpen);
     if (key === openKeys[openKeys.length - 1]) return undefined;
     const width = rail.cols?.[key];
     if (!width) return undefined;
@@ -291,6 +309,9 @@ export function DesktopDock({
   );
 
   const sections: Record<string, ReactNode> = {
+    /* The verbs — what you do to the page rather than to any one room. A
+       fold like the others: the keys still work with the column shut, so
+       folding it costs nothing but the width it was taking. */
     tools: (
       <Fold
         key="tools"
@@ -298,59 +319,60 @@ export function DesktopDock({
         style={colStyle('tools')}
         onGrip={sort.grip('tools')}
         dragging={sort.dragging === 'tools'}
-        icon={SlidersHorizontal}
+        icon={AlignLeft}
         name="Tools"
         tone="glass"
-        hint={mode === 'off' ? undefined
+        hint={mode === 'off' && !commenting ? undefined
           : mode === 'audit' ? 'Audit'
-            : mode === 'pick' ? (commenting ? 'Comment' : 'Select') : 'A / B'}
+            : commenting ? 'Comment'
+              : mode === 'pick' ? 'Select' : 'A / B'}
         open={toolsOpen}
         onToggle={() => onTools(!toolsOpen)}
       >
-        <div className="review-dock-bar">
-          <Tool
-            icon={Trash2}
-            label="Audit"
-            hint="a"
-            on={mode === 'audit'}
-            badge={auditTotal ? (auditLeft || '✓') : undefined}
-            badgeDone={auditTotal > 0 && auditLeft === 0}
-            onClick={() => onMode(mode === 'audit' ? 'off' : 'audit')}
-          />
-          <Tool
-            icon={MousePointerSquareDashed}
-            label="Select"
-            hint="p"
-            on={mode === 'pick'}
-            onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
-          />
-          {variants ? (
-            <Tool
-              icon={Columns2}
-              label="A / B"
-              hint="v"
-              on={mode === 'variants'}
-              badge={variants}
-              onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}
-            />
-          ) : null}
-          <Tool
-            icon={MessageSquarePlus}
-            label="Comment"
-            hint="c"
-            on={commenting}
-            onClick={onCommentMode}
-          />
-          <Tool
-            icon={Undo2}
-            label="Undo"
-            hint="u"
-            disabled={!undoDepth}
-            badge={undoDepth || undefined}
-            onClick={onUndo}
-          />
-          <Tool icon={X} label="Close" hint="esc" onClick={onClose} />
-        </div>
+            <div
+              className="review-rail-tools review-dock-bar"
+              role="toolbar"
+              aria-label="Review tools"
+            >
+              <Tool
+                icon={ScanSearch}
+                label="Audit"
+                hint="a"
+                on={mode === 'audit'}
+                badge={auditTotal ? (auditLeft || '✓') : undefined}
+                badgeDone={auditTotal > 0 && auditLeft === 0}
+                onClick={() => onMode(mode === 'audit' ? 'off' : 'audit')}
+              />
+              <Tool
+                icon={MousePointerSquareDashed}
+                label="Select"
+                hint="p"
+                on={mode === 'pick'}
+                onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
+              />
+              {variants ? (
+                <Tool
+                  icon={Columns2}
+                  label="A / B"
+                  hint="v"
+                  on={mode === 'variants'}
+                  badge={variants}
+                  onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}
+                />
+              ) : null}
+              <Tool
+                icon={MessageSquarePlus}
+                label="Comment"
+                hint="c"
+                on={commenting}
+                onClick={onCommentMode}
+              />
+              {/* Undo and Close are not tools. The tools act on the page;
+                  these two act on the console — one steps back through what
+                  it did, the other leaves. They are in the band at the top
+                  now, with the rest of the console's own furniture, where
+                  they are in reach whether or not this panel is folded. */}
+            </div>
       </Fold>
     ),
 
@@ -452,7 +474,7 @@ export function DesktopDock({
       )}
 
       <header className="review-rail-head">
-        <ScanSearch className="size-4" />
+        <Clock className="size-4" />
         <strong>Review</strong>
         {mode !== 'off' ? (
           <span className="review-rail-mode">
@@ -461,6 +483,21 @@ export function DesktopDock({
         ) : null}
         {journalNew ? <span className="review-rail-count" data-new>{journalNew} new</span>
           : openCount ? <span className="review-rail-count">{openCount}</span> : null}
+
+        <button
+          type="button"
+          className="review-rail-undo"
+          disabled={!undoDepth}
+          onClick={onUndo}
+          title={undoDepth
+            ? `Undo · u · ${undoDepth} step${undoDepth === 1 ? '' : 's'} back`
+            : 'Nothing to undo'}
+          aria-label="Undo the last change"
+        >
+          <Undo2 className="size-3.5" />
+          {undoDepth ? <span>{undoDepth}</span> : null}
+        </button>
+
 
         {/* Which edge it lives on. A menu rather than a row of three: the
             trigger wears the edge it is on, so the band shows the current
@@ -472,8 +509,8 @@ export function DesktopDock({
             className="review-rail-side-now"
             aria-haspopup="menu"
             aria-expanded={sidesOpen}
-            aria-label={`Docked ${side === 'bottom' ? 'along the bottom' : `on the ${side}`} — change`}
-            title={side === 'bottom' ? 'Along the bottom' : `On the ${side}`}
+            aria-label={`Dock edge and theme — docked ${side === 'bottom' ? 'along the bottom' : `on the ${side}`}`}
+            title="Dock edge · theme"
             onClick={() => setSidesOpen((current) => !current)}
           >
             {(() => {
@@ -485,6 +522,7 @@ export function DesktopDock({
 
           {sidesOpen ? (
             <span className="review-rail-side-menu" role="menu">
+              <span className="review-rail-menu-label">Edge</span>
               {SIDES.map(([which, Icon, name]) => (
                 <button
                   key={which}
@@ -506,22 +544,41 @@ export function DesktopDock({
                   {name}
                 </button>
               ))}
+
+              <span className="review-rail-menu-label">Theme</span>
+              {THEMES.map(([which, Icon, name]) => (
+                <button
+                  key={which}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={ui.theme === which}
+                  data-on={ui.theme === which || undefined}
+                  onClick={() => {
+                    setSidesOpen(false);
+                    setUi({ theme: which });
+                  }}
+                >
+                  <Icon className="size-3.5" />
+                  {name}
+                </button>
+              ))}
             </span>
           ) : null}
         </span>
 
-        {/* Points at the edge it folds away to, which is a different edge
-            depending on where the rail is. */}
+        {/* The corner. There was a chevron here that folded the rail away
+            and a Close in the tools that shut it — two controls, both of
+            which put the console behind the same tab, one of which also let
+            go of whatever mode you were in. One control, in the corner every
+            close in every window has been in. */}
         <button
           type="button"
-          className="review-rail-min"
-          onClick={onToggle}
-          title="Fold the rail away — the review keeps running"
-          aria-label="Fold the review rail away"
+          className="review-rail-quit"
+          onClick={onClose}
+          title="Close · esc — the tab brings it back"
+          aria-label="Close the review console"
         >
-          {side === 'left' ? <ChevronLeft className="size-4" />
-            : side === 'bottom' ? <ChevronDown className="size-4" />
-              : <ChevronRight className="size-4" />}
+          <X className="size-4" />
         </button>
       </header>
 
@@ -529,8 +586,8 @@ export function DesktopDock({
         {/* Along the bottom, a handle sits between each pair of open panels
             and drags the one on its left. Only between two open ones: a shut
             panel is a spine of its own name and has no width to give. */}
-        {order.map((key, index) => {
-          const previous = order.slice(0, index).reverse().find((other) => isOpen(other));
+        {panelOrder.map((key, index) => {
+          const previous = panelOrder.slice(0, index).reverse().find((other) => isOpen(other));
           const grip = flat && previous && isOpen(key) ? (
             <span
               key={`${key}-split`}

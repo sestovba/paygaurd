@@ -23,7 +23,8 @@ function headline(note: ReviewNote): string {
   if (note.members) return `GROUP — ${note.tray?.name ?? note.label}`;
   if (note.kind === 'choice') return `PICKED "${note.choice}" — ${note.label}`;
   if (note.verdict === 'approved') return `REMOVE — ${note.label}`;
-  if (note.verdict === 'rejected') return `KEEP (my suggestion rejected) — ${note.label}`;
+  if (note.verdict === 'unsure') return `UNSURE — ${note.label}`;
+  if (note.verdict === 'rejected') return `DISMISSED (not doing this) — ${note.label}`;
   if (note.placement) return `MOVE — ${note.label}`;
   if (note.stow) return `ARCHIVED — ${note.label}`;
   if (note.hidden) return `HIDDEN — ${note.label}`;

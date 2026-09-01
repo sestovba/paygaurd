@@ -380,6 +380,9 @@ function RootPane({
             <SafetyHero
               onTakeQuiz={() => onOpen({ kind: 'quiz' })}
               onReviewStatus={() => onOpen({ kind: 'verify' })}
+              onFixStream={(gap) => onOpen(gap.kind === 'schedule'
+                ? { kind: 'payday', streamId: gap.streamId }
+                : { kind: 'stream', streamId: gap.streamId })}
             />
             <PaycheckRadar
               onOpenMonth={(month) => onOpen({ kind: 'month', month })}

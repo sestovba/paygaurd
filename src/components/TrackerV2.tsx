@@ -185,7 +185,13 @@ export function TrackerV2() {
                   onOpenMonth={(m) => setDetail({ kind: 'month', month: m })}
                 />
                 <div className="grid gap-4 xl:grid-cols-12">
-                  <SafetyHero onTakeQuiz={() => setDetail({ kind: 'quiz' })} onReviewStatus={() => setDetail({ kind: 'verify' })} />
+                  <SafetyHero
+                    onTakeQuiz={() => setDetail({ kind: 'quiz' })}
+                    onReviewStatus={() => setDetail({ kind: 'verify' })}
+                    onFixStream={(gap) => setDetail(gap.kind === 'schedule'
+                      ? { kind: 'payday', streamId: gap.streamId }
+                      : { kind: 'stream', streamId: gap.streamId })}
+                  />
                   <PaycheckRadar onOpenMonth={(m) => setDetail({ kind: 'month', month: m })} onCheckNotifications={() => setNotificationsOpen(true)} />
                 </div>
               </div>

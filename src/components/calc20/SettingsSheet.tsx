@@ -8,7 +8,8 @@ import {
   rulesFor, isExactYear, knownYears, mileageRatesForYear, TWP_SELF_EMPLOYMENT_HOURS
 } from '../../domain/rules';
 import { TRIAL_MONTH_LIMIT, ROLLING_WINDOW } from '../../domain/trialWork';
-import { CloudIcon, DownloadIcon, TrashIcon, UploadIcon, ChevronRightIcon } from './Icons';
+import { CheckIcon, CloudIcon, DownloadIcon, TrashIcon, UploadIcon, ChevronRightIcon } from './Icons';
+import { LAYOUT_GROUPS } from '../LayoutSwitcher';
 import { HelpSpread } from './HelpSpread';
 import { SheetSurface } from './SheetSurface';
 import { TermsViewSheet } from './TermsViewSheet';
@@ -76,7 +77,8 @@ function SettingsMainContent({
   onTerms: () => void;
 }) {
   const {
-    data, ui, setUi, downloadJson, importFile, clearYear, setTwpAssessment
+    data, ui, setUi, downloadJson, importFile, clearYear, resetAll, setTwpAssessment,
+    appLayout, setAppLayout
   } = useTracker();
   const [tab, setTab] = useState<SettingsTab>('status');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -256,7 +258,7 @@ function SettingsMainContent({
 
           {tab === 'appearance' && (
           <div className="field">
-            <span className="eyebrow">Appearance</span>
+            <span className="eyebrow">Theme</span>
             <div className="segmented" role="group" aria-label="Theme">
               {([
                 ['system', 'System'],
@@ -292,6 +294,46 @@ function SettingsMainContent({
           </div>
           )}
 
+          {tab === 'appearance' && (
+          <div className="field">
+            <span className="eyebrow">Layout</span>
+            {/* Grouped, not flattened. Seven rows in a column is a list you
+                read start to finish; three named groups is a question with
+                three answers, and the heading tells you which one you are
+                looking for before you read any of them. */}
+            {LAYOUT_GROUPS.map((group) => (
+              <div className="c20-layout-group" key={group.title}>
+                <span className="c20-layout-group__title">{group.title}</span>
+                {group.options.map((option) => {
+                  const current = appLayout === option.id;
+                  return (
+                    <button
+                      className="rows rows--nav"
+                      key={option.id}
+                      type="button"
+                      aria-pressed={current}
+                      onClick={() => setAppLayout(option.id)}
+                    >
+                      <div className="rows__row">
+                        <div className="grow">
+                          <div className="rows__label rows__label--strong">{option.label}</div>
+                          <div className="help-note">{option.description}</div>
+                        </div>
+                        {current ? <CheckIcon size={16} /> : <ChevronRightIcon size={16} />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+            <p className="help-note">
+              Every layout reads and writes the same tracker — the jobs,
+              months and paychecks below follow you between them. Saved on
+              this device.
+            </p>
+          </div>
+          )}
+
           {tab === 'data' && (
           <div className="field">
             <span className="eyebrow">Your data</span>
@@ -308,6 +350,13 @@ function SettingsMainContent({
               <p className="help-note">
                 Removes entered income, hours, and paychecks for {ui.year} from every
                 stream. It does not touch app settings or layout preferences.
+              </p>
+              <button className="danger-button button--start" type="button" onClick={resetAll}>
+                <TrashIcon size={17} /> Clear all data on this device
+              </button>
+              <p className="help-note">
+                Every year, every stream, and your trial work record. This one
+                cannot be undone, so export first.
               </p>
               <input
                 ref={fileRef}

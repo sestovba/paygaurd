@@ -708,7 +708,7 @@ export function StreamsSection({
                 {open ? (
                   <div className="stream-card__panel" onClick={stop}>
                     {fieldChips()}
-                    {stream.type === 'ten99' && stream.spread !== 'perMonth' ? (
+                    {stream.type === 'ten99' ? (
                       <AnnualTotalEntry stream={stream} />
                     ) : null}
                     {gridFor(stream)}

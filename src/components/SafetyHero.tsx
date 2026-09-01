@@ -5,14 +5,21 @@ import { longMonthName, todayMonth, yearOf } from '../domain/months';
 import { monthStatus } from '../domain/earnings';
 import { activeThreshold, benefitPhase, trialWorkStatus, TRIAL_MONTH_LIMIT } from '../domain/trialWork';
 import { TrialMeter } from './TrialMeter';
+import { PrecisionLine } from './PrecisionLine';
+import { precisionFor } from '../domain/precision';
+import type { PrecisionGap } from '../domain/precision';
 import { ReviewVariants } from '../review/ReviewVariants';
 
 /** The one thing this app exists to answer: are you safe right now. */
 export function SafetyHero({
-  onTakeQuiz, onReviewStatus
+  onTakeQuiz, onReviewStatus, onFixStream
 }: {
   onTakeQuiz: () => void;
   onReviewStatus: () => void;
+  /** Opens the source that is holding the reading back, at the field it is
+   *  missing. Optional: a layout without a source editor to open still shows
+   *  the reading, it just cannot offer the fix. */
+  onFixStream?: (gap: PrecisionGap) => void;
 }) {
   const { data, ui } = useTracker();
   const now = todayMonth();
@@ -21,6 +28,7 @@ export function SafetyHero({
   const threshold = activeThreshold(data, asOf);
   const status = monthStatus(data, asOf);
   const twp = trialWorkStatus(data, asOf);
+  const precision = precisionFor(data, asOf);
 
   if (phase === 'unknown' || phase === 'verifyComplete') {
     return (
@@ -81,6 +89,11 @@ export function SafetyHero({
             : over ? 'TWP month used' : `Near ${phase === 'trialWork' ? 'TWP' : 'SGA'}`}
         </span>
       </div>
+
+      {/* What the figure above is worth. Under the number, not in a panel of
+          its own: precision is a property of this answer, and a card about
+          data quality would be one more section competing with the month. */}
+      <PrecisionLine reading={precision} onFix={onFixStream} />
 
       {threshold ? (
         <ReviewVariants

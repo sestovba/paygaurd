@@ -11,8 +11,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronUp, Columns2, EyeOff, ListChecks,
-  MessageSquarePlus, MousePointerSquareDashed, SlidersHorizontal, Trash2, Undo2, X
+  AlignLeft, Archive, ChevronUp, Columns2, EyeOff, ListChecks,
+  MessageSquarePlus, MousePointerSquareDashed, ScanSearch, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool, useReorder } from './DockParts';
@@ -138,7 +138,7 @@ export function MobileDock({
         section="tools"
         onGrip={sort.grip('tools')}
         dragging={sort.dragging === 'tools'}
-        icon={SlidersHorizontal}
+        icon={AlignLeft}
         name="Tools"
         tone="glass"
         hint={mode === 'off' ? undefined
@@ -149,7 +149,7 @@ export function MobileDock({
       >
         <div className="review-dock-bar">
           <Tool
-            icon={Trash2}
+            icon={ScanSearch}
             label="Audit"
             on={mode === 'audit'}
             badge={auditTotal ? (auditLeft || '✓') : undefined}

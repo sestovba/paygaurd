@@ -104,7 +104,15 @@ export function TrackerClassic() {
         <div className="flex flex-col gap-6">
           <div className="grid gap-4 xl:grid-cols-12">
             <ActionBanner onSetPayday={setPaydayStreamId} onReviewStream={setOpenStreamId} onOpenMonth={setOpenMonth} />
-            <SafetyHero onTakeQuiz={() => setQuizOpen(true)} onReviewStatus={() => setVerifyOpen(true)} />
+            <SafetyHero
+              onTakeQuiz={() => setQuizOpen(true)}
+              onReviewStatus={() => setVerifyOpen(true)}
+              /* A payday has a sheet of its own; anything else needs the
+                 whole source editor. */
+              onFixStream={(gap) => (gap.kind === 'schedule'
+                ? setPaydayStreamId(gap.streamId)
+                : setOpenStreamId(gap.streamId))}
+            />
             <PaycheckRadar onOpenMonth={setOpenMonth} onCheckNotifications={() => setNotificationsOpen(true)} />
           </div>
           <ReviewTarget

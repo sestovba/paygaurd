@@ -35,6 +35,7 @@ one thing in the app and another in the file is worth nothing.
 |---|---|---|
 | **Select** | Designate what the next action applies to — an element on the page, or rows in the journal. Same act, two kinds of object. | Audit. |
 | **Audit** | Walk the cuts the AI proposed, answering each. | Select. |
+| **Locate** | Take you to the element: switch layout and open the page if that is what it takes, scroll it into view, and flash it. | Select; Comment. |
 | **Comment** | Say what should change about an element. Starts a note. | Reply. |
 | **Reply** | Add to an existing note's thread. | Comment. |
 | **Remove** | Take the element out of the product. A decision for the code. | Delete; Hide; Archive. |
@@ -43,7 +44,9 @@ one thing in the app and another in the file is worth nothing.
 | **Archive** | Carry the element onto a shelf. Reversible, code untouched. | Hide; Remove. |
 | **Move** | Reposition the element in the layout. | Changing a note's state. |
 | **Close** | Leave the console, or shut an open row. | Done. |
-| **Undo** | Step back through decisions. Never touches the app's own data. | Delete. |
+| **Dismiss** | Take a note off the board. A proposal I made is remembered as dismissed so it is not made again; a note you wrote has nothing to remember, so it goes. Undo brings either back. | Remove; Delete. |
+| **Restore** | Put a hidden or archived element back on the page, where it came from. | Undo. |
+| **Undo** | Step back through decisions. Never touches the app's own data. | Delete; Restore. |
 
 ## State — where a note has got to
 
@@ -67,7 +70,7 @@ is still owed.
 | Verb | When | Report |
 |---|---|---|
 | **Remove** | A proposed cut you agreed with. | `REMOVE` |
-| **Keep** | A proposed cut you rejected. | `KEEP` |
+| **Unsure** | You looked at it and cannot call it. | `UNSURE` |
 | **Change** | You asked for something; my move. | `COMMENT` |
 | **Reply** | I answered; your move. | `COMMENT` |
 | **Move** | The element should sit somewhere else. | `MOVE` |
@@ -76,6 +79,61 @@ is still owed.
 | **Archived** | Carried onto a shelf. Nothing owed. | `ARCHIVED` |
 | **Hidden** | Switched off on the page. Nothing owed. | `HIDDEN` |
 | **Noted** | Marked, with nothing asked of it. | — |
+
+## Colour — what a Do is asking for
+
+One hue per verb, and grey for the ones asking for nothing. The colour is
+worn by the Do chip and by the row's own spine, so a screenful says what kind
+of pass it is going to be before a word of it is read.
+
+| Colour | Do |
+|---|---|
+| Red | **Remove** |
+| Green | **Picked** — an A/B answered is settled, which is the one thing green has ever meant here |
+| Blue | **Change**, **Reply**, **Apply** — the console's own colour, for the ones in conversation |
+| Violet | **Move** — not a cut at all, a relocation |
+| Amber | **Unsure** — what an open question looks like everywhere else in the console |
+| Grey | **Archived**, **Hidden**, **Noted** — nothing is owed on these |
+
+Amber and blue are also State's colours (To do, Commented). They do not
+collide: State is a pill on the right of the row and Do is a chip on the
+left, and a row is only ever wearing one of each.
+
+## Collisions fixed in this pass
+
+- **Keep** was a category for work nobody owes. A proposal turned down is a
+  finished conversation, and it sat on the board as a row you read and
+  skipped every time. Turning one down is now **Dismiss**, and it takes the
+  note off the board rather than filing it under a verb.
+- **Unsure** is the answer that was missing. Before it, a proposal you had
+  considered and could not call went back into the pile with the ones you had
+  not looked at yet.
+- **Find it**, in the queue, and **Locate**, on a journal row, were one act
+  under two names. It is **Locate**.
+- **Delete** was a bin on every row of a list you are mostly reading, behind
+  a confirm dialog — two frictions paying for one act, and it said the main
+  thing you might do to a note is destroy it. The row's way out is **Dismiss**.
+- **Show**, **Put back** and **Restore** were three words for putting a
+  hidden or archived element back — one on the on-page slot, one in the
+  Hidden panel, one on an archive chip. It is **Restore**.
+- The Hidden panel wore an eye on its header, an eye on every row's name and
+  an eye on every row's button: "hidden" three times before you reached the
+  label. The header keeps it; the rows say what pressing them does.
+- **Second look** (a state) and **Unsure** (a do) are close enough to be worth
+  watching. They are not the same: Second look is *filed, come back to it*;
+  Unsure is *not filed, cannot call it*. If they start being used
+  interchangeably, one of them is wrong.
+
+## Where the words live
+
+`DO` in `ReviewProvider.tsx` — one map, read by the chip on the row, the
+filter strip above the board, and (through `markdown.ts`) the report. Change
+a value there and the word changes in all three.
+
+What that map cannot do is add or remove an entry. `actOf` works each word
+out from the note itself: approving a cut *makes* it `remove`, archiving
+*makes* it `archived`. There is no field holding the word, so there is
+nothing for a delete to delete except the notes.
 
 ## Read — what you have looked at
 
@@ -103,6 +161,10 @@ be read and still be To do, or unread and already Done.
 - **Read** was in the Do column, which put a non-action among the actions and
   made every remark look like a chore. Reading is a **read mark**, nothing
   more.
+- **The note's name** was doing two acts at once: it opened nothing and
+  travelled to the element instead, while an icon beside it opened the note.
+  A name opens the thing it names. Travelling to the element is **Locate**,
+  and it has a button of its own.
 
 ## Deliberately one word for two objects
 

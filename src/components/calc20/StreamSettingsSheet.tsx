@@ -255,29 +255,17 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
             </>
           ) : (
             <>
+              {/* Where a spread toggle used to sit. This app has one rule for
+                * 1099 income and every layout follows it: a year figure is
+                * divided across the active months as it is entered, so the
+                * stored months are the months that count. Nothing to choose,
+                * and no way for two layouts to disagree about a total. */}
               <div className="field">
                 <span className="eyebrow">How this income spreads</span>
-                <div className="segmented">
-                  <button
-                    type="button"
-                    aria-pressed={(stream.spread ?? 'average') === 'average'}
-                    onClick={() => updateStream(stream.id, { spread: 'average' })}
-                  >
-                    Average
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={stream.spread === 'perMonth'}
-                    onClick={() => updateStream(stream.id, { spread: 'perMonth' })}
-                  >
-                    Per month
-                  </button>
-                </div>
                 <p className="help-note">
-                  Average divides the year's net across the months this stream was
-                  active — what SSA does when income cannot be tied to a month.
-                  Switching to Per month can change which past months crossed a
-                  threshold.
+                  The annual total on the card divides evenly across the months
+                  this stream was active — what SSA does when income cannot be
+                  tied to a month. Enter a month directly for an exact figure.
                 </p>
               </div>
 

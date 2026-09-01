@@ -88,8 +88,9 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
               note = 'Payday forecast: ' + count + (count === 1 ? ' scheduled check' : ' scheduled checks');
               if (heavy) note += ' — one more than usual';
               note += '. Enter gross earned during this month; pay-period dates control attribution.';
-            } else if (stream.type === 'ten99' && stream.spread === 'average') {
-              note = 'Averaged across the year, so a figure here spreads out.';
+            } else if (stream.type === 'ten99') {
+              note = 'Counts against this month alone. The annual total on the '
+                + 'card spreads a year figure evenly instead.';
             }
 
             return (

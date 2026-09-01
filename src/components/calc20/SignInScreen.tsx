@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import type { AuthState } from '../../auth/useAuth';
+import { loadUi } from '../../state/storage';
+import { useAppearance } from './appearance';
 
 /**
  * One button. Google is the only way in, so there is nothing to choose
@@ -43,4 +46,17 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
       </div>
     </div>
   );
+}
+
+/**
+ * The same screen, wearing this layout's chrome.
+ *
+ * Sign-in happens before the tracker — and so before any provider — so the
+ * saved preferences are read straight from storage. Someone who left the app
+ * on Calc20 comes back to Calc20's sign-in rather than to PayGuard's.
+ */
+export function Calc20SignInScreen({ auth }: { auth: AuthState }) {
+  const ui = useMemo(() => loadUi(), []);
+  useAppearance({ theme: ui.theme, glassStrength: ui.calc20.glassStrength });
+  return <SignInScreen auth={auth} />;
 }
