@@ -22,7 +22,7 @@ To answer a note, append to its `thread` array in review-notes.json with
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
 12 note(s) · 5 to delete · 3 parked · 1 A/B pick(s)
-Updated 2026-09-01 01:35
+Updated 2026-09-01 01:40
 
 ## Layout: ledger
 

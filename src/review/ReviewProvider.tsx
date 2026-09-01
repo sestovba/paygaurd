@@ -257,6 +257,9 @@ function ReviewConsole({
   /** A note that is off the page, and whose section is being marked on the
    *  page so it can be switched back on from where it belongs. */
   const [nest, setNest] = useState<string | null>(null);
+  /** The note you were actually looking for, when the marker is on the thing
+   *  that swallowed it. */
+  const [nestFor, setNestFor] = useState<string | null>(null);
   /** The row that is open for reading and answering. One at a time: two open
    *  rows is a page, not a list. */
   const [openRow, setOpenRow] = useState<string | null>(null);
@@ -1288,14 +1291,6 @@ function ReviewConsole({
 
   const journalBody = (
     <>
-            <p className="review-panel-sync">
-              {synced === 'file'
-                ? 'Written to review/REVIEW-NOTES.md'
-                : synced === 'local'
-                  ? 'This device only — dev server is not writing'
-                  : 'Saved on this device'}
-            </p>
-
             {/* Two scopes, contextual first. A journal that opens on every
                 note ever written about six layouts is an archive; what you
                 want when you tap it is what you just said about this screen. */}
@@ -1602,6 +1597,13 @@ function ReviewConsole({
                 them for the bottom of the sheet. */}
             {triage ? null : (
               <div className="review-panel-foot">
+                <span className="review-panel-sync" data-state={synced}>
+                  {synced === 'file'
+                    ? 'review/REVIEW-NOTES.md'
+                    : synced === 'local'
+                      ? 'This device only'
+                      : 'Saved on this device'}
+                </span>
                 <button type="button" onClick={() => navigator.clipboard?.writeText(notesToMarkdown(notes))}>
                   <Copy className="size-4" /> Copy for AI
                 </button>
@@ -1788,23 +1790,19 @@ function ReviewConsole({
               {note.tags.map((tag) => <span key={tag}>{tag}</span>)}
             </span>
           ) : null}
-          {said && !shown ? (
-            <span className="review-note-text">
-              {said}
-              {long ? (
-                <button
-                  type="button"
-                  className="review-more"
-                  onClick={() => { setOpenRow(note.id); markRead(note.id); }}
-                >
-                  more
-                </button>
-              ) : null}
-            </span>
-          ) : null}
-          {!said && long ? (
-            <button type="button" className="review-more" onClick={() => setOpenRow(note.id)}>
-              {note.thread?.length} repl{note.thread?.length === 1 ? 'y' : 'ies'}
+          {said && !shown ? <span className="review-note-text">{said}</span> : null}
+          {/* Outside the text, not trailing it: the summary is clipped to a
+              line and anything inside it is clipped away with the rest —
+              which is how the one control for reading the whole thing ended
+              up invisible on exactly the notes that needed it. */}
+          {!shown && long ? (
+            <button
+              type="button"
+              className="review-more"
+              onClick={() => { setOpenRow(note.id); markRead(note.id); }}
+            >
+              {said ? 'Read it all' : `${note.thread?.length} repl${note.thread?.length === 1 ? 'y' : 'ies'}`}
+              {note.thread?.length && said ? ` · ${note.thread.length} repl${note.thread.length === 1 ? 'y' : 'ies'}` : ''}
             </button>
           ) : null}
         </span>
@@ -1957,6 +1955,35 @@ function ReviewConsole({
     focusProposal(ahead ?? pool[direction === 1 ? 0 : pool.length - 1]);
   }
 
+  /** On the screen, as the browser understands it. getClientRects() was the
+   *  test, and it answers 0 for any element with `display: contents` — which
+   *  every audited section the review layer wraps transparently has. So every
+   *  one of those counted as "not on screen" whether it was there or not. */
+  function onScreen(el: Element): boolean {
+    return typeof el.checkVisibility === 'function'
+      ? el.checkVisibility({ checkVisibilityCSS: true })
+      : el.getClientRects().length > 0;
+  }
+
+  /** The note whose element is the reason this one is not showing: a section
+   *  that was stashed or hidden with something else inside it. Restoring the
+   *  thing you are looking at will not help; restoring what swallowed it
+   *  will, and the console should say which that is. */
+  function blockedBy(note: ReviewNote): ReviewNote | undefined {
+    const el = (note.anchor.reviewId
+      ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
+      : null) ?? safeQuery(note.anchor.domPath);
+    const swallowed = el?.closest('[data-review-stowed]');
+    if (!swallowed) return undefined;
+    return Object.values(notesRef.current).find((other) => {
+      if (other.id === note.id || !offPage(other) || other.anchor.layout !== layout) return false;
+      const target = (other.anchor.reviewId
+        ? document.querySelector(`[data-review-id="${other.anchor.reviewId}"]`)
+        : null) ?? safeQuery(other.anchor.domPath);
+      return target === swallowed;
+    });
+  }
+
   function elementForNote(note: ReviewNote): HTMLElement | null {
     const byId = note.anchor.reviewId
       ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
@@ -1966,7 +1993,7 @@ function ReviewConsole({
     // In the tree but not on the screen — inside a shut accordion, on a tab
     // that is not showing — is the same as absent for the purpose of
     // pointing at it, and flashing it would flash nothing.
-    return found.getClientRects().length ? found : null;
+    return onScreen(found) ? found : null;
   }
 
   /** The tab or nav item lit up right now, so "is it even on this page?"
@@ -1992,7 +2019,7 @@ function ReviewConsole({
     if (exact instanceof HTMLElement) {
       let node: HTMLElement | null = exact.parentElement;
       while (node && node !== document.body) {
-        if (node.getClientRects().length && !node.closest('[data-review-ui]')) return node;
+        if (onScreen(node) && !node.closest('[data-review-ui]')) return node;
         node = node.parentElement;
       }
     }
@@ -2000,7 +2027,7 @@ function ReviewConsole({
     const parts = (note.anchor.domPath ?? '').split(' > ');
     for (let take = parts.length - 1; take > 0; take -= 1) {
       const found = safeQuery(parts.slice(0, take).join(' > '));
-      if (found && found.getClientRects().length) return found;
+      if (found && onScreen(found)) return found;
     }
     return null;
   }
@@ -2085,8 +2112,19 @@ function ReviewConsole({
         say(`Lives in the ${note.anchor.layout} layout`, 'info');
         return;
       }
-      if (flashNearest(note)) { setNest(note.id); return; }
+      if (flashNearest(note)) { setNest(note.id); setNestFor(null); return; }
       say(`${note.stow ? 'Stashed' : 'Hidden'} — its section is not on this screen`, 'warn');
+      return;
+    }
+
+    // Not off the page itself, but sitting inside something that is. The
+    // switch worth offering is the one on whatever swallowed it.
+    const blocker = blockedBy(note);
+    if (blocker) {
+      flashNearest(blocker);
+      setNest(blocker.id);
+      setNestFor(note.id);
+      say(`Inside “${blocker.label}”, which is ${blocker.stow ? 'stashed' : 'hidden'}`, 'warn');
       return;
     }
 
@@ -2374,10 +2412,13 @@ function ReviewConsole({
               <span>{note.label}</span>
               <b>{note.stow ? 'stashed here' : 'hidden here'}</b>
             </button>
+            {nestFor && notes[nestFor] ? (
+              <span className="review-nest-holding">holds “{notes[nestFor].label}”</span>
+            ) : null}
             <button
               type="button"
               className="review-nest-close"
-              onClick={() => setNest(null)}
+              onClick={() => { setNest(null); setNestFor(null); }}
               aria-label="Stop marking this"
             >
               <X className="size-3" />

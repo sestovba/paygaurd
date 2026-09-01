@@ -14,22 +14,50 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronRight, Columns2, EyeOff, ListChecks,
-  MousePointerSquareDashed, NotebookPen, SlidersHorizontal, Trash2, Undo2, X
+  Archive, ChevronDown, ChevronRight, Columns2, EyeOff, ListChecks,
+  MousePointerSquareDashed, PanelBottom, PanelLeft, PanelRight, ScanSearch,
+  SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool } from './DockParts';
 
-const WIDTH_KEY = 'pg-review-rail-v1';
-const MIN_WIDTH = 300;
-const MAX_WIDTH = 560;
+const RAIL_KEY = 'pg-review-rail-v1';
 
-function loadWidth(): number {
+/** Which edge the console is welded to. Not a floating panel: it takes a
+ *  strip of the screen and the page takes the rest, whichever edge it is on,
+ *  so nothing ever sits on top of the thing under review. */
+type Side = 'right' | 'left' | 'bottom';
+
+interface Rail {
+  side: Side;
+  /** Width when it is down a side, height when it is along the bottom. */
+  size: number;
+}
+
+const LIMITS: Record<Side, { min: number; max: number; start: number }> = {
+  right: { min: 300, max: 640, start: 420 },
+  left: { min: 300, max: 640, start: 420 },
+  bottom: { min: 200, max: 640, start: 320 }
+};
+
+const SIDES = [
+  ['left', PanelLeft, 'Left'],
+  ['bottom', PanelBottom, 'Bottom'],
+  ['right', PanelRight, 'Right']
+] as const;
+
+function loadRail(): Rail {
   try {
-    const saved = Number(localStorage.getItem(WIDTH_KEY));
-    return saved >= MIN_WIDTH && saved <= MAX_WIDTH ? saved : 380;
+    const raw = localStorage.getItem(RAIL_KEY);
+    if (!raw) return { side: 'right', size: LIMITS.right.start };
+    // The key used to hold a bare width.
+    const saved = raw.startsWith('{') ? JSON.parse(raw) as Partial<Rail> : { size: Number(raw) };
+    const side: Side = saved.side === 'left' || saved.side === 'bottom' ? saved.side : 'right';
+    const { min, max, start } = LIMITS[side];
+    const size = Number(saved.size);
+    return { side, size: size >= min && size <= max ? size : start };
   } catch {
-    return 380;
+    return { side: 'right', size: LIMITS.right.start };
   }
 }
 
@@ -97,16 +125,35 @@ export function DesktopDock({
   hiddenCount: number;
   hiddenList: ReactNode;
 }) {
-  const [width, setWidth] = useState(loadWidth);
-  const drag = useRef<{ x: number; from: number } | null>(null);
+  const [rail, setRail] = useState(loadRail);
+  const { side, size } = rail;
+  const flat = side === 'bottom';
+  const drag = useRef<{ at: number; from: number } | null>(null);
+  const [sidesOpen, setSidesOpen] = useState(false);
+
+  // A menu that stays open after you have looked away is a menu you have to
+  // close on purpose.
+  useEffect(() => {
+    if (!sidesOpen) return;
+    const shut = (event: Event) => {
+      if (!(event.target as HTMLElement)?.closest?.('.review-rail-sides')) setSidesOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setSidesOpen(false); };
+    window.addEventListener('pointerdown', shut, true);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('pointerdown', shut, true);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [sidesOpen]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(WIDTH_KEY, String(width));
+      localStorage.setItem(RAIL_KEY, JSON.stringify(rail));
     } catch {
-      // Private mode; the rail just starts at its default width next time.
+      // Private mode; the rail starts on its default edge next time.
     }
-  }, [width]);
+  }, [rail]);
 
   /* The page is laid out beside the rail rather than under it, so the app can
      be judged at the width it actually has. A console that covers the thing
@@ -117,21 +164,30 @@ export function DesktopDock({
    * says it in. It is one property on one element, and it is put back when
    * the rail folds away. */
   useEffect(() => {
-    const inset = open && !journalWide ? `${width}px` : '';
-    document.body.style.setProperty('padding-right', inset, 'important');
+    const inset = open && !journalWide ? `${size}px` : '';
+    const edge = side === 'bottom' ? 'padding-bottom' : `padding-${side}`;
+    document.body.style.setProperty(edge, inset, 'important');
     document.documentElement.style.setProperty('--review-rail-w', inset || '0px');
     return () => {
-      document.body.style.removeProperty('padding-right');
+      document.body.style.removeProperty(edge);
       document.documentElement.style.removeProperty('--review-rail-w');
     };
-  }, [open, width, journalWide]);
+  }, [open, size, side, journalWide]);
 
   useEffect(() => {
     const onMove = (event: PointerEvent) => {
       const held = drag.current;
       if (!held) return;
       event.preventDefault();
-      setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, held.from + (held.x - event.clientX))));
+      // Dragging the inner edge always makes the rail bigger when it moves
+      // away from the edge the rail is welded to.
+      const now = flat ? event.clientY : event.clientX;
+      const grew = side === 'left' ? now - held.at : held.at - now;
+      const { min, max } = LIMITS[side];
+      setRail((current) => ({
+        ...current,
+        size: Math.min(max, Math.max(min, held.from + grew))
+      }));
     };
     const stop = () => { drag.current = null; };
     window.addEventListener('pointermove', onMove);
@@ -142,7 +198,8 @@ export function DesktopDock({
       window.removeEventListener('pointerup', stop);
       window.removeEventListener('pointercancel', stop);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [side, flat]);
 
   const auditLeft = auditTotal - auditSettled;
 
@@ -155,7 +212,7 @@ export function DesktopDock({
         onClick={onToggle}
         aria-label="Open the review console"
       >
-        <NotebookPen className="size-4" />
+        <ScanSearch className="size-4" />
         <span>Review</span>
         {journalNew ? <span className="review-rail-count" data-new>{journalNew}</span>
           : openCount ? <span className="review-rail-count">{openCount}</span> : null}
@@ -168,8 +225,9 @@ export function DesktopDock({
     <aside
       data-review-ui
       className="review-rail"
+      data-side={side}
       data-wide={journalWide || undefined}
-      style={journalWide ? undefined : { width }}
+      style={journalWide ? undefined : flat ? { height: size } : { width: size }}
     >
       {/* Drag the edge to give the rail more or less of the screen. The page
           reflows to what is left, so this is a real split, not an overlay. */}
@@ -177,12 +235,14 @@ export function DesktopDock({
         <span
           className="review-rail-grip"
           aria-hidden="true"
-          onPointerDown={(event) => { drag.current = { x: event.clientX, from: width }; }}
+          onPointerDown={(event) => {
+            drag.current = { at: flat ? event.clientY : event.clientX, from: size };
+          }}
         />
       )}
 
       <header className="review-rail-head">
-        <NotebookPen className="size-4" />
+        <ScanSearch className="size-4" />
         <strong>Review</strong>
         {mode !== 'off' ? (
           <span className="review-rail-mode">
@@ -191,6 +251,52 @@ export function DesktopDock({
         ) : null}
         {journalNew ? <span className="review-rail-count" data-new>{journalNew} new</span>
           : openCount ? <span className="review-rail-count">{openCount}</span> : null}
+
+        {/* Which edge it lives on. A menu rather than a row of three: the
+            trigger wears the edge it is on, so the band shows the current
+            state in one slot instead of three, and the other two are one
+            press away. */}
+        <span className="review-rail-sides">
+          <button
+            type="button"
+            className="review-rail-side-now"
+            aria-haspopup="menu"
+            aria-expanded={sidesOpen}
+            aria-label={`Docked ${side === 'bottom' ? 'along the bottom' : `on the ${side}`} — change`}
+            title={side === 'bottom' ? 'Along the bottom' : `On the ${side}`}
+            onClick={() => setSidesOpen((current) => !current)}
+          >
+            {(() => {
+              const Now = SIDES.find(([which]) => which === side)?.[1] ?? PanelRight;
+              return <Now className="size-3.5" />;
+            })()}
+            <ChevronDown className="size-3" />
+          </button>
+
+          {sidesOpen ? (
+            <span className="review-rail-side-menu" role="menu">
+              {SIDES.map(([which, Icon, name]) => (
+                <button
+                  key={which}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={side === which}
+                  data-on={side === which || undefined}
+                  onClick={() => {
+                    setSidesOpen(false);
+                    setRail((current) => (current.side === which
+                      ? current
+                      : { side: which, size: LIMITS[which].start }));
+                  }}
+                >
+                  <Icon className="size-3.5" />
+                  {name}
+                </button>
+              ))}
+            </span>
+          ) : null}
+        </span>
+
         <button
           type="button"
           className="review-rail-min"
