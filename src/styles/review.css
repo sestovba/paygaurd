@@ -5095,7 +5095,8 @@ body.review-picking * {
 .review-cell-what[data-act='Chose'],
 .review-cell-what[data-act='Move'] { color: #b45309; }
 .review-cell-what[data-act='Read'] { color: var(--review-blue); }
-.review-cell-what[data-act='Hidden'] { color: rgb(15 23 42 / 0.4); }
+.review-cell-what[data-act='Hidden'],
+.review-cell-what[data-act='Stashed'] { color: rgb(15 23 42 / 0.4); }
 
 .review-cell-item {
   display: flex;

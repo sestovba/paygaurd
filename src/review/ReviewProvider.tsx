@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Copy, Expand,
-  Eye, EyeOff, MessageSquarePlus, Minus, Trash2, X
+  Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Copy, Crosshair,
+  Expand, Eye, EyeOff, MessageSquarePlus, Minus, Trash2, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
 import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
@@ -18,7 +18,8 @@ import { EdgeTrays } from './EdgeTrays';
 import { MobileDock } from './MobileDock';
 import { DesktopDock } from './DesktopDock';
 import {
-  applyPlacements, applyStowAttributes, dropTargetAt, isStowed, safeQuery
+  applyPlacements, applyStowAttributes, dropTargetAt, isOffPage as offPage,
+  isStowed, safeQuery
 } from './stow';
 import type { DropTarget } from './stow';
 import '../styles/review.css';
@@ -1274,16 +1275,18 @@ function ReviewConsole({
 
                       <div className="review-queue-peek">
                         <button type="button" onClick={() => pointAtNote(triageNote)}>
-                          <Eye className="size-4" /> Show me
+                          <Crosshair className="size-4" /> Find it
                         </button>
                         <button
                           type="button"
-                          data-on={triageNote.hidden || undefined}
+                          data-on={offPage(triageNote) || undefined}
                           onClick={() => toggleHidden(triageNote)}
-                          title="Take it off the page to see the screen without it"
+                          title={offPage(triageNote)
+                            ? 'Put it back on the page'
+                            : 'Take it off the page to see the screen without it'}
                         >
-                          {triageNote.hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                          {triageNote.hidden ? 'Show it' : 'Hide it'}
+                          {offPage(triageNote) ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                          {offPage(triageNote) ? 'Put it back' : 'Hide it'}
                         </button>
                         <button
                           type="button"
@@ -1563,9 +1566,22 @@ function ReviewConsole({
    *  layout it was hidden in and travels in the file like everything else,
    *  so the page can be judged without something and then put back. */
   function toggleHidden(note: ReviewNote) {
-    const next = !note.hidden;
-    upsert({ id: note.id, hidden: next || undefined });
-    say(next ? `${note.label} hidden` : `${note.label} back on the page`, next ? 'info' : 'good');
+    // One switch, two ways of being off. Whether a thing was carried onto a
+    // shelf or just switched off where it stood, what the reviewer wants
+    // from a journal row is the same: put it back, or take it away.
+    if (offPage(note)) {
+      // A note that only ever recorded "this is off the page" has nothing
+      // left to say once it is back.
+      if (note.kind === 'stow' && !note.verdict && !note.comment && !note.thread?.length) {
+        remove(note.id);
+      } else {
+        upsert({ id: note.id, stow: undefined, hidden: undefined });
+      }
+      say(`${note.label} back on the page`, 'good');
+      return;
+    }
+    upsert({ id: note.id, hidden: true });
+    say(`${note.label} hidden`, 'info');
   }
 
 
@@ -1628,15 +1644,17 @@ function ReviewConsole({
           <button
             type="button"
             className="review-note-eye"
-            data-hidden={note.hidden || undefined}
+            data-hidden={offPage(note) || undefined}
             onClick={() => toggleHidden(note)}
-            aria-pressed={Boolean(note.hidden)}
-            aria-label={note.hidden ? `Show ${note.label} again` : `Hide ${note.label}`}
-            title={note.hidden
-              ? 'Hidden on this screen — click to put it back'
-              : 'Hide it on this screen. The note stays; the code is untouched.'}
+            aria-pressed={offPage(note)}
+            aria-label={offPage(note) ? `Put ${note.label} back on the page` : `Hide ${note.label}`}
+            title={note.stow
+              ? `Stashed in the ${note.stow.edge} shelf — click to put it back on the page`
+              : note.hidden
+                ? 'Hidden — click to put it back on the page'
+                : 'Hide it on this screen. The note stays; the code is untouched.'}
           >
-            {note.hidden ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {offPage(note) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
           <button
             type="button"
@@ -2192,7 +2210,10 @@ function actOf(note: ReviewNote): string {
   if (note.verdict === 'rejected') return 'Keep';
   if (note.verdict === 'revise') return 'Revise';
   if (note.comment) return 'Read';
-  if (note.stow) return 'Hidden';
+  // Two ways of being off the page, and they are not the same answer: one
+  // was carried onto a shelf, the other was switched off where it stood.
+  if (note.stow) return 'Stashed';
+  if (note.hidden) return 'Hidden';
   return 'Look';
 }
 
