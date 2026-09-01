@@ -11,7 +11,7 @@ your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`
 STASHED means carried onto a shelf in the app; the code is untouched and
 it can be dragged back. HIDDEN means switched off with the eye — also
 untouched code, and a question ("is the screen better without this?")
-rather than an answer. DELETE/KEEP/MOVE are the decisions to act on.
+rather than an answer. REMOVE/KEEP/MOVE are the decisions to act on.
 A `Kind:` line carries the reviewer's own tags (cut, reword, spacing…) —
 the prose says what to change, the tags say what sort of change it is.
 The console's own housekeeping — a stash's name, colour or folded state —
@@ -22,11 +22,11 @@ To answer a note, append to its `thread` array in review-notes.json with
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
 12 note(s) · 5 to delete · 3 parked · 1 A/B pick(s)
-Updated 2026-09-01 02:10
+Updated 2026-09-01 02:18
 
 ## Layout: ledger
 
-- [ ] **DELETE — Average active month**
+- [ ] **REMOVE — Average active month**
   - I proposed cutting it because: An average is safe-looking by construction — it averages away the 3- and 5-paycheck months that cause the problem.
   - Source: src/components/ledger/TrackerLedger.tsx:329
   - Section id: ledger-stat-average
@@ -82,7 +82,7 @@ Updated 2026-09-01 02:10
   - Noted: 2026-08-31 03:03
   - Reviewer replied: "Test"
   - Reviewer replied: "ssd"
-- [ ] **DELETE — YTD total in current status**
+- [ ] **REMOVE — YTD total in current status**
   - I proposed cutting it because: The active monthly TWP or SGA gap matters here; a year-to-date total does not.
   - Source: src/components/payguard/TrackerPayGuard.tsx:301
   - Section id: payguard-hero-ytd
@@ -101,7 +101,7 @@ Updated 2026-09-01 02:10
   - DOM: main#pg-main > section.pg-status-hero
   - Origin: picked by the user
   - Noted: 2026-08-31 03:04
-- [ ] **DELETE — Duplicate overview statistics**
+- [ ] **REMOVE — Duplicate overview statistics**
   - Stashed on the left shelf (off the page in the app, still in the code)
   - I proposed cutting it because: YTD, TWP, and SGA repeat the status above; averages and source counts do not guide a monthly benefit decision.
   - Source: src/components/payguard/TrackerPayGuard.tsx:339
@@ -122,7 +122,7 @@ Updated 2026-09-01 02:10
   - DOM: div#root > div.pg-payguard.pg-page-pad:nth-of-type(1) > header.pg-topbar > div > div:nth-of-type(4) > div:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-08-31 04:40
-- [ ] **DELETE — Income sources**
+- [ ] **REMOVE — Income sources**
   - Source: src/components/payguard/TrackerPayGuard.tsx:466
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Text: "Add Job"
@@ -132,7 +132,7 @@ Updated 2026-09-01 02:10
 
 ## Layout: v2
 
-- [ ] **CHOSE "C · one sentence" — Limit readout**
+- [ ] **PICKED "C · one sentence" — Limit readout**
   - Alternatives shown: A · amount + percent, B · money only, C · one sentence
   - Source: src/components/SafetyHero.tsx:87
   - Component: SafetyHero › TrackerV2 › Root › TrackerProvider

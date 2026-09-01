@@ -21,8 +21,8 @@ function line(label: string, value?: string): string {
 
 function headline(note: ReviewNote): string {
   if (note.members) return `GROUP — ${note.tray?.name ?? note.label}`;
-  if (note.kind === 'choice') return `CHOSE "${note.choice}" — ${note.label}`;
-  if (note.verdict === 'approved') return `DELETE — ${note.label}`;
+  if (note.kind === 'choice') return `PICKED "${note.choice}" — ${note.label}`;
+  if (note.verdict === 'approved') return `REMOVE — ${note.label}`;
   if (note.verdict === 'rejected') return `KEEP (my suggestion rejected) — ${note.label}`;
   if (note.placement) return `MOVE — ${note.label}`;
   if (note.stow) return `STASHED — ${note.label}`;
@@ -100,7 +100,7 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     'STASHED means carried onto a shelf in the app; the code is untouched and',
     'it can be dragged back. HIDDEN means switched off with the eye — also',
     'untouched code, and a question ("is the screen better without this?")',
-    'rather than an answer. DELETE/KEEP/MOVE are the decisions to act on.',
+    'rather than an answer. REMOVE/KEEP/MOVE are the decisions to act on.',
     'A `Kind:` line carries the reviewer\'s own tags (cut, reword, spacing…) —',
     'the prose says what to change, the tags say what sort of change it is.',
     'The console\'s own housekeeping — a stash\'s name, colour or folded state —',

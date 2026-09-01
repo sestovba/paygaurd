@@ -293,6 +293,8 @@ function ReviewConsole({
   /** The row that is open for reading and answering. One at a time: two open
    *  rows is a page, not a list. */
   const [openRow, setOpenRow] = useState<string | null>(null);
+  /** The row whose state menu is open. */
+  const [laneMenu, setLaneMenu] = useState<string | null>(null);
   /** Rows ticked for a bulk action. */
   const [chosen, setChosen] = useState<Set<string>>(() => new Set());
   /** Lanes folded away, so a board with forty done things is still a board. */
@@ -481,6 +483,22 @@ function ReviewConsole({
     // Opening/closing is the boundary; typing must not re-run this effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [Boolean(composer), compact]);
+
+  // A menu left open after you have looked away is a menu you have to close
+  // on purpose.
+  useEffect(() => {
+    if (!laneMenu) return;
+    const shut = (event: Event) => {
+      if (!(event.target as HTMLElement)?.closest?.('.review-lane-pick')) setLaneMenu(null);
+    };
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setLaneMenu(null); };
+    window.addEventListener('pointerdown', shut, true);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('pointerdown', shut, true);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [laneMenu]);
 
   // Hover and keyboard share one highlight: whichever moved last wins.
   useEffect(() => {
@@ -1633,11 +1651,32 @@ function ReviewConsole({
                   </p>
                 )}
 
+                {(() => {
+                  const shownIds = ordered.map((note) => note.id);
+                  const all = shownIds.length > 0 && shownIds.every((id) => chosen.has(id));
+                  const some = shownIds.some((id) => chosen.has(id));
+                  return (
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={all ? true : some ? 'mixed' : false}
+                      className="review-tick review-tick-all"
+                      data-some={(!all && some) || undefined}
+                      title={all ? 'Select none' : `Select all ${shownIds.length}`}
+                      aria-label={all ? 'Select none' : `Select all ${shownIds.length}`}
+                      onClick={() => setChosen(all ? new Set() : new Set(shownIds))}
+                    >
+                      {all ? <Check className="size-3" strokeWidth={3.5} /> : null}
+                    </button>
+                  );
+                })()}
+
                 {chosen.size ? (
                   /* Ticked rows take the strip over: with a selection the
                      only thing worth offering is what to do with it. */
                   <div className="review-bulk">
                     <span className="review-bulk-count">{chosen.size} selected</span>
+                    <span className="review-bulk-move">Move to</span>
                     {(['done', 'second', 'parked', 'open'] as ReviewLane[]).map((lane) => (
                       <button
                         key={lane}
@@ -1734,20 +1773,50 @@ function ReviewConsole({
                     const shut = laneShut.has(lane);
                     return (
                       <li key={lane} className="review-panel-lane" data-lane={lane} data-shut={shut || undefined}>
-                        <button
-                          type="button"
-                          className="review-panel-lane-head"
-                          aria-expanded={!shut}
-                          onClick={() => setLaneShut((current) => {
-                            const next = new Set(current);
-                            if (next.has(lane)) next.delete(lane); else next.add(lane);
-                            return next;
-                          })}
-                        >
-                          <ChevronDown className="size-3 review-lane-caret" />
-                          {LANE_NAME[lane]}
-                          <span>{inLane.length}</span>
-                        </button>
+                        {/* A band, not one button: taking a whole lane in one
+                            go is a thing you want per lane, not only for the
+                            board — "everything in To do" is the selection you
+                            actually make. */}
+                        <div className="review-panel-lane-head">
+                          {(() => {
+                            const ids = inLane.map((note) => note.id);
+                            const all = ids.every((id) => chosen.has(id));
+                            const some = ids.some((id) => chosen.has(id));
+                            return (
+                              <button
+                                type="button"
+                                role="checkbox"
+                                aria-checked={all ? true : some ? 'mixed' : false}
+                                className="review-tick"
+                                data-some={(!all && some) || undefined}
+                                title={all ? `Select none in ${LANE_NAME[lane]}` : `Select all ${ids.length} in ${LANE_NAME[lane]}`}
+                                aria-label={all ? `Select none in ${LANE_NAME[lane]}` : `Select all in ${LANE_NAME[lane]}`}
+                                onClick={() => setChosen((current) => {
+                                  const next = new Set(current);
+                                  if (all) ids.forEach((id) => next.delete(id));
+                                  else ids.forEach((id) => next.add(id));
+                                  return next;
+                                })}
+                              >
+                                {all ? <Check className="size-3" strokeWidth={3.5} /> : null}
+                              </button>
+                            );
+                          })()}
+                          <button
+                            type="button"
+                            className="review-lane-face"
+                            aria-expanded={!shut}
+                            onClick={() => setLaneShut((current) => {
+                              const next = new Set(current);
+                              if (next.has(lane)) next.delete(lane); else next.add(lane);
+                              return next;
+                            })}
+                          >
+                            <ChevronDown className="size-3 review-lane-caret" />
+                            {LANE_NAME[lane]}
+                            <span>{inLane.length}</span>
+                          </button>
+                        </div>
                         {shut ? null : <ul>{inLane.map(noteRow)}</ul>}
                       </li>
                     );
@@ -1848,11 +1917,6 @@ function ReviewConsole({
   /** Move a note to the next lane, wrapping round. The board is shared —
    *  a code pass moves the same field in review-notes.json — so this is a
    *  message as much as a state change. */
-  function moveLane(note: ReviewNote) {
-    const at = LANES.indexOf(laneOf(note));
-    setLane(note, LANES[(at + 1) % LANES.length]);
-  }
-
   /** File a note, and do not lose the reader while doing it. Moving lanes
    *  moves the row to another part of the board, which on a phone means it
    *  vanishes from under the thumb that just pressed it — so the row it
@@ -1976,16 +2040,41 @@ function ReviewConsole({
           {fileOf(note.anchor.source)?.split('/').pop() ?? '—'}
         </span>
 
-        <button
-          type="button"
-          className="review-note-lane review-cell-lane"
-          data-lane={laneOf(note)}
-          onClick={() => moveLane(note)}
-          aria-label={`${note.label} is ${LANE_NAME[laneOf(note)]} — move it on`}
-          title={`${LANE_NAME[laneOf(note)]} — click to move it on`}
-        >
-          {LANE_NAME[laneOf(note)]}
-        </button>
+        {/* A menu, not a cycle. Cycling meant you could not tell what the
+            next press would give you, and getting from To do to Not now was
+            three presses through states you did not want it in. */}
+        <span className="review-lane-pick review-cell-lane">
+          <button
+            type="button"
+            className="review-note-lane"
+            data-lane={laneOf(note)}
+            aria-haspopup="menu"
+            aria-expanded={laneMenu === note.id}
+            aria-label={`${note.label} is ${LANE_NAME[laneOf(note)]} — change`}
+            title={`${LANE_NAME[laneOf(note)]} — click to change`}
+            onClick={() => setLaneMenu(laneMenu === note.id ? null : note.id)}
+          >
+            {LANE_NAME[laneOf(note)]}
+            <ChevronDown className="size-3" />
+          </button>
+          {laneMenu === note.id ? (
+            <span className="review-lane-menu" role="menu">
+              {LANES.map((lane) => (
+                <button
+                  key={lane}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={laneOf(note) === lane}
+                  data-lane={lane}
+                  data-on={laneOf(note) === lane || undefined}
+                  onClick={() => { setLaneMenu(null); setLane(note, lane); }}
+                >
+                  {LANE_NAME[lane]}
+                </button>
+              ))}
+            </span>
+          ) : null}
+        </span>
 
         <span className="review-cell-acts">
           <button
@@ -2858,11 +2947,17 @@ function ReviewConsole({
  *  change or a question waiting on an answer, and which of those it is
  *  depends on whose word came last. */
 function actOf(note: ReviewNote): string {
-  if (note.kind === 'choice') return 'Chose';
+  if (note.kind === 'choice') return 'Picked';
   if (note.placement) return 'Move';
-  if (note.verdict === 'approved') return note.kind === 'delete' ? 'Cut' : 'Do';
+  // "Cut" read as cut-and-paste beside Move and Stashed, and never said what
+  // was being cut — the element, or the note about it. Remove is the plain
+  // word for it, and it pairs with Keep, which is the decision it is against.
+  if (note.verdict === 'approved') return note.kind === 'delete' ? 'Remove' : 'Apply';
   if (note.verdict === 'rejected') return 'Keep';
-  if (note.verdict === 'revise') return 'Revise';
+  // Revise and Change were two words for one thing: make a change. Which
+  // side is owed it is the only real difference, and Answer already says
+  // that, so there is no work left for a second word to do.
+  if (note.verdict === 'revise') return 'Change';
   // A tag is the reviewer naming the change themselves; nothing beats it.
   if (note.tags?.length) return note.tags[0][0].toUpperCase() + note.tags[0].slice(1);
   const last = note.thread?.[note.thread.length - 1];
@@ -2872,9 +2967,9 @@ function actOf(note: ReviewNote): string {
   // was carried onto a shelf, the other was switched off where it stood.
   if (note.stow) return 'Stashed';
   if (note.hidden) return 'Hidden';
-  // Marked, with nothing asked for yet. It is not owed anything, and the
+  // Nothing is asked of this one yet. It is not owed anything, and the
   // column should not pretend otherwise.
-  return 'Marked';
+  return 'Noted';
 }
 
 
