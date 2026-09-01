@@ -5043,13 +5043,16 @@ body.review-picking * {
 .review-table-head,
 .review-panel-list li.review-row {
   display: grid;
+  /* The item is the content; everything else is a label about it. It gets a
+     floor so the fixed columns can never squeeze it into an ellipsis, which
+     is what a 7rem file path and a 5.5rem button group were doing. */
   grid-template-columns:
-    1.9rem             /* tick and unread */
-    4.25rem            /* what has to happen */
-    minmax(0, 1fr)     /* the item itself */
-    minmax(0, 7rem)    /* where in the code */
-    5.25rem            /* which lane */
-    5.5rem;            /* its own controls */
+    1.9rem                /* tick and unread */
+    3.75rem               /* what has to happen */
+    minmax(7rem, 1fr)     /* the item itself */
+    minmax(0, 5rem)       /* where in the code */
+    4.5rem                /* which lane */
+    5rem;                 /* its own controls */
   align-items: start;
   gap: 0.4rem;
 }
@@ -5225,12 +5228,15 @@ body.review-picking * {
   opacity: 1;
 }
 
-/* Narrow rail: the file column goes first — the name and the verb are what
-   make a row scannable, and the file is in the note and in the queue. */
-@container (max-width: 30rem) {
+/* Under 30rem a five-column table gives the item about 140px, which is not a
+   column — it is an ellipsis. So there is one breakpoint, not a middle state:
+   the full table when there is room for it, and two lines when there is not.
+   The verb and the lane keep the top line, the name gets a line of its own,
+   and the file goes — it is in the note and in the queue. */
+@container (max-width: 36rem) {
   .review-table-head,
   .review-panel-list li.review-row {
-    grid-template-columns: 0.85rem 4rem minmax(0, 1fr) 5rem 3.75rem;
+    grid-template-columns: 1.9rem 3.75rem minmax(7rem, 1fr) 4.5rem 5rem;
   }
 
   .review-cell-where,
@@ -5239,10 +5245,7 @@ body.review-picking * {
   }
 }
 
-/* A phone: five columns across 375px leaves the item column too narrow to
-   hold a name, so the row goes to two lines instead of shrinking further.
-   The verb and the lane keep the top line, the name gets a line of its own. */
-@container (max-width: 26rem) {
+@container (max-width: 30rem) {
   .review-table-head {
     display: none;
   }
@@ -6097,4 +6100,55 @@ body.review-picking * {
   border-right: 0;
   border-left: 1px solid var(--review-glass-line);
   border-radius: 0 0.6rem 0.6rem 0;
+}
+
+
+/* --- The journal's chrome, sized to the room it has ------------------------
+ *
+ * Scope, the way into the queue, the filter chips, the column names and the
+ * key card stacked to 178px above a 594px board — a third of the panel spent
+ * on getting to it. They fold together as the panel narrows, and the parts
+ * that are conveniences rather than controls go first.
+ */
+
+.review-panel-scope,
+.review-panel-tools {
+  padding-block: 0.3rem;
+}
+
+.review-panel-tools {
+  padding-top: 0;
+}
+
+/* Wide enough to sit side by side: the scope is a segmented control, and the
+   way into the queue is the button beside it rather than a band under it. */
+@container (min-width: 26rem) {
+  .review-panel-scope {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.3rem;
+    padding-bottom: 0;
+  }
+
+  .review-panel-tools {
+    padding-top: 0.3rem;
+  }
+}
+
+/* The key card is a reminder, not a control. It goes as soon as the panel
+   has anything better to do with the line. */
+@container (max-width: 34rem) {
+  .review-panel-keys {
+    display: none;
+  }
+}
+
+/* Chips wrap rather than scroll, but they do not need a line each. */
+.review-filter {
+  padding-block: 0.3rem 0.1rem;
+  row-gap: 0.2rem;
+}
+
+.review-table-head {
+  padding-block: 0.25rem;
 }

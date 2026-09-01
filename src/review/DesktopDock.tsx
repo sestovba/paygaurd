@@ -42,6 +42,10 @@ interface Rail {
 
 const MIN_COL = 170;
 
+/** What the page keeps for itself, whatever the rail was dragged to. A rail
+ *  remembered from a wide monitor must not swallow a laptop. */
+const PAGE_FLOOR = 420;
+
 const LIMITS: Record<Side, { min: number; max: number; start: number }> = {
   right: { min: 300, max: 640, start: 420 },
   left: { min: 300, max: 640, start: 420 },
@@ -150,8 +154,21 @@ export function DesktopDock({
   hiddenList: ReactNode;
 }) {
   const [rail, setRail] = useState(loadRail);
-  const { side, size } = rail;
+  const [room, setRoom] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
+  const { side } = rail;
   const flat = side === 'bottom';
+  /* Clamped for this screen, not saved clamped: drag it wide on a monitor,
+     come back on a laptop, and it fits — then go back to the monitor and it
+     is wide again. */
+  const size = flat
+    ? Math.min(rail.size, Math.max(LIMITS.bottom.min, room.h - 220))
+    : Math.min(rail.size, Math.max(LIMITS[side].min, room.w - PAGE_FLOOR));
+
+  useEffect(() => {
+    const onResize = () => setRoom({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   const drag = useRef<{ at: number; from: number } | null>(null);
   const [sidesOpen, setSidesOpen] = useState(false);
   // Down a side the sections stack, so they are sorted top to bottom; along
@@ -259,7 +276,11 @@ export function DesktopDock({
     const openKeys = order.filter(isOpen);
     if (key === openKeys[openKeys.length - 1]) return undefined;
     const width = rail.cols?.[key];
-    return width ? { flex: `0 0 ${width}px` } : undefined;
+    if (!width) return undefined;
+    // Two open panels at least, so a remembered width can never leave the
+    // one after it with nothing.
+    const share = Math.max(MIN_COL, Math.min(width, room.w - MIN_COL * 2));
+    return { flex: `0 0 ${share}px` };
   };
 
   const isOpen = (key: string) => (
