@@ -3,7 +3,7 @@
 // and a section is a section, and they behave the same in both.
 
 import { useEffect, useRef, useState } from 'react';
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import { ChevronDown, GripVertical, Maximize2, Minimize2 } from 'lucide-react';
 
 /** Dragging the sections into the order you want them in.
@@ -116,6 +116,7 @@ export function Fold({
   section,
   onGrip,
   dragging,
+  style,
   children
 }: {
   icon: ComponentType<{ className?: string }>;
@@ -139,6 +140,8 @@ export function Fold({
   section?: string;
   onGrip?: (event: React.PointerEvent) => void;
   dragging?: boolean;
+  /** Laid out side by side along the bottom: the width dragged onto it. */
+  style?: CSSProperties;
   children: ReactNode;
 }) {
   return (
@@ -149,6 +152,7 @@ export function Fold({
       data-open={open || undefined}
       data-big={(open && big) || undefined}
       data-dragging={dragging || undefined}
+      style={style}
     >
       {/* A band, not one big button: it has controls of its own in it, and a
           button cannot hold another button. */}

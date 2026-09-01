@@ -11,10 +11,10 @@
 // what the desktop adds is room to work — a board that goes to columns when
 // the journal is opened wide, and a key for everything.
 
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronDown, ChevronRight, Columns2, EyeOff, ListChecks,
+  Archive, ChevronDown, ChevronLeft, ChevronRight, Columns2, EyeOff, ListChecks,
   MessageSquarePlus, MousePointerSquareDashed, PanelBottom, PanelLeft, PanelRight, ScanSearch,
   SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
@@ -32,7 +32,15 @@ interface Rail {
   side: Side;
   /** Width when it is down a side, height when it is along the bottom. */
   size: number;
+  /** Along the bottom the panels sit side by side, and how much width each
+   *  one wants is a matter of what you are doing — so the splits between
+   *  them are yours to drag. Keyed by panel; the last open one takes what is
+   *  left, so it never needs a width of its own. ("Column" is taken: the
+   *  journal is a table and has columns of its own.) */
+  cols?: Record<string, number>;
 }
+
+const MIN_COL = 170;
 
 const LIMITS: Record<Side, { min: number; max: number; start: number }> = {
   right: { min: 300, max: 640, start: 420 },
@@ -57,7 +65,8 @@ function loadRail(): Rail {
     const side: Side = saved.side === 'left' || saved.side === 'bottom' ? saved.side : 'right';
     const { min, max, start } = LIMITS[side];
     const size = Number(saved.size);
-    return { side, size: size >= min && size <= max ? size : start };
+    const cols = saved.cols && typeof saved.cols === 'object' ? saved.cols : {};
+    return { side, size: size >= min && size <= max ? size : start, cols };
   } catch {
     return { side: 'right', size: LIMITS.right.start };
   }
@@ -148,6 +157,29 @@ export function DesktopDock({
   // Down a side the sections stack, so they are sorted top to bottom; along
   // the bottom they sit in a row, and the same drag has to read left to right.
   const sort = useReorder(order, onOrder, flat ? 'x' : 'y');
+  /** The split being dragged: which section is growing or shrinking, and how
+   *  wide it was when the drag started. */
+  const split = useRef<{ key: string; at: number; from: number } | null>(null);
+
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      const held = split.current;
+      if (!held) return;
+      event.preventDefault();
+      const room = sort.rootRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+      const width = Math.max(MIN_COL, Math.min(held.from + (event.clientX - held.at), room - MIN_COL));
+      setRail((current) => ({ ...current, cols: { ...current.cols, [held.key]: width } }));
+    };
+    const stop = () => { split.current = null; };
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+    };
+  }, []);
 
   // A menu that stays open after you have looked away is a menu you have to
   // close on purpose.
@@ -220,12 +252,29 @@ export function DesktopDock({
   }, [side, flat]);
 
   const auditLeft = auditTotal - auditSettled;
+  /** The last open panel takes whatever is left, so it never needs a width
+   *  of its own — and the row always adds up however the others are dragged. */
+  const colStyle = (key: string) => {
+    if (!flat || !isOpen(key)) return undefined;
+    const openKeys = order.filter(isOpen);
+    if (key === openKeys[openKeys.length - 1]) return undefined;
+    const width = rail.cols?.[key];
+    return width ? { flex: `0 0 ${width}px` } : undefined;
+  };
+
+  const isOpen = (key: string) => (
+    key === 'tools' ? toolsOpen
+      : key === 'journal' ? journalOpen
+        : key === 'hidden' ? hiddenOpen
+          : key === 'archive' ? stashOpen : false
+  );
 
   const sections: Record<string, ReactNode> = {
     tools: (
       <Fold
         key="tools"
         section="tools"
+        style={colStyle('tools')}
         onGrip={sort.grip('tools')}
         dragging={sort.dragging === 'tools'}
         icon={SlidersHorizontal}
@@ -288,6 +337,7 @@ export function DesktopDock({
       <Fold
         key="journal"
         section="journal"
+        style={colStyle('journal')}
         onGrip={sort.grip('journal')}
         dragging={sort.dragging === 'journal'}
         icon={ListChecks}
@@ -308,6 +358,7 @@ export function DesktopDock({
       <Fold
         key="hidden"
         section="hidden"
+        style={colStyle('hidden')}
         onGrip={sort.grip('hidden')}
         dragging={sort.dragging === 'hidden'}
         icon={EyeOff}
@@ -325,6 +376,7 @@ export function DesktopDock({
       <Fold
         key="archive"
         section="archive"
+        style={colStyle('archive')}
         onGrip={sort.grip('archive')}
         dragging={sort.dragging === 'archive'}
         icon={Archive}
@@ -345,6 +397,7 @@ export function DesktopDock({
         type="button"
         data-review-ui
         className="review-rail-tab"
+        data-side={side}
         onClick={onToggle}
         aria-label="Open the review console"
       >
@@ -420,9 +473,12 @@ export function DesktopDock({
                   data-on={side === which || undefined}
                   onClick={() => {
                     setSidesOpen(false);
+                    // The panel widths belong to the bottom edge, not to
+                    // this visit to it: going away and coming back should
+                    // find the row laid out the way it was left.
                     setRail((current) => (current.side === which
                       ? current
-                      : { side: which, size: LIMITS[which].start }));
+                      : { ...current, side: which, size: LIMITS[which].start }));
                   }}
                 >
                   <Icon className="size-3.5" />
@@ -433,6 +489,8 @@ export function DesktopDock({
           ) : null}
         </span>
 
+        {/* Points at the edge it folds away to, which is a different edge
+            depending on where the rail is. */}
         <button
           type="button"
           className="review-rail-min"
@@ -440,12 +498,38 @@ export function DesktopDock({
           title="Fold the rail away — the review keeps running"
           aria-label="Fold the review rail away"
         >
-          <ChevronRight className="size-4" />
+          {side === 'left' ? <ChevronLeft className="size-4" />
+            : side === 'bottom' ? <ChevronDown className="size-4" />
+              : <ChevronRight className="size-4" />}
         </button>
       </header>
 
       <div className="review-rail-body" ref={sort.rootRef}>
-        {order.map((key) => sections[key] ?? null)}
+        {/* Along the bottom, a handle sits between each pair of open panels
+            and drags the one on its left. Only between two open ones: a shut
+            panel is a spine of its own name and has no width to give. */}
+        {order.map((key, index) => {
+          const previous = order.slice(0, index).reverse().find((other) => isOpen(other));
+          const grip = flat && previous && isOpen(key) ? (
+            <span
+              key={`${key}-split`}
+              className="review-panel-grip-x"
+              aria-hidden="true"
+              onPointerDown={(event) => {
+                const box = sort.rootRef.current
+                  ?.querySelector(`[data-section="${previous}"]`)
+                  ?.getBoundingClientRect();
+                split.current = { key: previous, at: event.clientX, from: box?.width ?? MIN_COL };
+              }}
+            />
+          ) : null;
+          return (
+            <Fragment key={key}>
+              {grip}
+              {sections[key] ?? null}
+            </Fragment>
+          );
+        })}
       </div>
     </aside>
   );

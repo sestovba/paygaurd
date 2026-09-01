@@ -6063,3 +6063,38 @@ body.review-picking * {
 .review-fold[data-tone='paper'] .review-fold-grip {
   color: rgb(255 255 255 / 0.3);
 }
+
+
+/* --- Panels side by side ---------------------------------------------------
+ *
+ * Along the bottom the split between two open panels is draggable: how much
+ * width the board wants against the archive depends on what you are doing.
+ * Not "columns" — the journal is a table and those are its columns.
+ */
+
+.review-panel-grip-x {
+  width: 7px;
+  flex: none;
+  margin: 0 -3px;
+  cursor: col-resize;
+}
+
+.review-panel-grip-x:hover {
+  background: rgb(37 99 235 / 0.5);
+}
+
+/* A caret pointing down means "there is more below", which is true in a
+   stack and meaningless in a row. Along the bottom the panels collapse
+   sideways, so the caret does too. */
+.review-rail[data-side='bottom'] .review-fold[data-open] .review-fold-caret {
+  transform: rotate(90deg);
+}
+
+/* The tab points at the edge it would come back from. */
+.review-rail-tab[data-side='left'] {
+  right: auto;
+  left: 0;
+  border-right: 0;
+  border-left: 1px solid var(--review-glass-line);
+  border-radius: 0 0.6rem 0.6rem 0;
+}
