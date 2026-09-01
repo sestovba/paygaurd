@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Copy, Crosshair,
-  Expand, Eye, EyeOff, MessageSquarePlus, Minus, Trash2, X
+  Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown,
+  Copy, Crosshair, Expand, Eye, EyeOff, MessageSquarePlus, Minus, Trash2, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
 import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
@@ -257,6 +257,17 @@ function ReviewConsole({
   /** A note that is off the page, and whose section is being marked on the
    *  page so it can be switched back on from where it belongs. */
   const [nest, setNest] = useState<string | null>(null);
+  /** The row that is open for reading and answering. One at a time: two open
+   *  rows is a page, not a list. */
+  const [openRow, setOpenRow] = useState<string | null>(null);
+  /** Rows ticked for a bulk action. */
+  const [chosen, setChosen] = useState<Set<string>>(() => new Set());
+  /** Lanes folded away, so a board with forty done things is still a board. */
+  const [laneShut, setLaneShut] = useState<Set<string>>(() => new Set());
+  /** Which kinds of decision to show. Chips, not a dropdown: they are not
+   *  mutually exclusive, so an empty set means all of them and anything else
+   *  means exactly those. */
+  const [only, setOnly] = useState<Set<string>>(() => new Set());
   const [read, setRead] = useState<ReadMarks>(loadRead);
   /** The row that just changed lane, so it can be found again in its new
    *  home instead of being hunted for. */
@@ -269,7 +280,6 @@ function ReviewConsole({
   const [picked, setPicked] = useState<Element | null>(null);
   const [, setTick] = useState(0); // scroll/resize nudge so overlays follow
   const [composer, setComposer] = useState<ComposerState | null>(null);
-  const [replyTo, setReplyTo] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [travelling, setTravelling] = useState<{ note: ReviewNote; tries: number } | null>(null);
   const [toast, setToast] = useState<{ text: string; tone: 'good' | 'warn' | 'info'; at: number } | null>(null);
@@ -1171,10 +1181,15 @@ function ReviewConsole({
   /** The journal itself — what has been said, and by whom. It is the same
    *  thing in both docks: a window on a desktop, a fold in the phone's dock.
    *  Only its frame changes. */
+  /** Every verb actually present, so the filter never offers an empty one. */
+  const acts = Array.from(new Set(journalNotes.map(actOf))).sort();
+  const shownNotes = only.size
+    ? journalNotes.filter((note) => only.has(actOf(note)))
+    : journalNotes;
   const laneGroups = LANES
     .map((lane) => ({
       lane,
-      notes: journalNotes
+      notes: shownNotes
         .filter((note) => laneOf(note) === lane)
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     }))
@@ -1374,7 +1389,7 @@ function ReviewConsole({
                         </button>
                         <button
                           type="button"
-                          onClick={() => { markRead(triageNote.id); setReplyTo(triageNote.id); }}
+                          onClick={() => { markRead(triageNote.id); setTriage(null); setOpenRow(triageNote.id); }}
                         >
                           <MessageSquarePlus className="size-4" /> Reply
                         </button>
@@ -1459,6 +1474,82 @@ function ReviewConsole({
                   </p>
                 )}
 
+                {chosen.size ? (
+                  /* Ticked rows take the strip over: with a selection the
+                     only thing worth offering is what to do with it. */
+                  <div className="review-bulk">
+                    <span className="review-bulk-count">{chosen.size} selected</span>
+                    {(['done', 'second', 'parked', 'open'] as ReviewLane[]).map((lane) => (
+                      <button
+                        key={lane}
+                        type="button"
+                        onClick={() => {
+                          for (const id of chosen) {
+                            const note = notesRef.current[id];
+                            if (note) setLane(note, lane);
+                          }
+                          setChosen(new Set());
+                        }}
+                      >
+                        {LANE_NAME[lane]}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        for (const id of chosen) {
+                          const note = notesRef.current[id];
+                          if (note && !offPage(note)) upsert({ id, hidden: true });
+                        }
+                        setChosen(new Set());
+                      }}
+                    >
+                      <EyeOff className="size-3.5" /> Hide
+                    </button>
+                    <button
+                      type="button"
+                      className="review-bulk-kill"
+                      onClick={() => {
+                        if (!confirm(`Delete ${chosen.size} note(s) and their threads?`)) return;
+                        for (const id of chosen) remove(id);
+                        setChosen(new Set());
+                      }}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                    <button type="button" className="review-bulk-clear" onClick={() => setChosen(new Set())}>
+                      Clear
+                    </button>
+                  </div>
+                ) : acts.length > 1 ? (
+                  <div className="review-filter" role="group" aria-label="Show only">
+                    <button
+                      type="button"
+                      data-on={!only.size || undefined}
+                      onClick={() => setOnly(new Set())}
+                    >
+                      All {journalNotes.length}
+                    </button>
+                    {acts.map((act) => (
+                      <button
+                        key={act}
+                        type="button"
+                        data-act={act}
+                        data-on={only.has(act) || undefined}
+                        aria-pressed={only.has(act)}
+                        onClick={() => setOnly((current) => {
+                          const next = new Set(current);
+                          if (next.has(act)) next.delete(act); else next.add(act);
+                          return next;
+                        })}
+                      >
+                        {act}
+                        <span>{journalNotes.filter((note) => actOf(note) === act).length}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
                 <div className="review-table-head" aria-hidden="true">
                   <span />
                   <span>Do</span>
@@ -1480,72 +1571,31 @@ function ReviewConsole({
                   {/* A board, not an inbox. The lanes are the sections and a
                       note is moved between them by either side — the point is
                       where a thing has got to, not whether it has been read. */}
-                  {laneGroups.map(({ lane, notes: inLane }) => (
-                    <li key={lane} className="review-panel-lane" data-lane={lane}>
-                      <span className="review-panel-lane-head">
-                        {LANE_NAME[lane]}
-                        <span>{inLane.length}</span>
-                      </span>
-                      <ul>{inLane.map(noteRow)}</ul>
-                    </li>
-                  ))}
+                  {laneGroups.map(({ lane, notes: inLane }) => {
+                    const shut = laneShut.has(lane);
+                    return (
+                      <li key={lane} className="review-panel-lane" data-lane={lane} data-shut={shut || undefined}>
+                        <button
+                          type="button"
+                          className="review-panel-lane-head"
+                          aria-expanded={!shut}
+                          onClick={() => setLaneShut((current) => {
+                            const next = new Set(current);
+                            if (next.has(lane)) next.delete(lane); else next.add(lane);
+                            return next;
+                          })}
+                        >
+                          <ChevronDown className="size-3 review-lane-caret" />
+                          {LANE_NAME[lane]}
+                          <span>{inLane.length}</span>
+                        </button>
+                        {shut ? null : <ul>{inLane.map(noteRow)}</ul>}
+                      </li>
+                    );
+                  })}
                 </ul>
               </>
             )}
-
-            {replyTo && notes[replyTo] ? (
-              <form
-                className="review-reply"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const text = replyDraft.trim();
-                  if (!text) return;
-                  const note = notes[replyTo];
-                  upsert({
-                    id: replyTo,
-                    // Saying something about a thing is doing something about
-                    // it, so the card moves to say so.
-                    ...(laneOf(note) === 'open' ? { status: 'commented' as ReviewLane } : {}),
-                    thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
-                  });
-                  setReplyDraft('');
-                  setReplyTo(null);
-                }}
-              >
-                <span className="review-reply-target">Reply · {notes[replyTo].label}</span>
-                <textarea
-                  autoFocus
-                  rows={2}
-                  value={replyDraft}
-                  placeholder="Add to this thread…"
-                  onChange={(event) => setReplyDraft(event.currentTarget.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Escape') setReplyTo(null);
-                  }}
-                />
-                <div className="review-composer-row">
-                  {/* Destroying the record lives here, spelled out, and not
-                      on the row: there it read as "I am not looking at this",
-                      which is what the Not now lane is for — and it threw the
-                      thread away instead of parking the item. */}
-                  <button
-                    type="button"
-                    className="review-reply-destroy"
-                    onClick={() => {
-                      const note = notes[replyTo];
-                      if (note && confirm(`Delete the note "${note.label}" and its thread?`)) {
-                        remove(replyTo);
-                        setReplyTo(null);
-                      }
-                    }}
-                  >
-                    <Trash2 className="size-4" /> Delete note
-                  </button>
-                  <button type="button" className="review-ghost" onClick={() => setReplyTo(null)}>Cancel</button>
-                  <button type="submit" className="review-primary">Send</button>
-                </div>
-              </form>
-            ) : null}
 
             {/* Not while going through them: mid-pass the only things worth
                 pressing are the three answers, and this was competing with
@@ -1624,7 +1674,7 @@ function ReviewConsole({
       toggleHidden(note);
       return true;
     }
-    if (event.key === 'r') { event.preventDefault(); markRead(note.id); setReplyTo(note.id); return true; }
+    if (event.key === 'r') { event.preventDefault(); markRead(note.id); setOpenRow(note.id); return true; }
     if (event.key === 'Enter') { event.preventDefault(); pointAtNote(note); return true; }
     return false;
   }
@@ -1675,11 +1725,19 @@ function ReviewConsole({
 
   /** One note in the journal — a table row, and the columns are the
    *  questions in the order they get asked: what has to happen, to what,
-   *  where in the code, and where it has got to. */
+   *  where in the code, and where it has got to.
+   *
+   *  A row opens. What was said about a thing is the whole reason the note
+   *  exists, and it does not fit on one line — so the line is a summary and
+   *  the row itself is where you read it, answer it, and see what came back. */
   function noteRow(note: ReviewNote) {
     const fresh = isUnread(note, read);
     const answered = isReply(note, read);
     const said = note.comment ?? note.reason;
+    const shown = openRow === note.id;
+    const long = Boolean(said && said.length > 68) || Boolean(note.thread?.length);
+    const ticked = chosen.has(note.id);
+
     return (
       <li
         key={note.id}
@@ -1690,10 +1748,26 @@ function ReviewConsole({
         data-unread={fresh || undefined}
         data-moved={moved === note.id || undefined}
         data-cursor={cursor === note.id || undefined}
+        data-open={shown || undefined}
+        data-ticked={ticked || undefined}
         onMouseEnter={compact ? undefined : () => setPeek(note.id)}
         onMouseLeave={compact ? undefined : () => setPeek(null)}
       >
         <span className="review-cell-mark">
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={ticked}
+            className="review-tick"
+            aria-label={`Select ${note.label}`}
+            onClick={() => setChosen((current) => {
+              const next = new Set(current);
+              if (next.has(note.id)) next.delete(note.id); else next.add(note.id);
+              return next;
+            })}
+          >
+            {ticked ? <Check className="size-3" strokeWidth={3.5} /> : null}
+          </button>
           {fresh ? <i className="review-note-dot" data-reply={answered || undefined} /> : null}
         </span>
 
@@ -1701,16 +1775,39 @@ function ReviewConsole({
             of notes can be read down rather than across. */}
         <span className="review-cell-what" data-act={actOf(note)}>{actOf(note)}</span>
 
-        <button type="button" className="review-cell-item" onClick={() => pointAtNote(note)}>
-          <span className="review-note-label">{note.label}</span>
+        <span className="review-cell-item">
+          <button
+            type="button"
+            className="review-note-label"
+            onClick={() => { setCursor(note.id); markRead(note.id); pointAtNote(note); }}
+          >
+            {note.label}
+          </button>
           {note.tags?.length ? (
             <span className="review-note-tags">
               {note.tags.map((tag) => <span key={tag}>{tag}</span>)}
             </span>
           ) : null}
-          {said ? <span className="review-note-text">{said}</span> : null}
-          {answered ? <span className="review-note-new">Claude replied</span> : null}
-        </button>
+          {said && !shown ? (
+            <span className="review-note-text">
+              {said}
+              {long ? (
+                <button
+                  type="button"
+                  className="review-more"
+                  onClick={() => { setOpenRow(note.id); markRead(note.id); }}
+                >
+                  more
+                </button>
+              ) : null}
+            </span>
+          ) : null}
+          {!said && long ? (
+            <button type="button" className="review-more" onClick={() => setOpenRow(note.id)}>
+              {note.thread?.length} repl{note.thread?.length === 1 ? 'y' : 'ies'}
+            </button>
+          ) : null}
+        </span>
 
         <span className="review-cell-where" title={note.anchor.source ?? note.anchor.layout}>
           {journalScope === 'all' ? <b>{note.anchor.layout}</b> : null}
@@ -1723,7 +1820,7 @@ function ReviewConsole({
           data-lane={laneOf(note)}
           onClick={() => moveLane(note)}
           aria-label={`${note.label} is ${LANE_NAME[laneOf(note)]} — move it on`}
-          title={`${LANE_NAME[laneOf(note)]} — tap to move it on`}
+          title={`${LANE_NAME[laneOf(note)]} — click to move it on`}
         >
           {LANE_NAME[laneOf(note)]}
         </button>
@@ -1734,12 +1831,11 @@ function ReviewConsole({
             className="review-note-eye"
             data-hidden={offPage(note) || undefined}
             onClick={() => toggleHidden(note)}
-            aria-pressed={offPage(note)}
             role="switch"
             aria-checked={offPage(note)}
             aria-label={`${note.label} — ${note.stow ? 'stashed' : note.hidden ? 'hidden' : 'visible'}`}
             title={note.stow
-              ? `Stashed in the ${note.stow.edge} shelf`
+              ? `Stashed on the ${note.stow.edge} shelf`
               : note.hidden ? 'Hidden' : 'Visible'}
           >
             {offPage(note) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -1747,15 +1843,14 @@ function ReviewConsole({
           <button
             type="button"
             className="review-note-remove"
-            onClick={() => { markRead(note.id); setReplyTo(replyTo === note.id ? null : note.id); }}
-            aria-label={`Reply to ${note.label}`}
-            title="Reply"
+            data-on={shown || undefined}
+            onClick={() => { markRead(note.id); setOpenRow(shown ? null : note.id); }}
+            aria-expanded={shown}
+            aria-label={`Open ${note.label}`}
+            title="Read it, and answer it"
           >
             <MessageSquarePlus className="size-4" />
           </button>
-          {/* Beside the eye, and the opposite of it: the eye takes the
-              element off the page and keeps the note, this throws the note
-              away and leaves the element alone. */}
           <button
             type="button"
             className="review-note-remove review-note-kill"
@@ -1770,6 +1865,57 @@ function ReviewConsole({
             <Trash2 className="size-4" />
           </button>
         </span>
+
+        {/* Open: the whole of what was said, what came back, and the box to
+            answer in — under the row it belongs to, not at the foot of the
+            panel where it could be about anything. */}
+        {shown ? (
+          <div className="review-row-open">
+            {said ? <p className="review-row-said">{said}</p> : null}
+            {note.thread?.length ? (
+              <ul className="review-row-thread">
+                {note.thread.map((reply, index) => (
+                  <li key={index} data-from={reply.from}>
+                    <b>{reply.from === 'claude' ? 'Claude' : 'You'}</b>
+                    <span>{reply.text}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <form
+              className="review-row-reply"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const text = replyDraft.trim();
+                if (!text) return;
+                upsert({
+                  id: note.id,
+                  ...(laneOf(note) === 'open' ? { status: 'commented' as ReviewLane } : {}),
+                  thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
+                });
+                setReplyDraft('');
+              }}
+            >
+              <textarea
+                rows={2}
+                value={replyDraft}
+                placeholder={`Reply about “${note.label}”…`}
+                onChange={(event) => setReplyDraft(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setOpenRow(null);
+                  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
+              />
+              <div className="review-row-reply-foot">
+                <span>⌘↵ to send</span>
+                <button type="button" className="review-ghost" onClick={() => setOpenRow(null)}>Close</button>
+                <button type="submit" className="review-primary">Send</button>
+              </div>
+            </form>
+          </div>
+        ) : null}
       </li>
     );
   }
@@ -2353,21 +2499,32 @@ function ReviewConsole({
   );
 }
 
-/** What has to happen about this note, in one word. The old labels named
- *  the note's own state — "Delete", "Approved" — which reads as a thing that
- *  already happened; these name the move that is still owed. */
+/** What has to happen about this note, in one word — the move that is still
+ *  owed, not the state it is already in.
+ *
+ *  Reading is not one of them. A note said "Read" when it carried a comment,
+ *  which put a non-action in the column of actions and made every remark
+ *  look like a chore. What a comment actually carries is either a proposed
+ *  change or a question waiting on an answer, and which of those it is
+ *  depends on whose word came last. */
 function actOf(note: ReviewNote): string {
   if (note.kind === 'choice') return 'Chose';
   if (note.placement) return 'Move';
   if (note.verdict === 'approved') return note.kind === 'delete' ? 'Cut' : 'Do';
   if (note.verdict === 'rejected') return 'Keep';
   if (note.verdict === 'revise') return 'Revise';
-  if (note.comment) return 'Read';
+  // A tag is the reviewer naming the change themselves; nothing beats it.
+  if (note.tags?.length) return note.tags[0][0].toUpperCase() + note.tags[0].slice(1);
+  const last = note.thread?.[note.thread.length - 1];
+  if (last?.from === 'claude') return 'Answer';
+  if (note.comment) return 'Change';
   // Two ways of being off the page, and they are not the same answer: one
   // was carried onto a shelf, the other was switched off where it stood.
   if (note.stow) return 'Stashed';
   if (note.hidden) return 'Hidden';
-  return 'Look';
+  // Marked, with nothing asked for yet. It is not owed anything, and the
+  // column should not pretend otherwise.
+  return 'Marked';
 }
 
 

@@ -11,8 +11,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronUp, Columns2, EyeOff, MousePointerSquareDashed, NotebookPen,
-  SlidersHorizontal, Trash2, Undo2, X
+  Archive, ChevronUp, Columns2, EyeOff, ListChecks,
+  MousePointerSquareDashed, SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool } from './DockParts';
@@ -196,7 +196,7 @@ export function MobileDock({
           {/* Each fold answers to itself. Minimising everything is one
               control, top right of the tab, and it is not this. */}
           <Fold
-            icon={NotebookPen}
+            icon={ListChecks}
             name="Journal"
             tone="paper"
             count={journalCount}

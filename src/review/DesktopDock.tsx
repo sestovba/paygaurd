@@ -14,8 +14,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronRight, Columns2, EyeOff, MousePointerSquareDashed,
-  NotebookPen, SlidersHorizontal, Trash2, Undo2, X
+  Archive, ChevronRight, Columns2, EyeOff, ListChecks,
+  MousePointerSquareDashed, NotebookPen, SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool } from './DockParts';
@@ -252,7 +252,7 @@ export function DesktopDock({
         </Fold>
 
         <Fold
-          icon={NotebookPen}
+          icon={ListChecks}
           name="Journal"
           tone="paper"
           count={journalCount}

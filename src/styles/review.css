@@ -5030,14 +5030,19 @@ body.review-picking * {
 .review-panel-list li.review-row {
   display: grid;
   grid-template-columns:
-    0.85rem            /* unread */
+    1.9rem             /* tick and unread */
     4.25rem            /* what has to happen */
     minmax(0, 1fr)     /* the item itself */
     minmax(0, 7rem)    /* where in the code */
     5.25rem            /* which lane */
-    4rem;              /* its own controls */
-  align-items: center;
+    5.5rem;            /* its own controls */
+  align-items: start;
   gap: 0.4rem;
+}
+
+/* The head is one line, so it centres; the rows are not. */
+.review-table-head {
+  align-items: center;
 }
 
 .review-table-head {
@@ -5072,14 +5077,40 @@ body.review-picking * {
 }
 
 .review-cell-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding-top: 0.35rem;
+}
+
+/* Bulk select. Off-white until ticked, so a column of them does not read as
+   a column of decisions already made. */
+.review-tick {
   display: grid;
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
   place-items: center;
+  border: 1px solid rgb(15 23 42 / 0.25);
+  border-radius: 0.2rem;
+  color: white;
+  cursor: pointer;
+}
+
+.review-row:hover .review-tick {
+  border-color: rgb(15 23 42 / 0.45);
+}
+
+.review-row[data-ticked] .review-tick {
+  border-color: var(--review-blue);
+  background: var(--review-blue);
 }
 
 /* One word, colour-coded by what it costs: cutting is red, keeping is green,
    everything else is the console's blue. */
 .review-cell-what {
   overflow: hidden;
+  padding-top: 0.4rem;
   color: rgb(15 23 42 / 0.6);
   font-size: 0.625rem;
   font-weight: 800;
@@ -5094,7 +5125,11 @@ body.review-picking * {
 .review-cell-what[data-act='Revise'],
 .review-cell-what[data-act='Chose'],
 .review-cell-what[data-act='Move'] { color: #b45309; }
-.review-cell-what[data-act='Read'] { color: var(--review-blue); }
+.review-cell-what[data-act='Change'],
+.review-cell-what[data-act='Answer'] { color: var(--review-blue); }
+
+/* Nothing is owed on this one yet. It should not shout like the rest. */
+.review-cell-what[data-act='Marked'] { color: rgb(15 23 42 / 0.35); }
 .review-cell-what[data-act='Hidden'],
 .review-cell-what[data-act='Stashed'] { color: rgb(15 23 42 / 0.4); }
 
@@ -5102,17 +5137,25 @@ body.review-picking * {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  align-items: flex-start;
   gap: 0.1rem;
   padding: 0.25rem 0;
   text-align: left;
-  cursor: pointer;
 }
 
 .review-cell-item .review-note-label {
+  display: block;
   overflow: hidden;
+  max-width: 100%;
   font-size: 0.8125rem;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.review-cell-item .review-note-label:hover {
+  text-decoration: underline;
 }
 
 /* What was said sits under the name, clipped to one line: the row is a row.
@@ -5128,6 +5171,7 @@ body.review-picking * {
 
 .review-cell-where {
   overflow: hidden;
+  padding-top: 0.45rem;
   color: rgb(15 23 42 / 0.42);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.625rem;
@@ -5149,6 +5193,7 @@ body.review-picking * {
   min-width: 0;
   width: 100%;
   height: 1.6rem;
+  margin-top: 0.2rem;
   font-size: 0.5625rem;
 }
 
@@ -5156,6 +5201,7 @@ body.review-picking * {
   display: flex;
   justify-content: flex-end;
   gap: 0.1rem;
+  padding-top: 0.15rem;
 }
 
 .review-cell-acts .review-note-eye,
@@ -5250,8 +5296,16 @@ body.review-picking * {
 /* The row the keys are pointed at. Distinct from hover, because both can be
    true at once and the cursor is the one the next keystroke acts on. */
 .review-panel-list li.review-row[data-cursor] {
-  background: rgb(37 99 235 / 0.1);
-  box-shadow: inset 3px 0 0 var(--review-blue);
+  background: rgb(37 99 235 / 0.12);
+  box-shadow: inset 4px 0 0 var(--review-blue), 0 1px 0 rgb(37 99 235 / 0.25);
+}
+
+.review-panel-list li.review-row[data-cursor] .review-note-label {
+  color: var(--review-blue);
+}
+
+.review-panel-list li.review-row[data-ticked] {
+  background: rgb(37 99 235 / 0.07);
 }
 
 .review-panel-keys {
@@ -5451,4 +5505,225 @@ body.review-picking * {
 [data-review-peek='holds'] {
   outline: 2px dashed #b45309 !important;
   outline-offset: 3px;
+}
+
+
+/* --- A row you can read ----------------------------------------------------
+ *
+ * What was said about a thing is the whole reason its note exists, and it
+ * never fitted on one line. The line is a summary with a way in; the row
+ * itself is where the comment is read, where the thread is, and where the
+ * answer is typed — under the note it is about, rather than at the foot of
+ * the panel where it could have been about any of them.
+ */
+
+.review-panel-list li.review-row[data-open] {
+  background: white;
+  box-shadow: inset 4px 0 0 var(--review-blue);
+}
+
+.review-more {
+  margin-left: 0.3rem;
+  color: var(--review-blue);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.review-row-open {
+  display: flex;
+  grid-column: 2 / -1;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-top: 1px solid rgb(15 23 42 / 0.08);
+  margin-top: 0.3rem;
+  padding: 0.5rem 0 0.35rem;
+}
+
+.review-row-said {
+  color: var(--review-ink);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.review-row-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-left: 2px solid rgb(15 23 42 / 0.1);
+  padding-left: 0.5rem;
+}
+
+.review-row-thread li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.review-row-thread b {
+  color: rgb(15 23 42 / 0.5);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-row-thread li[data-from='claude'] b {
+  color: var(--review-blue);
+}
+
+.review-row-reply {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.review-row-reply textarea {
+  width: 100%;
+  border: 1px solid rgb(15 23 42 / 0.16);
+  border-radius: 0.4rem;
+  background: white;
+  padding: 0.4rem 0.5rem;
+  color: var(--review-ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.review-row-reply textarea:focus {
+  border-color: var(--review-blue);
+  outline: none;
+}
+
+.review-row-reply-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.review-row-reply-foot span {
+  flex: 1;
+  color: rgb(15 23 42 / 0.35);
+  font-size: 0.625rem;
+}
+
+/* --- Filter, and what to do with a handful of them ------------------------- */
+
+.review-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.4rem 0.5rem 0.15rem;
+}
+
+.review-filter button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgb(15 23 42 / 0.12);
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  color: rgb(15 23 42 / 0.6);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.review-filter button:hover {
+  border-color: rgb(15 23 42 / 0.3);
+}
+
+.review-filter button[data-on] {
+  border-color: var(--review-ink);
+  background: var(--review-ink);
+  color: white;
+}
+
+.review-filter button span {
+  color: inherit;
+  font-size: 0.5625rem;
+  opacity: 0.7;
+}
+
+.review-bulk {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgb(37 99 235 / 0.25);
+  background: rgb(219 234 254 / 0.96);
+  padding: 0.35rem 0.5rem;
+  backdrop-filter: blur(8px);
+}
+
+.review-bulk-count {
+  margin-right: 0.15rem;
+  color: var(--review-blue);
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.review-bulk button {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  border: 1px solid rgb(37 99 235 / 0.3);
+  border-radius: 0.35rem;
+  background: white;
+  padding: 0.2rem 0.45rem;
+  color: var(--review-ink);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-bulk button:hover {
+  border-color: var(--review-blue);
+  background: var(--review-blue);
+  color: white;
+}
+
+.review-bulk-kill:hover {
+  border-color: var(--review-red) !important;
+  background: var(--review-red) !important;
+}
+
+.review-bulk-clear {
+  margin-left: auto;
+  border-color: transparent !important;
+  background: transparent !important;
+  color: rgb(15 23 42 / 0.5) !important;
+}
+
+/* --- Lanes fold ------------------------------------------------------------ */
+
+.review-panel-lane .review-panel-lane-head {
+  width: 100%;
+  cursor: pointer;
+}
+
+.review-panel-lane .review-panel-lane-head:hover {
+  background: rgb(15 23 42 / 0.05);
+}
+
+.review-lane-caret {
+  transition: transform 160ms;
+}
+
+.review-panel-lane[data-shut] .review-lane-caret {
+  transform: rotate(-90deg);
+}
+
+.review-panel-lane[data-shut] .review-panel-lane-head {
+  opacity: 0.65;
 }
