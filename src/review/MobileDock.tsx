@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronUp, Columns2, MousePointerSquareDashed, NotebookPen,
+  Archive, ChevronUp, Columns2, EyeOff, MousePointerSquareDashed, NotebookPen,
   SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
@@ -36,7 +36,11 @@ export function MobileDock({
   stashOpen,
   onStash,
   stashCount,
-  shelves
+  shelves,
+  hiddenOpen,
+  onHidden,
+  hiddenCount,
+  hiddenList
 }: {
   /** Open means the dock is showing its contents. Shut, the tab is still
    *  there — on a phone it is the only way into the console. */
@@ -63,6 +67,12 @@ export function MobileDock({
   onStash: (next: boolean) => void;
   stashCount: number;
   shelves: ReactNode;
+  /** Switched off on the page. Its own room — the archive is for things
+   *  carried away, this is for lights left off. */
+  hiddenOpen: boolean;
+  onHidden: (next: boolean) => void;
+  hiddenCount: number;
+  hiddenList: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   /** Folded to its tab with the review still running. Distinct from the
@@ -116,6 +126,7 @@ export function MobileDock({
             setToolsOpen(false);
             onJournal(false);
             onStash(false);
+            onHidden(false);
             setJournalBig(false);
             setMin(true);
           }}
@@ -190,6 +201,17 @@ export function MobileDock({
             onBig={() => setJournalBig((current) => !current)}
           >
             {journal}
+          </Fold>
+
+          <Fold
+            icon={EyeOff}
+            name="Hidden"
+            tone="glass"
+            count={hiddenCount}
+            open={hiddenOpen}
+            onToggle={() => onHidden(!hiddenOpen)}
+          >
+            {hiddenList}
           </Fold>
 
           <Fold

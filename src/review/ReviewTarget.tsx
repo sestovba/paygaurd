@@ -56,6 +56,9 @@ export function ReviewTarget({
     };
   }, [active]);
   const stowed = Boolean(review?.isStowed(id));
+  // Hidden is not stowed: there is no shelf holding it and nothing to drag
+  // back, so it renders nothing at all — that is the whole point of the eye.
+  const hidden = Boolean(review?.isHidden(id));
   const target = { id, label, reason, layout };
 
   function stop(event: React.MouseEvent) {
@@ -68,6 +71,8 @@ export function ReviewTarget({
   // in the gap answers a different question. Only the audit puts the slot
   // back — that is the one mode whose job is showing what was proposed for
   // cutting, and it is where stowed elements are revealed on the page too.
+  if (hidden) return null;
+
   if (stowed) {
     if (!review || review.mode !== 'audit') return null;
     return (

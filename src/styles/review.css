@@ -5272,3 +5272,101 @@ body.review-picking * {
   font-size: 0.5625rem;
   font-weight: 700;
 }
+
+
+/* --- Hidden ----------------------------------------------------------------
+ *
+ * A room of its own, next to the Archive and not inside it. The archive holds
+ * things carried off the page and kept on a shelf; this holds lights left
+ * off. Both leave the code alone, but only one of them is a question — "is
+ * the screen better without this?" — and it wants an answer, so it says how
+ * many are off and offers to put them all back.
+ */
+
+.review-hidden {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem;
+}
+
+.review-hidden-empty {
+  color: rgb(255 255 255 / 0.5);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+
+.review-hidden-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.review-hidden-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 0.4rem;
+  background: rgb(255 255 255 / 0.05);
+  padding: 0.15rem 0.15rem 0.15rem 0.45rem;
+}
+
+.review-hidden-list li:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.review-hidden-name {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0;
+  color: rgb(255 255 255 / 0.72);
+  font-size: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.review-hidden-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-hidden-back {
+  flex: none;
+  border-radius: 0.35rem;
+  background: rgb(37 99 235 / 0.24);
+  padding: 0.25rem 0.5rem;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-hidden-back:hover {
+  background: var(--review-blue);
+}
+
+.review-hidden-all {
+  border: 1px solid var(--review-glass-line);
+  border-radius: 0.4rem;
+  padding: 0.4rem;
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-hidden-all:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+/* Deleting the note sits beside the eye because they are opposites: the eye
+   takes the element off the page and keeps what was said about it, this
+   throws away what was said and leaves the element alone. */
+.review-note-kill:hover {
+  background: rgb(220 38 38 / 0.12);
+  color: var(--review-red);
+}

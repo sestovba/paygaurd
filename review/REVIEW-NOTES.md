@@ -9,7 +9,9 @@ your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`
 — acted on) or `"parked"` (`[-]` — deliberately not now).
 
 STOWED means parked out of the page in the app; the code is untouched and
-it can be dragged back. DELETE/KEEP/MOVE are the decisions to act on.
+it can be dragged back. HIDDEN means switched off with the eye — also
+untouched code, and a question ("is the screen better without this?")
+rather than an answer. DELETE/KEEP/MOVE are the decisions to act on.
 A `Kind:` line carries the reviewer's own tags (cut, reword, spacing…) —
 the prose says what to change, the tags say what sort of change it is.
 The console's own housekeeping — a stash's name, colour or folded state —
@@ -19,8 +21,8 @@ To answer a note, append to its `thread` array in review-notes.json with
 `{"from":"claude","text":"…","at":"<ISO>"}` and bump that note's
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
-11 note(s) · 4 to delete · 3 parked · 1 A/B pick(s)
-Updated 2026-08-31 16:19
+12 note(s) · 5 to delete · 3 parked · 1 A/B pick(s)
+Updated 2026-09-01 01:10
 
 ## Layout: ledger
 
@@ -45,7 +47,7 @@ Updated 2026-08-31 16:19
 
 ## Layout: payguard
 
-- [ ] **COMMENT — August countable earnings**
+- [x] **COMMENT — August countable earnings**
   - Needs: "This whole hero says three things where one would do — show the month, the limit, and the room left."
   - Source: src/components/payguard/TrackerPayGuard.tsx:282
   - Component: TrackerPayGuard › Root › TrackerProvider › App
@@ -120,6 +122,13 @@ Updated 2026-08-31 16:19
   - DOM: div#root > div.pg-payguard.pg-page-pad:nth-of-type(1) > header.pg-topbar > div > div:nth-of-type(4) > div:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-08-31 04:40
+- [ ] **DELETE — Income sources**
+  - Source: src/components/payguard/TrackerPayGuard.tsx:466
+  - Component: TrackerPayGuard › Root › TrackerProvider › App
+  - Text: "Add Job"
+  - DOM: div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs
+  - Origin: picked by the user
+  - Noted: 2026-09-01 01:08
 
 ## Layout: v2
 

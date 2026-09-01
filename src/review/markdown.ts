@@ -10,7 +10,8 @@ import { laneOf } from './types';
 export function actionable(note: ReviewNote): boolean {
   return Boolean(
     note.verdict || note.comment || note.tags?.length
-    || note.placement || note.members || note.stow || note.kind === 'choice'
+    || note.placement || note.members || note.stow || note.hidden
+    || note.kind === 'choice'
   );
 }
 
@@ -25,6 +26,7 @@ function headline(note: ReviewNote): string {
   if (note.verdict === 'rejected') return `KEEP (my suggestion rejected) — ${note.label}`;
   if (note.placement) return `MOVE — ${note.label}`;
   if (note.stow) return `STOWED — ${note.label}`;
+  if (note.hidden) return `HIDDEN — ${note.label}`;
   return `COMMENT — ${note.label}`;
 }
 
@@ -48,6 +50,7 @@ function renderNote(note: ReviewNote): string {
     note.members ? `\n  - Applies to: ${note.members.join(' · ')}` : '',
     note.tray?.name ? `\n  - Stash named "${note.tray.name}"` : '',
     note.stow ? `\n  - Parked in the ${note.stow.edge} tray (hidden in the app, still in the code)` : '',
+    note.hidden ? '\n  - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.' : '',
     note.reason ? `\n  - I proposed cutting it because: ${note.reason}` : '',
     note.options ? `\n  - Alternatives shown: ${note.options.join(', ')}` : '',
     line('Source', note.anchor.source),
@@ -95,7 +98,9 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     '— acted on) or `"parked"` (`[-]` — deliberately not now).',
     '',
     'STOWED means parked out of the page in the app; the code is untouched and',
-    'it can be dragged back. DELETE/KEEP/MOVE are the decisions to act on.',
+    'it can be dragged back. HIDDEN means switched off with the eye — also',
+    'untouched code, and a question ("is the screen better without this?")',
+    'rather than an answer. DELETE/KEEP/MOVE are the decisions to act on.',
     'A `Kind:` line carries the reviewer\'s own tags (cut, reword, spacing…) —',
     'the prose says what to change, the tags say what sort of change it is.',
     'The console\'s own housekeeping — a stash\'s name, colour or folded state —',

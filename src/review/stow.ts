@@ -9,6 +9,17 @@ export function isStowed(note: ReviewNote): boolean {
   return Boolean(note.stow);
 }
 
+/** Switched off on the page. Not the archive: the archive is where things
+ *  you carried away are kept, and this is a light left off. */
+export function isHidden(note: ReviewNote): boolean {
+  return Boolean(note.hidden);
+}
+
+/** Either reason the element is not on the page right now. */
+export function isOffPage(note: ReviewNote): boolean {
+  return isStowed(note) || isHidden(note);
+}
+
 export function stowedIn(notes: ReviewNotes, layout: LayoutMode): ReviewNote[] {
   return Object.values(notes)
     .filter((note) => isStowed(note) && note.anchor.layout === layout)
@@ -38,7 +49,11 @@ export function applyStowAttributes(
   });
 
   for (const note of Object.values(notes)) {
-    if (!isStowed(note) || note.origin !== 'user') continue;
+    // Stowed sections the audit wrapped take themselves out of the tree, so
+    // only hand-picked markup needs the attribute. Hiding is a switch on
+    // anything at all, so it applies either way.
+    const byStow = isStowed(note) && note.origin === 'user';
+    if (!byStow && !isHidden(note)) continue;
     if (note.anchor.layout !== layout) continue;
     const el = safeQuery(note.anchor.domPath);
     if (el) el.setAttribute('data-review-stowed', reveal ? 'preview' : 'true');

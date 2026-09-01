@@ -43,6 +43,8 @@ export interface ReviewContextValue {
   focusId?: string | null;
   /** True while this element is parked in an edge tray. */
   isStowed: (id: string) => boolean;
+  /** Switched off on the page — a layer eye, not the archive. */
+  isHidden: (id: string) => boolean;
   /** Park an element in an edge tray — storage only, no verdict. Stashes
    *  exactly what it is given; `section` widens to the audited card around
    *  it, which is always the reviewer's explicit choice. */

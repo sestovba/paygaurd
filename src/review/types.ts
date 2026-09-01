@@ -128,6 +128,12 @@ export interface ReviewNote {
   verdict?: ReviewVerdict;
   /** Parked out of the page. Independent of the verdict. */
   stow?: ReviewStow;
+  /** Taken off the page to see whether the page is better without it — a
+   *  layer switched off, nothing more. Distinct from `stow`: stowing carries
+   *  the thing into a shelf you can drag it back out of, and hiding just
+   *  turns it off where it stands. Neither is a verdict, and neither touches
+   *  the code. */
+  hidden?: boolean;
   /** For a tray-group note: what was parked on that side when it was written. */
   members?: string[];
   tray?: TraySettings;

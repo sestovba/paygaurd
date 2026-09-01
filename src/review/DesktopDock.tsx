@@ -14,8 +14,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Archive, ChevronRight, Columns2, MousePointerSquareDashed, NotebookPen,
-  SlidersHorizontal, Trash2, Undo2, X
+  Archive, ChevronRight, Columns2, EyeOff, MousePointerSquareDashed,
+  NotebookPen, SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
 import { Fold, Tool } from './DockParts';
@@ -55,7 +55,11 @@ export function DesktopDock({
   stashOpen,
   onStash,
   stashCount,
-  shelves
+  shelves,
+  hiddenOpen,
+  onHidden,
+  hiddenCount,
+  hiddenList
 }: {
   open: boolean;
   onToggle: () => void;
@@ -81,6 +85,12 @@ export function DesktopDock({
   onStash: (next: boolean) => void;
   stashCount: number;
   shelves: ReactNode;
+  /** Switched off on the page. Its own room — the archive is for things
+   *  carried away, this is for lights left off. */
+  hiddenOpen: boolean;
+  onHidden: (next: boolean) => void;
+  hiddenCount: number;
+  hiddenList: ReactNode;
 }) {
   const [width, setWidth] = useState(loadWidth);
   const [toolsOpen, setToolsOpen] = useState(true);
@@ -249,6 +259,17 @@ export function DesktopDock({
           onBig={() => onJournalWide(!journalWide)}
         >
           {journal}
+        </Fold>
+
+        <Fold
+          icon={EyeOff}
+          name="Hidden"
+          tone="glass"
+          count={hiddenCount}
+          open={hiddenOpen}
+          onToggle={() => onHidden(!hiddenOpen)}
+        >
+          {hiddenList}
         </Fold>
 
         <Fold

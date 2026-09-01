@@ -240,6 +240,8 @@ function ReviewConsole({
   /** The stash drawer's open state lives up here because the toolbar carries
    *  the button that opens it — it belongs in the group with Undo and Log. */
   const [stashOpen, setStashOpen] = useState(false);
+  /** The Hidden section's own open state. */
+  const [hiddenOpen, setHiddenOpen] = useState(false);
   /** Under this, the console is a bar on the bottom edge; over it, a rail
    *  down the side. They are different objects, not one thing squeezed. */
   const [compact, setCompact] = useState(() => window.innerWidth < 640);
@@ -981,7 +983,8 @@ function ReviewConsole({
     restore,
     stow,
     focusId,
-    isStowed: (id: string) => Boolean(notes[id] && isStowed(notes[id]))
+    isStowed: (id: string) => Boolean(notes[id] && isStowed(notes[id])),
+    isHidden: (id: string) => Boolean(notes[id]?.hidden)
   }), [mode, notes, focusId, register, registerVariants, decide, commentOn, chooseVariant, restore, stow]);
 
   const stashCount = Object.values(notes)
@@ -1129,6 +1132,62 @@ function ReviewConsole({
     triageStep(1);
   }
 
+/** Everything switched off on this screen, newest first. */
+  const hiddenHere = Object.values(notes)
+    .filter((note) => note.hidden && note.anchor.layout === layout)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+
+  /** What is switched off on this screen. Its own room, not the archive:
+   *  the archive holds things carried off the page and this holds lights
+   *  left off, and confusing the two loses both. */
+  const hiddenList = (
+    <div className="review-hidden">
+      {hiddenHere.length === 0 ? (
+        <p className="review-hidden-empty">
+          Nothing hidden on this screen. The eye on a note takes its element
+          off the page so you can see whether the page is better without it.
+        </p>
+      ) : (
+        <>
+          <ul className="review-hidden-list">
+            {hiddenHere.map((note) => (
+              <li key={note.id}>
+                <button
+                  type="button"
+                  className="review-hidden-name"
+                  onMouseEnter={compact ? undefined : () => setPeek(note.id)}
+                  onMouseLeave={compact ? undefined : () => setPeek(null)}
+                  onClick={() => pointAtNote(note)}
+                >
+                  <EyeOff className="size-3.5" />
+                  <span>{note.label}</span>
+                </button>
+                <button
+                  type="button"
+                  className="review-hidden-back"
+                  onClick={() => toggleHidden(note)}
+                  title="Put it back on the page"
+                >
+                  Show
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            className="review-hidden-all"
+            onClick={() => {
+              for (const note of hiddenHere) upsert({ id: note.id, hidden: undefined });
+              say('Everything back on the page', 'good');
+            }}
+          >
+            Show all {hiddenHere.length}
+          </button>
+        </>
+      )}
+    </div>
+  );
+
   const journalBody = (
     <>
             <p className="review-panel-sync">
@@ -1219,11 +1278,12 @@ function ReviewConsole({
                         </button>
                         <button
                           type="button"
-                          data-on={triageNote.stow ? true : undefined}
+                          data-on={triageNote.hidden || undefined}
                           onClick={() => toggleHidden(triageNote)}
+                          title="Take it off the page to see the screen without it"
                         >
-                          {triageNote.stow ? <EyeOff className="size-4" /> : <EyeOff className="size-4" />}
-                          {triageNote.stow ? 'Unhide' : 'Hide it'}
+                          {triageNote.hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                          {triageNote.hidden ? 'Show it' : 'Hide it'}
                         </button>
                         <button
                           type="button"
@@ -1497,18 +1557,17 @@ function ReviewConsole({
     setMoved(note.id);
   }
 
-  /** Hide or show the element this note is about. This is the stow the edge
-   *  shelves use — one field on the note — so a thing hidden from the board
-   *  is the same thing as a thing dragged off the page, sticks to the layout
-   *  it was hidden in, and travels in the file like everything else. */
+  /** Switch the element this note is about off, or back on. A layer eye:
+   *  not the archive, which is where things carried off the page are kept,
+   *  and not a verdict — the code is untouched either way. It sticks to the
+   *  layout it was hidden in and travels in the file like everything else,
+   *  so the page can be judged without something and then put back. */
   function toggleHidden(note: ReviewNote) {
-    if (note.stow) {
-      restore(note.id);
-      return;
-    }
-    upsert({ id: note.id, stow: { edge: 'right', at: new Date().toISOString() } });
-    say(`${note.label} hidden`, 'info');
+    const next = !note.hidden;
+    upsert({ id: note.id, hidden: next || undefined });
+    say(next ? `${note.label} hidden` : `${note.label} back on the page`, next ? 'info' : 'good');
   }
+
 
   /** One note in the journal — a table row, and the columns are the
    *  questions in the order they get asked: what has to happen, to what,
@@ -1569,13 +1628,15 @@ function ReviewConsole({
           <button
             type="button"
             className="review-note-eye"
-            data-hidden={note.stow ? true : undefined}
+            data-hidden={note.hidden || undefined}
             onClick={() => toggleHidden(note)}
-            aria-pressed={Boolean(note.stow)}
-            aria-label={note.stow ? `Show ${note.label} again` : `Hide ${note.label}`}
-            title={note.stow ? 'Hidden on this screen — click to show it' : 'Hide it on this screen'}
+            aria-pressed={Boolean(note.hidden)}
+            aria-label={note.hidden ? `Show ${note.label} again` : `Hide ${note.label}`}
+            title={note.hidden
+              ? 'Hidden on this screen — click to put it back'
+              : 'Hide it on this screen. The note stays; the code is untouched.'}
           >
-            {note.stow ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {note.hidden ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
           <button
             type="button"
@@ -1585,6 +1646,22 @@ function ReviewConsole({
             title="Reply"
           >
             <MessageSquarePlus className="size-4" />
+          </button>
+          {/* Beside the eye, and the opposite of it: the eye takes the
+              element off the page and keeps the note, this throws the note
+              away and leaves the element alone. */}
+          <button
+            type="button"
+            className="review-note-remove review-note-kill"
+            onClick={() => {
+              if (confirm(`Delete the note “${note.label}” and its thread? The element itself is not touched.`)) {
+                remove(note.id);
+              }
+            }}
+            aria-label={`Delete the note about ${note.label}`}
+            title="Delete this note. The element itself is not touched."
+          >
+            <Trash2 className="size-4" />
           </button>
         </span>
       </li>
@@ -2057,6 +2134,10 @@ function ReviewConsole({
           onStash={setStashOpen}
           stashCount={stashCount}
           shelves={shelves}
+          hiddenOpen={hiddenOpen}
+          onHidden={setHiddenOpen}
+          hiddenCount={hiddenHere.length}
+          hiddenList={hiddenList}
         />
       ) : (
         <DesktopDock
@@ -2091,6 +2172,10 @@ function ReviewConsole({
           onStash={setStashOpen}
           stashCount={stashCount}
           shelves={shelves}
+          hiddenOpen={hiddenOpen}
+          onHidden={setHiddenOpen}
+          hiddenCount={hiddenHere.length}
+          hiddenList={hiddenList}
         />
       )}
     </ReviewContext.Provider>
