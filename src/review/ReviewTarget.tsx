@@ -78,7 +78,7 @@ export function ReviewTarget({
     return (
       <div className={`review-slot ${className}`} data-review-id={id} data-review-ui>
         <Archive className="size-3.5 shrink-0" />
-        <span className="review-slot-label">Stashed · {label}</span>
+        <span className="review-slot-label">Archived · {label}</span>
         <button type="button" onClick={() => review.restore(id)} title="Put it back here">
           <Undo2 className="size-3.5" /> Restore
         </button>

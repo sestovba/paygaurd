@@ -25,7 +25,7 @@ function headline(note: ReviewNote): string {
   if (note.verdict === 'approved') return `REMOVE — ${note.label}`;
   if (note.verdict === 'rejected') return `KEEP (my suggestion rejected) — ${note.label}`;
   if (note.placement) return `MOVE — ${note.label}`;
-  if (note.stow) return `STASHED — ${note.label}`;
+  if (note.stow) return `ARCHIVED — ${note.label}`;
   if (note.hidden) return `HIDDEN — ${note.label}`;
   return `COMMENT — ${note.label}`;
 }
@@ -49,7 +49,7 @@ function renderNote(note: ReviewNote): string {
     line('Move', move),
     note.members ? `\n  - Applies to: ${note.members.join(' · ')}` : '',
     note.tray?.name ? `\n  - Stash named "${note.tray.name}"` : '',
-    note.stow ? `\n  - Stashed on the ${note.stow.edge} shelf (off the page in the app, still in the code)` : '',
+    note.stow ? `\n  - Archived on the ${note.stow.edge} shelf (off the page in the app, still in the code)` : '',
     note.hidden ? '\n  - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.' : '',
     note.reason ? `\n  - I proposed cutting it because: ${note.reason}` : '',
     note.options ? `\n  - Alternatives shown: ${note.options.join(', ')}` : '',
@@ -97,7 +97,7 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     'your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`',
     '— acted on) or `"parked"` (`[-]` — deliberately not now).',
     '',
-    'STASHED means carried onto a shelf in the app; the code is untouched and',
+    'ARCHIVED means carried onto a shelf in the app; the code is untouched and',
     'it can be dragged back. HIDDEN means switched off with the eye — also',
     'untouched code, and a question ("is the screen better without this?")',
     'rather than an answer. REMOVE/KEEP/MOVE are the decisions to act on.',

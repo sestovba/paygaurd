@@ -349,7 +349,7 @@ export function DesktopDock({
             badge={undoDepth || undefined}
             onClick={onUndo}
           />
-          <Tool icon={X} label="Done" hint="esc" onClick={onClose} />
+          <Tool icon={X} label="Close" hint="esc" onClick={onClose} />
         </div>
       </Fold>
     ),

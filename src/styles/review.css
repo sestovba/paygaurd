@@ -5136,12 +5136,12 @@ body.review-picking * {
 .review-cell-what[data-act='Move'] { color: #b45309; }
 .review-cell-what[data-act='Change'],
 .review-cell-what[data-act='Apply'],
-.review-cell-what[data-act='Answer'] { color: var(--review-blue); }
+.review-cell-what[data-act='Reply'] { color: var(--review-blue); }
 
 /* Nothing is owed on this one yet. It should not shout like the rest. */
 .review-cell-what[data-act='Noted'] { color: rgb(15 23 42 / 0.35); }
 .review-cell-what[data-act='Hidden'],
-.review-cell-what[data-act='Stashed'] { color: rgb(15 23 42 / 0.4); }
+.review-cell-what[data-act='Archived'] { color: rgb(15 23 42 / 0.4); }
 
 .review-cell-item {
   display: flex;

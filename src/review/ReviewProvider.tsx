@@ -1562,7 +1562,7 @@ function ReviewConsole({
                           onClick={() => toggleHidden(triageNote)}
                         >
                           {offPage(triageNote) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                          {offPage(triageNote) ? (triageNote.stow ? 'Stashed' : 'Hidden') : 'Visible'}
+                          {offPage(triageNote) ? (triageNote.stow ? 'Archived' : 'Hidden') : 'Visible'}
                         </button>
                         <button
                           type="button"
@@ -1594,7 +1594,7 @@ function ReviewConsole({
                           className="review-queue-did"
                           onClick={() => triageFile('done')}
                         >
-                          <Check className="size-4" /> Did it
+                          <Check className="size-4" /> Done
                         </button>
                         <button
                           type="button"
@@ -1676,7 +1676,7 @@ function ReviewConsole({
                      only thing worth offering is what to do with it. */
                   <div className="review-bulk">
                     <span className="review-bulk-count">{chosen.size} selected</span>
-                    <span className="review-bulk-move">Move to</span>
+                    <span className="review-bulk-move">State</span>
                     {(['done', 'second', 'parked', 'open'] as ReviewLane[]).map((lane) => (
                       <button
                         key={lane}
@@ -2084,9 +2084,9 @@ function ReviewConsole({
             onClick={() => toggleHidden(note)}
             role="switch"
             aria-checked={offPage(note)}
-            aria-label={`${note.label} — ${note.stow ? 'stashed' : note.hidden ? 'hidden' : 'visible'}`}
+            aria-label={`${note.label} — ${note.stow ? 'archived' : note.hidden ? 'hidden' : 'visible'}`}
             title={note.stow
-              ? `Stashed on the ${note.stow.edge} shelf`
+              ? `Archived on the ${note.stow.edge} shelf`
               : note.hidden ? 'Hidden' : 'Visible'}
           >
             {offPage(note) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -2314,7 +2314,7 @@ function ReviewConsole({
     const off = offPage(note);
     flashElement(near, off ? 'holds' : 'near');
     say(off
-      ? `${note.stow ? 'Stashed' : 'Hidden'} — this is the section it sits in`
+      ? `${note.stow ? 'Archived' : 'Hidden'} — this is the section it sits in`
       : 'Not on screen — flashing what holds it', off ? 'info' : 'warn');
     return true;
   }
@@ -2369,7 +2369,7 @@ function ReviewConsole({
         return;
       }
       if (flashNearest(note)) { setNest(note.id); setNestFor(null); return; }
-      say(`${note.stow ? 'Stashed' : 'Hidden'} — its section is not on this screen`, 'warn');
+      say(`${note.stow ? 'Archived' : 'Hidden'} — its section is not on this screen`, 'warn');
       return;
     }
 
@@ -2380,7 +2380,7 @@ function ReviewConsole({
       flashNearest(blocker);
       setNest(blocker.id);
       setNestFor(note.id);
-      say(`Inside “${blocker.label}”, which is ${blocker.stow ? 'stashed' : 'hidden'}`, 'warn');
+      say(`Inside “${blocker.label}”, which is ${blocker.stow ? 'archived' : 'hidden'}`, 'warn');
       return;
     }
 
@@ -2523,7 +2523,7 @@ function ReviewConsole({
               <button type="button" onClick={hidePicked}>
                 <EyeOff className="size-4" /> Hide <kbd>h</kbd>
               </button>
-              <span className="review-stow-group" title="Stash it on a shelf — pick a side. Shift+arrow does the same.">
+              <span className="review-stow-group" title="Archive it on a shelf — pick a side. Shift+arrow does the same.">
                 <Archive className="size-4" />
                 {([
                   ['left', ArrowLeft],
@@ -2534,8 +2534,8 @@ function ReviewConsole({
                   <button
                     key={edge}
                     type="button"
-                    aria-label={`Stash on the ${edge} shelf`}
-                    title={`Stash · ${edge} shelf`}
+                    aria-label={`Archive on the ${edge} shelf`}
+                    title={`Archive · ${edge} shelf`}
                     onClick={() => { stow(picked, edge); setPicked(null); }}
                   >
                     <Icon className="size-3.5" />
@@ -2779,7 +2779,7 @@ function ReviewConsole({
             >
               <EyeOff className="size-3.5" />
               <span>{note.label}</span>
-              <b>{note.stow ? 'stashed here' : 'hidden here'}</b>
+              <b>{note.stow ? 'archived here' : 'hidden here'}</b>
             </button>
             {nestFor && notes[nestFor] ? (
               <span className="review-nest-holding">holds “{notes[nestFor].label}”</span>
@@ -2961,11 +2961,11 @@ function actOf(note: ReviewNote): string {
   // A tag is the reviewer naming the change themselves; nothing beats it.
   if (note.tags?.length) return note.tags[0][0].toUpperCase() + note.tags[0].slice(1);
   const last = note.thread?.[note.thread.length - 1];
-  if (last?.from === 'claude') return 'Answer';
+  if (last?.from === 'claude') return 'Reply';
   if (note.comment) return 'Change';
   // Two ways of being off the page, and they are not the same answer: one
   // was carried onto a shelf, the other was switched off where it stood.
-  if (note.stow) return 'Stashed';
+  if (note.stow) return 'Archived';
   if (note.hidden) return 'Hidden';
   // Nothing is asked of this one yet. It is not owed anything, and the
   // column should not pretend otherwise.

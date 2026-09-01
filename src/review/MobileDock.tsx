@@ -184,7 +184,7 @@ export function MobileDock({
             badge={undoDepth || undefined}
             onClick={onUndo}
           />
-          <Tool icon={X} label="Done" onClick={onClose} />
+          <Tool icon={X} label="Close" onClick={onClose} />
         </div>
       </Fold>
     ),
