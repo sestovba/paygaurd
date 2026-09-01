@@ -16,6 +16,7 @@ import { TwpWizard } from './TwpWizard';
 import { VerifyCompleteSheet } from './VerifyCompleteSheet';
 import { StreamsPanel } from './StreamsPanel';
 import { SettingsPanel } from './SettingsPanel';
+import { ToastStack } from './ToastStack';
 import { NotificationsBell } from './NotificationsBell';
 import { YearTotal } from './YearTotal';
 import type { MonthKey } from '../domain/types';
@@ -131,6 +132,8 @@ export function TrackerClassic() {
       {statusOpen ? <StatusSheet onClose={() => setStatusOpen(false)} /> : null}
       {quizOpen ? <TwpWizard onClose={() => setQuizOpen(false)} /> : null}
       {verifyOpen ? <VerifyCompleteSheet onClose={() => setVerifyOpen(false)} /> : null}
+      <ToastStack />
+
       {settingsOpen ? (
         <SettingsPanel
           theme={ui.theme}

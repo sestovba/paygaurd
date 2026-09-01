@@ -3,19 +3,24 @@ import type { ReactNode } from 'react';
 import {
   Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown,
   ChevronsDownUp, ChevronsUpDown, Copy, Crosshair, Expand, Eye, EyeOff, FileCode2,
-  MessageSquarePlus, Minus, SquareCheck, Tag, Trash2, X
+  MessageSquarePlus, Minus, Plus, SquareCheck, Tag, Trash2, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
 import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
 import { actionable, notesToMarkdown } from './markdown';
-import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal } from './store';
+import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal, uploadShot } from './store';
 import type {
-  ReviewAnchor, ReviewLane, ReviewNote, ReviewNotes, ReviewVerdict, TrayEdge, TraySettings
+  ReviewAnchor, ReviewLane, ReviewNote, ReviewNotes, ReviewVerdict, TrayEdge
 } from './types';
-import { LANE_NAME, LANE_OPEN, LANES, laneOf } from './types';
+import { LANE_NAME, LANE_OPEN, laneOf } from './types';
+import {
+  BUCKET_NAME, CERTAINTY_BLURB, CERTAINTY_NAME, CERTAINTY_RANK,
+  STATE_NAME, STATE_BLURB, VERDICT_NAME,
+  altStep, bucketOf, canMove, certaintyOf, decisionsFor, nextStep, progressOf, stateOf
+} from './state';
+import type { Certainty, Decision, NoteState } from './state';
 import { ReviewContext } from './context';
 import type { ReviewContextValue, ReviewMode, SuggestedTarget } from './context';
-import { EdgeTrays } from './EdgeTrays';
 import { MobileDock } from './MobileDock';
 import { DesktopDock } from './DesktopDock';
 import {
@@ -28,12 +33,10 @@ import '../styles/review.css';
 /** How close to an edge a drag has to get before that tray takes it. */
 const EDGE_GRAB = 72;
 
-const EDGES: TrayEdge[] = ['left', 'right', 'top', 'bottom'];
 
 /** The horizontal shelves run across the app's own header and bottom nav, so
  *  they start off the screen. `t` and `b` bring them back, and a drag reveals
  *  all four whether they are hidden or not. */
-const DEFAULT_HIDDEN: TrayEdge[] = ['top', 'bottom'];
 
 /** Height of the picker's toolbar, used to flip it above a selection that
  *  sits too near the bottom of the window. */
@@ -82,6 +85,8 @@ interface ComposerState {
   members?: string[];
   /** Absent for tray-group comments, which belong to a side, not an element. */
   at?: Box;
+  /** Screenshots pasted onto this note, as repo-relative paths. */
+  shots?: string[];
   /** Prior back-and-forth, shown so a follow-up has its context. */
   thread?: ReviewNote['thread'];
   /** Live element, when the note was opened from the page. It lets the halo
@@ -109,9 +114,6 @@ const TAG_GROUPS = [
 
 /** One note per side per layout, so a group comment survives the items
  *  coming and going. */
-function trayNoteId(layout: LayoutMode, edge: TrayEdge): string {
-  return `tray-${layout}-${edge}`;
-}
 
 /** What has been looked at, per note: the note's `updatedAt` as it stood the
  *  last time it was read. One timestamp for the whole journal marks a dozen
@@ -132,26 +134,33 @@ interface Panels {
   open: boolean;
   min: boolean;
   tools: boolean;
-  comments: boolean;
   journal: boolean;
-  hidden: boolean;
-  archive: boolean;
   wide: boolean;
   scope: 'screen' | 'all';
   /** The order the sections are stacked in, yours to rearrange. */
   order: string[];
 }
 
-export const SECTIONS = ['tools', 'comments', 'journal', 'hidden', 'archive'] as const;
+/*
+ * Two rooms, not five.
+ *
+ * Comments, Hidden and Archive were each a section in the rail with its own
+ * count, its own empty state and its own restore button — three rooms holding
+ * rows the notes list already held, so the same item was in two places with
+ * two different counts beside it (My Comments said 44 while the list said
+ * 49). They are not places. They are ways of looking at one list, and they
+ * are filters now: see `LENSES` below.
+ *
+ * 'journal' keeps its key because it is persisted in localStorage and named
+ * in the stylesheet; what changed is the word on it, which is "Notes".
+ */
+export const SECTIONS = ['tools', 'journal'] as const;
 
 const PANELS: Panels = {
   open: false,
   min: false,
   tools: true,
-  comments: true,
-  journal: false,
-  hidden: false,
-  archive: false,
+  journal: true,
   wide: false,
   scope: 'screen',
   order: [...SECTIONS]
@@ -277,8 +286,6 @@ function ReviewConsole({
   const [dockMin, setDockMin] = useState(panels.min);
   /** The verbs. Their own section, like everything else in the dock. */
   const [toolsOpen, setToolsOpen] = useState(panels.tools);
-  /** Dedicated comments section. */
-  const [commentsOpen, setCommentsOpen] = useState(panels.comments ?? true);
   /** The order the sections are stacked in. */
   const [order, setOrder] = useState<string[]>(panels.order);
   const [notes, setNotes] = useState<ReviewNotes>(() => normalizeLanes(loadLocal()));
@@ -354,7 +361,7 @@ function ReviewConsole({
    *  send note A's half-written answer from note B. */
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [synced, setSynced] = useState<'unknown' | 'file' | 'local'>('unknown');
-  const [suggested, setSuggested] = useState<Record<string, { label: string; reason: string }>>({});
+  const [suggested, setSuggested] = useState<Record<string, { label: string; reason: string; certainty?: Certainty }>>({});
   const [variantSets, setVariantSets] = useState<string[]>([]);
   const [drag, setDrag] = useState<DragState | null>(null);
   /** How many steps back are available — a ref alone would never re-render
@@ -364,25 +371,25 @@ function ReviewConsole({
    *  behind one button. There are two tools here, not nine. */
   /** The stash drawer's open state lives up here because the toolbar carries
    *  the button that opens it — it belongs in the group with Undo and Log. */
-  const [stashOpen, setStashOpen] = useState(panels.archive);
-  /** The Hidden section's own open state. */
-  const [hiddenOpen, setHiddenOpen] = useState(panels.hidden);
   /** Under this, the console is a bar on the bottom edge; over it, a rail
    *  down the side. They are different objects, not one thing squeezed. */
   const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 40rem)').matches);
   /** Shelves taken off the screen for now. Not persisted — a hidden shelf is
    *  a thing you did a second ago, not a decision about the product. */
-  const [hiddenTrays, setHiddenTrays] = useState<TrayEdge[]>(DEFAULT_HIDDEN);
   const firstSync = useRef(true);
   /** Set once the notes file has been read, successfully or not. Nothing is
    *  written back before then. */
   const readFile = useRef(false);
+  /** The same fact as `readFile`, as state — a ref flipping cannot wake an
+   *  effect, and the anchor repair below has to run once the file has landed
+   *  even though nothing else changes at that moment. */
+  const [loaded, setLoaded] = useState(false);
   /** False until the read marks have been seeded. A browser that has never
    *  opened the console has read nothing and everything by the same token —
    *  starting it on "all read" is the honest reading of "nothing has changed
    *  since you last looked", and every later change stands out properly. */
   const seeded = useRef(Object.keys(loadRead()).length > 0);
-  const suggestedRef = useRef<Record<string, { label: string; reason: string }>>({});
+  const suggestedRef = useRef<Record<string, { label: string; reason: string; certainty?: Certainty }>>({});
   const notesRef = useRef<ReviewNotes>({});
   const readRef = useRef<ReadMarks>({});
   /** The board in the order it is drawn, for the keys that walk it. */
@@ -393,11 +400,12 @@ function ReviewConsole({
   /** Read by the global key handler, which must not re-bind on every hover. */
   const pickedRef = useRef<Element | null>(null);
   const composerRef = useRef<HTMLFormElement>(null);
+  /** The attach menu on the composer, and the file input it drives. */
+  const [attachOpen, setAttachOpen] = useState(false);
+  const shotInput = useRef<HTMLInputElement>(null);
   const composerInvoker = useRef<HTMLElement | null>(null);
   /** Snapshots of the notes before each change, newest last. */
   const history = useRef<ReviewNotes[]>([]);
-  /** Set once the reviewer has said what they want the shelves to do. */
-  const shelvesTouched = useRef(false);
 
   // The repo copy is the shared one: pull it in on mount so notes taken in
   // another browser (or restored from git) show up here too.
@@ -406,7 +414,7 @@ function ReviewConsole({
       if (remote && Object.keys(remote).length) {
         setNotes((current) => mergeNotes(current, normalizeLanes(remote)));
       }
-    }).finally(() => { readFile.current = true; });
+    }).finally(() => { readFile.current = true; setLoaded(true); });
   }, []);
 
   useEffect(() => {
@@ -568,14 +576,14 @@ function ReviewConsole({
   useEffect(() => {
     try {
       localStorage.setItem(PANELS_KEY, JSON.stringify({
-        open, min: dockMin, tools: toolsOpen, comments: commentsOpen, journal: panelOpen,
-        hidden: hiddenOpen, archive: stashOpen, wide: journalWide,
+        open, min: dockMin, tools: toolsOpen, journal: panelOpen,
+        wide: journalWide,
         scope: journalScope, order
       } satisfies Panels));
     } catch {
       // Private mode; the console opens on its defaults each session.
     }
-  }, [open, dockMin, toolsOpen, commentsOpen, panelOpen, hiddenOpen, stashOpen, journalWide, journalScope, order]);
+  }, [open, dockMin, toolsOpen, panelOpen, journalWide, journalScope, order]);
 
   useEffect(() => {
     try {
@@ -682,9 +690,11 @@ function ReviewConsole({
     say(`Moved to the ${edge} stash`, 'good');
   }, [upsert, say]);
 
-  const register = useCallback((id: string, label: string, reason: string) => {
+  const register = useCallback((id: string, label: string, reason: string, certainty?: Certainty) => {
     setSuggested((current) => (
-      current[id]?.label === label ? current : { ...current, [id]: { label, reason } }
+      current[id]?.label === label && current[id]?.certainty === certainty
+        ? current
+        : { ...current, [id]: { label, reason, certainty } }
     ));
     return () => setSuggested((current) => {
       if (!(id in current)) return current;
@@ -693,6 +703,32 @@ function ReviewConsole({
       return next;
     });
   }, []);
+
+  /**
+   * Describe the element a proposal is about, whether or not the caller had
+   * it in hand.
+   *
+   * Answering a proposal from its own badge passes the live element and the
+   * note gets a full anchor. Answering the same proposal from the queue, the
+   * toolbar or a keyboard shortcut passed `null`, and the note was written
+   * with `{ layout }` and nothing else — no file, no text, no path. Thirteen
+   * of eighteen payguard notes were recorded that way, which is why Locate
+   * could not find them and why no amount of cleverness at lookup time
+   * helped: there was nothing recorded to look up.
+   *
+   * Every audited section renders `data-review-id`, so the element is sitting
+   * in the DOM under a known key. Find it and describe it properly.
+   */
+  function anchorFor(target: { id: string; layout: LayoutMode }, el: Element | null): ReviewAnchor {
+    const found = el
+      ?? document.querySelector(`[data-review-id="${CSS.escape(target.id)}"]`);
+    // A transparent wrapper describes itself as the wrapper; the child is the
+    // thing the reviewer is actually looking at.
+    const subject = found?.getAttribute('data-review-transparent') && found.firstElementChild
+      ? found.firstElementChild
+      : found;
+    return subject ? describeElement(subject, target.layout) : { layout: target.layout };
+  }
 
   const commentOn = useCallback((
     label: string,
@@ -766,56 +802,10 @@ function ReviewConsole({
     });
   }, [notes, restore, layout, upsert]);
 
-  const setTray = useCallback((edge: TrayEdge, patch: TraySettings) => {
-    const id = trayNoteId(layout, edge);
-    const note = notesRef.current[id];
-    upsert({
-      id,
-      label: note?.label ?? `${edge} stash`,
-      tray: { ...note?.tray, ...patch },
-      anchor: note?.anchor ?? { layout }
-    });
-  }, [layout, upsert]);
-
-  /** Take a shelf off the screen entirely, or all four at once. This is a
-   *  view toggle, not a setting: shelves sit over the page and get in the way
-   *  of choosing something underneath, so it lives in memory and is never
-   *  written to the notes file. Dragging brings them back as drop targets. */
-
-  // A shelf standing over the thing you are aiming at makes it hard to pick,
-  // so selecting starts with them out of the way. A default, not a rule: the
-  // first time you press a shelf key, that choice sticks and this stops.
-  useEffect(() => {
-    if (shelvesTouched.current) return;
-    setHiddenTrays(mode === 'pick' ? [...EDGES] : [...DEFAULT_HIDDEN]);
-  }, [mode]);
-
   const registerVariants = useCallback((id: string) => {
     setVariantSets((current) => (current.includes(id) ? current : [...current, id]));
     return () => setVariantSets((current) => current.filter((item) => item !== id));
   }, []);
-
-  const commentOnTray = useCallback((edge: TrayEdge) => {
-    const id = trayNoteId(layout, edge);
-    const members = Object.values(notes)
-      .filter((note) => note.stow?.edge === edge && note.anchor.layout === layout)
-      .map((note) => note.label);
-    const draft = notes[id]?.comment ?? '';
-    const tags = notes[id]?.tags ?? [];
-    composerInvoker.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setConfirmDiscard(false);
-    setComposer({
-      id,
-      label: `${edge} stash · ${members.length} item${members.length === 1 ? '' : 's'}`,
-      anchor: { layout, page: undefined },
-      draft,
-      tags,
-      initialDraft: draft,
-      initialTags: tags,
-      thread: notes[id]?.thread,
-      members
-    });
-  }, [layout, notes]);
 
   const commentOnNote = useCallback((id: string) => {
     const note = notes[id];
@@ -888,17 +878,6 @@ function ReviewConsole({
     };
   }, [composer?.id, composer?.at, composer?.target]);
 
-  const flagStowed = useCallback((id: string) => {
-    const note = notes[id];
-    if (!note) return;
-    upsert({
-      id,
-      kind: 'delete',
-      verdict: note.verdict === 'approved' ? undefined : 'approved',
-      label: note.label
-    });
-  }, [notes, upsert]);
-
   const decide = useCallback((
     target: SuggestedTarget,
     verdict: ReviewVerdict,
@@ -931,8 +910,9 @@ function ReviewConsole({
           verdict,
           label: target.label,
           reason: target.reason,
+          certainty: target.certainty ?? suggestedRef.current[target.id]?.certainty,
           status: 'open',
-          anchor: el ? describeElement(el, target.layout) : { layout: target.layout },
+          anchor: anchorFor(target, el),
           createdAt: current[target.id]?.createdAt ?? now,
           updatedAt: now
         }
@@ -968,6 +948,7 @@ function ReviewConsole({
           origin: 'suggested',
           label: target.label,
           reason: target.reason,
+          certainty: target.certainty ?? existing?.certainty ?? suggestedRef.current[target.id]?.certainty,
           status: existing?.status ?? 'open',
           hidden: hidden || undefined,
           anchor: existing?.anchor ?? (el ? describeElement(el, target.layout) : { layout: target.layout }),
@@ -994,7 +975,7 @@ function ReviewConsole({
       choice: option,
       options,
       status: 'open',
-      anchor: el ? describeElement(el, target.layout) : { layout: target.layout }
+      anchor: anchorFor(target, el)
     });
     say(`Keeping "${option}"`, 'good');
   }, [upsert, say]);
@@ -1109,7 +1090,11 @@ function ReviewConsole({
     const reveal = mode === 'audit';
     let frame = 0;
     const apply = () => {
-      applyStowAttributes(notes, layout, reveal);
+      // `peek` is whatever is being pointed at right now — from a Locate, or
+      // from hovering a row. It is revealed on its own so the page still
+      // looks the way the review made it look, minus the one thing you asked
+      // to see.
+      applyStowAttributes(notes, layout, reveal, peek);
       applyPlacements(notes, layout);
     };
     apply();
@@ -1123,8 +1108,59 @@ function ReviewConsole({
       cancelAnimationFrame(frame);
       applyStowAttributes({}, layout, reveal);
     };
-  }, [notes, layout, mode]);
+  }, [notes, layout, mode, peek]);
 
+
+  /**
+   * Repair anchors that were never captured.
+   *
+   * A proposal answered from the queue or the toolbar used to be written with
+   * `{ layout }` and nothing else, so thirteen of eighteen payguard notes had
+   * no file, no text and no DOM path — nothing Locate could aim at, and
+   * nothing a code pass could grep for. `anchorFor` stops that happening
+   * again, but the notes already written stay broken until something touches
+   * them, and nothing ever does.
+   *
+   * So they heal as you browse: whenever an audited section is on screen and
+   * its note has no anchor, the anchor is filled in from the live element.
+   * `updatedAt` is deliberately left alone — this is the record catching up
+   * with what was always true, not news, and it should not mark thirteen
+   * notes unread or claim either side said something.
+   */
+  useEffect(() => {
+    if (!loaded) return;
+    const timer = setTimeout(() => {
+      let repaired = 0;
+      changeNotes((current) => {
+        let next = current;
+        for (const note of Object.values(current)) {
+          if (note.anchor.layout !== layout) continue;
+          if (note.anchor.text || note.anchor.domPath) continue;
+          const el = document.querySelector(`[data-review-id="${CSS.escape(note.anchor.reviewId ?? note.id)}"]`);
+          if (!el) continue;
+          /* The id sits on a transparent wrapper — `display: contents`, so it
+             has no box of its own and no client rects. Testing *it* for being
+             on screen answers no every time. The child is the element. */
+          const subject = el.getAttribute('data-review-transparent') && el.firstElementChild
+            ? el.firstElementChild
+            : el;
+          /* Deliberately not gated on visibility. Being on a tab that is not
+             showing makes an element impossible to *flash*, which is why
+             Locate cares; it does not make its text or its DOM path any less
+             true, which is all an anchor is. Requiring visibility here meant
+             every section behind a closed tab stayed unanchored forever. */
+          if (!subject.textContent?.trim()) continue;
+          if (next === current) next = { ...current };
+          next[note.id] = { ...note, anchor: { ...describeElement(subject, layout), ...note.anchor, layout } };
+          repaired += 1;
+        }
+        return next;
+      });
+      if (repaired) say(`Anchored ${repaired} note${repaired === 1 ? '' : 's'} to this screen`, 'info');
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout, notes, loaded]);
 
   // Entering the audit hands you the first proposal, however you got there.
   useEffect(() => {
@@ -1379,42 +1415,21 @@ function ReviewConsole({
     chooseVariant, restore, stow, setHiddenById
   ]);
 
-  const stashCount = Object.values(notes)
-    .filter((note) => note.stow && note.anchor.layout === layout).length;
-  const shelves = (
-    <EdgeTrays
-      notes={notes}
-      layout={layout}
-      shape="stack"
-      embedded
-      stackOpen
-      onStackToggle={() => setStashOpen((current) => !current)}
-      activeEdge={drag?.edge ?? null}
-      dragging={Boolean(drag)}
-      hidden={hiddenTrays}
-      onGrabChip={(id, event) => {
-        const note = notes[id];
-        if (!note) return;
-        event.preventDefault();
-        setDrag({
-          from: 'tray',
-          id,
-          label: note.label,
-          x: event.clientX,
-          y: event.clientY,
-          drop: null,
-          edge: null
-        });
-      }}
-      onFlag={flagStowed}
-      onComment={commentOnNote}
-      onRestore={restore}
-      onCommentGroup={commentOnTray}
-      groupNote={(edge) => notes[trayNoteId(layout, edge)]?.comment}
-      traySettings={(edge) => notes[trayNoteId(layout, edge)]?.tray ?? {}}
-      onTraySettings={setTray}
-    />
-  );
+  /* The edge shelves are gone.
+   *
+   * They were a second home for elements taken off the page — four coloured
+   * trays you dragged things onto, each with a name, a colour, a sort order
+   * and a folded state, all of it stored in review-notes.json as notes that
+   * asked for nothing. They had stopped painting at all, and the concept they
+   * carried was already covered twice over: an element that is not on the
+   * page is off the page, which is a property with a filter, and a note that
+   * is settled is Closed, which is a group.
+   *
+   * There is no Archive. "Where did the note go?" is answered by Closed;
+   * "where did the element go?" is answered by Off the page and by Locate,
+   * which now reveals it. Two questions, one answer each, no folders to file
+   * anything into.
+   */
 
   const all = Object.values(notes);
   // Tray names, colours and folded state are the console's own settings, not
@@ -1494,13 +1509,16 @@ function ReviewConsole({
 
   function saveComment() {
     // Tags alone are a note: "cut · spacing" on the right element says plenty.
-    if (!composer || (!composer.draft.trim() && !composer.tags.length)) return;
+    // So is a screenshot on its own — a picture of the thing that is wrong is
+    // an ask, and refusing to save it would throw away the upload.
+    if (!composer || (!composer.draft.trim() && !composer.tags.length && !composer.shots?.length)) return;
     const existing = Boolean(notes[composer.id]?.comment || notes[composer.id]?.tags?.length);
     upsert({
       id: composer.id,
       label: composer.label,
       comment: composer.draft.trim() || undefined,
       tags: composer.tags.length ? composer.tags : undefined,
+      shots: composer.shots?.length ? composer.shots : undefined,
       reason: composer.reason,
       members: composer.members,
       // Commenting on a cut I proposed is the "needs revision" answer.
@@ -1525,26 +1543,107 @@ function ReviewConsole({
       : commentIntent ? 'Comment added · click another element' : 'Comment added', 'good');
   }
 
+  /** Send pasted images to the dev server and hang the paths on the draft.
+   *  Anything that fails to upload is reported rather than silently dropped:
+   *  a screenshot you think you attached and did not is worse than none. */
+  async function attachShots(files: File[]) {
+    const id = composer?.id ?? `shot-${Date.now().toString(36)}`;
+    const saved: string[] = [];
+    for (const file of files) {
+      const path = await uploadShot(id, file);
+      if (path) saved.push(path);
+    }
+    if (!saved.length) { say('Could not save that image', 'warn'); return; }
+    setComposer((current) => (current
+      ? { ...current, shots: [...(current.shots ?? []), ...saved] }
+      : current));
+    say(`${saved.length === 1 ? 'Screenshot' : `${saved.length} screenshots`} attached`, 'good');
+  }
+
   /** The journal itself — what has been said, and by whom. It is the same
    *  thing in both docks: a window on a desktop, a fold in the phone's dock.
    *  Only its frame changes. */
   /** Every verb actually present, so the filter never offers an empty one. */
-  const acts = Array.from(new Set(journalNotes.map(actOf))).sort();
+  const acts = Array.from(new Set(journalNotes.map(actOf))).filter(Boolean).sort();
+
+  /* The two views that are not verbs.
+   *
+   * "My comments" and "Off the page" were sections; they are lenses on the
+   * one list. A lens answers "show me only…", which is exactly what the act
+   * chips beside them already do, so they sit in the same strip and behave
+   * the same way — one strip, one idea, no new control. */
+  const lenses = [
+    {
+      id: 'lens:mine',
+      name: 'Comments',
+      match: (note: ReviewNote) => Boolean(note.comment?.trim())
+    },
+    {
+      id: 'lens:offpage',
+      name: 'Hidden',
+      match: (note: ReviewNote) => offPage(note)
+    }
+  ].map((lens) => ({ ...lens, count: journalNotes.filter(lens.match).length }))
+    .filter((lens) => lens.count > 0);
+
+  const lensById = new Map(lenses.map((lens) => [lens.id, lens]));
   const shownNotes = only.size
-    ? journalNotes.filter((note) => only.has(actOf(note)))
+    ? journalNotes.filter((note) => (
+      // Any selected chip matching is enough, the way the act chips have
+      // always behaved — chips narrow by adding, never by intersecting.
+      [...only].some((key) => {
+        const lens = lensById.get(key);
+        return lens ? lens.match(note) : actOf(note) === key;
+      })
+    ))
     : journalNotes;
-  const laneGroups = LANES
-    .map((lane) => ({
-      lane,
-      notes: shownNotes
-        .filter((note) => laneOf(note) === lane)
-        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    }))
-    .filter((group) => group.notes.length);
-  /** The board read top to bottom, which is what the arrow keys walk. */
-  const ordered = laneGroups.flatMap((group) => group.notes);
+
+  /* An inbox, not a board.
+   *
+   * The five lanes were an axis the reviewer had to hold in their head — a
+   * note was somewhere among To do, Commented, Second look, Done and Not now,
+   * and moving it meant knowing which. Worse, nothing ever left: a lane with
+   * forty finished things is still forty rows to scroll past, so the list
+   * could not empty and there was no way to tell it was finished.
+   *
+   * Three groups replace them, and the question each answers is the whole
+   * reason to look:
+   *
+   *   Needs you    — your move. This is the list you are trying to clear.
+   *   With Claude  — handed over. Visible so nothing feels lost, never in
+   *                  your way, and it is not work you can do.
+   *   Closed       — everything settled, folded away with a count. The
+   *                  drawer that makes clearing the inbox safe.
+   *
+   * When Needs you is empty the inbox is clear, and says so. */
+  const inboxGroups = ([
+    { key: 'needsYou', name: BUCKET_NAME.needsYou, hint: 'Your move. Clear these.' },
+    { key: 'withClaude', name: BUCKET_NAME.withClaude, hint: 'Handed over. Nothing to do.' },
+    { key: 'closed', name: BUCKET_NAME.closed, hint: 'Settled. Still findable.' }
+  ] as const).map((group) => ({
+    ...group,
+    notes: shownNotes
+      .filter((note) => bucketOf(stateOf(note)) === group.key)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  }));
+
+  /** The inbox read top to bottom, which is what the arrow keys walk. */
+  const ordered = inboxGroups.flatMap((group) => group.notes);
   orderedRef.current = ordered;
-  const queue = journalNotes.filter((note) => LANE_OPEN.includes(laneOf(note)));
+
+  /** What Go Through hands over: your move only. It never offers something
+   *  that is waiting on Claude, because there is no answer you could give. */
+  const queue = journalNotes.filter((note) => bucketOf(stateOf(note)) === 'needsYou');
+
+  /** The one number in the header. Closed over everything, so it only moves
+   *  when something actually settles. */
+  const progress = progressOf(journalNotes);
+
+  /** Everything that could be closed right now without asserting anything
+   *  untrue: Claude has answered it, or it never owed a change. */
+  const closeable = journalNotes.filter((note) => (
+    bucketOf(stateOf(note)) !== 'closed' && canMove(note, 'done').ok
+  ));
 
   /** Hand them over one at a time, unread first, oldest first. Scanning a
    *  list is where the place gets lost — this remembers which ones it has
@@ -1557,6 +1656,9 @@ function ReviewConsole({
     const ids = [...queue]
       .sort((a, b) => (
         Number(!isUnread(a, read)) - Number(!isUnread(b, read))
+        // Then the checkable ones, which clear fast and build the sense of
+        // progress; hunches last, when there is room to think about them.
+        || (CERTAINTY_RANK[certaintyOf(a) ?? 'likely'] - CERTAINTY_RANK[certaintyOf(b) ?? 'likely'])
         || a.createdAt.localeCompare(b.createdAt)
       ))
       .map((note) => note.id);
@@ -1608,140 +1710,7 @@ function ReviewConsole({
   }, [say]);
 
 /** Everything switched off on this screen, newest first. */
-  const hiddenHere = Object.values(notes)
-    .filter((note) => note.hidden && note.anchor.layout === layout)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-
-  /** What is switched off on this screen. Its own room, not the archive:
-   *  the archive holds things carried off the page and this holds lights
-   *  left off, and confusing the two loses both. */
-  const hiddenList = (
-    <div className="review-hidden">
-      {hiddenHere.length === 0 ? (
-        <p className="review-hidden-empty">
-          Nothing hidden on this screen. The eye on a note takes its element
-          off the page so you can see whether the page is better without it.
-        </p>
-      ) : (
-        <>
-          <ul className="review-hidden-list">
-            {hiddenHere.map((note) => (
-              <li key={note.id}>
-                {/* No eye on the name. The panel is called Hidden and wears
-                    the eye in its own header — repeating it on every row
-                    says "hidden" three times before you reach the label. */}
-                <button
-                  type="button"
-                  className="review-hidden-name"
-                  onMouseEnter={compact ? undefined : () => setPeek(note.id)}
-                  onMouseLeave={compact ? undefined : () => setPeek(null)}
-                  onClick={() => pointAtNote(note)}
-                >
-                  <span>{note.label}</span>
-                </button>
-                {/* And the button says what pressing it does, not what the
-                    row already is. "Restore" is the word the archive's chips
-                    have always used for exactly this act, and one act with
-                    two names — Show here, Restore there — is the collision
-                    the vocabulary file exists to catch. */}
-                <button
-                  type="button"
-                  className="review-hidden-back"
-                  onClick={() => toggleHidden(note)}
-                  title={`Restore ${note.label} to the page`}
-                >
-                  Restore
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button
-            type="button"
-            className="review-hidden-all"
-            onClick={() => {
-              for (const note of hiddenHere) upsert({ id: note.id, hidden: undefined });
-              say('Everything back on the page', 'good');
-            }}
-          >
-            Restore all {hiddenHere.length}
-          </button>
-        </>
-      )}
-    </div>
-  );
-
   /** All user comments on this screen / everywhere */
-  const userComments = Object.values(notes)
-    .filter((note) => Boolean(note.comment || (note.tags && note.tags.length > 0) || note.kind === 'comment'))
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  const commentsHere = userComments.filter((note) => note.anchor.layout === layout);
-  const displayedComments = journalScope === 'screen' ? commentsHere : userComments;
-
-  const commentsList = (
-    <div className="review-comments-panel">
-      {displayedComments.length === 0 ? (
-        <p className="review-hidden-empty">
-          No comments {journalScope === 'screen' ? 'on this screen' : 'yet'}. Press <strong>C</strong> or use the Comment tool to pin feedback directly to any element.
-        </p>
-      ) : (
-        <ul className="review-comments-list">
-          {displayedComments.map((note) => {
-            const hasReply = note.thread?.some((t) => t.from === 'claude');
-            const lastReply = note.thread?.[note.thread.length - 1];
-            return (
-              <li key={note.id} className="review-comment-card" data-reply={hasReply ? 'true' : undefined}>
-                <div className="review-comment-head">
-                  <span className="review-comment-target">{note.label}</span>
-                  <span className="review-comment-meta">{note.anchor.layout}</span>
-                  <div className="review-comment-actions">
-                    <button
-                      type="button"
-                      className="review-comment-btn"
-                      onClick={() => pointAtNote(note)}
-                      title="Locate element on screen"
-                    >
-                      <Crosshair className="size-3.5" /> Locate
-                    </button>
-                    <button
-                      type="button"
-                      className="review-comment-btn"
-                      onClick={() => commentOnNote(note.id)}
-                      title="Edit comment"
-                    >
-                      <MessageSquarePlus className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      className="review-comment-btn review-comment-del"
-                      onClick={() => remove(note.id)}
-                      title="Delete comment"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </div>
-                </div>
-                {note.comment ? (
-                  <p className="review-comment-body">“{note.comment}”</p>
-                ) : null}
-                {note.tags?.length ? (
-                  <div className="review-comment-tags">
-                    {note.tags.map((tag) => (
-                      <span key={tag} className="review-comment-tag">{tag}</span>
-                    ))}
-                  </div>
-                ) : null}
-                {lastReply ? (
-                  <div className="review-comment-reply" data-from={lastReply.from}>
-                    <span className="font-semibold">{lastReply.from === 'claude' ? 'Claude' : 'You'}:</span> {lastReply.text}
-                  </div>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
 
   const journalBody = (
     <>
@@ -1800,9 +1769,17 @@ function ReviewConsole({
                             same colour, so the card you are answering says
                             what it is asking for in the words and the colour
                             you have been reading it in all along. */}
-                        <span className="review-cell-what" data-act={actOf(triageNote)}>
-                          {actOf(triageNote)}
-                        </span>
+                        {/* Nothing is being asked of a trial, so no chip is
+                            drawn. Rendering it regardless left an empty
+                            outlined capsule sitting beside the layout name —
+                            a control-shaped object with no content and no
+                            behaviour. In the list the cell is kept (blank) to
+                            hold the column; here there is no column to hold. */}
+                        {actOf(triageNote) ? (
+                          <span className="review-cell-what" data-act={actOf(triageNote)}>
+                            {actOf(triageNote)}
+                          </span>
+                        ) : null}
                         <span className="review-note-where">{triageNote.anchor.layout}</span>
                       </span>
                       <strong className="review-queue-label">{triageNote.label}</strong>
@@ -1810,7 +1787,26 @@ function ReviewConsole({
                         ? <span className="review-note-text">“{triageNote.comment}”</span>
                         : null}
                       {triageNote.reason
-                        ? <span className="review-queue-reason">I proposed cutting it: {triageNote.reason}</span>
+                        ? (
+                          <span className="review-queue-reason">
+                            {/* How sure I was, said out loud. Every proposal
+                                used to arrive at the same volume, so the
+                                reviewer had to work out how much to trust
+                                each one — the work the proposal was meant to
+                                save. */}
+                            <b>I propose cutting it</b>
+                            {certaintyOf(triageNote) ? (
+                              <i
+                                className="review-certainty"
+                                data-level={certaintyOf(triageNote)}
+                                title={CERTAINTY_BLURB[certaintyOf(triageNote)!]}
+                              >
+                                {CERTAINTY_NAME[certaintyOf(triageNote)!]}
+                              </i>
+                            ) : null}
+                            <span>{triageNote.reason}</span>
+                          </span>
+                        )
                         : null}
                       {triageNote.anchor.source
                         ? <span className="review-note-source">{triageNote.anchor.source}</span>
@@ -1843,7 +1839,7 @@ function ReviewConsole({
                           onClick={() => toggleHidden(triageNote)}
                         >
                           {offPage(triageNote) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                          {offPage(triageNote) ? (triageNote.stow ? 'Archived' : 'Hidden') : 'Visible'}
+                          {offPage(triageNote) ? 'Hidden' : 'Visible'}
                         </button>
                         <button
                           type="button"
@@ -1869,48 +1865,44 @@ function ReviewConsole({
                         <span className="review-queue-hint">files it and moves on</span>
                         <button type="button" onClick={() => triageStep(1)}>Skip ›</button>
                       </div>
+                      {/* The same six answers as everywhere else, in the
+                          same order and the same words. This card used to
+                          offer Keep As-Is / Remove / Change / Later while the
+                          element badge offered Remove / Kept / Note / Unsure
+                          and the list offered five lanes — three vocabularies
+                          for one question. There is now one list, and it
+                          lives in state.ts. */}
                       <div className="review-queue-acts">
-                        <button
-                          type="button"
-                          className="review-queue-keep"
-                          title="Keep this feature — reject the proposed cut"
-                          onClick={() => {
-                            decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'rejected', null);
-                            triageStep(1);
-                          }}
-                        >
-                          <X className="size-4" /> Keep As-Is
-                        </button>
-                        <button
-                          type="button"
-                          className="review-queue-remove"
-                          title="Agree to cut — queue for deletion in code"
-                          onClick={() => {
-                            decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'approved', null);
-                            triageStep(1);
-                          }}
-                        >
-                          <Trash2 className="size-4" /> Remove
-                        </button>
-                        <button
-                          type="button"
-                          className="review-queue-change"
-                          title="Keep feature, but request changes"
-                          onClick={() => {
-                            setTriage(null);
-                            commentOnNote(triageNote.id);
-                          }}
-                        >
-                          <MessageSquarePlus className="size-4" /> Change / Note
-                        </button>
-                        <button
-                          type="button"
-                          className="review-queue-later"
-                          title="Snooze for later"
-                          onClick={() => triageFile('second')}
-                        >
-                          <Minus className="size-4" /> Later
-                        </button>
+                        {decisionsFor(triageNote).map((decision) => (
+                          <button
+                            key={decision.id}
+                            type="button"
+                            className="review-queue-act"
+                            data-act={decision.id}
+                            title={decision.hint}
+                            onClick={() => {
+                              // A decision that needs prose opens the composer
+                              // instead of filing something empty. The queue
+                              // is left, not advanced: you come back to it
+                              // having actually said the thing.
+                              if (decision.needsWords) {
+                                setTriage(null);
+                                commentOnNote(triageNote.id);
+                                return;
+                              }
+                              answer(triageNote, decision);
+                              triageStep(1);
+                            }}
+                          >
+                            {decision.id === 'cut' ? <Trash2 className="size-4" />
+                              : decision.id === 'rework' ? <MessageSquarePlus className="size-4" />
+                                : decision.id === 'trial' ? <EyeOff className="size-4" />
+                                  : decision.id === 'note' ? <MessageSquarePlus className="size-4" />
+                                    : decision.id === 'keep' ? <Check className="size-4" />
+                                      : <Minus className="size-4" />}
+                            {decision.verb}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </>
@@ -1937,6 +1929,27 @@ function ReviewConsole({
                     <ArrowRight className="size-4" />
                     {queue.length ? `Go through ${queue.length}` : 'Nothing to go through'}
                   </button>
+
+                  {/* Close everything that is genuinely finished.
+                      It runs each note through the same check a single row
+                      does, so it closes the answered ones and the decisions
+                      that owe nothing, and leaves anything still waiting on a
+                      code pass exactly where it is. A "close all" that could
+                      clear the board regardless is precisely how forty-nine
+                      notes came to claim work that never happened. */}
+                  {closeable.length ? (
+                    <button
+                      type="button"
+                      className="review-closeall"
+                      title="Close every item that is answered or owes nothing"
+                      onClick={() => {
+                        for (const note of closeable) moveTo(note, 'done');
+                        say(`Closed ${closeable.length}`, 'good');
+                      }}
+                    >
+                      <Check className="size-3.5" /> Close {closeable.length}
+                    </button>
+                  ) : null}
                   {unread.length ? (
                     <button type="button" className="review-panel-readall" onClick={markAllRead}>
                       Mark {unread.length} read
@@ -1965,8 +1978,8 @@ function ReviewConsole({
                   {/* One button, not two: "collapse all" and "expand all" are
                       the same control in its two states, and a board with
                       every group already shut has nothing to collapse. */}
-                  {laneGroups.length > 1 ? (() => {
-                    const allShut = laneGroups.every(({ lane }) => laneShut.has(lane));
+                  {inboxGroups.filter((g) => g.notes.length).length > 1 ? (() => {
+                    const allShut = inboxGroups.every(({ key }) => laneShut.has(key));
                     return (
                       <button
                         type="button"
@@ -1975,7 +1988,7 @@ function ReviewConsole({
                         title={allShut ? 'Open every group' : 'Shut every group'}
                         onClick={() => setLaneShut(allShut
                           ? new Set()
-                          : new Set(laneGroups.map(({ lane }) => lane)))}
+                          : new Set(inboxGroups.map(({ key }) => key)))}
                       >
                         {allShut ? <ChevronsUpDown className="size-3.5" /> : <ChevronsDownUp className="size-3.5" />}
                         <span>{allShut ? 'Expand all' : 'Collapse all'}</span>
@@ -1992,7 +2005,7 @@ function ReviewConsole({
                   </p>
                 )}
 
-                {acts.length > 1 ? (
+                {acts.length > 1 || lenses.length ? (
                   <div className="review-filter" role="group" aria-label="Show only">
                     <button
                       type="button"
@@ -2001,6 +2014,28 @@ function ReviewConsole({
                     >
                       {DO.all} {journalNotes.length}
                     </button>
+                    {/* Comments and Hidden used to be sections in the rail.
+                        They are the same rows the list already holds, so they
+                        are chips in the same strip as everything else — and
+                        they lead, because "show me what I wrote" and "show me
+                        what is off the page" are the two you reach for. */}
+                    {lenses.map((lens) => (
+                      <button
+                        key={lens.id}
+                        type="button"
+                        data-lens={lens.id.slice(5)}
+                        data-on={only.has(lens.id) || undefined}
+                        aria-pressed={only.has(lens.id)}
+                        onClick={() => setOnly((current) => {
+                          const next = new Set(current);
+                          if (next.has(lens.id)) next.delete(lens.id); else next.add(lens.id);
+                          return next;
+                        })}
+                      >
+                        {lens.name}
+                        <span>{lens.count}</span>
+                      </button>
+                    ))}
                     {acts.map((act) => (
                       <button
                         key={act}
@@ -2029,20 +2064,38 @@ function ReviewConsole({
                      away for as long as you were choosing. */
                   <div className="review-bulk">
                     <span className="review-bulk-count">{chosen.size} selected</span>
-                    <span className="review-bulk-move">State</span>
-                    {(['done', 'second', 'parked', 'open'] as ReviewLane[]).map((lane) => (
+                    <span className="review-bulk-move">Mark all as</span>
+                    {/* The bulk bar still offered the five old lanes, which no
+                        longer exist. It offers the states now — and it goes
+                        through the same check a single row does, so a bulk
+                        action cannot do what one row is forbidden to do.
+                        Anything refused is counted and named rather than
+                        silently skipped: "closed 6" with four quietly left
+                        behind is how you stop trusting a button. */}
+                    {(['done', 'later', 'wontDo', 'needsYou'] as NoteState[]).map((next) => (
                       <button
-                        key={lane}
+                        key={next}
                         type="button"
+                        title={STATE_BLURB[next]}
                         onClick={() => {
+                          let moved = 0;
+                          let refused = 0;
                           for (const id of chosen) {
                             const note = notesRef.current[id];
-                            if (note) setLane(note, lane);
+                            if (!note) continue;
+                            if (canMove(note, next).ok) { moveTo(note, next); moved += 1; }
+                            else refused += 1;
                           }
                           setChosen(new Set());
+                          say(
+                            refused
+                              ? `${moved} → ${STATE_NAME[next]} · ${refused} still owed a change`
+                              : `${moved} → ${STATE_NAME[next]}`,
+                            refused ? 'warn' : 'good'
+                          );
                         }}
                       >
-                        {LANE_NAME[lane]}
+                        {STATE_NAME[next]}
                       </button>
                     ))}
                     <button
@@ -2083,6 +2136,20 @@ function ReviewConsole({
                     is not where the thing it selects is: each group's tick
                     sits in that group's band, beside its dot, where "all of
                     these" is a sentence about something you can see. */}
+                {/* How much is left, as one bar and one sentence. The old
+                    console showed five lane counts, which is five numbers to
+                    add up before you know whether you are nearly finished. */}
+                <div className="review-progress" role="group" aria-label="Review progress">
+                  <span className="review-progress-text">
+                    <b>{progress.needsYou}</b> yours
+                    {progress.withClaude ? <> · {progress.withClaude} sent</> : null}
+                    {' '}· {progress.closed}/{progress.total} settled
+                  </span>
+                  <span className="review-progress-bar" aria-hidden="true">
+                    <i style={{ width: `${Math.round(progress.ratio * 100)}%` }} />
+                  </span>
+                </div>
+
                 <div className="review-table-head" data-selecting={selecting || undefined}>
                   <span />
                   <span>Do</span>
@@ -2099,15 +2166,33 @@ function ReviewConsole({
                         ? 'Nothing marked on this screen yet — the other screens are under Everywhere.'
                         : 'Nothing marked yet. Select something on the page to start.'}
                     </li>
+                  ) : progress.needsYou === 0 ? (
+                    /* The whole point of the redesign, and it has to be said
+                       out loud: nothing here is waiting on you. Anything
+                       still moving is named, so an empty list never reads as
+                       a list that lost something. */
+                    <li className="review-panel-empty" data-clear="true">
+                      <strong>You are clear.</strong>
+                      {progress.withClaude
+                        ? ` ${progress.withClaude} sent. `
+                        : ' '}
+                      {progress.closed} settled.
+                    </li>
                   ) : null}
 
                   {/* A board, not an inbox. The lanes are the sections and a
                       note is moved between them by either side — the point is
                       where a thing has got to, not whether it has been read. */}
-                  {laneGroups.map(({ lane, notes: inLane }) => {
-                    const shut = laneShut.has(lane);
+                  {inboxGroups.map(({ key, name, hint, notes: inLane }) => {
+                    /* Closed folds itself away. It is the drawer that makes
+                       clearing the list safe — nothing is destroyed, it is
+                       just not in the way — so it opens on request and never
+                       on arrival. An empty group renders nothing at all
+                       rather than an empty heading. */
+                    if (!inLane.length) return null;
+                    const shut = key === 'closed' ? !laneShut.has(key) : laneShut.has(key);
                     return (
-                      <li key={lane} className="review-panel-lane" data-lane={lane} data-shut={shut || undefined}>
+                      <li key={key} className="review-panel-lane" data-lane={key} data-shut={shut || undefined}>
                         {/* A band, not one button: taking a whole lane in one
                             go is a thing you want per lane, not only for the
                             board — "everything in To do" is the selection you
@@ -2124,8 +2209,8 @@ function ReviewConsole({
                                 aria-checked={all ? true : some ? 'mixed' : false}
                                 className="review-tick"
                                 data-some={(!all && some) || undefined}
-                                title={all ? `Select none in ${LANE_NAME[lane]}` : `Select all ${ids.length} in ${LANE_NAME[lane]}`}
-                                aria-label={all ? `Select none in ${LANE_NAME[lane]}` : `Select all in ${LANE_NAME[lane]}`}
+                                title={all ? `Select none in ${name}` : `Select all ${ids.length} in ${name}`}
+                                aria-label={all ? `Select none in ${name}` : `Select all in ${name}`}
                                 onClick={() => {
                                   setSelecting(true);
                                   setChosen((current) => {
@@ -2144,16 +2229,18 @@ function ReviewConsole({
                             type="button"
                             className="review-lane-face"
                             aria-expanded={!shut}
+                            title={hint}
                             onClick={() => setLaneShut((current) => {
                               const next = new Set(current);
-                              if (next.has(lane)) next.delete(lane); else next.add(lane);
+                              if (next.has(key)) next.delete(key); else next.add(key);
                               return next;
                             })}
                           >
                             <ChevronDown className="size-3 review-lane-caret" />
-                            {LANE_NAME[lane]}
+                            {name}
                             <span>{inLane.length}</span>
                           </button>
+
                         </div>
                         {shut ? null : <ul>{inLane.map(noteRow)}</ul>}
                       </li>
@@ -2266,6 +2353,49 @@ function ReviewConsole({
     setMoved(note.id);
   }
 
+  /**
+   * Move a note to a state, or refuse and say why.
+   *
+   * This is the only way a state changes, and the refusal is the feature: the
+   * console will not let the reviewer file something as Done while the change
+   * behind it is still owed. That single check is what the old board was
+   * missing — forty-nine notes claimed to be finished and a third of them had
+   * never been touched, because Done was a lane you could drag anything into.
+   */
+  function moveTo(note: ReviewNote, next: NoteState) {
+    const allowed = canMove(note, next);
+    if (!allowed.ok) {
+      say(allowed.why, 'warn');
+      return false;
+    }
+    upsert({ id: note.id, status: next as unknown as ReviewLane });
+    say(`${note.label} → ${STATE_NAME[next]}`, next === 'done' ? 'good' : 'info');
+    setMoved(note.id);
+    return true;
+  }
+
+  /**
+   * Answer a note with one of the six decisions — the same six wherever you
+   * are. Recording the verdict, switching the element off, and moving the
+   * state are one act here, so no surface can do two of the three and leave
+   * a note half-answered.
+   */
+  function answer(note: ReviewNote, decision: Decision) {
+    const patch: Partial<ReviewNote> & { id: string } = { id: note.id };
+    if (decision.verdict) patch.verdict = decision.verdict;
+    if (decision.hides) patch.hidden = true;
+    // Coming out of a trial, the element goes back on the page unless the
+    // answer was to cut it — leaving it invisible after "Keep it" is how you
+    // end up with a page missing something you decided to keep.
+    if (!decision.hides && decision.id !== 'cut' && note.hidden) patch.hidden = undefined;
+
+    const allowed = canMove(note, decision.to);
+    if (!allowed.ok) { say(allowed.why, 'warn'); return; }
+    upsert({ ...patch, status: decision.to as unknown as ReviewLane });
+    say(`${note.label} → ${STATE_NAME[decision.to]}`, decision.to === 'sent' ? 'good' : 'info');
+    setMoved(note.id);
+  }
+
   /** Switch the element this note is about off, or back on. A layer eye:
    *  not the archive, which is where things carried off the page are kept,
    *  and not a verdict — the code is untouched either way. It sticks to the
@@ -2364,7 +2494,9 @@ function ReviewConsole({
 
         {/* What has to happen, in one word, in its own column so a screenful
             of notes can be read down rather than across. */}
-        <span className="review-cell-what" data-act={actOf(note)}>{actOf(note)}</span>
+        {actOf(note)
+          ? <span className="review-cell-what" data-act={actOf(note)}>{actOf(note)}</span>
+          : <span className="review-cell-what" data-act="none" aria-hidden="true" />}
 
         <span className="review-cell-item">
           <button
@@ -2410,31 +2542,70 @@ function ReviewConsole({
             next press would give you, and getting from To do to Not now was
             three presses through states you did not want it in. */}
         <span className="review-lane-pick review-cell-lane">
+          {/* The state, and the one move that follows from it.
+              The menu used to list five lanes and let you drag a note into
+              any of them — which is how Done came to mean nothing. Now the
+              row states where it is, and offers the step that is actually
+              next; anything else is a decision, and decisions live in the
+              same six-button set as every other surface. */}
           <button
             type="button"
             className="review-note-lane"
-            data-lane={laneOf(note)}
+            data-lane={stateOf(note)}
             aria-haspopup="menu"
             aria-expanded={laneMenu === note.id}
-            aria-label={`${note.label} is ${LANE_NAME[laneOf(note)]} — change`}
-            title={`${LANE_NAME[laneOf(note)]} — click to change`}
+            aria-label={`${note.label} is ${STATE_NAME[stateOf(note)]} — change`}
+            title={STATE_BLURB[stateOf(note)]}
             onClick={() => setLaneMenu(laneMenu === note.id ? null : note.id)}
           >
-            {LANE_NAME[laneOf(note)]}
+            {STATE_NAME[stateOf(note)]}
+            {note.verdict && VERDICT_NAME[note.verdict]
+              ? <i className="review-note-verdict">{VERDICT_NAME[note.verdict]}</i>
+              : null}
           </button>
+          {(() => {
+            const step = nextStep(note);
+            const alt = altStep(note);
+            if (!step) return null;
+            return (
+              <span className="review-note-step">
+                <button
+                  type="button"
+                  className="review-note-go"
+                  title={step.hint}
+                  onClick={() => moveTo(note, step.to)}
+                >
+                  {step.verb}
+                </button>
+                {alt ? (
+                  <button
+                    type="button"
+                    className="review-note-go review-note-go-alt"
+                    title={alt.hint}
+                    onClick={() => moveTo(note, alt.to)}
+                  >
+                    {alt.verb}
+                  </button>
+                ) : null}
+              </span>
+            );
+          })()}
           {laneMenu === note.id ? (
             <span className="review-lane-menu" role="menu">
-              {LANES.map((lane) => (
+              {decisionsFor(note).map((decision) => (
                 <button
-                  key={lane}
+                  key={decision.id}
                   type="button"
-                  role="menuitemradio"
-                  aria-checked={laneOf(note) === lane}
-                  data-lane={lane}
-                  data-on={laneOf(note) === lane || undefined}
-                  onClick={() => { setLaneMenu(null); setLane(note, lane); }}
+                  role="menuitem"
+                  data-act={decision.id}
+                  title={decision.hint}
+                  onClick={() => {
+                    setLaneMenu(null);
+                    if (decision.needsWords) { commentOnNote(note.id); return; }
+                    answer(note, decision);
+                  }}
                 >
-                  {LANE_NAME[lane]}
+                  {decision.verb}
                 </button>
               ))}
             </span>
@@ -2584,11 +2755,79 @@ function ReviewConsole({
     });
   }
 
+  /** Text as the reader sees it: one line, no case, no runs of space. Both
+   *  sides of every comparison go through this, so "AUGUST  COUNTABLE" and
+   *  "August countable" are the same string. */
+  function flatten(text: string): string {
+    return text.replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  /**
+   * Find the element a note points at, when the easy handles have failed.
+   *
+   * A recorded DOM path is exact and brittle: one wrapper div added anywhere
+   * above the element and it resolves to nothing, which is most of what
+   * "Locate does nothing" was. The text the reviewer actually saw survives
+   * that, because restructuring the page rarely rewrites the words on it.
+   *
+   * So candidates are gathered from whatever handles exist and scored, rather
+   * than tried in a fixed order and given up on. The smallest element that
+   * contains the remembered text wins — a container that merely encloses it
+   * is technically a match and useless to point at.
+   */
+  function searchForNote(note: ReviewNote): HTMLElement | null {
+    const wanted = flatten(note.anchor.text ?? '');
+    const hooks = (note.anchor.hooks ?? '').split(' ').filter(Boolean);
+    if (wanted.length < 4 && !hooks.length) return null;
+
+    let best: { el: HTMLElement; score: number } | null = null;
+
+    // Class hooks narrow the field enormously when they exist; otherwise the
+    // sweep is over elements that carry their own text rather than every node.
+    const pool = hooks.length
+      ? document.querySelectorAll<HTMLElement>(hooks.map((h) => `.${CSS.escape(h)}`).join(''))
+      : document.querySelectorAll<HTMLElement>('[class]');
+
+    for (const el of pool) {
+      if (isReviewUi(el) || !onScreen(el)) continue;
+      const text = flatten(el.textContent ?? '');
+      if (!text) continue;
+
+      let score = 0;
+      if (wanted) {
+        if (text === wanted) score += 1;
+        else if (text.startsWith(wanted) || wanted.startsWith(text)) score += 0.8;
+        else if (text.includes(wanted)) score += 0.55;
+        else {
+          // Nothing shared at the start; fall back to how much of the
+          // remembered opening line this element still carries.
+          const words = wanted.split(' ').slice(0, 6);
+          const hit = words.filter((w) => w.length > 2 && text.includes(w)).length;
+          if (!hit) continue;
+          score += 0.3 * (hit / words.length);
+        }
+      }
+      if (hooks.length) {
+        score += 0.3 * (hooks.filter((h) => el.classList.contains(h)).length / hooks.length);
+      }
+      // Prefer the tightest wrapper: an element ten times longer than the text
+      // it was remembered by is a section, not the thing.
+      if (wanted && text.length > wanted.length) {
+        score -= Math.min(0.35, (text.length / Math.max(wanted.length, 1) - 1) * 0.05);
+      }
+      if (score > (best?.score ?? 0.34)) best = { el, score };
+    }
+
+    return best?.el ?? null;
+  }
+
   function elementForNote(note: ReviewNote): HTMLElement | null {
     const byId = note.anchor.reviewId
       ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
       : document.querySelector(`[data-review-id="${note.id}"]`);
-    const found = byId ?? safeQuery(note.anchor.domPath);
+    // Exact handles first, then the search — which is what keeps Locate
+    // working after the layout it was recorded against has been rebuilt.
+    const found = byId ?? safeQuery(note.anchor.domPath) ?? searchForNote(note);
     if (!(found instanceof HTMLElement)) return null;
     const resolved = (found.getAttribute('data-review-transparent') && found.firstElementChild instanceof HTMLElement)
       ? found.firstElementChild
@@ -2718,8 +2957,23 @@ function ReviewConsole({
         say(`Lives in the ${note.anchor.layout} layout`, 'info');
         return;
       }
+      /* Show the thing, not the shelf it is on.
+       *
+       * Locate used to flash the nearest visible section instead, which on a
+       * page where most notes are off-page looked exactly like a button that
+       * does nothing — and it only appeared to start working once the audit
+       * was open, because the audit is what reveals stowed markup. Peeking
+       * the one element reveals it here and now, in any mode. */
+      setPeek(note.id);
+      const shown = elementForNote(note);
+      if (shown) {
+        flashElement(shown);
+        window.history.replaceState(null, '', `#note=${note.id}`);
+        say(`Showing ${note.label} — hidden, peeking`, 'info');
+        return;
+      }
       if (flashNearest(note)) { setNest(note.id); setNestFor(null); return; }
-      say(`${note.stow ? 'Archived' : 'Hidden'} — its section is not on this screen`, 'warn');
+      say('Hidden — its section is not on this screen', 'warn');
       return;
     }
 
@@ -2730,7 +2984,7 @@ function ReviewConsole({
       flashNearest(blocker);
       setNest(blocker.id);
       setNestFor(note.id);
-      say(`Inside “${blocker.label}”, which is ${blocker.stow ? 'archived' : 'hidden'}`, 'warn');
+      say(`Inside “${blocker.label}”, which is hidden`, 'warn');
       return;
     }
 
@@ -3081,6 +3335,11 @@ function ReviewConsole({
                 Your comment
                 <span>Describe the friction, the outcome you want, or both.</span>
               </label>
+              {/* Paste or drop a picture straight into the box you are
+                  already typing in. No button, no file dialog: a screenshot
+                  is on the clipboard the instant you take one, and the whole
+                  reason for attaching it is that describing the thing in
+                  words is the part that was not working. */}
               <textarea
                 id="review-compose-text"
                 autoFocus
@@ -3088,15 +3347,111 @@ function ReviewConsole({
                 value={composer.draft}
                 placeholder={composer.members
                   ? 'What should happen to this group?'
-                  : 'What feels off, and what would make it better?'}
+                  : 'What feels off, and what would make it better? Paste a screenshot too.'}
                 onChange={(event) => {
                   setConfirmDiscard(false);
                   setComposer({ ...composer, draft: event.currentTarget.value });
                 }}
+                onPaste={(event) => {
+                  const images = [...event.clipboardData.files].filter((f) => f.type.startsWith('image/'));
+                  if (images.length) { event.preventDefault(); void attachShots(images); }
+                }}
+                onDragOver={(event) => { if (event.dataTransfer.types.includes('Files')) event.preventDefault(); }}
+                onDrop={(event) => {
+                  const images = [...event.dataTransfer.files].filter((f) => f.type.startsWith('image/'));
+                  if (images.length) { event.preventDefault(); void attachShots(images); }
+                }}
               />
-              <p id="review-compose-help" className="review-compose-help">
-                Text or a change type is enough to save a useful note.
-              </p>
+              <div className="review-compose-tools">
+                <p id="review-compose-help" className="review-compose-help">
+                  Text or a change type is enough to save a useful note.
+                </p>
+                {/* Paste and drop both work, and neither announces itself.
+                    One visible control so the ability is discoverable — the
+                    menu holds the two ways in that actually exist, and will
+                    not grow a third for the sake of looking like a menu. */}
+                <span className="review-attach">
+                  <button
+                    type="button"
+                    className="review-attach-btn"
+                    aria-haspopup="menu"
+                    aria-expanded={attachOpen}
+                    title="Attach a screenshot"
+                    onClick={() => setAttachOpen((current) => !current)}
+                  >
+                    <Plus className="size-3.5" /> Attach
+                  </button>
+                  {attachOpen ? (
+                    <span className="review-attach-menu" role="menu">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { setAttachOpen(false); shotInput.current?.click(); }}
+                      >
+                        Screenshot…
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={async () => {
+                          setAttachOpen(false);
+                          // Reading the clipboard needs permission the paste
+                          // event never does, so this is the fallback rather
+                          // than the main road — and it says so when refused.
+                          try {
+                            const items = await navigator.clipboard.read();
+                            const files: File[] = [];
+                            for (const item of items) {
+                              const type = item.types.find((t) => t.startsWith('image/'));
+                              if (!type) continue;
+                              const blob = await item.getType(type);
+                              files.push(new File([blob], 'pasted', { type }));
+                            }
+                            if (files.length) await attachShots(files);
+                            else say('No image on the clipboard', 'info');
+                          } catch {
+                            say('Clipboard blocked — press ⌘V in the box instead', 'warn');
+                          }
+                        }}
+                      >
+                        Paste from clipboard
+                      </button>
+                    </span>
+                  ) : null}
+                  <input
+                    ref={shotInput}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={(event) => {
+                      const files = [...(event.currentTarget.files ?? [])];
+                      event.currentTarget.value = '';
+                      if (files.length) void attachShots(files);
+                    }}
+                  />
+                </span>
+              </div>
+
+              {composer.shots?.length ? (
+                <ul className="review-compose-shots" aria-label="Screenshots on this note">
+                  {composer.shots.map((path) => (
+                    <li key={path}>
+                      <img src={`/${path}`} alt="" />
+                      <button
+                        type="button"
+                        aria-label={`Remove ${path.split('/').pop()}`}
+                        title="Remove"
+                        onClick={() => setComposer((current) => (current
+                          ? { ...current, shots: current.shots?.filter((p) => p !== path) }
+                          : current))}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
 
               {/* Faster than typing it, and it sorts the notes file by intent. */}
               <section className="review-compose-types" aria-labelledby="review-compose-types-title">
@@ -3242,10 +3597,6 @@ function ReviewConsole({
           onMin={setDockMin}
           toolsOpen={toolsOpen}
           onTools={setToolsOpen}
-          commentsOpen={commentsOpen}
-          onComments={setCommentsOpen}
-          commentsCount={displayedComments.length}
-          commentsList={commentsList}
           order={order}
           onOrder={setOrder}
           mode={mode}
@@ -3273,14 +3624,6 @@ function ReviewConsole({
           journalCount={findings.length}
           journalNew={unread.length}
           journal={journalBody}
-          stashOpen={stashOpen}
-          onStash={setStashOpen}
-          stashCount={stashCount}
-          shelves={shelves}
-          hiddenOpen={hiddenOpen}
-          onHidden={setHiddenOpen}
-          hiddenCount={hiddenHere.length}
-          hiddenList={hiddenList}
         />
       ) : (
         <DesktopDock
@@ -3288,10 +3631,6 @@ function ReviewConsole({
           onToggle={() => setOpen((current) => !current)}
           toolsOpen={toolsOpen}
           onTools={setToolsOpen}
-          commentsOpen={commentsOpen}
-          onComments={setCommentsOpen}
-          commentsCount={displayedComments.length}
-          commentsList={commentsList}
           onClose={() => {
             setOpen(false);
             setMode('off');
@@ -3329,14 +3668,6 @@ function ReviewConsole({
           journalWide={journalWide}
           onJournalWide={setJournalWide}
           journal={journalBody}
-          stashOpen={stashOpen}
-          onStash={setStashOpen}
-          stashCount={stashCount}
-          shelves={shelves}
-          hiddenOpen={hiddenOpen}
-          onHidden={setHiddenOpen}
-          hiddenCount={hiddenHere.length}
-          hiddenList={hiddenList}
           onCopyAiPrompt={copyAiPrompt}
         />
       )}
@@ -3345,11 +3676,17 @@ function ReviewConsole({
       {triage && triageNote ? (
         <aside data-review-ui className="review-walkthrough-hud" role="region" aria-label="Review Walkthrough">
           <div className="review-hud-progress-pill">
+            {/* Same words and same arithmetic as the card's counter, because
+                they are two views of one queue and were disagreeing: the bar
+                here filled to (at + 1) / total, counting the card you are
+                still looking at as finished, so the first of ten opened at
+                10% while the card behind it correctly read 0%. Progress is
+                what you have answered, never what you have been shown. */}
             <span className="review-hud-step-num">
-              {triage.at + 1} / {triage.ids.length}
+              {Math.min(triage.at + 1, triage.ids.length)} of {triage.ids.length}
             </span>
             <span className="review-hud-step-bar" aria-hidden="true">
-              <i style={{ width: `${((triage.at + 1) / triage.ids.length) * 100}%` }} />
+              <i style={{ width: `${(triage.at / triage.ids.length) * 100}%` }} />
             </span>
           </div>
 
@@ -3368,49 +3705,37 @@ function ReviewConsole({
             >
               ‹
             </button>
-            <button
-              type="button"
-              className="review-hud-btn review-hud-keep"
-              title="Keep As-Is (K or 1) — reject proposal, keep in product"
-              onClick={() => {
-                decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'rejected', null);
-                triageStep(1);
-              }}
-            >
-              <X className="size-4" />
-              <span>Keep (K)</span>
-            </button>
-            <button
-              type="button"
-              className="review-hud-btn review-hud-remove"
-              title="Remove (R or 2) — agree to cut from code"
-              onClick={() => {
-                decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'approved', null);
-                triageStep(1);
-              }}
-            >
-              <Trash2 className="size-4" />
-              <span>Remove (R)</span>
-            </button>
-            <button
-              type="button"
-              className="review-hud-btn review-hud-change"
-              title="Change / Note (C or 3) — keep but request changes"
-              onClick={() => commentOnNote(triageNote.id)}
-            >
-              <MessageSquarePlus className="size-4" />
-              <span>Change (C)</span>
-            </button>
-            <button
-              type="button"
-              className="review-hud-btn review-hud-preview"
-              data-on={offPage(triageNote) || undefined}
-              title="Preview Cut (H or Space) — toggle visual preview on screen"
-              onClick={() => toggleHidden(triageNote)}
-            >
-              {offPage(triageNote) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              <span>{offPage(triageNote) ? 'Hidden' : 'Preview'}</span>
-            </button>
+            {/* The same six answers as the Go Through card and the note row,
+                in the same order and the same words.
+
+                This bar had grown a fourth vocabulary — Keep / Remove /
+                Change / Hidden — of which "Hidden" was an adjective on a row
+                of verbs, and it was missing the two answers that get used
+                most: leaving a note without deciding, and Later. The words
+                come from DECISIONS now, so there is one place to change them
+                and no way for a surface to drift again. */}
+            {decisionsFor(triageNote).map((decision, index) => (
+              <button
+                key={decision.id}
+                type="button"
+                className="review-hud-btn"
+                data-act={decision.id}
+                data-on={decision.id === 'trial' && offPage(triageNote) ? true : undefined}
+                title={`${decision.verb} (${index + 1}) — ${decision.hint}`}
+                onClick={() => {
+                  if (decision.needsWords) { commentOnNote(triageNote.id); return; }
+                  answer(triageNote, decision);
+                  triageStep(1);
+                }}
+              >
+                {decision.id === 'cut' ? <Trash2 className="size-4" />
+                  : decision.id === 'rework' || decision.id === 'note' ? <MessageSquarePlus className="size-4" />
+                    : decision.id === 'trial' ? <EyeOff className="size-4" />
+                      : decision.id === 'keep' ? <Check className="size-4" />
+                        : <Minus className="size-4" />}
+                <span>{decision.verb}</span>
+              </button>
+            ))}
             <button
               type="button"
               className="review-hud-btn review-hud-next"
@@ -3464,20 +3789,32 @@ function ReviewConsole({
  *
  *  The colours are set in review.css, keyed off `data-act` with the value
  *  from this map — so a renamed verb needs its selector renamed with it. */
+/** Tags that name a decision, mapped to that decision's word. Tags with no
+ *  equivalent — spacing, contrast, confusing — keep their own name, because
+ *  they describe a kind of change rather than an answer. */
+const TAG_AS_ACT: Record<string, string> = {
+  remove: 'Cut',
+  cut: 'Cut',
+  reword: 'Rework',
+  resize: 'Rework',
+  move: 'Move'
+};
+
 export const DO: Record<string, string> = {
   /* A proposed cut you agreed with. ("Cut" read as cut-and-paste beside Move
      and Archive, and never said what was being cut — the element, or the
      note about it.) */
-  remove: 'Remove',
-  /* You looked at it and could not call it. The answer that was missing:
-     before this, a proposal you had considered and not decided went back
-     into the pile with the ones you had not looked at yet. */
-  unsure: 'Unsure',
+  remove: 'Cut',
+  /* Legacy only. "Unsure" was picked by reviewers as the least permanent
+     option available, not because they were undecided — what they wanted was
+     to say something without deciding. That is now its own answer, Note, and
+     old notes render under the same word so the vocabulary has no seams. */
+  unsure: 'Note',
   /* An approved suggestion that is not a deletion. */
   apply: 'Apply',
   /* You asked for something; my move. (Revise and Change were two words for
      one thing: make a change. Which side owes it is what `reply` says.) */
-  change: 'Change',
+  change: 'Rework',
   /* I answered; your move. */
   reply: 'Reply',
   /* The element should sit somewhere else. */
@@ -3488,8 +3825,11 @@ export const DO: Record<string, string> = {
   archived: 'Archived',
   /* Switched off where it stood. Nothing owed. */
   hidden: 'Hidden',
-  /* Marked, with nothing asked of it. */
-  noted: 'Noted',
+  /* Marked, with nothing asked of it. "Noted" sat one letter from "Notes",
+     the panel it lives inside, and two from "Note", the button beside it —
+     three near-identical words in one column. This one is the odd meaning
+     out: it is not a note being made, it is a note that asks for nothing. */
+  noted: 'Marked',
   /* The filter chip that turns filtering off. Not a verb, but it sits in the
      same strip wearing the same shape, so it is named in the same place. */
   all: 'All'
@@ -3499,6 +3839,12 @@ export const DO: Record<string, string> = {
  *  sides write the same `review-notes.json`, and a word that is computed
  *  from the record cannot drift out of step with it. */
 function actOf(note: ReviewNote): string {
+  /* A trial has not decided anything, so the Do column has nothing to say
+     about it. It used to print the reviewer's intent tag — a red REMOVE
+     beside a chip reading "Trying without it" — which is the row telling you
+     the decision is made and still open in the same breath. The state chip
+     and its two answers carry it alone. */
+  if (stateOf(note) === 'trial') return '';
   if (note.kind === 'choice') return DO.picked;
   if (note.placement) return DO.move;
   if (note.verdict === 'approved') return note.kind === 'delete' ? DO.remove : DO.apply;
@@ -3506,15 +3852,24 @@ function actOf(note: ReviewNote): string {
   // 'rejected' is a dismissal and never reaches the board — see `findings`.
   if (note.verdict === 'rejected') return DO.noted;
   if (note.verdict === 'revise') return DO.change;
-  // A tag is the reviewer naming the change themselves; nothing beats it.
-  if (note.tags?.length) return note.tags[0][0].toUpperCase() + note.tags[0].slice(1);
+  /* A tag is the reviewer naming the change themselves; nothing beats it —
+     but it says it in the tag vocabulary, and the strip has to speak one
+     language. A 'remove' tag and an approved cut are the same instruction,
+     and they were producing two chips, "Remove 2" and "Cut 2", side by side.
+     Tags that mean a decision are shown in that decision's word. */
+  if (note.tags?.length) {
+    const tag = note.tags[0];
+    const asDecision = TAG_AS_ACT[tag];
+    if (asDecision) return asDecision;
+    return tag[0].toUpperCase() + tag.slice(1);
+  }
   const last = note.thread?.[note.thread.length - 1];
   if (last?.from === 'claude') return DO.reply;
   if (note.comment) return DO.change;
-  // Two ways of being off the page, and they are not the same answer: one
-  // was carried onto a shelf, the other was switched off where it stood.
-  if (note.stow) return DO.archived;
-  if (note.hidden) return DO.hidden;
+  /* Being off the page is not something anyone is being asked to do — it is
+     a fact about where the element currently is, and it now shows as a mark
+     on the row and a lens in the filter strip. As verbs, Archived and Hidden
+     split one idea across two chips and crowded out the actual ask. */
   // Nothing is asked of this one yet. It is not owed anything, and the
   // column should not pretend otherwise.
   return DO.noted;

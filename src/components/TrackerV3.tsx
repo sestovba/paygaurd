@@ -30,6 +30,7 @@ import { PaycheckRadar } from './PaycheckRadar';
 import { QuickPaydaySheet } from './QuickPaydaySheet';
 import { SafetyHero } from './SafetyHero';
 import { SettingsPanel } from './SettingsPanel';
+import { ToastStack } from './ToastStack';
 import { Sheet } from './Sheet';
 import { StatusPage } from './StatusPage';
 import { StreamSheet } from './StreamSheet';
@@ -296,6 +297,7 @@ export function TrackerV3() {
           onSettings={() => openPane({ kind: 'settings' })}
         />
       </div>
+      <ToastStack />
     </div>
   );
 }
@@ -812,6 +814,7 @@ function NewSourcePane({
         id="v3-new-source-tutorial"
         label="Three-step tutorial"
         reason="The choices already make the flow clear; this repeats interface instructions."
+        certainty="hunch"
         layout="responsive"
       >
         <div className="rounded-xl border border-border bg-surface-2 p-4">

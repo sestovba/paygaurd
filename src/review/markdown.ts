@@ -3,14 +3,30 @@
 
 import type { ReviewNote, ReviewNotes } from './types';
 import { laneOf } from './types';
+import { bucketOf, claimCheck, priorityOf, stateOf } from './state';
 
-/** A note a code pass can act on. The console also keeps housekeeping notes —
- *  a stash's name, colour and folded state — and those are settings, not
- *  findings, so they never reach the report. */
+/** A note a code pass can act on.
+ *
+ *  Group and shelf notes used to qualify by carrying `members` or `stow`.
+ *  Those were the edge trays' own bookkeeping — a shelf's name, colour and
+ *  folded state — and with the trays retired they are records of a feature
+ *  that no longer exists, asking for nothing. They stay in the file, and they
+ *  stop reaching the report. */
+/** Can this note's element be found at all?
+ *
+ *  A note with prose and no anchor reads like work and is not: there is no
+ *  file, no text, no path — nothing to act on. "right tray · 2 items" carried
+ *  a real sentence about year-level summaries and pointed at a layout, which
+ *  is not a place. These are worth seeing and fixing; they are not worth
+ *  putting in a list of things to go and do. */
+export function locatable(note: ReviewNote): boolean {
+  return Boolean(note.anchor.source || note.anchor.text || note.anchor.domPath || note.anchor.reviewId);
+}
+
 export function actionable(note: ReviewNote): boolean {
   return Boolean(
     note.verdict || note.comment || note.tags?.length
-    || note.placement || note.members || note.stow || note.hidden
+    || note.placement || note.hidden || note.shots?.length
     || note.kind === 'choice'
   );
 }
@@ -52,7 +68,12 @@ function renderNote(note: ReviewNote): string {
     note.tray?.name ? `\n  - Stash named "${note.tray.name}"` : '',
     note.stow ? `\n  - Archived on the ${note.stow.edge} shelf (off the page in the app, still in the code)` : '',
     note.hidden ? '\n  - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.' : '',
-    note.reason ? `\n  - I proposed cutting it because: ${note.reason}` : '',
+    note.reason
+      ? `\n  - I propose cutting it${note.certainty ? ` (${note.certainty})` : ''}: ${note.reason}`
+      : '',
+    note.effort ? `\n  - Effort: ${note.effort}` : '',
+    // Listed as plain repo paths so a code pass can open them directly.
+    note.shots?.length ? `\n  - Screenshots: ${note.shots.join(', ')}` : '',
     note.options ? `\n  - Alternatives shown: ${note.options.join(', ')}` : '',
     line('Source', note.anchor.source),
     line('Section id', note.anchor.reviewId),
@@ -69,8 +90,12 @@ function renderNote(note: ReviewNote): string {
 }
 
 export function notesToMarkdown(notes: ReviewNotes): string {
-  const all = Object.values(notes)
-    .filter(actionable)
+  const everything = Object.values(notes).filter(actionable);
+  /* Notes nobody can act on are kept out of the body and the digest, and
+     named at the foot so nothing vanishes without a trace. */
+  const unlocatable = everything.filter((note) => !locatable(note));
+  const all = everything
+    .filter(locatable)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const layouts = Array.from(new Set(all.map((n) => n.anchor.layout))).sort();
   const deletes = all.filter((n) => n.verdict === 'approved').length;
@@ -87,30 +112,94 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     ].join('\n');
   });
 
+  /* What a code pass needs first, before any of the prose: the short list of
+   * what is actually owed to it, in the order worth doing, with the anchor on
+   * the same line. Reading fifty-three notes to find fourteen was the tax on
+   * every pass; this is that answer, precomputed. */
+  const owed = all
+    .filter((note) => bucketOf(stateOf(note)) === 'withClaude')
+    .sort((a, b) => priorityOf(a) - priorityOf(b));
+
+  const suspect = all.filter((note) => claimCheck(note) === 'suspect');
+
+  const digest = [
+    '## Owed to Claude',
+    '',
+    owed.length
+      ? 'Sorted by certainty then size — the checkable and contained first.'
+      : 'Nothing is waiting on a code pass.',
+    '',
+    ...owed.map((note) => {
+      const marks = [
+        note.certainty ? `certainty: ${note.certainty}` : null,
+        note.effort ? `effort: ${note.effort}` : null
+      ].filter(Boolean).join(' · ');
+      return `- **${note.label}** — ${note.anchor.layout}${marks ? ` (${marks})` : ''}`
+        + `${note.anchor.source ? `\n  \`${note.anchor.source}\`` : ''}`
+        + `${note.comment ? `\n  > ${note.comment.replace(/\n+/g, ' ')}` : ''}`;
+    }),
+    ''
+  ];
+
+  /* The check that would have caught the phantom backlog on its own: filed as
+   * a finished cut, and the element is still in the source. */
+  const flags = suspect.length ? [
+    '## Claims that do not match the code',
+    '',
+    'Filed as a finished cut, but the element is still in the source. One of',
+    'the two is wrong — check before trusting either.',
+    '',
+    ...suspect.map((note) => `- **${note.label}** — \`${note.anchor.source ?? note.anchor.layout}\``),
+    ''
+  ] : [];
+
   return [
     '# Review notes',
     '',
     'Written by the in-app review console (dev/localhost only — ⌘R, or the',
     'button bottom right). Do not hand-edit while the app is open: the app',
-    'overwrites this file. Every note sits in a lane, and either side can',
-    'move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),',
-    '`"commented"` (`[!]` — the reviewer has said what they want and it is',
-    'your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`',
-    '— acted on) or `"parked"` (`[-]` — deliberately not now).',
+    'overwrites this file.',
     '',
-    'ARCHIVED means carried onto a shelf in the app; the code is untouched and',
-    'it can be dragged back. HIDDEN means switched off with the eye — also',
-    'untouched code, and a question ("is the screen better without this?")',
-    'rather than an answer. REMOVE/KEEP/MOVE are the decisions to act on.',
-    'A `Kind:` line carries the reviewer\'s own tags (cut, reword, spacing…) —',
-    'the prose says what to change, the tags say what sort of change it is.',
-    'The console\'s own housekeeping — a stash\'s name, colour or folded state —',
-    'is deliberately not in here; every entry below is something to act on.',
+    'One state per note, in `"status"`. Exactly one is true at a time, and each',
+    'belongs to a group, which is whose move it is:',
+    '',
+    '| State | Group | Means |',
+    '|---|---|---|',
+    '| `new` | Yours | Not looked at yet. |',
+    '| `needsYou` | Yours | Looked at; the reviewer says what they want. |',
+    '| `trial` | Yours | Off the page while they see whether they miss it. |',
+    '| `sent` | **Claude** | Handed over. Your move. |',
+    '| `answered` | Yours | Claude replied; the reviewer confirms. |',
+    '| `done` | Closed | Acted on in the code, and confirmed. |',
+    '| `later` | Closed | Deliberately deferred. |',
+    '| `wontDo` | Closed | Looked at and kept as it is. |',
+    '',
+    '**`done` is never taken at face value.** It is a claim about the code, and',
+    'three things write this file. An item that still owes a change and has no',
+    'reply saying it was made is read back as `sent`, whatever the word says.',
+    '',
+    '`certainty` (sure / likely / hunch) is how confident the proposal was.',
+    '`effort` (small / medium / large) is how big the change is. `found` is set',
+    'by the dev server on every write: whether the element is still in the',
+    'source. HIDDEN means switched off on the page to see whether it is missed',
+    '— a question, not an answer, and the code is untouched.',
     '',
     'To answer a note, append to its `thread` array in review-notes.json with',
-    '`{"from":"claude","text":"…","at":"<ISO>"}` and bump that note\'s',
+    '`{"from":"claude","text":"…","at":"<ISO>"}`, set its `"status"`, and bump',
     '`updatedAt` — the app merges it in and shows the reply next to the comment.',
     '',
+    ...digest,
+    ...flags,
+    ...(unlocatable.length ? [
+      '## Not anchored to anything',
+      '',
+      'These carry a comment but nothing that identifies an element — no file,',
+      'no text, no path. Nothing can be done with them until they point at',
+      'something. Kept here so they are not lost.',
+      '',
+      ...unlocatable.map((note) => `- ${note.label}${note.comment ? ` — "${note.comment.replace(/\n+/g, ' ')}"` : ''}`),
+      ''
+    ] : []),
     `${all.length} note(s) · ${deletes} to delete · ${parked} parked · ${choices} A/B pick(s)`,
     `Updated ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`,
     '',

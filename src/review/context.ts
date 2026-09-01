@@ -5,6 +5,7 @@
 import { createContext, useContext } from 'react';
 import type { LayoutMode } from '../state/storage';
 import type { ReviewNotes, ReviewVerdict, TrayEdge } from './types';
+import type { Certainty } from './state';
 
 export type ReviewMode = 'off' | 'audit' | 'pick' | 'variants';
 
@@ -12,6 +13,8 @@ export interface SuggestedTarget {
   id: string;
   label: string;
   reason: string;
+  /** How sure the proposal is. See state.ts. */
+  certainty?: Certainty;
   layout: LayoutMode;
 }
 
@@ -21,7 +24,7 @@ export interface ReviewContextValue {
   /** Lets the dock report what this screen is proposing — the reason travels
    *  too, so the toolbar can answer a proposal without the page's own
    *  buttons being on screen. */
-  register: (id: string, label: string, reason: string) => () => void;
+  register: (id: string, label: string, reason: string, certainty?: Certainty) => () => void;
   /** Variant sets announce themselves so the A/B control stays hidden on
    *  screens with no alternatives to compare. */
   registerVariants: (id: string) => () => void;

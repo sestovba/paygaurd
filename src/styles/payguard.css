@@ -2505,3 +2505,117 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =================================================================== */
+/* Months that need attention                                          */
+/* =================================================================== */
+/*
+ * The one calendar fact that catches people out — a month with a third or
+ * fifth paycheck in it — used to be a column in a table you scroll to. It is
+ * an alert now, directly under the status hero, alongside the months already
+ * over a limit and the ones close enough that coasting is not safe.
+ *
+ * A clean year renders nothing here at all: the strip is only ever the
+ * exceptions, so its presence is itself the signal.
+ */
+.pg-attention {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--pg-warn-border);
+  border-radius: var(--pg-radius-md);
+  background: var(--pg-warn-bg);
+  color: var(--pg-warn-text);
+}
+
+.pg-attention-rail {
+  display: flex;
+  gap: 0.375rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pg-attention-rail::-webkit-scrollbar { display: none; }
+
+.pg-attention-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 0 0 auto;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--pg-radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.pg-attention-chip[data-kind='over'] {
+  color: var(--pg-over-text);
+  background: var(--pg-over-bg);
+  border-color: var(--pg-over-border);
+}
+.pg-attention-chip[data-kind='near'] {
+  color: var(--pg-warn-text);
+  background: var(--pg-warn-bg);
+  border-color: var(--pg-warn-border);
+}
+.pg-attention-chip[data-kind='pay'] {
+  color: var(--pg-info-text);
+  background: var(--pg-info-bg);
+  border-color: var(--pg-info-border);
+}
+
+.pg-attention-month {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.pg-attention-chip:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: -2px;
+}
+
+/* -------------------------------------------------------------------
+ * Precision — how far the figure above can be trusted
+ * -------------------------------------------------------------------
+ * The component is shared with the classic family; only the paint is per
+ * family. A line under the number, never a card: precision is a property of
+ * a claim, not a room in the app.
+ */
+.pg-payguard .precision-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--pg-fg-dim);
+}
+
+.pg-payguard .precision-line[data-fix] { cursor: pointer; }
+.pg-payguard .precision-line[data-fix]:hover .precision-why { text-decoration: underline; }
+
+.pg-payguard .precision-level {
+  flex: 0 0 auto;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.pg-payguard .precision-line[data-level='estimated'] { color: var(--pg-warn-text); }
+.pg-payguard .precision-line[data-level='scheduled'] { color: var(--pg-info-text); }
+.pg-payguard .precision-line[data-level='exact'] { color: var(--pg-safe-text); }
+
+.pg-payguard .precision-why { min-width: 0; color: var(--pg-fg-dim); }
+
+/* workrecord shares the payguard palette and sits on a sheet, so it gets a
+   rule above it rather than a colour of its own. */
+.wr-precision { padding: 0.25rem var(--wr-pad) 0.5rem; }

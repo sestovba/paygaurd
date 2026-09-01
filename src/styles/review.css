@@ -4348,13 +4348,10 @@ body.review-picking * {
   backdrop-filter: blur(8px);
 }
 
-.review-lane-face::before {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 9999px;
-  background: currentColor;
-  content: '';
-}
+/* The coloured dot that used to sit before a group name is gone. The name is
+ * already coloured and already counted; the dot was a third statement of the
+ * same fact, and it pushed the label off the left edge every other row in the
+ * panel aligns to. */
 
 .review-panel-lane[data-lane='open'] .review-panel-lane-head { color: #b45309; }
 .review-panel-lane[data-lane='doing'] .review-panel-lane-head { color: var(--review-blue); }
@@ -11705,21 +11702,27 @@ body.review-picking * {
 .review-hud-progress-pill {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 0.4rem;
   padding: 0.2rem 0.5rem;
   border-radius: 9999px;
   background: rgb(255 255 255 / 0.12);
 }
 
+/* "1 of 10" was wrapping to two lines inside the pill — 32px wide, 36px tall
+   — which pushed the pill taller than every other control on the bar and
+   read as a broken element rather than a counter. A count never wraps. */
 .review-hud-step-num {
   font-size: 0.75rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .review-hud-step-bar {
   display: block;
-  width: 2.5rem;
+  flex: 0 0 auto;
+  width: 3rem;
   height: 4px;
   border-radius: 9999px;
   background: rgb(255 255 255 / 0.2);
@@ -11865,3 +11868,370 @@ body.review-picking * {
 }
 
 
+
+/* ==================================================================== */
+/* Inbox model — states, groups, progress                               */
+/* ==================================================================== */
+/*
+ * Three groups instead of five lanes, one decision vocabulary instead of
+ * four, and a bar that says how much is left. Appended last so it wins over
+ * the older lane rules without editing them out from under anything that
+ * still refers to them.
+ */
+
+/* --- the group bands ------------------------------------------------ */
+.review-panel-lane[data-lane='needsYou'] .review-panel-lane-head { color: var(--review-amber-lit, #b45309); }
+.review-panel-lane[data-lane='withClaude'] .review-panel-lane-head { color: var(--review-blue-lit, #2563eb); }
+.review-panel-lane[data-lane='closed'] .review-panel-lane-head { color: var(--review-text-3, #64748b); }
+
+/* Closed is a drawer: quiet, and its rows do not compete with live work. */
+.review-panel-lane[data-lane='closed'] .review-note-label { color: var(--review-text-3, #64748b); }
+
+/* The group hints are tooltips now, not a second line. With one-word names —
+   Yours, Claude, Closed — a sentence under each heading was explaining words
+   that no longer need explaining, and it was the only element in the panel
+   that did not sit on the shared left edge. */
+.review-lane-hint { display: none; }
+
+/* An item with nothing being asked of it leaves the Do column blank rather
+   than painting an empty chip in it. The column still holds its width, so
+   every row's name starts at the same x. */
+.review-cell-what[data-act='none'] {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* --- the state chip on a row ---------------------------------------- */
+.review-note-lane[data-lane='new'] { background: #ede9fe; color: #6d28d9; }
+.review-note-lane[data-lane='needsYou'] { background: #fef3c7; color: #b45309; }
+.review-note-lane[data-lane='trial'] { background: #e0f2fe; color: #0369a1; }
+.review-note-lane[data-lane='sent'] { background: #dbeafe; color: #1d4ed8; }
+.review-note-lane[data-lane='answered'] { background: #dcfce7; color: #15803d; }
+.review-note-lane[data-lane='done'] { background: #f1f5f9; color: #475569; }
+.review-note-lane[data-lane='later'] { background: #f1f5f9; color: #64748b; }
+.review-note-lane[data-lane='wontDo'] { background: #f1f5f9; color: #64748b; }
+
+/* The verdict rides on the state chip rather than beside it: they are one
+   fact ("sent, as a cut"), and two chips read as two things to act on. */
+.review-note-verdict {
+  margin-left: 0.375rem;
+  padding-left: 0.375rem;
+  border-left: 1px solid currentColor;
+  font-style: normal;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+/* --- the one next step ---------------------------------------------- */
+.review-note-step { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+/* The state chip and the step buttons sit on one line, so they are one size.
+   They were 20px and 24.5px tall at 10px and 11px type — close enough to look
+   like a mistake rather than a distinction, and the mismatch threw the row's
+   baseline out. Every metric here is the chip's own. */
+.review-cell-lane {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* The dock has no surface token — it paints its own grounds — so these
+   derive from the inherited ink instead. That way one rule is legible in the
+   dark rail and the light board without either guessing a background. */
+.review-note-go {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 20px;
+  padding: 0 0.45rem;
+  border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 10%, transparent);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 15px;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.review-note-go:hover { background: color-mix(in oklab, currentColor 20%, transparent); }
+.review-note-go-alt { font-weight: 600; opacity: 0.8; }
+
+/* --- progress -------------------------------------------------------- */
+/* The bar sat in a flex row taking whatever width was left over, so its
+   length was arbitrary, it started at a different x from every row beneath
+   it, and its right edge landed mid-sentence. It is a full-width rule under
+   its own sentence now: both share the panel's padding, so the bar spans
+   exactly the content width and lines up with the rows below it. */
+.review-progress {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--review-line, #e2e8f0);
+}
+
+.review-progress-bar {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin-top: 0.375rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, currentColor 18%, transparent);
+  overflow: hidden;
+}
+.review-progress-bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--review-green-lit, #16a34a);
+  transition: width 180ms ease;
+}
+
+.review-progress-text {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--review-text-2, #475569);
+  white-space: nowrap;
+}
+.review-progress-text b { color: var(--review-text, #0f172a); }
+
+/* The cleared state. Said plainly, because "nothing is waiting on you" is
+   the sentence the whole console exists to be able to print. */
+.review-panel-empty[data-clear='true'] {
+  color: var(--review-text-2, #475569);
+}
+.review-panel-empty[data-clear='true'] strong {
+  display: block;
+  margin-bottom: 0.125rem;
+  font-size: 0.875rem;
+  color: var(--review-green-lit, #15803d);
+}
+
+/* --- the shared decision buttons ------------------------------------- */
+.review-queue-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.review-queue-act[data-act='cut'] { color: var(--review-red, #b91c1c); }
+.review-queue-act[data-act='keep'] { color: var(--review-green-lit, #15803d); }
+.review-queue-act[data-act='trial'] { color: var(--review-blue, #2563eb); }
+
+/* Narrow rails stack the six decisions rather than scrolling them out of
+   reach — the answer must never be off-screen on the card that asks. */
+@media (max-width: 30rem) {
+  .review-queue-acts { flex-wrap: wrap; }
+  .review-queue-acts button { flex: 1 1 8rem; justify-content: center; }
+  .review-progress { flex-wrap: wrap; }
+  .review-progress-text { white-space: normal; }
+  .review-note-step { margin-left: 0; }
+}
+
+/* ==================================================================== */
+/* Status is not a button                                               */
+/* ==================================================================== */
+/*
+ * Matching the state chip to the step buttons fixed the alignment and broke
+ * the meaning: Trying · Cut · Restore became three identical pills, two of
+ * which do something and one of which is a fact. Metrics stay identical, so
+ * the row still sits on one baseline; the treatment diverges, so you can see
+ * at a glance which one is telling you and which two are asking you.
+ *
+ * The state is quiet text. The actions keep the pill.
+ */
+.review-cell-lane .review-note-lane {
+  /* Box untouched — same padding, same min-height, same border width — so
+     nothing moves by a pixel. Only the fill and the outline go. */
+  background: none;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* It still opens the decision menu, so it admits to being pressable — on
+   hover only, where it cannot be mistaken for a standing button. */
+.review-cell-lane .review-note-lane:hover {
+  background: color-mix(in oklab, currentColor 12%, transparent);
+  border-color: color-mix(in oklab, currentColor 24%, transparent);
+}
+
+/* ==================================================================== */
+/* Go Through bar — one treatment, colour as accent                     */
+/* ==================================================================== */
+/*
+ * The bar had four saturated blocks side by side — a green Keep, a red
+ * Remove, a blue Change, an orange Hidden — which made every answer shout
+ * equally loudly and none of them read as more or less consequential than
+ * the others. Four full-strength fills next to each other is a decision the
+ * eye has to make before the mind can.
+ *
+ * One treatment for all six now: the same quiet ground the rest of the
+ * console uses, with the colour carried in the ink and a tinted wash on
+ * hover. Cut is the only one that stays visibly warmer at rest, because it
+ * is the only one that ends with something leaving the product.
+ */
+.review-walkthrough-hud .review-hud-btn[data-act] {
+  background: rgb(255 255 255 / 0.10);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  color: rgb(255 255 255 / 0.92);
+}
+
+.review-walkthrough-hud .review-hud-btn[data-act]:hover {
+  background: color-mix(in oklab, currentColor 22%, rgb(255 255 255 / 0.10));
+  transform: none;
+}
+
+/* Accent in the ink, not the fill. */
+.review-walkthrough-hud .review-hud-btn[data-act='cut'] {
+  color: #fca5a5;
+  border-color: rgb(252 165 165 / 0.35);
+  background: rgb(252 165 165 / 0.14);
+}
+.review-walkthrough-hud .review-hud-btn[data-act='keep'] { color: #86efac; }
+.review-walkthrough-hud .review-hud-btn[data-act='trial'] { color: #93c5fd; }
+
+/* Running a trial is a state the bar should show it is in. */
+.review-walkthrough-hud .review-hud-btn[data-act='trial'][data-on='true'] {
+  background: rgb(147 197 253 / 0.24);
+  border-color: rgb(147 197 253 / 0.45);
+}
+
+/* Six answers need to wrap rather than push the exit button off the bar. */
+@media (max-width: 52rem) {
+  .review-walkthrough-hud { flex-wrap: wrap; row-gap: 0.4rem; }
+  .review-hud-info { order: -1; flex: 1 1 100%; }
+}
+
+/* Certainty — how sure a proposal is, said where the proposal is made. */
+.review-certainty {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  margin: 0 0.375rem;
+  padding: 0 0.45rem;
+  border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 12%, transparent);
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
+/* Sure reads as settled, hunch as a question. Likely is left uncoloured on
+   purpose: it is the default, and a default that shouts is not a default. */
+.review-certainty[data-level='sure'] { color: #86efac; }
+.review-certainty[data-level='hunch'] { color: #fcd34d; }
+
+/* Attaching a screenshot to a note. */
+.review-compose-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.review-compose-tools .review-compose-help { margin: 0; }
+
+.review-attach { position: relative; flex: 0 0 auto; }
+
+.review-attach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 20px;
+  padding: 0 0.45rem;
+  border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 10%, transparent);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 15px;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.review-attach-btn:hover { background: color-mix(in oklab, currentColor 20%, transparent); }
+
+.review-attach-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.25rem);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 11rem;
+  padding: 0.25rem;
+  border: 1px solid var(--review-line, #cbd5e1);
+  border-radius: 0.5rem;
+  background: #1e293b;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+}
+.review-attach-menu button {
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: none;
+  color: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.review-attach-menu button:hover { background: rgb(255 255 255 / 0.12); }
+
+/* Thumbnails of what is attached. Small enough to stay out of the way of the
+   text, big enough to tell two screenshots apart. */
+.review-compose-shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.review-compose-shots li { position: relative; }
+.review-compose-shots img {
+  display: block;
+  width: 4.5rem;
+  height: 3rem;
+  object-fit: cover;
+  border: 1px solid var(--review-line, #cbd5e1);
+  border-radius: 0.35rem;
+}
+.review-compose-shots button {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  display: grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid var(--review-line, #cbd5e1);
+  border-radius: 9999px;
+  background: #1e293b;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Close all — sits beside Go through, and is absent when nothing qualifies
+   rather than present and disabled. A greyed button is a question you have to
+   answer ("why can't I?"); an absent one is not. */
+.review-closeall {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 20px;
+  padding: 0 0.5rem;
+  border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 10%, transparent);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 15px;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.review-closeall:hover { background: color-mix(in oklab, currentColor 20%, transparent); }

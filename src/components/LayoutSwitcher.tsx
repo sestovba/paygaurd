@@ -23,6 +23,26 @@ export interface LayoutGroup {
  */
 export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
   {
+    title: 'Small screens and slow phones',
+    options: [
+      {
+        id: 'pocket',
+        label: 'Pocket',
+        description: 'Big text, one action, no chart. Built for a cheap phone on slow data.'
+      }
+    ]
+  },
+  {
+    title: 'Looking ahead',
+    options: [
+      {
+        id: 'horizon',
+        label: 'Horizon',
+        description: 'The months you have left, what lands in them, and what to do about it.'
+      }
+    ]
+  },
+  {
     title: 'All on one page',
     options: [
       { id: 'classic', label: 'Classic', description: 'The month, the year and your jobs, in one scroll.' },

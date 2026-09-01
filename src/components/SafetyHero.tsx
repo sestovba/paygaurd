@@ -36,19 +36,19 @@ export function SafetyHero({
           <TriangleAlert className="size-6 shrink-0 text-warn" />
           <div className="min-w-0">
             <div className="text-lg font-semibold">
-              {phase === 'unknown' ? 'Confirm TWP status' : 'Review 9 possible TWP months'}
+              {phase === 'unknown' ? 'Confirm your Trial Work Period status' : 'Review 9 possible Trial Work months'}
             </div>
             <p className="type-muted mt-1.5">
               {phase === 'unknown'
-                ? 'We need this to choose the correct TWP or SGA limit.'
-                : 'Confirm these months before switching to the SGA limit.'}
+                ? 'We need this to show you the correct monthly earnings limit.'
+                : 'Check these 9 months against your records before switching to the SGA limit.'}
             </p>
             <button
               type="button"
               onClick={phase === 'unknown' ? onTakeQuiz : onReviewStatus}
               className="btn-primary mt-4"
             >
-              {phase === 'unknown' ? 'Confirm status' : 'Review months'}
+              {phase === 'unknown' ? 'Answer questions' : 'Review months'}
             </button>
           </div>
         </div>
@@ -58,9 +58,6 @@ export function SafetyHero({
 
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
-  // Crossing SGA is the month that can actually stop payments — red.
-  // Using a TWP month is real but not that; same amber as "close but not
-  // over yet", matching the same keep/spent/over split the calendar uses.
   const tone = phase === 'sga' && over ? 'over' : (over || room <= 200) ? 'caution' : 'safe';
 
   const toneClasses = {
@@ -73,7 +70,7 @@ export function SafetyHero({
     <section className="panel overflow-hidden p-5 sm:p-6 xl:col-span-6">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
         <div className="min-w-0">
-          <p className="label-caps">{longMonthName(asOf)} countable earnings</p>
+          <p className="label-caps">What Social Security counts for {longMonthName(asOf)}</p>
           <p className={'display-figure mt-1 text-5xl sm:text-6xl ' + toneClasses.value}>
             {money(status.countable)}
           </p>
@@ -82,30 +79,27 @@ export function SafetyHero({
           {tone === 'safe' ? <CircleCheck className="size-4" />
             : tone === 'caution' ? <TriangleAlert className="size-4" />
             : <CircleAlert className="size-4" />}
-          {tone === 'safe' ? `Below ${phase === 'trialWork' ? 'TWP' : 'SGA'}`
-            : tone === 'over' ? 'Over SGA'
-            : over ? 'TWP month used' : `Near ${phase === 'trialWork' ? 'TWP' : 'SGA'}`}
+          {tone === 'safe' ? `Below ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit`
+            : tone === 'over' ? 'Over monthly limit'
+            : over ? '1 TWP month used' : 'Close to limit'}
         </span>
       </div>
 
-      {/* What the figure above is worth. Under the number, not in a panel of
-          its own: precision is a property of this answer, and a card about
-          data quality would be one more section competing with the month. */}
       <PrecisionLine reading={precision} onFix={onFixStream} />
 
       {threshold ? (
         <p className="mt-6 text-lg font-semibold">
           {over
-            ? `${money(status.countable - threshold.amount)} over the ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit this month`
-            : `${money(room)} left before the ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit this month`}
+            ? `${money(status.countable - threshold.amount)} over your ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit ($${money(threshold.amount)}) this month`
+            : `${money(room)} left before reaching your ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit ($${money(threshold.amount)}) this month`}
         </p>
       ) : null}
 
       <div className="mt-6 border-t border-border pt-5">
         <p className="type-muted min-w-0">
           {phase === 'trialWork'
-            ? `TWP: ${twp.used} of ${TRIAL_MONTH_LIMIT} months used · ${twp.remaining} left`
-            : 'SGA applies · TWP complete'}
+            ? `Trial Work Period: ${twp.used} of ${TRIAL_MONTH_LIMIT} months used · ${twp.remaining} remaining`
+            : 'Substantial Gainful Activity (SGA) limit applies · 9 Trial Work months complete'}
         </p>
       </div>
 

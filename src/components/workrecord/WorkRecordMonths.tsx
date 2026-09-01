@@ -130,6 +130,7 @@ export function WorkRecordMonths({
           id="workrecord-months-year-total"
           label="Monthly-history year total"
           reason="The total repeats the headline and can hide a single risky TWP or SGA month."
+          certainty="sure"
           layout="workrecord"
         >
           <span className="wr-legend-item">

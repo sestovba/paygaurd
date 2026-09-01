@@ -1,13 +1,6 @@
 import { TrackerProvider, useTracker } from './state/TrackerProvider';
 import { hasMeaningfulData } from './domain/earnings';
 import { Onboarding } from './components/Onboarding';
-import { TrackerClassic } from './components/TrackerClassic';
-import { TrackerV2 } from './components/TrackerV2';
-import { TrackerV3 } from './components/TrackerV3';
-import { TrackerLedger } from './components/ledger/TrackerLedger';
-import { TrackerPayGuard } from './components/payguard/TrackerPayGuard';
-import { TrackerWorkRecord } from './components/workrecord/TrackerWorkRecord';
-import { TrackerCalc20 } from './components/calc20/TrackerCalc20';
 import { PayGuardShell } from './components/payguard/PayGuardShell';
 import { useAuth } from './auth/useAuth';
 import { SignInScreen } from './components/SignInScreen';
@@ -29,6 +22,30 @@ const REVIEW_HOST = import.meta.env.DEV
 
 const ReviewProvider = lazy(() => import('./review/ReviewProvider')
   .then((module) => ({ default: module.ReviewProvider })));
+
+/*
+ * One layout per chunk.
+ *
+ * Nine layouts were shipping in a single 494kB bundle so that one of them
+ * could render. On a Lifeline handset — a cheap Android on metered data,
+ * which is what a large share of this app's users are holding — that is a
+ * download and a parse of eight screens nobody asked for, before the ninth
+ * appears. Split, the browser fetches the shell and the one layout in use.
+ *
+ * The fallback is deliberately `null`: these chunks are small and local, the
+ * gap is a frame or two, and a spinner that flashes is worse than nothing.
+ */
+const LAYOUTS = {
+  classic: lazy(() => import('./components/TrackerClassic').then((m) => ({ default: m.TrackerClassic }))),
+  v2: lazy(() => import('./components/TrackerV2').then((m) => ({ default: m.TrackerV2 }))),
+  responsive: lazy(() => import('./components/TrackerV3').then((m) => ({ default: m.TrackerV3 }))),
+  ledger: lazy(() => import('./components/ledger/TrackerLedger').then((m) => ({ default: m.TrackerLedger }))),
+  payguard: lazy(() => import('./components/payguard/TrackerPayGuard').then((m) => ({ default: m.TrackerPayGuard }))),
+  workrecord: lazy(() => import('./components/workrecord/TrackerWorkRecord').then((m) => ({ default: m.TrackerWorkRecord }))),
+  horizon: lazy(() => import('./components/horizon/TrackerHorizon').then((m) => ({ default: m.TrackerHorizon }))),
+  pocket: lazy(() => import('./components/pocket/TrackerPocket').then((m) => ({ default: m.TrackerPocket }))),
+  calc20: lazy(() => import('./components/calc20/TrackerCalc20').then((m) => ({ default: m.TrackerCalc20 })))
+} as const;
 
 export default function App() {
   const auth = useAuth();
@@ -85,13 +102,12 @@ function Root({ session }: { session: Session | null }) {
       : <Onboarding />;
   }
 
-  const tracker = calc20 ? <TrackerCalc20 />
-    : ui.layout === 'classic' ? <TrackerClassic />
-      : ui.layout === 'v2' ? <TrackerV2 />
-        : ui.layout === 'ledger' ? <TrackerLedger />
-          : ui.layout === 'payguard' ? <TrackerPayGuard />
-            : ui.layout === 'workrecord' ? <TrackerWorkRecord />
-              : <TrackerV3 />;
+  const Layout = LAYOUTS[ui.layout] ?? LAYOUTS.responsive;
+  const tracker = (
+    <Suspense fallback={null}>
+      <Layout />
+    </Suspense>
+  );
 
   if (!REVIEW_HOST) return tracker;
 

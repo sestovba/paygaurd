@@ -29,7 +29,7 @@ export function MonthSheet({
   return (
     <Sheet
       title={formatMonth(month)}
-      eyebrow="Monthly entry"
+      eyebrow="Monthly earnings"
       onClose={onClose}
       variant={variant === 'inline' ? 'inline' : 'modal'}
       backLabel={variant === 'inline' ? backLabel : undefined}
@@ -40,7 +40,7 @@ export function MonthSheet({
       }>
         <span className="display-figure text-3xl">{money(status.countable)}</span>
         <span className="label-caps">
-          countable{phase === 'trialWork' ? ' · TWP month' : phase === 'sga' ? ' · SGA' : ''}
+          What Social Security counts{phase === 'trialWork' ? ' · TWP month' : phase === 'sga' ? ' · SGA' : ''}
         </span>
       </div>
 
@@ -55,7 +55,7 @@ export function MonthSheet({
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <Chip tone={stream.type === 'w2' ? 'good' : 'info'}>
-                      {stream.type === 'w2' ? 'W-2' : '1099'}
+                      {stream.type === 'w2' ? 'W-2 Job' : '1099 Work'}
                     </Chip>
                     <span className="truncate text-base font-semibold">{stream.name}</span>
                   </div>
@@ -74,7 +74,7 @@ export function MonthSheet({
                   <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2.5">
                     <div>
                       <p className="num text-base font-semibold">{money(countableFor(stream, month))}</p>
-                      <p className="type-muted text-sm">This month's share of the YTD total</p>
+                      <p className="type-muted text-sm">This month's share of your total earnings</p>
                     </div>
                     <button
                       type="button"
@@ -87,7 +87,7 @@ export function MonthSheet({
                 ) : (
                   <>
                     <label className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2.5">
-                      <span className="text-base font-medium">Whole year</span>
+                      <span className="text-base font-medium">Show all months for this job</span>
                       <Switch
                         checked={checked}
                         label={`Show every month for ${stream.name}`}
@@ -104,7 +104,7 @@ export function MonthSheet({
                               className="num field-input min-w-0 flex-1"
                               prefix="$"
                               value={stream.months[m]?.gross}
-                              placeholder="0"
+                              placeholder="Numbers only"
                               onCommit={(next) => updateMonthEntry(stream.id, m, { gross: next })}
                             />
                           </div>
@@ -112,12 +112,12 @@ export function MonthSheet({
                       </div>
                     ) : (
                       <label className="flex items-center gap-2">
-                        <span className="field-label">Gross</span>
+                        <span className="field-label">Pay before taxes (Gross)</span>
                         <NumericInput
                           className="num field-input min-w-0 flex-1"
                           prefix="$"
                           value={stream.months[month]?.gross}
-                          placeholder="0"
+                          placeholder="Numbers only"
                           onCommit={(next) => updateMonthEntry(stream.id, month, { gross: next })}
                         />
                       </label>
@@ -137,9 +137,7 @@ export function MonthSheet({
 
       {streams.length > 0 ? (
         <InfoNote>
-          Only Gross counts toward these thresholds. 1099 work is entered as
-          a YTD total on the job's own page, then split evenly across its
-          active months here.
+          Social Security counts Gross pay (the amount before taxes and deductions). Social Security counts your earnings in the month the paycheck was paid to you.
         </InfoNote>
       ) : null}
     </Sheet>

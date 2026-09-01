@@ -7,7 +7,7 @@ const DATA_KEY = 'pg-data-v1';
 const UI_KEY = 'pg-ui-v1';
 
 export type ThemePref = 'system' | 'light' | 'dark';
-export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord' | 'calc20';
+export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket';
 export type LedgerTheme = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
 
 /**

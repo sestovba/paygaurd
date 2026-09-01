@@ -3637,7 +3637,15 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 /* Lives in the banner now, right under the year/undo/notifications row —
  * a normal-flow block, not a viewport-fixed overlay, so it never covers
  * page content and never needs its own backdrop. */
+/* calc20 puts its toasts inside the header flow rather than on a fixed
+   plate at the bottom, which is where the shared base rule places them for
+   every other layout. Reset the position it inherits, keep the placement
+   this layout was designed around. */
 .pg-calc20 .toast-stack {
+  position: static;
+  transform: none;
+  width: min(380px, 100%);
+  pointer-events: auto;
   align-self: flex-end;
   display: flex;
   flex-direction: column;
@@ -6095,3 +6103,31 @@ html.pg-calc20, .pg-calc20 body, .pg-calc20 .app-shell {
   text-transform: uppercase;
   opacity: 0.55;
 }
+
+/* Precision — how far the figures can be trusted. The component is shared
+   with every other layout; only the paint is calc20's. */
+.calc20-precision { padding: 0.25rem 0.75rem 0.5rem; }
+
+.pg-calc20 .precision-line,
+.calc20-precision .precision-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--pg-fg-dim, #64748b);
+}
+.calc20-precision .precision-level {
+  flex: 0 0 auto;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.calc20-precision .precision-line[data-level='estimated'] { color: var(--pg-warn-text, #b45309); }
+.calc20-precision .precision-line[data-level='scheduled'] { color: var(--pg-info-text, #2563eb); }
+.calc20-precision .precision-line[data-level='exact'] { color: var(--pg-safe-text, #15803d); }

@@ -11,7 +11,7 @@ import { StatusSection } from './StatusSection';
 import { SettingsSheet } from './SettingsSheet';
 import { StreamSettingsSheet } from './StreamSettingsSheet';
 import { MonthSheet } from './MonthSheet';
-import { ToastStack } from './Toast';
+import { ToastStack } from '../ToastStack';
 import {
   CheckIcon, ChevronDownIcon, CollapseAllIcon, ExpandAllIcon,
   GridIcon, PlusIcon

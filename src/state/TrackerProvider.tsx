@@ -16,6 +16,14 @@ import type { Session } from '../auth/session';
 
 export type CloudSyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 
+/** One transient message. */
+export interface Toast {
+  id: number;
+  message: string;
+  /** Present when the action behind it can be undone from the toast. */
+  undo?: boolean;
+}
+
 interface TrackerContextValue {
   data: TrackerData;
   ui: UiState;
@@ -47,6 +55,18 @@ interface TrackerContextValue {
   /** Single-level-per-step undo across every mutator below (not reset/replace). */
   undoCount: number;
   undo: () => void;
+
+  /* Transient feedback.
+   *
+   * This lived only in calc20, so six of the seven layouts could delete a
+   * source or clear a year and say nothing at all. It belongs here, with the
+   * data it reports on, rather than in whichever layout happened to invent
+   * it — a confirmation is a property of the edit, not of the skin. */
+  toasts: Toast[];
+  /** `undoable` puts an Undo on the toast, which is the only place a
+   *  destructive edit is offered back before it scrolls out of mind. */
+  pushToast: (message: string, undoable?: boolean) => void;
+  dismissToast: (id: number) => void;
 
   /** True only for the allowlisted account — see state/cloudSync.ts. */
   canSync: boolean;
@@ -93,6 +113,25 @@ export function TrackerProvider({ children, session, onSignOut }: {
   const [ui, setUiState] = useState<UiState>(() => loadUi());
   const dataRef = useRef(data);
   dataRef.current = data;
+
+  /* Transient feedback, moved up from calc20 so every layout has it. Three
+     at a time and five seconds each: a stack that grows without bound is a
+     log, and a log is not feedback. */
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastId = useRef(0);
+
+  const pushToast = useCallback((message: string, undoable?: boolean) => {
+    if (!message) return;
+    toastId.current += 1;
+    const id = toastId.current;
+    setToasts((list) => [...list.slice(-2), { id, message, undo: undoable }]);
+    setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), 5000);
+  }, []);
+
+  const dismissToast = useCallback((id: number) => {
+    setToasts((list) => list.filter((t) => t.id !== id));
+  }, []);
+
 
   const HISTORY_LIMIT = 20;
   const [history, setHistory] = useState<TrackerData[]>([]);
@@ -214,8 +253,12 @@ export function TrackerProvider({ children, session, onSignOut }: {
 
   const removeStream = useCallback((id: string) => {
     snapshot();
+    // Named before it goes, because "Removed" is no help when you have three
+    // sources and cannot remember which one you had selected.
+    const name = dataRef.current.streams.find((s) => s.id === id)?.name;
     setData((current) => ({ ...current, streams: current.streams.filter((s) => s.id !== id) }));
-  }, [snapshot]);
+    pushToast(`${name ?? 'Source'} removed`, true);
+  }, [snapshot, pushToast]);
 
   const updateMonthEntry = useCallback((streamId: string, month: MonthKey, patch: Partial<MonthEntry>) => {
     snapshot();
@@ -309,12 +352,16 @@ export function TrackerProvider({ children, session, onSignOut }: {
       version: 1, streams: [], priorTrialMonths: [],
       twpAssessment: { state: 'unknown', basis: 'unconfirmed' }, irwe: {}, activity: []
     });
-  }, []);
+    // No undo offered: resetAll clears the history too, and an Undo that
+    // cannot undo is worse than none.
+    pushToast('Everything cleared');
+  }, [pushToast]);
 
   const replaceAll = useCallback((next: Partial<TrackerData>) => {
     setHistory([]);
     setData({ ...EMPTY_DATA, ...next });
-  }, []);
+    pushToast('Tracker imported');
+  }, [pushToast]);
 
   const signOut = useCallback(async () => {
     if (onSignOut) await onSignOut();
@@ -324,12 +371,14 @@ export function TrackerProvider({ children, session, onSignOut }: {
     data, ui, setUi, addStream, updateStream, removeStream, updateMonthEntry, updateMonthEntries,
     addPaycheck, removePaycheck, setTwpAssessment, setPriorTrialMonths, setIrwe, commit, resetAll, replaceAll,
     undoCount: history.length, undo,
+    toasts, pushToast, dismissToast,
     canSync: allowed, cloudSyncEnabled: ui.cloudSyncEnabled, cloudSyncStatus, setCloudSyncEnabled,
     session: session ?? null, signOut
   }), [
     data, ui, setUi, addStream, updateStream, removeStream, updateMonthEntry, updateMonthEntries,
     addPaycheck, removePaycheck, setTwpAssessment, setPriorTrialMonths, setIrwe, commit, resetAll, replaceAll,
-    history.length, undo, allowed, cloudSyncStatus, setCloudSyncEnabled, session, signOut
+    history.length, undo, toasts, pushToast, dismissToast,
+    allowed, cloudSyncStatus, setCloudSyncEnabled, session, signOut
   ]);
 
   return <TrackerContext.Provider value={value}>{children}</TrackerContext.Provider>;

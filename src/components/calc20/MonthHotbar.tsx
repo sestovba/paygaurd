@@ -6,46 +6,17 @@
 
 import type { MonthKey } from '../../domain/types';
 import { useTracker } from './state';
-import { money } from '../../domain/format';
 import { displayMonths, formatMonth, shortMonthName } from '../../domain/months';
-import { monthStatus, nearLimit } from '../../domain/earnings';
-import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
-import { benefitPhase } from '../../domain/trialWork';
+import { attentionFlags } from '../../domain/attention';
 import { WarningIcon } from './Icons';
-
-interface Flag {
-  month: MonthKey;
-  text: string;
-  kind: 'over' | 'near' | 'pay';
-}
 
 export function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
-  const phase = benefitPhase(data, `${ui.year}-12`);
-  const extraPay = extraPaycheckMonths(data.streams, ui.year);
-
-  const flags: Flag[] = [];
-  for (const month of displayMonths(ui.year, ui.hideFuture)) {
-    const status = monthStatus(data, month);
-    const extra = extraPay.get(month);
-
-    if (phase === 'sga' && status.overSga) {
-      flags.push({ month, text: 'over SGA', kind: 'over' });
-    } else if (phase === 'trialWork' && status.isServiceMonth) {
-      flags.push({ month, text: 'TWP used', kind: 'over' });
-    } else {
-      const near = nearLimit(status, phase);
-      if (near) {
-        flags.push({
-          month,
-          text: money(near.room) + (near.kind === 'trial' ? ' to TWP' : ' to SGA'),
-          kind: 'near'
-        });
-        continue;
-      }
-    }
-    if (extra) flags.push({ month, text: extraPaycheckLabel(extra.counts), kind: 'pay' });
-  }
+  // The rule is shared with the ledger, payguard and workrecord — see
+  // src/domain/attention.ts. This file used to carry its own copy, which
+  // resolved the benefit phase once at year end; a TWP completing in June
+  // made every month after it judged against the wrong limit.
+  const flags = attentionFlags(data, displayMonths(ui.year, ui.hideFuture));
 
   if (!flags.length) return null;
 

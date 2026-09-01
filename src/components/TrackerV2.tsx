@@ -16,6 +16,7 @@ import { VerifyCompleteSheet } from './VerifyCompleteSheet';
 import { StreamsPanel } from './StreamsPanel';
 import { StatusPage } from './StatusPage';
 import { SettingsPanel } from './SettingsPanel';
+import { ToastStack } from './ToastStack';
 import { NotificationsBell } from './NotificationsBell';
 import { YearTotal } from './YearTotal';
 import { Sidebar, TabBar } from './PageNav';
@@ -183,6 +184,7 @@ export function TrackerV2() {
                 id="v2-year-history"
                 label="Full-year history"
                 reason="The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months."
+                certainty="hunch"
                 layout="v2"
               >
                 <div className="flex flex-col gap-3">
@@ -221,6 +223,7 @@ export function TrackerV2() {
       </div>
 
       <TabBar page={page} onNavigate={navigate} />
+      <ToastStack />
     </div>
   );
 }

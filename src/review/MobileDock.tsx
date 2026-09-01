@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  AlignLeft, Archive, ChevronUp, Columns2, EyeOff, ListChecks,
+  AlignLeft, ChevronUp, Columns2, ListChecks,
   MessageSquarePlus, MousePointerSquareDashed, ScanSearch, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
@@ -25,10 +25,6 @@ export function MobileDock({
   onMin,
   toolsOpen,
   onTools,
-  commentsOpen,
-  onComments,
-  commentsCount,
-  commentsList,
   order,
   onOrder,
   mode,
@@ -45,14 +41,6 @@ export function MobileDock({
   journalCount,
   journalNew,
   journal,
-  stashOpen,
-  onStash,
-  stashCount,
-  shelves,
-  hiddenOpen,
-  onHidden,
-  hiddenCount,
-  hiddenList
 }: {
   /** Open means the dock is showing its contents. Shut, the tab is still
    *  there — on a phone it is the only way into the console. */
@@ -66,10 +54,6 @@ export function MobileDock({
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
   /** Dedicated comments section */
-  commentsOpen: boolean;
-  onComments: (next: boolean) => void;
-  commentsCount: number;
-  commentsList: ReactNode;
   /** The sections, in the order they are stacked. Dragged by their grips
    *  and kept by the console, so the dock stays arranged the way you left
    *  it rather than the way it shipped. */
@@ -96,16 +80,8 @@ export function MobileDock({
   /** The journal's contents, built by the console — the same thing the
    *  desktop window shows, in a fold instead of a frame. */
   journal: ReactNode;
-  stashOpen: boolean;
-  onStash: (next: boolean) => void;
-  stashCount: number;
-  shelves: ReactNode;
   /** Switched off on the page. Its own room — the archive is for things
    *  carried away, this is for lights left off. */
-  hiddenOpen: boolean;
-  onHidden: (next: boolean) => void;
-  hiddenCount: number;
-  hiddenList: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   /** The journal filling the dock. Reading a thread in a 42vh slot on a
@@ -198,22 +174,6 @@ export function MobileDock({
       </Fold>
     ),
 
-    comments: (
-      <Fold
-        key="comments"
-        section="comments"
-        onGrip={sort.grip('comments')}
-        dragging={sort.dragging === 'comments'}
-        icon={MessageSquarePlus}
-        name="My Comments"
-        tone="paper"
-        count={commentsCount}
-        open={commentsOpen}
-        onToggle={() => onComments(!commentsOpen)}
-      >
-        {commentsList}
-      </Fold>
-    ),
 
     journal: (
       <Fold
@@ -222,7 +182,7 @@ export function MobileDock({
         onGrip={sort.grip('journal')}
         dragging={sort.dragging === 'journal'}
         icon={ListChecks}
-        name="Journal"
+        name="Notes"
         tone="paper"
         count={journalCount}
         news={journalNew}
@@ -235,39 +195,7 @@ export function MobileDock({
       </Fold>
     ),
 
-    hidden: (
-      <Fold
-        key="hidden"
-        section="hidden"
-        onGrip={sort.grip('hidden')}
-        dragging={sort.dragging === 'hidden'}
-        icon={EyeOff}
-        name="Hidden"
-        tone="glass"
-        count={hiddenCount}
-        open={hiddenOpen}
-        onToggle={() => onHidden(!hiddenOpen)}
-      >
-        {hiddenList}
-      </Fold>
-    ),
 
-    archive: (
-      <Fold
-        key="archive"
-        section="archive"
-        onGrip={sort.grip('archive')}
-        dragging={sort.dragging === 'archive'}
-        icon={Archive}
-        name="Archive"
-        tone="glass"
-        count={stashCount}
-        open={stashOpen}
-        onToggle={() => onStash(!stashOpen)}
-      >
-        {shelves}
-      </Fold>
-    )
   };
 
   return (
@@ -287,8 +215,6 @@ export function MobileDock({
             if (!shown) { setMin(false); setToolsOpen(true); return; }
             setToolsOpen(false);
             onJournal(false);
-            onStash(false);
-            onHidden(false);
             setJournalBig(false);
             setMin(true);
           }}

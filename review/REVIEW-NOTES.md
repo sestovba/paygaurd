@@ -2,27 +2,82 @@
 
 Written by the in-app review console (dev/localhost only — ⌘R, or the
 button bottom right). Do not hand-edit while the app is open: the app
-overwrites this file. Every note sits in a lane, and either side can
-move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),
-`"commented"` (`[!]` — the reviewer has said what they want and it is
-your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`
-— acted on) or `"parked"` (`[-]` — deliberately not now).
+overwrites this file.
 
-ARCHIVED means carried onto a shelf in the app; the code is untouched and
-it can be dragged back. HIDDEN means switched off with the eye — also
-untouched code, and a question ("is the screen better without this?")
-rather than an answer. REMOVE/KEEP/MOVE are the decisions to act on.
-A `Kind:` line carries the reviewer's own tags (cut, reword, spacing…) —
-the prose says what to change, the tags say what sort of change it is.
-The console's own housekeeping — a stash's name, colour or folded state —
-is deliberately not in here; every entry below is something to act on.
+One state per note, in `"status"`. Exactly one is true at a time, and each
+belongs to a group, which is whose move it is:
+
+| State | Group | Means |
+|---|---|---|
+| `new` | Yours | Not looked at yet. |
+| `needsYou` | Yours | Looked at; the reviewer says what they want. |
+| `trial` | Yours | Off the page while they see whether they miss it. |
+| `sent` | **Claude** | Handed over. Your move. |
+| `answered` | Yours | Claude replied; the reviewer confirms. |
+| `done` | Closed | Acted on in the code, and confirmed. |
+| `later` | Closed | Deliberately deferred. |
+| `wontDo` | Closed | Looked at and kept as it is. |
+
+**`done` is never taken at face value.** It is a claim about the code, and
+three things write this file. An item that still owes a change and has no
+reply saying it was made is read back as `sent`, whatever the word says.
+
+`certainty` (sure / likely / hunch) is how confident the proposal was.
+`effort` (small / medium / large) is how big the change is. `found` is set
+by the dev server on every write: whether the element is still in the
+source. HIDDEN means switched off on the page to see whether it is missed
+— a question, not an answer, and the code is untouched.
 
 To answer a note, append to its `thread` array in review-notes.json with
-`{"from":"claude","text":"…","at":"<ISO>"}` and bump that note's
+`{"from":"claude","text":"…","at":"<ISO>"}`, set its `"status"`, and bump
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
-49 note(s) · 3 to delete · 1 parked · 1 A/B pick(s)
-Updated 2026-09-01 06:48
+## Owed to Claude
+
+Sorted by certainty then size — the checkable and contained first.
+
+- **August countable earnings** — payguard
+  `src/components/payguard/TrackerPayGuard.tsx:234`
+  > This whole hero says three things where one would do — show the month, the limit, and the room left.
+- **Income sources** — payguard
+  `src/components/payguard/TrackerPayGuard.tsx:375`
+- **Annual income chart** — payguard
+  `src/components/payguard/TrackerPayGuard.tsx:300`
+  > Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it.
+- **Full monthly analysis** — payguard
+  `src/components/payguard/PayGuardAnalysis.tsx (near line 219, unverified)`
+  > This is the most useful thing on the layout — it has the month, the countable figure, the status and the by-hours column. It sits below a chart and two duplicate stat rows. It should be what you land on.
+- **Recent activity log** — responsive
+  `src/components/TrackerV3.tsx:925`
+  > What you changed is not what you owe. Useful for trusting the record — which matters — but it is a subpage, not a section on the screen where you check whether you are over.
+- **Annual total on the overview** — responsive
+  `src/components/TrackerV3.tsx:401`
+  > Same as the ledger's: no limit is annual. Below the month grid.
+- **Full-year month grid** — responsive
+  `src/components/TrackerV3.tsx:392`
+  > The right thing in the right place. It would be the strongest surface in the product if each cell said which of the three states it is in — under TWP, TWP month used, at or over SGA — and marked the 3- and 5-paycheck months before they happen rather than after.
+- **Onboarding does not ask for the payday** — payguard
+  `src/components/Onboarding.tsx (near line 23, unverified)`
+  > Onboarding collects a job and an amount. Without a payday and a frequency the app cannot name a single 3- or 5-paycheck month, which is most of what it is for. Those two fields are the difference between general advice and a calendar, and they should be asked for in the first minute — with the reason attached.
+- **Annual income chart** — ledger
+  `src/components/ledger/TrackerLedger.tsx:290`
+  > Do what you think is best I trust your judgement
+- **New job W-2** — responsive
+  `src/components/StreamsPanel.tsx (near line 56, unverified)`
+  > testing
+- **Switch to dark theme** — responsive
+  `src/components/TrackerV3.tsx (near line 223, unverified)`
+
+## Not anchored to anything
+
+These carry a comment but nothing that identifies an element — no file,
+no text, no path. Nothing can be done with them until they point at
+something. Kept here so they are not lost.
+
+- right tray · 2 items — "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
+
+49 note(s) · 11 to delete · 0 parked · 1 A/B pick(s)
+Updated 2026-09-01 08:51
 
 ## Layout: classic
 
@@ -36,17 +91,21 @@ Updated 2026-09-01 06:48
 - [x] **COMMENT — Annual total**
   - Needs: "No limit is annual. Below the month grid."
   - Kind: move
-  - Source: src/components/TrackerClassic.tsx:112
+  - Source: src/components/TrackerClassic.tsx:113
+  - Section id: classic-year-total
+  - Component: YearTotal › TrackerClassic › Root › TrackerProvider
+  - Text: "2026 total, all sources 1 active source $12,838 88% of Trial Work Period threshold, annualized"
+  - DOM: div#root > div > main > div > div:nth-of-type(3) > section
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Confirmed YearTotal positioned below MonthGrid."
 
 ## Layout: ledger
 
-- [x] **HIDDEN — Average active month**
+- [x] **REMOVE — Average active month**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: An average is safe-looking by construction: it averages away the 3- and 5-paycheck months that cause the problem. This is the one stat on the screen that can actively mislead.
+  - I propose cutting it: An average is safe-looking by construction: it averages away the 3- and 5-paycheck months that cause the problem. This is the one stat on the screen that can actively mislead.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 329, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -56,10 +115,11 @@ Updated 2026-09-01 06:48
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 99, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Done. The rule for "which months need you" now lives in one place — src/domain/attention.ts — and every layout draws it. A month gets flagged for crossing a limit, being close enough that coasting is not safe, or carrying a third/fifth paycheck. A clean year renders nothing, so the strip appearing is itself the signal. On the ledger it is now a NEEDS ATTENTION band above the stat strip, so the extra-paycheck month leads the page instead of being a cell in the analysis table. Verified with a weekly schedule: it reads "OCT · 5 checks"."
 - [x] **UNSURE — Four-palette switcher**
   - Needs: "Four palettes in the header of a benefits tracker. If they stay at all they belong in Settings — the header is where the year and the current phase should be."
   - Kind: move
-  - I proposed cutting it because: Four colour schemes in the working toolbar; the same control already lives in Settings.
+  - I propose cutting it: Four colour schemes in the working toolbar; the same control already lives in Settings.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 274, unverified)
   - Section id: ledger-palette-switcher
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -71,8 +131,8 @@ Updated 2026-09-01 06:48
   - Claude replied: "Moved 4-palette switcher to Settings Panel and removed from header tools."
 - [x] **DISMISSED (not doing this) — Scroll-to-top button**
   - Needs: "on IOS I would agree that theres a shortcut to go up quickly on android there isn't I defend this choice, not sure about desktop there isn't much scrolling on desktop, but hiding for desktop why? So leave it."
-  - I proposed cutting it because: Duplicates what the scrollbar and Home key already do.
-  - Source: src/components/ledger/TrackerLedger.tsx:168
+  - I propose cutting it: Duplicates what the scrollbar and Home key already do.
+  - Source: src/components/ledger/TrackerLedger.tsx:175
   - Section id: ledger-scroll-top
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "TOP Scroll-to-top button"
@@ -82,7 +142,7 @@ Updated 2026-09-01 06:48
   - Claude replied: "Preserved scroll-to-top button per your preference."
 - [x] **COMMENT — Notice counter**
   - Needs: "Honestly this fine, it's just incomplete this is a toast icon section where notifications hide. Lets me the real thing like in other layouts, we should standardize this find the most complete version and crosspolinate into here"
-  - I proposed cutting it because: A count with no way to read the notices — it warns without saying what to do.
+  - I propose cutting it: A count with no way to read the notices — it warns without saying what to do.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 194, unverified)
   - Section id: ledger-notice-count
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -93,8 +153,8 @@ Updated 2026-09-01 06:48
   - Claude replied: "Replaced static notice counter badge with interactive NotificationsBell component."
 - [x] **UNSURE — Income-source count**
   - Kind: remove
-  - I proposed cutting it because: The job tabs directly below already show every source by name.
-  - Source: src/components/ledger/TrackerLedger.tsx:389
+  - I propose cutting it: The job tabs directly below already show every source by name.
+  - Source: src/components/ledger/TrackerLedger.tsx:415
   - Section id: ledger-stat-sources
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "INCOME SOURCES 1 1 W2 · 0 SE Income-source count"
@@ -106,7 +166,7 @@ Updated 2026-09-01 06:48
   - Needs: "True and useful at tax time, but neither limit is annual. Below the monthly picture, not above it."
   - Kind: move
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit.
+  - I propose cutting it: TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 311, unverified)
   - Section id: ledger-stat-ytd
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -115,10 +175,10 @@ Updated 2026-09-01 06:48
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Removed YTD countable total from top stat strip to focus on monthly limits."
-- [x] **HIDDEN — Repeated summary strip**
+- [x] **REMOVE — Repeated summary strip**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: YTD Total Countable, Trial Work Period and Months at or over SGA appear again at the foot of the analysis, having already been stated at the top of the page.
+  - I propose cutting it: YTD Total Countable, Trial Work Period and Months at or over SGA appear again at the foot of the analysis, having already been stated at the top of the page.
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 224, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -132,7 +192,7 @@ Updated 2026-09-01 06:48
   - Claude replied: "Streamlined multi-view switcher with Table as default view."
 - [x] **REMOVE — Header subtitle**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: "Financial Analysis Ledger" names the skin, not the user's TWP or SGA position.
+  - I propose cutting it: "Financial Analysis Ledger" names the skin, not the user's TWP or SGA position.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 183, unverified)
   - Section id: ledger-header-subtitle
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -145,17 +205,17 @@ Updated 2026-09-01 06:48
 - [x] **UNSURE — Annual income chart**
   - Needs: "Do what you think is best I trust your judgement"
   - Kind: confusing
-  - I proposed cutting it because: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
-  - Source: src/components/ledger/TrackerLedger.tsx:265
+  - I propose cutting it: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
+  - Source: src/components/ledger/TrackerLedger.tsx:290
   - Section id: ledger-year-chart
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "2026 COUNTABLE INCOME BY MONTH W2 Self-Emp ceiling $2,113 SGA $1,690 TWP $1,210 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC Annual incom"
   - DOM: div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 05:29
-- [x] **HIDDEN — Repeated summary strip**
+- [ ] **HIDDEN — Repeated summary strip**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: All four tiles repeat the header stats a screen above — same YTD, same TWP count, same SGA count.
+  - I propose cutting it: All four tiles repeat the header stats a screen above — same YTD, same TWP count, same SGA count.
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 241, unverified)
   - Section id: ledger-analysis-summary
   - Component: LedgerAnalysis › TrackerLedger › Root › TrackerProvider
@@ -164,9 +224,9 @@ Updated 2026-09-01 06:48
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 05:30
   - Claude replied: "Removed duplicated summary strip from Ledger analysis."
-- [x] **HIDDEN — Income Sources**
+- [ ] **HIDDEN — Income Sources**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - Source: src/components/ledger/TrackerLedger.tsx:389
+  - Source: src/components/ledger/TrackerLedger.tsx:415
   - Section id: ledger-stat-sources
   - Component: StatTile › TrackerLedger › Root › TrackerProvider
   - Text: "INCOME SOURCES 1 1 W2 · 0 SE"
@@ -178,29 +238,15 @@ Updated 2026-09-01 06:48
 
 - [x] **COMMENT — August countable earnings**
   - Needs: "This whole hero says three things where one would do — show the month, the limit, and the room left."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:228
+  - Source: src/components/payguard/TrackerPayGuard.tsx:234
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Page: Jobs
   - Text: "AUGUST COUNTABLE EARNINGS BENEFIT PHASE NEEDS REVIEW Current countable income $2,090 this month YTD THROUGH AUGUST $15,685 BENEFIT PHASE Rev"
   - DOM: main#pg-main > section.pg-status-hero
   - Origin: picked by the user
   - Noted: 2026-08-31 02:24
-- [x] **GROUP — right tray · 2 items**
-  - Needs: "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
-  - Applies to: Annual income chart · Duplicate overview statistics
-  - Origin: picked by the user
-  - Noted: 2026-08-31 02:44
-- [x] **ARCHIVED — August countable earnings**
-  - Archived on the left shelf (off the page in the app, still in the code)
-  - Source: src/components/payguard/TrackerPayGuard.tsx:228
-  - Component: TrackerPayGuard › Root › TrackerProvider › App
-  - Page: Jobs
-  - Text: "AUGUST COUNTABLE EARNINGS $310 ABOVE TWP Current countable income $1,520 this month YTD THROUGH AUGUST $8,891 TWP MONTHLY THRESHOLD $1,210 B"
-  - DOM: main#pg-main > section.pg-status-hero
-  - Origin: picked by the user
-  - Noted: 2026-08-31 03:04
 - [x] **REMOVE — Income sources**
-  - Source: src/components/payguard/TrackerPayGuard.tsx:339
+  - Source: src/components/payguard/TrackerPayGuard.tsx:375
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Text: "Add Job"
   - DOM: div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs
@@ -209,7 +255,7 @@ Updated 2026-09-01 06:48
 - [x] **COMMENT — Header import / export**
   - Needs: "Housekeeping in the highest-value strip on the screen. Settings already exists two icons along and is where anyone would look."
   - Kind: move
-  - I proposed cutting it because: These maintenance actions already belong in Settings and compete with live benefit signals.
+  - I propose cutting it: These maintenance actions already belong in Settings and compete with live benefit signals.
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 259, unverified)
   - Section id: payguard-header-transfer
   - Component: TrackerPayGuard › Root › TrackerProvider › App
@@ -220,21 +266,26 @@ Updated 2026-09-01 06:48
   - Claude replied: "Moved Import/Export actions to Settings Panel and removed from header."
 - [x] **COMMENT — Annual income chart**
   - Needs: "Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:274
+  - Source: src/components/payguard/TrackerPayGuard.tsx:300
+  - Section id: payguard-year-chart
+  - Component: PayGuardChart › TrackerPayGuard › Root › TrackerProvider
+  - Page: Jobs
+  - Text: "2026 countable income by monthSGA threshold $1,690 per month. Trial Work Period threshold $1,210 per month. W-2 1099Peak: $0$2,000$1,500$1,0"
+  - DOM: div#pg-income-chart
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
-- [x] **HIDDEN — Duplicate overview statistics**
+- [x] **REMOVE — Duplicate overview statistics**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: YTD Countable, Trial Work Period and Months Over SGA repeat the status block directly above them. Active Monthly Avg is worse than redundant: an average smooths away the 3- and 5-paycheck months, which is precisely the signal the product exists to raise.
+  - I propose cutting it: YTD Countable, Trial Work Period and Months Over SGA repeat the status block directly above them. Active Monthly Avg is worse than redundant: an average smooths away the 3- and 5-paycheck months, which is precisely the signal the product exists to raise.
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 339, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Removed duplicate overview statistics block."
-- [x] **HIDDEN — YTD total in the status hero**
+- [x] **REMOVE — YTD total in the status hero**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: Both limits are monthly. A year-to-date total cannot be over or under $1,210 or $1,690 — it is a number with no threshold attached, sitting in the one place on the screen reserved for the answer to 'am I safe this month'.
+  - I propose cutting it: Both limits are monthly. A year-to-date total cannot be over or under $1,210 or $1,690 — it is a number with no threshold attached, sitting in the one place on the screen reserved for the answer to 'am I safe this month'.
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 301, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -242,6 +293,11 @@ Updated 2026-09-01 06:48
 - [x] **COMMENT — Full monthly analysis**
   - Needs: "This is the most useful thing on the layout — it has the month, the countable figure, the status and the by-hours column. It sits below a chart and two duplicate stat rows. It should be what you land on."
   - Source: src/components/payguard/PayGuardAnalysis.tsx (near line 219, unverified)
+  - Section id: payguard-monthly-analysis
+  - Component: PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider
+  - Page: Jobs
+  - Text: "Monthly work-limit status Confirm your TWP status to enable threshold warnings.CardsTableActivityJan—No incomeFeb—No incomeMar—No incomeApr—"
+  - DOM: div#pg-analysis > div > div
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
 - [x] **COMMENT — No precision gauge anywhere**
@@ -251,6 +307,7 @@ Updated 2026-09-01 06:48
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "We have this more in the classic theme kind of as reference maybe even derivative of classic"
   - Claude replied: "Integrated PrecisionLine into SafetyHero to surface data precision and missing payday gaps."
+  - Claude replied: "Done, and on all seven layouts now — which was the missing half. The reading itself already existed (src/domain/precision.ts grades every month Estimated / Scheduled / Exact and names the one gap holding it back), but PrecisionLine was only rendered inside SafetyHero, so classic, v2 and v3 had it and ledger, payguard, workrecord and calc20 did not. Same component in all seven now, painted per family. It reads as a line under the figure rather than a panel, because precision qualifies a specific claim at the moment you read it — a "data quality" card would be one more section competing with the month. It names one gap, not all of them, with a button on it: on payguard the button opens the source that is holding the reading back. Verified live: with a weekly schedule and no logged checks it reads "Scheduled — Cafe shift is missing this month’s actual paychecks, so the total is projected from the schedule, not counted." That is exactly the "basic help now, most accurate once we have everything" ladder."
 - [x] **COMMENT — Pace warnings computed and never shown**
   - Needs: "paceWarning() works out that a stream is tracking to cross the threshold before the year ends, and the only place it surfaces is inside StreamSheet — a sheet you have to open, per source. The warning that matters is 'at this pace you cross SGA in November', and it should be on the first screen of every layout. This is the single largest gap between what the domain layer knows and what a user is told."
   - Source: src/domain/paySchedule.ts (near line 235, unverified)
@@ -262,6 +319,7 @@ Updated 2026-09-01 06:48
   - Source: src/components/payguard/PayGuardAnalysis.tsx (near line 238, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Done. The rule for "which months need you" now lives in one place — src/domain/attention.ts — and every layout draws it. A month gets flagged for crossing a limit, being close enough that coasting is not safe, or carrying a third/fifth paycheck. A clean year renders nothing, so the strip appearing is itself the signal. On payguard it sits directly under the status hero — the first thing after "am I safe this month" is "which months are not". Verified: "OCT · 5 checks"."
 - [x] **UNSURE — Job view controls**
   - Needs: "View arrangement is a preference, not a decision about your benefits. It belongs in Settings or behind the section's own menu."
   - Kind: move
@@ -296,10 +354,10 @@ Updated 2026-09-01 06:48
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Added 1099 hours input and 80-hour TWP threshold rule explanation to StreamSheet."
-- [x] **HIDDEN — Workspace progress**
+- [x] **REMOVE — Workspace progress**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: Progress through the app's own screens, not progress against a limit. The only progress worth a bar here is 9 TWP months, and TrialMeter already draws it.
+  - I propose cutting it: Progress through the app's own screens, not progress against a limit. The only progress worth a bar here is 9 TWP months, and TrialMeter already draws it.
   - Source: src/components/TrackerV3.tsx (near line 585, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -314,21 +372,21 @@ Updated 2026-09-01 06:48
   - Claude replied: "Removed interface helper text box from sidebar."
 - [-] **COMMENT — Three-step tutorial**
   - Kind: remove
-  - I proposed cutting it because: Three steps to explain a form with four fields, shown every time. The payday and frequency fields are the ones that need explaining, and they need it in the field, not before it.
-  - Source: src/components/TrackerV3.tsx:812
+  - I propose cutting it: Three steps to explain a form with four fields, shown every time. The payday and frequency fields are the ones that need explaining, and they need it in the field, not before it.
+  - Source: src/components/TrackerV3.tsx:814
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "I cant see it, I am not sure what is being talked about. I cant take action on what I dont know"
 - [x] **COMMENT — Recent activity log**
   - Needs: "What you changed is not what you owe. Useful for trusting the record — which matters — but it is a subpage, not a section on the screen where you check whether you are over."
   - Kind: move
-  - Source: src/components/TrackerV3.tsx:922
+  - Source: src/components/TrackerV3.tsx:925
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
-- [x] **HIDDEN — Duplicate income sources**
+- [x] **REMOVE — Duplicate income sources**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: The sources list already has a page of its own. Two lists of the same thing means one of them is stale the moment you edit.
+  - I propose cutting it: The sources list already has a page of its own. Two lists of the same thing means one of them is stale the moment you edit.
   - Source: src/components/TrackerV3.tsx (near line 398, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -336,18 +394,24 @@ Updated 2026-09-01 06:48
 - [x] **COMMENT — Annual total on the overview**
   - Needs: "Same as the ledger's: no limit is annual. Below the month grid."
   - Kind: move
-  - Source: src/components/TrackerV3.tsx:399
+  - Source: src/components/TrackerV3.tsx:401
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
 - [x] **COMMENT — Full-year month grid**
   - Needs: "The right thing in the right place. It would be the strongest surface in the product if each cell said which of the three states it is in — under TWP, TWP month used, at or over SGA — and marked the 3- and 5-paycheck months before they happen rather than after."
-  - Source: src/components/TrackerV3.tsx:390
+  - Source: src/components/TrackerV3.tsx:392
+  - Section id: v3-overview-month-grid
+  - Component: RootPane › TrackerV3 › Root › TrackerProvider
+  - Page: Overview
+  - Text: "Monthly countable income Hide future SEP — AUG — JUL — JUN — MAY — APR — MAR — FEB — JAN —"
+  - DOM: div#root > div > div > main > section.v3-root-pane > div > div:nth-of-type(2) > div:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Reviewer replied: "Yeah I agree"
 - [x] **COMMENT — Numbered workspace trail**
   - Needs: "We need to redesign this as a breadcrumb trail only so the user can trace back their steps"
-  - I proposed cutting it because: The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.
-  - Source: src/components/TrackerV3.tsx:169
+  - I propose cutting it: The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.
+  - Source: src/components/TrackerV3.tsx:170
   - Section id: v3-journey-trail
   - Component: TrackerV3 › Root › TrackerProvider › App
   - Page: Overview
@@ -356,6 +420,22 @@ Updated 2026-09-01 06:48
   - Origin: picked by the user
   - Noted: 2026-09-01 06:01
   - Claude replied: "Redesigned numbered workspace trail into a clean breadcrumb navigation trail."
+- [!] **COMMENT — New job W-2**
+  - Needs: "testing"
+  - Source: src/components/StreamsPanel.tsx (near line 56, unverified)
+  - Component: StreamsPanel › RootPane › TrackerV3 › Root
+  - Page: Income
+  - Text: "New job W-2"
+  - DOM: main > section > div:nth-of-type(2) > section > div:nth-of-type(1) > ul > li:nth-of-type(2) > button
+  - Origin: picked by the user
+  - Noted: 2026-09-01 07:00
+- [ ] **REMOVE — Switch to dark theme**
+  - Source: src/components/TrackerV3.tsx (near line 223, unverified)
+  - Component: TrackerV3 › Root › TrackerProvider › App
+  - Page: Overview
+  - DOM: div#root > div:nth-of-type(1) > div > header > div:nth-of-type(1) > button:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 08:08
 
 ## Layout: v2
 
@@ -374,7 +454,7 @@ Updated 2026-09-01 06:48
   - Needs: "Appearance in the header of every layout. Settings."
   - Kind: move
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: Light/dark already lives in Settings; in the header it takes space from the year and the alerts.
+  - I propose cutting it: Light/dark already lives in Settings; in the header it takes space from the year and the alerts.
   - Source: src/components/TrackerV2.tsx (near line 163, unverified)
   - Section id: v2-theme-toggle
   - Component: TrackerV2 › Root › TrackerProvider › App
@@ -385,18 +465,18 @@ Updated 2026-09-01 06:48
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "yes"
   - Claude replied: "Moved theme toggle to Settings Panel and removed from V2 header."
-- [x] **HIDDEN — Income page intro**
+- [x] **REMOVE — Income page intro**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I proposed cutting it because: Prose above a list that explains what the list is. The heading already does that.
+  - I propose cutting it: Prose above a list that explains what the list is. The heading already does that.
   - Source: src/components/TrackerV2.tsx (near line 208, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Removed redundant introductory text from the Income page."
 - [x] **COMMENT — Full-year history**
   - Needs: "Worth keeping, but a year of history answers 'what happened'. The product's question is 'what is about to happen' — this needs the coming months in it, marked with their paycheck counts."
-  - I proposed cutting it because: The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months.
-  - Source: src/components/TrackerV2.tsx:183
+  - I propose cutting it: The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months.
+  - Source: src/components/TrackerV2.tsx:184
   - Section id: v2-year-history
   - Component: TrackerV2 › Root › TrackerProvider › App
   - Page: Overview
@@ -405,7 +485,7 @@ Updated 2026-09-01 06:48
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Maintained full-year history with upcoming month highlights and extra paycheck indicators."
-- [x] **HIDDEN — Add or edit W-2 and 1099 income.**
+- [ ] **HIDDEN — Add or edit W-2 and 1099 income.**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - Source: src/components/TrackerV2.tsx (near line 240, unverified)
   - Section id: v2-income-page-intro
@@ -420,14 +500,14 @@ Updated 2026-09-01 06:48
 
 - [x] **UNSURE — Repeated TWP band**
   - Kind: remove
-  - I proposed cutting it because: The phase is stated in the status section and again in a band across the months. One of them is enough, and the one attached to the months is the more useful.
+  - I propose cutting it: The phase is stated in the status section and again in a band across the months. One of them is enough, and the one attached to the months is the more useful.
   - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 308, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Removed duplicate TWP phase band."
 - [x] **COMMENT — Repeated SGA band**
   - Kind: remove
-  - I proposed cutting it because: "SGA applies · TWP complete" appears twice on one screen.
+  - I propose cutting it: "SGA applies · TWP complete" appears twice on one screen.
   - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 322, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -444,3 +524,4 @@ Updated 2026-09-01 06:48
   - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 545, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Done, and taken up on the other layouts as you asked. The workrecord strip was already right; what it lacked was company. Its flag logic moved into src/domain/attention.ts and workrecord, ledger and payguard now all render it (calc20 already had its own copy of the same idea). One correctness change came out of sharing it: the phase is resolved per month rather than once at year end, so a TWP completing mid-year no longer mis-judges the months after it — the two old copies disagreed on exactly that."

@@ -42,7 +42,13 @@ export function safeQuery(selector?: string): HTMLElement | null {
 export function applyStowAttributes(
   notes: ReviewNotes,
   layout: LayoutMode,
-  reveal: boolean
+  reveal: boolean,
+  /** One note to reveal whatever the mode — the element Locate is pointing
+   *  at. Pointing at something and leaving it invisible is the failure this
+   *  argument exists to stop: most notes in a mature review are off the page,
+   *  so "Locate" appeared to do nothing at all unless the audit happened to
+   *  be open. */
+  peekId?: string | null
 ): void {
   document.querySelectorAll('[data-review-stowed]').forEach((el) => {
     el.removeAttribute('data-review-stowed');
@@ -56,7 +62,7 @@ export function applyStowAttributes(
     if (!byStow && !isHidden(note)) continue;
     if (note.anchor.layout !== layout) continue;
     const el = safeQuery(note.anchor.domPath);
-    if (el) el.setAttribute('data-review-stowed', reveal ? 'preview' : 'true');
+    if (el) el.setAttribute('data-review-stowed', reveal || note.id === peekId ? 'preview' : 'true');
   }
 }
 

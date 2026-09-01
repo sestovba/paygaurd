@@ -56,16 +56,16 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
   const ytdHours = round2(eligibleMonths.reduce((sum, m) => sum + hoursFor(stream, m), 0));
 
   return (
-    <CollapsibleSection label="What you earned">
+    <CollapsibleSection label="What you earned (1099 / Self-employment)">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="field-label">{isYearToDate ? `Year to date, ${year}` : `Total for ${year}`}</span>
+        <span className="field-label">{isYearToDate ? `Year to date total, ${year}` : `Total for ${year}`}</span>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setHelpOpen(true)}
             className="text-xs font-semibold text-accent-foreground hover:underline"
           >
-            How spread works
+            How Social Security counts this
           </button>
           <select
             className="field-input w-28"
@@ -79,12 +79,12 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">{isYearToDate ? 'YTD Gross' : 'Gross'}</span>
+          <span className="field-label">{isYearToDate ? 'Total money earned (YTD)' : 'Total money earned'}</span>
           <NumericInput
             className="num field-input w-full"
             prefix="$"
             value={ytdGross}
-            placeholder="0"
+            placeholder="Numbers only"
             disabled={!eligibleMonths.length}
             onCommit={(total) => {
               if (!eligibleMonths.length) return;
@@ -94,7 +94,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">{isYearToDate ? 'YTD Miles' : 'Miles'}</span>
+          <span className="field-label">{isYearToDate ? 'Business miles (YTD)' : 'Business miles'}</span>
           <NumericInput
             className="num field-input w-full"
             prefix="mi"
@@ -109,7 +109,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">{isYearToDate ? 'YTD Hours' : 'Hours'}</span>
+          <span className="field-label">{isYearToDate ? 'Hours worked (YTD)' : 'Hours worked'}</span>
           <NumericInput
             className="num field-input w-full"
             value={ytdHours || undefined}
@@ -126,8 +126,8 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
 
       <InfoNote>
         {eligibleMonths.length
-          ? `Splits evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'elapsed so far' : 'active'} in ${year} for the monthly limit checks. Over ${TWP_SELF_EMPLOYMENT_HOURS} hours in any month uses a Trial Work Period month.`
-          : `No elapsed active months in ${year} yet to split this across.`}
+          ? `Social Security rule: Your profit (earnings minus business mileage) counts toward your monthly limit. Also, if you work more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in any month, that month uses 1 of your 9 Trial Work Period months, even if you did not earn much.`
+          : `No active months in ${year} yet to split this across.`}
       </InfoNote>
       {helpOpen ? <HelpSpread onClose={() => setHelpOpen(false)} /> : null}
     </CollapsibleSection>
@@ -152,13 +152,13 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
   }
 
   return (
-    <CollapsibleSection label="What you earned">
+    <CollapsibleSection label="Paycheck amounts (W-2 job)">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented
           value={mode}
           onChange={setMode}
           options={[
-            { id: 'monthly', label: 'By month' },
+            { id: 'monthly', label: 'Month by month' },
             { id: 'yearly', label: 'Yearly total' }
           ]}
         />
@@ -187,7 +187,7 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
                   className="num field-input min-w-0 w-full"
                   prefix="$"
                   value={stream.months[m]?.gross}
-                  placeholder="0"
+                  placeholder="Numbers only"
                   disabled={disabled}
                   onCommit={(next) => {
                     if (next !== undefined) extendIfEarly();
@@ -201,13 +201,13 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
       ) : (
         <label className="flex flex-col gap-1.5">
           <span className="field-label">
-            {isYearToDate ? `Total gross so far in ${year}` : `Total gross for ${year}`}
+            {isYearToDate ? `Total pay before taxes so far in ${year}` : `Total pay before taxes for ${year}`}
           </span>
           <NumericInput
             className="num field-input w-40"
             prefix="$"
             value={ytdGross}
-            placeholder="0"
+            placeholder="Numbers only"
             disabled={!eligibleMonths.length}
             onCommit={(total) => {
               if (!eligibleMonths.length) return;
@@ -220,10 +220,10 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
 
       <InfoNote>
         {mode === 'monthly'
-          ? 'Only Gross counts toward the thresholds. Real paychecks take priority over this grid.'
+          ? 'Type the Gross pay amount before taxes and deductions from your paystub. Do not use your take-home pay. Real paychecks you enter will override this grid.'
           : eligibleMonths.length
-            ? `Splits evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'elapsed so far' : 'active'} in ${year}. Switch to By month to fine-tune.`
-            : `No elapsed active months in ${year} yet to split this across.`}
+            ? `Splits evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'so far' : 'active'} in ${year}. Switch to Month by month to fine-tune.`
+            : `No active months in ${year} yet to split this across.`}
       </InfoNote>
     </CollapsibleSection>
   );
@@ -252,7 +252,7 @@ export function StreamSheet({
   return (
     <Sheet
       title={stream.name}
-      eyebrow={stream.type === 'w2' ? 'W-2 job' : '1099 work'}
+      eyebrow={stream.type === 'w2' ? 'W-2 job' : '1099 self-employment'}
       size="lg"
       variant={variant === 'inline' ? 'inline' : 'modal'}
       backLabel={variant === 'inline' ? backLabel : undefined}
@@ -286,9 +286,9 @@ export function StreamSheet({
         </button>
       }
     >
-      <CollapsibleSection label="This job">
+      <CollapsibleSection label="Job details">
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">Name</span>
+          <span className="field-label">Job or company name</span>
           <input
             className="field-input"
             type="text"
@@ -299,7 +299,7 @@ export function StreamSheet({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
-            <span className="field-label">Active since</span>
+            <span className="field-label">When you started working here</span>
             <input
               className="field-input"
               type="month"
@@ -319,7 +319,7 @@ export function StreamSheet({
                 activeTo: lifecycle === 'completed' ? (stream.activeTo ?? todayMonth()) : stream.activeTo
               })}
               options={[
-                { id: 'active', label: 'Ongoing' },
+                { id: 'active', label: 'I work here' },
                 { id: 'inactive', label: 'Paused' },
                 { id: 'completed', label: 'Ended' }
               ]}
@@ -329,10 +329,10 @@ export function StreamSheet({
 
         <InfoNote>
           {stream.lifecycle === 'inactive'
-            ? 'Paused work stays out of future paycheck and threshold projections, but keeps its history.'
+            ? 'Paused jobs stay in your records but do not count toward future month estimates.'
             : stream.lifecycle === 'completed'
-              ? 'Ended work stops counting after the date below. Past months keep whatever was already entered.'
-              : 'Ongoing work counts toward this month and every future one.'}
+              ? 'Ended jobs stop counting after the date below. Past months keep whatever was entered.'
+              : 'Active jobs count toward this month and upcoming months.'}
         </InfoNote>
 
         {stream.lifecycle === 'completed' ? (
@@ -368,9 +368,9 @@ export function StreamSheet({
       </CollapsibleSection>
 
       {stream.type === 'w2' ? (
-        <CollapsibleSection label="When you get paid">
+        <CollapsibleSection label="When you get your paychecks">
           <div className="flex flex-col gap-1.5">
-            <span className="field-label">How often</span>
+            <span className="field-label">Pay schedule (How often you are paid)</span>
             <Segmented
               value={stream.payFrequency}
               columns={4}
@@ -386,7 +386,7 @@ export function StreamSheet({
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-base font-semibold">
                 <Calendar className="size-5 shrink-0" />
-                Last known payday
+                One real payday from your paystub
               </span>
               {stream.anchorDate ? (
                 <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-good">
@@ -405,7 +405,7 @@ export function StreamSheet({
               onChange={(e) => updateStream(stream.id, { anchorDate: e.target.value })}
             />
             <p className="type-muted">
-              One real payday is enough. From that date we can see which months land an extra check.
+              Type any date you were paid on this job. We use this date to find every other payday and alert you when an extra paycheck lands in a month.
             </p>
           </div>
 
@@ -421,10 +421,10 @@ export function StreamSheet({
       <IncomeEntrySection stream={stream} year={ui.year} onYearChange={(year) => setUi({ year })} />
 
       {stream.type === 'w2' ? (
-        <CollapsibleSection label="Planning numbers">
+        <CollapsibleSection label="Estimated pay (Hourly wage & hours)">
           <div className="flex flex-wrap gap-3">
             <label className="flex w-full flex-col gap-1.5 sm:w-40">
-              <span className="field-label">Hourly rate</span>
+              <span className="field-label">Hourly wage (Pay per hour)</span>
               <NumericInput
                 className="num field-input w-full"
                 prefix="$"
@@ -434,7 +434,7 @@ export function StreamSheet({
               />
             </label>
             <label className="flex w-full flex-col gap-1.5 sm:w-40">
-              <span className="field-label">Hours / week</span>
+              <span className="field-label">Hours you work each week</span>
               <NumericInput
                 className="num field-input w-full"
                 value={stream.plannedHoursPerWeek}
@@ -453,10 +453,10 @@ export function StreamSheet({
               <p className="leading-relaxed">
                 <span className="font-semibold">
                   {pace.level === 'over'
-                    ? `At this rate, a ${pace.checks}-paycheck month would earn about ${money(pace.amount)} — over the ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`
-                    : `At this rate, a normal month would earn about ${money(pace.amount)}, close to the ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`}
+                    ? `In a month with ${pace.checks} paychecks, you would earn about ${money(pace.amount)}. This is over the ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`
+                    : `In a normal month, you would earn about ${money(pace.amount)}, close to the ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`}
                 </span>
-                {' '}This is a planning estimate. Enter real Gross each month for the figure that counts.
+                {' '}This is a planning estimate. Type the exact amount from your paystubs each month for the number that counts.
               </p>
             </div>
           ) : null}

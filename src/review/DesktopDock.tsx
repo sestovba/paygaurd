@@ -14,7 +14,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  AlignLeft, Archive, ChevronDown, Clock, Columns2, Copy, EyeOff, LayoutGrid, ListChecks,
+  AlignLeft, ChevronDown, Clock, Columns2, Copy, LayoutGrid, ListChecks,
   MessageSquarePlus, Monitor, Moon, MousePointerSquareDashed, PanelBottom,
   PanelLeft, PanelRight, ScanSearch, Sun, Undo2, X
 } from 'lucide-react';
@@ -103,10 +103,6 @@ export function DesktopDock({
   onClose,
   toolsOpen,
   onTools,
-  commentsOpen,
-  onComments,
-  commentsCount,
-  commentsList,
   order,
   onOrder,
   openCount,
@@ -127,14 +123,6 @@ export function DesktopDock({
   journalWide,
   onJournalWide,
   journal,
-  stashOpen,
-  onStash,
-  stashCount,
-  shelves,
-  hiddenOpen,
-  onHidden,
-  hiddenCount,
-  hiddenList,
   onCopyAiPrompt
 }: {
   open: boolean;
@@ -146,10 +134,6 @@ export function DesktopDock({
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
   /** Dedicated comments section */
-  commentsOpen: boolean;
-  onComments: (next: boolean) => void;
-  commentsCount: number;
-  commentsList: ReactNode;
   onCopyAiPrompt?: () => void;
   /** The sections, in the order they are stacked. Dragged by their grips and
    *  kept by the console, so the rail stays arranged the way you left it. */
@@ -178,16 +162,8 @@ export function DesktopDock({
   journalWide: boolean;
   onJournalWide: (next: boolean) => void;
   journal: ReactNode;
-  stashOpen: boolean;
-  onStash: (next: boolean) => void;
-  stashCount: number;
-  shelves: ReactNode;
   /** Switched off on the page. Its own room — the archive is for things
    *  carried away, this is for lights left off. */
-  hiddenOpen: boolean;
-  onHidden: (next: boolean) => void;
-  hiddenCount: number;
-  hiddenList: ReactNode;
 }) {
   const { ui, setUi } = useTracker();
   const [rail, setRail] = useState(loadRail);
@@ -325,11 +301,7 @@ export function DesktopDock({
   };
 
   const isOpen = (key: string) => (
-    key === 'tools' ? toolsOpen
-      : key === 'comments' ? commentsOpen
-        : key === 'journal' ? journalOpen
-          : key === 'hidden' ? hiddenOpen
-            : key === 'archive' ? stashOpen : false
+    key === 'tools' ? toolsOpen : key === 'journal' ? journalOpen : false
   );
 
   const sections: Record<string, ReactNode> = {
@@ -395,23 +367,6 @@ export function DesktopDock({
       </Fold>
     ),
 
-    comments: (
-      <Fold
-        key="comments"
-        section="comments"
-        style={colStyle('comments')}
-        onGrip={sort.grip('comments')}
-        dragging={sort.dragging === 'comments'}
-        icon={MessageSquarePlus}
-        name="My Comments"
-        tone="paper"
-        count={commentsCount}
-        open={commentsOpen}
-        onToggle={() => onComments(!commentsOpen)}
-      >
-        {commentsList}
-      </Fold>
-    ),
 
     journal: (
       <Fold
@@ -421,7 +376,7 @@ export function DesktopDock({
         onGrip={sort.grip('journal')}
         dragging={sort.dragging === 'journal'}
         icon={ListChecks}
-        name="Journal"
+        name="Notes"
         tone="paper"
         count={journalCount}
         news={journalNew}
@@ -434,41 +389,7 @@ export function DesktopDock({
       </Fold>
     ),
 
-    hidden: (
-      <Fold
-        key="hidden"
-        section="hidden"
-        style={colStyle('hidden')}
-        onGrip={sort.grip('hidden')}
-        dragging={sort.dragging === 'hidden'}
-        icon={EyeOff}
-        name="Hidden"
-        tone="glass"
-        count={hiddenCount}
-        open={hiddenOpen}
-        onToggle={() => onHidden(!hiddenOpen)}
-      >
-        {hiddenList}
-      </Fold>
-    ),
 
-    archive: (
-      <Fold
-        key="archive"
-        section="archive"
-        style={colStyle('archive')}
-        onGrip={sort.grip('archive')}
-        dragging={sort.dragging === 'archive'}
-        icon={Archive}
-        name="Archive"
-        tone="glass"
-        count={stashCount}
-        open={stashOpen}
-        onToggle={() => onStash(!stashOpen)}
-      >
-        {shelves}
-      </Fold>
-    )
   };
 
   if (!open) {

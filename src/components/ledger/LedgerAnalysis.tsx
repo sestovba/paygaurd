@@ -91,6 +91,7 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
           id="ledger-analysis-view-modes"
           label="Three views of one table"
           reason="Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question."
+          certainty="sure"
           layout="ledger"
           className="ml-auto w-full sm:w-auto"
         >

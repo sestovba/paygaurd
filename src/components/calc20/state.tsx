@@ -195,22 +195,13 @@ export function Calc20Store({ children }: { children: ReactNode }) {
     data, ui: pgUi, setUi: setPgUi, commit, undoCount, undo, session
   } = pg;
 
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const toastId = useRef(0);
+  /* Toasts moved up to TrackerProvider so every layout has them. calc20 keeps
+     the same three names it always used, forwarded, so nothing here changes
+     at the call sites — this layout invented the idea and should not have to
+     be rewritten to share it. */
+  const { toasts, pushToast, dismissToast } = pg;
   const dataRef = useRef(data);
   dataRef.current = data;
-
-  const pushToast = useCallback((message: string, undoable?: boolean) => {
-    if (!message) return;
-    toastId.current += 1;
-    const id = toastId.current;
-    setToasts((list) => [...list.slice(-2), { id, message, undo: undoable }]);
-    setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), 5000);
-  }, []);
-
-  const dismissToast = useCallback((id: number) => {
-    setToasts((list) => list.filter((t) => t.id !== id));
-  }, []);
 
   // PayGuard reports sync as a status only. This layout also says when the
   // last successful sync happened, so remember the moment it flips green.
@@ -273,7 +264,6 @@ export function Calc20Store({ children }: { children: ReactNode }) {
   }, [pg, patchCalc20, pushToast]);
 
   const removeStream = useCallback((id: string) => {
-    const name = dataRef.current.streams.find((s) => s.id === id)?.name ?? 'Stream';
     patchCalc20((slice) => {
       const collapsed = { ...slice.collapsed };
       const streamSettings = { ...slice.streamSettings };
@@ -284,7 +274,8 @@ export function Calc20Store({ children }: { children: ReactNode }) {
       return { collapsed, streamSettings, streamMonthColumnAdjustments };
     });
     pg.removeStream(id);
-    pushToast(name + ' removed', true);
+    // The provider toasts this now, for every layout — see removeStream
+    // in TrackerProvider. Toasting again here would show it twice.
   }, [pg, patchCalc20, pushToast]);
 
   const duplicateStream = useCallback((id: string) => {

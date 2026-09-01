@@ -13,8 +13,10 @@ import { AccountMenu } from './AccountMenu';
 import { BellIcon, CloseIcon, UndoIcon } from './Icons';
 import { AnchoredPopover, useAnchoredPopover } from './Popover';
 import { TrialMeter } from './TrialMeter';
-import { ToastStack } from './Toast';
+import { ToastStack } from '../ToastStack';
 import { MonthHotbar } from './MonthHotbar';
+import { PrecisionLine } from '../PrecisionLine';
+import { precisionFor } from '../../domain/precision';
 import type { MonthKey } from '../../domain/types';
 import type { Session } from '../../auth/session';
 
@@ -148,6 +150,12 @@ export function Header({
       )}
 
       <MonthHotbar onOpenMonth={onOpenMonth} />
+      {/* The seventh layout gets the same reading as the other six: how far
+          the figures can be trusted, and the one thing that would sharpen
+          them. See src/domain/precision.ts. */}
+      <div className="calc20-precision">
+        <PrecisionLine reading={precisionFor(data, focusMonth)} />
+      </div>
     </header>
   );
 }

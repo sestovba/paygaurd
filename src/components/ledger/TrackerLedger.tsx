@@ -5,9 +5,14 @@ import {
 import { useTracker } from '../../state/TrackerProvider';
 import { countableFor, streamYearGross } from '../../domain/earnings';
 import { trialWorkStatus } from '../../domain/trialWork';
+import { attentionFlags } from '../../domain/attention';
+import { precisionFor } from '../../domain/precision';
+import { PrecisionLine } from '../PrecisionLine';
+import type { MonthKey } from '../../domain/types';
 import { rulesFor, knownYears } from '../../domain/rules';
-import { monthsOfYear } from '../../domain/months';
+import { formatMonth, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
 import { SettingsPanel } from '../SettingsPanel';
+import { ToastStack } from '../ToastStack';
 import { NotificationsBell } from '../NotificationsBell';
 import { LedgerChart } from './LedgerChart';
 import { JOB_SECTIONS, jobSectionKey, LedgerJobEditor } from './LedgerJobEditor';
@@ -47,6 +52,8 @@ export function TrackerLedger() {
   const selected = streams.find((s) => s.id === selectedId) ?? streams[0] ?? null;
 
   const rules = rulesFor(year);
+  const now = todayMonth();
+  const gradedMonth: MonthKey = yearOf(now) === year ? now : `${year}-12`;
   const months = monthsOfYear(year);
 
   const overSgaCount = months.filter((m) =>
@@ -168,6 +175,7 @@ export function TrackerLedger() {
                 id="ledger-scroll-top"
                 label="Scroll-to-top button"
                 reason="Duplicates what the scrollbar and Home key already do."
+                certainty="hunch"
                 layout="ledger"
               >
                 <button
@@ -236,6 +244,14 @@ export function TrackerLedger() {
         </div>
       </header>
 
+      {/* Review note: "PaycheckRadar is the surface that names the months to
+          be on high alert… the ledger only has paycheckContextForMonth inside
+          the monthly analysis table — a column in a table you scroll to. The
+          hazard the product exists to catch should not be a cell." So it
+          leads, above the stat strip. Same rule as every other layout; see
+          src/domain/attention.ts. */}
+      <MonthAttention />
+
       <div className="flex flex-wrap lg-border-b">
         <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 border-t sm:border-t-0 lg-stat-tile lg-border-r">
           <span className="lg-label">TWP Months Used</span>
@@ -261,10 +277,20 @@ export function TrackerLedger() {
         />
       </div>
 
+      {/* Same reading as every other layout: how far the figures above can be
+          trusted, and the single thing that would sharpen them. Graded on the
+          month you are actually in when the ledger is showing this year, and
+          on December when it is showing a past one — grading a finished year
+          against a month that has not happened in it says nothing. */}
+      <div className="lg-precision lg-border-b">
+        <PrecisionLine reading={precisionFor(data, gradedMonth)} />
+      </div>
+
       <ReviewTarget
         id="ledger-year-chart"
         label="Annual income chart"
         reason="Twelve bars against two threshold lines; the monthly analysis below states the same thing in words."
+        certainty="hunch"
         layout="ledger"
         className="lg-border-b"
       >
@@ -399,6 +425,8 @@ export function TrackerLedger() {
       <LedgerAnalysis data={data} year={year} />
       </div>
 
+      <ToastStack />
+
       {settingsOpen ? (
         <SettingsPanel
           theme={ui.theme}
@@ -413,5 +441,41 @@ export function TrackerLedger() {
         />
       ) : null}
     </div>
+  );
+}
+
+
+/**
+ * The months that need attention, in the ledger's own hand. The rule is
+ * shared with payguard, workrecord and calc20 — only the markup is local.
+ */
+function MonthAttention() {
+  const { data, ui } = useTracker();
+  const now = todayMonth();
+  const months = monthsOfYear(ui.year).filter((month) => (
+    yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
+  ));
+  const flags = attentionFlags(data, months);
+  if (!flags.length) return null;
+
+  return (
+    <section className="lg-attention lg-border-b" aria-label="Months that need attention">
+      <span className="lg-label lg-attention-title">Needs attention</span>
+      <div className="lg-attention-rail">
+        {flags.map((flag) => (
+          <button
+            key={flag.month + flag.kind + flag.text}
+            type="button"
+            className="lg-attention-chip"
+            data-kind={flag.kind}
+            title={`${formatMonth(flag.month)}: ${flag.text}`}
+            onClick={() => document.querySelector('.lg-analysis')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            <span className="lg-attention-month">{shortMonthName(flag.month).toUpperCase()}</span>
+            <span>{flag.text}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

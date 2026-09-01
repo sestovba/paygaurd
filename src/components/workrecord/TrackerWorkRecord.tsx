@@ -10,9 +10,11 @@ import {
   X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
+import { attentionFlags } from '../../domain/attention';
+import { precisionFor } from '../../domain/precision';
+import { PrecisionLine } from '../PrecisionLine';
 import { useTheme } from '../../theme';
-import { monthStatus, nearLimit, yearTotal } from '../../domain/earnings';
-import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
+import { monthStatus, yearTotal } from '../../domain/earnings';
 import {
   activeThreshold, benefitPhase, trialWorkStatus, TRIAL_MONTH_LIMIT
 } from '../../domain/trialWork';
@@ -21,6 +23,7 @@ import { formatMonth, longMonthName, monthsOfYear, shortMonthName, todayMonth, y
 import { money } from '../../domain/format';
 import type { MonthKey } from '../../domain/types';
 import { SettingsPanel } from '../SettingsPanel';
+import { ToastStack } from '../ToastStack';
 import { NotificationsBell } from '../NotificationsBell';
 import { MonthSheet } from '../MonthSheet';
 import { StatusSheet } from '../StatusSheet';
@@ -257,6 +260,12 @@ export function TrackerWorkRecord() {
             </div>
           </div>
 
+          {/* How far the headline figure can be trusted, and the one thing
+              that would sharpen it. Same reading as every other layout. */}
+          <div className="wr-precision">
+            <PrecisionLine reading={precisionFor(data, yearOf(now) === year ? now : `${year}-12`)} />
+          </div>
+
           {/* Phase warning shown only when status is not confirmed */}
           {phase === 'unknown' || phase === 'verifyComplete' ? (
             <div className="wr-phase-warning">
@@ -386,6 +395,8 @@ export function TrackerWorkRecord() {
         <MonthSheet month={openMonth} onClose={() => setOpenMonth(null)} onOpenStream={revealStream} />
       ) : null}
       {statusOpen ? <StatusSheet onClose={() => setStatusOpen(false)} /> : null}
+      <ToastStack />
+
       {settingsOpen ? (
         <SettingsPanel
           theme={ui.theme}
@@ -440,36 +451,13 @@ function Slab({
  */
 function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
-  const extraPay = extraPaycheckMonths(data.streams, ui.year);
   const now = todayMonth();
   const months = monthsOfYear(ui.year).filter((month) => (
     yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
   ));
-
-  const flags: Array<{ month: MonthKey; text: string; kind: 'over' | 'near' | 'pay' }> = [];
-  for (const month of months) {
-    const status = monthStatus(data, month);
-    const phase = benefitPhase(data, month);
-
-    if (phase === 'sga' && status.overSga) {
-      flags.push({ month, text: 'over SGA', kind: 'over' });
-    } else if (phase === 'trialWork' && status.isServiceMonth) {
-      flags.push({ month, text: 'TWP used', kind: 'over' });
-    } else {
-      const near = nearLimit(status, phase);
-      if (near) {
-        flags.push({
-          month,
-          text: money(near.room) + (near.kind === 'trial' ? ' to TWP' : ' to SGA'),
-          kind: 'near'
-        });
-        continue;
-      }
-    }
-
-    const extra = extraPay.get(month);
-    if (extra) flags.push({ month, text: extraPaycheckLabel(extra.counts), kind: 'pay' });
-  }
+  // The rule for what needs attention is shared with the ledger, payguard and
+  // calc20 — see src/domain/attention.ts. Only the clothes are local.
+  const flags = attentionFlags(data, months);
 
   if (!flags.length) return null;
 

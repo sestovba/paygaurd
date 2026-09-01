@@ -73,6 +73,15 @@ export interface ReviewAnchor {
   hooks?: string;
   /** First ~140 characters of visible text — the strongest grep handle. */
   text?: string;
+  /** The source line as it actually read when the note was taken, trimmed.
+   *
+   *  `text` is what the *browser* rendered, which CSS has often uppercased or
+   *  truncated, so it frequently matches nothing in the file. This is the
+   *  line itself. It gives a code pass two things nothing else does: an exact
+   *  string to grep for when the line number has drifted, and a way to tell
+   *  "this element is gone" from "this element moved" — if the line is still
+   *  in the file somewhere, the work was not done. */
+  sourceLine?: string;
 }
 
 /** Where the reviewer dropped a stowed element when putting it back. The app
@@ -131,6 +140,17 @@ export interface ReviewNote {
   label: string;
   /** Why the AI proposed deleting it (suggested deletes only). */
   reason?: string;
+  /** How sure the AI was when it proposed this — 'sure' | 'likely' | 'hunch'.
+   *  Absent on notes the reviewer raised themselves: it qualifies a proposal,
+   *  and the reviewer's own notes are not proposals. See state.ts. */
+  certainty?: 'sure' | 'likely' | 'hunch';
+  /** How big the change is — 'small' | 'medium' | 'large'. The other half of
+   *  the estimate: certainty is about the diagnosis, effort about the fix. */
+  effort?: 'small' | 'medium' | 'large';
+  /** Repo-relative paths of screenshots pasted onto this note, e.g.
+   *  "review/shots/el-abc123-mf2k1.png". Paths only — the images live on
+   *  disk so review-notes.json stays a file a person can read. */
+  shots?: string[];
   /** The user's comment (comment notes only). */
   comment?: string;
   /** Short intent tags picked in the composer — 'cut', 'reword', 'spacing'.
@@ -159,6 +179,10 @@ export interface ReviewNote {
    *  to-do that gets moved: said, answered, worth another look, done, or
    *  deliberately not now. Either side can move it. */
   status: ReviewLane;
+  /** Set by the dev server on every write, never by the app: whether the
+   *  element this note points at can still be found in the source.
+   *  'present' | 'absent' | 'unknown'. Read it with `claimCheck()`. */
+  found?: 'present' | 'absent' | 'unknown';
   anchor: ReviewAnchor;
   createdAt: string;
   updatedAt: string;

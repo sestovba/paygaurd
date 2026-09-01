@@ -126,6 +126,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
               id="workrecord-status-year-total"
               label="Status year total"
               reason="The TWP / SGA panel should show the active monthly rule, not a repeated annual total."
+              certainty="sure"
               layout="workrecord"
             >
               <div className="wr-row">
@@ -144,6 +145,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
         id="workrecord-safe-work-simulator"
         label="Safe-work simulator"
         reason="The multi-input planner overwhelms the core status view and belongs in an optional advanced tool."
+        certainty="hunch"
         layout="workrecord"
       >
         <SafeWorkSimulator />

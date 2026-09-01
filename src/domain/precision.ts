@@ -7,20 +7,11 @@
  * fifth paycheck. Without them it is dividing a year by twelve. Those two
  * answers look identical on screen, and one of them is a guess.
  *
- * So the answer carries its own grade. Three states, not a percentage: a
- * percentage invents precision about precision, and none of these are
- * degrees of the same thing — they are three different capabilities.
+ * So the answer carries its own grade. Three states, not a percentage:
  *
- *   Estimated  Amounts only. `payPlan` cannot run, so no 3- or 5-paycheck
- *              month can be named before it happens.
- *   Scheduled  A payday and a frequency are on file. `extraPaycheckMonths`
- *              and `paceWarning` both work. This is the jump worth pushing.
- *   Exact      The real paychecks are recorded rather than projected, and
- *              1099 hours are in, so the 80-hour rule is actually running.
- *
- * A reading is only ever as good as its weakest stream: one job with no
- * payday means the month's total cannot be trusted, however complete the
- * others are.
+ *   Estimated  Amounts only. No pay schedule, so 3- or 5-paycheck months cannot be predicted.
+ *   Scheduled  A payday and pay schedule are on file. We can predict extra paycheck months.
+ *   Exact      Actual paystub amounts are entered, and 1099 hours are recorded.
  */
 
 import type { MonthKey, Stream, TrackerData } from './types';
@@ -31,8 +22,8 @@ export type Precision = 'estimated' | 'scheduled' | 'exact';
 
 export const PRECISION_NAME: Record<Precision, string> = {
   estimated: 'Estimated',
-  scheduled: 'Scheduled',
-  exact: 'Exact'
+  scheduled: 'Pay Schedule Set',
+  exact: 'Exact (From Paystubs)'
 };
 
 /** Which field is missing — so a layout can send you to the fastest way of
@@ -71,9 +62,9 @@ function w2Gap(stream: Stream, month: MonthKey): PrecisionGap | null {
       streamId: stream.id,
       streamName: stream.name,
       kind: 'schedule',
-      missing: !stream.payFrequency && !stream.anchorDate ? 'a payday and how often'
-        : stream.payFrequency ? 'a payday' : 'how often you are paid',
-      cost: 'extra-paycheck months cannot be flagged before they land',
+      missing: !stream.payFrequency && !stream.anchorDate ? 'a payday and pay schedule'
+        : stream.payFrequency ? 'a payday from your paystub' : 'how often you are paid',
+      cost: 'we cannot predict months with an extra paycheck',
       level: 'estimated'
     };
   }
@@ -84,8 +75,8 @@ function w2Gap(stream: Stream, month: MonthKey): PrecisionGap | null {
       streamId: stream.id,
       streamName: stream.name,
       kind: 'checks',
-      missing: 'this month’s actual paychecks',
-      cost: 'the total is projected from the schedule, not counted',
+      missing: 'your actual paystub amount for this month',
+      cost: 'this total is estimated, not from a real paystub',
       level: 'scheduled'
     };
   }
@@ -102,7 +93,7 @@ function ten99Gap(stream: Stream, month: MonthKey): PrecisionGap | null {
       streamName: stream.name,
       kind: 'hours',
       missing: 'hours worked this month',
-      cost: 'the 80-hour trial-work rule cannot be checked',
+      cost: 'we cannot check the 80-hour Trial Work rule',
       level: 'estimated'
     };
   }
@@ -128,10 +119,10 @@ export function precisionFor(data: TrackerData, month: MonthKey): PrecisionReadi
 
 /** The whole sentence, so every layout says it the same way. */
 export function precisionSentence(reading: PrecisionReading): string {
-  if (!reading.streams) return 'Add an income source to start tracking.';
+  if (!reading.streams) return 'Add a job to start tracking.';
   const gap = reading.gaps[0];
-  if (!gap) return 'Every source has its schedule and its actual paychecks.';
+  if (!gap) return 'All earnings are verified with exact paystub amounts.';
   const more = reading.gaps.length - 1;
-  return `${gap.streamName} is missing ${gap.missing}, so ${gap.cost}`
-    + (more ? ` · ${more} more source${more === 1 ? '' : 's'} to fill in` : '');
+  return `${gap.streamName} is missing ${gap.missing} (${gap.cost})`
+    + (more ? ` · ${more} more job${more === 1 ? '' : 's'} to complete` : '');
 }

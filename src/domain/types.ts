@@ -26,6 +26,13 @@ export interface Paycheck {
 
 export interface MonthEntry {
   gross?: number;
+  /** Where `gross` came from. Absent means it was typed in as-is.
+   *
+   *  This exists so the precision gauge can tell the truth about a figure the
+   *  app worked out rather than was told. Offering easier ways in — "what
+   *  went into your bank", "your hourly rate" — is only honest if the result
+   *  is then reported as the estimate it is. */
+  basis?: 'entered' | 'fromNet' | 'fromHours';
   hours?: number;
   /** Business miles driven, deducted at that year's IRS rate. */
   miles?: number;

@@ -30,7 +30,7 @@ export function QuickPaydaySheet({
   return (
     <Sheet
       title={`Payday for ${stream.name}`}
-      eyebrow="Quick fix"
+      eyebrow="Paycheck calendar"
       onClose={onClose}
       variant={variant === 'inline' ? 'inline' : 'modal'}
       backLabel={variant === 'inline' ? backLabel : undefined}
@@ -58,7 +58,7 @@ export function QuickPaydaySheet({
       }
     >
       <label className="flex flex-col gap-1.5">
-        <span className="field-label">Payday</span>
+        <span className="field-label">Pay date (from your paystub or bank deposit)</span>
         <input
           className="field-input"
           type="date"
@@ -69,8 +69,7 @@ export function QuickPaydaySheet({
       </label>
 
       <InfoNote>
-        Any one real pay date — past or upcoming — is enough. It tells us
-        every other payday on this job's schedule, forward and backward.
+        Type any one real payday from your paystub. We use this date to find every other payday on your schedule and alert you when an extra paycheck lands in a month.
       </InfoNote>
     </Sheet>
   );

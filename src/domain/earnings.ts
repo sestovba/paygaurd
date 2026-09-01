@@ -211,3 +211,107 @@ export function streamYearHours(stream: Stream, year: number): number {
 export function hasMeaningfulData(data: TrackerData): boolean {
   return data.streams.length > 0 || data.priorTrialMonths.length > 0;
 }
+
+/*
+ * Working backwards from the number people actually know.
+ *
+ * Social Security counts gross pay — the figure before anything is taken
+ * out. That number lives on a document a lot of people do not have to hand,
+ * cannot find, or were never taught to read. The number they do know is what
+ * landed in the bank, because it is in their banking app.
+ *
+ * So this estimates gross from net. It is deliberately conservative and
+ * deliberately explained rather than silently applied:
+ *
+ * FICA is 7.65% of gross (6.2% Social Security + 1.45% Medicare) and is the
+ * one deduction almost every W-2 worker has. Below roughly $15k a year — the
+ * band nearly everyone tracking against these limits is in — federal income
+ * tax withholding is often little or nothing, because the standard deduction
+ * covers it. State tax, insurance, union dues and retirement all vary and
+ * cannot be guessed from one number.
+ *
+ * That makes the result a FLOOR, not an estimate in the middle: real gross is
+ * at least this, and more if anything else is withheld. A floor is the safe
+ * direction to be wrong in here, because under-reporting income to a benefits
+ * tracker is what causes an overpayment the person then has to repay.
+ */
+export const FICA_RATE = 0.0765;
+
+/*
+ * A padded rate, used for the estimate we actually show.
+ *
+ * FICA alone is the floor. In practice a low-wage W-2 worker usually has a
+ * little federal withholding on top, and state tax in most states, so total
+ * withholding of 10–15% is more typical than 7.65%. Twelve per cent sits in
+ * that band.
+ *
+ * The direction of the padding is the part that matters, and it is not a
+ * coin toss:
+ *
+ *   Guess gross too LOW  → the app says you are under the limit when you are
+ *                          over it → you keep working → SSA later calls it an
+ *                          overpayment and asks for the money back. A debt.
+ *   Guess gross too HIGH → the app says you are nearer the limit than you
+ *                          are → you work fewer hours than you safely could.
+ *                          Lost income, which is bad, but not a debt and it
+ *                          corrects the moment a real figure is entered.
+ *
+ * So the estimate leans high on purpose. For a benefits tracker, cautious and
+ * slightly wrong beats optimistic and slightly wrong.
+ */
+export const TYPICAL_WITHHOLDING = 0.12;
+
+/**
+ * Estimate gross pay from what actually reached the bank.
+ *
+ * `floor: true` uses FICA only, which is the least gross could possibly be.
+ * The default pads for typical withholding, which is the number worth
+ * showing — and which must always be recorded as an estimate, never as an
+ * entered figure. See MonthEntry.basis and precisionFor.
+ */
+export function grossFromNet(net: number, opts?: { floor?: boolean }): number | undefined {
+  if (!Number.isFinite(net) || net <= 0) return undefined;
+  const rate = opts?.floor ? FICA_RATE : TYPICAL_WITHHOLDING;
+  return round2(net / (1 - rate));
+}
+
+/*
+ * How much room a guess costs you.
+ *
+ * A figure worked out from what reached the bank could be off by a fair
+ * margin: withholding varies with state, filing status, insurance, dues and
+ * retirement, and none of that can be recovered from one number. Twenty per
+ * cent covers the realistic spread.
+ *
+ * The important design decision is where that uncertainty goes. It would be
+ * easy to show the same "$162 left" and add "this is an estimate" underneath
+ * — and nobody reads the underneath. Someone about to pick up an extra shift
+ * reads the number, not the caveat.
+ *
+ * So the uncertainty is taken out of the room instead. When a month's pay was
+ * guessed, the app assumes it could be 20% higher than it looks and reports
+ * the room that is left after assuming the worst. The caveat still appears,
+ * but the number itself is already honest — and the way to get the room back
+ * is the same as the way to make the app accurate: enter the real figure.
+ */
+export const ESTIMATE_UNCERTAINTY = 0.20;
+
+/** Was any of this month's pay worked out rather than entered? */
+export function isEstimatedMonth(data: TrackerData, month: MonthKey): boolean {
+  return data.streams.some((stream) => (
+    isActive(stream, month) && Boolean(stream.months[month]?.basis)
+    && stream.months[month]?.basis !== 'entered'
+  ));
+}
+
+/**
+ * Countable pay for the month, raised to the top of its uncertainty band when
+ * the figure was a guess. Use this for anything that answers "how much more
+ * can I earn"; use `monthStatus().countable` for reporting what was recorded.
+ */
+export function cautiousCountable(data: TrackerData, month: MonthKey): number {
+  const actual = monthTotal(data, month);
+  return isEstimatedMonth(data, month)
+    ? round2(actual * (1 + ESTIMATE_UNCERTAINTY))
+    : actual;
+}

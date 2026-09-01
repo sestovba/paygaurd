@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Archive, CircleEllipsis, Eye, EyeOff, MessageSquarePlus, Trash2, Undo2, X } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
+import type { Certainty } from './state';
 import { useReview } from './context';
 
 /**
@@ -29,6 +30,7 @@ export function ReviewTarget({
   id,
   label,
   reason,
+  certainty = 'likely',
   layout,
   className = '',
   children
@@ -36,6 +38,10 @@ export function ReviewTarget({
   id: string;
   label: string;
   reason: string;
+  /** How sure this proposal is. Defaults to 'likely' — the honest answer
+   *  when nobody has thought about it, and never 'sure', which has to be
+   *  earned by the claim being checkable. */
+  certainty?: Certainty;
   layout: LayoutMode;
   className?: string;
   children: ReactNode;
@@ -44,7 +50,7 @@ export function ReviewTarget({
   const host = useRef<HTMLDivElement>(null);
   const register = review?.register;
 
-  useEffect(() => register?.(id, label, reason), [register, id, label, reason]);
+  useEffect(() => register?.(id, label, reason, certainty), [register, id, label, reason, certainty]);
 
   const verdict = review?.notes[id]?.verdict;
   const active = review?.mode === 'audit';

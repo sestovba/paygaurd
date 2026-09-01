@@ -9,16 +9,22 @@ import {
   Settings,
   Shield,
   ShieldCheck,
+  TriangleAlert,
   Undo2,
   X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
 import { countableFor, streamYearGross } from '../../domain/earnings';
 import { benefitPhase } from '../../domain/trialWork';
+import { attentionFlags } from '../../domain/attention';
+import { precisionFor } from '../../domain/precision';
+import { PrecisionLine } from '../PrecisionLine';
 import { rulesFor, knownYears } from '../../domain/rules';
-import { longMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, longMonthName, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
 import { money } from '../../domain/format';
+import type { MonthKey } from '../../domain/types';
 import { SettingsPanel } from '../SettingsPanel';
+import { ToastStack } from '../ToastStack';
 import { NotificationsBell } from '../NotificationsBell';
 import { PayGuardChart } from './PayGuardChart';
 import { PayGuardJobEditor } from './PayGuardJobEditor';
@@ -248,6 +254,17 @@ export function TrackerPayGuard() {
             <div className="pg-status-track mt-3" aria-hidden="true">
               <span style={{ width: `${thresholdProgress}%`, background: statusMeterColor }} />
             </div>
+
+            {/* How much the figure above can be trusted, and the one thing
+                that would improve it. A line under the number, not a panel:
+                precision qualifies a specific claim at the moment someone
+                reads it, and a "data quality" card would be one more section
+                competing with the month. Same reading as every other layout —
+                see src/domain/precision.ts. */}
+            <PrecisionLine
+              reading={precisionFor(data, asOf)}
+              onFix={(gap) => focusStream(gap.streamId)}
+            />
           </div>
 
           <div className="pg-status-hero-side">
@@ -268,12 +285,22 @@ export function TrackerPayGuard() {
           </div>
         </section>
 
+        {/* The months that need you, named as alerts.
+            Review note: "the extra-paycheck month is a column in the monthly
+            analysis rather than an alert. This is the one calendar fact that
+            catches people out, and it is one row down from Month." It sits
+            directly under the status hero now — the first thing after "am I
+            safe this month" is "which months are not". Same rule as the
+            workrecord strip; see src/domain/attention.ts. */}
+        <MonthAttention onOpenMonth={openAnalysis} />
+
         {/* ---------------- Overview: chart ---------------- */}
         <div id="pg-overview" className={`flex-col gap-3 sm:gap-4 ${sectionVisibility('overview')}`}>
           <ReviewTarget
             id="payguard-year-chart"
             label="Annual income chart"
             reason="The chart duplicates monthly history and presents TWP and SGA as simultaneous targets."
+            certainty="hunch"
             layout="payguard"
           >
             <PayGuardChart streams={streams} year={year} />
@@ -301,9 +328,18 @@ export function TrackerPayGuard() {
                     aria-pressed={isSelected}
                   >
                     <span className="pg-tab-join" aria-hidden="true" />
-                    <span className={`pg-badge ${s.type === 'w2' ? 'pg-badge-w2' : 'pg-badge-se'}`}>
-                      {s.type === 'w2' ? 'W-2' : '1099'}
-                    </span>
+                    {/* The type badge does a browser favicon's job: it tells
+                        the tabs apart at a glance. On the *active* tab it has
+                        nothing left to say — the editor directly below opens
+                        with the same W-2 / 1099 badge beside the job name, so
+                        the label was printed twice within an inch of itself.
+                        The active tab is already named by its shape and its
+                        accent colour, which is how a browser does it too. */}
+                    {isSelected ? null : (
+                      <span className={`pg-badge ${s.type === 'w2' ? 'pg-badge-w2' : 'pg-badge-se'}`}>
+                        {s.type === 'w2' ? 'W-2' : '1099'}
+                      </span>
+                    )}
                     <span className="max-w-[8.5rem] truncate font-semibold" title={s.name}>{s.name}</span>
                     <span className="pg-tab-amount">{money(streamYearGross(s, year))}</span>
                   </button>
@@ -385,6 +421,7 @@ export function TrackerPayGuard() {
             id="payguard-monthly-analysis"
             label="Full monthly analysis"
             reason="Cards, table modes, summary totals, and the simulator repeat the same TWP / SGA facts; this should become a short risk-month list."
+            certainty="sure"
             layout="payguard"
           >
             <PayGuardAnalysis data={data} year={year} />
@@ -411,6 +448,8 @@ export function TrackerPayGuard() {
         ))}
       </nav>
 
+      <ToastStack />
+
       {settingsOpen ? (
         <SettingsPanel
           theme={ui.theme}
@@ -425,5 +464,41 @@ export function TrackerPayGuard() {
         />
       ) : null}
     </div>
+  );
+}
+
+
+/**
+ * The strip of months that need attention. The rule is shared with the
+ * ledger, workrecord and calc20; only the markup is payguard's.
+ */
+function MonthAttention({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
+  const { data, ui } = useTracker();
+  const now = todayMonth();
+  const months = monthsOfYear(ui.year).filter((month) => (
+    yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
+  ));
+  const flags = attentionFlags(data, months);
+  if (!flags.length) return null;
+
+  return (
+    <section className="pg-attention" aria-label="Months that need attention">
+      <TriangleAlert className="size-4 shrink-0" aria-hidden="true" />
+      <div className="pg-attention-rail">
+        {flags.map((flag) => (
+          <button
+            key={flag.month + flag.kind + flag.text}
+            type="button"
+            className="pg-attention-chip"
+            data-kind={flag.kind}
+            title={`${formatMonth(flag.month)}: ${flag.text}`}
+            onClick={() => onOpenMonth(flag.month)}
+          >
+            <span className="pg-attention-month">{shortMonthName(flag.month).toUpperCase()}</span>
+            <span>{flag.text}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
