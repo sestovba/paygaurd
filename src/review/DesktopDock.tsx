@@ -37,6 +37,8 @@ export function DesktopDock({
   open,
   onToggle,
   onClose,
+  toolsOpen,
+  onTools,
   openCount,
   mode,
   onMode,
@@ -64,6 +66,9 @@ export function DesktopDock({
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
+  /** Kept by the console so it survives a reload, like every other panel. */
+  toolsOpen: boolean;
+  onTools: (next: boolean) => void;
   openCount: number;
   mode: ReviewMode;
   onMode: (next: ReviewMode) => void;
@@ -93,7 +98,6 @@ export function DesktopDock({
   hiddenList: ReactNode;
 }) {
   const [width, setWidth] = useState(loadWidth);
-  const [toolsOpen, setToolsOpen] = useState(true);
   const drag = useRef<{ x: number; from: number } | null>(null);
 
   useEffect(() => {
@@ -206,7 +210,7 @@ export function DesktopDock({
           hint={mode === 'off' ? undefined
             : mode === 'audit' ? 'Audit' : mode === 'pick' ? 'Select' : 'A / B'}
           open={toolsOpen}
-          onToggle={() => setToolsOpen((current) => !current)}
+          onToggle={() => onTools(!toolsOpen)}
         >
           <div className="review-dock-bar">
             <Tool

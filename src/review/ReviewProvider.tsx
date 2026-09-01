@@ -106,6 +106,43 @@ function trayNoteId(layout: LayoutMode, edge: TrayEdge): string {
  *  not part of the record both sides write. */
 const READ_KEY = 'pg-review-read-v1';
 
+/** Which parts of the console were open. Furniture, not findings — it never
+ *  goes near the notes file — but resetting it on every reload means picking
+ *  the same three things open again every time the page rebuilds, which on a
+ *  dev server is constantly. */
+const PANELS_KEY = 'pg-review-panels-v1';
+
+interface Panels {
+  open: boolean;
+  min: boolean;
+  tools: boolean;
+  journal: boolean;
+  hidden: boolean;
+  archive: boolean;
+  wide: boolean;
+  scope: 'screen' | 'all';
+}
+
+const PANELS: Panels = {
+  open: false,
+  min: false,
+  tools: true,
+  journal: false,
+  hidden: false,
+  archive: false,
+  wide: false,
+  scope: 'screen'
+};
+
+function loadPanels(): Panels {
+  try {
+    const raw = localStorage.getItem(PANELS_KEY);
+    return raw ? { ...PANELS, ...JSON.parse(raw) as Partial<Panels> } : PANELS;
+  } catch {
+    return PANELS;
+  }
+}
+
 type ReadMarks = Record<string, string>;
 
 function loadRead(): ReadMarks {
@@ -197,21 +234,29 @@ function ReviewConsole({
   onNavigate?: (anchor: ReviewAnchor) => void;
   children: ReactNode;
 }) {
+  const panels = useRef(loadPanels()).current;
   const [mode, setMode] = useState<ReviewMode>('off');
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(panels.open);
+  /** Folded to its tab with the review still running. */
+  const [dockMin, setDockMin] = useState(panels.min);
+  /** The verbs. Their own section, like everything else in the dock. */
+  const [toolsOpen, setToolsOpen] = useState(panels.tools);
   const [notes, setNotes] = useState<ReviewNotes>(() => normalizeLanes(loadLocal()));
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(panels.journal);
   /** The journal opens on the screen you are looking at. Everything ever
    *  said is a tab away, but it is not the thing you are handed first. */
-  const [journalScope, setJournalScope] = useState<'screen' | 'all'>('screen');
+  const [journalScope, setJournalScope] = useState<'screen' | 'all'>(panels.scope);
   /** The board spread into columns across the screen. Desktop only — it is
    *  the one thing here a phone genuinely cannot do. */
-  const [journalWide, setJournalWide] = useState(false);
+  const [journalWide, setJournalWide] = useState(panels.wide);
   /** The row under the pointer, or under the keyboard cursor. On a desktop
    *  the page is beside the console rather than behind it, so a row can point
    *  at the thing it is about without anyone having to click anything. */
   const [peek, setPeek] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
+  /** A note that is off the page, and whose section is being marked on the
+   *  page so it can be switched back on from where it belongs. */
+  const [nest, setNest] = useState<string | null>(null);
   const [read, setRead] = useState<ReadMarks>(loadRead);
   /** The row that just changed lane, so it can be found again in its new
    *  home instead of being hunted for. */
@@ -240,9 +285,9 @@ function ReviewConsole({
    *  behind one button. There are two tools here, not nine. */
   /** The stash drawer's open state lives up here because the toolbar carries
    *  the button that opens it — it belongs in the group with Undo and Log. */
-  const [stashOpen, setStashOpen] = useState(false);
+  const [stashOpen, setStashOpen] = useState(panels.archive);
   /** The Hidden section's own open state. */
-  const [hiddenOpen, setHiddenOpen] = useState(false);
+  const [hiddenOpen, setHiddenOpen] = useState(panels.hidden);
   /** Under this, the console is a bar on the bottom edge; over it, a rail
    *  down the side. They are different objects, not one thing squeezed. */
   const [compact, setCompact] = useState(() => window.innerWidth < 640);
@@ -377,6 +422,11 @@ function ReviewConsole({
   }, [peek, cursor, notes, layout, mode]);
 
   useEffect(() => {
+    const note = nest ? notes[nest] : undefined;
+    if (nest && (!note || !offPage(note))) setNest(null);
+  }, [nest, notes]);
+
+  useEffect(() => {
     if (!moved) return;
     const timer = window.setTimeout(() => {
       const row = document.querySelector(`[data-note-id="${moved}"]`);
@@ -406,6 +456,17 @@ function ReviewConsole({
       return next;
     });
   }, [notes]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PANELS_KEY, JSON.stringify({
+        open, min: dockMin, tools: toolsOpen, journal: panelOpen,
+        hidden: hiddenOpen, archive: stashOpen, wide: journalWide, scope: journalScope
+      } satisfies Panels));
+    } catch {
+      // Private mode; the console opens on its defaults each session.
+    }
+  }, [open, dockMin, toolsOpen, panelOpen, hiddenOpen, stashOpen, journalWide, journalScope]);
 
   useEffect(() => {
     try {
@@ -883,12 +944,15 @@ function ReviewConsole({
       if (event.key === '4') setPanelOpen((current) => !current);
       if (event.key === 'u') undo();
 
-      // Note: on whatever is selected, or go and select something first.
-      if (event.key === 'n') {
+      // On whatever is selected. A key is named for the word on the button
+      // it stands in for, or it is a second vocabulary to learn.
+      if (event.key === 'c') {
         const chosen = pickedRef.current;
         if (chosen) commentOn(labelFor(chosen), chosen);
-        else { setMode('pick'); say('Pick what the note is about'); }
+        else { setMode('pick'); say('Select what the comment is about'); }
       }
+      if (event.key === 'x' && pickedRef.current) markPicked();
+      if (event.key === 'h' && pickedRef.current) hidePicked();
 
       // The board, driven from the keyboard. The letters that used to hide
       // the four screen shelves are free: those shelves are the Archive
@@ -1044,6 +1108,23 @@ function ReviewConsole({
     : null;
   const pickedRect = picked ? picked.getBoundingClientRect() : null;
 
+  /** Switch off whatever is selected, from the selection itself. */
+  function hidePicked() {
+    if (!picked) return;
+    const anchor = describeElement(picked, layout);
+    upsert({
+      id: anchorId(anchor),
+      kind: 'stow',
+      origin: 'user',
+      label: labelFor(picked),
+      status: 'open',
+      hidden: true,
+      anchor
+    });
+    setPicked(null);
+    say('Hidden — the eye in the journal puts it back', 'info');
+  }
+
   function markPicked() {
     if (!picked) return;
     const anchor = describeElement(picked, layout);
@@ -1165,11 +1246,12 @@ function ReviewConsole({
                 </button>
                 <button
                   type="button"
+                  role="switch"
+                  aria-checked="true"
                   className="review-hidden-back"
                   onClick={() => toggleHidden(note)}
-                  title="Put it back on the page"
                 >
-                  Show
+                  <EyeOff className="size-3.5" /> Hidden
                 </button>
               </li>
             ))}
@@ -1182,7 +1264,7 @@ function ReviewConsole({
               say('Everything back on the page', 'good');
             }}
           >
-            Show all {hiddenHere.length}
+            Put all {hiddenHere.length} back on the page
           </button>
         </>
       )}
@@ -1250,7 +1332,7 @@ function ReviewConsole({
                   <>
                     <div className="review-queue-card">
                       <span className="review-note-kind">
-                        {verdictLabel(triageNote)}
+                        {actOf(triageNote)}
                         <span className="review-note-where">{triageNote.anchor.layout}</span>
                       </span>
                       <strong className="review-queue-label">{triageNote.label}</strong>
@@ -1277,16 +1359,18 @@ function ReviewConsole({
                         <button type="button" onClick={() => pointAtNote(triageNote)}>
                           <Crosshair className="size-4" /> Find it
                         </button>
+                        {/* A switch, so it reads as the state it is in rather
+                            than as an instruction about what pressing it does.
+                            You can see what happens by pressing it. */}
                         <button
                           type="button"
+                          role="switch"
+                          aria-checked={offPage(triageNote)}
                           data-on={offPage(triageNote) || undefined}
                           onClick={() => toggleHidden(triageNote)}
-                          title={offPage(triageNote)
-                            ? 'Put it back on the page'
-                            : 'Take it off the page to see the screen without it'}
                         >
-                          {offPage(triageNote) ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                          {offPage(triageNote) ? 'Put it back' : 'Hide it'}
+                          {offPage(triageNote) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                          {offPage(triageNote) ? (triageNote.stow ? 'Stashed' : 'Hidden') : 'Visible'}
                         </button>
                         <button
                           type="button"
@@ -1535,7 +1619,11 @@ function ReviewConsole({
       setCursor(board[at + 1]?.id ?? board[at - 1]?.id ?? null);
       return true;
     }
-    if (event.key === 'h') { event.preventDefault(); toggleHidden(note); return true; }
+    if (event.key === 'h' && !pickedRef.current) {
+      event.preventDefault();
+      toggleHidden(note);
+      return true;
+    }
     if (event.key === 'r') { event.preventDefault(); markRead(note.id); setReplyTo(note.id); return true; }
     if (event.key === 'Enter') { event.preventDefault(); pointAtNote(note); return true; }
     return false;
@@ -1647,12 +1735,12 @@ function ReviewConsole({
             data-hidden={offPage(note) || undefined}
             onClick={() => toggleHidden(note)}
             aria-pressed={offPage(note)}
-            aria-label={offPage(note) ? `Put ${note.label} back on the page` : `Hide ${note.label}`}
+            role="switch"
+            aria-checked={offPage(note)}
+            aria-label={`${note.label} — ${note.stow ? 'stashed' : note.hidden ? 'hidden' : 'visible'}`}
             title={note.stow
-              ? `Stashed in the ${note.stow.edge} shelf — click to put it back on the page`
-              : note.hidden
-                ? 'Hidden — click to put it back on the page'
-                : 'Hide it on this screen. The note stays; the code is untouched.'}
+              ? `Stashed in the ${note.stow.edge} shelf`
+              : note.hidden ? 'Hidden' : 'Visible'}
           >
             {offPage(note) ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
@@ -1783,15 +1871,22 @@ function ReviewConsole({
     if (!note) return;
     const exact = elementForNote(note);
     const el = exact ?? nearestVisible(note);
-    if (el) el.setAttribute('data-review-peek', exact ? 'exact' : 'near');
+    // Three answers, and they are different: here it is; here is the section
+    // holding the thing you switched off; here is roughly where it lived.
+    if (el) el.setAttribute('data-review-peek', exact ? 'exact' : offPage(note) ? 'holds' : 'near');
   }
 
-  /** Point at the container instead of the thing, and say so. */
+  /** Point at the section holding it, and say why the thing itself is not
+   *  being pointed at. Off the page on purpose reads differently from not
+   *  found, and the reviewer is owed the difference. */
   function flashNearest(note: ReviewNote): boolean {
     const near = nearestVisible(note);
     if (!near) return false;
-    flashElement(near, 'near');
-    say('Not on screen — flashing what holds it', 'warn');
+    const off = offPage(note);
+    flashElement(near, off ? 'holds' : 'near');
+    say(off
+      ? `${note.stow ? 'Stashed' : 'Hidden'} — this is the section it sits in`
+      : 'Not on screen — flashing what holds it', off ? 'info' : 'warn');
     return true;
   }
 
@@ -1820,8 +1915,8 @@ function ReviewConsole({
 
   /** Clicking a note should say "this one" out loud: scroll to it and flash
    *  it, every time, even if it is already on screen. */
-  function flashElement(target: HTMLElement, tone: 'exact' | 'near' = 'exact') {
-    const mark = tone === 'near' ? 'review-flash-near' : 'review-flash';
+  function flashElement(target: HTMLElement, tone: 'exact' | 'near' | 'holds' = 'exact') {
+    const mark = tone === 'exact' ? 'review-flash' : 'review-flash-near';
     target.scrollIntoView({ block: 'center', behavior: 'smooth' });
     target.classList.remove(mark);
     void target.offsetWidth; // restart the animation on a repeat click
@@ -1834,13 +1929,18 @@ function ReviewConsole({
   /** Clicking a note takes you to it — switching layout, palette and page if
    *  that is what it takes — then flashes the element itself. */
   function pointAtNote(note: ReviewNote) {
-    if (note.stow) {
-      const here = note.anchor.layout === layout;
-      say(here
-        ? `Stashed in the ${note.stow.edge} panel`
-        : `Stashed in the ${note.stow.edge} panel over in ${note.anchor.layout}`);
-      // Stashing is per screen, so following one means going to that screen.
-      if (!here && onNavigate) onNavigate(note.anchor);
+    // Off the page is still somewhere: it sits inside a section that is on
+    // the screen, and that is the honest answer to "where is this?". Saying
+    // "stashed in the left shelf" told you which drawer it was in, not which
+    // part of the product it came out of.
+    if (offPage(note)) {
+      if (note.anchor.layout !== layout) {
+        if (onNavigate) { onNavigate(note.anchor); setNest(note.id); return; }
+        say(`Lives in the ${note.anchor.layout} layout`, 'info');
+        return;
+      }
+      if (flashNearest(note)) { setNest(note.id); return; }
+      say(`${note.stow ? 'Stashed' : 'Hidden'} — its section is not on this screen`, 'warn');
       return;
     }
 
@@ -1956,13 +2056,22 @@ function ReviewConsole({
             </div>
 
             <div className="review-actions-row">
+              {/* The same three words the journal and the report use. This
+                  said "Note" for a comment and "Flag" for a cut, which meant
+                  the act had one name where it was done and another name
+                  everywhere it was read. */}
               <button type="button" onClick={() => commentOn(labelFor(picked), picked)}>
-                <MessageSquarePlus className="size-4" /> Note <kbd>n</kbd>
+                <MessageSquarePlus className="size-4" /> Comment <kbd>c</kbd>
               </button>
               <button type="button" onClick={markPicked}>
-                <Trash2 className="size-4" /> Flag <kbd>f</kbd>
+                <Trash2 className="size-4" /> Cut <kbd>x</kbd>
               </button>
-              <span className="review-stow-group" title="Stash it — pick a side. Shift+arrow does the same.">
+              {/* Hiding is a first-class answer now, so it belongs where you
+                  are actually looking at the thing. */}
+              <button type="button" onClick={hidePicked}>
+                <EyeOff className="size-4" /> Hide <kbd>h</kbd>
+              </button>
+              <span className="review-stow-group" title="Stash it on a shelf — pick a side. Shift+arrow does the same.">
                 <Archive className="size-4" />
                 {([
                   ['left', ArrowLeft],
@@ -1973,8 +2082,8 @@ function ReviewConsole({
                   <button
                     key={edge}
                     type="button"
-                    aria-label={`Stash in the ${edge} tray`}
-                    title={`Stash · ${edge}`}
+                    aria-label={`Stash on the ${edge} shelf`}
+                    title={`Stash · ${edge} shelf`}
                     onClick={() => { stow(picked, edge); setPicked(null); }}
                   >
                     <Icon className="size-3.5" />
@@ -2093,6 +2202,44 @@ function ReviewConsole({
         </div>
       ) : null}
 
+      {/* Where a hidden thing lives. Anchored to the section holding it, so
+          the answer to "which part of the page is this in?" is on the page
+          rather than in a file path — and it is the switch that puts it back,
+          because that is what you want the moment you have found it. */}
+      {(() => {
+        const note = nest ? notes[nest] : undefined;
+        if (!note) return null;
+        const box = nearestVisible(note)?.getBoundingClientRect();
+        if (!box) return null;
+        return (
+          <div
+            data-review-ui
+            className="review-nest"
+            style={{ top: Math.max(4, box.top + 6), left: Math.max(4, box.left + 6) }}
+          >
+            <button
+              type="button"
+              role="switch"
+              aria-checked="true"
+              className="review-nest-switch"
+              onClick={() => toggleHidden(note)}
+            >
+              <EyeOff className="size-3.5" />
+              <span>{note.label}</span>
+              <b>{note.stow ? 'stashed here' : 'hidden here'}</b>
+            </button>
+            <button
+              type="button"
+              className="review-nest-close"
+              onClick={() => setNest(null)}
+              aria-label="Stop marking this"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        );
+      })()}
+
       {drag ? (
         <div
           data-review-ui
@@ -2131,6 +2278,10 @@ function ReviewConsole({
             if (!next) { setMode('off'); setPicked(null); }
           }}
           onClose={() => { setOpen(false); setMode('off'); setPicked(null); }}
+          min={dockMin}
+          onMin={setDockMin}
+          toolsOpen={toolsOpen}
+          onTools={setToolsOpen}
           mode={mode}
           onMode={(next) => {
             setMode(next);
@@ -2166,6 +2317,8 @@ function ReviewConsole({
             if (!next) { setMode('off'); setPicked(null); }
           }}
           onClose={() => { setOpen(false); setMode('off'); setPicked(null); }}
+          toolsOpen={toolsOpen}
+          onTools={setToolsOpen}
           openCount={openCount}
           mode={mode}
           onMode={(next) => {
@@ -2217,14 +2370,6 @@ function actOf(note: ReviewNote): string {
   return 'Look';
 }
 
-function verdictLabel(note: ReviewNote): string {
-  if (note.kind === 'choice') return `Chose ${note.choice}`;
-  if (note.stow && !note.verdict) return 'Stashed';
-  if (note.verdict === 'approved') return note.kind === 'delete' ? 'Delete' : 'Approved';
-  if (note.verdict === 'rejected') return 'Keep';
-  if (note.verdict === 'revise') return 'Revise';
-  return 'Comment';
-}
 
 /** Dev source line numbers count the HMR prelude, so they are ~19 lines off.
  *  The dev server rewrites them to real lines when it writes the notes file;

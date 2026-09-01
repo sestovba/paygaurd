@@ -78,7 +78,7 @@ export function ReviewTarget({
     return (
       <div className={`review-slot ${className}`} data-review-id={id} data-review-ui>
         <Archive className="size-3.5 shrink-0" />
-        <span className="review-slot-label">Stowed · {label}</span>
+        <span className="review-slot-label">Stashed · {label}</span>
         <button type="button" onClick={() => review.restore(id)} title="Put it back here">
           <Undo2 className="size-3.5" /> Restore
         </button>
@@ -111,8 +111,8 @@ export function ReviewTarget({
               className="review-target-btn review-yes"
               data-on={verdict === 'approved' || undefined}
               onClick={(event) => { stop(event); review?.decide(target, 'approved', host.current); }}
-              aria-label={`Agree: delete ${label}`}
-              title={`Agree, cut it. ${reason}`}
+              aria-label={`Cut ${label}`}
+              title={`Cut it. ${reason}`}
             >
               <Trash2 className="size-4" />
             </button>

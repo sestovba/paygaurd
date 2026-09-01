@@ -8,7 +8,7 @@ move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),
 your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`
 — acted on) or `"parked"` (`[-]` — deliberately not now).
 
-STOWED means parked out of the page in the app; the code is untouched and
+STASHED means carried onto a shelf in the app; the code is untouched and
 it can be dragged back. HIDDEN means switched off with the eye — also
 untouched code, and a question ("is the screen better without this?")
 rather than an answer. DELETE/KEEP/MOVE are the decisions to act on.
@@ -22,7 +22,7 @@ To answer a note, append to its `thread` array in review-notes.json with
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
 12 note(s) · 5 to delete · 3 parked · 1 A/B pick(s)
-Updated 2026-09-01 01:13
+Updated 2026-09-01 01:19
 
 ## Layout: ledger
 
@@ -71,8 +71,8 @@ Updated 2026-09-01 01:13
   - DOM: div#pg-overview > div:nth-of-type(2)
   - Origin: picked by the user
   - Noted: 2026-08-31 02:44
-- [ ] **STOWED — Since**
-  - Parked in the right tray (hidden in the app, still in the code)
+- [ ] **STASHED — Since**
+  - Stashed on the right shelf (off the page in the app, still in the code)
   - Source: src/components/payguard/PayGuardJobEditor.tsx:194
   - Component: PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider
   - Page: Jobs
@@ -92,8 +92,8 @@ Updated 2026-09-01 01:13
   - DOM: main#pg-main > section.pg-status-hero > div.pg-status-hero-main:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-08-31 03:03
-- [ ] **STOWED — August countable earnings**
-  - Parked in the left tray (hidden in the app, still in the code)
+- [ ] **STASHED — August countable earnings**
+  - Stashed on the left shelf (off the page in the app, still in the code)
   - Source: src/components/payguard/TrackerPayGuard.tsx:282
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Page: Jobs
@@ -102,7 +102,7 @@ Updated 2026-09-01 01:13
   - Origin: picked by the user
   - Noted: 2026-08-31 03:04
 - [ ] **DELETE — Duplicate overview statistics**
-  - Parked in the left tray (hidden in the app, still in the code)
+  - Stashed on the left shelf (off the page in the app, still in the code)
   - I proposed cutting it because: YTD, TWP, and SGA repeat the status above; averages and source counts do not guide a monthly benefit decision.
   - Source: src/components/payguard/TrackerPayGuard.tsx:339
   - Section id: payguard-overview-stats

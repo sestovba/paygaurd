@@ -5371,3 +5371,84 @@ body.review-picking * {
   background: rgb(220 38 38 / 0.12);
   color: var(--review-red);
 }
+
+
+/* --- Where a hidden thing lives --------------------------------------------
+ *
+ * Taking something off the page loses the answer to "which part of the
+ * product was that in?" — a file path is not that answer. So finding a
+ * hidden note outlines the section holding it and pins this to the corner of
+ * it: what is missing, and the switch that puts it back, at the place it
+ * belongs rather than in a list somewhere else.
+ */
+
+.review-nest {
+  position: fixed;
+  z-index: 118;
+  display: flex;
+  max-width: min(22rem, 70vw);
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgb(180 83 9 / 0.5);
+  border-radius: 0.45rem;
+  background: rgb(120 53 15 / 0.94);
+  color: white;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  box-shadow: 0 8px 20px rgb(2 6 23 / 0.35);
+  backdrop-filter: var(--review-blur);
+}
+
+.review-nest-switch {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.6875rem;
+  cursor: pointer;
+}
+
+.review-nest-switch:hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+.review-nest-switch span {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-nest-switch b {
+  flex: none;
+  color: rgb(253 230 138 / 0.9);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.review-nest-close {
+  display: grid;
+  width: 1.5rem;
+  flex: none;
+  place-items: center;
+  border-left: 1px solid rgb(255 255 255 / 0.16);
+  color: rgb(255 255 255 / 0.65);
+  cursor: pointer;
+}
+
+.review-nest-close:hover {
+  background: rgb(255 255 255 / 0.14);
+  color: white;
+}
+
+/* The section that holds something switched off, as opposed to a section
+   standing in for an element that simply is not there. */
+.review-flash-holds {
+  outline: 2px dashed #b45309;
+  outline-offset: 3px;
+}
+
+[data-review-peek='holds'] {
+  outline: 2px dashed #b45309 !important;
+  outline-offset: 3px;
+}

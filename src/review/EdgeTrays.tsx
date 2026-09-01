@@ -214,7 +214,7 @@ export function EdgeTrays({
           event.stopPropagation();
           setSettingsFor(settingsFor === edge ? null : edge);
         }}
-        aria-label={`Settings for the ${edge} stash`}
+        aria-label={`Settings for the ${edge} shelf`}
         title="Name, colour, sort"
       >
         <Settings2 className="size-3.5" />
@@ -223,7 +223,7 @@ export function EdgeTrays({
         type="button"
         className="review-tray-comment"
         onClick={(event) => { event.stopPropagation(); onCommentGroup(edge); }}
-        aria-label={`Comment on everything in the ${edge} stash`}
+        aria-label={`Comment on everything on the ${edge} shelf`}
         title={`One comment covering all ${count} item(s) on this shelf`}
       >
         <MessageSquarePlus className="size-3.5" />
@@ -243,7 +243,7 @@ export function EdgeTrays({
             <span
               className="review-stack-grip"
               onPointerDown={onGripDown}
-              title="Drag the stashes around"
+              title="Drag the shelves around"
               aria-hidden="true"
             >
               <GripVertical className="size-3.5" />

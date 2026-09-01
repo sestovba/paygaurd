@@ -21,6 +21,10 @@ export function MobileDock({
   open,
   onToggle,
   onClose,
+  min,
+  onMin,
+  toolsOpen,
+  onTools,
   mode,
   onMode,
   auditTotal,
@@ -47,6 +51,12 @@ export function MobileDock({
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
+  /** Folded to its tab with the review still running. Kept by the console so
+   *  it survives a reload, like every other panel in here. */
+  min: boolean;
+  onMin: (next: boolean) => void;
+  toolsOpen: boolean;
+  onTools: (next: boolean) => void;
   mode: ReviewMode;
   onMode: (next: ReviewMode) => void;
   auditTotal: number;
@@ -75,20 +85,16 @@ export function MobileDock({
   hiddenList: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  /** Folded to its tab with the review still running. Distinct from the
-   *  console being off: Done ends the review, this just gets the dock out of
-   *  the way of the screen it is reviewing. */
-  const [min, setMin] = useState(false);
-  /** The Review section — the verbs — starts open: you opened the dock to
-   *  do something with them. It folds away like every other section. */
-  const [toolsOpen, setToolsOpen] = useState(true);
   /** The journal filling the dock. Reading a thread in a 42vh slot on a
    *  phone is reading through a letterbox. */
   const [journalBig, setJournalBig] = useState(false);
+  /** Minimised is not the console being off: Done ends the review, this just
+   *  gets the dock out of the way of the screen it is reviewing. Both it and
+   *  the sections are kept by the console, so a reload comes back to the
+   *  same dock rather than to the defaults. */
   const shown = open && !min;
-
-  // A console that was shut and reopened starts on its feet, not folded.
-  useEffect(() => { if (!open) setMin(false); }, [open]);
+  const setMin = onMin;
+  const setToolsOpen = onTools;
 
   /* The dock stands in front of the app's own bottom furniture, so the page
      needs to know how much of itself is behind it. */
@@ -150,7 +156,7 @@ export function MobileDock({
             hint={mode === 'off' ? undefined
               : mode === 'audit' ? 'Audit' : mode === 'pick' ? 'Select' : 'A / B'}
             open={toolsOpen}
-            onToggle={() => setToolsOpen((current) => !current)}
+            onToggle={() => setToolsOpen(!toolsOpen)}
           >
             <div className="review-dock-bar">
               <Tool
