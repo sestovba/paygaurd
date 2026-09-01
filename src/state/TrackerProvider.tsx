@@ -33,6 +33,10 @@ interface TrackerContextValue {
   setTwpAssessment: (assessment: TwpAssessment) => void;
   setPriorTrialMonths: (months: MonthKey[]) => void;
   setIrwe: (month: MonthKey, amount: number) => void;
+  /** A whole-dataset edit that still takes one undo step — for the operations
+   *  the named mutators above cannot express (clearing a year, duplicating a
+   *  stream). Snapshots first, exactly like they do. */
+  commit: (updater: (current: TrackerData) => TrackerData) => void;
   resetAll: () => void;
   /** Wholesale replace, for restoring a JSON export. Tolerates a partial or
    *  older-shaped object the same way loadData does. */
@@ -286,6 +290,11 @@ export function TrackerProvider({ children, session, onSignOut }: {
     setData((current) => ({ ...current, irwe: { ...current.irwe, [month]: amount } }));
   }, [snapshot]);
 
+  const commit = useCallback((updater: (current: TrackerData) => TrackerData) => {
+    snapshot();
+    setData(updater);
+  }, [snapshot]);
+
   const resetAll = useCallback(() => {
     if (!confirm('Clear everything on this device? This cannot be undone.')) return;
     setHistory([]);
@@ -306,13 +315,13 @@ export function TrackerProvider({ children, session, onSignOut }: {
 
   const value = useMemo<TrackerContextValue>(() => ({
     data, ui, setUi, addStream, updateStream, removeStream, updateMonthEntry, updateMonthEntries,
-    addPaycheck, removePaycheck, setTwpAssessment, setPriorTrialMonths, setIrwe, resetAll, replaceAll,
+    addPaycheck, removePaycheck, setTwpAssessment, setPriorTrialMonths, setIrwe, commit, resetAll, replaceAll,
     undoCount: history.length, undo,
     canSync: allowed, cloudSyncEnabled: ui.cloudSyncEnabled, cloudSyncStatus, setCloudSyncEnabled,
     session: session ?? null, signOut
   }), [
     data, ui, setUi, addStream, updateStream, removeStream, updateMonthEntry, updateMonthEntries,
-    addPaycheck, removePaycheck, setTwpAssessment, setPriorTrialMonths, setIrwe, resetAll, replaceAll,
+    addPaycheck, removePaycheck, setTwpAssessment, setPriorTrialMonths, setIrwe, commit, resetAll, replaceAll,
     history.length, undo, allowed, cloudSyncStatus, setCloudSyncEnabled, session, signOut
   ]);
 

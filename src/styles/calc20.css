@@ -1,0 +1,6230 @@
+/* SSDI Income Tracker — v2
+ *
+ * Type: Inter for words and money; JetBrains Mono for tracking labels
+ * (eyebrows, chips, month codes). Tabular numerals keep columns of money
+ * lined up — that is the point of a ledger.
+ *
+ * Colour: first-paste Work Record tokens (oklch navy / sky / primary).
+ * Status fills still say what happened to a month: kept, trial month
+ * spent, over SGA. Proximity is never a fill — it is a small figure.
+ *
+ * Order in this file:
+ *   tokens / reset
+ *   shell, header, toolbar, sections
+ *   streams, month grid, totals, squares
+ *   buttons, empty, hotbar, warning
+ *   popovers, sheets, sign-in, toasts
+ *   layout (wrapping stack + stream cards)
+ *   theme (2026 Work Record surfaces)
+ *   menus / sheets (drawer craft)
+ *   final (must-win canvas + month hover)
+ */
+
+:root {
+  color-scheme: light;
+
+  /* SSDI Income Tracker — 2026 Work Record.html (:root) */
+  --background: oklch(96.5% .008 240);
+  --foreground: oklch(25% .04 255);
+  --card-bg: oklch(100% 0 0);
+  --primary: oklch(55% .17 255);
+  --primary-fg: oklch(98.5% .005 250);
+  --secondary: oklch(94.5% .015 240);
+  --muted-fill: oklch(94.5% .015 240);
+  --muted-fg: oklch(55% .03 250);
+  --border: oklch(91.5% .012 245);
+  --ring: oklch(65% .12 255);
+  --sky: oklch(78% .12 230);
+  --navy: oklch(33% .06 258);
+  --navy-deep: oklch(28% .055 258);
+  --ink-soft: oklch(52% .035 252);
+  --header-accent: var(--sky);
+
+  /* surfaces */
+  --desk: var(--background);
+  --paper: var(--secondary);
+  --paper-2: var(--secondary);
+  --paper-3: color-mix(in oklab, var(--secondary) 70%, var(--border));
+  --card: var(--card-bg);
+
+  /* ink */
+  --ink: oklch(22% .045 258);
+  --ink-2: oklch(30% .04 255);
+  --ink-3: var(--ink-soft);
+  --muted: var(--muted-fg);
+  --on-ink: var(--primary-fg);
+  --on-ink-muted: color-mix(in oklab, var(--sky) 80%, transparent);
+
+  /* lines */
+  --line: var(--border);
+  --line-2: var(--border);
+  --line-3: color-mix(in oklab, var(--border) 70%, var(--background));
+  --line-strong: color-mix(in oklab, var(--ink-soft) 35%, var(--border));
+  --line-ink: color-mix(in oklab, var(--on-ink) 22%, transparent);
+
+  /* accent — current month + filled action */
+  --accent: var(--sky);
+  --accent-ink: var(--primary);
+  --accent-ink-hover: oklch(48% .17 255);
+
+  /* status — twp-green / twp-amber / twp-red */
+  --keep-bg: #e8f5e8;
+  --keep-line: #a8d5a8;
+  --keep-label: #2d6a2d;
+  --keep-value: #1a4d1a;
+
+  --spent-bg: #fef9e7;
+  --spent-line: #f6cc75;
+  --spent-label: #92400e;
+  --spent-value: #78350f;
+  --spent-strong: #fbbf24;
+
+  --over-bg: #fef2f2;
+  --over-line: #fecaca;
+  --over-label: #991b1b;
+  --over-value: #7f1d1d;
+
+  --badge-w2-bg: color-mix(in oklab, var(--primary) 10%, var(--card));
+  --badge-w2-ink: var(--primary);
+  --badge-1099-bg: color-mix(in oklab, oklch(72% .09 310) 20%, var(--card));
+  --badge-1099-ink: oklch(42% .14 310);
+  --badge-ended-bg: color-mix(in oklab, var(--secondary) 72%, var(--border));
+  --badge-ended-ink: oklch(40% .035 250);
+  --badge-paused-bg: var(--spent-bg);
+  --badge-paused-ink: var(--spent-label);
+  --hover-blue-border: color-mix(in oklab, var(--primary) 42%, var(--border));
+  --hover-blue-fill: color-mix(in oklab, var(--sky) 22%, var(--card));
+  --shadow-hover: 0 1px 2px oklch(30% .04 255 / .05);
+
+  --radius: .75rem;
+  --radius-md: calc(var(--radius) + 8px);
+  --radius-lg: calc(var(--radius) + 12px);
+  --motion: cubic-bezier(.4, 0, .2, 1);
+  --motion-spring: cubic-bezier(.22, 1.42, .28, 1);
+
+  /* shared glass pigments and edges */
+  --glass-blue: color-mix(in oklab, var(--secondary) calc(100% - 44% * var(--glass-strength)), transparent);
+  --glass-cyan: color-mix(in oklab, var(--secondary) calc(100% - 58% * var(--glass-strength)), transparent);
+  --glass-lilac: color-mix(in oklab, var(--secondary) calc(100% - 58% * var(--glass-strength)), transparent);
+  --glass-rose: color-mix(in oklab, var(--secondary) calc(100% - 70% * var(--glass-strength)), transparent);
+  --glass-edge: color-mix(in oklab, var(--card) calc(48% + 38% * var(--glass-strength)), transparent);
+  --glass-edge-soft: color-mix(in oklab, var(--card) calc(34% + 30% * var(--glass-strength)), transparent);
+  --glass-shadow: 0 24px 72px oklch(30% .04 255 / .13);
+
+  /* Frosted glass — blur + saturate, no SVG displacement. Every alpha is
+   * multiplied by --glass-strength so Settings → Appearance can flatten it. */
+  --glass-strength: 1;
+
+  /* Chrome the later layout layers consume — themable, not hardcoded. */
+  --header-fill: var(--navy);
+  --header-glow: color-mix(in oklab, var(--sky) calc(17% * var(--glass-strength)), transparent);
+  --header-ink: var(--on-ink);
+  --header-muted: var(--on-ink-muted);
+  --over-bright: #ffb6c7;
+  --filled-from: var(--primary);
+  --filled-to: var(--primary);
+  --card-fill: var(--card);
+  --card-edge: var(--border);
+  --well-fill: color-mix(in oklab, var(--secondary) 60%, transparent);
+  --well-edge: var(--border);
+  --inset-fill: color-mix(in oklab, var(--card) 70%, var(--secondary));
+  --inset-edge: var(--border);
+  --pane-body: color-mix(in oklab, var(--secondary) 60%, var(--desk));
+  --pane-shine: color-mix(in oklab, var(--card) calc(22% * var(--glass-strength)), transparent);
+  --desk-glow-1: transparent;
+  --desk-glow-2: transparent;
+  --desk-glow-3: transparent;
+  --desk-glow-4: transparent;
+  --desk-a: var(--desk);
+  --desk-b: var(--desk);
+  --desk-c: var(--desk);
+  --theme-color: #eff4f8;
+
+  --shadow-header: 0 20px 50px -20px oklch(28% .055 258 / .6);
+  --shadow-section: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-card: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-card-hover: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-card-open: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-lift: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-month: 0 1px 3px oklch(30% .04 255 / .10);
+  --shadow-chip: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-filled: 0 10px 25px -8px oklch(55% .17 255 / .55);
+
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --background: oklch(18% .03 258);
+  --foreground: oklch(96% .008 250);
+  --card-bg: oklch(23% .04 258);
+  --primary: oklch(68% .15 245);
+  --primary-fg: oklch(18% .03 258);
+  --secondary: oklch(28% .04 258);
+  --muted-fill: oklch(28% .04 258);
+  --muted-fg: oklch(70% .03 250);
+  --border: oklch(100% 0 0 / .12);
+  --ring: oklch(60% .1 250);
+  --sky: oklch(78% .12 230);
+  --navy: oklch(33% .06 258);
+  --navy-deep: oklch(28% .055 258);
+  --ink-soft: oklch(70% .03 250);
+  --header-accent: var(--sky);
+
+  --desk: var(--background);
+  --paper: var(--secondary);
+  --paper-2: var(--secondary);
+  --paper-3: color-mix(in oklab, var(--secondary) 80%, var(--card-bg));
+  --card: var(--card-bg);
+
+  --ink: var(--foreground);
+  --ink-2: oklch(96% .008 250);
+  --ink-3: var(--ink-soft);
+  --muted: var(--muted-fg);
+  --on-ink: oklch(96% .008 250);
+  --on-ink-muted: color-mix(in oklab, var(--sky) 80%, transparent);
+
+  --line: var(--border);
+  --line-2: var(--border);
+  --line-3: oklch(100% 0 0 / .08);
+  --line-strong: oklch(100% 0 0 / .18);
+  --line-ink: oklch(100% 0 0 / .2);
+
+  --accent: var(--sky);
+  --accent-ink: var(--primary);
+  --accent-ink-hover: oklch(78% .12 230);
+
+  --keep-bg: #1a3320;
+  --keep-line: #2d6a2d;
+  --keep-label: #86efac;
+  --keep-value: #bbf7d0;
+
+  --spent-bg: #3a2e12;
+  --spent-line: #b45309;
+  --spent-label: #fcd34d;
+  --spent-value: #fde68a;
+  --spent-strong: #fbbf24;
+
+  --over-bg: #3f1515;
+  --over-line: #991b1b;
+  --over-label: #fca5a5;
+  --over-value: #fecaca;
+
+  --badge-w2-bg: color-mix(in oklab, var(--primary) 18%, var(--card));
+  --badge-w2-ink: var(--sky);
+  --badge-1099-bg: color-mix(in oklab, oklch(70% .08 310) 22%, var(--card));
+  --badge-1099-ink: oklch(78% .08 310);
+  --badge-ended-bg: color-mix(in oklab, var(--secondary) 80%, var(--card));
+  --badge-ended-ink: oklch(72% .03 250);
+  --badge-paused-bg: var(--spent-bg);
+  --badge-paused-ink: var(--spent-label);
+
+  --glass-blue: color-mix(in oklab, var(--secondary) calc(100% - 44% * var(--glass-strength)), transparent);
+  --glass-cyan: color-mix(in oklab, var(--secondary) calc(100% - 58% * var(--glass-strength)), transparent);
+  --glass-lilac: color-mix(in oklab, var(--secondary) calc(100% - 58% * var(--glass-strength)), transparent);
+  --glass-rose: color-mix(in oklab, var(--secondary) calc(100% - 70% * var(--glass-strength)), transparent);
+  --glass-edge: oklch(100% 0 0 / calc(.12 + .18 * var(--glass-strength)));
+  --glass-edge-soft: oklch(100% 0 0 / calc(.08 + .12 * var(--glass-strength)));
+  --glass-shadow: 0 24px 72px oklch(0% 0 0 / .45);
+
+  --header-fill: var(--navy);
+  --header-glow: color-mix(in oklab, var(--sky) calc(12% * var(--glass-strength)), transparent);
+  --over-bright: #ffb6c7;
+  --filled-from: var(--primary);
+  --filled-to: var(--primary);
+  --card-fill: var(--card);
+  --card-edge: var(--border);
+  --well-fill: color-mix(in oklab, var(--secondary) 60%, transparent);
+  --well-edge: var(--border);
+  --inset-fill: color-mix(in oklab, var(--card) 80%, transparent);
+  --inset-edge: var(--border);
+  --pane-body: color-mix(in oklab, var(--secondary) 70%, var(--desk));
+  --pane-shine: color-mix(in oklab, var(--card) calc(10% * var(--glass-strength)), transparent);
+  --desk-glow-1: transparent;
+  --desk-glow-2: transparent;
+  --desk-glow-3: transparent;
+  --desk-glow-4: transparent;
+  --desk-a: var(--desk);
+  --desk-b: var(--desk);
+  --desk-c: var(--desk);
+  --theme-color: #09121f;
+
+  --shadow-header: 0 20px 50px -20px rgba(0, 0, 0, .55);
+  --shadow-section: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-card: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-card-hover: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-card-open: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-lift: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-month: 0 1px 3px oklch(30% .04 255 / .14);
+  --shadow-chip: 0 1px 2px oklch(30% .04 255 / .05);
+  --shadow-filled: 0 10px 25px -8px rgba(96, 165, 250, .4);
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; background: var(--desk); }
+
+body {
+  margin: 0;
+  position: relative;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Soft colour behind the page, not a flat field — every glass surface in
+ * the app is translucent now, and a single flat beige behind it gives the
+ * distortion/tint nothing to actually show. Built from hues already in
+ * the palette (the accent teal, the spent/over status tones) so it reads
+ * as an extension of the existing colour system, not a new one.
+ *
+ * A real position: fixed element, not background-attachment: fixed on
+ * body — that property has real bugs on iOS Safari, and more importantly
+ * here, percentage gradient positions on body itself resolve against its
+ * full scrollable height, not the viewport. On a short page that stretched
+ * the ellipses' falloff across the whole page — a "teal leaking in at the
+ * bottom" that was really the top-positioned blob, just miscalculated
+ * against a body far taller than what was actually visible at once. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 880px 660px at 4% -8%, var(--desk-glow-1), transparent 62%),
+    radial-gradient(ellipse 760px 600px at 98% 4%, var(--desk-glow-2), transparent 60%),
+    radial-gradient(ellipse 780px 660px at 12% 102%, var(--desk-glow-3), transparent 62%),
+    radial-gradient(ellipse 820px 680px at 92% 108%, var(--desk-glow-4), transparent 64%),
+    linear-gradient(155deg, var(--desk-a) 0%, var(--desk-b) 48%, var(--desk-c) 100%);
+}
+
+a { color: var(--accent-ink); text-decoration: none; }
+a:hover { color: var(--accent-ink-hover); text-decoration: underline; }
+
+button { font-family: inherit; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Every figure in the app. */
+.num {
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+
+.eyebrow,
+.mono-track {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- shell */
+
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 0 0 64px;
+}
+
+.app-main {
+  width: 100%;
+  max-width: 1180px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 780px) {
+  .app-shell { padding: 24px 24px 64px; }
+  .app-main {
+    border-radius: var(--radius-md);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    overflow: visible;
+  }
+}
+
+/* --------------------------------------------------------------- header */
+
+.topbar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 20px 16px 19px;
+  /* Solid --ink base always — the sheen is a highlight layered on top of
+   * an opaque plate, not transparency, so h1/eyebrow text is never
+   * actually resting on glass. */
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, calc(.1 * var(--glass-strength))) 0%, rgba(255, 255, 255, 0) 40%),
+    var(--ink);
+  backdrop-filter: saturate(calc(100% + 60% * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 60% * var(--glass-strength)));
+  border-bottom: 2px solid var(--accent);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, .18),
+    inset 0 -8px 8px rgba(255, 255, 255, calc(.06 * var(--glass-strength))),
+    inset 0 8px 8px rgba(255, 255, 255, calc(.08 * var(--glass-strength))),
+    inset 0 4px 0 rgba(255, 255, 255, calc(.14 * var(--glass-strength)));
+}
+
+.topbar__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.topbar__title { flex: 1 1 auto; min-width: 0; }
+
+.topbar__eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--on-ink-muted);
+}
+
+.topbar h1 {
+  margin: 3px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.025em;
+  color: var(--on-ink);
+}
+
+.topbar__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.year-select {
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--line-ink);
+  border-radius: 5px;
+  background: var(--ink-2);
+  color: var(--on-ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.year-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-ink-muted);
+  cursor: pointer;
+  transition: background 140ms var(--motion), color 140ms var(--motion);
+}
+
+/* This lives on the header, which stays dark navy in both themes — but
+ * --ink-2 does not (it is the "ink" token, meant to flip to near-white in
+ * dark mode). Using it here meant a dark-theme hover turned this into a
+ * near-white pill with hardcoded white text on top of it: invisible. A
+ * plain white wash is theme-constant, which is what a permanently-dark
+ * surface's hover state actually needs. */
+.icon-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.icon-button:disabled { opacity: .38; cursor: default; }
+
+/* On a light background (a card, a section bar) instead of the dark header —
+ * the default color and hover above assume a dark background to show up
+ * against, and washed out or never visibly changed here without this. */
+/* A background at rest, not just on hover — on a touch device nothing
+ * ever hovers, so a glyph that only gained contrast on hover was
+ * effectively invisible there. */
+.icon-button--muted {
+  background: var(--paper-2);
+  color: var(--ink-2);
+}
+.icon-button--muted:hover:not(:disabled) {
+  background: var(--paper-3);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+.notice-menu { position: relative; }
+
+.notice-menu__count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+
+.notice-menu__surface .popover-drawer__items > .notice-row .notice-row__main {
+  min-height: 56px;
+}
+
+/* initials avatar */
+.avatar {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #46525f;
+  border-radius: 50%;
+  background: var(--ink-2);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 140ms var(--motion), border-color 140ms var(--motion);
+}
+
+.avatar:hover { background: var(--line-ink); border-color: rgba(255, 255, 255, .4); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* the one figure that matters */
+.headline {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.headline__main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.headline__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--on-ink-muted);
+}
+
+.headline__value {
+  font-family: var(--mono);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.headline__value--over { color: #ffb4a8; }
+
+.headline__aside {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-family: var(--mono);
+}
+
+.headline__of { font-size: 11px; letter-spacing: .02em; color: var(--on-ink-muted); }
+.headline__room { font-size: 13px; font-weight: 600; color: var(--on-ink); }
+
+/* nine-dot trial work meter */
+.twp-meter { display: flex; flex-direction: column; gap: 8px; }
+.twp-meter__dots { display: flex; gap: 4px; }
+
+/* Remaining months are a lightly tinted outline, spent/prior months are a
+ * solid fill, so the count is legible from the shape at a glance — this is
+ * the number of irreversible trial-work months left, not a decorative
+ * progress bar, so it needs to read as clearly as the big figure above it. */
+.twp-dot {
+  flex: 1 1 0;
+  height: 10px;
+  border-radius: 99px;
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  border: 2px solid var(--accent);
+  transition: background 180ms var(--motion), border-color 180ms var(--motion);
+}
+
+.twp-dot--prior {
+  background: var(--muted);
+  border-color: var(--muted);
+}
+
+.twp-dot--spent {
+  background: var(--spent-strong);
+  border-color: var(--spent-strong);
+}
+
+.twp-meter__label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--on-ink-muted);
+}
+
+/* desktop header adds standing figures beside the headline */
+.standings { display: none; }
+
+@media (min-width: 780px) {
+  .topbar { padding: 20px 22px 18px; }
+  .topbar h1 { font-size: 23px; }
+
+  .standings {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+  }
+
+  .standing { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+
+  .standing__label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    text-align: right;
+    color: var(--on-ink-muted);
+  }
+
+  .standing__value {
+    font-family: var(--mono);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--on-ink);
+  }
+
+  .standing__value--accent { color: var(--accent); }
+  .standing__unit { font-size: 12px; font-weight: 400; color: var(--on-ink-muted); }
+
+  .standing-divider { display: none; }
+}
+
+/* --------------------------------------------------------------- toolbar */
+
+/* Shown at every width. Controls that only make sense with room carry
+ * .toolbar__wide — hiding the whole bar on mobile silently removed choices
+ * that matter more on a small screen, not less. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 780px) { .toolbar { padding: 13px 22px; } }
+
+/* Grouped, because "cols" beside "pivot" reads as two unrelated switches
+ * when they are the same decision: how the months are laid out. */
+.toolbar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 7px;
+  background: var(--paper);
+  border: 1px solid var(--line-2);
+}
+
+.toolbar__group-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 4px 0 5px;
+}
+
+.toolbar__wide { display: none; }
+
+@media (min-width: 780px) {
+  .toolbar__wide { display: flex; }
+  .toolbar__field.toolbar__wide { display: flex; }
+}
+
+.toolbar__spacer { flex: 1 1 auto; }
+.toolbar__note { font-family: var(--mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); }
+.toolbar__divider { width: 1px; height: 24px; margin: 0 5px; background: var(--line); }
+
+.toolbar__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar__field span {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.col-select {
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+
+/* --------------------------------------------------------------- sections */
+
+.stack { display: flex; flex-direction: column; }
+
+.section {
+  --section-pad: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+
+@media (min-width: 780px) { .section { --section-pad: 22px; } }
+
+.section__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+}
+
+.section__head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  /* Buttons shrink-wrap their label in a flex row unless the basis is 0. */
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 44px;
+  width: auto;
+  margin: 0;
+  padding: 24px var(--section-pad);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.section__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding-right: var(--section-pad);
+}
+
+.section > :not(.section__bar) {
+  /* Margin, not padding — padding on this child overwrote .totals-card
+   * and left the months panel full-bleed. */
+  margin: 0 var(--section-pad) 22px;
+}
+
+.section__head:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+.section__head:hover .section__chevron { color: var(--ink); }
+
+.section__chevron {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--ink-3);
+  transform-origin: 50% 50%;
+  transition: transform 180ms var(--motion);
+}
+
+.section__chevron--closed { transform: rotate(-90deg); }
+
+.section__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  line-height: 28px;
+  color: var(--ink);
+}
+
+.section__aside {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.stream-section-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stream-section-actions .icon-button {
+  color: var(--ink-3);
+}
+
+.stream-section-actions .icon-button:hover:not(:disabled) {
+  background: rgba(82, 112, 138, .08);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.stream-section-actions .icon-button--on {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.stream-section-actions .seg {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: stretch;
+  height: 32px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  overflow: hidden;
+}
+
+.seg--solo {
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seg--solo:hover { background: var(--paper-2); }
+.seg--on {
+  background: var(--paper-2);
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.seg__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 0;
+  border-right: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.seg > .seg__btn:last-child { border-right: 0; }
+
+.seg__btn:hover { background: var(--paper-2); color: var(--ink); }
+.seg__btn--on { background: var(--paper-2); color: var(--ink); }
+.seg__btn:focus-visible,
+.seg--solo:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: -1px; }
+
+.seg__btn--icon {
+  width: 32px;
+  padding: 0;
+}
+
+.seg__btn:disabled { opacity: .32; cursor: default; }
+.seg__btn:disabled:hover { background: transparent; color: var(--ink-3); }
+
+.seg__select {
+  min-width: 0;
+  width: max-content;
+  max-width: 220px;
+  height: 32px;
+  padding: 0 22px 0 10px;
+  border: 0;
+  border-right: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  field-sizing: content;
+  cursor: pointer;
+}
+
+.seg__select:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: -1px; }
+.seg__btn--menu { padding-inline: 10px 8px; }
+.seg__btn--menu svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.popover-surface > button.view-option,
+.popover-drawer__items > button.view-option {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 56px;
+}
+
+.view-option svg { flex: 0 0 auto; color: var(--ink-3); }
+.view-option svg.view-option__check {
+  margin-left: auto;
+  color: var(--ink);
+}
+
+.view-option__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.view-option--on { background: var(--paper-2); }
+
+.view-option:hover {
+  background: rgba(82, 112, 138, .08);
+  color: var(--ink);
+}
+
+.view-option:hover svg {
+  color: var(--ink-3);
+}
+
+.view-option:hover svg.view-option__check {
+  color: var(--ink);
+}
+
+.view-option:disabled { opacity: .45; cursor: default; }
+
+/* A reminder row needs its own dismiss control alongside the "go to this
+ * month" action, so unlike every other menu item it is a button pair
+ * inside a plain row, not one .popover-drawer__items > button. */
+.notice-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.notice-row__main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 6px 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notice-row__main:hover { background: rgba(82, 112, 138, .08); }
+
+.notice-row__dismiss {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  margin-right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.notice-row__dismiss:hover { background: var(--paper-2); color: var(--ink); }
+
+.view-customize {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--paper-2);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.view-customize input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent-ink);
+}
+
+.view-customize__note {
+  margin: 0;
+  padding: 0 10px 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.view-option__label { font-weight: 700; }
+
+.view-option__hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------- streams */
+
+/* Desktop default: cards side by side, each ~380px, scrolled horizontally.
+ * A stack of 1100px-wide cards wastes the width it is given — one card is
+ * one job, and a job is not a wide thing.
+ *
+ * Popovers portal to body, so this scroll container cannot clip their menus. */
+.streams-section {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.carousel-nav {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.carousel-nav--below {
+  padding-top: 4px;
+}
+
+.carousel-stage {
+  position: relative;
+}
+
+.carousel-stage__arrow {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--ink-2);
+  cursor: pointer;
+  transform: translateY(-50%);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 140ms var(--motion), color 140ms var(--motion), transform 140ms var(--motion);
+}
+
+.carousel-stage__arrow--prev { left: 6px; }
+.carousel-stage__arrow--next { right: 6px; }
+
+.carousel-stage__arrow:hover {
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  color: var(--ink);
+}
+
+.carousel-stage__arrow:active {
+  background: color-mix(in srgb, var(--ink) 26%, transparent);
+  color: var(--ink);
+  transform: translateY(-50%) scale(.94);
+}
+
+.carousel-stage__arrow:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.carousel-stage__arrow:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+.carousel-jump__select {
+  min-width: 0;
+  max-width: calc(100% - 72px);
+  width: max-content;
+  height: 32px;
+  padding: 0 22px 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  field-sizing: content;
+  cursor: pointer;
+}
+
+.carousel-jump__select:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+
+.carousel-nav__arrow {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-ink);
+  cursor: pointer;
+}
+
+.carousel-nav__arrow:hover { background: var(--ink-2); color: #fff; }
+.carousel-nav__arrow:disabled { opacity: .28; cursor: default; background: var(--paper-2); color: var(--muted); }
+.carousel-nav__arrow:focus-visible,
+.carousel-nav__dot:focus-visible,
+.carousel-nav__jump:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+
+.carousel-nav__dots {
+  flex: 0 1 auto;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.carousel-nav__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: var(--line-strong);
+  cursor: pointer;
+  transition: width 160ms var(--motion), background 160ms var(--motion);
+}
+
+.carousel-nav__dot--active { width: 22px; background: var(--accent-ink); }
+
+.carousel-nav__note {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.carousel-nav__jump {
+  flex: 0 1 190px;
+  min-width: 0;
+  height: 30px;
+  padding: 0 24px 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--paper);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.stream-carousel {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 1px 4px;
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  scroll-padding-inline: 8px;
+}
+
+.stream-carousel::-webkit-scrollbar { display: none; }
+
+.stream-carousel > .stream-card {
+  align-self: flex-start;
+  height: auto;
+}
+
+.stream-card--carousel {
+  flex: 0 0 clamp(272px, 26vw, 292px);
+  max-width: 292px;
+  scroll-snap-align: center;
+}
+
+.stream-card--carousel.stream-card--open {
+  flex-basis: min(720px, calc(100% - 8px));
+  max-width: min(720px, 100%);
+}
+
+.stream-grid {
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+}
+
+.stream-grid {
+  box-sizing: border-box;
+  padding-inline: 1px;
+}
+
+.stream-card--grid { min-width: 0; }
+
+.stream-grid > .stream-card--grid {
+  align-self: start;
+  height: auto;
+}
+
+.stream-add { width: min(100%, 280px); }
+.stream-add__row {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  width: 100%;
+}
+.stream-add__row > button { flex: 1 1 0; }
+
+.stream-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+/* Collapse chevron. A span, not a button — the whole header is the target. */
+.disclosure {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-3);
+  transition: background 130ms var(--motion);
+}
+
+.stream-card:not(.stream-card--open) .stream-card__head {
+  flex: 0 0 auto;
+  min-height: 72px;
+  align-content: start;
+}
+
+/* Collapsed is just a toggle target — the sub-line only earns its space
+ * once the card is actually open and showing the months it describes. */
+.stream-card:not(.stream-card--open) .stream-card__meta {
+  display: none;
+}
+
+/* desktop: a card per job, holding its months */
+.stream-card {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  border-radius: var(--radius-md);
+  transform-origin: top center;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.35 * var(--glass-strength))), rgba(255, 255, 255, calc(.1 * var(--glass-strength)))),
+    rgba(255, 255, 255, calc(1 - .45 * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 35% * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 35% * var(--glass-strength)));
+  border: 1px solid var(--line-2);
+  transition:
+    box-shadow 280ms var(--motion-spring),
+    border-radius 420ms var(--motion-spring),
+    border-color 180ms var(--motion);
+}
+
+/* Tinted glass hover — catch-light only; the card must stay put so the
+ * kebab ("...") and other chrome remain easy to click. */
+.stream-card:hover {
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, .14),
+    inset 0 0 0 1px rgba(123, 216, 246, .36),
+    inset 0 40px 60px -30px rgba(123, 216, 246, .18);
+}
+
+.stream-card__panel { width: 100%; min-width: 0; }
+
+/* MOBILE_PANEL_CONTROLS_V1 */
+.stream-card--open {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+/* The whole header toggles. 56px minimum, so it is a target rather than a
+ * 16px chevron. Interactive children stop the click. */
+.stream-card__head {
+  flex: 0 0 auto;
+  min-height: 72px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "chevron name right"
+    ". badge .";
+  align-items: flex-start;
+  align-content: start;
+  column-gap: 10px;
+  row-gap: 4px;
+  padding: 12px 12px 12px 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    background 130ms var(--motion),
+    border-radius 420ms var(--motion-spring);
+}
+
+.stream-card__head > .disclosure { grid-area: chevron; }
+.stream-card__head > .stream-card__name-wrap { grid-area: name; min-width: 0; }
+.stream-card__head > .stream-card__right { grid-area: right; }
+.stream-card__head > .stream-card__badge { grid-area: badge; }
+
+.stream-card--open .stream-card__head {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.stream-card__head:hover { background: var(--paper-2); }
+.stream-card__head:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: -2px; }
+
+.stream-card__panel {
+  flex: 0 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 14px 0;
+  border-top: 1px solid var(--line-3);
+}
+
+.glass-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.glass-slider input[type='range'] {
+  flex: 1 1 auto;
+  accent-color: var(--ink);
+}
+
+.glass-slider__value {
+  flex: 0 0 auto;
+  min-width: 34px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.ledger {
+  /* Edge-to-edge with the card, flush against the footer — not a nested
+   * rounded box sitting in the panel gap. */
+  margin: 0 -14px 0;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--line-2);
+  background: var(--card);
+}
+
+.ledger + .stream-card__foot {
+  margin-top: -9px;
+}
+
+.ledger__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 26px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ledger__toggle:hover { background: var(--paper-2); color: var(--ink); }
+
+.ledger__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: var(--paper-3);
+  color: var(--ink-3);
+  font-size: 10.5px;
+  font-family: var(--mono);
+}
+
+.ledger__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 26px 12px;
+  border-top: 1px solid var(--line-2);
+}
+
+.ledger__rows { display: flex; flex-direction: column; gap: 1px; padding-top: 4px; }
+
+.ledger__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: 6px;
+}
+
+.ledger__row:hover {
+  background: linear-gradient(135deg, rgba(123, 216, 246, .2), rgba(153, 171, 235, .06));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+}
+
+.ledger__date {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.ledger__gross {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.ledger__hours {
+  flex: 0 0 auto;
+  width: 32px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.ledger__remove {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.ledger__remove:hover { background: var(--over-bg); color: var(--over-label); }
+
+.ledger__add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.ledger__date-input,
+.ledger__num-input {
+  flex: 1 1 96px;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  color: var(--ink);
+  font-family: var(--mono);
+  /* 16px so iOS does not zoom the page on focus. */
+  font-size: 16px;
+}
+
+.ledger__add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* A narrow-screen 2+2 wrap leaves Add cramped in the corner — give it the
+ * full row instead, a clearer tap target than half a wrapped row. */
+@media (max-width: 480px) {
+  .ledger__add-button { flex: 1 1 100%; min-height: 42px; }
+}
+
+.ledger__add-button:disabled { opacity: .4; cursor: not-allowed; }
+.ledger__add-button:not(:disabled):hover { background: var(--ink-2); }
+
+.stream-card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  /* Horizontal only — the panel's own flex `gap` already spaces this from
+   * whatever's above it (the ledger, when open, or its own bottom padding).
+   * A top margin here on top of that gap was stacking into an oversized
+   * bottom gap under the ledger. */
+  margin: 0 -14px 0;
+  padding: 8px 12px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--line-2);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+/* Two groups, not one drifting row: which columns show (left) vs display
+ * preferences (right). margin-left:auto on the second group keeps that
+ * split even as the card gets wider, without pinning it to the container's
+ * literal edge via justify-content: space-between (that read as two
+ * unrelated controls stranded far apart once cards could span a whole wide
+ * panel). */
+.stream-card__foot-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.stream-panel-fields {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 9px;
+}
+
+.stream-panel-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  container-type: inline-size;
+  container-name: stream-tools;
+}
+
+.stream-panel-end > .stream-panel-edit:last-child {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.stream-panel-end .seg {
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.stream-panel-end .seg__btn {
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.stream-panel-end .seg__btn--icon {
+  width: 26px;
+  flex: 0 0 auto;
+}
+
+.col-auto {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  z-index: 4;
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.col-auto:has(input[type='checkbox']:checked) {
+  background: var(--paper-2);
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.col-auto__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 4px 0 9px;
+  cursor: pointer;
+}
+
+.col-auto__check {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--accent-ink);
+  cursor: pointer;
+}
+
+.col-auto__menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.col-auto__chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 140ms var(--motion);
+}
+
+.col-auto__chevron--open {
+  transform: rotate(180deg);
+}
+
+.col-auto__drop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: 0 8px 20px rgba(28, 39, 51, .14);
+}
+
+.col-auto__drop input[type='range'] {
+  width: 112px;
+  height: 32px;
+  margin: 0;
+  accent-color: var(--accent-ink);
+  cursor: pointer;
+}
+
+@container stream-tools (max-width: 420px) {
+  .stream-panel-end {
+    gap: 6px;
+  }
+}
+
+.stream-panel-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stream-panel-edit:hover { background: var(--paper-2); color: var(--ink); }
+.stream-panel-edit:disabled { opacity: .4; cursor: default; }
+.stream-panel-edit:disabled:hover { background: var(--card); color: var(--ink-3); }
+.stream-panel-edit--on {
+  background: var(--paper-2);
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.lock-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lock-toggle:hover { background: var(--paper-2); color: var(--ink); }
+
+.lock-toggle[aria-pressed="true"] {
+  border-color: var(--spent-line);
+  background: var(--spent-bg);
+  color: var(--spent-label);
+}
+.stream-future-toggle {
+  align-self: center;
+  min-height: 32px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+
+@media (max-width: 639px) {
+  .carousel-stage {
+    width: calc(100% + 32px);
+    margin-inline: -16px;
+  }
+
+  .stream-carousel {
+    width: 100%;
+    margin-inline: 0;
+    padding-inline: 16px;
+  }
+
+  .stream-card--carousel {
+    flex-basis: calc(100vw - 48px);
+    max-width: calc(100vw - 48px);
+  }
+
+  .stream-card--carousel.stream-card--open {
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+}
+
+@media (max-width: 779px) {
+  .stream-section-actions {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+  }
+}
+
+/* CARD_NAME_PRIORITY
+ * The name is how you identify a card, so it gets the remaining space and
+ * the figures beside it shrink to their content. Previously the total and
+ * the menu held their width and the name truncated to "New 109…". */
+.stream-card__name-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.stream-card__name {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.018em;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The totals must be allowed to shrink too. Marking the parent
+ * shrinkable while pinning its only child meant the parent could never
+ * shrink below that child, so the name kept yielding instead. */
+.stream-card__right { flex: 0 1 auto; min-width: 0; }
+
+/* Pinned, not shrinkable. In a column with align-items: flex-end a child
+ * keeps its own max-content width, so shrinking this box did not shrink the
+ * label — the label simply overflowed leftward onto the meta line. The room
+ * comes from a shorter label instead. */
+.stream-card__totals { flex: 0 0 auto; overflow: hidden; }
+
+.stream-card__total { white-space: nowrap; }
+
+.stream-card__total-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stream-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Deliberately more legible than the other small tags in this card family
+ * (archived-chip__tag, .chip) — this one answers "which kind of income is
+ * this", which needs to read at a glance, not just on close inspection. */
+.stream-card__type {
+  flex: 0 0 auto;
+  padding: 1px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 99px;
+  background: var(--paper-2);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background 130ms var(--motion), border-color 130ms var(--motion);
+}
+
+.stream-card__type:hover { background: var(--paper-3); border-color: var(--line-ink); }
+.stream-card__type[aria-expanded='true'] { background: var(--paper-3); border-color: var(--accent-ink); }
+
+.stream-card__lock {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.stream-card__badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  width: max-content;
+  flex: 0 1 auto;
+  justify-self: start;
+  margin-top: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+
+.stream-card__badge--warn {
+  background: var(--spent-bg);
+  color: var(--spent-label);
+  align-self: start;
+  flex: 0 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: min(100%, 8rem);
+  overflow: hidden;
+}
+
+.stream-card__badge--warn .stream-card__badge-text {
+  min-width: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stream-card__badge svg { flex: 0 0 auto; }
+
+.stream-card__meta {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+
+}
+
+.stream-card__right { display: flex; align-items: flex-start; gap: 14px; }
+.stream-card__totals { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+
+.stream-card__total {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.018em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.stream-card__total-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+
+}
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.chip {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 130ms var(--motion), border-color 130ms var(--motion), color 130ms var(--motion);
+}
+
+.chip--spent {
+  border-width: 1.5px;
+  border-color: var(--spent-line);
+  background: var(--spent-bg);
+  color: var(--spent-label);
+  font-weight: 700;
+}
+
+.chip--over {
+  border-width: 1.5px;
+  border-color: var(--over-line);
+  background: var(--over-bg);
+  color: var(--over-label);
+  font-weight: 700;
+}
+
+span.chip { cursor: default; }
+
+.chip:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+
+/* Read mode. Figures, not form fields — an always-on grid of inputs makes
+ * the whole app look like something you are stuck inside. */
+.month-cell--read {
+  align-items: stretch;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.month-cell--read:hover { background: #e2f4fd; border-color: #79bfe2; }
+.month-cell--read:disabled { cursor: default; }
+.month-cell--read:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+
+.month-cell--locked.month-cell--read { cursor: not-allowed; }
+.month-cell--locked.month-cell--read:hover { background: transparent; border-color: var(--line); }
+
+.month-cell__read-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.month-cell__blank { color: var(--muted); font-weight: 400; }
+
+.month-cell__read-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+
+.month-cell--pivot.month-cell--read .month-cell__read-value { flex: 1 1 auto; }
+
+.month-cell__note {
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.month-cell__done {
+  width: 100%;
+  min-height: 26px;
+  margin-top: 2px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--paper-3);
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.month-cell__done:hover { background: var(--line); color: var(--ink); }
+.month-cell--comfortable .month-cell__done { min-height: 32px; font-size: 13px; }
+
+/* Click the name to rename it. */
+.name-button {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2px 5px;
+  margin: -2px -5px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background 130ms var(--motion), box-shadow 130ms var(--motion);
+}
+
+.name-button:hover { background: var(--paper-2); box-shadow: inset 0 -1px 0 var(--line-strong); }
+.name-button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+
+.name-input {
+  max-width: 100%;
+  padding: 2px 5px;
+  margin: -2px -5px;
+  border: 0;
+  border-bottom: 1px solid var(--accent-ink);
+  border-radius: 4px 4px 0 0;
+  background: var(--paper);
+  color: inherit;
+  font: inherit;
+}
+
+.name-input:focus { outline: none; }
+
+/* Month sheet entry — the mobile data-entry surface. */
+.entry-row { display: flex; gap: 8px; }
+.entry-field { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+
+.entry-field__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.entry-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  color: var(--ink);
+  font-family: var(--mono);
+  /* 16px so iOS does not zoom on focus */
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-field input:focus { outline: none; border-color: var(--accent-ink); box-shadow: 0 0 0 2px var(--accent); }
+
+.entry-field__hint {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.status-pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+
+.status-pill--keep { background: var(--keep-bg); color: var(--keep-label); }
+.status-pill--spent { background: var(--spent-bg); color: var(--spent-label); }
+.status-pill--over { background: var(--over-bg); color: var(--over-label); }
+.status-pill--unknown { background: var(--paper-2); color: var(--muted); }
+
+/* ------------------------------------------------------------------ grid */
+
+.month-grid { display: grid; gap: 5px; }
+.month-grid--comfortable { gap: 7px; }
+
+.month-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-3);
+  background: #fdfcfa;
+  transition: background 140ms var(--motion), border-color 140ms var(--motion);
+}
+
+.month-cell--comfortable { padding: 10px; }
+.month-cell--hover { background: #e2f4fd; border-color: #79bfe2; }
+
+/* Pivot: the month label is a column down the left, one month per row. Wider
+ * containers give the fields more room rather than starting a second block. */
+.month-cell--pivot { flex-direction: row; align-items: center; gap: 9px; }
+
+.month-cell__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.month-cell--pivot .month-cell__head {
+  flex: 0 0 auto;
+  width: 44px;
+  justify-content: flex-start;
+}
+
+.month-cell__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.month-cell__label--now { font-weight: 600; color: var(--accent-ink); }
+
+.month-cell__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.month-cell__dot--filled { background: var(--accent-ink); }
+
+.month-cell__lock { flex: 0 0 auto; color: var(--muted); }
+
+.month-cell__fields { display: flex; flex-direction: column; gap: 4px; }
+.month-cell--pivot .month-cell__fields { flex: 1 1 auto; min-width: 0; flex-direction: row; gap: 5px; }
+
+/* Inputs never carry a fixed width — they fill the cell, and the cell is
+ * sized by the column count. Comfortable is 16px because iOS Safari zooms
+ * the page when a focused input is smaller. */
+.cell-input {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  transition: border-color 120ms linear, box-shadow 120ms linear;
+}
+
+.cell-input--comfortable { height: 46px; font-size: 16px; padding: 0 10px; }
+
+/* Compact density packs more months per row on wide screens, but on a
+ * phone there is only ever one column — the space it buys back is not
+ * worth a font small enough to zoom the page on focus. */
+@media (max-width: 779px) {
+  .cell-input { height: 36px; font-size: 16px; padding: 0 9px; }
+}
+
+.cell-input::placeholder { font-family: var(--sans); color: var(--muted); }
+.cell-input:focus { outline: none; border-color: var(--accent-ink); box-shadow: 0 0 0 2px var(--accent); }
+
+/* ------------------------------------------------------- totals by month */
+
+.totals-card {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 15px;
+  border-radius: var(--radius-md);
+  background: var(--paper-2);
+  border: 1px solid var(--line-2);
+}
+
+.totals-card__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+
+.totals-card__title {
+  flex: 1 1 auto;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.018em;
+  color: var(--ink);
+}
+
+.total-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 56px;
+  padding: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  /* A glossy sheen on every cell regardless of status colour — the status
+   * meaning still comes entirely from --keep/--spent/--over below, this
+   * just rides on top of whichever one applies. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -14px 22px -14px rgba(255, 255, 255, .3);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms var(--motion);
+}
+
+.total-cell:hover { border-color: var(--accent-ink); }
+.total-cell:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+.total-cell--empty { border-style: dashed; }
+.total-cell--keep { background: var(--keep-bg); border-color: var(--keep-line); }
+.total-cell--spent { background: var(--spent-bg); border-color: var(--spent-line); }
+.total-cell--over { background: var(--over-bg); border-color: var(--over-line); }
+
+.total-cell--now {
+  border-width: 2px;
+  border-color: var(--ink);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -14px 22px -14px rgba(255, 255, 255, .3);
+}
+.total-cell--hover { border-color: var(--accent-ink); }
+
+.total-cell__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.total-cell__value {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* Proximity is a figure, never a cell fill — "nearly" must not look like
+ * "did". It still needs its own small badge rather than plain coloured
+ * text, though: getting close to a limit is a genuine safety warning
+ * ("not safe to be near SGA/TWP"), not a footnote. */
+.total-cell__near,
+.month-square__near {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+
+/* Extra-paycheck months: name them here, not as a cell fill. */
+.total-cell__pay,
+.month-square__pay {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  white-space: nowrap;
+  color: var(--spent-label);
+}
+
+.total-cell--keep .total-cell__label { color: var(--keep-label); }
+.total-cell--keep .total-cell__value { color: var(--keep-value); }
+.total-cell--spent .total-cell__label { color: var(--spent-label); }
+.total-cell--spent .total-cell__value { color: var(--spent-value); }
+.total-cell--over .total-cell__label { color: var(--over-label); }
+.total-cell--over .total-cell__value { color: var(--over-value); }
+
+.near--trial { background: var(--spent-bg); color: var(--spent-label); }
+.near--sga { background: var(--over-bg); color: var(--over-label); }
+
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-top: 3px; }
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  color: var(--ink-3);
+}
+
+.legend__swatch { width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--line-strong); }
+.legend__swatch--keep { background: var(--keep-bg); border-color: var(--keep-line); }
+.legend__swatch--spent { background: var(--spent-bg); border-color: var(--spent-line); }
+.legend__swatch--over { background: var(--over-bg); border-color: var(--over-line); }
+
+/* ------------------------------------------------------- month squares */
+
+.month-squares { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+@media (min-width: 560px) { .month-squares { grid-template-columns: repeat(6, 1fr); } }
+
+.month-square {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 9px;
+  border-radius: 7px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  /* Same glossy sheen as .total-cell, riding on top of whichever status
+   * colour applies below. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -10px 16px -10px rgba(255, 255, 255, .3);
+  cursor: pointer;
+  transition: box-shadow 180ms var(--motion);
+}
+
+.month-square:hover {
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, .14),
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -10px 16px -10px rgba(255, 255, 255, .3);
+}
+.month-square--empty { border-style: dashed; }
+.month-square--keep { background: var(--keep-bg); border-color: var(--keep-line); }
+.month-square--spent { background: var(--spent-bg); border-color: var(--spent-line); }
+.month-square--over { background: var(--over-bg); border-color: var(--over-line); }
+.month-square--now {
+  border-width: 2px;
+  border-color: var(--ink);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -10px 16px -10px rgba(255, 255, 255, .3);
+}
+.month-square:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+.month-square__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .09em;
+  color: var(--muted);
+}
+
+.month-square__value {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.month-square--keep .month-square__label { color: var(--keep-label); }
+.month-square--keep .month-square__value { color: var(--keep-value); }
+.month-square--spent .month-square__label { color: var(--spent-label); }
+.month-square--spent .month-square__value { color: var(--spent-value); }
+.month-square--over .month-square__label { color: var(--over-label); }
+.month-square--over .month-square__value { color: var(--over-value); }
+
+/* ------------------------------------------------------------- buttons */
+
+.filled-button,
+.tonal-button,
+.text-button,
+.danger-button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms var(--motion), border-color 140ms var(--motion), color 140ms var(--motion);
+}
+
+.filled-button { background: var(--ink); color: var(--on-ink); }
+.filled-button:hover { background: var(--ink-2); }
+
+.tonal-button { background: var(--paper-3); color: var(--ink); }
+.tonal-button:hover { background: var(--line); }
+
+.text-button { min-height: 44px; background: transparent; color: var(--muted); font-size: 13px; }
+.text-button:hover { background: var(--paper-3); color: var(--ink-3); }
+
+.danger-button { background: var(--card); border: 1px solid var(--line-strong); color: var(--over-label); }
+.danger-button:hover:not(:disabled) { background: var(--over-bg); }
+.danger-button:disabled { opacity: .4; cursor: not-allowed; }
+
+.filled-button:focus-visible,
+.tonal-button:focus-visible,
+.text-button:focus-visible,
+.danger-button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+/* ---------------------------------------------------------- empty state */
+
+/* Centred, like the sign-in screen. The first thing you see in either case
+ * is one instruction and its buttons, so both sit the same way. */
+.app-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 22px;
+  padding: 9vh 16px 0;
+}
+
+@media (min-width: 780px) { .app-empty { padding: 12vh 22px 40px; } }
+
+.app-empty__title { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+
+.app-empty__note {
+  margin: 6px auto 0;
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.app-empty__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.app-empty__actions .filled-button,
+.app-empty__actions .tonal-button { min-height: 48px; width: 100%; }
+.app-empty__actions .text-button { align-self: center; margin-top: 2px; }
+
+/* ------------------------------------------------------------- hotbar */
+
+/* Quick-glance risk strip, above Active. Renders nothing when the year is
+ * clean — it exists to be seen without opening a section, not to explain
+ * itself when there is nothing to flag. */
+.hotbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--spent-line);
+  border-radius: var(--radius-md);
+  background: var(--spent-bg);
+}
+
+.hotbar__icon { flex: 0 0 auto; color: var(--spent-label); }
+
+.hotbar__rail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hotbar__rail::-webkit-scrollbar { display: none; }
+
+.hotbar__chip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 99px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+.hotbar__chip-month {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+
+.hotbar__chip-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hotbar__chip--over { border-color: var(--over-line); background: var(--over-bg); }
+.hotbar__chip--over .hotbar__chip-text { color: var(--over-label); }
+
+.hotbar__chip--near { border-color: var(--spent-line); background: var(--spent-bg); }
+.hotbar__chip--near .hotbar__chip-text { color: var(--spent-label); }
+
+.hotbar__chip--pay .hotbar__chip-text { color: var(--spent-label); }
+
+@media (max-width: 520px) {
+  .hotbar { padding: 9px 10px; }
+  .hotbar__chip-text { font-size: 11.5px; }
+}
+
+/* ------------------------------------------------------------- warning */
+
+.warning {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  border-radius: var(--radius-md);
+  background: var(--spent-bg);
+  border: 1px solid var(--spent-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
+}
+
+.warning__bar { flex: 0 0 auto; width: 4px; border-radius: 99px; background: var(--spent-strong); }
+.warning__body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 7px; }
+
+.warning__title {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  color: var(--spent-value);
+}
+
+.warning__text { font-size: 12.5px; line-height: 1.55; color: var(--spent-label); }
+.warning__figures { display: flex; align-items: baseline; gap: 9px; padding-top: 3px; font-family: var(--mono); }
+.warning__big { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--spent-value); }
+.warning__small { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--spent-label); }
+
+/* ------------------------------------------------------------- popovers */
+
+/* Popovers portal to document.body. Anchored next to the trigger on
+ * desktop, a bottom-center sheet on a phone — see Popover.tsx. */
+.popover-surface {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px;
+  border-radius: 20px;
+  /* Genuinely translucent, with real refraction where the browser can do
+   * it (see backdrop-filter below) — content behind visibly bends through
+   * the edges, not just blurs. The base layer's own alpha carries the
+   * strength taper down to opaque --card, same trick as .sheet. */
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.45 * var(--glass-strength))), rgba(255, 255, 255, calc(.16 * var(--glass-strength)))),
+    rgba(255, 255, 255, calc(1 - .6 * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 65% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 65% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, .16),
+    inset 0 1px 0 rgba(255, 255, 255, calc(.8 * var(--glass-strength))),
+    inset 0 -1px 0 rgba(0, 0, 0, calc(.05 * var(--glass-strength)));
+  overflow-y: auto;
+  transform-origin: top right;
+  animation: bubble-in 200ms var(--motion) both;
+  transition: width 200ms var(--motion), left 200ms var(--motion);
+}
+
+.popover-surface--closing { animation: bubble-out 180ms var(--motion) both; }
+
+/* Popover.tsx sets this when the trigger sits on a dark surface (checked
+ * by walking up for the first opaque ancestor and reading its luminance —
+ * not hardcoded to the header specifically, so any future dark surface
+ * gets this automatically too). A see-through fill would pick up that
+ * darkness instead of reading as light glass, so this raises the white
+ * floor well above the normal one. */
+.popover-surface--on-dark {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.45 * var(--glass-strength))), rgba(255, 255, 255, calc(.16 * var(--glass-strength)))),
+    rgba(255, 255, 255, calc(1 - .15 * var(--glass-strength)));
+}
+
+/* Mouse-tracking shine — a moving highlight confined to a thin ring right
+ * at the edge (padding-box minus content-box, via mask-composite), like
+ * light catching the rim of the glass as the pointer moves over it. --mx/
+ * --my are written directly by Popover.tsx's onMouseMove (a ref write, not
+ * React state — this needs to be cheap enough for every pointer event). */
+.popover-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .9), transparent 65%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 200ms var(--motion);
+  pointer-events: none;
+}
+
+.popover-surface:hover::before { opacity: calc(.85 * var(--glass-strength)); }
+
+/* Edge-only ring, commented out for now — see the matching comment on
+ * .sheet::after.
+.popover-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 16px;
+
+
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+*/
+
+.popover-surface > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Drill-down row inside a menu (e.g. "Type" in the stream actions menu) —
+ * a trailing hint of the current value plus a chevron, same row height and
+ * hover as every other menuitem so it doesn't read as a different kind of
+ * control. */
+.stream-menu__hint {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* The back row atop a drilled-down view. Muted so it doesn't compete with
+ * the actual options below it. */
+.stream-menu__back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  margin-bottom: 2px;
+  border: 0;
+  border-bottom: 1px solid var(--line-3);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stream-menu__back:hover { color: var(--ink); }
+
+/* A second, smaller glass layer riding on top of the surface's own —
+ * catches its own light instead of just being a flat highlight. */
+/* Tinted with the app's one accent colour (the "you are here" cyan), not
+ * plain white — a glass chip catching its own colour, not just light.
+ * Deliberately not used on .menu-danger below: that row's solid red stays
+ * the one unambiguous "this is destructive" signal, undiluted by glass. */
+.popover-surface > button:hover {
+  background:
+    linear-gradient(135deg, rgba(123, 216, 246, .34), rgba(153, 171, 235, .12));
+  backdrop-filter: saturate(180%);
+  -webkit-backdrop-filter: saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .75),
+    inset 0 -1px 0 rgba(13, 107, 96, .18),
+    0 3px 10px rgba(13, 107, 96, .16);
+  color: var(--ink);
+}
+.popover-surface .menu-danger { color: var(--over-label); }
+.popover-surface .menu-danger:hover { background: var(--over-bg); color: var(--over-label); }
+.popover-surface > button:disabled { opacity: .45; cursor: not-allowed; }
+.popover-surface > button:disabled:hover { background: transparent; color: var(--ink); }
+.popover-surface .menu-danger:disabled:hover { background: transparent; color: var(--over-label); }
+
+/* Header on a titled surface. The close button is the visible counterpart
+ * to click-away, which a tall surface gives no hint of. */
+.popover-surface__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 6px 10px;
+  border-bottom: 1px solid var(--line-3);
+  margin-bottom: 4px;
+}
+
+.popover-surface__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.popover-surface__close {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 130ms var(--motion), color 130ms var(--motion);
+}
+
+.popover-surface__close:hover { background: var(--paper-2); color: var(--ink); }
+.popover-surface__close:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+
+.popover-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1150;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom));
+  /* Same reasoning as .sheet-backdrop: the drawer is genuinely translucent
+   * glass now, so it should reveal the real page behind it, not a flat
+   * navy tint sitting between the two. This element still does the actual
+   * work of centering/bottom-docking .popover-drawer and catching the
+   * outside-click to close — it just doesn't paint anything itself. */
+  background: transparent;
+  animation: scrim-in 160ms var(--motion) both;
+}
+
+.popover-scrim--closing { animation: scrim-out 180ms var(--motion) both; }
+
+.popover-drawer {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 10px 10px;
+  border-radius: 26px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.45 * var(--glass-strength))), rgba(255, 255, 255, calc(.16 * var(--glass-strength)))),
+    rgba(255, 255, 255, calc(1 - .6 * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 65% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 65% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, .3),
+    0 6px 20px rgba(0, 0, 0, .14),
+    inset 0 1px 0 rgba(255, 255, 255, calc(.8 * var(--glass-strength))),
+    inset 0 -1px 0 rgba(0, 0, 0, calc(.05 * var(--glass-strength)));
+  animation: sheet-bubble-in 240ms var(--motion) both;
+}
+
+/* The distortion, isolated to its own layer with nothing else chained
+ * into the same backdrop-filter declaration — untested theory, but a
+ * mobile GPU is more likely to choke on url(...) saturate(...)
+ * contrast(...) brightness(...) all in one filter list than on url(...)
+ * alone. Separating it can't hurt and might be the actual fix; I can't
+ * verify this one myself since I only have a desktop browser to test in. */
+.popover-drawer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  -webkit-backdrop-filter: saturate(calc(100% + 46% * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 46% * var(--glass-strength)));
+}
+
+/* Edge-only ring, commented out for now — see the matching comment on
+ * .sheet::after.
+.popover-drawer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 20px;
+
+
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+*/
+
+.popover-drawer__top, .popover-drawer__items { position: relative; z-index: 2; }
+
+.popover-drawer--closing { animation: sheet-bubble-out 180ms var(--motion) both; }
+
+.popover-drawer__top {
+  position: relative;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px 0 8px;
+}
+
+.popover-drawer__grip {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 36px;
+  height: 4px;
+  margin: 0;
+  border-radius: 99px;
+  background: var(--line-strong);
+  transform: translateX(-50%);
+}
+
+.popover-drawer__title {
+  min-width: 0;
+  padding: 7px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.popover-drawer__close {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.popover-drawer__close:active { background: var(--paper-3); color: var(--ink); }
+
+.popover-drawer__items { display: flex; flex-direction: column; gap: 2px; }
+
+.popover-drawer__items > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.popover-drawer__items > button:active {
+  background: linear-gradient(135deg, rgba(123, 216, 246, .34), rgba(153, 171, 235, .12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), inset 0 -1px 0 rgba(13, 107, 96, .18);
+}
+.popover-drawer__items .menu-danger { color: var(--over-label); }
+.popover-drawer__items .menu-danger:active { background: var(--over-bg); }
+.popover-drawer__items > button:disabled { opacity: .45; cursor: not-allowed; }
+.popover-drawer__items > button:disabled:active { background: transparent; }
+
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scrim-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* The shared "bubble" entrance/exit: a slight overshoot past 100% on the
+ * way in gives it a soft pop rather than a mechanical fade, then it
+ * settles. Used by every popup — small anchored menus scale in place,
+ * bottom-docked sheets/drawers also rise a little. */
+@keyframes bubble-in {
+  from { transform: scale(.9); opacity: 0; }
+  55% { transform: scale(1.03); opacity: 1; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes bubble-out {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(.92); opacity: 0; }
+}
+@keyframes sheet-bubble-in {
+  from { transform: translateY(70px) scale(.96); opacity: 0; }
+  60% { transform: translateY(-8px) scale(1.008); opacity: 1; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes sheet-bubble-out {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(60px) scale(.97); opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- sheet */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 0 0;
+  /* No dark scrim — the sheet is genuinely translucent glass now, so it
+   * should reveal the actual page behind it, not a flat navy tint sitting
+   * between the two. Position/layout stays: this is still what centers
+   * and bottom-docks .sheet, just with nothing painted here itself. */
+  background: transparent;
+  /* animation: scrim-in 180ms var(--motion) both; */
+}
+
+/* .sheet-backdrop--closing { animation: scrim-out 200ms var(--motion) both; } */
+
+@media (min-width: 640px) {
+  .sheet-backdrop { padding: 24px 24px 0; }
+}
+
+/* Same structure as .popover-surface — a single element, one backdrop-
+ * filter chain. Distortion only for now, no blur mixed in: an earlier
+ * version here split this into three stacked pseudo-element panes
+ * (distortion / tint+blur / shine) and separately tried combining blur
+ * into the same pass as the distortion — both over-engineered past what
+ * was actually asked for. */
+.sheet {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: none;
+  max-height: calc(100dvh - max(12px, env(safe-area-inset-top)));
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px 26px 0 0;
+  /* Edge-only masking (the ::after below) is commented out for now —
+   * middle ground restored: uniform distortion combined with tint/
+   * saturation in one pass on the base element again, like before the
+   * edge-mask experiment. */
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.3 * var(--glass-strength))), rgba(255, 255, 255, calc(.1 * var(--glass-strength)))),
+    rgba(250, 248, 244, calc(1 - .6 * var(--glass-strength)));
+  -webkit-backdrop-filter: blur(calc(18px * var(--glass-strength))) saturate(calc(100% + 90% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  backdrop-filter: blur(calc(18px * var(--glass-strength))) saturate(calc(100% + 90% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  box-shadow:
+    0 -30px 100px rgba(0, 0, 0, .3),
+    0 -6px 24px rgba(0, 0, 0, .12),
+    inset 0 1px 0 rgba(255, 255, 255, calc(.8 * var(--glass-strength))),
+    inset 0 -1px 0 rgba(0, 0, 0, calc(.05 * var(--glass-strength)));
+  overflow: hidden;
+  animation: sheet-bubble-in 260ms var(--motion) both;
+}
+
+/* Second layer, .sheet only for now — a plain blur pass, nothing else,
+ * stacked on top of the base element's distortion+tint. Its own
+ * backdrop-filter samples the already-distorted/tinted result under it,
+ * so this softens that rather than replacing it. */
+.sheet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  -webkit-backdrop-filter: blur(calc(3px * var(--glass-strength)));
+  backdrop-filter: blur(calc(3px * var(--glass-strength)));
+}
+
+/* Third layer — a subtle warm wash on top of the blur, its own thing
+ * rather than folded into the base element's background. Paints only,
+ * no backdrop-filter of its own; it's just tint. */
+.sheet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background: rgba(250, 248, 244, calc(.12 * var(--glass-strength)));
+}
+
+/* Edge-only ring, commented out for now — back to uniform distortion on
+ * the base element above (a fixed geometric shape via mask-composite:
+ * exclude, not the backdrop-content-dependent SourceAlpha trick from
+ * before). Re-enable by uncommenting this and removing the url() from
+ * .sheet's own backdrop-filter above.
+.sheet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 26px;
+
+
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+*/
+
+.sheet__head, .sheet__body { position: relative; z-index: 3; }
+
+.sheet--closing { animation: sheet-bubble-out 200ms var(--motion) both; }
+
+@media (min-width: 640px) {
+  .sheet {
+    max-width: 520px;
+    max-height: calc(100dvh - 48px);
+  }
+}
+
+.sheet__head {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, calc(.08 * var(--glass-strength)));
+  /* Same recipe as .popover-surface — the title/close button read fine at
+   * this floor (confirmed there already), and it keeps the head visually
+   * part of the same glass shell as the body below it, instead of a flat
+   * plate sitting on top of it. */
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.4 * var(--glass-strength))), rgba(255, 255, 255, calc(.14 * var(--glass-strength)))),
+    rgba(250, 248, 244, calc(1 - .5 * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 50% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 50% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength)));
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, calc(.6 * var(--glass-strength)));
+  transition: min-height 190ms var(--motion), padding 190ms var(--motion);
+}
+
+/* A drag handle for swipe-to-dismiss — touch only, so it's not shown
+ * where the sheet is a centered desktop panel instead of a bottom sheet. */
+.sheet__grip {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 36px;
+  height: 4px;
+  margin: 0;
+  border-radius: 99px;
+  background: var(--line-strong);
+  transform: translateX(-50%);
+}
+
+@media (min-width: 640px) {
+  .sheet__grip { display: none; }
+}
+
+.sheet__heading {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sheet__eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: font-size 190ms var(--motion);
+}
+
+.sheet__title {
+  max-width: 100%;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: font-size 190ms var(--motion);
+}
+
+.sheet__back,
+.sheet__close {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.sheet__back:hover,
+.sheet__close:hover { background: var(--paper-3); color: var(--ink); }
+
+.sheet--condensed .sheet__head {
+  min-height: 56px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.sheet--condensed .sheet__eyebrow { font-size: 8px; }
+.sheet--condensed .sheet__title { font-size: 17px; letter-spacing: -.022em; }
+
+.sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 16px calc(24px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(70, 108, 140, .75) rgba(86, 123, 153, .14);
+}
+
+.sheet__body::-webkit-scrollbar {
+  width: 12px;
+}
+
+.sheet__body::-webkit-scrollbar-track {
+  background: rgba(86, 123, 153, .12);
+  border-radius: 99px;
+  margin: 8px 2px 18px;
+}
+
+.sheet__body::-webkit-scrollbar-thumb {
+  background: rgba(70, 108, 140, .7);
+  border: 2px solid transparent;
+  border-radius: 99px;
+  background-clip: content-box;
+  min-height: 36px;
+}
+
+.sheet__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(70, 108, 140, .9);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+@media (min-width: 640px) {
+  .sheet__head { min-height: 82px; }
+  .sheet__title { font-size: 24px; }
+  .sheet__body { padding: 10px 18px 24px; }
+}
+
+/* Page navigation, not a setting's value — an underline strip on purpose,
+ * so it never reads as another .segmented/.seg control. Those two convey
+ * "this is the current value"; this one conveys "this is where you are". */
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line-2);
+  margin-bottom: 4px;
+}
+
+.settings-tabs__btn {
+  min-height: 40px;
+  padding: 0 4px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-tabs__btn:hover { color: var(--ink); }
+
+.settings-tabs__btn[aria-selected='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--accent-ink);
+}
+
+@media (min-width: 400px) {
+  .settings-tabs { gap: 18px; }
+  .settings-tabs__btn { padding: 0; }
+}
+
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field--spaced { margin-top: 10px; }
+
+.help-note { margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.help-note--tight { margin: 0 0 4px; }
+
+.help-copy {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.help-example {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 13px 14px;
+}
+
+.help-example__total {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rows--nav {
+  padding: 0;
+  border: 1px solid var(--line-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.rows__label--strong { font-weight: 700; }
+
+.stack-col { display: flex; flex-direction: column; gap: 6px; }
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-row__count { flex: 0 0 80px; }
+
+.button--start { justify-content: flex-start; }
+
+.warning--onboarding {
+  margin-top: 14px;
+  max-width: 44ch;
+  text-align: left;
+}
+
+.confirm-input {
+  margin-top: 2px;
+  max-width: 14ch;
+}
+
+.month-square--pick {
+  aspect-ratio: auto;
+  min-height: 46px;
+}
+
+.month-cell--inactive { opacity: .4; }
+.month-cell--inactive:not(.month-cell--read) { opacity: .45; }
+
+.grow { flex: 1 1 auto; min-width: 0; }
+
+.menu-label { flex: 1 1 auto; min-width: 0; }
+
+.sheet-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+}
+
+.sheet-hero--row {
+  align-items: baseline;
+  flex-wrap: nowrap;
+}
+
+.sheet-hero__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sheet-hero__aside {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hero-figure {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.hero-figure__of {
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.hero-figure--over { color: var(--over-label); }
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--sans);
+  /* 16px so iOS does not zoom on focus */
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.field input.num-input { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.field input:focus,
+.field select:focus { outline: none; border-color: var(--accent-ink); box-shadow: 0 0 0 2px var(--accent); }
+
+/* .num-input's own base — every other place it's used sits inside .field
+ * or .entry-field, which supply padding/height/font-size; a few (the
+ * cloud-sync DELETE confirmation) do not, and were falling back to an
+ * unstyled, small-text native input. */
+.num-input {
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--mono);
+  /* 16px so iOS does not zoom on focus */
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.num-input:focus {
+  outline: none;
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* A date field's own content ("mm/dd/yyyy") never needs the full field
+ * width — stretching it edge-to-edge just exaggerates the empty picker
+ * icon gap. */
+.field input[type='date'] { max-width: 220px; }
+
+.field__row { display: flex; gap: 9px; }
+.field__row > * { flex: 1 1 0; }
+
+.segmented { display: flex; gap: 4px; padding: 4px; border-radius: 7px; background: var(--paper-3); }
+
+.segmented button {
+  flex: 1 1 0;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 140ms var(--motion), color 140ms var(--motion);
+}
+
+.segmented button:hover { background: rgba(255, 255, 255, .6); }
+.segmented button[aria-pressed='true'] { background: var(--ink); color: var(--on-ink); font-weight: 700; }
+
+/* Constant, not tied to the button's own (inverting) text color — a
+ * checkmark or a red X needs to read as "good news" / "bad news" whether
+ * or not this option is the one currently selected. */
+.twp-status-icon { flex: 0 0 auto; }
+.twp-status-icon--good { color: #16a34a; }
+.twp-status-icon--bad { color: #dc2626; }
+
+/* Black liquid glass — the selected pill inside a sheet, dark instead of
+ * light glass since it's already carrying --ink's own dark fill. Same
+ * strength-taper trick as the light recipes: the base layer's own alpha
+ * slides from fully opaque --ink at 0 down to a still-legible-for-white-
+ * text floor at 1, with a faint sheen on top for the glass read. Scoped to
+ * `.sheet` — this is specifically the "selected fill inside the modal",
+ * not every dark selected pill app-wide. */
+.sheet .segmented button[aria-pressed='true'] {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, calc(.14 * var(--glass-strength))), rgba(255, 255, 255, 0)),
+    rgba(0, 0, 0, calc(1 - .05 * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 40% * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 40% * var(--glass-strength)));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, calc(.18 * var(--glass-strength)));
+}
+
+.derived {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 18px;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, .14), transparent 46%),
+    linear-gradient(125deg, #244c6f, #263c62);
+  box-shadow: 0 14px 34px rgba(32, 56, 81, .15), inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+
+.derived__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--on-ink-muted);
+}
+
+.derived__main {
+  font-family: var(--mono);
+  font-size: 14.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-ink);
+}
+
+.derived__accent {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.rows { display: flex; flex-direction: column; border-radius: 7px; background: var(--card); border: 1px solid var(--line-2); overflow: hidden; }
+
+.rows__row { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-bottom: 1px solid var(--line-3); }
+.rows__row:last-child { border-bottom: 0; }
+.rows__label { flex: 1 1 auto; font-size: 13.5px; font-weight: 500; color: var(--ink); }
+
+.rows__value {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.rows__unit { font-size: 11px; font-weight: 400; color: var(--muted); }
+
+/* --------------------------------------------------------------- sign in */
+
+/* Paper, not desk. --muted on --desk is 3.92:1, below AA for the note and
+ * eyebrow text — and this is the first screen of the app. On --paper the same
+ * pairing is 5.21:1. */
+.signin-shell { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--paper); }
+.signin-panel { width: min(392px, 100%); display: flex; flex-direction: column; gap: 22px; }
+
+.signin-title {
+  margin: 4px 0 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.028em;
+}
+
+.signin-note { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.signin-actions { display: flex; flex-direction: column; gap: 10px; }
+
+.signin-google {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms var(--motion), border-color 150ms var(--motion);
+}
+
+.signin-google:hover:not(:disabled) { background: var(--paper); border-color: var(--muted); }
+.signin-google:disabled { opacity: .6; cursor: default; }
+.signin-google__mark { flex: 0 0 auto; display: block; width: 18px; height: 18px; }
+.signin-error { color: var(--over-label); font-size: 13px; line-height: 1.5; }
+
+.terms-panel { width: min(560px, 100%); max-height: 88dvh; }
+.terms-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: rgba(229, 243, 252, calc(1 - .35 * var(--glass-strength)));
+  -webkit-backdrop-filter: saturate(calc(100% + 30% * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 30% * var(--glass-strength)));
+}
+.terms-content h3 { margin: 16px 0 4px; font-size: 14px; }
+.terms-content h3:first-child { margin-top: 0; }
+.terms-content p { margin: 0 0 4px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.terms-check input { margin-top: 2px; }
+
+/* ---------------------------------------------------------------- toasts */
+
+/* Lives in the banner now, right under the year/undo/notifications row —
+ * a normal-flow block, not a viewport-fixed overlay, so it never covers
+ * page content and never needs its own backdrop. */
+.toast-stack {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(380px, 100%);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: var(--radius-md);
+  /* Dark --ink base, sheen on top — same reasoning as .derived and
+   * .topbar: light-on-dark text needs a solid plate underneath, not a
+   * swap to light glass. */
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, calc(.12 * var(--glass-strength))) 0%, rgba(255, 255, 255, 0) 45%),
+    var(--ink);
+  -webkit-backdrop-filter: saturate(calc(100% + 30% * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 30% * var(--glass-strength)));
+  color: var(--on-ink);
+  font-size: 13px;
+  line-height: 1.45;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
+}
+
+/* Same --ink base as .topbar itself, so undifferentiated there — a
+ * lighter translucent plate instead, the same trick .tonal-button already
+ * uses to read clearly on the dark header. */
+.topbar .toast {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .14) 0%, rgba(255, 255, 255, .04) 100%);
+  border: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .2);
+}
+
+.toast__text { flex: 1 1 auto; }
+
+.toast__action {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--ink-2);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toast__action:hover { background: var(--line-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .month-square:hover { transform: none; }
+}
+
+/* An opened card drops to the end of the grid so closed cards keep a tight
+ * row, then spans the full grid width. */
+.stream-grid > .stream-card.stream-card--open {
+  order: 1;
+}
+
+/* Several open at once keep their relative order and stack below the rest. */
+.stream-grid > .stream-card--open ~ .stream-card--open { order: 2; }
+
+/* At 272px the head cannot hold name, meta, figure and label on two lines
+ * without the meta truncating. The label is the one that can go: the meta
+ * line already names it — "1099 · net of expenses", "W-2 · 0 hrs" — so
+ * "net" under the figure was saying it twice. Grid and stack cards
+ * keep it; they have the room. */
+.stream-card--carousel .stream-card__total-label { display: none; }
+
+/* PROGRESSIVE_BENEFIT_PHASE_V1 */
+
+.phase-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--spent-line);
+  border-radius: var(--radius-md);
+  background: var(--spent-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
+  color: var(--spent-label);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.topbar .phase-warning { border-color: #6e603f; background: #302f2b; color: #f4dfad; }
+.topbar .phase-warning .text-button { flex: 0 0 auto; color: var(--accent); }
+
+.topbar .hotbar {
+  border-color: #6e603f;
+  background: #302f2b;
+}
+.topbar .hotbar__icon { color: #f4dfad; }
+.topbar .hotbar__chip { border-color: rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .06); }
+.topbar .hotbar__chip-month { color: var(--on-ink-muted); }
+.topbar .hotbar__chip-text { color: #f4dfad; }
+.topbar .hotbar__chip--over { border-color: rgba(255, 180, 168, .4); background: rgba(255, 180, 168, .12); }
+.topbar .hotbar__chip--over .hotbar__chip-text { color: #ffb4a8; }
+
+.twp-quiet {
+  font-family: var(--mono);
+  color: var(--on-ink-muted);
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+
+.total-cell--unknown,
+.month-square--unknown {
+  background: var(--paper-2);
+  border-color: var(--line-strong);
+}
+
+.settings-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-fieldset:disabled { opacity: .58; }
+
+.onboarding-phase {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  margin: 14px auto 0;
+}
+
+.onboarding-phase .seg__btn {
+  flex: 1 1 auto;
+  padding-inline: 10px;
+}
+
+.missing-month {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--spent-line);
+  border-radius: var(--radius-md);
+  background: var(--spent-bg);
+  color: var(--spent-label);
+}
+
+.missing-month__go {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.missing-month strong { flex: 0 0 auto; font-size: 12px; }
+.missing-month span { min-width: 0; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.missing-month__dismiss {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--spent-label);
+  cursor: pointer;
+}
+
+.missing-month__dismiss:hover { background: color-mix(in srgb, var(--spent-label) 12%, transparent); }
+
+.archived-streams {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.archived-streams__title {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+
+.archived-streams__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.archived-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 1px 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 99px;
+  background: var(--paper-2);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.archived-chip:hover,
+.archived-chip--open {
+  background: var(--paper-3);
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.archived-chip__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.archived-chip__tag {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.archived-chip__total {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.simulator {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.simulator--paused { background: var(--paper-2); }
+.simulator__eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.simulator__title { font-size: 17px; font-weight: 700; letter-spacing: -.015em; }
+
+.simulator__inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.simulator__results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.simulator__results > div {
+  display: flex;
+  flex-direction: column;
+  padding: 11px;
+  border-radius: var(--radius);
+  background: var(--keep-bg);
+}
+
+.simulator__results strong { font-family: var(--mono); font-size: 16px; color: var(--keep-value); }
+.simulator__result-label { font-size: 10.5px; color: var(--keep-label); }
+.simulator__projection { grid-column: 1 / -1; font-size: 12px; color: var(--ink-2); }
+.simulator__results > .simulator__projection--over { background: var(--over-bg); color: var(--over-label); }
+.simulator__projection--over strong { color: var(--over-value); }
+
+.simulator__paydays {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 11px;
+  border-left: 3px solid var(--spent-line);
+  background: var(--spent-bg);
+  color: var(--spent-label);
+  font-size: 11.5px;
+}
+
+@media (min-width: 780px) {
+  .simulator__inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 520px) {
+  .simulator__inputs,
+  .simulator__results { grid-template-columns: 1fr; }
+  .simulator__projection { grid-column: auto; }
+}
+
+/* ------------------------------------------- layout: wrapping stack + stream cards */
+
+/* Header and body are two independent panes in the same centered column.
+ * The body shrink-wraps its content instead of stretching into one window. */
+.app-shell {
+  --shell-inset: 14px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 14px;
+  padding: var(--shell-inset) 14px 64px;
+}
+
+.app-main,
+.topbar {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 1180px;
+  height: fit-content;
+}
+
+.app-main {
+  /* Transparent stack: each .section is the glass. */
+  position: relative;
+  z-index: auto;
+  isolation: auto;
+  overflow: visible;
+  filter: none;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.topbar {
+  /* Scrolls away with the page — not pinned. */
+  position: relative;
+  top: auto;
+  z-index: 2;
+  gap: 17px;
+  padding: 20px 16px 19px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, calc(.12 * var(--glass-strength))), transparent 44%),
+    radial-gradient(460px circle at 88% -25%, var(--header-glow), transparent 65%),
+    var(--header-fill);
+  -webkit-backdrop-filter: saturate(calc(100% + 90% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 90% * var(--glass-strength))) contrast(calc(100% + 15% * var(--glass-strength))) brightness(calc(1 + .04 * var(--glass-strength)));
+  box-shadow:
+    0 18px 46px rgba(42, 67, 89, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .13),
+    inset 0 -1px 0 rgba(0, 0, 0, .08);
+}
+
+.topbar__row,
+.headline,
+.topbar > .twp-meter,
+.topbar > .twp-quiet,
+.topbar > .phase-warning {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.topbar__row { align-items: flex-start; }
+
+.headline {
+  align-items: flex-end;
+  min-height: 0;
+}
+
+.topbar__eyebrow,
+.headline__label,
+.headline__of,
+.standing__label,
+.standing__unit,
+.topbar .twp-meter__label,
+.topbar .twp-quiet { color: var(--header-muted); }
+
+.topbar h1,
+.headline__room,
+.standing__value { color: var(--header-ink); }
+
+.topbar h1 {
+  margin-top: 3px;
+  font-size: 20px;
+  font-weight: 650;
+}
+
+.headline__value {
+  font-size: 36px;
+  font-weight: 650;
+  color: var(--accent);
+}
+
+.headline__value--over { color: var(--over-bright); }
+.standing__value--accent { color: var(--accent); }
+.standing-divider { background: rgba(255, 255, 255, .16); }
+
+.year-select {
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .09);
+  color: var(--header-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+
+.topbar .icon-button {
+  color: var(--header-muted);
+}
+
+.topbar .icon-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .1);
+  color: var(--header-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.avatar {
+  border-color: rgba(255, 255, 255, .2);
+  background: rgba(255, 255, 255, .09);
+  color: var(--accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+
+.avatar:hover {
+  border-color: rgba(255, 255, 255, .34);
+  background: rgba(255, 255, 255, .14);
+}
+
+.topbar .tonal-button {
+  border-color: rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, .1);
+  color: var(--header-ink);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+
+.topbar .tonal-button:hover { background: rgba(255, 255, 255, .15); }
+
+.topbar > .phase-warning {
+  min-height: 0;
+  padding: 10px 11px 10px 13px;
+  border: 1px solid rgba(255, 227, 158, .18);
+  border-radius: 14px;
+  background: rgba(255, 219, 130, .08);
+  color: #ffe5a6;
+}
+
+.topbar .phase-warning .text-button { color: var(--accent); }
+
+.twp-dot { border-color: var(--accent); }
+
+/* One uninterrupted content stack, not floating islands. */
+.stack {
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  filter: none;
+  transform: none;
+  isolation: auto;
+  background: transparent;
+}
+
+.section,
+.section:nth-child(3n + 2),
+.section:nth-child(3n + 3) {
+  --pane-rotation: 0deg;
+  --section-pad: 16px;
+  --section-radius-outer: 22px;
+  --section-radius-inner: 8px;
+  --section-cluster-gap: 3px;
+  --section-group-gap: 10px;
+  padding: 0;
+}
+
+.section__bar {
+  min-height: 44px;
+  padding: 0;
+}
+
+.section__head {
+  flex: 1 1 0%;
+  min-height: 44px;
+  padding: 24px var(--section-pad);
+}
+
+.section__title {
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.disclosure {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.section__head:hover .disclosure { background: rgba(82, 112, 138, .08); }
+
+.section .icon-button:hover:not(:disabled),
+.section .icon-button--muted:hover:not(:disabled) {
+  background: rgba(82, 112, 138, .08);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.section__head:hover .section__chevron { color: var(--ink); }
+
+.app-empty {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 28px 16px 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.app-empty__title {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -.03em;
+}
+
+.app-empty__note {
+  max-width: 46ch;
+  font-size: 14px;
+}
+
+.app-empty__actions {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+/* Compact, legible inner cards from the original design, polished rather
+ * than turned into additional top-level panes. */
+.stream-card,
+.stream-card:nth-child(3n + 2),
+.stream-card:nth-child(3n + 3) {
+  border: 1px solid var(--card-edge);
+  border-radius: 16px;
+  background: var(--card-fill);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 5px 18px rgba(43, 69, 92, .055), inset 0 1px 0 rgba(255, 255, 255, .92);
+  transform: none;
+}
+
+.stream-card:hover {
+  transform: none;
+  box-shadow: 0 9px 24px rgba(43, 69, 92, .09), inset 0 1px 0 #fff;
+}
+
+.totals-card,
+.simulator {
+  border: 1px solid var(--well-edge);
+  border-radius: 16px;
+  background: var(--well-fill);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+.ledger,
+.rows,
+.seg,
+.segmented,
+.toolbar__group,
+.archived-chip {
+  border-color: var(--inset-edge);
+  background: var(--inset-fill);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82);
+}
+
+.ledger {
+  margin: 0 -14px 0;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid rgba(164, 185, 201, .34);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.ledger + .stream-card__foot {
+  margin-top: -9px;
+}
+
+.month-cell,
+.cell-input,
+.num-input,
+.entry-field input,
+.field input,
+.field select {
+  border-color: rgba(171, 192, 207, .54);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .78);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+.month-cell { background: rgba(255, 255, 255, .54); }
+
+.filled-button {
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--filled-from), var(--filled-to));
+  box-shadow: 0 7px 16px rgba(0, 104, 194, .18), inset 0 1px 0 rgba(255, 255, 255, .26);
+}
+
+.tonal-button,
+.danger-button {
+  border-radius: 12px;
+  border-color: rgba(165, 185, 201, .38);
+  background: rgba(255, 255, 255, .68);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 3px 10px rgba(43, 68, 91, .045);
+}
+
+.chip,
+.stream-panel-edit,
+.lock-toggle {
+  border-color: rgba(163, 184, 200, .4);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .66);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.seg__btn--on,
+.stream-panel-edit--on,
+.lock-toggle[aria-pressed='true'] {
+  border-color: rgba(0, 122, 255, .18);
+  background: rgba(0, 122, 255, .11);
+  color: var(--accent-ink);
+}
+
+@media (min-width: 780px) {
+  .app-shell {
+    --shell-inset: 24px;
+    gap: 16px;
+    padding: var(--shell-inset) 24px 70px;
+  }
+
+  .topbar { border-radius: 26px; padding: 20px 22px 18px; }
+  .topbar h1 { font-size: 23px; }
+  .section,
+  .section:nth-child(3n + 2),
+  .section:nth-child(3n + 3) {
+    --section-pad: 22px;
+    --section-radius-outer: 26px;
+    padding: 0;
+  }
+  .app-empty { padding: 32px 22px 28px; }
+}
+
+@media (max-width: 779px) {
+  .app-shell {
+    --shell-inset: 12px;
+    gap: 12px;
+    padding: var(--shell-inset) 12px 54px;
+  }
+
+  .topbar { border-radius: 20px; }
+
+  .stack { gap: 0; margin: 0; }
+  .section,
+  .section:nth-child(3n + 2),
+  .section:nth-child(3n + 3) {
+    --section-pad: 16px;
+    --section-radius-outer: 20px;
+    padding: 0;
+  }
+  .app-empty { margin: 0; border-radius: 0; }
+}
+
+/* Each .section is its own glass slab in normal document flow.
+ * Adjacent collapsed sections form an MD connected list (CSS only). */
+.stack > .section,
+.stack > .section:nth-child(3n + 2),
+.stack > .section:nth-child(3n + 3) {
+  position: relative;
+  isolation: auto;
+  overflow: visible;
+  margin-top: var(--section-group-gap);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--section-radius-outer);
+  transform-origin: top center;
+  transition:
+    border-radius 480ms var(--motion-spring),
+    margin-top 420ms var(--motion-spring),
+    box-shadow 360ms var(--motion-spring),
+    transform 420ms var(--motion-spring);
+  background:
+    linear-gradient(145deg, var(--pane-shine), rgba(255, 255, 255, calc(.04 * var(--glass-strength))) 52%),
+    var(--pane-body);
+  box-shadow:
+    0 10px 28px rgba(43, 78, 111, .08),
+    inset 0 1px 0 rgba(255, 255, 255, calc(.5 + .36 * var(--glass-strength))),
+    inset 0 -1px 0 rgba(74, 112, 143, .08);
+  -webkit-backdrop-filter:
+    blur(calc(14px * var(--glass-strength)))
+    saturate(calc(100% + 46% * var(--glass-strength)))
+    contrast(calc(100% + 8% * var(--glass-strength)));
+  backdrop-filter:
+    blur(calc(14px * var(--glass-strength)))
+    saturate(calc(100% + 46% * var(--glass-strength)))
+    contrast(calc(100% + 8% * var(--glass-strength)));
+}
+
+.stack > .section:first-child {
+  margin-top: 0;
+}
+
+.stack > .section:not(.section--open):has(+ .section:not(.section--open)) {
+  border-radius: var(--section-radius-outer) var(--section-radius-outer) var(--section-radius-inner) var(--section-radius-inner);
+}
+
+.stack > .section:not(.section--open) + .section:not(.section--open) {
+  margin-top: var(--section-cluster-gap);
+  border-radius: var(--section-radius-inner) var(--section-radius-inner) var(--section-radius-outer) var(--section-radius-outer);
+}
+
+.stack > .section:not(.section--open) + .section:not(.section--open):has(+ .section:not(.section--open)) {
+  border-radius: var(--section-radius-inner);
+}
+
+.stack > .section.section--open,
+.stack > .section.section--open:nth-child(3n + 2),
+.stack > .section.section--open:nth-child(3n + 3) {
+  position: relative;
+  top: auto;
+  box-shadow:
+    0 18px 46px rgba(42, 67, 89, .14),
+    inset 0 1px 0 rgba(255, 255, 255, calc(.5 + .36 * var(--glass-strength))),
+    inset 0 -1px 0 rgba(74, 112, 143, .08);
+  -webkit-backdrop-filter:
+    blur(calc(16px * var(--glass-strength)))
+    saturate(calc(100% + 65% * var(--glass-strength)))
+    contrast(calc(100% + 15% * var(--glass-strength)))
+    brightness(calc(1 + .04 * var(--glass-strength)));
+  backdrop-filter:
+    blur(calc(16px * var(--glass-strength)))
+    saturate(calc(100% + 65% * var(--glass-strength)))
+    contrast(calc(100% + 15% * var(--glass-strength)))
+    brightness(calc(1 + .04 * var(--glass-strength)));
+}
+
+
+/* Stream cards — last in this file so it wins leftover 72px head mins,
+ * height:max-content / min-height:min-content, overflow:hidden, and flex:1.
+ *
+ * Flexbox, not grid, for the same reason .stack uses it: a collapsed card
+ * hugs its own content width rather than stretching (that's the "centred
+ * when alone" look this card family wants, the opposite of how the
+ * top-level panels behave), which means any row can legitimately have
+ * leftover space — a full row of evenly-hugged cards, or a last row with
+ * just one stranded card. flex-wrap justifies *each line* independently,
+ * so both cases centre themselves with no per-case selector needed. Grid
+ * would need to be told explicitly which tracks a stranded item spans,
+ * and (as found while building the equivalent .stack layout) a grid item
+ * with an auto start and a fixed end doesn't actually span multiple
+ * tracks — it only relocates a normal one-track item, so it can't fill or
+ * centre across a partial row at all. */
+.stream-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.stream-grid > .stream-card,
+.stream-grid > .stream-card.stream-card--grid {
+  align-self: start;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: auto;
+  max-height: none;
+}
+
+/* Collapsed: hug title row + optional badge. On a phone the line is one
+ * card wide anyway, so grow:1 there just fills it like it always has
+ * (flat "fill" beats a mid-size card floating with dead space beside it).
+ * From tablet up, more than one card can share a line — grow:0 so each
+ * one only claims what its content needs, and the line's own
+ * justify-content centres however many end up on it. */
+.stream-grid > .stream-card:not(.stream-card--open) {
+  flex: 1 1 min(280px, 100%);
+  /* Collapsed cards on the same row match the tallest one, the way a row
+   * of cards normally reads — only an open card (below) stays sized to
+   * its own content instead of stretching to fill the row. */
+  align-self: stretch;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+@media (min-width: 640px) {
+  .stream-grid > .stream-card:not(.stream-card--open) {
+    flex-grow: 0;
+  }
+}
+
+@media (min-width: 64rem) {
+  .stream-grid > .stream-card:not(.stream-card--open) {
+    flex: 1 1 0;
+    max-width: none;
+  }
+}
+
+.stream-grid > .stream-card .stream-card__head,
+.stream-grid > .stream-card:not(.stream-card--open) .stream-card__head,
+.stream-card:not(.stream-card--open) .stream-card__head {
+  flex: 0 0 auto;
+  flex-grow: 0;
+  height: auto;
+  min-height: 0;
+}
+
+.stream-grid > .stream-card .stream-card__head,
+.stream-card__head {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "chevron name right"
+    ". badge .";
+  align-items: start;
+  align-content: start;
+  justify-items: start;
+  min-width: 0;
+}
+
+.stream-card__head > .disclosure {
+  grid-area: chevron;
+  align-self: start;
+}
+.stream-card__head > .stream-card__name-wrap {
+  grid-area: name;
+  min-width: 0;
+  overflow: hidden;
+}
+.stream-card__head > .stream-card__right {
+  grid-area: right;
+  align-self: start;
+  align-items: flex-start;
+}
+.stream-card__head > .stream-card__badge { grid-area: badge; }
+
+.stream-grid > .stream-card .stream-card__badge,
+.stream-grid > .stream-card .stream-card__badge--warn,
+.stream-card__badge--warn {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: min(100%, 8rem);
+  width: auto;
+  flex: 0 1 auto;
+  justify-self: start;
+  overflow: hidden;
+}
+
+.stream-card__head > .stream-card__badge.stream-card__badge--warn {
+  grid-area: badge;
+  min-width: 0;
+  max-width: min(100%, 8rem);
+  width: auto;
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+
+.stream-grid > .stream-card .stream-card__badge-text,
+.stream-card__badge--warn .stream-card__badge-text {
+  min-width: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stream-grid > .stream-card.stream-card--open .stream-card__badge--warn,
+.stream-grid > .stream-card.stream-card--open .stream-card__head > .stream-card__badge.stream-card__badge--warn {
+  max-width: 100%;
+}
+
+.stream-grid > .stream-card .stream-card__panel {
+  flex: 0 0 auto;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Layout chips render an empty wrapper when customize is off — it still
+ * ate a 9px panel gap above the month grid. */
+.stream-grid > .stream-card .stream-panel-fields:not(:has(.seg, .col-auto, .chip, .stream-panel-edit)) {
+  display: none;
+}
+
+.stream-grid > .stream-card .stream-card__panel > .field {
+  margin-top: 0;
+}
+
+.stream-grid > .stream-card .stream-card__foot,
+.stream-grid > .stream-card .ledger {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.stream-grid > .stream-card .ledger + .stream-card__foot {
+  margin-top: -9px;
+}
+
+.stream-grid > .stream-card.stream-card--open ~ .stream-card.stream-card--open {
+  order: 2;
+}
+
+/* Open: own row, full width, height from used (spanned) width. */
+.stream-grid > .stream-card.stream-card--open {
+  order: 1;
+  flex: 1 1 100%;
+  width: 100%;
+  max-width: 100%;
+  align-self: start;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Frost lives on .topbar / .section above — blur only, no SVG displacement. */
+
+.stack > .section.section--open,
+.stack > .section.section--open:nth-child(3n + 2),
+.stack > .section.section--open:nth-child(3n + 3) {
+  position: relative;
+  top: auto;
+  z-index: auto;
+}
+
+.topbar {
+  position: relative;
+  top: auto;
+  z-index: 2;
+  transform: none;
+  -webkit-backdrop-filter:
+    blur(calc(18px * var(--glass-strength)))
+    saturate(calc(100% + 90% * var(--glass-strength)))
+    contrast(calc(100% + 15% * var(--glass-strength)))
+    brightness(calc(1 + .04 * var(--glass-strength)));
+  backdrop-filter:
+    blur(calc(18px * var(--glass-strength)))
+    saturate(calc(100% + 90% * var(--glass-strength)))
+    contrast(calc(100% + 15% * var(--glass-strength)))
+    brightness(calc(1 + .04 * var(--glass-strength)));
+}
+
+@keyframes section-slab-settle {
+  0% { transform: scale3d(1, .992, 1); }
+  58% { transform: scale3d(1.002, 1.009, 1); }
+  100% { transform: scale3d(1, 1, 1); }
+}
+
+.slab-bounce {
+  animation: section-slab-settle 480ms var(--motion-spring);
+}
+
+/* Hover is catch-light + a tiny spring scale from the top edge, so titles
+ * and kebabs barely move. No pointer-follow / translate. Bounce (open/close)
+ * owns transform while it is running. */
+@media (hover: hover) {
+  .stack > .section:hover:not(.slab-bounce) {
+    z-index: 1;
+    box-shadow:
+      0 16px 38px rgba(42, 67, 89, .13),
+      inset 0 1px 0 rgba(255, 255, 255, calc(.62 + .3 * var(--glass-strength))),
+      inset 0 38px 52px -30px rgba(123, 216, 246, .16),
+      inset 0 -1px 0 rgba(74, 112, 143, .08);
+    transform: scale3d(1.002, 1.006, 1);
+  }
+
+  .stack > .section.section--open:hover:not(.slab-bounce) {
+    box-shadow:
+      0 22px 52px rgba(42, 67, 89, .16),
+      inset 0 1px 0 rgba(255, 255, 255, calc(.55 + .36 * var(--glass-strength))),
+      inset 0 42px 56px -30px rgba(123, 216, 246, .14),
+      inset 0 -1px 0 rgba(74, 112, 143, .08);
+  }
+
+  .stream-card:hover {
+    box-shadow:
+      0 16px 38px rgba(46, 74, 99, .12),
+      inset 0 0 0 1px rgba(123, 216, 246, .3),
+      inset 0 40px 56px -30px rgba(123, 216, 246, .16);
+  }
+
+  .month-square,
+  .total-cell,
+  .month-cell--read {
+    transition:
+      transform 320ms var(--motion-spring),
+      box-shadow 280ms var(--motion-spring),
+      border-color 180ms var(--motion),
+      background 180ms var(--motion);
+  }
+
+  .month-square:hover,
+  .total-cell:hover,
+  .month-cell--read:hover:not(:disabled):not(.month-cell--locked) {
+    transform: scale(1.04);
+  }
+
+  .month-square:active,
+  .total-cell:active,
+  .month-cell--read:active:not(:disabled):not(.month-cell--locked) {
+    transform: scale(.97);
+  }
+}
+
+/* Settings (and every other sheet): chrome stays put, body scrolls. Last
+ * in this file so leftover overflow/height rules cannot clip the panel. */
+.sheet {
+  overflow: hidden;
+  min-height: 0;
+  max-height: calc(100dvh - max(12px, env(safe-area-inset-top)));
+}
+
+.sheet__head {
+  flex: 0 0 auto;
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, calc(.38 * var(--glass-strength))), rgba(255, 255, 255, calc(.05 * var(--glass-strength))) 56%),
+    color-mix(in oklab, var(--secondary) calc(32% * var(--glass-strength)), transparent);
+  -webkit-backdrop-filter: saturate(calc(100% + 45% * var(--glass-strength)));
+  backdrop-filter: saturate(calc(100% + 45% * var(--glass-strength)));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, calc(.58 * var(--glass-strength)));
+}
+
+.sheet__head::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -80%;
+  left: -16%;
+  width: 72%;
+  height: 180%;
+  border-radius: 50%;
+  background: linear-gradient(115deg, rgba(255, 255, 255, calc(.3 * var(--glass-strength))), transparent 68%);
+  pointer-events: none;
+}
+
+.sheet__head > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(70, 108, 140, .75) rgba(86, 123, 153, .14);
+}
+
+.sheet__body::-webkit-scrollbar { width: 12px; }
+.sheet__body::-webkit-scrollbar-track {
+  background: rgba(86, 123, 153, .12);
+  border-radius: 99px;
+  margin: 8px 2px 18px;
+}
+.sheet__body::-webkit-scrollbar-thumb {
+  background: rgba(70, 108, 140, .7);
+  border: 2px solid transparent;
+  border-radius: 99px;
+  background-clip: content-box;
+  min-height: 36px;
+}
+.sheet__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(70, 108, 140, .9);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+@media (min-width: 640px) {
+  .sheet { max-height: calc(100dvh - 48px); }
+}
+
+@media (min-width: 780px) {
+  .sheet { max-height: calc(100dvh - 48px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack > .section,
+  .stream-card,
+  .month-square,
+  .total-cell,
+  .month-cell--read {
+    transition: none;
+    animation: none;
+  }
+
+  .stack > .section:hover,
+  .month-square:hover,
+  .total-cell:hover,
+  .month-cell--read:hover {
+    transform: none;
+  }
+}
+
+/* Top-level panels as self-sizing, wrapping tiles: one per row on a phone,
+ * 2- or 3-up as room allows. Flexbox rather than grid on purpose — grid
+ * needs to be told explicitly which tracks an item spans, which means
+ * hand-coding every "how many tiles ended up in the last row" case for a
+ * dynamic, fluid column count. Flexbox's own wrapping already grows every
+ * item on an under-full line (including a line of exactly one) to fill it,
+ * for any mix of tile counts, with no special-casing.
+ *
+ * An open panel forces its own full-width row via flex-basis:100% — same
+ * rule stream cards already use inside Active (collapsed = a tile, open =
+ * the full row) — so opening a panel *is* how you stretch it. The
+ * single-column "connected pill list" merge (adjoining collapsed panels
+ * sharing an edge) only makes sense stacked vertically; here it's
+ * neutralised by equalising the inner/outer radius and the two gap
+ * variables it reads from, rather than fought on specificity. */
+.stack {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.stack > .section {
+  --section-radius-inner: var(--section-radius-outer);
+  --section-group-gap: 0px;
+  --section-cluster-gap: 0px;
+  flex: 1 1 300px;
+  min-width: 0;
+  order: 1;
+}
+
+/* Opening a panel also promotes it above every still-collapsed one — open
+ * panels keep their relative order among themselves (order ties break by
+ * document order), collapsed ones sink below regardless of where they sit
+ * in the markup. */
+.stack > .section.section--open {
+  flex-basis: 100%;
+  order: 0;
+}
+
+/* Shared composition: Status uses the same inner-card as Months. A simulator
+ * nested there is a section of that card, not a second pane. */
+.totals-card .sheet-hero .twp-meter {
+  flex: 1 1 160px;
+  max-width: 280px;
+}
+
+.chip--spent {
+  border-color: var(--spent-line);
+  background: var(--spent-bg);
+  color: var(--spent-label);
+}
+
+.chip--over {
+  border-color: var(--over-line);
+  background: var(--over-bg);
+  color: var(--over-label);
+}
+
+.totals-card > .simulator,
+.totals-card > .simulator.simulator--paused {
+  margin-top: 4px;
+  padding: 10px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.popover-drawer__items > .stream-menu__back {
+  min-height: 44px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line-3);
+  border-radius: 0;
+  color: var(--muted);
+}
+
+.popover-drawer__items > .stream-menu__back:active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+}
+
+/* Dark surfaces that still had light-only fills after the token swap. */
+[data-theme='dark'] .popover-surface,
+[data-theme='dark'] .popover-drawer,
+[data-theme='dark'] .sheet,
+[data-theme='dark'] .signin-panel,
+[data-theme='dark'] .terms-panel {
+  border-color: var(--glass-edge);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, calc(.08 * var(--glass-strength))), transparent 58%),
+    var(--paper);
+}
+
+/* iOS Safari does not reliably reskin a native date input's placeholder
+ * text and calendar glyph from an inherited color-scheme alone — both can
+ * stay light-styled (invisible on a dark field) unless the input itself
+ * declares color-scheme, and the glyph gets an explicit invert. */
+[data-theme='dark'] input[type='date'] {
+  color-scheme: dark;
+}
+[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Same leftover-light-fill bug: a hardcoded warm-cream glass tint that
+ * never got a dark counterpart, so the amber warning read as a pale beige
+ * card instead of a dark amber one. */
+[data-theme='dark'] .warning,
+[data-theme='dark'] .missing-month {
+  border-color: var(--spent-line);
+  background: var(--spent-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+[data-theme='dark'] .popover-surface--on-dark {
+  background: var(--paper);
+}
+
+[data-theme='dark'] .tonal-button,
+[data-theme='dark'] .danger-button,
+[data-theme='dark'] .chip,
+[data-theme='dark'] .stream-panel-edit,
+[data-theme='dark'] .lock-toggle {
+  border-color: var(--inset-edge);
+  background: var(--inset-fill);
+}
+
+[data-theme='dark'] .month-cell,
+[data-theme='dark'] .cell-input,
+[data-theme='dark'] .num-input,
+[data-theme='dark'] .entry-field input,
+[data-theme='dark'] .field input,
+[data-theme='dark'] .field select {
+  border-color: var(--line-strong);
+  background: var(--card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+[data-theme='dark'] .sheet .segmented button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--desk);
+}
+
+[data-theme='dark'] .chip--spent {
+  border-color: var(--spent-line);
+  background: var(--spent-bg);
+  color: var(--spent-label);
+}
+
+[data-theme='dark'] .chip--over {
+  border-color: var(--over-line);
+  background: var(--over-bg);
+  color: var(--over-label);
+}
+
+/* ------------------------------------------- theme: 2026 Work Record surfaces
+ *
+ * Colour, type, and elevation from the 2026 tracker mock.
+ * Tokens at the top of this file are the source of truth.
+ */
+
+body::before {
+  background:
+    radial-gradient(ellipse 880px 660px at 4% -8%, var(--desk-glow-1), transparent 62%),
+    radial-gradient(ellipse 760px 600px at 98% 4%, var(--desk-glow-2), transparent 60%),
+    var(--desk);
+}
+
+.app-shell {
+  --shell-inset: 12px;
+  gap: 12px;
+  padding: 12px 12px 54px;
+}
+
+.app-main,
+.topbar {
+  max-width: 48rem;
+}
+
+@media (min-width: 780px) {
+  .app-shell {
+    --shell-inset: 24px;
+    gap: 16px;
+    padding: 24px 24px 70px;
+  }
+}
+
+@media (min-width: 64rem) {
+  .app-main,
+  .topbar { max-width: 72rem; }
+}
+
+@media (min-width: 80rem) {
+  .app-main,
+  .topbar { max-width: 80rem; }
+}
+
+/* Header — one navy rectangular card. Packing from the Apple-like
+ * island (compact type, title beside actions). Paint from Enhance. */
+.topbar {
+  position: relative;
+  top: auto;
+  gap: 17px;
+  padding: 20px 16px 19px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  background: var(--header-fill);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: var(--shadow-header);
+}
+
+@media (min-width: 780px) {
+  .topbar {
+    padding: 20px 22px 18px;
+    border-radius: 26px;
+  }
+}
+
+.topbar__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 8px;
+}
+
+.topbar__title {
+  display: contents;
+}
+
+.topbar__eyebrow {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.topbar h1 {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 3px;
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -.025em;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--header-ink);
+}
+
+.topbar__actions {
+  grid-column: 2;
+  grid-row: 1;
+  gap: 4px;
+}
+
+.topbar__eyebrow,
+.headline__label,
+.topbar .twp-meter__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--header-muted);
+}
+
+@media (min-width: 780px) {
+  .topbar h1 { font-size: 23px; }
+}
+
+.year-select {
+  height: 34px;
+  min-height: 0;
+  padding: 0 8px;
+  border: 1px solid color-mix(in oklab, var(--on-ink) 18%, transparent);
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--on-ink) 9%, transparent);
+  color: var(--header-ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.topbar .icon-button,
+.topbar .avatar {
+  width: 34px;
+  height: 34px;
+  color: color-mix(in oklab, var(--on-ink) 70%, transparent);
+}
+
+.topbar .icon-button:hover:not(:disabled),
+.topbar .avatar:hover {
+  background: color-mix(in oklab, var(--on-ink) 10%, transparent);
+  color: var(--header-ink);
+  box-shadow: none;
+}
+
+.notice-menu__count {
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--sky);
+  color: var(--navy-deep);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 32px;
+  width: 100%;
+}
+
+.headline__main {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.headline__value {
+  font-family: var(--sans);
+  font-size: 36px;
+  font-weight: 650;
+  letter-spacing: -.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--sky);
+}
+
+.headline__value--over { color: var(--over-bright); }
+
+.headline__aside {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  letter-spacing: 0;
+  text-align: right;
+  align-items: flex-end;
+}
+
+.headline__of {
+  font-size: 14px;
+  letter-spacing: .02em;
+  color: color-mix(in oklab, var(--header-ink) 60%, transparent);
+}
+
+.headline__room {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--header-ink);
+}
+
+.standings { display: none; }
+
+@media (min-width: 780px) {
+  .headline__value { font-size: 48px; }
+}
+
+/* Four even columns: labels on one row, figures share the $0 bottom. */
+@media (min-width: 64rem) {
+  .headline {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    column-gap: 0;
+  }
+
+  .standings { display: contents; }
+  .standing-divider { display: none; }
+
+  .headline__main,
+  .headline__aside,
+  .standing {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .headline__main { align-items: flex-start; }
+
+  .headline__aside,
+  .headline .standing {
+    align-items: flex-end;
+    text-align: right;
+    padding-left: 20px;
+    padding-right: 16px;
+    border-left: 1px solid color-mix(in oklab, var(--on-ink) 15%, transparent);
+  }
+
+  .headline__aside > *,
+  .headline .standing > * {
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .headline .standing:last-of-type {
+    padding-left: 28px;
+    padding-right: 0;
+  }
+
+  .headline__label {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--header-muted);
+  }
+
+  .standing__label,
+  .headline__of {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--header-ink) 60%, transparent);
+  }
+
+  .headline__of {
+    letter-spacing: .02em;
+    text-transform: none;
+  }
+
+  .headline__value,
+  .headline__room,
+  .standing__value {
+    margin-top: auto;
+    line-height: 1;
+  }
+
+  .headline__room,
+  .standing__value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--header-ink);
+  }
+
+  .standing__value {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+  }
+
+  .standing__value--accent { color: var(--sky); font-size: 28px; line-height: 1; }
+  .standing__unit { font-size: 16px; line-height: 1; color: var(--header-ink); }
+}
+
+@media (min-width: 64rem) {
+  .topbar {
+    gap: 22px;
+    padding: 24px 28px 22px;
+  }
+
+  .topbar__eyebrow {
+    font-size: 12px;
+    letter-spacing: .14em;
+  }
+
+  .topbar h1 {
+    font-size: 36px;
+    line-height: 1.1;
+  }
+
+  .year-select {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  .topbar .icon-button,
+  .topbar .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .topbar .icon-button svg,
+  .topbar .avatar svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .notice-menu__count {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+    line-height: 20px;
+  }
+
+  .topbar .twp-meter__label {
+    font-size: 12px;
+    letter-spacing: .1em;
+  }
+
+  .topbar .twp-dot {
+    height: 8px;
+  }
+}
+
+.twp-meter { gap: 8px; }
+.twp-meter__dots { gap: 4px; }
+
+.twp-dot {
+  height: 10px;
+  border: 2px solid var(--sky);
+  background: color-mix(in oklab, var(--sky) 16%, transparent);
+  opacity: 1;
+}
+
+.twp-dot--prior {
+  background: var(--muted);
+  border-color: var(--muted);
+}
+
+.twp-dot--spent {
+  background: var(--spent-strong);
+  border-color: var(--spent-strong);
+}
+
+/* Header — Figma patterned lines: unused dashed, used solid amber. */
+.topbar .twp-meter {
+  gap: 8px;
+}
+
+.topbar .twp-meter__dots {
+  gap: 6px;
+}
+
+.topbar .twp-dot {
+  height: 6px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in srgb, var(--sky) 50%, transparent);
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  opacity: 1;
+}
+
+@media (min-width: 64rem) {
+  .topbar .twp-dot { height: 8px; }
+}
+
+.topbar .twp-dot--prior,
+.topbar .twp-dot--spent {
+  border-style: solid;
+  border-color: var(--spent-strong);
+  background: var(--spent-strong);
+}
+
+.topbar .twp-meter__label {
+  margin-top: 4px;
+  color: var(--header-muted);
+}
+
+/* Working panes -------------------------------------------------------- */
+.stack {
+  gap: 20px;
+}
+
+@media (min-width: 64rem) {
+  .stack { gap: 28px; }
+}
+
+.stack > .section,
+.stack > .section:nth-child(3n + 2),
+.stack > .section:nth-child(3n + 3),
+.stack > .section.section--open,
+.stack > .section.section--open:nth-child(3n + 2),
+.stack > .section.section--open:nth-child(3n + 3) {
+  --section-pad: 24px;
+  --section-radius-outer: 1.5rem;
+  --section-radius-inner: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--card);
+  box-shadow: 0 1px 2px oklch(30% .04 255 / .05);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (min-width: 40rem) {
+  .stack > .section,
+  .stack > .section:nth-child(3n + 2),
+  .stack > .section:nth-child(3n + 3) {
+    --section-pad: 28px;
+  }
+}
+
+@media (hover: hover) {
+  .stack > .section:hover:not(.slab-bounce),
+  .stack > .section.section--open:hover:not(.slab-bounce) {
+    box-shadow: 0 1px 2px oklch(30% .04 255 / .05);
+    transform: none;
+    background: var(--card);
+  }
+}
+
+.section__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.3;
+}
+
+.stack > .section:not(.section--open) .section__title {
+  font-size: 1.25rem;
+}
+
+.section__aside {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted-fg);
+}
+
+.disclosure { color: var(--muted); }
+
+/* Stream cards --------------------------------------------------------- */
+.stream-grid { gap: 16px; }
+
+.stream-card,
+.stream-card:nth-child(3n + 2),
+.stream-card:nth-child(3n + 3),
+.stream-card.stream-card--open {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: 0 1px 2px oklch(30% .04 255 / .05);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.stream-card:hover:not(.slab-bounce),
+.stream-card.stream-card--open:hover {
+  transform: none;
+  box-shadow: 0 1px 2px oklch(30% .04 255 / .05);
+}
+
+.stream-card__head:hover {
+  background: transparent;
+}
+
+.stream-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+  .stream-card__name { font-size: 1.125rem; }
+}
+
+.stream-card__type {
+  padding: 2px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--badge-1099-bg);
+  color: var(--badge-1099-ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.stream-card__type--w2 {
+  background: var(--badge-w2-bg);
+  color: var(--badge-w2-ink);
+  font-family: var(--sans);
+}
+
+.stream-card__type:hover,
+.stream-card__type[aria-expanded='true'] {
+  filter: brightness(.96);
+  border-color: transparent;
+}
+
+.stream-card__total {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+  .stream-card__total { font-size: 1.125rem; }
+}
+
+.stream-card__total-label {
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
+.stream-card:not(.stream-card--open) .stream-card__head {
+  padding: 16px;
+}
+
+@media (min-width: 40rem) {
+  .stream-card:not(.stream-card--open) .stream-card__head {
+    padding: 20px;
+  }
+}
+
+.stream-card--open .stream-card__head {
+  padding: 16px 16px 16px 4px;
+}
+
+@media (min-width: 40rem) {
+  .stream-card--open .stream-card__head {
+    padding: 20px 24px 20px 8px;
+  }
+}
+
+.stream-card .month-cell:not(.month-cell--pivot) {
+  border-color: var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: color-mix(in oklab, var(--card) 70%, var(--secondary));
+  padding: 12px;
+}
+
+.stream-card .month-cell--comfortable:not(.month-cell--pivot) {
+  min-height: 7rem;
+}
+
+.stream-card .month-cell__read-value {
+  font-family: var(--sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.stream-card .month-cell__label--now { color: var(--primary); }
+
+.stream-card__foot {
+  background: color-mix(in oklab, var(--secondary) 60%, transparent);
+  border-top-color: var(--border);
+}
+
+.stream-card__foot .chip {
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.stream-card__foot .stream-panel-edit,
+.stream-card__foot .lock-toggle {
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Add / archive -------------------------------------------------------- */
+.stream-add { width: 100%; max-width: none; }
+
+.stream-add__row {
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.stream-add__row > button {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.stream-footer { padding-top: 8px; }
+
+.archived-streams { margin-top: 12px; gap: 12px; }
+
+.archived-streams__title {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--sky) 22%, var(--muted));
+}
+
+.archived-streams__chips { gap: 12px; }
+
+.archived-chip {
+  gap: 10px;
+  min-height: 36px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.archived-chip__name {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.archived-chip__tag {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.archived-chip__tag--ended {
+  background: var(--badge-ended-bg);
+  color: var(--badge-ended-ink);
+}
+
+.archived-chip__tag--paused {
+  background: var(--badge-paused-bg);
+  color: var(--badge-paused-ink);
+}
+
+.archived-chip__total {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .archived-chip:hover,
+  .archived-chip--open {
+    background: var(--hover-blue-fill);
+    border-color: var(--hover-blue-border);
+    box-shadow: var(--shadow-chip);
+  }
+}
+
+/* Buttons -------------------------------------------------------------- */
+.filled-button {
+  border: 0;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--primary);
+  color: var(--primary-fg);
+  box-shadow: var(--shadow-filled);
+}
+
+.filled-button:hover {
+  background: var(--primary);
+  filter: brightness(1.1);
+}
+
+.tonal-button,
+.danger-button {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition:
+    box-shadow 180ms var(--motion),
+    background 180ms var(--motion),
+    border-color 180ms var(--motion),
+    color 180ms var(--motion);
+}
+
+.tonal-button:hover {
+  background: var(--card);
+  filter: none;
+  box-shadow:
+    0 1px 2px oklch(30% .04 255 / .08),
+    0 6px 16px oklch(30% .04 255 / .14);
+}
+
+.totals-card,
+.simulator {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.app-empty {
+  padding: 28px 16px 24px;
+}
+
+.app-empty__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+
+[data-theme='dark'] .stream-card,
+[data-theme='dark'] .stream-card:nth-child(3n + 2),
+[data-theme='dark'] .stream-card:nth-child(3n + 3),
+[data-theme='dark'] .totals-card,
+[data-theme='dark'] .archived-chip {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+/* Flush inside .totals-card in every theme — see the light-mode rule above. */
+[data-theme='dark'] .totals-card > .simulator {
+  background: transparent;
+  border-color: transparent;
+}
+
+[data-theme='dark'] .stream-card .month-cell:not(.month-cell--pivot) {
+  background: color-mix(in oklab, var(--card) 70%, var(--secondary));
+  border-color: var(--border);
+}
+
+[data-theme='dark'] .stack > .section,
+[data-theme='dark'] .stack > .section:nth-child(3n + 2),
+[data-theme='dark'] .stack > .section:nth-child(3n + 3) {
+  background: color-mix(in oklab, var(--secondary) 60%, var(--desk));
+  border-color: var(--border);
+}
+
+[data-theme='dark'] .filled-button {
+  color: var(--primary-fg);
+}
+
+[data-theme='dark'] .year-select {
+  color: var(--header-ink);
+}
+
+/* ------------------------------------------- menus / sheets
+ *
+ * Extra floor under the last menuitem was not the home indicator: a 16px
+ * scrim pad + 12px drawer pad + 32px sheet pad, all on top of
+ * env(safe-area-inset-bottom). The drawer now docks flush to the bottom
+ * edge (same shape as .sheet) and carries its own safe-area padding
+ * internally, so the scrim itself adds no bottom floor at all — a gap
+ * there just reads as the sheet not reaching the edge.
+ */
+
+.popover-scrim {
+  padding: max(12px, env(safe-area-inset-top, 0px)) 0 0;
+}
+
+.popover-drawer {
+  gap: 4px;
+  padding: 4px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  border-radius: 22px 22px 0 0;
+}
+
+.popover-drawer__items {
+  gap: 0;
+  padding-bottom: 0;
+}
+
+.popover-drawer__items > button {
+  min-height: 44px;
+  gap: 12px;
+  padding: 0 12px;
+  border-radius: 12px;
+}
+
+.popover-drawer__items > button > svg,
+.popover-surface > button > svg {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.popover-drawer__items > button > span,
+.popover-surface > button > span:not(.stream-menu__hint):not(.menu-label) {
+  min-width: 0;
+}
+
+.popover-surface {
+  padding-bottom: 6px;
+}
+
+.popover-surface > button {
+  min-height: 40px;
+  gap: 10px;
+}
+
+.sheet__body {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+  .sheet__body { padding-bottom: 16px; }
+}
+
+/* Kebab sits on the $0 / GROSS stack, not the top of the name. */
+.stream-card__head > .stream-card__right,
+.stream-card__right {
+  align-self: center;
+  align-items: center;
+}
+
+.stream-card .icon-button--muted {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin-top: 0;
+}
+
+.stream-card .icon-button--muted:hover:not(:disabled),
+.stream-card .icon-button--muted[aria-expanded='true'] {
+  background: color-mix(in oklab, var(--ink) 7%, transparent);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.stream-section-actions .icon-button {
+  width: 36px;
+  height: 36px;
+}
+
+.stream-section-actions .icon-button:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--ink) 7%, transparent);
+}
+
+/* Money stays tabular mono so 0 and $ line up. */
+.stream-card__total {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.section__aside {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted-fg);
+}
+
+/* Paycheck ledger — collapsed accordion; body only when open. */
+.ledger {
+  margin: 0 -14px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+
+.ledger + .stream-card__foot { margin-top: 0; }
+
+.ledger__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 0;
+  padding: 16px 24px;
+  border: 0;
+  border-radius: 0;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ledger__toggle:hover {
+  background: var(--paper-2);
+}
+
+.ledger__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+.ledger__chevron {
+  flex: 0 0 auto;
+  color: var(--muted-fg);
+  transition: transform 160ms var(--motion);
+}
+
+.ledger__chevron--open {
+  transform: rotate(90deg);
+}
+
+.ledger__count {
+  background: var(--secondary);
+  color: var(--muted);
+}
+
+/* This month is a 3- or 5-paycheck month for this stream — the same flag
+ * the calendar shows, surfaced here too since this is where you are
+ * actually entering the paycheck that makes it heavy. */
+.ledger__extra-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 99px;
+  background: var(--spent-bg);
+  color: var(--spent-label);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.ledger__body {
+  gap: 12px;
+  padding: 4px 24px 16px;
+  border-top: 0;
+  background: transparent;
+}
+
+.ledger__empty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.ledger__add {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .8fr) auto;
+  align-items: stretch;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+@media (max-width: 520px) {
+  .ledger__add {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ledger__add-button { grid-column: 1 / -1; }
+
+  /* A phone is a reading device held closer than a laptop, not further —
+   * the smallest body copy in the app still needs to be legible there. */
+  .help-note { font-size: 13px; }
+  .warning__title { font-size: 15.5px; }
+  .warning__text { font-size: 13.5px; }
+  .entry-field__hint { font-size: 11.5px; }
+
+  /* A <select> zooms the page on focus below 16px exactly like a text
+   * input does — the year picker was still at its compact desktop size. */
+  .year-select { min-height: 40px; font-size: 16px; }
+}
+
+.ledger__date-input,
+.ledger__field,
+.ledger__num-input {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  /* 16px so iOS does not zoom on focus */
+  font-size: 16px;
+}
+
+.ledger__date-input {
+  padding: 0 10px;
+  color: var(--muted);
+}
+
+.ledger__field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  min-width: 0;
+}
+
+.ledger__prefix {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ledger__field .ledger__num-input {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ledger__add-button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--secondary);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.ledger__add-button:disabled {
+  opacity: 1;
+  background: var(--secondary);
+  color: color-mix(in oklab, var(--muted) 70%, var(--card));
+}
+
+.ledger__add-button:not(:disabled) {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.ledger__add-button:not(:disabled):hover { filter: brightness(1.05); }
+
+.ledger__row {
+  min-height: 36px;
+  padding: 0 6px;
+  border-radius: 8px;
+}
+
+.ledger__row:hover {
+  background: var(--secondary);
+  box-shadow: none;
+}
+
+.ledger__gross {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger__remove {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.ledger__remove:hover { background: var(--over-bg); color: var(--over-label); }
+
+.stream-card__foot {
+  gap: 12px;
+  margin: 0 -14px;
+  padding: 12px 24px 16px;
+  background: color-mix(in oklab, var(--secondary) 60%, transparent);
+  border-top: 1px solid var(--border);
+}
+
+.ledger-seg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.ledger-seg__btn {
+  min-height: 0;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ledger-seg__btn:hover {
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+}
+
+.ledger-seg__btn--on {
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.ledger-seg__btn:not(.ledger-seg__btn--on) {
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+  color: color-mix(in oklab, var(--primary) 62%, var(--muted));
+}
+
+.stream-card__foot .stream-panel-edit,
+.stream-card__foot .lock-toggle {
+  min-height: 32px;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: none;
+}
+
+.stream-card__foot .stream-panel-edit svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  stroke-width: 1.75;
+}
+
+.stream-card__foot .stream-panel-edit:hover,
+.stream-card__foot .lock-toggle:hover {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 4px 12px oklch(30% .04 255 / .12);
+}
+
+.stream-card__foot .stream-panel-edit--on {
+  background: color-mix(in oklab, var(--secondary) 70%, var(--card));
+  border-color: var(--border);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.stream-card__foot .stream-panel-edit--on:hover {
+  box-shadow: 0 4px 12px oklch(30% .04 255 / .12);
+}
+
+/* ------------------------------------------- final: canvas + month hover
+ * Last so earlier slabs cannot keep a rest umbra.
+ */
+html,
+body,
+.app-shell {
+  background: var(--background);
+}
+
+body::before {
+  background: var(--background);
+}
+
+.section__aside {
+  color: color-mix(in oklab, var(--sky) 22%, var(--muted));
+}
+
+.stream-card__total,
+.archived-chip__total {
+  color: var(--ink);
+}
+
+.ledger--open .ledger__body {
+  background: transparent;
+}
+
+.stream-card .month-cell:not(.month-cell--pivot),
+.month-cell--read {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.month-cell--hover,
+.month-cell--read:hover:not(:disabled):not(.month-cell--locked) {
+  background: var(--card);
+  border-color: var(--hover-blue-border);
+  box-shadow: var(--shadow-month);
+  transform: none;
+}
+
+.stream-add__row > .filled-button,
+.app-empty__actions > .filled-button {
+  box-shadow: none;
+}
+
+
+

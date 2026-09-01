@@ -1,14 +1,83 @@
 // Persistence. Local-only, one key, one dataset, multi-year.
 
-import type { TrackerData } from '../domain/types';
+import type { MonthKey, TrackerData } from '../domain/types';
 import { EMPTY_DATA } from '../domain/types';
 
 const DATA_KEY = 'pg-data-v1';
 const UI_KEY = 'pg-ui-v1';
 
 export type ThemePref = 'system' | 'light' | 'dark';
-export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord';
+export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord' | 'calc20';
 export type LedgerTheme = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
+
+/**
+ * Presentation state belonging to the Calc20 layout alone.
+ *
+ * It is nested rather than flattened because that layout arrived with two
+ * dozen of its own switches, and spreading them across the shared record
+ * would make it impossible to see which preference belongs to which screen.
+ * Everything the layouts genuinely share — year, hideFuture, theme, sync,
+ * terms — stays on UiState below and is read straight from there.
+ *
+ * Note `layout` here is the Calc20 *stream arrangement*, not UiState.layout
+ * (the app-wide layout mode). Same word, two scopes, hence the separation.
+ */
+export interface Calc20Ui {
+  layout: 'carousel';
+  carouselArrange: 'rail' | 'grid';
+  streamMonthColumnAdjustments: Record<string, number>;
+  monthColumnAdjustment: number;
+  monthColumnsAuto: boolean;
+  monthColumnsAutoChosen: boolean;
+  expandAllAsStack: boolean;
+  view: 'cards' | 'list';
+  viewChosen: boolean;
+  pivot: boolean;
+  pivotChosen: boolean;
+  density: 'compact' | 'comfortable';
+  densityChosen: boolean;
+  columns: 'auto' | number;
+  customizeLayout: boolean;
+  touchLayout: 'rail' | 'grid' | null;
+  streamsOpen: boolean;
+  archivedOpen: boolean;
+  monthsOpen: boolean;
+  statusOpen: boolean;
+  editing: boolean;
+  collapsed: Record<string, boolean>;
+  streamSettings: Record<string, boolean>;
+  dismissedMissingMonths: MonthKey[];
+  /** 0-100. How opaque the header, menus and sheets are; 0 is see-through. */
+  glassStrength: number;
+}
+
+export const DEFAULT_CALC20_UI: Calc20Ui = {
+  layout: 'carousel',
+  carouselArrange: 'grid',
+  streamMonthColumnAdjustments: {},
+  monthColumnAdjustment: 0,
+  monthColumnsAuto: true,
+  monthColumnsAutoChosen: false,
+  expandAllAsStack: false,
+  view: 'list',
+  viewChosen: false,
+  pivot: false,
+  pivotChosen: false,
+  density: 'comfortable',
+  densityChosen: false,
+  columns: 'auto',
+  customizeLayout: false,
+  touchLayout: null,
+  streamsOpen: true,
+  archivedOpen: false,
+  monthsOpen: true,
+  statusOpen: false,
+  editing: false,
+  collapsed: {},
+  streamSettings: {},
+  dismissedMissingMonths: [],
+  glassStrength: 0
+};
 
 export interface UiState {
   year: number;
@@ -29,6 +98,8 @@ export interface UiState {
   wrStreamsOpen: boolean;
   wrMonthsOpen: boolean;
   wrStatusOpen: boolean;
+  /** Everything the Calc20 layout remembers for itself. */
+  calc20: Calc20Ui;
   /** Set once someone adds a stream or explicitly skips — after that, an
    *  empty tracker shows the real (empty) dashboard, not onboarding again. */
   onboarded: boolean;
@@ -55,6 +126,7 @@ export const DEFAULT_UI: UiState = {
   wrStreamsOpen: true,
   wrMonthsOpen: true,
   wrStatusOpen: false,
+  calc20: DEFAULT_CALC20_UI,
   onboarded: false,
   cloudSyncEnabled: false
 };
@@ -78,7 +150,13 @@ export function loadUi(): UiState {
     const raw = localStorage.getItem(UI_KEY);
     if (!raw) return { ...DEFAULT_UI };
     const saved = JSON.parse(raw) as Partial<UiState>;
-    return { ...DEFAULT_UI, ...saved };
+    // The top-level spread is one level deep, so a nested slice saved before
+    // a switch existed would arrive missing that switch. Merge it by hand.
+    return {
+      ...DEFAULT_UI,
+      ...saved,
+      calc20: { ...DEFAULT_CALC20_UI, ...(saved.calc20 ?? {}) }
+    };
   } catch {
     return { ...DEFAULT_UI };
   }
