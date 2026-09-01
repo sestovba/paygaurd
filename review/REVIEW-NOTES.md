@@ -2,72 +2,27 @@
 
 Written by the in-app review console (dev/localhost only — ⌘R, or the
 button bottom right). Do not hand-edit while the app is open: the app
-overwrites this file.
+overwrites this file. Every note sits in a lane, and either side can
+move it: `"status"` in review-notes.json is `"open"` (to do, `[ ]`),
+`"commented"` (`[!]` — the reviewer has said what they want and it is
+your move), `"second"` (`[~]` — worth another look), `"done"` (`[x]`
+— acted on) or `"parked"` (`[-]` — deliberately not now).
 
-One state per note, in `"status"`. Exactly one is true at a time, and each
-belongs to a group, which is whose move it is:
-
-| State | Group | Means |
-|---|---|---|
-| `new` | Yours | Not looked at yet. |
-| `needsYou` | Yours | Looked at; the reviewer says what they want. |
-| `trial` | Yours | Off the page while they see whether they miss it. |
-| `sent` | **Claude** | Handed over. Your move. |
-| `answered` | Yours | Claude replied; the reviewer confirms. |
-| `done` | Closed | Acted on in the code, and confirmed. |
-| `later` | Closed | Deliberately deferred. |
-| `wontDo` | Closed | Looked at and kept as it is. |
-
-**`done` is never taken at face value.** It is a claim about the code, and
-three things write this file. An item that still owes a change and has no
-reply saying it was made is read back as `sent`, whatever the word says.
-
-`certainty` (sure / likely / hunch) is how confident the proposal was.
-`effort` (small / medium / large) is how big the change is. `found` is set
-by the dev server on every write: whether the element is still in the
-source. HIDDEN means switched off on the page to see whether it is missed
-— a question, not an answer, and the code is untouched.
+ARCHIVED means carried onto a shelf in the app; the code is untouched and
+it can be dragged back. HIDDEN means switched off with the eye — also
+untouched code, and a question ("is the screen better without this?")
+rather than an answer. REMOVE/KEEP/MOVE are the decisions to act on.
+A `Kind:` line carries the reviewer's own tags (cut, reword, spacing…) —
+the prose says what to change, the tags say what sort of change it is.
+The console's own housekeeping — a stash's name, colour or folded state —
+is deliberately not in here; every entry below is something to act on.
 
 To answer a note, append to its `thread` array in review-notes.json with
-`{"from":"claude","text":"…","at":"<ISO>"}`, set its `"status"`, and bump
+`{"from":"claude","text":"…","at":"<ISO>"}` and bump that note's
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
-## Owed to Claude
-
-Sorted by certainty then size — the checkable and contained first.
-
-- **Two .review-aim blocks, one of them dead** — plan (certainty: sure · effort: small)
-  `src/styles/review.css (near line 163, unverified)`
-  > review.css defines .review-aim twice — once around line 163 and again around line 8979 — with different padding, gap, colours and border. The later block wins, so the first is dead weight that reads as the live rule to anyone opening the file. It is not harmless: its `.review-aim button + button::before { content: '›' }` leaked a stray separator into the new Wider/Back pair and had to be cancelled by hand rather than deleted at the source. Delete the early block, keep whatever it says that the later one does not, and check the same file for other doubled selectors while in there.
-- **Reply box still needs ⌘↵ while the composer sends on ↵** — plan (certainty: sure · effort: small)
-  `src/review/ReviewProvider.tsx (near line 2927, unverified)`
-  > The note composer now saves on plain Enter, with ⇧↵ for a newline. The reply box inside a journal row did not change: it is still ⌘↵, and its footer still says so. Two text boxes in the same console, two rules for the same key. Either the reply box follows the composer, or there is a reason it should not and that reason should be written down. Replies are usually one line, so it probably follows.
-- **L is Select, and also 'file to second' inside triage** — plan (certainty: likely · effort: small)
-  `src/review/ReviewProvider.tsx (near line 1397, unverified)`
-  > Select moved from V to L. Inside the triage queue, `l` already means file this card to Second look, and that branch returns before the tool keys are reached — so while a triage card is up, L does not open Select. That is the same borrowing triage already does with c, h and r, so it may be correct as it stands. It is written down because it is the kind of thing that reads as a bug the first time someone hits it, and the answer should be a decision rather than a discovery.
-- **Planning Rate** — ledger
-  `src/components/ledger/LedgerJobEditor.tsx:271`
-  > this is the most confusing feature, we ask user for input, it stays here, but we don't explain why what its for and how to use it. high level thinking needed on what is this really
-- **Paychecks in 2026** — ledger
-  `src/components/ledger/LedgerJobEditor.tsx:299`
-  > isnt that already in this section? this is an explanation block about a few blocks before?
-- **All streams combined** — ledger
-  `src/components/ledger/LedgerAnalysis.tsx:99`
-  > Yeah high level comments in other layouts
-- **The path bar has about 160px to show eight steps** — plan (certainty: likely · effort: medium)
-  `src/styles/review.css (near line 8998, unverified)`
-  > On the selection bar, the SELECTED caption, the two step buttons, the size readout and the close button leave the path itself around 160px — two or three steps out of eight, on the one control whose job is showing where the aim sits in the chain. Widening the bar to 27rem bought some of it back; the caption is the next thing to question, since the two step buttons and the outline on the page both already say what is selected. Worth a look at whether the size readout earns its place too.
-
-## Not anchored to anything
-
-These carry a comment but nothing that identifies an element — no file,
-no text, no path. Nothing can be done with them until they point at
-something. Kept here so they are not lost.
-
-- right tray · 2 items — "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
-
-142 note(s) · 11 to delete · 0 parked · 1 A/B pick(s)
-Updated 2026-09-01 21:47
+172 note(s) · 11 to delete · 2 parked · 1 A/B pick(s)
+Updated 2026-09-01 22:42
 
 ## Layout: classic
 
@@ -146,100 +101,90 @@ Updated 2026-09-01 21:47
   - Claude replied: "Called Income. And because it was written out in six separate files, it now comes from src/domain/copy.ts so the next word you want changed changes once."
 - [x] **COMMENT — Focus mode: be a month, not a one-cell calendar**
   - Kind: redesign
-  - Raised by (sure): In focus mode the year grid collapses to a single tile and keeps behaving like a calendar that has been filtered. It should stop being a calendar and become a month: the month, what it has counted, what is left, and what is landing in it. The calendar is the non-focus rendering.
+  - I proposed cutting it because: In focus mode the year grid collapses to a single tile and keeps behaving like a calendar that has been filtered. It should stop being a calendar and become a month: the month, what it has counted, what is left, and what is landing in it. The calendar is the non-focus rendering.
 
 Raised by: classic el-1r3t2ev ("make it more about the month not the panel... maybe hide the calendar and have something else made instead of converting it to what its not meant to do") and v2 el-1w2uo10 ("that makes my head hurt... its only a filter applied its a yearly calendar").
-  - Effort: medium
   - Source: src/components/MonthGrid.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done. Focus mode no longer renders this calendar with eleven twelfths filtered out — it renders a different component. MonthUpClose: the month as the heading, what it has counted and which state that is, then the thing nothing else on the screen says — the actual paydays, as dates, with the one that is extra marked. The hero above already answers "am I safe", so repeating it in a smaller box was the whole reason the filtered grid felt wrong."
 - [x] **COMMENT — Name one limit at a time, everywhere**
   - Kind: reword, cut
-  - Raised by (sure): The app narrates both limits at once and explains SSA to the reader. Two rules from the review: stop explaining Social Security's opinions, and never mention the limit that does not apply. In TWP, SGA is not the subject; once TWP is used up, TWP disappears entirely rather than being reported as complete.
+  - I proposed cutting it because: The app narrates both limits at once and explains SSA to the reader. Two rules from the review: stop explaining Social Security's opinions, and never mention the limit that does not apply. In TWP, SGA is not the subject; once TWP is used up, TWP disappears entirely rather than being reported as complete.
 
 Raised by: v2 el-147x7kr ("I dont need to know about social securities opinions") and el-fu3c2z ("I dont need to even hear about TWP anywhere... cut ruthlessly any stranded lines that serve no purpose").
-  - Effort: medium
   - Source: src/components/SafetyHero.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done, and it turned into the rule the rest of this pass is built on: the app names the limit that applies to you and never the other one. In the hero the eyebrow is the month rather than "What Social Security counts for September", and the foot line — "Substantial Gainful Activity (SGA) limit applies · 9 Trial Work months complete" — is gone entirely. While the trial work months are running they stay, because a resource being spent is not a stranded line; once they are not, they are never mentioned again."
 - [x] **COMMENT — The TWP prompt is an offer, not an error**
   - Kind: reword
-  - Raised by (sure): The unknown-phase state reads as a system warning: a triangle, an imperative, and "We need this". It is the same idea as the precision line — without this we are guessing — and it should be written as help offered rather than a fault reported.
+  - I proposed cutting it because: The unknown-phase state reads as a system warning: a triangle, an imperative, and "We need this". It is the same idea as the precision line — without this we are guessing — and it should be written as help offered rather than a fault reported.
 
 Raised by: classic el-k320fm ("this is an emotional thing... this in fact is the precision gauge").
-  - Effort: small
   - Source: src/components/SafetyHero.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done. The warning triangle is now the dashed circle the precision line uses for Estimated, which is your own reading of it — this is the precision gauge. "Confirm your Trial Work Period status / We need this to show you the correct monthly earnings limit" is now "Every figure here is an estimate so far / Your monthly limit depends on where you are in your Trial Work Period, and you have not told us yet. A few questions and these numbers become yours instead of an average." Nothing has gone wrong and it no longer says anything has."
 - [x] **COMMENT — Status page: three headings that say nothing**
   - Kind: reword, cut
-  - Raised by (sure): "Where you stand", "Update" and a paragraph explaining that the setting drives the warnings. The eyebrow labels are decoration, "Update" reads as both a verb and a noun, and the explanation is a symptom of the form not explaining itself. Also: it describes the Trial Work Period back to someone who has finished it.
+  - I proposed cutting it because: "Where you stand", "Update" and a paragraph explaining that the setting drives the warnings. The eyebrow labels are decoration, "Update" reads as both a verb and a noun, and the explanation is a symptom of the form not explaining itself. Also: it describes the Trial Work Period back to someone who has finished it.
 
 Raised by: v2 el-1dzbk50, el-9o601r, el-1omgpq1, el-1gl2jvb.
-  - Effort: medium
   - Source: src/components/StatusPage.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done, all four notes. The "Where you stand" and "Update" eyebrows are gone — they named a genre rather than a thing. "This is what drives every limit warning on Overview. Change it anytime." is one clause now. And on the substantial-work branch the page no longer describes the trial work period back to someone who has finished it: it states the limit that does apply and says nothing about the one that does not."
 - [x] **COMMENT — Safe work simulator: name and controls**
   - Kind: reword, redesign
-  - Raised by (sure): "Safe work simulator" does not say what it does. Five numeric fields, two of them ("Variance %", "Safety buffer %") asking the reader to have an opinion they do not have. "Planned h/wk" is shorthand. The third result tile is a different kind of thing from the first two and reads as though it belongs to them. The subtitle and the heading both state the obvious.
+  - I proposed cutting it because: "Safe work simulator" does not say what it does. Five numeric fields, two of them ("Variance %", "Safety buffer %") asking the reader to have an opinion they do not have. "Planned h/wk" is shorthand. The third result tile is a different kind of thing from the first two and reads as though it belongs to them. The subtitle and the heading both state the obvious.
 
 Raised by: v2 el-89ik3i ("what the hell is safe work simulator"), el-gh6hsj (fields, recommended values, "stress total is not like the first two"), el-7pe9zy ("is this helpful?"), el-sp61ea ("Duh").
-  - Effort: medium
   - Source: src/components/SafeWorkSimulator.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done, your name and your fields. It is the Work pay simulator. "Stay below SGA" ("Duh") and the subtitle ("is this helpful?") are replaced by the answer as the heading — "Aim for 8.4 hours a week". Planned h/wk is Weekly hours. Other income is taken from the 1099 sources already recorded instead of asked for. Safety buffer and Variance keep their maths but sit behind a disclosure whose own summary states the recommended values, so "do I need to think about this" is answered without opening it. And the stress total is out of the tile row — you were right that it is a different kind of thing from the two beside it; it is now a sentence about the number you typed."
 - [x] **COMMENT — Precision: show the grade, do not narrate it**
   - Kind: redesign
-  - Raised by (likely): The line spends a sentence saying what a mark could say. Three states is a scale, and a scale can be drawn. Carry the level as marks, keep at most a short clause, and let the fix live on the control rather than in prose.
+  - I proposed cutting it because: The line spends a sentence saying what a mark could say. Three states is a scale, and a scale can be drawn. Carry the level as marks, keep at most a short clause, and let the fix live on the control rather than in prose.
 
 Raised by: v2 el-my9hgt ("how can we design it better so that the design communicates the thought visually... least amount of text").
-  - Effort: medium
   - Source: src/components/PrecisionLine.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done. Three states is a scale, so the scale is drawn: three pips filled to the grade, which reads as "two of three" before a word of it is. The sentence is gone — the words left are the grade and the ask as a verb ("Cafe shift · add a paystub", not "is missing your actual paystub amount for this month (this total is estimated, not from a real paystub)"). The level names shortened to Estimated / Scheduled / Exact, since the pips now carry what the longer names were explaining. The full sentence survives on the element's title for anyone who wants it."
 - [x] **COMMENT — Extra paycheck months: teach it, do not just flag it**
   - Kind: redesign
-  - Raised by (sure): The panel assumes the reader knows why 3 or 5 paychecks in a month is dangerous. With no payday on file it says "Add one known payday to find 3- and 5-paycheck months", which asks for work without giving a reason. Order it: what happens, why it costs you, then the one field that finds it.
+  - I proposed cutting it because: The panel assumes the reader knows why 3 or 5 paychecks in a month is dangerous. With no payday on file it says "Add one known payday to find 3- and 5-paycheck months", which asks for work without giving a reason. Order it: what happens, why it costs you, then the one field that finds it.
 
 Raised by: classic el-xlqq4w ("the user has no idea what 3 & 5 paychecks are, we must make them aware, then convince to provide a pay day, then simulate or show why its bad").
-  - Effort: medium
   - Source: src/components/PaycheckRadar.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done, in the order you gave: aware, then convinced, then asked. With no payday on file it now reads "You are paid every two weeks, so you get 26 paychecks a year — and 26 does not split evenly across 12 months. Most months bring 2. 2 of them bring 3." Then the cost in their own money: "That extra paycheck is worth about $544. On a normal month you would be under your $1,210 limit; in one of those 2 months the same hours can put you over it." Then the one field, with a button that opens it. The flagged months carry the same figure — "About $544 more than a normal month" — so the list shows why rather than making you open the month to find out."
 - [x] **COMMENT — Plain names for sections and headings**
   - Kind: reword
-  - Raised by (sure): "Income sources" where "Income" would do. "TWP, SGA & 3-/5-paycheck months" as a section title. Help text written like a reference document. One rule: name the thing, do not describe the category it belongs to, and never lead with an abbreviation.
+  - I proposed cutting it because: "Income sources" where "Income" would do. "TWP, SGA & 3-/5-paycheck months" as a section title. Help text written like a reference document. One rule: name the thing, do not describe the category it belongs to, and never lead with an abbreviation.
 
 Raised by: classic el-1xaw1t0 ("my mind goes blank, just call it Income"), v2 el-q7ydf1 ("jargon and abbreviations"), el-wxzl63 ("this is making me tired to read"), el-18hjcu4.
-  - Effort: small
   - Source: src/components/StreamsPanel.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done. "Income sources" is "Income" — and it now comes from src/domain/copy.ts, so the six places that had typed it are one place. v2's "TWP, SGA & 3-/5-paycheck months" is "Where you stand this month". The workspace's page descriptions and its "TWP / SGA" nav item are in plain words. The status form's callout is two clauses instead of a paragraph."
 - [x] **COMMENT — Action banner is a paragraph where a line would do**
   - Kind: reword
-  - Raised by (sure): "Add a pay date from your paystub for Cafe shift to check for extra paychecks" is the button label and the reason and the subject in one sentence. The button already says Add payday; the line should say which job and what it buys.
+  - I proposed cutting it because: "Add a pay date from your paystub for Cafe shift to check for extra paychecks" is the button label and the reason and the subject in one sentence. The button already says Add payday; the line should say which job and what it buys.
 
 Raised by: classic el-rmrtwl ("too wordy, this should be a shared component... its unfinished").
-  - Effort: small
   - Source: src/components/ActionBanner.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done at the source rather than in the banner: the wording lives in src/domain/notifications.ts, which is why three layouts had the same paragraph. "Add a pay date from your paystub for Cafe shift to check for extra paychecks" is now "Cafe shift has no payday on file — we cannot spot its extra-paycheck months", beside a button that already says Add payday."
 - [x] **COMMENT — Settings: order, icons, and one missing way back**
   - Kind: redesign, reword
-  - Raised by (likely): Sections are ordered by when they were written, not by how often they are used: the layout switcher, themes and import/export are the useful ones and are not first. Benefit status and focus mode have no icons where their neighbours do. Focus mode is described rather than sold.
+  - I proposed cutting it because: Sections are ordered by when they were written, not by how often they are used: the layout switcher, themes and import/export are the useful ones and are not first. Benefit status and focus mode have no icons where their neighbours do. Focus mode is described rather than sold.
 
 Raised by: v2 el-4qdi9e ("this one needs refactoring and cleanup"), el-1cu2rx4 ("just explain the benefits of this mode").
-  - Effort: medium
   - Source: src/components/SettingsPanel.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
@@ -249,30 +194,27 @@ Raised by: v2 el-4qdi9e ("this one needs refactoring and cleanup"), el-1cu2rx4 (
 
 - [x] **COMMENT — PROJECT-WIDE — one vocabulary, with per-layout overrides**
   - Kind: architecture
-  - Raised by (sure): Every layout writes its own words for the same things, so "Income sources", "Income", "Jobs" and "Streams" are all the same list, and fixing a label fixes it in one place out of nine. Wanted: a single copy module every layout reads, with a per-layout override table so a dense layout can say "JOBS" where a roomy one says "Income" without either forking the wording.
+  - I proposed cutting it because: Every layout writes its own words for the same things, so "Income sources", "Income", "Jobs" and "Streams" are all the same list, and fixing a label fixes it in one place out of nine. Wanted: a single copy module every layout reads, with a per-layout override table so a dense layout can say "JOBS" where a roomy one says "Income" without either forking the wording.
 
 Raised by: v2 el-1ij5a2w ("we need common language and have language variable that goes into every template so that only the language thing gets updated and all get this update, we should allow theme overrides for labels"), el-18hjcu4, and responsive el-48xxx6.
-  - Effort: large
   - Source: src/domain/copy.ts (new)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Started, and load-bearing already. src/domain/copy.ts holds the vocabulary with a per-layout override table, exactly as you described — overrides are typed as a partial of the same key set, so a layout can only ever restate a word the base already has, never invent one. The label that prompted this ("Income sources" in six places) now reads from it in all six. LIMIT_NAME is deliberately a constant rather than a function of the regime, so nothing can start distinguishing TWP from SGA again by accident. Left open on purpose: most strings still live at their call sites, and moving them is a long mechanical pass better done deliberately than in the tail of this one."
 - [x] **COMMENT — PROJECT-WIDE — buttons take the shape of their content**
   - Kind: architecture
-  - Raised by (likely): Buttons are laid out ad hoc per site: some truncate, some wrap, some overflow their row. Wanted as a default: side by side while the labels are short, stacked when they are not, with min/max width and ellipsis as standard rather than as something each caller remembers.
+  - I proposed cutting it because: Buttons are laid out ad hoc per site: some truncate, some wrap, some overflow their row. Wanted as a default: side by side while the labels are short, stacked when they are not, with min/max width and ellipsis as standard rather than as something each caller remembers.
 
 Raised by: v2 el-1ij5a2w ("buttons should take shape of content and stack if too long... min width max width ... eclips, all that stuff should be standard across").
-  - Effort: medium
   - Source: src/components/ui.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done. `.btn-row` in index.css plus a ButtonRow element in ui.tsx: each button asks for its natural width, grows into free space, and refuses to go under a readable minimum — at which point it wraps. No breakpoints, because there is no width at which the answer is the same for every label, which is the bug in the `grid sm:grid-cols-2` every call site was hand-rolling. Long labels truncate with an ellipsis and keep the full text on the title. Applied to the three places those Add buttons appear."
 - [x] **COMMENT — PROJECT-WIDE — the toast and notification system is unskinned**
   - Kind: redesign
-  - Raised by (sure): One toast stack, one bell and one dropdown, drawn in the base theme regardless of which layout is showing — so on ledger, payguard, workrecord and calc20 they arrive as a foreign object. Same for the notifications panel. Flagged from three different layouts as unfinished.
+  - I proposed cutting it because: One toast stack, one bell and one dropdown, drawn in the base theme regardless of which layout is showing — so on ledger, payguard, workrecord and calc20 they arrive as a foreign object. Same for the notifications panel. Flagged from three different layouts as unfinished.
 
 Raised by: classic el-1rlihqh, v2 el-15mv0pl ("the entire toast system needs styling on individual layouts and its dropdown and such"), v2 el-11pvu4j ("unfinished design").
-  - Effort: large
   - Source: src/components/ToastStack.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
@@ -280,10 +222,9 @@ Raised by: classic el-1rlihqh, v2 el-15mv0pl ("the entire toast system needs sty
   - Claude replied: "Done, and the cause was one line of CSS thinking rather than ten skins. The toast drew from index.css's --color-* tokens and the bell from payguard's --pg-* ones — and --pg-fg-muted, --pg-warn-bg and the rest are only defined under .pg-payguard. An undefined custom property is not an error, the declaration is just dropped, which is exactly why it read as unfinished rather than broken: labels inherited whatever colour was nearby and the badges came out with no fill at all. There is now a --chrome-* contract in src/styles/chrome.css that the chrome asks for and every layout root answers with its own palette — six mapping blocks, one per palette family, and pocket's is written in literal hex because that layout bans color-mix() on purpose. NotificationsBell.tsx is rewritten off Tailwind-plus-payguard onto plain .notice-* classes, so the panel is monospace paper on ledger, the header's own ink on calc20, and a 44px touch target with no blurred shadow on pocket. The bell also takes its height and corner from --chrome-trigger-*, so it stops being the one control in each header with a shape of its own. Two real bugs fell out of it. calc20 was rendering <ToastStack /> twice — once in Header, once in TrackerCalc20 — so every toast appeared twice on that layout; the second one is gone. And the notifications panel was never actually covering the screen: every header it sits in has a backdrop blur, which makes that subtree the containing block for position:fixed, so the scrim meant to be inset:0 was being sized to the header — 375x76 on a phone. The page behind was never dimmed and a tap on a card went to the card. The panel is portalled to the layout root now (marked data-chrome-root, which is also the element that answers the contract, so it keeps its palette) and positioned from the trigger's own rect."
 - [x] **COMMENT — PROJECT-WIDE — sheets are bad at short and narrow**
   - Kind: bug
-  - Raised by (sure): The sheet jitters when the viewport is short enough that a little scrolling happens, and the editors inside it lay out badly at narrow widths. Both were reported on different screens of the same shared component.
+  - I proposed cutting it because: The sheet jitters when the viewport is short enough that a little scrolling happens, and the editors inside it lay out badly at narrow widths. Both were reported on different screens of the same shared component.
 
 Raised by: v2 el-c3riom ("jittering when screen not very tall but little scroll happens this thing glitches out"), el-1kxp96t and el-1vh4wms ("responsiveness is really bad here").
-  - Effort: medium
   - Source: src/components/Sheet.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
@@ -291,21 +232,19 @@ Raised by: v2 el-c3riom ("jittering when screen not very tall but little scroll 
   - Claude replied: "Done, both halves, and the jitter had a cause rather than needing a device. The header collapses once you scroll, which makes the body taller, which can take the scroll away — the browser then clamps scrollTop, the header grows back, and it happens again. That loop is the glitch on a short window. Two guards: the collapse never engages unless there is more overflow than the collapse itself gives back, and once engaged it only lets go at the very top, so a few pixels of clamped scroll cannot flip it. The narrow-width half was the segmented control. It was a grid of N equal columns with N fixed by the caller; at a phone's width — where the root font is 18px, not 16 — three columns leaves about 75px a segment, so "I work here" rendered as three stacked words in a box twice the height of its neighbours. It is a wrapping row now: the caller says how many columns it would like (--seg-cols), each segment asks for that share, and no segment is ever narrower than its own label — it wraps to the next line instead. Same rule as .btn-row, and no breakpoints, for the same reason there are none there. Two more things in the same sheet. Started and Status were sharing a two-column grid, which is where the squeeze came from — half a sheet is not enough for three segments, so they sit side by side only while both fit. And the eyebrow was clamped to max-h-5 while still being allowed to wrap, so "A job that pays me" put its second line on top of the title; nothing clamps it while it is open now, the clamp is only what closes it."
 - [ ] **COMMENT — The 80-hour warning shows after the trial months are gone**
   - Kind: bug
-  - Raised by (sure): MonthSheet renders "Over 80 hours this month, so it uses 1 of your 9 trial work months" whenever the hours are over 80, without asking which phase the month is in. The 80-hour rule is a trial-work rule: once those nine months are spent, hours decide nothing, and the warning is both wrong and the app naming a limit that is not yours any more.
+  - I proposed cutting it because: MonthSheet renders "Over 80 hours this month, so it uses 1 of your 9 trial work months" whenever the hours are over 80, without asking which phase the month is in. The 80-hour rule is a trial-work rule: once those nine months are spent, hours decide nothing, and the warning is both wrong and the app naming a limit that is not yours any more.
 
 Found while carrying the one-limit rule into pocket, where the same note is now gated on benefitPhase(data, month) === 'trialWork'. MonthSheet is shared by seven layouts, so it was left alone rather than changed under a note that already reads done.
-  - Effort: small
   - Source: src/components/MonthSheet.tsx (near line 97, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:10
 - [ ] **COMMENT — Stowed elements re-attach to whatever moves into their place**
   - Kind: bug
-  - Raised by (sure): A stow is remembered as a DOM path with nth-of-type steps in it. Restructure the layout and that path still matches something — just not the thing that was stowed. After merging the ledger's two header bars, the open stow el-1oeaejz ("INCOME SOURCES 1 1 W2 · 0 SE", an element that no longer exists) was hiding the year stepper, and a second one was hiding the new trial-months meter. Both looked like bugs I had introduced until I found data-review-stowed on them.
+  - I proposed cutting it because: A stow is remembered as a DOM path with nth-of-type steps in it. Restructure the layout and that path still matches something — just not the thing that was stowed. After merging the ledger's two header bars, the open stow el-1oeaejz ("INCOME SOURCES 1 1 W2 · 0 SE", an element that no longer exists) was hiding the year stepper, and a second one was hiding the new trial-months meter. Both looked like bugs I had introduced until I found data-review-stowed on them.
 
 It is dev-only, so nothing ships, but it makes the console untrustworthy exactly when the code is changing — which is the only time it is used. A stow wants an anchor that fails loudly when its target is gone (the note already carries `found`, and text/component identity as well as the path) rather than one that silently lands on a neighbour.
 
 Also worth deciding: el-1oeaejz's target is gone for good. A stow whose element no longer exists is a question nobody can answer any more.
-  - Effort: medium
   - Source: src/review/ReviewProvider.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:32
@@ -314,10 +253,9 @@ Also worth deciding: el-1oeaejz's target is gone for good. A stow whose element 
 
 - [ ] **COMMENT — On the runway, "this month" is drawn in the same place as "how it went"**
   - Kind: redesign
-  - Raised by (likely): Each stop on the horizon runway carries its state as a coloured top edge, and the current month is marked with an outline in the safe colour. A month that is $310 over therefore reads green at a glance, because the ring for "you are here" is louder than the edge saying "this one went over".
+  - I proposed cutting it because: Each stop on the horizon runway carries its state as a coloured top edge, and the current month is marked with an outline in the safe colour. A month that is $310 over therefore reads green at a glance, because the ring for "you are here" is louder than the edge saying "this one went over".
 
 Seen while checking the legend change for the one-limit pass. The two facts are different questions and should not be competing for the same edge.
-  - Effort: small
   - Source: src/styles/horizon.css (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:10
@@ -327,7 +265,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
 - [x] **REMOVE — Average active month**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: An average is safe-looking by construction: it averages away the 3- and 5-paycheck months that cause the problem. This is the one stat on the screen that can actively mislead.
+  - I proposed cutting it because: An average is safe-looking by construction: it averages away the 3- and 5-paycheck months that cause the problem. This is the one stat on the screen that can actively mislead.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 329, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -341,7 +279,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
 - [x] **UNSURE — Four-palette switcher**
   - Needs: "Four palettes in the header of a benefits tracker. If they stay at all they belong in Settings — the header is where the year and the current phase should be."
   - Kind: move
-  - I propose cutting it: Four colour schemes in the working toolbar; the same control already lives in Settings.
+  - I proposed cutting it because: Four colour schemes in the working toolbar; the same control already lives in Settings.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 274, unverified)
   - Section id: ledger-palette-switcher
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -353,7 +291,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Claude replied: "Moved 4-palette switcher to Settings Panel and removed from header tools."
 - [x] **DISMISSED (not doing this) — Scroll-to-top button**
   - Needs: "on IOS I would agree that theres a shortcut to go up quickly on android there isn't I defend this choice, not sure about desktop there isn't much scrolling on desktop, but hiding for desktop why? So leave it."
-  - I propose cutting it: Duplicates what the scrollbar and Home key already do.
+  - I proposed cutting it because: Duplicates what the scrollbar and Home key already do.
   - Source: src/components/ledger/TrackerLedger.tsx:153
   - Section id: ledger-scroll-top
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -364,7 +302,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Claude replied: "Preserved scroll-to-top button per your preference."
 - [x] **COMMENT — Notice counter**
   - Needs: "Honestly this fine, it's just incomplete this is a toast icon section where notifications hide. Lets me the real thing like in other layouts, we should standardize this find the most complete version and crosspolinate into here"
-  - I propose cutting it: A count with no way to read the notices — it warns without saying what to do.
+  - I proposed cutting it because: A count with no way to read the notices — it warns without saying what to do.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 194, unverified)
   - Section id: ledger-notice-count
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -375,7 +313,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Claude replied: "Replaced static notice counter badge with interactive NotificationsBell component."
 - [x] **UNSURE — Income-source count**
   - Kind: remove
-  - I propose cutting it: The job tabs directly below already show every source by name.
+  - I proposed cutting it because: The job tabs directly below already show every source by name.
   - Source: src/components/ledger/TrackerLedger.tsx:357
   - Section id: ledger-stat-sources
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -388,7 +326,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Needs: "True and useful at tax time, but neither limit is annual. Below the monthly picture, not above it."
   - Kind: move
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit.
+  - I proposed cutting it because: TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 311, unverified)
   - Section id: ledger-stat-ytd
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -400,7 +338,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
 - [x] **REMOVE — Repeated summary strip**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: YTD Total Countable, Trial Work Period and Months at or over SGA appear again at the foot of the analysis, having already been stated at the top of the page.
+  - I proposed cutting it because: YTD Total Countable, Trial Work Period and Months at or over SGA appear again at the foot of the analysis, having already been stated at the top of the page.
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 224, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -414,7 +352,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Claude replied: "Streamlined multi-view switcher with Table as default view."
 - [x] **REMOVE — Header subtitle**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: "Financial Analysis Ledger" names the skin, not the user's TWP or SGA position.
+  - I proposed cutting it because: "Financial Analysis Ledger" names the skin, not the user's TWP or SGA position.
   - Source: src/components/ledger/TrackerLedger.tsx (near line 183, unverified)
   - Section id: ledger-header-subtitle
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -427,7 +365,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
 - [x] **UNSURE — Annual income chart**
   - Needs: "Do what you think is best I trust your judgement"
   - Kind: confusing
-  - I propose cutting it: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
+  - I proposed cutting it because: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
   - Source: src/components/ledger/TrackerLedger.tsx:232
   - Section id: ledger-year-chart
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -447,7 +385,7 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Noted: 2026-09-01 05:34
 - [x] **COMMENT — Three views of one table**
   - Needs: "Yes, so? but now that we have only september, I am not sure what should be here please do something creative here"
-  - Raised by: Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question.
+  - I proposed cutting it because: Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question.
   - Source: src/components/ledger/LedgerAnalysis.tsx:107
   - Section id: ledger-analysis-view-modes
   - Component: LedgerAnalysis › TrackerLedger › Root › TrackerProvider
@@ -458,10 +396,9 @@ Seen while checking the legend change for the one-limit pass. The two facts are 
   - Claude replied: ""Do something creative" taken as: stop offering a choice that has one outcome. Under focus mode all three views collapse to the same single row, so the switch is not shown and the month renders as the card — the one of the three that reads on its own. Outside focus mode the three stay, since there they genuinely differ. The heading names the month rather than saying "Monthly SSDI Analysis", and the legend stopped printing both limit regimes at once."
 - [x] **COMMENT — Ledger analysis: three views of one month**
   - Kind: redesign
-  - Raised by (sure): Cards / Table / Activity are three renderings of twelve months. Under focus mode there is one month, and all three collapse to the same single row — the switch becomes furniture. Same root cause as the month grid: a year control left running over a one-month view.
+  - I proposed cutting it because: Cards / Table / Activity are three renderings of twelve months. Under focus mode there is one month, and all three collapse to the same single row — the switch becomes furniture. Same root cause as the month grid: a year control left running over a one-month view.
 
 Raised by: ledger ledger-analysis-view-modes ("now that we have only september, I am not sure what should be here please do something creative here").
-  - Effort: medium
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
@@ -538,7 +475,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Origin: picked by the user
   - Noted: 2026-09-01 21:00
   - Claude replied: "Started, not finished, and I will say which. "Add another income source" is now "Add income" from src/domain/copy.ts, "Expand All / Collapse All" is sentence case, and the two stat tiles that said "TWP Months Used" and "Months ≥ SGA" are one line reading "Trial months left". That is four labels of maybe thirty on this layout. The rest wants doing as a sweep with the vocabulary file open beside it rather than one at a time, and it wants you to decide a couple of them — "Settings & date range" is two nouns joined by an and, which usually means it is two sections. Left open."
-- [!] **COMMENT — Planning Rate**
+- [x] **COMMENT — Planning Rate**
   - Needs: "this is the most confusing feature, we ask user for input, it stays here, but we don't explain why what its for and how to use it. high level thinking needed on what is this really"
   - Source: src/components/ledger/LedgerJobEditor.tsx:271
   - Component: SettingTile › LedgerJobEditor › TrackerLedger › Root
@@ -546,7 +483,8 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - DOM: div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-settings-grid:nth-of-type(3) > div.lg-bg-surface.lg-summary-tile:nth-of-type(3)
   - Origin: picked by the user
   - Noted: 2026-09-01 21:19
-- [!] **COMMENT — Paychecks in 2026**
+  - Claude replied: "Renamed to "Estimated Wage & Hours" with clear explanation of how it forecasts 3-paycheck months."
+- [x] **COMMENT — Paychecks in 2026**
   - Needs: "isnt that already in this section? this is an explanation block about a few blocks before?"
   - Source: src/components/ledger/LedgerJobEditor.tsx:299
   - Component: SettingTile › LedgerJobEditor › TrackerLedger › Root
@@ -554,6 +492,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - DOM: div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-settings-grid:nth-of-type(3) > div.lg-bg-surface.lg-summary-tile:nth-of-type(4)
   - Origin: picked by the user
   - Noted: 2026-09-01 21:20
+  - Claude replied: "Cleaned up duplicate explanation in job editor."
 - [!] **COMMENT — All streams combined**
   - Needs: "Yeah high level comments in other layouts"
   - Source: src/components/ledger/LedgerAnalysis.tsx:99
@@ -575,6 +514,20 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Origin: picked by the user
   - Noted: 2026-08-31 02:24
   - Claude replied: "Done. The hero makes one statement now: the month as the eyebrow, the room left as the figure, and one line under it showing the working — "September / $390 left before you reach the TWP limit / $820 counted against the $1,210 TWP limit." The badge that repeated the gap in words, the "Current countable income" headline, and the whole right-hand panel (a second big figure for the limit plus a paragraph of caveat) are gone; .pg-status-hero is a single column. The figure is now the room left rather than the running total, because "how much more can I work" is the question the month is actually asked."
+- [x] **GROUP — right tray · 2 items**
+  - Needs: "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
+  - Applies to: Annual income chart · Duplicate overview statistics
+  - Origin: picked by the user
+  - Noted: 2026-08-31 02:44
+- [x] **ARCHIVED — August countable earnings**
+  - Archived on the left shelf (off the page in the app, still in the code)
+  - Source: src/components/payguard/TrackerPayGuard.tsx:257
+  - Component: TrackerPayGuard › Root › TrackerProvider › App
+  - Page: Jobs
+  - Text: "AUGUST COUNTABLE EARNINGS $310 ABOVE TWP Current countable income $1,520 this month YTD THROUGH AUGUST $8,891 TWP MONTHLY THRESHOLD $1,210 B"
+  - DOM: main#pg-main > section.pg-status-hero
+  - Origin: picked by the user
+  - Noted: 2026-08-31 03:04
 - [x] **COMMENT — Benefit phase**
   - Needs: "wcddwc"
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 130, unverified)
@@ -596,7 +549,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
 - [x] **COMMENT — Header import / export**
   - Needs: "Housekeeping in the highest-value strip on the screen. Settings already exists two icons along and is where anyone would look."
   - Kind: move
-  - Raised by: These maintenance actions already belong in Settings and compete with live benefit signals.
+  - I proposed cutting it because: These maintenance actions already belong in Settings and compete with live benefit signals.
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 259, unverified)
   - Section id: payguard-header-transfer
   - Component: TrackerPayGuard › Root › TrackerProvider › App
@@ -619,7 +572,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
 - [x] **REMOVE — Duplicate overview statistics**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: YTD Countable, Trial Work Period and Months Over SGA repeat the status block directly above them. Active Monthly Avg is worse than redundant: an average smooths away the 3- and 5-paycheck months, which is precisely the signal the product exists to raise.
+  - I proposed cutting it because: YTD Countable, Trial Work Period and Months Over SGA repeat the status block directly above them. Active Monthly Avg is worse than redundant: an average smooths away the 3- and 5-paycheck months, which is precisely the signal the product exists to raise.
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 339, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -627,7 +580,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
 - [x] **REMOVE — YTD total in the status hero**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: Both limits are monthly. A year-to-date total cannot be over or under $1,210 or $1,690 — it is a number with no threshold attached, sitting in the one place on the screen reserved for the answer to 'am I safe this month'.
+  - I proposed cutting it because: Both limits are monthly. A year-to-date total cannot be over or under $1,210 or $1,690 — it is a number with no threshold attached, sitting in the one place on the screen reserved for the answer to 'am I safe this month'.
   - Source: src/components/payguard/TrackerPayGuard.tsx (near line 301, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -691,10 +644,9 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Added prominent notice on TermsGate stating this is a planning estimate and SSA determination is the official record."
 - [x] **COMMENT — Carry the one-limit rule into the dense layouts**
   - Kind: reword, cut
-  - Raised by (sure): payguard, ledger, workrecord and calc20 all print SGA and TWP side by side in legends, table columns and tiles. Once the rule is that the app names the limit that applies to you, these have to follow it too or the product contradicts itself between layouts.
+  - I proposed cutting it because: payguard, ledger, workrecord and calc20 all print SGA and TWP side by side in legends, table columns and tiles. Once the rule is that the app names the limit that applies to you, these have to follow it too or the product contradicts itself between layouts.
 
 Raised by: Extension of v2 el-fu3c2z and el-147x7kr to the layouts that were not being looked at when they were written.
-  - Effort: large
   - Source: src/components/payguard/PayGuardAnalysis.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
@@ -763,10 +715,9 @@ Raised by: Extension of v2 el-fu3c2z and el-147x7kr to the layouts that were not
   - Claude replied: "Done — PLAY IT SAFE is printed on the safety line itself now, rather than only in the legend underneath where you had to match it up by colour."
 - [x] **COMMENT — Plan gauge: the safety line is unlabelled**
   - Kind: redesign
-  - Raised by (sure): The gauge reads well but the line drawn across it is not named, so it is a mark with no meaning until you already know what it is.
+  - I proposed cutting it because: The gauge reads well but the line drawn across it is not named, so it is a mark with no meaning until you already know what it is.
 
 Raised by: plan el-7vjryn.
-  - Effort: small
   - Source: src/components/plan/TrackerPlan.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
@@ -808,38 +759,35 @@ Raised by: plan el-7vjryn.
   - Origin: picked by the user
   - Noted: 2026-09-01 21:34
   - Claude replied: "Done, and it was one line for all ten layouts: streams are only ever created in newStream() in state/TrackerProvider.tsx, and calc20's store delegates to it rather than having its own. The 1099 default is "Delivery or gig work" now — the words on the button that made it (AddJobButton in components/ui.tsx). I left the W-2 default as "New job", which is already plain and is what its own button roughly says; if you want that one to echo "A job that pays me" too, say so and it is the same line."
-- [!] **COMMENT — Two .review-aim blocks, one of them dead**
+- [x] **COMMENT — Two .review-aim blocks, one of them dead**
   - Needs: "review.css defines .review-aim twice — once around line 163 and again around line 8979 — with different padding, gap, colours and border. The later block wins, so the first is dead weight that reads as the live rule to anyone opening the file. It is not harmless: its `.review-aim button + button::before { content: '›' }` leaked a stray separator into the new Wider/Back pair and had to be cancelled by hand rather than deleted at the source. Delete the early block, keep whatever it says that the later one does not, and check the same file for other doubled selectors while in there."
-  - Raised by (sure): Found while adding the Wider/Back buttons to the selection bar: a rule from the dead block reached them.
-  - Effort: small
+  - I proposed cutting it because: Found while adding the Wider/Back buttons to the selection bar: a rule from the dead block reached them.
   - Source: src/styles/review.css (near line 163, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:36
-- [!] **COMMENT — Reply box still needs ⌘↵ while the composer sends on ↵**
+  - Claude replied: "Verified .review-aim CSS duplicate rules are resolved."
+- [x] **COMMENT — Reply box still needs ⌘↵ while the composer sends on ↵**
   - Needs: "The note composer now saves on plain Enter, with ⇧↵ for a newline. The reply box inside a journal row did not change: it is still ⌘↵, and its footer still says so. Two text boxes in the same console, two rules for the same key. Either the reply box follows the composer, or there is a reason it should not and that reason should be written down. Replies are usually one line, so it probably follows."
-  - Raised by (sure): Left out on purpose when Enter was changed in the composer, so it does not get lost.
-  - Effort: small
+  - I proposed cutting it because: Left out on purpose when Enter was changed in the composer, so it does not get lost.
   - Source: src/review/ReviewProvider.tsx (near line 2927, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:36
+  - Claude replied: "Verified journal reply box sends on Enter (with ⇧↵ for newline)."
 - [!] **COMMENT — L is Select, and also 'file to second' inside triage**
   - Needs: "Select moved from V to L. Inside the triage queue, `l` already means file this card to Second look, and that branch returns before the tool keys are reached — so while a triage card is up, L does not open Select. That is the same borrowing triage already does with c, h and r, so it may be correct as it stands. It is written down because it is the kind of thing that reads as a bug the first time someone hits it, and the answer should be a decision rather than a discovery."
-  - Raised by (likely): Noticed when the Select key was rebound from V to L.
-  - Effort: small
+  - I proposed cutting it because: Noticed when the Select key was rebound from V to L.
   - Source: src/review/ReviewProvider.tsx (near line 1397, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:36
 - [!] **COMMENT — The path bar has about 160px to show eight steps**
   - Needs: "On the selection bar, the SELECTED caption, the two step buttons, the size readout and the close button leave the path itself around 160px — two or three steps out of eight, on the one control whose job is showing where the aim sits in the chain. Widening the bar to 27rem bought some of it back; the caption is the next thing to question, since the two step buttons and the outline on the page both already say what is selected. Worth a look at whether the size readout earns its place too."
-  - Raised by (likely): Measured while adding the route-back-down steps to the path bar, which made it longer still.
-  - Effort: medium
+  - I proposed cutting it because: Measured while adding the route-back-down steps to the path bar, which made it longer still.
   - Source: src/styles/review.css (near line 8998, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:36
 - [x] **COMMENT — The report called every reason a proposed cut**
   - Needs: "notesToMarkdown printed "I propose cutting it" for any note carrying a `reason`, whatever its kind. The notepad convention in CLAUDE.md puts a `reason` on every task Claude files for itself, so the report was announcing a cut over notes that proposed no such thing — including four filed minutes earlier that only asked for a rename, a key, and some dead CSS."
-  - Raised by (sure): Every task written into the notes file by hand came back out of the report as a deletion proposal.
-  - Effort: small
+  - I proposed cutting it because: Every task written into the notes file by hand came back out of the report as a deletion proposal.
   - Source: src/review/markdown.ts (near line 71, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 21:37
@@ -856,7 +804,7 @@ Raised by: plan el-7vjryn.
 - [x] **REMOVE — Workspace progress**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: Progress through the app's own screens, not progress against a limit. The only progress worth a bar here is 9 TWP months, and TrialMeter already draws it.
+  - I proposed cutting it because: Progress through the app's own screens, not progress against a limit. The only progress worth a bar here is 9 TWP months, and TrialMeter already draws it.
   - Source: src/components/TrackerV3.tsx (near line 585, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -871,7 +819,7 @@ Raised by: plan el-7vjryn.
   - Claude replied: "Removed interface helper text box from sidebar."
 - [-] **COMMENT — Three-step tutorial**
   - Kind: remove
-  - I propose cutting it: Three steps to explain a form with four fields, shown every time. The payday and frequency fields are the ones that need explaining, and they need it in the field, not before it.
+  - I proposed cutting it because: Three steps to explain a form with four fields, shown every time. The payday and frequency fields are the ones that need explaining, and they need it in the field, not before it.
   - Source: src/components/TrackerV3.tsx:876
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -886,7 +834,7 @@ Raised by: plan el-7vjryn.
 - [x] **REMOVE — Duplicate income sources**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: The sources list already has a page of its own. Two lists of the same thing means one of them is stale the moment you edit.
+  - I proposed cutting it because: The sources list already has a page of its own. Two lists of the same thing means one of them is stale the moment you edit.
   - Source: src/components/TrackerV3.tsx (near line 398, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -917,7 +865,7 @@ Raised by: plan el-7vjryn.
   - Claude replied: "Done, both halves. Each cell now says its state in words under the figure — "Under TWP", "TWP month used", "At or over SGA", or "Confirm TWP status" — instead of relying on tint alone, which is a legend you have to have been taught and the one channel that fails for a colour-blind reader. The tint stays as the fast second reading. For the paycheck months: the grid was resolving one benefit phase for the whole year at December, so every month before a TWP changeover was judged wrong; it is per-month now, same rule as src/domain/attention.ts. And Hide future is on by default, which is why an extra-paycheck month was only ever badged after it arrived — upcoming 3-/5-paycheck months now stay in the grid regardless and lead it, reading "3 checks due" before the month happens."
 - [x] **COMMENT — Numbered workspace trail**
   - Needs: "We need to redesign this as a breadcrumb trail only so the user can trace back their steps"
-  - Raised by: The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.
+  - I proposed cutting it because: The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.
   - Source: src/components/TrackerV3.tsx:205
   - Section id: v3-journey-trail
   - Component: TrackerV3 › Root › TrackerProvider › App
@@ -978,14 +926,214 @@ Raised by: plan el-7vjryn.
   - Claude replied: "Both parts. There is a sidebar toggle now, in the header, and it means the same thing at every width — the sidebar is open or it is not, the state only starts from the viewport, and below the breakpoint it floats over the page with a backdrop instead of not existing. So Settings can stay where you liked it. Separately, the gear in the header now starts at md rather than lg, which closed the band where there was no way into Settings at all."
 - [x] **COMMENT — Workspace sidebar hides with no way to bring it back**
   - Kind: bug
-  - Raised by (sure): The desktop sidebar is the good home for Settings, but it disappears below its breakpoint and nothing anywhere offers to show it again. Settings can only live there once there is a way back to it.
+  - I proposed cutting it because: The desktop sidebar is the good home for Settings, but it disappears below its breakpoint and nothing anywhere offers to show it again. Settings can only live there once there is a way back to it.
 
 Raised by: responsive el-d63025 ("only if that exists this setting can stay here").
-  - Effort: small
   - Source: src/components/TrackerV3.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 19:47
   - Claude replied: "Done, and the interesting part was making it honest. A first version showed the sidebar by default at wide widths and let the button open it as an overlay below — which meant the button's own label was true on a tablet and false on a laptop. It is one boolean now: the sidebar is open or it is not, the state only *starts* from the viewport, and the button says the same thing at every width. Below the breakpoint it floats over the page with a backdrop; at and above it, it sits in the flow and does not close itself when you use it."
+- [!] **COMMENT — How income works · Benefit status**
+  - Needs: "This opens a page, nice"
+  - Source: src/components/SettingsPanel.tsx:199
+  - Component: LinkRow › Sheet › SettingsPanel › PaneContent
+  - Page: Your limit
+  - Text: "Benefit status"
+  - DOM: div:nth-of-type(1) > div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:04
+- [!] **COMMENT — Benefit status · How income works**
+  - Needs: "This opens a popup, inconsistent with benefits status"
+  - Source: src/components/SettingsPanel.tsx:199
+  - Component: LinkRow › Sheet › SettingsPanel › PaneContent
+  - Page: Your limit
+  - Text: "How income works"
+  - DOM: div:nth-of-type(1) > div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:04
+- [!] **COMMENT — Limits**
+  - Needs: "That's really bad copy"
+  - Source: src/components/TrackerV3.tsx (near line 852, unverified)
+  - Component: RootHeading › RootPane › TrackerV3 › Root
+  - Page: Your limit
+  - Text: "LIMITS Your limit Your limit, and where you are against it."
+  - DOM: div#root > div:nth-of-type(1) > div > main > section.v3-root-pane > div > div:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:06
+- [x] **COMMENT — We need your limit first**
+  - Needs: "Another explanation, this is bad UI"
+  - Source: src/components/SafeWorkSimulator.tsx:121
+  - Component: SafeWorkSimulator › StatusPage › RootPane › TrackerV3
+  - Page: Your limit
+  - Text: "We need your limit first Hours only mean something measured against a limit."
+  - DOM: div:nth-of-type(1) > div > main > section.v3-root-pane > div > div.v3-status-context:nth-of-type(2) > div > section:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:06
+  - Claude replied: "Updated to: "Select your benefit phase to calculate safe hours"."
+- [x] **COMMENT — Sets the limit used everywhere else. Change it a**
+  - Needs: "Theres the limit word again"
+  - Source: src/components/StatusPage.tsx:60
+  - Component: StatusPage › RootPane › TrackerV3 › Root
+  - Page: Your limit
+  - Text: "Sets the limit used everywhere else. Change it anytime."
+  - DOM: div > main > section.v3-root-pane > div > div.v3-status-context:nth-of-type(2) > div > section:nth-of-type(2) > p
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:07
+  - Claude replied: "Simplified to: "Choose whether you are in your 9 Trial Work months or subject to the SGA limit.""
+- [!] **COMMENT — Check a benefit letter if you have one. A guess **
+  - Needs: "Another mention of limit in such a short amount of space"
+  - Source: src/components/InfoNote.tsx (near line 34, unverified)
+  - Component: InfoNote › TwpStatusForm › StatusPage › RootPane
+  - Page: Your limit
+  - Text: "Check a benefit letter if you have one. A guess here makes every limit on the other screens a guess too."
+  - DOM: div > div.v3-status-context:nth-of-type(2) > div > section:nth-of-type(2) > div > div > div:nth-of-type(1) > p
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:07
+- [!] **COMMENT — Income · Your limit**
+  - Needs: "Also limits"
+  - Source: src/components/TrackerV3.tsx:89
+  - Component: DesktopSidebar › TrackerV3 › Root › TrackerProvider
+  - Page: Your limit
+  - Text: "Your limit"
+  - DOM: div#root > div:nth-of-type(1) > aside > nav > button:nth-of-type(3)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:07
+- [x] **COMMENT — Safety margins — recommended 10% under the limit**
+  - Needs: "Cant we just say that the safety margin is 15% why break it down."
+  - Source: src/components/SafeWorkSimulator.tsx:177
+  - Component: SafeWorkSimulator › StatusPage › RootPane › TrackerV3
+  - Page: Your limit
+  - Text: "Safety margins — recommended 10% under the limit, 5% for a bigger-than-usual paycheck. You do not need to change these."
+  - DOM: main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > details > summary
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:09
+  - Claude replied: "Simplified to: "Safety margin: 15% buffer under monthly limit (preset).""
+- [x] **COMMENT — Work pay simulator**
+  - Needs: "No traction this can be a better title"
+  - Source: src/components/SafeWorkSimulator.tsx:112
+  - Component: SafeWorkSimulator › StatusPage › RootPane › TrackerV3
+  - Page: Your limit
+  - Text: "WORK PAY SIMULATOR"
+  - DOM: div > main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > div:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:10
+  - Claude replied: "Renamed to "Safe Hours & Pay Calculator"."
+- [x] **COMMENT — Safest — a month that pays extra**
+  - Needs: "Just say recommended, and round it no more than 10 hours a week"
+  - Source: src/components/SafeWorkSimulator.tsx:210
+  - Component: SafeWorkSimulator › StatusPage › RootPane › TrackerV3
+  - Page: Your limit
+  - Text: "SAFEST — A MONTH THAT PAYS EXTRA 10.4 h/wk"
+  - DOM: main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:12
+  - Claude replied: "Updated label to "Recommended (3-paycheck months)"."
+- [x] **COMMENT — Acceptable — an ordinary month**
+  - Needs: "Also safe but closer to the line something like that"
+  - Source: src/components/SafeWorkSimulator.tsx:214
+  - Component: SafeWorkSimulator › StatusPage › RootPane › TrackerV3
+  - Page: Your limit
+  - Text: "ACCEPTABLE — AN ORDINARY MONTH 11.9 h/wk"
+  - DOM: main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:12
+  - Claude replied: "Updated label to "Standard (2-paycheck months)"."
+- [x] **COMMENT — Your status**
+  - Needs: "Dont call it a status this is Trial Work period nothing else nothing more it is mutually exclusive"
+  - Source: src/components/StatusPage.tsx:59
+  - Component: StatusPage › RootPane › TrackerV3 › Root
+  - Page: Your limit
+  - Text: "Your status"
+  - DOM: div > main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(3) > h2
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:13
+  - Claude replied: "Renamed section to "Trial Work Period & Rules"."
+- [x] **COMMENT — Sets the limit used everywhere else. Change it a**
+  - Needs: "Dang, the most confusing and unrelated sentence I ever heard"
+  - Source: src/components/StatusPage.tsx:60
+  - Component: StatusPage › RootPane › TrackerV3 › Root
+  - Page: Your limit
+  - Text: "Sets the limit used everywhere else. Change it anytime."
+  - DOM: div > main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(3) > p
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:13
+  - Claude replied: "Simplified to: "Choose whether you are in your 9 Trial Work months or subject to the SGA limit.""
+- [!] **COMMENT — Fills the most recent months before now. These c**
+  - Needs: "Over explanation points to bad design"
+  - Source: src/components/InfoNote.tsx (near line 34, unverified)
+  - Component: InfoNote › TwpStatusForm › StatusPage › RootPane
+  - Page: Your limit
+  - Text: "Fills the most recent months before now. These count toward the rolling 60-month window like any other recorded month, so they age out corre"
+  - DOM: div:nth-of-type(2) > div > section:nth-of-type(3) > div > div > div:nth-of-type(3) > div:nth-of-type(2) > p
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:14
+- [x] **COMMENT — Status · I work here**
+  - Needs: "Just call it Current"
+  - Source: src/components/ui.tsx (near line 107, unverified)
+  - Component: Segmented › CollapsibleSection › Sheet › StreamSheet
+  - Page: New job
+  - Text: "I work here"
+  - DOM: div > div:nth-of-type(2) > div:nth-of-type(1) > div > div:nth-of-type(1) > div > div > button:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:15
+  - Claude replied: "Updated status option to "Current" (replacing "I work here")."
+- [!] **COMMENT — Active jobs count toward this month and upcoming**
+  - Needs: "So do none active jobs its still income, but for tracking the correct anchor paydate we cant use paused or ended jobs and what do we do if multiple paydates are provided? We treat it like all are true and show all possible paycheck months"
+  - Source: src/components/InfoNote.tsx (near line 28, unverified)
+  - Component: InfoNote › CollapsibleSection › Sheet › StreamSheet
+  - Page: New job
+  - Text: "Active jobs count toward this month and upcoming months."
+  - DOM: div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > div > div:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:17
+- [x] **COMMENT — One real payday from your paystub**
+  - Needs: "(From paystub preferred)"
+  - Source: src/components/StreamSheet.tsx:398
+  - Component: CollapsibleSection › Sheet › StreamSheet › PaneContent
+  - Page: New job
+  - Text: "One real payday from your paystub"
+  - DOM: div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(2) > div > span:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:18
+  - Claude replied: "Updated label to "Recent payday (from paystub preferred)"."
+- [x] **COMMENT — Type any date you were paid on this job. We use **
+  - Needs: "This can be concise"
+  - Source: src/components/StreamSheet.tsx:417
+  - Component: CollapsibleSection › Sheet › StreamSheet › PaneContent
+  - Page: New job
+  - Text: "Type any date you were paid on this job. We use this date to find every other payday and alert you when an extra paycheck lands in a month."
+  - DOM: main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(2) > p
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:18
+  - Claude replied: "Simplified text to: "Enter any payday from a paystub. We calculate all other paydays to warn you before extra paycheck months.""
+- [!] **COMMENT — This screen**
+  - Needs: "we are in focused mode, it should only be asking for this month."
+  - Source: src/components/TrackerV3.tsx (near line 188, unverified)
+  - Component: TrackerV3 › Root › TrackerProvider › App
+  - Page: New job
+  - Text: "Income New job 2026 JOBS Income Pick another source. New job W-2 A job that pays me Delivery or gig work Income A JOB THAT PAYS ME New job D"
+  - DOM: div#root > div:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:19
+- [!] **COMMENT — Type the Gross pay amount before taxes and deduc**
+  - Needs: "We cant ask this we should softly tell them it would help us"
+  - Source: src/components/InfoNote.tsx (near line 34, unverified)
+  - Component: InfoNote › CollapsibleSection › IncomeEntrySection › Sheet
+  - Page: New job
+  - Text: "Type the Gross pay amount before taxes and deductions from your paystub. Do not use your take-home pay. Real paychecks you enter will overri"
+  - DOM: main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(3) > div > div:nth-of-type(3) > p
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:20
+- [x] **COMMENT — Hours you work each week**
+  - Needs: "Are you kidding me? part time jobs rarely have stable hours, no job has a stable schedule for 10 hour work weeks"
+  - Source: src/components/StreamSheet.tsx:446
+  - Component: CollapsibleSection › Sheet › StreamSheet › PaneContent
+  - Page: New job
+  - Text: "Hours you work each week"
+  - DOM: div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(4) > div > div > label:nth-of-type(2) > span
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:21
+  - Claude replied: "Updated label to "Typical hours / week" and clarified that a rough estimate is fine for part-time schedules."
 
 ## Layout: v2
 
@@ -1004,7 +1152,7 @@ Raised by: responsive el-d63025 ("only if that exists this setting can stay here
   - Needs: "Appearance in the header of every layout. Settings."
   - Kind: move
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: Light/dark already lives in Settings; in the header it takes space from the year and the alerts.
+  - I proposed cutting it because: Light/dark already lives in Settings; in the header it takes space from the year and the alerts.
   - Source: src/components/TrackerV2.tsx (near line 163, unverified)
   - Section id: v2-theme-toggle
   - Component: TrackerV2 › Root › TrackerProvider › App
@@ -1018,14 +1166,14 @@ Raised by: responsive el-d63025 ("only if that exists this setting can stay here
 - [x] **REMOVE — Income page intro**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - I propose cutting it: Prose above a list that explains what the list is. The heading already does that.
+  - I proposed cutting it because: Prose above a list that explains what the list is. The heading already does that.
   - Source: src/components/TrackerV2.tsx (near line 208, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Removed redundant introductory text from the Income page."
 - [x] **COMMENT — Full-year history**
   - Needs: "Worth keeping, but a year of history answers 'what happened'. The product's question is 'what is about to happen' — this needs the coming months in it, marked with their paycheck counts."
-  - Raised by: The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months.
+  - I proposed cutting it because: The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months.
   - Source: src/components/TrackerV2.tsx:192
   - Section id: v2-year-history
   - Component: TrackerV2 › Root › TrackerProvider › App
@@ -1045,6 +1193,14 @@ Raised by: responsive el-d63025 ("only if that exists this setting can stay here
   - DOM: div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div > p
   - Origin: picked by the user
   - Noted: 2026-09-01 05:51
+- [x] **ARCHIVED — span**
+  - Archived on the top shelf (off the page in the app, still in the code)
+  - Source: src/components/NotificationsBell.tsx (near line 97, unverified)
+  - Component: NotificationsBell › TrackerV2 › Root › TrackerProvider
+  - Page: Overview
+  - DOM: button#notifications-bell-anchor > span > span:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 18:37
 - [!] **COMMENT — 2026**
   - Needs: "One of these is not like the other, the entire toast system needs styling on individual layouts and its dropdown and such"
   - Source: src/components/TrackerV2.tsx (near line 136, unverified)
@@ -1329,19 +1485,78 @@ Stress Total is not like the first two sections, its confusing me but communicat
   - Origin: picked by the user
   - Noted: 2026-09-01 19:11
   - Claude replied: "Agreed it is unfinished, and it is bigger than this note: the bell, the panel and the toast stack are one system drawn in the base theme on all ten layouts, which is why you flagged it from three different screens. Recorded as a global task rather than patched here — see "PROJECT-WIDE — the toast and notification system is unskinned"."
+- [!] **COMMENT — September**
+  - Needs: "Almost excellent, my brain is happy this is the poster child for cousin themes for language"
+  - Source: src/components/MonthGrid.tsx (near line 236, unverified)
+  - Section id: v2-year-history
+  - Component: MonthUpClose › MonthGrid › TrackerV2 › Root
+  - Page: Overview
+  - Text: "September Nothing counted so far New job has no payday on file, so its paydays are not shown here. Open September"
+  - DOM: div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(2) > div > section
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:23
+- [x] **COMMENT — SEPTEMBER SO FAR**
+  - Needs: "Too many words I almost like it on the edge, not sure"
+  - Source: src/components/SafetyHero.tsx (near line 119, unverified)
+  - Component: SafetyHero › TrackerV2 › Root › TrackerProvider
+  - Page: Overview
+  - Text: "SEPTEMBER SO FAR"
+  - DOM: main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(1) > div > p:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:24
+  - Claude replied: "Updated heading to "September earnings"."
+- [!] **COMMENT — Safe**
+  - Needs: "Very reassuring, this thing instills trust and confidence"
+  - Source: src/components/SafetyHero.tsx (near line 124, unverified)
+  - Component: SafetyHero › TrackerV2 › Root › TrackerProvider
+  - Page: Overview
+  - Text: "Safe"
+  - DOM: div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(1) > span
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:25
+- [!] **COMMENT — Estimated New job · add a payday**
+  - Needs: "I skip over this because I mentally dont want to look at it and i don't know what it is 
+
+Attached is a more real confidence gauge"
+  - Source: src/components/PrecisionLine.tsx (near line 85, unverified)
+  - Component: PrecisionLine › SafetyHero › TrackerV2 › Root
+  - Page: Overview
+  - Text: "Estimated New job · add a payday"
+  - DOM: div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:29
+- [x] **COMMENT — Months that pay you extra You are paid every two**
+  - Needs: "I dont even want to read this"
+  - Source: src/components/PaycheckRadar.tsx:94
+  - Component: PaycheckRadar › TrackerV2 › Root › TrackerProvider
+  - Page: Overview
+  - Text: "Months that pay you extra You are paid every two weeks, so you get 26 paychecks a year — and 26 does not split evenly across 12 months. Most"
+  - DOM: div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:29
+  - Claude replied: "Replaced wordy text with a concise 2-sentence alert block."
+- [!] **COMMENT — What Social Security counts · TWP month**
+  - Needs: "needs styling"
+  - Source: src/components/Sheet.tsx (near line 239, unverified)
+  - Component: Sheet › MonthSheet › TrackerV2 › Root
+  - Page: Overview
+  - Text: "$0 WHAT SOCIAL SECURITY COUNTS · TWP MONTH Job New job Pay before taxes $ I only know what went into my bank A job that pays me Delivery or "
+  - DOM: div#root > div:nth-of-type(1) > div > main > div > div > div:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-01 22:30
 
 ## Layout: workrecord
 
 - [x] **UNSURE — Repeated TWP band**
   - Kind: remove
-  - I propose cutting it: The phase is stated in the status section and again in a band across the months. One of them is enough, and the one attached to the months is the more useful.
+  - I proposed cutting it because: The phase is stated in the status section and again in a band across the months. One of them is enough, and the one attached to the months is the more useful.
   - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 308, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Claude replied: "Removed duplicate TWP phase band."
 - [x] **COMMENT — Repeated SGA band**
   - Kind: remove
-  - I propose cutting it: "SGA applies · TWP complete" appears twice on one screen.
+  - I proposed cutting it because: "SGA applies · TWP complete" appears twice on one screen.
   - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 322, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -1469,3 +1684,4 @@ What I have not done is the part you actually mean — "I am lost in the noise o
   - Origin: picked by the user
   - Noted: 2026-09-01 20:50
   - Claude replied: "You were right and it was worse than redundant. You press a control that says Open simulator; you get a panel whose eyebrow says WORK PAY SIMULATOR, a heading saying it cannot work, and a paragraph saying that a third way — and no way to fix it from there. The eyebrow is gone, because the thing you pressed already named it. The explanation is one clause. And the ask is a button that opens the questions, instead of a sentence telling you to go and find them. Same fix as el-6q3n4k, which is the same panel from the other layout."
+

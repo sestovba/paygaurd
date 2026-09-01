@@ -328,7 +328,7 @@ export function StreamSheet({
                 activeTo: lifecycle === 'completed' ? (stream.activeTo ?? todayMonth()) : stream.activeTo
               })}
               options={[
-                { id: 'active', label: 'I work here' },
+                { id: 'active', label: 'Current' },
                 { id: 'inactive', label: 'Paused' },
                 { id: 'completed', label: 'Ended' }
               ]}
@@ -395,7 +395,7 @@ export function StreamSheet({
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-base font-semibold">
                 <Calendar className="size-5 shrink-0" />
-                One real payday from your paystub
+                Recent payday (from paystub preferred)
               </span>
               {stream.anchorDate ? (
                 <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-good">
@@ -414,7 +414,7 @@ export function StreamSheet({
               onChange={(e) => updateStream(stream.id, { anchorDate: e.target.value })}
             />
             <p className="type-muted">
-              Type any date you were paid on this job. We use this date to find every other payday and alert you when an extra paycheck lands in a month.
+              Enter any payday from a paystub. We calculate all other paydays to warn you before extra paycheck months.
             </p>
           </div>
 
@@ -443,7 +443,7 @@ export function StreamSheet({
               />
             </label>
             <label className="flex w-full flex-col gap-1.5 sm:w-40">
-              <span className="field-label">Hours you work each week</span>
+              <span className="field-label">Typical hours / week</span>
               <NumericInput
                 className="num field-input w-full"
                 value={stream.plannedHoursPerWeek}

@@ -103,28 +103,16 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     }));
   });
 
-  /*
-   * Review notes: "How much more redundant can we be? Holy moly, bad bad bad
-   * design", and "I dont understand at a glance what is the problem I clicked
-   * on simulator and this what the heck as a user".
-   *
-   * Both are the same fault. You press a control that says Open simulator and
-   * get a panel that says WORK PAY SIMULATOR, then a heading saying it cannot
-   * work, then a paragraph saying the same thing a third way — and no way to
-   * fix it from here. The eyebrow is gone (the thing you pressed named it),
-   * the explanation is one clause, and the ask is now a button that opens the
-   * questions rather than a sentence telling you to go and find them.
-   */
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
     return (
       <section className="panel p-4 sm:p-5">
-        <h2 className="display-figure">We need your limit first</h2>
+        <h2 className="display-figure">Select your benefit phase to calculate safe hours</h2>
         <p className="type-muted mt-1.5 max-w-prose">
-          Hours only mean something measured against a limit.
+          Safe hours are calculated based on your active Trial Work or SGA monthly earnings limit.
         </p>
         {onOpenStatus ? (
           <button type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
-            Answer a few questions
+            Confirm benefit phase
           </button>
         ) : null}
       </section>
@@ -135,32 +123,16 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     <section className="panel p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 shrink-0 text-good" />
-        <p className="label-caps">Work pay simulator</p>
+        <p className="label-caps">Safe Hours &amp; Pay Calculator</p>
       </div>
-      {/* Review notes: "Stay below SGA — Duh", and of the subtitle, "is this
-          helpful?". Both were the panel restating its own job instead of
-          doing it. The heading is the answer now: the number of hours a week
-          to aim for. */}
       <h2 className="display-figure mt-1.5">
         Aim for {safeFiveWeekHours.toFixed(1)} hours a week
       </h2>
       <p className="type-muted mt-1 max-w-prose">
-        That holds even in a month that pays you an extra time.
-        {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already taken off.` : ''}
+        That keeps you safe even in months with 3 paychecks.
+        {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already deducted.` : ''}
       </p>
 
-      {/* Five fields, three of which nobody can answer. Review note: "this is
-          a simulator, we dont need other income; what is a variance; put
-          there recommended so that user feels assured they dont need to think
-          about that number, same for safety buffer; Planned h/wk is Weekly
-          hours."
-
-          Two questions are left in the open, and they are the two a person
-          actually knows about their own job. Other income is taken from the
-          1099 sources already recorded rather than asked for. The buffer and
-          the variance keep their maths and move behind a disclosure that
-          states its own recommended values, so the answer to "do I need to
-          think about this" is visible without opening it. */}
       <div className="mt-4 grid grid-cols-2 gap-2.5 sm:max-w-sm">
         <label className="flex flex-col gap-1.5">
           <span className="field-label">Hourly rate</span>
@@ -174,8 +146,7 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
 
       <details className="mt-3">
         <summary className="type-muted cursor-pointer list-none text-base">
-          Safety margins — recommended {bufferValue}% under the limit, {varianceValue}% for a
-          bigger-than-usual paycheck. You do not need to change these.
+          Safety margin: 15% buffer under monthly limit (preset).
         </summary>
         <div className="mt-3 grid grid-cols-2 gap-2.5 sm:max-w-sm">
           <label className="flex flex-col gap-1.5">
@@ -198,20 +169,13 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         </div>
       </details>
 
-      {/* Review note: "Stress Total is not like the first two sections, its
-          confusing me but communicating some other category." It is not the
-          same kind of thing — the first two are answers about hours, and the
-          third is a consequence of the hours you typed. Sitting all three in
-          one row of identical tiles said they were siblings. Two tiles for
-          the answer; the consequence gets its own line and says out loud that
-          it is about the number you entered. */}
       <div className="mt-4 grid gap-2.5 sm:grid-cols-2 sm:max-w-md">
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
-          <span className="label-caps">Safest — a month that pays extra</span>
+          <span className="label-caps">Recommended (3-paycheck months)</span>
           <span className="display-figure text-good">{safeFiveWeekHours.toFixed(1)} h/wk</span>
         </div>
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
-          <span className="label-caps">Acceptable — an ordinary month</span>
+          <span className="label-caps">Standard (2-paycheck months)</span>
           <span className="display-figure">{safeAverageHours.toFixed(1)} h/wk</span>
         </div>
       </div>

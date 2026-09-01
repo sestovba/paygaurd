@@ -257,8 +257,8 @@ export function LedgerJobEditor({
                 </select>
               </SettingTile>
               <SettingTile
-                label="Anchor Payday"
-                help={stream.anchorDate ? 'One real payday is enough to project every check date.' : 'Not set — extra-check months stay hidden.'}
+                label="Recent Payday"
+                help={stream.anchorDate ? 'Payday set. Used to forecast extra check dates.' : 'From paystub preferred — needed to find extra check months.'}
               >
                 <input
                   type="date"
@@ -268,7 +268,7 @@ export function LedgerJobEditor({
                   className="lg-field"
                 />
               </SettingTile>
-              <SettingTile label="Planning Rate" help="Optional — used only for paycheck estimates.">
+              <SettingTile label="Estimated Wage & Hours" help="Optional — forecasts your pay in 3-paycheck months.">
                 <div className="grid grid-cols-2 gap-1.5">
                   <span className="lg-field flex min-w-0 items-center gap-1">
                     <span className="lg-text-muted">$</span>
@@ -297,7 +297,7 @@ export function LedgerJobEditor({
               </SettingTile>
               <SettingTile
                 label={'Paychecks in ' + year}
-                help={plan ? `Usually ${plan.typicalCount} a month.` : 'Set an anchor payday to count checks.'}
+                help={plan ? (plan.heavyMonths.length ? `${plan.heavyMonths.length} month(s) have extra checks.` : 'Consistent schedule.') : 'Set payday to forecast.'}
               >
                 <span className="text-lg font-semibold">{plan ? plan.total : '—'}</span>
               </SettingTile>

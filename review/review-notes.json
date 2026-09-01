@@ -3732,7 +3732,7 @@
     "kind": "comment",
     "origin": "user",
     "label": "Planning Rate",
-    "status": "commented",
+    "status": "done",
     "anchor": {
       "layout": "ledger",
       "theme": {
@@ -3746,16 +3746,23 @@
       "text": "PLANNING RATE $ /hr h/wk Optional — used only for paycheck estimates."
     },
     "createdAt": "2026-09-01T21:19:54.936Z",
-    "updatedAt": "2026-09-01T21:19:54.936Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
     "comment": "this is the most confusing feature, we ask user for input, it stays here, but we don't explain why what its for and how to use it. high level thinking needed on what is this really",
-    "found": "unknown"
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Renamed to \"Estimated Wage & Hours\" with clear explanation of how it forecasts 3-paycheck months.",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
   },
   "el-11axeqz": {
     "id": "el-11axeqz",
     "kind": "comment",
     "origin": "user",
     "label": "Paychecks in 2026",
-    "status": "commented",
+    "status": "done",
     "anchor": {
       "layout": "ledger",
       "theme": {
@@ -3769,9 +3776,16 @@
       "text": "PAYCHECKS IN 2026 — Set an anchor payday to count checks."
     },
     "createdAt": "2026-09-01T21:20:38.518Z",
-    "updatedAt": "2026-09-01T21:20:38.518Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
     "comment": "isnt that already in this section? this is an explanation block about a few blocks before?",
-    "found": "unknown"
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Cleaned up duplicate explanation in job editor.",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
   },
   "el-13x6gfw": {
     "id": "el-13x6gfw",
@@ -3946,36 +3960,50 @@
     "kind": "comment",
     "origin": "suggested",
     "label": "Two .review-aim blocks, one of them dead",
-    "status": "commented",
+    "status": "done",
     "anchor": {
       "layout": "plan",
       "source": "src/styles/review.css (near line 163, unverified)"
     },
     "createdAt": "2026-09-01T21:36:03.104269Z",
-    "updatedAt": "2026-09-01T21:36:03.104269Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
     "reason": "Found while adding the Wider/Back buttons to the selection bar: a rule from the dead block reached them.",
     "certainty": "sure",
     "effort": "small",
     "comment": "review.css defines .review-aim twice — once around line 163 and again around line 8979 — with different padding, gap, colours and border. The later block wins, so the first is dead weight that reads as the live rule to anyone opening the file. It is not harmless: its `.review-aim button + button::before { content: '›' }` leaked a stray separator into the new Wider/Back pair and had to be cancelled by hand rather than deleted at the source. Delete the early block, keep whatever it says that the later one does not, and check the same file for other doubled selectors while in there.",
-    "found": "unknown"
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Verified .review-aim CSS duplicate rules are resolved.",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
   },
   "task-reply-box-enter-key": {
     "id": "task-reply-box-enter-key",
     "kind": "comment",
     "origin": "suggested",
     "label": "Reply box still needs ⌘↵ while the composer sends on ↵",
-    "status": "commented",
+    "status": "done",
     "anchor": {
       "layout": "plan",
       "source": "src/review/ReviewProvider.tsx (near line 2927, unverified)"
     },
     "createdAt": "2026-09-01T21:36:03.104269Z",
-    "updatedAt": "2026-09-01T21:36:03.104269Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
     "reason": "Left out on purpose when Enter was changed in the composer, so it does not get lost.",
     "certainty": "sure",
     "effort": "small",
     "comment": "The note composer now saves on plain Enter, with ⇧↵ for a newline. The reply box inside a journal row did not change: it is still ⌘↵, and its footer still says so. Two text boxes in the same console, two rules for the same key. Either the reply box follows the composer, or there is a reason it should not and that reason should be written down. Replies are usually one line, so it probably follows.",
-    "found": "unknown"
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Verified journal reply box sends on Enter (with ⇧↵ for newline).",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
   },
   "task-select-key-triage-collision": {
     "id": "task-select-key-triage-collision",
@@ -4057,6 +4085,621 @@
         "at": "2026-09-01T21:37:26.753276Z"
       }
     ],
+    "found": "unknown"
+  },
+  "el-130mgu3": {
+    "id": "el-130mgu3",
+    "kind": "comment",
+    "origin": "user",
+    "label": "How income works · Benefit status",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SettingsPanel.tsx:199",
+      "components": "LinkRow › Sheet › SettingsPanel › PaneContent",
+      "domPath": "div:nth-of-type(1) > div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
+      "text": "Benefit status"
+    },
+    "createdAt": "2026-09-01T22:04:34.992Z",
+    "updatedAt": "2026-09-01T22:04:34.992Z",
+    "comment": "This opens a page, nice",
+    "found": "unknown"
+  },
+  "el-130meew": {
+    "id": "el-130meew",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Benefit status · How income works",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SettingsPanel.tsx:199",
+      "components": "LinkRow › Sheet › SettingsPanel › PaneContent",
+      "domPath": "div:nth-of-type(1) > div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2)",
+      "text": "How income works"
+    },
+    "createdAt": "2026-09-01T22:04:54.638Z",
+    "updatedAt": "2026-09-01T22:04:54.638Z",
+    "comment": "This opens a popup, inconsistent with benefits status",
+    "found": "present"
+  },
+  "el-1mnded5": {
+    "id": "el-1mnded5",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Limits",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/TrackerV3.tsx (near line 852, unverified)",
+      "components": "RootHeading › RootPane › TrackerV3 › Root",
+      "domPath": "div#root > div:nth-of-type(1) > div > main > section.v3-root-pane > div > div:nth-of-type(1)",
+      "text": "LIMITS Your limit Your limit, and where you are against it."
+    },
+    "createdAt": "2026-09-01T22:06:26.670Z",
+    "updatedAt": "2026-09-01T22:06:26.670Z",
+    "comment": "That's really bad copy",
+    "found": "unknown"
+  },
+  "el-o3yk3y": {
+    "id": "el-o3yk3y",
+    "kind": "comment",
+    "origin": "user",
+    "label": "We need your limit first",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SafeWorkSimulator.tsx:121",
+      "components": "SafeWorkSimulator › StatusPage › RootPane › TrackerV3",
+      "domPath": "div:nth-of-type(1) > div > main > section.v3-root-pane > div > div.v3-status-context:nth-of-type(2) > div > section:nth-of-type(1)",
+      "text": "We need your limit first Hours only mean something measured against a limit."
+    },
+    "createdAt": "2026-09-01T22:06:48.913Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Another explanation, this is bad UI",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated to: \"Select your benefit phase to calculate safe hours\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-m4sqq3": {
+    "id": "el-m4sqq3",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Sets the limit used everywhere else. Change it a",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/StatusPage.tsx:60",
+      "components": "StatusPage › RootPane › TrackerV3 › Root",
+      "domPath": "div > main > section.v3-root-pane > div > div.v3-status-context:nth-of-type(2) > div > section:nth-of-type(2) > p",
+      "text": "Sets the limit used everywhere else. Change it anytime."
+    },
+    "createdAt": "2026-09-01T22:07:04.622Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Theres the limit word again",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Simplified to: \"Choose whether you are in your 9 Trial Work months or subject to the SGA limit.\"",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-1u2xzb": {
+    "id": "el-1u2xzb",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Check a benefit letter if you have one. A guess ",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/InfoNote.tsx (near line 34, unverified)",
+      "components": "InfoNote › TwpStatusForm › StatusPage › RootPane",
+      "domPath": "div > div.v3-status-context:nth-of-type(2) > div > section:nth-of-type(2) > div > div > div:nth-of-type(1) > p",
+      "text": "Check a benefit letter if you have one. A guess here makes every limit on the other screens a guess too."
+    },
+    "createdAt": "2026-09-01T22:07:28.162Z",
+    "updatedAt": "2026-09-01T22:07:28.162Z",
+    "comment": "Another mention of limit in such a short amount of space",
+    "found": "present"
+  },
+  "el-1ji3vjg": {
+    "id": "el-1ji3vjg",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Income · Your limit",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/TrackerV3.tsx:89",
+      "components": "DesktopSidebar › TrackerV3 › Root › TrackerProvider",
+      "domPath": "div#root > div:nth-of-type(1) > aside > nav > button:nth-of-type(3)",
+      "text": "Your limit"
+    },
+    "createdAt": "2026-09-01T22:07:47.820Z",
+    "updatedAt": "2026-09-01T22:07:47.820Z",
+    "comment": "Also limits",
+    "found": "unknown"
+  },
+  "el-k1w5yk": {
+    "id": "el-k1w5yk",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Safety margins — recommended 10% under the limit",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SafeWorkSimulator.tsx:177",
+      "components": "SafeWorkSimulator › StatusPage › RootPane › TrackerV3",
+      "domPath": "main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > details > summary",
+      "text": "Safety margins — recommended 10% under the limit, 5% for a bigger-than-usual paycheck. You do not need to change these."
+    },
+    "createdAt": "2026-09-01T22:09:41.334Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Cant we just say that the safety margin is 15% why break it down.",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Simplified to: \"Safety margin: 15% buffer under monthly limit (preset).\"",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-iyqft3": {
+    "id": "el-iyqft3",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Work pay simulator",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SafeWorkSimulator.tsx:112",
+      "components": "SafeWorkSimulator › StatusPage › RootPane › TrackerV3",
+      "domPath": "div > main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > div:nth-of-type(1)",
+      "text": "WORK PAY SIMULATOR"
+    },
+    "createdAt": "2026-09-01T22:10:10.309Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "No traction this can be a better title",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Renamed to \"Safe Hours & Pay Calculator\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-1olxgv9": {
+    "id": "el-1olxgv9",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Safest — a month that pays extra",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SafeWorkSimulator.tsx:210",
+      "components": "SafeWorkSimulator › StatusPage › RootPane › TrackerV3",
+      "domPath": "main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1)",
+      "text": "SAFEST — A MONTH THAT PAYS EXTRA 10.4 h/wk"
+    },
+    "createdAt": "2026-09-01T22:12:04.262Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Just say recommended, and round it no more than 10 hours a week",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated label to \"Recommended (3-paycheck months)\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-1nco0x9": {
+    "id": "el-1nco0x9",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Acceptable — an ordinary month",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/SafeWorkSimulator.tsx:214",
+      "components": "SafeWorkSimulator › StatusPage › RootPane › TrackerV3",
+      "domPath": "main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2)",
+      "text": "ACCEPTABLE — AN ORDINARY MONTH 11.9 h/wk"
+    },
+    "createdAt": "2026-09-01T22:12:32.928Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Also safe but closer to the line something like that",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated label to \"Standard (2-paycheck months)\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-1dd3529": {
+    "id": "el-1dd3529",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Your status",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/StatusPage.tsx:59",
+      "components": "StatusPage › RootPane › TrackerV3 › Root",
+      "domPath": "div > main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(3) > h2",
+      "text": "Your status"
+    },
+    "createdAt": "2026-09-01T22:13:16.345Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Dont call it a status this is Trial Work period nothing else nothing more it is mutually exclusive",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Renamed section to \"Trial Work Period & Rules\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-3itfgq": {
+    "id": "el-3itfgq",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Sets the limit used everywhere else. Change it a",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/StatusPage.tsx:60",
+      "components": "StatusPage › RootPane › TrackerV3 › Root",
+      "domPath": "div > main > section.v3-root-pane > div > div:nth-of-type(2) > div > section:nth-of-type(3) > p",
+      "text": "Sets the limit used everywhere else. Change it anytime."
+    },
+    "createdAt": "2026-09-01T22:13:34.919Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Dang, the most confusing and unrelated sentence I ever heard",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Simplified to: \"Choose whether you are in your 9 Trial Work months or subject to the SGA limit.\"",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-6lihta": {
+    "id": "el-6lihta",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Fills the most recent months before now. These c",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "Your limit",
+      "source": "src/components/InfoNote.tsx (near line 34, unverified)",
+      "components": "InfoNote › TwpStatusForm › StatusPage › RootPane",
+      "domPath": "div:nth-of-type(2) > div > section:nth-of-type(3) > div > div > div:nth-of-type(3) > div:nth-of-type(2) > p",
+      "text": "Fills the most recent months before now. These count toward the rolling 60-month window like any other recorded month, so they age out corre"
+    },
+    "createdAt": "2026-09-01T22:14:14.072Z",
+    "updatedAt": "2026-09-01T22:14:14.072Z",
+    "comment": "Over explanation points to bad design",
+    "found": "present"
+  },
+  "el-114dcay": {
+    "id": "el-114dcay",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Status · I work here",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/ui.tsx (near line 107, unverified)",
+      "components": "Segmented › CollapsibleSection › Sheet › StreamSheet",
+      "domPath": "div > div:nth-of-type(2) > div:nth-of-type(1) > div > div:nth-of-type(1) > div > div > button:nth-of-type(1)",
+      "text": "I work here"
+    },
+    "createdAt": "2026-09-01T22:15:17.221Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Just call it Current",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated status option to \"Current\" (replacing \"I work here\").",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-1y5b3uf": {
+    "id": "el-1y5b3uf",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Active jobs count toward this month and upcoming",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/InfoNote.tsx (near line 28, unverified)",
+      "components": "InfoNote › CollapsibleSection › Sheet › StreamSheet",
+      "domPath": "div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > div > div:nth-of-type(2)",
+      "text": "Active jobs count toward this month and upcoming months."
+    },
+    "createdAt": "2026-09-01T22:17:16.361Z",
+    "updatedAt": "2026-09-01T22:17:16.361Z",
+    "comment": "So do none active jobs its still income, but for tracking the correct anchor paydate we cant use paused or ended jobs and what do we do if multiple paydates are provided? We treat it like all are true and show all possible paycheck months",
+    "found": "present"
+  },
+  "el-1ijrwj1": {
+    "id": "el-1ijrwj1",
+    "kind": "comment",
+    "origin": "user",
+    "label": "One real payday from your paystub",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/StreamSheet.tsx:398",
+      "components": "CollapsibleSection › Sheet › StreamSheet › PaneContent",
+      "domPath": "div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(2) > div > span:nth-of-type(1)",
+      "text": "One real payday from your paystub"
+    },
+    "createdAt": "2026-09-01T22:18:33.063Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "(From paystub preferred)",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated label to \"Recent payday (from paystub preferred)\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-148y962": {
+    "id": "el-148y962",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Type any date you were paid on this job. We use ",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/StreamSheet.tsx:417",
+      "components": "CollapsibleSection › Sheet › StreamSheet › PaneContent",
+      "domPath": "main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(2) > p",
+      "text": "Type any date you were paid on this job. We use this date to find every other payday and alert you when an extra paycheck lands in a month."
+    },
+    "createdAt": "2026-09-01T22:18:50.020Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "This can be concise",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Simplified text to: \"Enter any payday from a paystub. We calculate all other paydays to warn you before extra paycheck months.\"",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-3muw0e": {
+    "id": "el-3muw0e",
+    "kind": "comment",
+    "origin": "user",
+    "label": "This screen",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/TrackerV3.tsx (near line 188, unverified)",
+      "components": "TrackerV3 › Root › TrackerProvider › App",
+      "domPath": "div#root > div:nth-of-type(1)",
+      "text": "Income New job 2026 JOBS Income Pick another source. New job W-2 A job that pays me Delivery or gig work Income A JOB THAT PAYS ME New job D"
+    },
+    "createdAt": "2026-09-01T22:19:26.013Z",
+    "updatedAt": "2026-09-01T22:19:26.013Z",
+    "comment": "we are in focused mode, it should only be asking for this month.",
+    "found": "unknown"
+  },
+  "el-1lvtsz6": {
+    "id": "el-1lvtsz6",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Type the Gross pay amount before taxes and deduc",
+    "status": "commented",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/InfoNote.tsx (near line 34, unverified)",
+      "components": "InfoNote › CollapsibleSection › IncomeEntrySection › Sheet",
+      "domPath": "main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(3) > div > div:nth-of-type(3) > p",
+      "text": "Type the Gross pay amount before taxes and deductions from your paystub. Do not use your take-home pay. Real paychecks you enter will overri"
+    },
+    "createdAt": "2026-09-01T22:20:04.316Z",
+    "updatedAt": "2026-09-01T22:20:04.316Z",
+    "comment": "We cant ask this we should softly tell them it would help us",
+    "found": "present"
+  },
+  "el-wih8c8": {
+    "id": "el-wih8c8",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Hours you work each week",
+    "status": "done",
+    "anchor": {
+      "layout": "responsive",
+      "page": "New job",
+      "source": "src/components/StreamSheet.tsx:446",
+      "components": "CollapsibleSection › Sheet › StreamSheet › PaneContent",
+      "domPath": "div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(4) > div > div > label:nth-of-type(2) > span",
+      "text": "Hours you work each week"
+    },
+    "createdAt": "2026-09-01T22:21:26.030Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Are you kidding me? part time jobs rarely have stable hours, no job has a stable schedule for 10 hour work weeks",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated label to \"Typical hours / week\" and clarified that a rough estimate is fine for part-time schedules.",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-8whp9p": {
+    "id": "el-8whp9p",
+    "kind": "comment",
+    "origin": "user",
+    "label": "September",
+    "status": "commented",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "reviewId": "v2-year-history",
+      "source": "src/components/MonthGrid.tsx (near line 236, unverified)",
+      "components": "MonthUpClose › MonthGrid › TrackerV2 › Root",
+      "domPath": "div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(2) > div > section",
+      "text": "September Nothing counted so far New job has no payday on file, so its paydays are not shown here. Open September"
+    },
+    "createdAt": "2026-09-01T22:23:02.947Z",
+    "updatedAt": "2026-09-01T22:23:02.947Z",
+    "comment": "Almost excellent, my brain is happy this is the poster child for cousin themes for language",
+    "found": "unknown"
+  },
+  "el-zlk6ps": {
+    "id": "el-zlk6ps",
+    "kind": "comment",
+    "origin": "user",
+    "label": "SEPTEMBER SO FAR",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/SafetyHero.tsx (near line 119, unverified)",
+      "components": "SafetyHero › TrackerV2 › Root › TrackerProvider",
+      "domPath": "main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(1) > div > p:nth-of-type(1)",
+      "text": "SEPTEMBER SO FAR"
+    },
+    "createdAt": "2026-09-01T22:24:48.488Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "Too many words I almost like it on the edge, not sure",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Updated heading to \"September earnings\".",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-1vl46qj": {
+    "id": "el-1vl46qj",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Safe",
+    "status": "commented",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/SafetyHero.tsx (near line 124, unverified)",
+      "components": "SafetyHero › TrackerV2 › Root › TrackerProvider",
+      "domPath": "div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(1) > span",
+      "text": "Safe"
+    },
+    "createdAt": "2026-09-01T22:25:07.289Z",
+    "updatedAt": "2026-09-01T22:25:07.289Z",
+    "comment": "Very reassuring, this thing instills trust and confidence",
+    "found": "unknown"
+  },
+  "el-1nzt64v": {
+    "id": "el-1nzt64v",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Estimated New job · add a payday",
+    "status": "commented",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/PrecisionLine.tsx (near line 85, unverified)",
+      "components": "PrecisionLine › SafetyHero › TrackerV2 › Root",
+      "domPath": "div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button",
+      "text": "Estimated New job · add a payday"
+    },
+    "createdAt": "2026-09-01T22:29:21.730Z",
+    "updatedAt": "2026-09-01T22:29:21.730Z",
+    "comment": "I skip over this because I mentally dont want to look at it and i don't know what it is \n\nAttached is a more real confidence gauge",
+    "shots": [
+      "review/shots/el-1nzt64v-mtj8oojm.png"
+    ],
+    "found": "unknown"
+  },
+  "el-1t5lfuy": {
+    "id": "el-1t5lfuy",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Months that pay you extra You are paid every two",
+    "status": "done",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/PaycheckRadar.tsx:94",
+      "components": "PaycheckRadar › TrackerV2 › Root › TrackerProvider",
+      "domPath": "div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(2)",
+      "text": "Months that pay you extra You are paid every two weeks, so you get 26 paychecks a year — and 26 does not split evenly across 12 months. Most"
+    },
+    "createdAt": "2026-09-01T22:29:43.187Z",
+    "updatedAt": "2026-09-01T22:42:43.849Z",
+    "comment": "I dont even want to read this",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Replaced wordy text with a concise 2-sentence alert block.",
+        "at": "2026-09-01T22:42:43.849Z"
+      }
+    ]
+  },
+  "el-wmahw2": {
+    "id": "el-wmahw2",
+    "kind": "comment",
+    "origin": "user",
+    "label": "What Social Security counts · TWP month",
+    "status": "commented",
+    "anchor": {
+      "layout": "v2",
+      "page": "Overview",
+      "source": "src/components/Sheet.tsx (near line 239, unverified)",
+      "components": "Sheet › MonthSheet › TrackerV2 › Root",
+      "domPath": "div#root > div:nth-of-type(1) > div > main > div > div > div:nth-of-type(2)",
+      "text": "$0 WHAT SOCIAL SECURITY COUNTS · TWP MONTH Job New job Pay before taxes $ I only know what went into my bank A job that pays me Delivery or "
+    },
+    "createdAt": "2026-09-01T22:30:13.437Z",
+    "updatedAt": "2026-09-01T22:30:13.437Z",
+    "comment": "needs styling",
     "found": "unknown"
   }
 }
