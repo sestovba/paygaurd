@@ -25,6 +25,10 @@ export function MobileDock({
   onMin,
   toolsOpen,
   onTools,
+  commentsOpen,
+  onComments,
+  commentsCount,
+  commentsList,
   order,
   onOrder,
   mode,
@@ -61,6 +65,11 @@ export function MobileDock({
   onMin: (next: boolean) => void;
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
+  /** Dedicated comments section */
+  commentsOpen: boolean;
+  onComments: (next: boolean) => void;
+  commentsCount: number;
+  commentsList: ReactNode;
   /** The sections, in the order they are stacked. Dragged by their grips
    *  and kept by the console, so the dock stays arranged the way you left
    *  it rather than the way it shipped. */
@@ -186,6 +195,23 @@ export function MobileDock({
           />
           <Tool icon={X} label="Close" onClick={onClose} />
         </div>
+      </Fold>
+    ),
+
+    comments: (
+      <Fold
+        key="comments"
+        section="comments"
+        onGrip={sort.grip('comments')}
+        dragging={sort.dragging === 'comments'}
+        icon={MessageSquarePlus}
+        name="My Comments"
+        tone="paper"
+        count={commentsCount}
+        open={commentsOpen}
+        onToggle={() => onComments(!commentsOpen)}
+      >
+        {commentsList}
       </Fold>
     ),
 

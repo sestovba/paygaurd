@@ -93,6 +93,10 @@ export function DesktopDock({
   onClose,
   toolsOpen,
   onTools,
+  commentsOpen,
+  onComments,
+  commentsCount,
+  commentsList,
   order,
   onOrder,
   openCount,
@@ -105,6 +109,7 @@ export function DesktopDock({
   variants,
   undoDepth,
   onUndo,
+  onStepProposal,
   journalOpen,
   onJournal,
   journalCount,
@@ -129,6 +134,11 @@ export function DesktopDock({
    *  furniture you cannot get out of the way. */
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
+  /** Dedicated comments section */
+  commentsOpen: boolean;
+  onComments: (next: boolean) => void;
+  commentsCount: number;
+  commentsList: ReactNode;
   /** The sections, in the order they are stacked. Dragged by their grips and
    *  kept by the console, so the rail stays arranged the way you left it. */
   order: string[];
@@ -146,6 +156,7 @@ export function DesktopDock({
   variants: number;
   undoDepth: number;
   onUndo: () => void;
+  onStepProposal?: (direction: 1 | -1) => void;
   journalOpen: boolean;
   onJournal: (next: boolean) => void;
   journalCount: number;
@@ -303,9 +314,10 @@ export function DesktopDock({
 
   const isOpen = (key: string) => (
     key === 'tools' ? toolsOpen
-      : key === 'journal' ? journalOpen
-        : key === 'hidden' ? hiddenOpen
-          : key === 'archive' ? stashOpen : false
+      : key === 'comments' ? commentsOpen
+        : key === 'journal' ? journalOpen
+          : key === 'hidden' ? hiddenOpen
+            : key === 'archive' ? stashOpen : false
   );
 
   const sections: Record<string, ReactNode> = {
@@ -367,12 +379,25 @@ export function DesktopDock({
                 on={commenting}
                 onClick={onCommentMode}
               />
-              {/* Undo and Close are not tools. The tools act on the page;
-                  these two act on the console — one steps back through what
-                  it did, the other leaves. They are in the band at the top
-                  now, with the rest of the console's own furniture, where
-                  they are in reach whether or not this panel is folded. */}
             </div>
+      </Fold>
+    ),
+
+    comments: (
+      <Fold
+        key="comments"
+        section="comments"
+        style={colStyle('comments')}
+        onGrip={sort.grip('comments')}
+        dragging={sort.dragging === 'comments'}
+        icon={MessageSquarePlus}
+        name="My Comments"
+        tone="paper"
+        count={commentsCount}
+        open={commentsOpen}
+        onToggle={() => onComments(!commentsOpen)}
+      >
+        {commentsList}
       </Fold>
     ),
 
@@ -479,6 +504,26 @@ export function DesktopDock({
         {mode !== 'off' ? (
           <span className="review-rail-mode">
             {mode === 'audit' ? 'Audit' : mode === 'pick' ? 'Select' : 'A / B'}
+          </span>
+        ) : null}
+        {mode === 'audit' && onStepProposal ? (
+          <span className="review-rail-nav">
+            <button
+              type="button"
+              className="review-rail-step"
+              onClick={() => onStepProposal(-1)}
+              title="Previous proposal (‹)"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="review-rail-step"
+              onClick={() => onStepProposal(1)}
+              title="Next proposal (›)"
+            >
+              ›
+            </button>
           </span>
         ) : null}
         {journalNew ? <span className="review-rail-count" data-new>{journalNew} new</span>

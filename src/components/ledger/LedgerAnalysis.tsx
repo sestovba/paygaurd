@@ -4,7 +4,7 @@ import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
 import { longMonthName, monthsOfYear, todayMonth } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
 import { paycheckContextForMonth } from '../../domain/paySchedule';
-import { benefitPhase, trialWorkStatus } from '../../domain/trialWork';
+import { benefitPhase } from '../../domain/trialWork';
 import type { BenefitPhase } from '../../domain/trialWork';
 import type { MonthStatus, TrackerData } from '../../domain/types';
 import { SafeWorkSimulator } from '../SafeWorkSimulator';
@@ -56,12 +56,12 @@ function deltaToLimit(value: number, limit: number): string {
   return delta > 0 ? `${money0(delta)} over` : `${money0(Math.abs(delta))} below`;
 }
 
-type Mode = 'cards' | 'table' | 'activeOnly';
+type Mode = 'table' | 'cards' | 'activeOnly';
 
 export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number }) {
-  const [mode, setMode] = useState<Mode>('cards');
+  const [mode, setMode] = useState<Mode>('table');
   const [simulatorOpen, setSimulatorOpen] = useState(false);
-  const view = mode === 'table' ? 'table' : 'cards';
+  const view = mode === 'cards' ? 'cards' : 'table';
   const onlyIncome = mode === 'activeOnly';
   const rules = rulesFor(year);
   const now = todayMonth();
@@ -82,13 +82,6 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
 
   const visible = onlyIncome ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth) : cards;
 
-  const elapsedCards = cards.filter((card) => card.month <= asOf);
-  const yearTotalCountable = elapsedCards.reduce((sum, card) => sum + card.status.countable, 0);
-  const w2Year = elapsedCards.reduce((sum, c) => sum + c.w2, 0);
-  const seYear = elapsedCards.reduce((sum, c) => sum + c.se, 0);
-  const twp = trialWorkStatus(data, asOf);
-  const overSgaMonths = elapsedCards.filter((c) => c.status.overSga).length;
-
   return (
     <div className="lg-analysis">
       <div className="lg-analysis-pad flex flex-wrap items-center gap-2.5 pb-3 pt-5">
@@ -102,8 +95,8 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
           className="ml-auto w-full sm:w-auto"
         >
           <div className="lg-seg w-full sm:w-auto">
-            <button type="button" data-on={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</button>
             <button type="button" data-on={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</button>
+            <button type="button" data-on={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</button>
             <button type="button" data-on={mode === 'activeOnly'} className="lg-seg-item" onClick={() => setMode('activeOnly')}>Active Only</button>
           </div>
         </ReviewTarget>
@@ -181,14 +174,14 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
           ) : null}
         </div>
       ) : (
-        <div className="overflow-x-auto" >
+        <div className="overflow-x-auto">
           <table className="w-full lg-analysis-table">
             <thead>
               <tr>
                 {['Month', 'Combined', 'Status', 'vs SGA', 'vs TWP'].map((h, i) => (
                   <th key={h} className={`lg-label border-b px-3 py-3 sm:px-4 lg-label-border ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
                 ))}
-            </tr>
+              </tr>
             </thead>
             <tbody>
               {visible.map((c) => (
@@ -218,36 +211,6 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
           </table>
         </div>
       )}
-
-      <ReviewTarget
-        id="ledger-analysis-summary"
-        label="Repeated summary strip"
-        reason="All four tiles repeat the header stats a screen above — same YTD, same TWP count, same SGA count."
-        layout="ledger"
-      >
-      <div className="flex flex-wrap lg-analysis-summary">
-        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
-          <span className="lg-label">YTD Total Countable</span>
-          <span className="text-xl font-semibold sm:text-2xl">{money2(yearTotalCountable)}</span>
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
-          <span className="lg-label">W2 / Self-Emp Split</span>
-          <span className="text-xl font-semibold sm:text-2xl">
-            <span className="lg-text-w2">{money2(w2Year)}</span>
-            <span className="lg-text-muted"> · </span>
-            <span className="lg-text-se">{money2(seYear)}</span>
-          </span>
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
-          <span className="lg-label">Trial Work Period</span>
-          <span className="text-xl font-semibold sm:text-2xl lg-text-twp">{twp.used} of 9 months used</span>
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 lg-summary-tile">
-          <span className="lg-label">Months at or over SGA</span>
-          <span className={`text-xl font-semibold sm:text-2xl ${overSgaMonths ? 'lg-text-over' : 'lg-text-safe'}`}>{overSgaMonths} months</span>
-        </div>
-      </div>
-      </ReviewTarget>
 
       <div className="lg-analysis-pad py-3 lg-border-t">
         <button

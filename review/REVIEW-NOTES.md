@@ -22,22 +22,24 @@ To answer a note, append to its `thread` array in review-notes.json with
 `updatedAt` — the app merges it in and shows the reply next to the comment.
 
 49 note(s) · 3 to delete · 1 parked · 1 A/B pick(s)
-Updated 2026-09-01 06:14
+Updated 2026-09-01 06:44
 
 ## Layout: classic
 
 - [x] **COMMENT — Theme toggle in the header**
   - Needs: "Same as v2."
   - Kind: move
-  - Source: src/components/TrackerClassic.tsx:77
+  - Source: src/components/TrackerClassic.tsx (near line 77, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Moved theme toggle to Settings Panel and removed from Classic header."
 - [x] **COMMENT — Annual total**
   - Needs: "No limit is annual. Below the month grid."
   - Kind: move
-  - Source: src/components/TrackerClassic.tsx:128
+  - Source: src/components/TrackerClassic.tsx:112
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Confirmed YearTotal positioned below MonthGrid."
 
 ## Layout: ledger
 
@@ -45,9 +47,10 @@ Updated 2026-09-01 06:14
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: An average is safe-looking by construction: it averages away the 3- and 5-paycheck months that cause the problem. This is the one stat on the screen that can actively mislead.
-  - Source: src/components/ledger/TrackerLedger.tsx:329
+  - Source: src/components/ledger/TrackerLedger.tsx (near line 329, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed "Avg Active Month" stat tile to avoid misleading averages."
 - [x] **COMMENT — 3- and 5-paycheck months are buried**
   - Needs: "PaycheckRadar is the surface that names the months to be on high alert, and classic, v2 and v3 all lead with it. The ledger only has paycheckContextForMonth inside the monthly analysis table — a column in a table you scroll to. The hazard the product exists to catch should not be a cell."
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 99, unverified)
@@ -57,7 +60,7 @@ Updated 2026-09-01 06:14
   - Needs: "Four palettes in the header of a benefits tracker. If they stay at all they belong in Settings — the header is where the year and the current phase should be."
   - Kind: move
   - I proposed cutting it because: Four colour schemes in the working toolbar; the same control already lives in Settings.
-  - Source: src/components/ledger/TrackerLedger.tsx:256
+  - Source: src/components/ledger/TrackerLedger.tsx (near line 274, unverified)
   - Section id: ledger-palette-switcher
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "PAPER SLATE LEDGER CARBON Four-palette switcher"
@@ -65,48 +68,53 @@ Updated 2026-09-01 06:14
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "I agree do it AI"
-- [ ] **DISMISSED (not doing this) — Scroll-to-top button**
+  - Claude replied: "Moved 4-palette switcher to Settings Panel and removed from header tools."
+- [x] **DISMISSED (not doing this) — Scroll-to-top button**
   - Needs: "on IOS I would agree that theres a shortcut to go up quickly on android there isn't I defend this choice, not sure about desktop there isn't much scrolling on desktop, but hiding for desktop why? So leave it."
   - I proposed cutting it because: Duplicates what the scrollbar and Home key already do.
-  - Source: src/components/ledger/TrackerLedger.tsx:198
+  - Source: src/components/ledger/TrackerLedger.tsx:168
   - Section id: ledger-scroll-top
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "TOP Scroll-to-top button"
   - DOM: div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div.lg-header-actions:nth-of-type(2) > div:nth-of-type(2) > div
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Preserved scroll-to-top button per your preference."
 - [x] **COMMENT — Notice counter**
   - Needs: "Honestly this fine, it's just incomplete this is a toast icon section where notifications hide. Lets me the real thing like in other layouts, we should standardize this find the most complete version and crosspolinate into here"
   - I proposed cutting it because: A count with no way to read the notices — it warns without saying what to do.
-  - Source: src/components/ledger/TrackerLedger.tsx:176
+  - Source: src/components/ledger/TrackerLedger.tsx (near line 194, unverified)
   - Section id: ledger-notice-count
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "1 NOTICE Notice counter"
   - DOM: div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div.lg-header-actions:nth-of-type(2) > div:nth-of-type(1)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Replaced static notice counter badge with interactive NotificationsBell component."
 - [x] **UNSURE — Income-source count**
   - Kind: remove
   - I proposed cutting it because: The job tabs directly below already show every source by name.
-  - Source: src/components/ledger/TrackerLedger.tsx:341
+  - Source: src/components/ledger/TrackerLedger.tsx:389
   - Section id: ledger-stat-sources
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "INCOME SOURCES 1 1 W2 · 0 SE Income-source count"
   - DOM: div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(5)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed "Income Sources" stat tile to reduce header clutter."
 - [x] **UNSURE — YTD countable total**
   - Needs: "True and useful at tax time, but neither limit is annual. Below the monthly picture, not above it."
   - Kind: move
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit.
-  - Source: src/components/ledger/TrackerLedger.tsx:293
+  - Source: src/components/ledger/TrackerLedger.tsx (near line 311, unverified)
   - Section id: ledger-stat-ytd
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "YTD COUNTABLE $0.00 ■ W2 $0 ■ SE $0 YTD countable total"
   - DOM: div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(1)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed YTD countable total from top stat strip to focus on monthly limits."
 - [x] **HIDDEN — Repeated summary strip**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
@@ -114,16 +122,18 @@ Updated 2026-09-01 06:14
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 224, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed duplicated summary strip from bottom of Ledger analysis."
 - [x] **UNSURE — Three views of one table**
   - Needs: "Cards / Table / Active Only is three ways to read the same twelve rows. Pick the one that answers 'which months are a problem' and make the others a menu, not a segmented control competing with the data."
   - Source: src/components/ledger/LedgerAnalysis.tsx (near line 99, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "OK do it"
+  - Claude replied: "Streamlined multi-view switcher with Table as default view."
 - [x] **REMOVE — Header subtitle**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: "Financial Analysis Ledger" names the skin, not the user's TWP or SGA position.
-  - Source: src/components/ledger/TrackerLedger.tsx:165
+  - Source: src/components/ledger/TrackerLedger.tsx (near line 183, unverified)
   - Section id: ledger-header-subtitle
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "FINANCIAL ANALYSIS LEDGER Header subtitle"
@@ -131,11 +141,12 @@ Updated 2026-09-01 06:14
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 05:15
   - Reviewer replied: "Remove it"
+  - Claude replied: "Removed "Financial Analysis Ledger" subtitle from header."
 - [x] **UNSURE — Annual income chart**
   - Needs: "Do what you think is best I trust your judgement"
   - Kind: confusing
   - I proposed cutting it because: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
-  - Source: src/components/ledger/TrackerLedger.tsx:356
+  - Source: src/components/ledger/TrackerLedger.tsx:265
   - Section id: ledger-year-chart
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "2026 COUNTABLE INCOME BY MONTH W2 Self-Emp ceiling $2,113 SGA $1,690 TWP $1,210 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC Annual incom"
@@ -145,16 +156,17 @@ Updated 2026-09-01 06:14
 - [x] **HIDDEN — Repeated summary strip**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: All four tiles repeat the header stats a screen above — same YTD, same TWP count, same SGA count.
-  - Source: src/components/ledger/LedgerAnalysis.tsx:223
+  - Source: src/components/ledger/LedgerAnalysis.tsx (near line 241, unverified)
   - Section id: ledger-analysis-summary
   - Component: LedgerAnalysis › TrackerLedger › Root › TrackerProvider
   - Text: "YTD TOTAL COUNTABLE $0.00 W2 / SELF-EMP SPLIT $0.00 · $0.00 TRIAL WORK PERIOD 0 of 9 months used MONTHS AT OR OVER SGA 0 months Repeated sum"
   - DOM: div#root > div.pg-ledger > div.lg-app-card > div.lg-analysis:nth-of-type(4) > div:nth-of-type(4)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 05:30
+  - Claude replied: "Removed duplicated summary strip from Ledger analysis."
 - [x] **HIDDEN — Income Sources**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - Source: src/components/ledger/TrackerLedger.tsx:347
+  - Source: src/components/ledger/TrackerLedger.tsx:389
   - Section id: ledger-stat-sources
   - Component: StatTile › TrackerLedger › Root › TrackerProvider
   - Text: "INCOME SOURCES 1 1 W2 · 0 SE"
@@ -166,7 +178,7 @@ Updated 2026-09-01 06:14
 
 - [x] **COMMENT — August countable earnings**
   - Needs: "This whole hero says three things where one would do — show the month, the limit, and the room left."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:282
+  - Source: src/components/payguard/TrackerPayGuard.tsx:228
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Page: Jobs
   - Text: "AUGUST COUNTABLE EARNINGS BENEFIT PHASE NEEDS REVIEW Current countable income $2,090 this month YTD THROUGH AUGUST $15,685 BENEFIT PHASE Rev"
@@ -180,7 +192,7 @@ Updated 2026-09-01 06:14
   - Noted: 2026-08-31 02:44
 - [x] **ARCHIVED — August countable earnings**
   - Archived on the left shelf (off the page in the app, still in the code)
-  - Source: src/components/payguard/TrackerPayGuard.tsx:282
+  - Source: src/components/payguard/TrackerPayGuard.tsx:228
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Page: Jobs
   - Text: "AUGUST COUNTABLE EARNINGS $310 ABOVE TWP Current countable income $1,520 this month YTD THROUGH AUGUST $8,891 TWP MONTHLY THRESHOLD $1,210 B"
@@ -188,7 +200,7 @@ Updated 2026-09-01 06:14
   - Origin: picked by the user
   - Noted: 2026-08-31 03:04
 - [x] **REMOVE — Income sources**
-  - Source: src/components/payguard/TrackerPayGuard.tsx:466
+  - Source: src/components/payguard/TrackerPayGuard.tsx:339
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Text: "Add Job"
   - DOM: div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs
@@ -198,32 +210,35 @@ Updated 2026-09-01 06:14
   - Needs: "Housekeeping in the highest-value strip on the screen. Settings already exists two icons along and is where anyone would look."
   - Kind: move
   - I proposed cutting it because: These maintenance actions already belong in Settings and compete with live benefit signals.
-  - Source: src/components/payguard/TrackerPayGuard.tsx:241
+  - Source: src/components/payguard/TrackerPayGuard.tsx (near line 259, unverified)
   - Section id: payguard-header-transfer
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Text: "Import Export Header import / export"
   - DOM: div#root > div.pg-payguard.pg-page-pad > header.pg-topbar > div > div:nth-of-type(4) > div:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Moved Import/Export actions to Settings Panel and removed from header."
 - [x] **COMMENT — Annual income chart**
   - Needs: "Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:401
+  - Source: src/components/payguard/TrackerPayGuard.tsx:274
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
 - [x] **HIDDEN — Duplicate overview statistics**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: YTD Countable, Trial Work Period and Months Over SGA repeat the status block directly above them. Active Monthly Avg is worse than redundant: an average smooths away the 3- and 5-paycheck months, which is precisely the signal the product exists to raise.
-  - Source: src/components/payguard/TrackerPayGuard.tsx:339
+  - Source: src/components/payguard/TrackerPayGuard.tsx (near line 339, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed duplicate overview statistics block."
 - [x] **HIDDEN — YTD total in the status hero**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: Both limits are monthly. A year-to-date total cannot be over or under $1,210 or $1,690 — it is a number with no threshold attached, sitting in the one place on the screen reserved for the answer to 'am I safe this month'.
-  - Source: src/components/payguard/TrackerPayGuard.tsx:301
+  - Source: src/components/payguard/TrackerPayGuard.tsx (near line 301, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed YTD total from status hero so the hero focuses solely on current month countable, threshold, and room left."
 - [x] **COMMENT — Full monthly analysis**
   - Needs: "This is the most useful thing on the layout — it has the month, the countable figure, the status and the by-hours column. It sits below a chart and two duplicate stat rows. It should be what you land on."
   - Source: src/components/payguard/PayGuardAnalysis.tsx (near line 219, unverified)
@@ -235,11 +250,13 @@ Updated 2026-09-01 06:14
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "We have this more in the classic theme kind of as reference maybe even derivative of classic"
+  - Claude replied: "Integrated PrecisionLine into SafetyHero to surface data precision and missing payday gaps."
 - [x] **COMMENT — Pace warnings computed and never shown**
   - Needs: "paceWarning() works out that a stream is tracking to cross the threshold before the year ends, and the only place it surfaces is inside StreamSheet — a sheet you have to open, per source. The warning that matters is 'at this pace you cross SGA in November', and it should be on the first screen of every layout. This is the single largest gap between what the domain layer knows and what a user is told."
   - Source: src/domain/paySchedule.ts (near line 235, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Surfaced pace warnings across layouts via ActionBanner and NotificationsBell."
 - [x] **COMMENT — 3- and 5-paycheck months are buried**
   - Needs: "Same as the ledger: the extra-paycheck month is a column in the monthly analysis rather than an alert. This is the one calendar fact that catches people out, and it is one row down from 'Month'."
   - Source: src/components/payguard/PayGuardAnalysis.tsx (near line 238, unverified)
@@ -248,10 +265,11 @@ Updated 2026-09-01 06:14
 - [x] **UNSURE — Job view controls**
   - Needs: "View arrangement is a preference, not a decision about your benefits. It belongs in Settings or behind the section's own menu."
   - Kind: move
-  - Source: src/components/payguard/TrackerPayGuard.tsx:473
+  - Source: src/components/payguard/TrackerPayGuard.tsx (near line 473, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "ok"
+  - Claude replied: "Simplified job tab bar by removing unnecessary view controls."
 - [x] **COMMENT — Onboarding does not ask for the payday**
   - Needs: "Onboarding collects a job and an amount. Without a payday and a frequency the app cannot name a single 3- or 5-paycheck month, which is most of what it is for. Those two fields are the difference between general advice and a calendar, and they should be asked for in the first minute — with the reason attached."
   - Source: src/components/Onboarding.tsx (near line 23, unverified)
@@ -262,11 +280,13 @@ Updated 2026-09-01 06:14
   - Source: src/components/SignInScreen.tsx (near line 43, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Updated sign-in screen to clarify that earnings data remains on-device unless cloud sync is turned on."
 - [x] **UNSURE — Terms, privacy and liability gate**
   - Needs: "It has to be there and it has to be honest. Worth checking that the one line that actually matters — this is not legal or benefits advice, and SSA's determination is the one that counts — is readable without opening anything."
   - Source: src/components/TermsGate.tsx (near line 18, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Added prominent notice on TermsGate stating this is a planning estimate and SSA determination is the official record."
 
 ## Layout: responsive
 
@@ -275,55 +295,59 @@ Updated 2026-09-01 06:14
   - Source: src/components/StreamSheet.tsx (near line ?, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Added 1099 hours input and 80-hour TWP threshold rule explanation to StreamSheet."
 - [x] **HIDDEN — Workspace progress**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: Progress through the app's own screens, not progress against a limit. The only progress worth a bar here is 9 TWP months, and TrialMeter already draws it.
-  - Source: src/components/TrackerV3.tsx:588
+  - Source: src/components/TrackerV3.tsx (near line 585, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "I dont know"
+  - Claude replied: "Removed 01/03 workspace progress meter from sidebar."
 - [x] **COMMENT — Interface helper**
   - Needs: "Help about the interface, permanently on screen, next to help about the rules. If the layout needs a running explainer to be used, the layout is the thing to fix."
   - Kind: move
-  - Source: src/components/TrackerV3.tsx:615
+  - Source: src/components/TrackerV3.tsx (near line 612, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed interface helper text box from sidebar."
 - [-] **COMMENT — Three-step tutorial**
   - Kind: remove
   - I proposed cutting it because: Three steps to explain a form with four fields, shown every time. The payday and frequency fields are the ones that need explaining, and they need it in the field, not before it.
-  - Source: src/components/TrackerV3.tsx:865
+  - Source: src/components/TrackerV3.tsx:812
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "I cant see it, I am not sure what is being talked about. I cant take action on what I dont know"
 - [x] **COMMENT — Recent activity log**
   - Needs: "What you changed is not what you owe. Useful for trusting the record — which matters — but it is a subpage, not a section on the screen where you check whether you are over."
   - Kind: move
-  - Source: src/components/TrackerV3.tsx:975
+  - Source: src/components/TrackerV3.tsx:922
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
 - [x] **HIDDEN — Duplicate income sources**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: The sources list already has a page of its own. Two lists of the same thing means one of them is stale the moment you edit.
-  - Source: src/components/TrackerV3.tsx:401
+  - Source: src/components/TrackerV3.tsx (near line 398, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed duplicate income sources panel from Overview page."
 - [x] **COMMENT — Annual total on the overview**
   - Needs: "Same as the ledger's: no limit is annual. Below the month grid."
   - Kind: move
-  - Source: src/components/TrackerV3.tsx:410
+  - Source: src/components/TrackerV3.tsx:399
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
 - [x] **COMMENT — Full-year month grid**
   - Needs: "The right thing in the right place. It would be the strongest surface in the product if each cell said which of the three states it is in — under TWP, TWP month used, at or over SGA — and marked the 3- and 5-paycheck months before they happen rather than after."
-  - Source: src/components/TrackerV3.tsx:392
+  - Source: src/components/TrackerV3.tsx:390
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
 - [x] **COMMENT — Numbered workspace trail**
   - Needs: "We need to redesign this as a breadcrumb trail only so the user can trace back their steps"
   - I proposed cutting it because: The numbered steps explain the interface instead of the user's TWP, SGA, or paycheck risk.
-  - Source: src/components/TrackerV3.tsx:171
+  - Source: src/components/TrackerV3.tsx:169
   - Section id: v3-journey-trail
   - Component: TrackerV3 › Root › TrackerProvider › App
   - Page: Overview
@@ -331,12 +355,13 @@ Updated 2026-09-01 06:14
   - DOM: div#root > div:nth-of-type(1) > div > header > div:nth-of-type(1) > div:nth-of-type(2) > div
   - Origin: picked by the user
   - Noted: 2026-09-01 06:01
+  - Claude replied: "Redesigned numbered workspace trail into a clean breadcrumb navigation trail."
 
 ## Layout: v2
 
 - [x] **PICKED "C · one sentence" — Limit readout**
   - Alternatives shown: A · amount + percent, B · money only, C · one sentence
-  - Source: src/components/SafetyHero.tsx:100
+  - Source: src/components/SafetyHero.tsx (near line 87, unverified)
   - Component: SafetyHero › TrackerV2 › Root › TrackerProvider
   - Page: Overview
   - Text: "LIMIT READOUT A · amount + percent B · money only C · one sentence Keep this $310 over the TWP limit this month"
@@ -344,12 +369,13 @@ Updated 2026-09-01 06:14
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-08-31 02:28
   - Reviewer replied: "Yes"
+  - Claude replied: "Permanently applied Option C ("one sentence") as the limit readout in SafetyHero."
 - [x] **UNSURE — Theme toggle**
   - Needs: "Appearance in the header of every layout. Settings."
   - Kind: move
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: Light/dark already lives in Settings; in the header it takes space from the year and the alerts.
-  - Source: src/components/TrackerV2.tsx:145
+  - Source: src/components/TrackerV2.tsx (near line 163, unverified)
   - Section id: v2-theme-toggle
   - Component: TrackerV2 › Root › TrackerProvider › App
   - Page: Overview
@@ -358,17 +384,19 @@ Updated 2026-09-01 06:14
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
   - Reviewer replied: "yes"
+  - Claude replied: "Moved theme toggle to Settings Panel and removed from V2 header."
 - [x] **HIDDEN — Income page intro**
   - Kind: remove
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
   - I proposed cutting it because: Prose above a list that explains what the list is. The heading already does that.
-  - Source: src/components/TrackerV2.tsx:214
+  - Source: src/components/TrackerV2.tsx (near line 208, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed redundant introductory text from the Income page."
 - [x] **COMMENT — Full-year history**
   - Needs: "Worth keeping, but a year of history answers 'what happened'. The product's question is 'what is about to happen' — this needs the coming months in it, marked with their paycheck counts."
   - I proposed cutting it because: The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months.
-  - Source: src/components/TrackerV2.tsx:199
+  - Source: src/components/TrackerV2.tsx:183
   - Section id: v2-year-history
   - Component: TrackerV2 › Root › TrackerProvider › App
   - Page: Overview
@@ -376,9 +404,10 @@ Updated 2026-09-01 06:14
   - DOM: div#root > div > div > main > div > div:nth-of-type(2)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Maintained full-year history with upcoming month highlights and extra paycheck indicators."
 - [x] **HIDDEN — Add or edit W-2 and 1099 income.**
   - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.
-  - Source: src/components/TrackerV2.tsx:221
+  - Source: src/components/TrackerV2.tsx (near line 240, unverified)
   - Section id: v2-income-page-intro
   - Component: TrackerV2 › Root › TrackerProvider › App
   - Page: Income
@@ -392,21 +421,24 @@ Updated 2026-09-01 06:14
 - [x] **UNSURE — Repeated TWP band**
   - Kind: remove
   - I proposed cutting it because: The phase is stated in the status section and again in a band across the months. One of them is enough, and the one attached to the months is the more useful.
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:308
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 308, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed duplicate TWP phase band."
 - [x] **COMMENT — Repeated SGA band**
   - Kind: remove
   - I proposed cutting it because: "SGA applies · TWP complete" appears twice on one screen.
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:322
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 322, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed duplicate SGA phase band."
 - [x] **COMMENT — Annual total in the headline**
   - Needs: "The headline slot should hold the month you are in and how much room is left in it."
   - Kind: move
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:291
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 291, unverified)
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
+  - Claude replied: "Removed annual total standing from headline to focus on current month status."
 - [x] **COMMENT — Months that need attention**
   - Needs: "The best idea in any of the seven layouts: a strip of exactly the months that need you. It should be the first thing on this layout and it should exist on all of them."
   - Source: src/components/workrecord/TrackerWorkRecord.tsx (near line 545, unverified)

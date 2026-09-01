@@ -41,6 +41,10 @@ export interface ReviewContextValue {
   restore: (id: string) => void;
   /** The proposal currently being walked through, if any. */
   focusId?: string | null;
+  /** Focus a proposal by id. */
+  focusProposal?: (id: string | null) => void;
+  /** Step forward (+1) or backward (-1) through proposals. */
+  stepProposal?: (direction: 1 | -1) => void;
   /** True while this element is parked in an edge tray. */
   isStowed: (id: string) => boolean;
   /** Switched off on the page — a layer eye, not the archive. */

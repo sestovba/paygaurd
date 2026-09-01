@@ -42,8 +42,7 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
           <p className="label-caps text-accent-foreground">PayGuard</p>
           <h1 className="display-figure mt-1 text-3xl">Sign in to your work record</h1>
           <p className="type-muted mt-2">
-            Your earnings stay on this device. Signing in is how the app knows
-            who you are.
+            Your earnings stay on this device unless you enable cloud sync. Signing in is how the app knows who you are.
           </p>
         </div>
 

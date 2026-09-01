@@ -3,12 +3,10 @@ import {
   ChevronDown,
   ChevronsDown,
   ChevronsUp,
-  Download,
   Plus,
   Settings,
   TriangleAlert,
   Undo2,
-  Upload,
   X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
@@ -26,12 +24,10 @@ import { SettingsPanel } from '../SettingsPanel';
 import { NotificationsBell } from '../NotificationsBell';
 import { MonthSheet } from '../MonthSheet';
 import { StatusSheet } from '../StatusSheet';
-import { TrialMeter } from '../TrialMeter';
 import { PayGuardJobEditor } from '../payguard/PayGuardJobEditor';
-import { importTrackerFile, exportTrackerJson } from '../payguard/payguardData';
+import { importTrackerFile } from '../payguard/payguardData';
 import { WorkRecordMonths } from './WorkRecordMonths';
 import { WorkRecordStatus } from './WorkRecordStatus';
-import { ReviewTarget } from '../../review/ReviewTarget';
 
 /**
  * Work Record — the sga_calc20 layout, rebuilt on this app's core.
@@ -204,35 +200,6 @@ export function TrackerWorkRecord() {
               <Undo2 className="size-3.5" />
             </button>
 
-            <span className="mx-0.5 hidden h-5 w-px pg-rule-fill md:block" />
-
-            <ReviewTarget
-              id="workrecord-header-transfer"
-              label="Header import / export"
-              reason="These maintenance actions belong in Settings and compete with live benefit signals."
-              layout="workrecord"
-              className="hidden md:block"
-            >
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  className="pg-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Import a PayGuard JSON export"
-                >
-                  <Upload className="size-3.5" /> Import
-                </button>
-                <button
-                  type="button"
-                  className="pg-btn pg-btn-solid"
-                  onClick={() => exportTrackerJson(data, year)}
-                  title="Download everything as JSON"
-                >
-                  <Download className="size-3.5" /> Export
-                </button>
-              </div>
-            </ReviewTarget>
-
             <button
               type="button"
               className="pg-icon-btn pg-icon-btn-bordered group"
@@ -287,46 +254,11 @@ export function TrackerWorkRecord() {
                     : phase === 'verifyComplete' ? 'Verify 9' : 'Not confirmed'}
                 </span>
               </div>
-              <ReviewTarget
-                id="workrecord-headline-year-total"
-                label="Annual total"
-                reason="A year total does not answer the active monthly TWP / SGA or 3-/5-paycheck question."
-                layout="workrecord"
-              >
-                <div className="wr-standing">
-                  <span className="pg-label">{year} total</span>
-                  <span className="pg-figure pg-figure-md">{money(yearTotal(data, year))}</span>
-                </div>
-              </ReviewTarget>
             </div>
           </div>
 
-          {/* Phase band: the meter while TWP months remain, otherwise the one
-              line of context or the warning that limits are paused. */}
-          {phase === 'trialWork' ? (
-            <ReviewTarget
-              id="workrecord-phase-band-twp"
-              label="Repeated TWP band"
-              reason="The headline already shows the active limit and TWP standing."
-              layout="workrecord"
-            >
-              <div className="wr-phase-quiet flex items-center gap-3">
-                <span className="shrink-0">TWP</span>
-                <span className="min-w-[8rem] flex-1">
-                  <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
-                </span>
-              </div>
-            </ReviewTarget>
-          ) : phase === 'sga' ? (
-            <ReviewTarget
-              id="workrecord-phase-band-sga"
-              label="Repeated SGA band"
-              reason="The headline already shows that SGA is the active monthly limit."
-              layout="workrecord"
-            >
-              <div className="wr-phase-quiet">SGA applies · TWP complete</div>
-            </ReviewTarget>
-          ) : (
+          {/* Phase warning shown only when status is not confirmed */}
+          {phase === 'unknown' || phase === 'verifyComplete' ? (
             <div className="wr-phase-warning">
               <span className="min-w-[16rem] flex-1">
                 {phase === 'verifyComplete'
@@ -337,7 +269,7 @@ export function TrackerWorkRecord() {
                 Review status
               </button>
             </div>
-          )}
+          ) : null}
 
           <MonthHotbar onOpenMonth={setOpenMonth} />
 

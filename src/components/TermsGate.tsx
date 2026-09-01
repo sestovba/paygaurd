@@ -23,6 +23,10 @@ export function TermsGate({ onAgree }: { onAgree: () => void }) {
           </p>
         </div>
 
+        <div className="rounded-lg border border-warn/40 bg-warn-soft/60 p-3 text-xs leading-relaxed text-warn-foreground">
+          <strong>Notice:</strong> This is a planning estimate, not legal or benefits advice. The Social Security Administration's determination is the only official record.
+        </div>
+
         <div className="pg-border-all pg-surface-2 max-h-72 overflow-y-auto rounded-[var(--pg-radius-md)] p-4">
           <TermsContent />
         </div>

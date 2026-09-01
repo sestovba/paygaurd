@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Menu, Moon, Settings, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, Settings } from 'lucide-react';
 import { BrandMark } from './ui';
 import { useTracker } from '../state/TrackerProvider';
-import { resolveTheme, useTheme } from '../theme';
+import { useTheme } from '../theme';
 import { knownYears } from '../domain/rules';
 import { SafetyHero } from './SafetyHero';
 import { ActionBanner } from './ActionBanner';
@@ -45,7 +45,6 @@ type DetailRequest =
 export function TrackerV2() {
   const { ui, setUi, resetAll } = useTracker();
   useTheme(ui.theme);
-  const isDark = resolveTheme(ui.theme, window.matchMedia('(prefers-color-scheme: dark)').matches) === 'dark';
 
   const [page, setPage] = useState<PageId>('overview');
   const [incomeSelectedId, setIncomeSelectedId] = useState<string | null>(null);
@@ -141,21 +140,6 @@ export function TrackerV2() {
               onReviewStream={(id) => setDetail({ kind: 'stream', streamId: id })}
               onOpenMonth={(m) => setDetail({ kind: 'month', month: m })}
             />
-            <ReviewTarget
-              id="v2-theme-toggle"
-              label="Theme toggle"
-              reason="Light/dark already lives in Settings; in the header it takes space from the year and the alerts."
-              layout="v2"
-            >
-              <button
-                type="button"
-                aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-                onClick={() => setUi({ theme: isDark ? 'light' : 'dark' })}
-                className="icon-btn grid border border-border bg-surface text-muted-foreground hover:bg-muted"
-              >
-                {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
-              </button>
-            </ReviewTarget>
             <button
               type="button"
               aria-label="Settings"
@@ -210,17 +194,9 @@ export function TrackerV2() {
             </div>
           ) : page === 'income' ? (
             <div className="flex flex-col gap-4">
-              <ReviewTarget
-                id="v2-income-page-intro"
-                label="Income page intro"
-                reason="A page titled Income, on the Income tab, explaining that it is for income."
-                layout="v2"
-              >
-                <div>
-                  <h1 className="display-figure mt-1 text-3xl sm:text-4xl">Income</h1>
-                  <p className="type-muted mt-2">Add or edit W-2 and 1099 income.</p>
-                </div>
-              </ReviewTarget>
+              <div>
+                <h1 className="display-figure mt-1 text-3xl sm:text-4xl">Income</h1>
+              </div>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
                 <div className={(incomeSelectedId ? 'hidden sm:block ' : '') + 'w-full lg:w-80 lg:shrink-0'}>
                   <div className="overflow-hidden rounded-xl border border-border bg-surface">

@@ -22,6 +22,15 @@
 .review-target {
   position: relative;
   min-width: 0;
+  scroll-margin-top: 140px;
+  scroll-margin-bottom: 100px;
+}
+
+[data-review-id],
+.review-flash,
+.review-flash-near {
+  scroll-margin-top: 140px;
+  scroll-margin-bottom: 100px;
 }
 
 .review-target[data-review-transparent]:not([data-review-on='true']) {
@@ -473,7 +482,7 @@ body.review-picking * {
 }
 
 .review-panel-list li:hover {
-  background: #f8fafc;
+  background: rgb(255 255 255 / 0.12);
 }
 
 .review-panel-list li[data-kind='delete'] .review-note-kind {
@@ -1810,7 +1819,7 @@ body.review-picking * {
 }
 
 .review-panel-group > ul > li:hover {
-  background: #f8fafc;
+  background: rgb(255 255 255 / 0.12);
 }
 
 
@@ -11472,3 +11481,196 @@ body.review-picking * {
 .review-tick {
   border-radius: 0.25rem;
 }
+
+/* --- Dedicated Comments Panel & Triage Upgrades ------------------------- */
+
+.review-comments-panel {
+  padding: 0.5rem;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.review-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.review-comment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.05);
+  padding: 0.6rem 0.7rem;
+  transition: border-color 150ms, background-color 150ms;
+}
+
+.review-comment-card:hover {
+  background: rgb(255 255 255 / 0.09);
+  border-color: var(--review-blue);
+}
+
+.review-comment-card[data-reply='true'] {
+  border-left: 3px solid var(--review-blue);
+}
+
+.review-comment-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.review-comment-target {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-comment-meta {
+  font-size: 0.6875rem;
+  color: rgb(255 255 255 / 0.5);
+  margin-right: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.review-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.review-comment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  background: rgb(255 255 255 / 0.12);
+  color: rgb(255 255 255 / 0.85);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 120ms, color 120ms;
+}
+
+.review-comment-btn:hover {
+  background: var(--review-blue);
+  color: white;
+}
+
+.review-comment-btn.review-comment-del:hover {
+  background: var(--review-red);
+  color: white;
+}
+
+.review-comment-body {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.9);
+  margin: 0;
+}
+
+.review-comment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.review-comment-tag {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 9999px;
+  background: rgb(37 99 235 / 0.25);
+  border: 1px solid rgb(37 99 235 / 0.45);
+  color: #93c5fd;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.review-comment-reply {
+  margin-top: 0.2rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.35rem;
+  background: rgb(37 99 235 / 0.14);
+  border-left: 2px solid var(--review-blue);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #bfdbfe;
+}
+
+/* Triage queue upgraded action buttons */
+.review-queue-keep {
+  background: #16a34a !important;
+  color: white !important;
+}
+
+.review-queue-keep:hover {
+  background: #15803d !important;
+}
+
+.review-queue-remove {
+  background: var(--review-red) !important;
+  color: white !important;
+}
+
+.review-queue-remove:hover {
+  background: #991b1b !important;
+}
+
+.review-queue-change {
+  background: var(--review-blue) !important;
+  color: white !important;
+}
+
+.review-queue-change:hover {
+  background: #1d4ed8 !important;
+}
+
+.review-queue-later {
+  background: rgb(255 255 255 / 0.14) !important;
+  color: rgb(255 255 255 / 0.8) !important;
+}
+
+.review-queue-later:hover {
+  background: rgb(255 255 255 / 0.25) !important;
+  color: white !important;
+}
+
+.review-rail-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+  margin-right: 0.4rem;
+}
+
+.review-rail-step {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.3rem;
+  background: rgb(255 255 255 / 0.12);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: background-color 120ms;
+}
+
+.review-rail-step:hover {
+  background: var(--review-blue);
+}
+

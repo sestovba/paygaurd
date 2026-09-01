@@ -5,7 +5,6 @@ import {
   CalendarClock,
   ChevronLeft,
   ChevronRight,
-  CircleHelp,
   LayoutGrid,
   Moon,
   Plus,
@@ -152,7 +151,6 @@ export function TrackerV3() {
     <div className="flex h-dvh overflow-hidden bg-background">
       <DesktopSidebar
         page={page}
-        step={panes.length + 1}
         navItems={navItems}
         onNavigate={navigate}
         onNewEntry={() => openPane({ kind: 'newSource' })}
@@ -393,18 +391,9 @@ function RootPane({
               label="Full-year month grid"
               reason="This repeats the active monthly limit across twelve tiles instead of focusing on 3-/5-paycheck and risk months."
               layout="responsive"
-              className="xl:col-span-6"
+              className="xl:col-span-12"
             >
               <MonthGrid onOpenMonth={(month) => onOpen({ kind: 'month', month })} />
-            </ReviewTarget>
-            <ReviewTarget
-              id="v3-overview-income-sources"
-              label="Duplicate income sources"
-              reason="Income source management already has its own page."
-              layout="responsive"
-              className="xl:col-span-6"
-            >
-              <StreamsPanel onOpenStream={(streamId) => onOpen({ kind: 'stream', streamId })} />
             </ReviewTarget>
             <ReviewTarget
               id="v3-overview-year-total"
@@ -531,14 +520,12 @@ function PaneContent({
 
 function DesktopSidebar({
   page,
-  step,
   navItems,
   onNavigate,
   onNewEntry,
   onSettings
 }: {
   page: PageId;
-  step: number;
   navItems: { id: PageId; label: string; icon: LucideIcon }[];
   onNavigate: (page: PageId) => void;
   onNewEntry: () => void;
@@ -584,26 +571,6 @@ function DesktopSidebar({
       </nav>
 
       <div className="mt-auto border-t border-border p-4">
-        <ReviewTarget
-          id="v3-workspace-progress"
-          label="Workspace progress"
-          reason="The 01/03 meter is decorative workflow chrome, not benefit-safety information."
-          layout="responsive"
-          className="mb-4"
-        >
-          <div className="rounded-xl bg-surface-2 p-3">
-            <div className="flex items-center justify-between">
-              <span className="label-caps">Workspace</span>
-              <span className="num text-xs font-semibold">0{step} / 03</span>
-            </div>
-            <div className="mt-3 grid grid-cols-3 gap-1">
-              {[1, 2, 3].map((item) => (
-                <span key={item} className={`h-1 rounded-full ${item <= step ? 'bg-primary' : 'bg-border'}`} />
-              ))}
-            </div>
-          </div>
-        </ReviewTarget>
-
         <button
           type="button"
           onClick={onSettings}
@@ -611,16 +578,6 @@ function DesktopSidebar({
         >
           <Settings className="size-[18px]" /> Settings
         </button>
-        <ReviewTarget
-          id="v3-context-help"
-          label="Interface helper"
-          reason="This explains the workspace implementation instead of helping with TWP, SGA, or paychecks."
-          layout="responsive"
-        >
-          <div className="mt-1 flex items-center gap-3 px-3 py-2 text-xs text-muted-foreground">
-            <CircleHelp className="size-4" /> Your open item stays beside the list
-          </div>
-        </ReviewTarget>
       </div>
     </aside>
   );
@@ -732,42 +689,32 @@ function JourneyTrail({
   const rootLabel = page === 'overview' ? 'Overview' : page === 'income' ? 'Income' : statusLabel;
   const labels = [rootLabel, ...panes.map(paneLabel)];
   return (
-    <div className="flex min-w-0 items-center gap-1.5" aria-label="Workspace trail">
-      {labels.map((label, index) => (
-        <div key={`${label}-${index}`} className="flex min-w-0 items-center gap-1.5">
-          {index > 0 ? <ChevronRight className="size-4 shrink-0 text-muted-foreground/60" /> : null}
-          <button
-            type="button"
-            aria-label={`${index + 1}. ${label}`}
-            aria-current={index === labels.length - 1 ? 'step' : undefined}
-            onClick={() => onStep(index)}
-            className={
-              'flex min-w-0 items-center gap-2 rounded-lg py-1.5 text-left transition-colors hover:text-foreground '
-              + (compact ? 'px-1' : 'px-2')
-              + (index === labels.length - 1 ? ' font-semibold text-foreground' : ' text-muted-foreground')
-            }
-          >
-            <span className={
-              'num grid size-6 shrink-0 place-items-center rounded-md text-xs font-bold '
-              + (index === labels.length - 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')
-            }>
-              {index + 1}
-            </span>
-            <span className={`truncate text-sm font-medium ${compact && index < labels.length - 1 ? 'hidden sm:inline' : ''}`}>
+    <nav className="flex min-w-0 items-center gap-1 text-sm font-medium" aria-label="Workspace breadcrumb">
+      {labels.map((label, index) => {
+        const isCurrent = index === labels.length - 1;
+        return (
+          <div key={`${label}-${index}`} className="flex min-w-0 items-center gap-1">
+            {index > 0 ? (
+              <ChevronRight className="size-4 shrink-0 text-muted-foreground/50" aria-hidden="true" />
+            ) : null}
+            <button
+              type="button"
+              aria-current={isCurrent ? 'page' : undefined}
+              onClick={() => onStep(index)}
+              className={
+                'truncate rounded-md px-2 py-1 transition-colors '
+                + (compact && index < labels.length - 1 ? 'hidden sm:inline-block ' : '')
+                + (isCurrent
+                  ? 'font-semibold text-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground')
+              }
+            >
               {label}
-            </span>
-          </button>
-        </div>
-      ))}
-      {Array.from({ length: Math.max(0, 3 - labels.length) }, (_, index) => (
-        <div key={`empty-${index}`} className="hidden items-center gap-1.5 sm:flex" aria-hidden="true">
-          <ChevronRight className="size-4 text-muted-foreground/30" />
-          <span className="num grid size-6 place-items-center rounded-md border border-dashed border-border text-xs text-muted-foreground/50">
-            {labels.length + index + 1}
-          </span>
-        </div>
-      ))}
-    </div>
+            </button>
+          </div>
+        );
+      })}
+    </nav>
   );
 }
 

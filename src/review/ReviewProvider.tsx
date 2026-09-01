@@ -132,6 +132,7 @@ interface Panels {
   open: boolean;
   min: boolean;
   tools: boolean;
+  comments: boolean;
   journal: boolean;
   hidden: boolean;
   archive: boolean;
@@ -141,12 +142,13 @@ interface Panels {
   order: string[];
 }
 
-export const SECTIONS = ['tools', 'journal', 'hidden', 'archive'] as const;
+export const SECTIONS = ['tools', 'comments', 'journal', 'hidden', 'archive'] as const;
 
 const PANELS: Panels = {
   open: false,
   min: false,
   tools: true,
+  comments: true,
   journal: false,
   hidden: false,
   archive: false,
@@ -275,6 +277,8 @@ function ReviewConsole({
   const [dockMin, setDockMin] = useState(panels.min);
   /** The verbs. Their own section, like everything else in the dock. */
   const [toolsOpen, setToolsOpen] = useState(panels.tools);
+  /** Dedicated comments section. */
+  const [commentsOpen, setCommentsOpen] = useState(panels.comments ?? true);
   /** The order the sections are stacked in. */
   const [order, setOrder] = useState<string[]>(panels.order);
   const [notes, setNotes] = useState<ReviewNotes>(() => normalizeLanes(loadLocal()));
@@ -564,14 +568,14 @@ function ReviewConsole({
   useEffect(() => {
     try {
       localStorage.setItem(PANELS_KEY, JSON.stringify({
-        open, min: dockMin, tools: toolsOpen, journal: panelOpen,
+        open, min: dockMin, tools: toolsOpen, comments: commentsOpen, journal: panelOpen,
         hidden: hiddenOpen, archive: stashOpen, wide: journalWide,
         scope: journalScope, order
       } satisfies Panels));
     } catch {
       // Private mode; the console opens on its defaults each session.
     }
-  }, [open, dockMin, toolsOpen, panelOpen, hiddenOpen, stashOpen, journalWide, journalScope, order]);
+  }, [open, dockMin, toolsOpen, commentsOpen, panelOpen, hiddenOpen, stashOpen, journalWide, journalScope, order]);
 
   useEffect(() => {
     try {
@@ -1268,6 +1272,44 @@ function ReviewConsole({
     };
   });
 
+  /** Proposals in the order the reader meets them, not the order they mounted. */
+  const proposalsInOrder = useCallback((): string[] => {
+    return Array.from(document.querySelectorAll('[data-review-id]'))
+      .map((el) => el.getAttribute('data-review-id') ?? '')
+      .filter((id) => id in suggested);
+  }, [suggested]);
+
+  const focusProposal = useCallback((id: string | null) => {
+    setFocusId(id);
+    if (!id) return;
+    const el = document.querySelector(`[data-review-id="${id}"]`);
+    if (!(el instanceof HTMLElement)) return;
+    const target = (el.getAttribute('data-review-transparent') && el.firstElementChild instanceof HTMLElement)
+      ? el.firstElementChild
+      : el;
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    target.classList.remove('review-flash');
+    void target.offsetWidth;
+    target.classList.add('review-flash');
+    window.setTimeout(() => target.classList.remove('review-flash'), 1600);
+  }, []);
+
+  const stepProposal = useCallback((direction: 1 | -1) => {
+    const order = proposalsInOrder();
+    if (!order.length) return;
+    const from = focusId ? order.indexOf(focusId) : -1;
+    const unanswered = order.filter((id) => !notes[id]?.verdict);
+    const pool = unanswered.length ? unanswered : order;
+    if (from < 0) {
+      focusProposal(pool[direction === 1 ? 0 : pool.length - 1]);
+      return;
+    }
+    const ahead = direction === 1
+      ? pool.find((id) => order.indexOf(id) > from)
+      : [...pool].reverse().find((id) => order.indexOf(id) < from);
+    focusProposal(ahead ?? pool[direction === 1 ? 0 : pool.length - 1]);
+  }, [focusId, focusProposal, notes, proposalsInOrder]);
+
   advanceRef.current = () => { if (mode === 'audit') stepProposal(1); };
 
   const value = useMemo<ReviewContextValue>(() => ({
@@ -1281,11 +1323,12 @@ function ReviewConsole({
     restore,
     stow,
     focusId,
+    focusProposal,
     isStowed: (id: string) => Boolean(notes[id] && isStowed(notes[id])),
     isHidden: (id: string) => Boolean(notes[id]?.hidden),
     setHidden: setHiddenById
   }), [
-    mode, notes, focusId, register, registerVariants, decide, commentOn,
+    mode, notes, focusId, focusProposal, register, registerVariants, decide, commentOn,
     chooseVariant, restore, stow, setHiddenById
   ]);
 
@@ -1549,6 +1592,79 @@ function ReviewConsole({
     </div>
   );
 
+  /** All user comments on this screen / everywhere */
+  const userComments = Object.values(notes)
+    .filter((note) => Boolean(note.comment || (note.tags && note.tags.length > 0) || note.kind === 'comment'))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const commentsHere = userComments.filter((note) => note.anchor.layout === layout);
+  const displayedComments = journalScope === 'screen' ? commentsHere : userComments;
+
+  const commentsList = (
+    <div className="review-comments-panel">
+      {displayedComments.length === 0 ? (
+        <p className="review-hidden-empty">
+          No comments {journalScope === 'screen' ? 'on this screen' : 'yet'}. Press <strong>C</strong> or use the Comment tool to pin feedback directly to any element.
+        </p>
+      ) : (
+        <ul className="review-comments-list">
+          {displayedComments.map((note) => {
+            const hasReply = note.thread?.some((t) => t.from === 'claude');
+            const lastReply = note.thread?.[note.thread.length - 1];
+            return (
+              <li key={note.id} className="review-comment-card" data-reply={hasReply ? 'true' : undefined}>
+                <div className="review-comment-head">
+                  <span className="review-comment-target">{note.label}</span>
+                  <span className="review-comment-meta">{note.anchor.layout}</span>
+                  <div className="review-comment-actions">
+                    <button
+                      type="button"
+                      className="review-comment-btn"
+                      onClick={() => pointAtNote(note)}
+                      title="Locate element on screen"
+                    >
+                      <Crosshair className="size-3.5" /> Locate
+                    </button>
+                    <button
+                      type="button"
+                      className="review-comment-btn"
+                      onClick={() => commentOnNote(note.id)}
+                      title="Edit comment"
+                    >
+                      <MessageSquarePlus className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      className="review-comment-btn review-comment-del"
+                      onClick={() => remove(note.id)}
+                      title="Delete comment"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+                {note.comment ? (
+                  <p className="review-comment-body">“{note.comment}”</p>
+                ) : null}
+                {note.tags?.length ? (
+                  <div className="review-comment-tags">
+                    {note.tags.map((tag) => (
+                      <span key={tag} className="review-comment-tag">{tag}</span>
+                    ))}
+                  </div>
+                ) : null}
+                {lastReply ? (
+                  <div className="review-comment-reply" data-from={lastReply.from}>
+                    <span className="font-semibold">{lastReply.from === 'claude' ? 'Claude' : 'You'}:</span> {lastReply.text}
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+
   const journalBody = (
     <>
             {/* Two scopes, contextual first. A journal that opens on every
@@ -1678,24 +1794,44 @@ function ReviewConsole({
                       <div className="review-queue-acts">
                         <button
                           type="button"
-                          className="review-queue-did"
-                          onClick={() => triageFile('done')}
+                          className="review-queue-keep"
+                          title="Keep this feature — reject the proposed cut"
+                          onClick={() => {
+                            decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'rejected', null);
+                            triageStep(1);
+                          }}
                         >
-                          <Check className="size-4" /> Done
+                          <X className="size-4" /> Keep As-Is
                         </button>
                         <button
                           type="button"
-                          className="review-queue-again"
-                          onClick={() => triageFile('second')}
+                          className="review-queue-remove"
+                          title="Agree to cut — queue for deletion in code"
+                          onClick={() => {
+                            decide({ id: triageNote.id, label: triageNote.label, reason: triageNote.reason ?? '', layout: triageNote.anchor.layout }, 'approved', null);
+                            triageStep(1);
+                          }}
                         >
-                          <Eye className="size-4" /> Second look
+                          <Trash2 className="size-4" /> Remove
+                        </button>
+                        <button
+                          type="button"
+                          className="review-queue-change"
+                          title="Keep feature, but request changes"
+                          onClick={() => {
+                            setTriage(null);
+                            commentOnNote(triageNote.id);
+                          }}
+                        >
+                          <MessageSquarePlus className="size-4" /> Change / Note
                         </button>
                         <button
                           type="button"
                           className="review-queue-later"
-                          onClick={() => triageFile('parked')}
+                          title="Snooze for later"
+                          onClick={() => triageFile('second')}
                         >
-                          <Minus className="size-4" /> Not now
+                          <Minus className="size-4" /> Later
                         </button>
                       </div>
                     </div>
@@ -2341,43 +2477,6 @@ function ReviewConsole({
     );
   }
 
-  /** Proposals in the order the reader meets them, not the order they mounted. */
-  function proposalsInOrder(): string[] {
-    return Array.from(document.querySelectorAll('[data-review-id]'))
-      .map((el) => el.getAttribute('data-review-id') ?? '')
-      .filter((id) => id in suggested);
-  }
-
-  function focusProposal(id: string | null) {
-    setFocusId(id);
-    if (!id) return;
-    const el = document.querySelector(`[data-review-id="${id}"]`);
-    if (!(el instanceof HTMLElement)) return;
-    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    el.classList.remove('review-flash');
-    void el.offsetWidth;
-    el.classList.add('review-flash');
-    window.setTimeout(() => el.classList.remove('review-flash'), 1600);
-  }
-
-  /** Step to the next proposal, preferring ones still unanswered — the point
-   *  is to get through them, not to admire the list. */
-  function stepProposal(direction: 1 | -1) {
-    const order = proposalsInOrder();
-    if (!order.length) return;
-    const from = focusId ? order.indexOf(focusId) : -1;
-    const unanswered = order.filter((id) => !notes[id]?.verdict);
-    const pool = unanswered.length ? unanswered : order;
-    if (from < 0) {
-      focusProposal(pool[direction === 1 ? 0 : pool.length - 1]);
-      return;
-    }
-    const ahead = direction === 1
-      ? pool.find((id) => order.indexOf(id) > from)
-      : [...pool].reverse().find((id) => order.indexOf(id) < from);
-    focusProposal(ahead ?? pool[direction === 1 ? 0 : pool.length - 1]);
-  }
-
   /** On the screen, as the browser understands it. getClientRects() was the
    *  test, and it answers 0 for any element with `display: contents` — which
    *  every audited section the review layer wraps transparently has. So every
@@ -2413,10 +2512,13 @@ function ReviewConsole({
       : document.querySelector(`[data-review-id="${note.id}"]`);
     const found = byId ?? safeQuery(note.anchor.domPath);
     if (!(found instanceof HTMLElement)) return null;
+    const resolved = (found.getAttribute('data-review-transparent') && found.firstElementChild instanceof HTMLElement)
+      ? found.firstElementChild
+      : found;
     // In the tree but not on the screen — inside a shut accordion, on a tab
     // that is not showing — is the same as absent for the purpose of
     // pointing at it, and flashing it would flash nothing.
-    return onScreen(found) ? found : null;
+    return onScreen(resolved) ? found : null;
   }
 
   /** The tab or nav item lit up right now, so "is it even on this page?"
@@ -2513,13 +2615,16 @@ function ReviewConsole({
    *  it, every time, even if it is already on screen. */
   function flashElement(target: HTMLElement, tone: 'exact' | 'near' | 'holds' = 'exact') {
     const mark = tone === 'exact' ? 'review-flash' : 'review-flash-near';
-    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    target.classList.remove(mark);
-    void target.offsetWidth; // restart the animation on a repeat click
-    target.classList.add(mark);
+    const targetEl = (target.getAttribute('data-review-transparent') && target.firstElementChild instanceof HTMLElement)
+      ? target.firstElementChild
+      : target;
+    targetEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    targetEl.classList.remove(mark);
+    void targetEl.offsetWidth; // restart the animation on a repeat click
+    targetEl.classList.add(mark);
     // The near miss holds longer: it is asking you to look for something
     // inside it, which takes longer than being shown the thing itself.
-    window.setTimeout(() => target.classList.remove(mark), tone === 'near' ? 2600 : 1600);
+    window.setTimeout(() => targetEl.classList.remove(mark), tone === 'near' ? 2600 : 1600);
   }
 
   /** Clicking a note takes you to it — switching layout, palette and page if
@@ -3059,6 +3164,10 @@ function ReviewConsole({
           onMin={setDockMin}
           toolsOpen={toolsOpen}
           onTools={setToolsOpen}
+          commentsOpen={commentsOpen}
+          onComments={setCommentsOpen}
+          commentsCount={displayedComments.length}
+          commentsList={commentsList}
           order={order}
           onOrder={setOrder}
           mode={mode}
@@ -3101,6 +3210,10 @@ function ReviewConsole({
           onToggle={() => setOpen((current) => !current)}
           toolsOpen={toolsOpen}
           onTools={setToolsOpen}
+          commentsOpen={commentsOpen}
+          onComments={setCommentsOpen}
+          commentsCount={displayedComments.length}
+          commentsList={commentsList}
           onClose={() => {
             setOpen(false);
             setMode('off');
@@ -3130,6 +3243,7 @@ function ReviewConsole({
           variants={variantSets.length}
           undoDepth={undoDepth}
           onUndo={undo}
+          onStepProposal={stepProposal}
           journalOpen={panelOpen}
           onJournal={setPanelOpen}
           journalCount={findings.length}

@@ -4,32 +4,26 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
-  ChevronsDown,
-  ChevronsUp,
-  Download,
   PieChart,
   Plus,
-  Rows,
   Settings,
   Shield,
   ShieldCheck,
   Undo2,
-  Upload,
   X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
 import { countableFor, streamYearGross } from '../../domain/earnings';
-import { benefitPhase, trialWorkStatus } from '../../domain/trialWork';
+import { benefitPhase } from '../../domain/trialWork';
 import { rulesFor, knownYears } from '../../domain/rules';
-import { longMonthName, monthsOfYear, todayMonth } from '../../domain/months';
+import { longMonthName, todayMonth } from '../../domain/months';
 import { money } from '../../domain/format';
 import { SettingsPanel } from '../SettingsPanel';
 import { NotificationsBell } from '../NotificationsBell';
 import { PayGuardChart } from './PayGuardChart';
 import { PayGuardJobEditor } from './PayGuardJobEditor';
 import { PayGuardAnalysis } from './PayGuardAnalysis';
-import { importTrackerFile, exportTrackerJson } from './payguardData';
-import { Stat } from './PayGuardPrimitives';
+import { importTrackerFile } from './payguardData';
 import { useTheme } from '../../theme';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
@@ -64,7 +58,6 @@ export function TrackerPayGuard() {
   const selected = streams.find((s) => s.id === selectedId) ?? streams[0] ?? null;
 
   const rules = rulesFor(year);
-  const months = monthsOfYear(year);
   const now = todayMonth();
   const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
   const phase = benefitPhase(data, asOf);
@@ -72,18 +65,6 @@ export function TrackerPayGuard() {
   const combinedFor = (month: string, type?: 'w2' | 'ten99') => streams
     .filter((s) => !type || s.type === type)
     .reduce((sum, s) => sum + countableFor(s, month), 0);
-
-  const elapsedMonths = months.filter((month) => month <= asOf);
-  const totalCountable = elapsedMonths.reduce((sum, m) => sum + combinedFor(m), 0);
-  const w2Total = elapsedMonths.reduce((sum, m) => sum + combinedFor(m, 'w2'), 0);
-  const seTotal = elapsedMonths.reduce((sum, m) => sum + combinedFor(m, 'ten99'), 0);
-  const activeMonthCount = elapsedMonths.filter((m) => combinedFor(m) > 0).length;
-  const avgActive = activeMonthCount ? totalCountable / activeMonthCount : 0;
-  const overSgaCount = elapsedMonths.filter((m) => combinedFor(m) > rules.sga).length;
-  const twp = trialWorkStatus(data);
-  const priorInWindow = twp.inWindow.filter((m) => data.priorTrialMonths.includes(m)).length;
-  const w2Count = streams.filter((s) => s.type === 'w2').length;
-  const seCount = streams.filter((s) => s.type === 'ten99').length;
 
   // Keep the selected tab pointing at a stream that still exists.
   useEffect(() => {
@@ -98,12 +79,6 @@ export function TrackerPayGuard() {
     setTabsMode(true);
     setAddingMenuOpen(false);
     setMobileTab('jobs');
-  }
-
-  const allCollapsed = streams.length > 0 && streams.every((s) => collapsedIds.has(s.id));
-
-  function toggleCollapseAll() {
-    setCollapsedIds(allCollapsed ? new Set() : new Set(streams.map((s) => s.id)));
   }
 
   function toggleOne(id: string) {
@@ -235,35 +210,6 @@ export function TrackerPayGuard() {
               <Undo2 className="size-3.5" />
             </button>
 
-            <span className="mx-0.5 hidden h-5 w-px pg-rule-fill md:block" />
-
-            <ReviewTarget
-              id="payguard-header-transfer"
-              label="Header import / export"
-              reason="These maintenance actions already belong in Settings and compete with live benefit signals."
-              layout="payguard"
-              className="hidden md:block"
-            >
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  className="pg-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Import a PayGuard JSON export"
-                >
-                  <Upload className="size-3.5" /> Import
-                </button>
-                <button
-                  type="button"
-                  className="pg-btn pg-btn-solid"
-                  onClick={() => exportTrackerJson(data, year)}
-                  title="Download everything as JSON"
-                >
-                  <Download className="size-3.5" /> Export
-                </button>
-              </div>
-            </ReviewTarget>
-
             <button
               type="button"
               className="pg-icon-btn pg-icon-btn-bordered group relative"
@@ -297,17 +243,6 @@ export function TrackerPayGuard() {
                   <span className="text-xs font-semibold pg-muted">this month</span>
                 </div>
               </div>
-              <ReviewTarget
-                id="payguard-hero-ytd"
-                label="YTD total in current status"
-                reason="The active monthly TWP or SGA gap matters here; a year-to-date total does not."
-                layout="payguard"
-              >
-                <div className="pg-status-ytd">
-                  <span className="pg-label">YTD through {longMonthName(asOf)}</span>
-                  <span className="pg-figure pg-figure-md">{money(totalCountable)}</span>
-                </div>
-              </ReviewTarget>
             </div>
 
             <div className="pg-status-track mt-3" aria-hidden="true">
@@ -333,70 +268,8 @@ export function TrackerPayGuard() {
           </div>
         </section>
 
-        {/* ---------------- Overview: stats + chart ---------------- */}
+        {/* ---------------- Overview: chart ---------------- */}
         <div id="pg-overview" className={`flex-col gap-3 sm:gap-4 ${sectionVisibility('overview')}`}>
-          <ReviewTarget
-            id="payguard-overview-stats"
-            label="Duplicate overview statistics"
-            reason="YTD, TWP, and SGA repeat the status above; averages and source counts do not guide a monthly benefit decision."
-            layout="payguard"
-          >
-            <div className="pg-card overflow-hidden">
-              <div className="pg-stat-grid">
-              <Stat
-                label="YTD Countable"
-                value={money(totalCountable)}
-                sub={
-                  <span className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
-                    <span className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-xs pg-fill-w2" /> W-2 {money(w2Total)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-xs pg-fill-se" /> 1099 {money(seTotal)}
-                    </span>
-                  </span>
-                }
-              />
-
-              <Stat
-                label="Trial Work Period"
-                value={<>{twp.used}<span className="ml-1 text-sm font-semibold pg-dim">/ 9 used</span></>}
-                valueColor={twp.used >= 9 ? 'var(--pg-over-text)' : 'var(--pg-twp-text)'}
-                sub={`TWP ${money(rules.trialWork)} / mo`}
-              >
-                <div className="pg-pips" role="img" aria-label={`${twp.used} of 9 trial work months used`}>
-                  {Array.from({ length: 9 }, (_, i) => (
-                    <span
-                      key={i}
-                      className="pg-pip"
-                      data-state={i < priorInWindow ? 'prior' : i < twp.used ? 'used' : 'free'}
-                    />
-                  ))}
-                </div>
-              </Stat>
-
-              <Stat
-                label="Months Over SGA"
-                value={<>{overSgaCount}<span className="ml-1 text-sm font-semibold pg-dim">/ 12</span></>}
-                valueColor={overSgaCount > 0 ? 'var(--pg-over-text)' : 'var(--pg-safe-text)'}
-                sub={`SGA limit ${money(rules.sga)} / mo`}
-              />
-
-              <Stat
-                label="Active Monthly Avg"
-                value={money(avgActive)}
-                sub={`Across ${activeMonthCount} active month${activeMonthCount === 1 ? '' : 's'}`}
-              />
-
-              <Stat
-                label="Income Sources"
-                value={String(streams.length)}
-                sub={`${w2Count} W-2 · ${seCount} 1099`}
-              />
-              </div>
-            </div>
-          </ReviewTarget>
-
           <ReviewTarget
             id="payguard-year-chart"
             label="Annual income chart"
@@ -467,31 +340,6 @@ export function TrackerPayGuard() {
                 </button>
               )}
             </div>
-
-            {streams.length > 0 ? (
-              <ReviewTarget
-                id="payguard-job-view-controls"
-                label="Job view controls"
-                reason="Collapse-all and Tabs / Continuous are interface modes, not TWP, SGA, or paycheck decisions."
-                layout="payguard"
-                className="hidden sm:block"
-              >
-                <div className="pg-tabbar-actions flex">
-                  <button type="button" className="pg-btn pg-btn-sm" onClick={toggleCollapseAll}>
-                    {allCollapsed ? <ChevronsDown className="size-3.5" /> : <ChevronsUp className="size-3.5" />}
-                    {allCollapsed ? 'Expand All' : 'Collapse All'}
-                  </button>
-                  <button
-                    type="button"
-                    className="pg-btn pg-btn-sm"
-                    onClick={() => setTabsMode((v) => !v)}
-                    title={tabsMode ? 'Switch to one continuous list' : 'Switch to tabs'}
-                  >
-                    <Rows className="size-3.5" /> {tabsMode ? 'Continuous' : 'Tabs'}
-                  </button>
-                </div>
-              </ReviewTarget>
-            ) : null}
           </div>
 
           {streams.length ? (

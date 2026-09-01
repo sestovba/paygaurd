@@ -4,8 +4,8 @@ import { Calendar, Check, ChevronDown, Lock, LockOpen, TriangleAlert, Trash2, Za
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
 import { longMonthName, monthIndex, monthKey, monthsOfYear, parseMonth, shortMonthName, todayMonth } from '../domain/months';
-import { knownYears } from '../domain/rules';
-import { activeMonthsInYear, evenSplit, grossFor } from '../domain/earnings';
+import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../domain/rules';
+import { activeMonthsInYear, evenSplit, grossFor, hoursFor } from '../domain/earnings';
 import { frequencyLabel, paceWarning, payPlan } from '../domain/paySchedule';
 import { activeThreshold, benefitPhase } from '../domain/trialWork';
 import { InfoNote } from './InfoNote';
@@ -53,6 +53,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
   const isYearToDate = eligibleMonths.length > 0 && eligibleMonths.length < activeMonths.length;
   const ytdGross = round2(eligibleMonths.reduce((sum, m) => sum + grossFor(stream, m), 0));
   const ytdMiles = round2(eligibleMonths.reduce((sum, m) => sum + (stream.months[m]?.miles ?? 0), 0));
+  const ytdHours = round2(eligibleMonths.reduce((sum, m) => sum + hoursFor(stream, m), 0));
 
   return (
     <CollapsibleSection label="What you earned">
@@ -76,7 +77,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
           <span className="field-label">{isYearToDate ? 'YTD Gross' : 'Gross'}</span>
           <NumericInput
@@ -107,11 +108,25 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
             }}
           />
         </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="field-label">{isYearToDate ? 'YTD Hours' : 'Hours'}</span>
+          <NumericInput
+            className="num field-input w-full"
+            value={ytdHours || undefined}
+            placeholder="0"
+            disabled={!eligibleMonths.length}
+            onCommit={(total) => {
+              if (!eligibleMonths.length) return;
+              updateMonthEntries(stream.id, evenSplit(total ?? 0, eligibleMonths.length)
+                .map((hours, i) => ({ month: eligibleMonths[i], patch: { hours } })));
+            }}
+          />
+        </label>
       </div>
 
       <InfoNote>
         {eligibleMonths.length
-          ? `Splits evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'elapsed so far' : 'active'} in ${year} for the monthly limit checks. Only Gross, minus mileage, counts toward the thresholds.`
+          ? `Splits evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'elapsed so far' : 'active'} in ${year} for the monthly limit checks. Over ${TWP_SELF_EMPLOYMENT_HOURS} hours in any month uses a Trial Work Period month.`
           : `No elapsed active months in ${year} yet to split this across.`}
       </InfoNote>
       {helpOpen ? <HelpSpread onClose={() => setHelpOpen(false)} /> : null}

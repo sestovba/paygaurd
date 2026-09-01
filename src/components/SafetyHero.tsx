@@ -8,7 +8,6 @@ import { TrialMeter } from './TrialMeter';
 import { PrecisionLine } from './PrecisionLine';
 import { precisionFor } from '../domain/precision';
 import type { PrecisionGap } from '../domain/precision';
-import { ReviewVariants } from '../review/ReviewVariants';
 
 /** The one thing this app exists to answer: are you safe right now. */
 export function SafetyHero({
@@ -59,7 +58,6 @@ export function SafetyHero({
 
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
-  const pct = threshold ? Math.min(100, Math.round((status.countable / threshold.amount) * 100)) : 0;
   // Crossing SGA is the month that can actually stop payments — red.
   // Using a TWP month is real but not that; same amber as "close but not
   // over yet", matching the same keep/spent/over split the calendar uses.
@@ -96,60 +94,11 @@ export function SafetyHero({
       <PrecisionLine reading={precision} onFix={onFixStream} />
 
       {threshold ? (
-        <ReviewVariants
-          id="safety-hero-limit-row"
-          label="Limit readout"
-          layout={ui.layout}
-          options={[
-            {
-              key: 'A · amount + percent',
-              node: (
-                <>
-                  <div className="mt-6 flex items-baseline justify-between gap-3">
-                    <p className="type-muted">
-                      {over ? (
-                        <>Over by <span className={'num font-semibold ' + toneClasses.value}>{money(status.countable - threshold.amount)}</span></>
-                      ) : (
-                        <><span className="num font-semibold text-foreground">{money(room)}</span> below {phase === 'trialWork' ? 'TWP' : 'SGA'}</>
-                      )}
-                    </p>
-                    <span className="num text-base font-semibold text-muted-foreground">{pct}%</span>
-                  </div>
-                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div className={'h-full rounded-full transition-all ' + toneClasses.bar} style={{ width: Math.min(100, pct) + '%' }} />
-                  </div>
-                </>
-              )
-            },
-            {
-              key: 'B · money only',
-              node: (
-                <>
-                  <p className="type-muted mt-6">
-                    {over ? (
-                      <>Over by <span className={'num font-semibold ' + toneClasses.value}>{money(status.countable - threshold.amount)}</span></>
-                    ) : (
-                      <><span className="num font-semibold text-foreground">{money(room)}</span> below {phase === 'trialWork' ? 'TWP' : 'SGA'} ({money(threshold.amount)})</>
-                    )}
-                  </p>
-                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div className={'h-full rounded-full transition-all ' + toneClasses.bar} style={{ width: Math.min(100, pct) + '%' }} />
-                  </div>
-                </>
-              )
-            },
-            {
-              key: 'C · one sentence',
-              node: (
-                <p className="mt-6 text-lg font-semibold">
-                  {over
-                    ? `${money(status.countable - threshold.amount)} over the ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit this month`
-                    : `${money(room)} left before the ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit this month`}
-                </p>
-              )
-            }
-          ]}
-        />
+        <p className="mt-6 text-lg font-semibold">
+          {over
+            ? `${money(status.countable - threshold.amount)} over the ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit this month`
+            : `${money(room)} left before the ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit this month`}
+        </p>
       ) : null}
 
       <div className="mt-6 border-t border-border pt-5">

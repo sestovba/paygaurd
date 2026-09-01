@@ -7,21 +7,13 @@ import { countableFor, streamYearGross } from '../../domain/earnings';
 import { trialWorkStatus } from '../../domain/trialWork';
 import { rulesFor, knownYears } from '../../domain/rules';
 import { monthsOfYear } from '../../domain/months';
-import { actionItems } from '../../domain/notifications';
 import { SettingsPanel } from '../SettingsPanel';
-import type { LedgerTheme } from '../../state/storage';
+import { NotificationsBell } from '../NotificationsBell';
 import { LedgerChart } from './LedgerChart';
 import { JOB_SECTIONS, jobSectionKey, LedgerJobEditor } from './LedgerJobEditor';
 import { LedgerAnalysis } from './LedgerAnalysis';
-import { money0, money2 } from './ledgerFormat';
+import { money0 } from './ledgerFormat';
 import { ReviewTarget } from '../../review/ReviewTarget';
-
-const THEMES: { id: LedgerTheme; label: string; title: string }[] = [
-  { id: 'paper', label: 'Paper', title: 'High-contrast warm white — the default' },
-  { id: 'slate', label: 'Slate', title: 'Cold steel with a blue accent' },
-  { id: 'ledger', label: 'Ledger', title: 'Accounting green and red on cream' },
-  { id: 'carbon', label: 'Carbon', title: 'Deep dark with neon status colors' }
-];
 
 function StatTile({ label, value, sub, last }: { label: string; value: string; sub?: React.ReactNode; last?: boolean }) {
   return (
@@ -43,6 +35,7 @@ export function TrackerLedger() {
   const year = ui.year;
   const years = knownYears();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [tabsMode, setTabsMode] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(data.streams[0]?.id ?? null);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
@@ -55,27 +48,11 @@ export function TrackerLedger() {
 
   const rules = rulesFor(year);
   const months = monthsOfYear(year);
-  const items = actionItems(data, year);
 
-  const totalCountable = months.reduce((sum, m) =>
-    sum + data.streams.reduce((s2, s) => s2 + countableFor(s, m), 0), 0);
-  const w2Total = months.reduce((sum, m) =>
-    sum + data.streams.filter((s) => s.type === 'w2').reduce((s2, s) => s2 + countableFor(s, m), 0), 0);
-  const seTotal = months.reduce((sum, m) =>
-    sum + data.streams.filter((s) => s.type === 'ten99').reduce((s2, s) => s2 + countableFor(s, m), 0), 0);
-  const activeMonthCount = months.filter((m) =>
-    data.streams.reduce((s2, s) => s2 + countableFor(s, m), 0) > 0).length;
-  const avgActive = activeMonthCount ? totalCountable / activeMonthCount : 0;
   const overSgaCount = months.filter((m) =>
     data.streams.reduce((s2, s) => s2 + countableFor(s, m), 0) > rules.sga).length;
   const twp = trialWorkStatus(data);
   const priorInWindow = twp.inWindow.filter((m) => data.priorTrialMonths.includes(m)).length;
-  const w2Count = streams.filter((s) => s.type === 'w2').length;
-  const seCount = streams.filter((s) => s.type === 'ten99').length;
-
-  function selectTheme(theme: LedgerTheme) {
-    setUi({ ledgerTheme: theme });
-  }
 
   // Ledger sub-themes replace the app-wide light/dark toggle. Strip .dark on
   // mount so production (which bootstraps theme from localStorage in
@@ -142,6 +119,11 @@ export function TrackerLedger() {
     });
   }
 
+  function focusStream(id: string) {
+    setSelectedId(id);
+    setTabsMode(true);
+  }
+
   return (
     <div className="pg-ledger min-h-dvh" data-ledger-theme={ui.ledgerTheme}>
       <input
@@ -161,29 +143,17 @@ export function TrackerLedger() {
         <div className="lg-header-bar">
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="lg-header-title truncate">SSDI Income Tracker</span>
-            <ReviewTarget
-              id="ledger-header-subtitle"
-              label="Header subtitle"
-              reason="&quot;Financial Analysis Ledger&quot; names the skin, not the user's TWP or SGA position."
-              layout="ledger"
-            >
-              <span className="lg-header-sub truncate">Financial Analysis Ledger</span>
-            </ReviewTarget>
           </div>
           <div className="lg-header-actions flex items-center gap-2">
-            {items.length ? (
-              <ReviewTarget
-                id="ledger-notice-count"
-                label="Notice counter"
-                reason="A count with no way to read the notices — it warns without saying what to do."
-                layout="ledger"
-                className="hidden sm:block"
-              >
-                <span className="inline-flex items-center gap-1 text-[0.6875rem] font-bold uppercase tracking-wider px-2 py-1 rounded lg-notice-badge">
-                  {items.length} Notice{items.length === 1 ? '' : 's'}
-                </span>
-              </ReviewTarget>
-            ) : null}
+            <NotificationsBell
+              open={notificationsOpen}
+              onOpenChange={setNotificationsOpen}
+              onSetPayday={focusStream}
+              onReviewStream={focusStream}
+              onOpenMonth={() => {
+                document.querySelector('.lg-analysis')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            />
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -249,30 +219,8 @@ export function TrackerLedger() {
 
               <button type="button" className="lg-btn" onClick={toggleCollapseAll}>
                 {allCollapsed ? <ChevronsDown className="size-4" /> : <ChevronsUp className="size-4" />}
-                {allCollapsed ? 'Expand All' : 'Collapse All'}
+                {allCollapsed ? 'Expand All' : 'Collapse All' }
               </button>
-
-              <ReviewTarget
-                id="ledger-palette-switcher"
-                label="Four-palette switcher"
-                reason="Four colour schemes in the working toolbar; the same control already lives in Settings."
-                layout="ledger"
-              >
-              <div className="lg-seg">
-                {THEMES.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    title={t.title}
-                    data-on={ui.ledgerTheme === t.id}
-                    className="lg-seg-item"
-                    onClick={() => selectTheme(t.id)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              </ReviewTarget>
             </div>
 
             {/* Cluster 2: Data Import / Export */}
@@ -289,21 +237,6 @@ export function TrackerLedger() {
       </header>
 
       <div className="flex flex-wrap lg-border-b">
-        <ReviewTarget
-          id="ledger-stat-ytd"
-          label="YTD countable total"
-          reason="TWP and SGA are judged month by month; a year-to-date total hides the month that breaks the limit."
-          layout="ledger"
-        >
-          <StatTile
-            label="YTD Countable"
-            value={money2(totalCountable)}
-            sub={<>
-              <span className="lg-text-w2">■</span> W2 {money0(w2Total)}{' '}
-              <span className="lg-text-se">■</span> SE {money0(seTotal)}
-            </>}
-          />
-        </ReviewTarget>
         <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 border-t sm:border-t-0 lg-stat-tile lg-border-r">
           <span className="lg-label">TWP Months Used</span>
           <span className={`text-2xl font-semibold leading-none sm:text-[1.75rem] ${twp.used >= 9 ? 'lg-text-over' : 'lg-text-safe'}`}>
@@ -324,32 +257,8 @@ export function TrackerLedger() {
           label="Months ≥ SGA"
           value={String(overSgaCount)}
           sub={`SGA ${money0(rules.sga)} / month`}
+          last
         />
-        <ReviewTarget
-          id="ledger-stat-average"
-          label="Average active month"
-          reason="An average is safe-looking by construction — it averages away the 3- and 5-paycheck months that cause the problem."
-          layout="ledger"
-        >
-          <StatTile
-            label="Avg Active Month"
-            value={money0(avgActive)}
-            sub={`TWP ${money0(rules.trialWork)} / month`}
-          />
-        </ReviewTarget>
-        <ReviewTarget
-          id="ledger-stat-sources"
-          label="Income-source count"
-          reason="The job tabs directly below already show every source by name."
-          layout="ledger"
-        >
-          <StatTile
-            label="Income Sources"
-            value={String(streams.length)}
-            sub={`${w2Count} W2 · ${seCount} SE`}
-            last
-          />
-        </ReviewTarget>
       </div>
 
       <ReviewTarget

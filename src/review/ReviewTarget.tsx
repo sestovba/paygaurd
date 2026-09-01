@@ -140,6 +140,11 @@ export function ReviewTarget({
       data-review-verdict={verdict}
       data-review-size={active && tiny ? 'tiny' : undefined}
       data-review-id={id}
+      onClick={() => {
+        if (active && review?.focusId !== id) {
+          review?.focusProposal?.(id);
+        }
+      }}
     >
       {children}
       {active ? (
