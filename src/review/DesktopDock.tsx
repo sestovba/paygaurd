@@ -15,11 +15,11 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   Archive, ChevronDown, ChevronRight, Columns2, EyeOff, ListChecks,
-  MousePointerSquareDashed, PanelBottom, PanelLeft, PanelRight, ScanSearch,
+  MessageSquarePlus, MousePointerSquareDashed, PanelBottom, PanelLeft, PanelRight, ScanSearch,
   SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
-import { Fold, Tool } from './DockParts';
+import { Fold, Tool, useReorder } from './DockParts';
 
 const RAIL_KEY = 'pg-review-rail-v1';
 
@@ -69,9 +69,13 @@ export function DesktopDock({
   onClose,
   toolsOpen,
   onTools,
+  order,
+  onOrder,
   openCount,
   mode,
   onMode,
+  commenting,
+  onCommentMode,
   auditTotal,
   auditSettled,
   variants,
@@ -99,9 +103,18 @@ export function DesktopDock({
   /** Kept by the console so it survives a reload, like every other panel. */
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
+  /** The sections, in the order they are stacked. Dragged by their grips and
+   *  kept by the console, so the rail stays arranged the way you left it. */
+  order: string[];
+  onOrder: (next: string[]) => void;
   openCount: number;
   mode: ReviewMode;
   onMode: (next: ReviewMode) => void;
+  /** Select is the precision tool; Comment is the fast path that borrows its
+   *  hit-testing and opens the note card on the very next click. They share a
+   *  mode, so only one of them is ever lit. */
+  commenting: boolean;
+  onCommentMode: () => void;
   auditTotal: number;
   auditSettled: number;
   variants: number;
@@ -132,6 +145,9 @@ export function DesktopDock({
   const flat = side === 'bottom';
   const drag = useRef<{ at: number; from: number } | null>(null);
   const [sidesOpen, setSidesOpen] = useState(false);
+  // Down a side the sections stack, so they are sorted top to bottom; along
+  // the bottom they sit in a row, and the same drag has to read left to right.
+  const sort = useReorder(order, onOrder, flat ? 'x' : 'y');
 
   // A menu that stays open after you have looked away is a menu you have to
   // close on purpose.
@@ -204,6 +220,124 @@ export function DesktopDock({
   }, [side, flat]);
 
   const auditLeft = auditTotal - auditSettled;
+
+  const sections: Record<string, ReactNode> = {
+    tools: (
+      <Fold
+        key="tools"
+        section="tools"
+        onGrip={sort.grip('tools')}
+        dragging={sort.dragging === 'tools'}
+        icon={SlidersHorizontal}
+        name="Tools"
+        tone="glass"
+        hint={mode === 'off' ? undefined
+          : mode === 'audit' ? 'Audit'
+            : mode === 'pick' ? (commenting ? 'Comment' : 'Select') : 'A / B'}
+        open={toolsOpen}
+        onToggle={() => onTools(!toolsOpen)}
+      >
+        <div className="review-dock-bar">
+          <Tool
+            icon={Trash2}
+            label="Audit"
+            hint="a"
+            on={mode === 'audit'}
+            badge={auditTotal ? (auditLeft || '✓') : undefined}
+            badgeDone={auditTotal > 0 && auditLeft === 0}
+            onClick={() => onMode(mode === 'audit' ? 'off' : 'audit')}
+          />
+          <Tool
+            icon={MousePointerSquareDashed}
+            label="Select"
+            hint="p"
+            on={mode === 'pick'}
+            onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
+          />
+          {variants ? (
+            <Tool
+              icon={Columns2}
+              label="A / B"
+              hint="v"
+              on={mode === 'variants'}
+              badge={variants}
+              onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}
+            />
+          ) : null}
+          <Tool
+            icon={MessageSquarePlus}
+            label="Comment"
+            hint="c"
+            on={commenting}
+            onClick={onCommentMode}
+          />
+          <Tool
+            icon={Undo2}
+            label="Undo"
+            hint="u"
+            disabled={!undoDepth}
+            badge={undoDepth || undefined}
+            onClick={onUndo}
+          />
+          <Tool icon={X} label="Done" hint="esc" onClick={onClose} />
+        </div>
+      </Fold>
+    ),
+
+    journal: (
+      <Fold
+        key="journal"
+        section="journal"
+        onGrip={sort.grip('journal')}
+        dragging={sort.dragging === 'journal'}
+        icon={ListChecks}
+        name="Journal"
+        tone="paper"
+        count={journalCount}
+        news={journalNew}
+        open={journalOpen}
+        onToggle={() => onJournal(!journalOpen)}
+        big={journalWide}
+        onBig={() => onJournalWide(!journalWide)}
+      >
+        {journal}
+      </Fold>
+    ),
+
+    hidden: (
+      <Fold
+        key="hidden"
+        section="hidden"
+        onGrip={sort.grip('hidden')}
+        dragging={sort.dragging === 'hidden'}
+        icon={EyeOff}
+        name="Hidden"
+        tone="glass"
+        count={hiddenCount}
+        open={hiddenOpen}
+        onToggle={() => onHidden(!hiddenOpen)}
+      >
+        {hiddenList}
+      </Fold>
+    ),
+
+    archive: (
+      <Fold
+        key="archive"
+        section="archive"
+        onGrip={sort.grip('archive')}
+        dragging={sort.dragging === 'archive'}
+        icon={Archive}
+        name="Archive"
+        tone="glass"
+        count={stashCount}
+        open={stashOpen}
+        onToggle={() => onStash(!stashOpen)}
+      >
+        {shelves}
+      </Fold>
+    )
+  };
 
   if (!open) {
     return (
@@ -310,90 +444,8 @@ export function DesktopDock({
         </button>
       </header>
 
-      <div className="review-rail-body">
-        <Fold
-          icon={SlidersHorizontal}
-          name="Tools"
-          tone="glass"
-          hint={mode === 'off' ? undefined
-            : mode === 'audit' ? 'Audit' : mode === 'pick' ? 'Select' : 'A / B'}
-          open={toolsOpen}
-          onToggle={() => onTools(!toolsOpen)}
-        >
-          <div className="review-dock-bar">
-            <Tool
-              icon={Trash2}
-              label="Audit"
-              hint="a"
-              on={mode === 'audit'}
-              badge={auditTotal ? (auditLeft || '✓') : undefined}
-              badgeDone={auditTotal > 0 && auditLeft === 0}
-              onClick={() => onMode(mode === 'audit' ? 'off' : 'audit')}
-            />
-            <Tool
-              icon={MousePointerSquareDashed}
-              label="Select"
-              hint="p"
-              on={mode === 'pick'}
-              onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
-            />
-            {variants ? (
-              <Tool
-                icon={Columns2}
-                label="A / B"
-                hint="v"
-                on={mode === 'variants'}
-                badge={variants}
-                onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}
-              />
-            ) : null}
-            <Tool
-              icon={Undo2}
-              label="Undo"
-              hint="u"
-              disabled={!undoDepth}
-              badge={undoDepth || undefined}
-              onClick={onUndo}
-            />
-            <Tool icon={X} label="Done" hint="esc" onClick={onClose} />
-          </div>
-        </Fold>
-
-        <Fold
-          icon={ListChecks}
-          name="Journal"
-          tone="paper"
-          count={journalCount}
-          news={journalNew}
-          open={journalOpen}
-          onToggle={() => onJournal(!journalOpen)}
-          big={journalWide}
-          onBig={() => onJournalWide(!journalWide)}
-        >
-          {journal}
-        </Fold>
-
-        <Fold
-          icon={EyeOff}
-          name="Hidden"
-          tone="glass"
-          count={hiddenCount}
-          open={hiddenOpen}
-          onToggle={() => onHidden(!hiddenOpen)}
-        >
-          {hiddenList}
-        </Fold>
-
-        <Fold
-          icon={Archive}
-          name="Archive"
-          tone="glass"
-          count={stashCount}
-          open={stashOpen}
-          onToggle={() => onStash(!stashOpen)}
-        >
-          {shelves}
-        </Fold>
+      <div className="review-rail-body" ref={sort.rootRef}>
+        {order.map((key) => sections[key] ?? null)}
       </div>
     </aside>
   );

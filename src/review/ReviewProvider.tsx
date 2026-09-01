@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown,
-  Copy, Crosshair, Expand, Eye, EyeOff, MessageSquarePlus, Minus, Trash2, X
+  Copy, Crosshair, Expand, Eye, EyeOff, FileCode2, MessageSquarePlus, Minus,
+  Tag, Trash2, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
 import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
@@ -83,12 +84,21 @@ interface ComposerState {
   at?: Box;
   /** Prior back-and-forth, shown so a follow-up has its context. */
   thread?: ReviewNote['thread'];
+  /** Live element, when the note was opened from the page. It lets the halo
+   *  and card follow a resize or scroll instead of pointing at stale pixels. */
+  target?: Element;
+  /** The starting values make backdrop/Escape dismissal safe: an untouched
+   *  editor can close immediately; a real draft asks before it is discarded. */
+  initialDraft: string;
+  initialTags: string[];
 }
 
 /** The kinds of change a note usually asks for. Picking one is faster than
  *  typing it, and it makes the notes file sortable by intent. */
-const TAGS = [
-  'cut', 'move', 'reword', 'resize', 'spacing', 'contrast', 'confusing', 'wrong', 'later'
+const TAG_GROUPS = [
+  { label: 'Action', tags: ['cut', 'move', 'reword', 'resize'] },
+  { label: 'Polish', tags: ['spacing', 'contrast'] },
+  { label: 'Concern', tags: ['confusing', 'wrong', 'later'] }
 ] as const;
 
 /** One note per side per layout, so a group comment survives the items
@@ -121,7 +131,11 @@ interface Panels {
   archive: boolean;
   wide: boolean;
   scope: 'screen' | 'all';
+  /** The order the sections are stacked in, yours to rearrange. */
+  order: string[];
 }
+
+export const SECTIONS = ['tools', 'journal', 'hidden', 'archive'] as const;
 
 const PANELS: Panels = {
   open: false,
@@ -131,13 +145,21 @@ const PANELS: Panels = {
   hidden: false,
   archive: false,
   wide: false,
-  scope: 'screen'
+  scope: 'screen',
+  order: [...SECTIONS]
 };
 
 function loadPanels(): Panels {
   try {
     const raw = localStorage.getItem(PANELS_KEY);
-    return raw ? { ...PANELS, ...JSON.parse(raw) as Partial<Panels> } : PANELS;
+    const saved = raw ? { ...PANELS, ...JSON.parse(raw) as Partial<Panels> } : PANELS;
+    // A section added or removed since the order was saved must not vanish
+    // from the dock, and one that no longer exists must not hold a slot.
+    const kept = (saved.order ?? []).filter((key) => SECTIONS.includes(key as typeof SECTIONS[number]));
+    return {
+      ...saved,
+      order: [...kept, ...SECTIONS.filter((key) => !kept.includes(key))]
+    };
   } catch {
     return PANELS;
   }
@@ -191,18 +213,24 @@ function isReply(note: ReviewNote, read: ReadMarks): boolean {
 
 /** Beside the element, never over it — clamped so the composer is always
  *  fully on screen even when the element is at a corner. */
-function composerAt(at: Box): { top: number; left: number } {
-  const width = 336;
-  const height = 340;
+function composerAt(at: Box, width = 376, height = 520): { top: number; left: number } {
   const gap = 14;
+  const root = getComputedStyle(document.documentElement);
+  const inset = (name: string) => Number.parseFloat(root.getPropertyValue(name)) || 0;
+  const bounds = {
+    left: inset('--review-rail-left') + 10,
+    right: window.innerWidth - inset('--review-rail-right') - 10,
+    top: 10,
+    bottom: window.innerHeight - inset('--review-rail-bottom') - 10
+  };
   const right = at.left + at.width + gap;
-  const left = right + width < window.innerWidth - 8
+  const left = right + width <= bounds.right
     ? right
-    : at.left - gap - width > 8
+    : at.left - gap - width >= bounds.left
       ? at.left - gap - width
-      : Math.max(8, Math.min(at.left, window.innerWidth - width - 8));
+      : Math.max(bounds.left, Math.min(at.left, bounds.right - width));
   return {
-    top: Math.max(8, Math.min(at.top, window.innerHeight - height - 8)),
+    top: Math.max(bounds.top, Math.min(at.top, bounds.bottom - height)),
     left
   };
 }
@@ -241,6 +269,8 @@ function ReviewConsole({
   const [dockMin, setDockMin] = useState(panels.min);
   /** The verbs. Their own section, like everything else in the dock. */
   const [toolsOpen, setToolsOpen] = useState(panels.tools);
+  /** The order the sections are stacked in. */
+  const [order, setOrder] = useState<string[]>(panels.order);
   const [notes, setNotes] = useState<ReviewNotes>(() => normalizeLanes(loadLocal()));
   const [panelOpen, setPanelOpen] = useState(panels.journal);
   /** The journal opens on the screen you are looking at. Everything ever
@@ -281,12 +311,23 @@ function ReviewConsole({
   const [triage, setTriage] = useState<{ ids: string[]; at: number } | null>(null);
   const [hovered, setHovered] = useState<Element | null>(null);
   const [picked, setPicked] = useState<Element | null>(null);
+  /** Select is the precision workshop. Comment is the fast path: it borrows
+   *  the same hit-testing, then opens the note card on the very next click. */
+  const [commentIntent, setCommentIntent] = useState(false);
   const [, setTick] = useState(0); // scroll/resize nudge so overlays follow
   const [composer, setComposer] = useState<ComposerState | null>(null);
+  const [composerLayout, setComposerLayout] = useState<{
+    top: number;
+    left: number;
+    anchor: Box;
+  } | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [travelling, setTravelling] = useState<{ note: ReviewNote; tries: number } | null>(null);
   const [toast, setToast] = useState<{ text: string; tone: 'good' | 'warn' | 'info'; at: number } | null>(null);
-  const [replyDraft, setReplyDraft] = useState('');
+  /** A reply belongs to its row. Keeping one global string can accidentally
+   *  send note A's half-written answer from note B. */
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [synced, setSynced] = useState<'unknown' | 'file' | 'local'>('unknown');
   const [suggested, setSuggested] = useState<Record<string, { label: string; reason: string }>>({});
   const [variantSets, setVariantSets] = useState<string[]>([]);
@@ -303,7 +344,7 @@ function ReviewConsole({
   const [hiddenOpen, setHiddenOpen] = useState(panels.hidden);
   /** Under this, the console is a bar on the bottom edge; over it, a rail
    *  down the side. They are different objects, not one thing squeezed. */
-  const [compact, setCompact] = useState(() => window.innerWidth < 640);
+  const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 40rem)').matches);
   /** Shelves taken off the screen for now. Not persisted — a hidden shelf is
    *  a thing you did a second ago, not a decision about the product. */
   const [hiddenTrays, setHiddenTrays] = useState<TrayEdge[]>(DEFAULT_HIDDEN);
@@ -326,6 +367,8 @@ function ReviewConsole({
   const advanceRef = useRef<(() => void) | null>(null);
   /** Read by the global key handler, which must not re-bind on every hover. */
   const pickedRef = useRef<Element | null>(null);
+  const composerRef = useRef<HTMLFormElement>(null);
+  const composerInvoker = useRef<HTMLElement | null>(null);
   /** Snapshots of the notes before each change, newest last. */
   const history = useRef<ReviewNotes[]>([]);
   /** Set once the reviewer has said what they want the shelves to do. */
@@ -421,12 +464,23 @@ function ReviewConsole({
   useEffect(() => {
     // Both docks are welded to an edge, so a resize only ever decides which
     // of the two is the right object for the screen.
-    const onResize = () => {
-      setCompact(window.innerWidth < 640);
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    const query = window.matchMedia('(max-width: 40rem)');
+    const onResize = () => setCompact(query.matches);
+    query.addEventListener('change', onResize);
+    return () => query.removeEventListener('change', onResize);
   }, []);
+
+  /** On a phone the dock and composer are both bottom furniture. Put the dock
+   *  down while writing so the note card gets the screen and the keyboard,
+   *  then restore exactly the state the reviewer had before. */
+  useEffect(() => {
+    if (!composer || !compact) return;
+    const wasMin = dockMin;
+    setDockMin(true);
+    return () => setDockMin(wasMin);
+    // Opening/closing is the boundary; typing must not re-run this effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [Boolean(composer), compact]);
 
   // Hover and keyboard share one highlight: whichever moved last wins.
   useEffect(() => {
@@ -474,12 +528,13 @@ function ReviewConsole({
     try {
       localStorage.setItem(PANELS_KEY, JSON.stringify({
         open, min: dockMin, tools: toolsOpen, journal: panelOpen,
-        hidden: hiddenOpen, archive: stashOpen, wide: journalWide, scope: journalScope
+        hidden: hiddenOpen, archive: stashOpen, wide: journalWide,
+        scope: journalScope, order
       } satisfies Panels));
     } catch {
       // Private mode; the console opens on its defaults each session.
     }
-  }, [open, dockMin, toolsOpen, panelOpen, hiddenOpen, stashOpen, journalWide, journalScope]);
+  }, [open, dockMin, toolsOpen, panelOpen, hiddenOpen, stashOpen, journalWide, journalScope, order]);
 
   useEffect(() => {
     try {
@@ -607,17 +662,28 @@ function ReviewConsole({
     const anchor = describeElement(el, layout);
     const id = opts?.id ?? anchorId(anchor);
     const rect = el.getBoundingClientRect();
+    const prior = notesRef.current[id];
+    const draft = prior?.comment ?? '';
+    const tags = prior?.tags ?? [];
+    const active = document.activeElement;
+    composerInvoker.current = active instanceof HTMLElement && active !== document.body
+      ? active
+      : el instanceof HTMLElement ? el : null;
+    setConfirmDiscard(false);
     setComposer({
       id,
       label,
       anchor,
       reason: opts?.reason,
       at: { top: rect.top, left: rect.left, bottom: rect.bottom, width: rect.width, height: rect.height },
+      target: el,
       // Re-opening a note reopens what is already there rather than starting
       // a blank one over the top of it.
-      draft: notesRef.current[id]?.comment ?? '',
-      tags: notesRef.current[id]?.tags ?? [],
-      thread: notesRef.current[id]?.thread
+      draft,
+      tags,
+      initialDraft: draft,
+      initialTags: tags,
+      thread: prior?.thread
     });
   }, [layout]);
 
@@ -690,12 +756,18 @@ function ReviewConsole({
     const members = Object.values(notes)
       .filter((note) => note.stow?.edge === edge && note.anchor.layout === layout)
       .map((note) => note.label);
+    const draft = notes[id]?.comment ?? '';
+    const tags = notes[id]?.tags ?? [];
+    composerInvoker.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setConfirmDiscard(false);
     setComposer({
       id,
       label: `${edge} stash · ${members.length} item${members.length === 1 ? '' : 's'}`,
       anchor: { layout, page: undefined },
-      draft: notes[id]?.comment ?? '',
-      tags: notes[id]?.tags ?? [],
+      draft,
+      tags,
+      initialDraft: draft,
+      initialTags: tags,
       thread: notes[id]?.thread,
       members
     });
@@ -704,16 +776,73 @@ function ReviewConsole({
   const commentOnNote = useCallback((id: string) => {
     const note = notes[id];
     if (!note) return;
+    const draft = note.comment ?? '';
+    const tags = note.tags ?? [];
+    composerInvoker.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setConfirmDiscard(false);
     setComposer({
       id,
       label: note.label,
       anchor: note.anchor,
       reason: note.reason,
-      draft: note.comment ?? '',
-      tags: note.tags ?? [],
+      draft,
+      tags,
+      initialDraft: draft,
+      initialTags: tags,
       thread: note.thread
     });
   }, [notes]);
+
+  /** Measure the real card and keep both it and its spotlight attached to the
+   *  live element. Reasons, threads, labels and a growing textarea all change
+   *  the height, so a guessed rectangle is never quite right. */
+  useLayoutEffect(() => {
+    if (!composer?.at || !composerRef.current) {
+      setComposerLayout(null);
+      return;
+    }
+    const panel = composerRef.current;
+    let frame = 0;
+    const place = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const live = composer.target?.isConnected ? composer.target.getBoundingClientRect() : null;
+        const anchor: Box = live
+          ? {
+              top: live.top,
+              left: live.left,
+              bottom: live.bottom,
+              width: live.width,
+              height: live.height
+            }
+          : composer.at!;
+        const card = panel.getBoundingClientRect();
+        const next = { ...composerAt(anchor, card.width, card.height), anchor };
+        setComposerLayout((current) => (
+          current
+          && Math.abs(current.top - next.top) < 0.5
+          && Math.abs(current.left - next.left) < 0.5
+          && Math.abs(current.anchor.top - next.anchor.top) < 0.5
+          && Math.abs(current.anchor.left - next.anchor.left) < 0.5
+            ? current
+            : next
+        ));
+      });
+    };
+    const observer = new ResizeObserver(place);
+    observer.observe(panel);
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    window.visualViewport?.addEventListener('resize', place);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+      window.visualViewport?.removeEventListener('resize', place);
+    };
+  }, [composer?.id, composer?.at, composer?.target]);
 
   const flagStowed = useCallback((id: string) => {
     const note = notes[id];
@@ -811,7 +940,10 @@ function ReviewConsole({
         draggedJustNow.current = false;
         return;
       }
-      if (event.target instanceof Element) setPicked(event.target);
+      if (event.target instanceof Element) {
+        if (commentIntent) commentOn(labelFor(event.target), event.target);
+        else setPicked(event.target);
+      }
     };
     const onKey = (event: KeyboardEvent) => {
       // The composer is a text box that opens straight out of this mode, so
@@ -822,7 +954,10 @@ function ReviewConsole({
       }
       if (event.key === 'Escape') {
         if (picked) setPicked(null);
-        else setMode('off');
+        else {
+          setCommentIntent(false);
+          setMode('off');
+        }
         return;
       }
       if (!picked) return;
@@ -878,7 +1013,7 @@ function ReviewConsole({
       document.body.classList.remove('review-picking');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, picked]);
+  }, [mode, picked, commentIntent, commentOn]);
 
   // Keep the page matching the notes: parked hand-picked elements stay out of
   // view (React owns that markup, so it is hidden rather than detached), and
@@ -919,6 +1054,9 @@ function ReviewConsole({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
+      // Dialog controls are review UI too. Once focus is in the composer its
+      // letters must describe the note, never switch a tool behind it.
+      if (target?.closest('.review-composer')) return;
       const typing = target
         && (target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName));
       if (typing) return;
@@ -927,31 +1065,28 @@ function ReviewConsole({
       // dev server is one click away anyway, and this is dev-only code.
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'r') {
         event.preventDefault();
-        setOpen((current) => {
-          if (current) { setMode('off'); setPicked(null); }
-          return !current;
-        });
+        setOpen((current) => !current);
         return;
       }
       if (event.metaKey || event.ctrlKey || event.altKey) return;
 
       if (event.key === '`') {
         event.preventDefault();
-        setOpen((current) => {
-          if (current) { setMode('off'); setPicked(null); }
-          return !current;
-        });
+        setOpen((current) => !current);
         return;
       }
       if (!open) return;
 
       if (event.key === 'a' || event.key === '1') {
+        setCommentIntent(false);
         setMode((current) => (current === 'audit' ? 'off' : 'audit'));
       }
       if (event.key === 'p' || event.key === '2') {
+        setCommentIntent(false);
         setMode((current) => (current === 'pick' ? 'off' : 'pick'));
       }
       if ((event.key === 'v' || event.key === '3') && variantSets.length) {
+        setCommentIntent(false);
         setMode((current) => (current === 'variants' ? 'off' : 'variants'));
       }
       if (event.key === '4') setPanelOpen((current) => !current);
@@ -962,7 +1097,11 @@ function ReviewConsole({
       if (event.key === 'c') {
         const chosen = pickedRef.current;
         if (chosen) commentOn(labelFor(chosen), chosen);
-        else { setMode('pick'); say('Select what the comment is about'); }
+        else {
+          setMode('pick');
+          setCommentIntent(true);
+          say('Comment mode · click anything on the page');
+        }
       }
       if (event.key === 'x' && pickedRef.current) markPicked();
       if (event.key === 'h' && pickedRef.current) hidePicked();
@@ -978,7 +1117,7 @@ function ReviewConsole({
       // Escape while picking is already handled there: it clears the selection
       // before it closes anything.
       if (event.key === 'Escape' && mode !== 'pick') {
-        if (composer) setComposer(null);
+        if (composer) dismissComposer();
         else if (panelOpen) setPanelOpen(false);
         else if (mode !== 'off') setMode('off');
         else setOpen(false);
@@ -1153,9 +1292,30 @@ function ReviewConsole({
     setPicked(null);
   }
 
+  function returnComposerFocus() {
+    const target = composerInvoker.current;
+    requestAnimationFrame(() => {
+      if (target?.isConnected) target.focus({ preventScroll: true });
+    });
+  }
+
+  function dismissComposer(force = false) {
+    if (!composer) return;
+    const tagsChanged = composer.tags.join('\u0000') !== composer.initialTags.join('\u0000');
+    const dirty = composer.draft !== composer.initialDraft || tagsChanged;
+    if (dirty && !force) {
+      setConfirmDiscard(true);
+      return;
+    }
+    setConfirmDiscard(false);
+    setComposer(null);
+    returnComposerFocus();
+  }
+
   function saveComment() {
     // Tags alone are a note: "cut · spacing" on the right element says plenty.
     if (!composer || (!composer.draft.trim() && !composer.tags.length)) return;
+    const existing = Boolean(notes[composer.id]?.comment || notes[composer.id]?.tags?.length);
     upsert({
       id: composer.id,
       label: composer.label,
@@ -1176,9 +1336,13 @@ function ReviewConsole({
         : laneOf(notes[composer.id]),
       anchor: composer.anchor
     });
+    setConfirmDiscard(false);
     setComposer(null);
     setPicked(null);
-    say('Comment saved', 'good');
+    returnComposerFocus();
+    say(existing
+      ? 'Comment updated'
+      : commentIntent ? 'Comment added · click another element' : 'Comment added', 'good');
   }
 
   /** The journal itself — what has been said, and by whom. It is the same
@@ -1884,21 +2048,24 @@ function ReviewConsole({
               className="review-row-reply"
               onSubmit={(event) => {
                 event.preventDefault();
-                const text = replyDraft.trim();
+                const text = (replyDrafts[note.id] ?? '').trim();
                 if (!text) return;
                 upsert({
                   id: note.id,
                   ...(laneOf(note) === 'open' ? { status: 'commented' as ReviewLane } : {}),
                   thread: [...(note.thread ?? []), { from: 'you', text, at: new Date().toISOString() }]
                 });
-                setReplyDraft('');
+                setReplyDrafts((current) => ({ ...current, [note.id]: '' }));
               }}
             >
               <textarea
                 rows={2}
-                value={replyDraft}
+                value={replyDrafts[note.id] ?? ''}
                 placeholder={`Reply about “${note.label}”…`}
-                onChange={(event) => setReplyDraft(event.currentTarget.value)}
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  setReplyDrafts((current) => ({ ...current, [note.id]: value }));
+                }}
                 onKeyDown={(event) => {
                   if (event.key === 'Escape') setOpenRow(null);
                   if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
@@ -2189,6 +2356,18 @@ function ReviewConsole({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [Object.keys(notes).length === 0]);
 
+  const composerCanSave = Boolean(composer && (composer.draft.trim() || composer.tags.length));
+  const composerExisting = Boolean(composer && (
+    notes[composer.id]?.comment || notes[composer.id]?.tags?.length
+  ));
+  const composerCta = composer?.reason
+    ? 'Request changes'
+    : composerExisting ? 'Update comment' : 'Add comment';
+  const composerAnchor = composerLayout?.anchor ?? composer?.at;
+  const composerPosition = composer?.at
+    ? composerLayout ?? composerAt(composer.at)
+    : undefined;
+
   return (
     <ReviewContext.Provider value={value}>
       {children}
@@ -2300,88 +2479,189 @@ function ReviewConsole({
           data-review-ui
           className="review-composer-scrim"
           data-anchored={composer.at ? true : undefined}
-          onClick={() => setComposer(null)}
+          onClick={() => dismissComposer()}
         >
           {/* The element keeps its own light: a comment is about something you
               are looking at, so nothing covers it while you write. */}
-          {composer.at ? (
+          {composerAnchor ? (
             <span
               className="review-composer-halo"
               style={{
-                top: composer.at.top,
-                left: composer.at.left,
-                width: composer.at.width,
-                height: composer.at.height
+                top: composerAnchor.top,
+                left: composerAnchor.left,
+                width: composerAnchor.width,
+                height: composerAnchor.height
               }}
             />
           ) : null}
           <form
-            className="review-composer"
-            style={composer.at ? composerAt(composer.at) : undefined}
+            ref={composerRef}
+            className="review-composer review-compose"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-compose-title"
+            aria-describedby="review-compose-help"
+            style={composerPosition
+              ? { top: composerPosition.top, left: composerPosition.left }
+              : undefined}
             onClick={(event) => event.stopPropagation()}
             onSubmit={(event) => { event.preventDefault(); saveComment(); }}
+            onKeyDown={(event) => {
+              event.stopPropagation();
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                dismissComposer();
+                return;
+              }
+              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                if (composerCanSave) saveComment();
+                return;
+              }
+              if (event.key !== 'Tab') return;
+              const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+                'button:not(:disabled), textarea, summary, [href], [tabindex]:not([tabindex="-1"])'
+              )).filter((item) => item.getClientRects().length > 0);
+              const first = focusable[0];
+              const last = focusable[focusable.length - 1];
+              if (!first || !last) return;
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+              }
+            }}
           >
-            <p className="review-composer-target">{composer.label}</p>
-            <p className="review-composer-source">
-              {composer.members
-                ? `${composer.members.length} item(s) parked here · ${composer.anchor.layout}`
-                : fileOf(composer.anchor.source) ?? composer.anchor.domPath ?? 'unknown source'}
-            </p>
-            {composer.reason ? (
-              <p className="review-composer-reason">I proposed cutting this: {composer.reason}</p>
-            ) : null}
-            {composer.members?.length ? (
-              <p className="review-composer-members">
-                Covers everything in this stash: {composer.members.join(' · ')}
-              </p>
-            ) : null}
-            {composer.thread?.length ? (
-              <div className="review-composer-thread">
-                {composer.thread.map((reply, index) => (
-                  <p key={index} data-from={reply.from}>
-                    <b>{reply.from === 'claude' ? 'Claude' : 'You'}</b> {reply.text}
-                  </p>
-                ))}
+            <header className="review-compose-head">
+              <span className="review-compose-mark" aria-hidden="true">
+                <MessageSquarePlus className="size-[18px]" />
+              </span>
+              <span className="review-compose-heading">
+                <span className="review-compose-kicker">
+                  {composer.reason ? 'Feedback on a suggested cut'
+                    : composerExisting ? 'Edit anchored comment' : 'New anchored comment'}
+                </span>
+                <h2 id="review-compose-title">{composer.label}</h2>
+              </span>
+              <button
+                type="button"
+                className="review-compose-close"
+                aria-label="Close comment editor"
+                onClick={() => dismissComposer()}
+              >
+                <X className="size-4" />
+              </button>
+            </header>
+
+            <div className="review-compose-scroll">
+              <div className="review-compose-context">
+                <span className="review-compose-layout">{composer.anchor.layout}</span>
+                <details className="review-compose-details">
+                  <summary><FileCode2 className="size-3.5" /> Technical details</summary>
+                  <code>
+                    {composer.members
+                      ? `${composer.members.length} item(s) parked here`
+                      : fileOf(composer.anchor.source) ?? composer.anchor.domPath ?? 'Source unavailable'}
+                  </code>
+                </details>
               </div>
-            ) : null}
-            <textarea
-              autoFocus
-              rows={3}
-              value={composer.draft}
-              placeholder={composer.members
-                ? 'What should happen to all of these?'
-                : 'What should change here?'}
-              onChange={(event) => setComposer({ ...composer, draft: event.currentTarget.value })}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) saveComment();
-                // Both key handlers step aside while something is being typed
-                // into, so the composer has to close itself.
-                if (event.key === 'Escape') setComposer(null);
-              }}
-            />
-            {/* Faster than typing it, and it sorts the notes file by intent. */}
-            <div className="review-tag-row">
-              {TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  data-on={composer.tags.includes(tag) || undefined}
-                  onClick={() => setComposer({
-                    ...composer,
-                    tags: composer.tags.includes(tag)
-                      ? composer.tags.filter((item) => item !== tag)
-                      : [...composer.tags, tag]
-                  })}
-                >
-                  {tag}
+
+              {composer.reason ? (
+                <div className="review-compose-reason">
+                  <strong>Suggested change</strong>
+                  <span>{composer.reason}</span>
+                </div>
+              ) : null}
+              {composer.members?.length ? (
+                <div className="review-compose-members">
+                  <strong>Covers this stash</strong>
+                  <span>{composer.members.join(' · ')}</span>
+                </div>
+              ) : null}
+              {composer.thread?.length ? (
+                <section className="review-compose-thread" aria-label="Earlier conversation">
+                  <h3>Conversation</h3>
+                  {composer.thread.map((reply, index) => (
+                    <p key={index} data-from={reply.from}>
+                      <b>{reply.from === 'claude' ? 'Claude' : 'You'}</b>
+                      <span>{reply.text}</span>
+                    </p>
+                  ))}
+                </section>
+              ) : null}
+
+              <label className="review-compose-label" htmlFor="review-compose-text">
+                Your comment
+                <span>Describe the friction, the outcome you want, or both.</span>
+              </label>
+              <textarea
+                id="review-compose-text"
+                autoFocus
+                rows={4}
+                value={composer.draft}
+                placeholder={composer.members
+                  ? 'What should happen to this group?'
+                  : 'What feels off, and what would make it better?'}
+                onChange={(event) => {
+                  setConfirmDiscard(false);
+                  setComposer({ ...composer, draft: event.currentTarget.value });
+                }}
+              />
+              <p id="review-compose-help" className="review-compose-help">
+                Text or a change type is enough to save a useful note.
+              </p>
+
+              {/* Faster than typing it, and it sorts the notes file by intent. */}
+              <section className="review-compose-types" aria-labelledby="review-compose-types-title">
+                <h3 id="review-compose-types-title"><Tag className="size-3.5" /> Change type <span>optional</span></h3>
+                <div className="review-tag-groups">
+                  {TAG_GROUPS.map((group) => (
+                    <div key={group.label} className="review-tag-group">
+                      <span>{group.label}</span>
+                      <div className="review-tag-row">
+                        {group.tags.map((tag) => (
+                          <button
+                            key={tag}
+                            type="button"
+                            aria-pressed={composer.tags.includes(tag)}
+                            data-on={composer.tags.includes(tag) || undefined}
+                            onClick={() => {
+                              setConfirmDiscard(false);
+                              setComposer({
+                                ...composer,
+                                tags: composer.tags.includes(tag)
+                                  ? composer.tags.filter((item) => item !== tag)
+                                  : [...composer.tags, tag]
+                              });
+                            }}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {confirmDiscard ? (
+              <div className="review-compose-discard" role="alert">
+                <span><strong>Discard this draft?</strong><small>Your changes have not been saved.</small></span>
+                <button type="button" autoFocus onClick={() => setConfirmDiscard(false)}>Keep writing</button>
+                <button type="button" data-danger onClick={() => dismissComposer(true)}>Discard</button>
+              </div>
+            ) : (
+              <footer className="review-compose-foot">
+                <span className="review-composer-keys">⌘↵ save · esc close</span>
+                <button type="button" className="review-compose-cancel" onClick={() => dismissComposer()}>Cancel</button>
+                <button type="submit" className="review-compose-submit" disabled={!composerCanSave}>
+                  <MessageSquarePlus className="size-4" /> {composerCta}
                 </button>
-              ))}
-            </div>
-            <div className="review-composer-row">
-              <span className="review-composer-keys">⌘↵ save · esc cancel</span>
-              <button type="button" className="review-ghost" onClick={() => setComposer(null)}>Cancel</button>
-              <button type="submit" className="review-primary">Save</button>
-            </div>
+              </footer>
+            )}
           </form>
         </div>
       ) : null}
@@ -2451,7 +2731,14 @@ function ReviewConsole({
       ) : null}
 
       {toast ? (
-        <div key={toast.at} data-review-ui className="review-toast" data-tone={toast.tone}>
+        <div
+          key={toast.at}
+          data-review-ui
+          className="review-toast"
+          data-tone={toast.tone}
+          role="status"
+          aria-live="polite"
+        >
           {toast.text}
         </div>
       ) : null}
@@ -2459,18 +2746,29 @@ function ReviewConsole({
       {compact ? (
         <MobileDock
           open={open}
-          onToggle={() => {
-            const next = !open;
-            setOpen(next);
-            if (!next) { setMode('off'); setPicked(null); }
+          onToggle={() => setOpen((current) => !current)}
+          onClose={() => {
+            setOpen(false);
+            setMode('off');
+            setCommentIntent(false);
+            setPicked(null);
           }}
-          onClose={() => { setOpen(false); setMode('off'); setPicked(null); }}
           min={dockMin}
           onMin={setDockMin}
           toolsOpen={toolsOpen}
           onTools={setToolsOpen}
+          order={order}
+          onOrder={setOrder}
           mode={mode}
+          commenting={mode === 'pick' && commentIntent}
+          onCommentMode={() => {
+            const next = !(mode === 'pick' && commentIntent);
+            setCommentIntent(next);
+            setMode(next ? 'pick' : 'off');
+            setPicked(null);
+          }}
           onMode={(next) => {
+            setCommentIntent(false);
             setMode(next);
             setPicked(null);
             if (next === 'audit') setTimeout(() => stepProposal(1), 60);
@@ -2498,17 +2796,28 @@ function ReviewConsole({
       ) : (
         <DesktopDock
           open={open}
-          onToggle={() => {
-            const next = !open;
-            setOpen(next);
-            if (!next) { setMode('off'); setPicked(null); }
+          onToggle={() => setOpen((current) => !current)}
+          onClose={() => {
+            setOpen(false);
+            setMode('off');
+            setCommentIntent(false);
+            setPicked(null);
           }}
-          onClose={() => { setOpen(false); setMode('off'); setPicked(null); }}
           toolsOpen={toolsOpen}
           onTools={setToolsOpen}
+          order={order}
+          onOrder={setOrder}
           openCount={openCount}
           mode={mode}
+          commenting={mode === 'pick' && commentIntent}
+          onCommentMode={() => {
+            const next = !(mode === 'pick' && commentIntent);
+            setCommentIntent(next);
+            setMode(next ? 'pick' : 'off');
+            setPicked(null);
+          }}
           onMode={(next) => {
+            setCommentIntent(false);
             setMode(next);
             setPicked(null);
             if (next === 'audit') setTimeout(() => stepProposal(1), 60);
@@ -2575,5 +2884,3 @@ function actOf(note: ReviewNote): string {
 function fileOf(source?: string): string | undefined {
   return source?.split(':')[0];
 }
-
-

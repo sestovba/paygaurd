@@ -6018,3 +6018,48 @@ body.review-picking * {
 .review-row-reply-foot .review-ghost:hover {
   background: rgb(15 23 42 / 0.06);
 }
+
+
+/* --- Sections in your own order --------------------------------------------
+ *
+ * A grip, not a press-and-hold on the header: these headers are pressed
+ * constantly to open and shut sections, and one that is sometimes a button
+ * and sometimes a handle is a header you have to be careful with.
+ */
+
+.review-fold-grip {
+  display: grid;
+  width: 1.1rem;
+  flex: none;
+  place-items: center;
+  color: rgb(255 255 255 / 0.25);
+  cursor: grab;
+  /* The drag is ours; the browser must not read it as a scroll. */
+  touch-action: none;
+}
+
+.review-fold-grip:hover {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.review-fold-grip:active {
+  cursor: grabbing;
+}
+
+/* The one being carried, so it is obvious which section the others are
+   making room for. */
+.review-fold[data-dragging] {
+  position: relative;
+  z-index: 2;
+  outline: 1px solid var(--review-blue);
+  background: rgb(37 99 235 / 0.18);
+}
+
+.review-fold[data-dragging] .review-fold-grip {
+  color: white;
+}
+
+/* Paper sections keep their own grip colour against the light body. */
+.review-fold[data-tone='paper'] .review-fold-grip {
+  color: rgb(255 255 255 / 0.3);
+}

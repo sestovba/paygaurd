@@ -12,10 +12,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   Archive, ChevronUp, Columns2, EyeOff, ListChecks,
-  MousePointerSquareDashed, SlidersHorizontal, Trash2, Undo2, X
+  MessageSquarePlus, MousePointerSquareDashed, SlidersHorizontal, Trash2, Undo2, X
 } from 'lucide-react';
 import type { ReviewMode } from './context';
-import { Fold, Tool } from './DockParts';
+import { Fold, Tool, useReorder } from './DockParts';
 
 export function MobileDock({
   open,
@@ -25,8 +25,12 @@ export function MobileDock({
   onMin,
   toolsOpen,
   onTools,
+  order,
+  onOrder,
   mode,
   onMode,
+  commenting,
+  onCommentMode,
   auditTotal,
   auditSettled,
   variants,
@@ -57,8 +61,18 @@ export function MobileDock({
   onMin: (next: boolean) => void;
   toolsOpen: boolean;
   onTools: (next: boolean) => void;
+  /** The sections, in the order they are stacked. Dragged by their grips
+   *  and kept by the console, so the dock stays arranged the way you left
+   *  it rather than the way it shipped. */
+  order: string[];
+  onOrder: (next: string[]) => void;
   mode: ReviewMode;
   onMode: (next: ReviewMode) => void;
+  /** Select is the precision tool; Comment is the fast path that borrows its
+   *  hit-testing and opens the note card on the very next click. They share a
+   *  mode, so only one of them is ever lit. */
+  commenting: boolean;
+  onCommentMode: () => void;
   auditTotal: number;
   auditSettled: number;
   variants: number;
@@ -95,6 +109,7 @@ export function MobileDock({
   const shown = open && !min;
   const setMin = onMin;
   const setToolsOpen = onTools;
+  const sort = useReorder(order, onOrder, 'y');
 
   /* The dock stands in front of the app's own bottom furniture, so the page
      needs to know how much of itself is behind it. */
@@ -113,6 +128,121 @@ export function MobileDock({
   }, []);
 
   const auditLeft = auditTotal - auditSettled;
+
+  const sections: Record<string, ReactNode> = {
+    /* The verbs — what you do to the page. A fold like the others: nothing
+       in this dock is fixed furniture that cannot be got out of the way. */
+    tools: (
+      <Fold
+        key="tools"
+        section="tools"
+        onGrip={sort.grip('tools')}
+        dragging={sort.dragging === 'tools'}
+        icon={SlidersHorizontal}
+        name="Tools"
+        tone="glass"
+        hint={mode === 'off' ? undefined
+          : mode === 'audit' ? 'Audit'
+            : mode === 'pick' ? (commenting ? 'Comment' : 'Select') : 'A / B'}
+        open={toolsOpen}
+        onToggle={() => setToolsOpen(!toolsOpen)}
+      >
+        <div className="review-dock-bar">
+          <Tool
+            icon={Trash2}
+            label="Audit"
+            on={mode === 'audit'}
+            badge={auditTotal ? (auditLeft || '✓') : undefined}
+            badgeDone={auditTotal > 0 && auditLeft === 0}
+            onClick={() => onMode(mode === 'audit' ? 'off' : 'audit')}
+          />
+          <Tool
+            icon={MousePointerSquareDashed}
+            label="Select"
+            on={mode === 'pick' && !commenting}
+            onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
+          />
+          {variants ? (
+            <Tool
+              icon={Columns2}
+              label="A / B"
+              on={mode === 'variants'}
+              badge={variants}
+              onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}
+            />
+          ) : null}
+          <Tool
+            icon={MessageSquarePlus}
+            label="Comment"
+            on={commenting}
+            onClick={onCommentMode}
+          />
+          <Tool
+            icon={Undo2}
+            label="Undo"
+            disabled={!undoDepth}
+            badge={undoDepth || undefined}
+            onClick={onUndo}
+          />
+          <Tool icon={X} label="Done" onClick={onClose} />
+        </div>
+      </Fold>
+    ),
+
+    journal: (
+      <Fold
+        key="journal"
+        section="journal"
+        onGrip={sort.grip('journal')}
+        dragging={sort.dragging === 'journal'}
+        icon={ListChecks}
+        name="Journal"
+        tone="paper"
+        count={journalCount}
+        news={journalNew}
+        open={journalOpen}
+        onToggle={() => onJournal(!journalOpen)}
+        big={journalBig}
+        onBig={() => setJournalBig((current) => !current)}
+      >
+        {journal}
+      </Fold>
+    ),
+
+    hidden: (
+      <Fold
+        key="hidden"
+        section="hidden"
+        onGrip={sort.grip('hidden')}
+        dragging={sort.dragging === 'hidden'}
+        icon={EyeOff}
+        name="Hidden"
+        tone="glass"
+        count={hiddenCount}
+        open={hiddenOpen}
+        onToggle={() => onHidden(!hiddenOpen)}
+      >
+        {hiddenList}
+      </Fold>
+    ),
+
+    archive: (
+      <Fold
+        key="archive"
+        section="archive"
+        onGrip={sort.grip('archive')}
+        dragging={sort.dragging === 'archive'}
+        icon={Archive}
+        name="Archive"
+        tone="glass"
+        count={stashCount}
+        open={stashOpen}
+        onToggle={() => onStash(!stashOpen)}
+      >
+        {shelves}
+      </Fold>
+    )
+  };
 
   return (
     <div ref={rootRef} data-review-ui className="review-mdock" data-open={shown || undefined}>
@@ -145,91 +275,8 @@ export function MobileDock({
       </div>
 
       {shown ? (
-        <div className="review-mdock-body">
-          {/* The verbs — what you do to the page. A fold like the others:
-              nothing in this dock is fixed furniture that cannot be got out
-              of the way. */}
-          <Fold
-            icon={SlidersHorizontal}
-            name="Tools"
-            tone="glass"
-            hint={mode === 'off' ? undefined
-              : mode === 'audit' ? 'Audit' : mode === 'pick' ? 'Select' : 'A / B'}
-            open={toolsOpen}
-            onToggle={() => setToolsOpen(!toolsOpen)}
-          >
-            <div className="review-dock-bar">
-              <Tool
-                icon={Trash2}
-                label="Audit"
-                on={mode === 'audit'}
-                badge={auditTotal ? (auditLeft || '✓') : undefined}
-                badgeDone={auditTotal > 0 && auditLeft === 0}
-                onClick={() => onMode(mode === 'audit' ? 'off' : 'audit')}
-              />
-              <Tool
-                icon={MousePointerSquareDashed}
-                label="Select"
-                on={mode === 'pick'}
-                onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
-              />
-              {variants ? (
-                <Tool
-                  icon={Columns2}
-                  label="A / B"
-                  on={mode === 'variants'}
-                  badge={variants}
-                  onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}
-                />
-              ) : null}
-              <Tool
-                icon={Undo2}
-                label="Undo"
-                disabled={!undoDepth}
-                badge={undoDepth || undefined}
-                onClick={onUndo}
-              />
-              <Tool icon={X} label="Done" onClick={onClose} />
-            </div>
-          </Fold>
-
-          {/* Each fold answers to itself. Minimising everything is one
-              control, top right of the tab, and it is not this. */}
-          <Fold
-            icon={ListChecks}
-            name="Journal"
-            tone="paper"
-            count={journalCount}
-            news={journalNew}
-            open={journalOpen}
-            onToggle={() => onJournal(!journalOpen)}
-            big={journalBig}
-            onBig={() => setJournalBig((current) => !current)}
-          >
-            {journal}
-          </Fold>
-
-          <Fold
-            icon={EyeOff}
-            name="Hidden"
-            tone="glass"
-            count={hiddenCount}
-            open={hiddenOpen}
-            onToggle={() => onHidden(!hiddenOpen)}
-          >
-            {hiddenList}
-          </Fold>
-
-          <Fold
-            icon={Archive}
-            name="Archive"
-            tone="glass"
-            count={stashCount}
-            open={stashOpen}
-            onToggle={() => onStash(!stashOpen)}
-          >
-            {shelves}
-          </Fold>
+        <div className="review-mdock-body" ref={sort.rootRef}>
+          {order.map((key) => sections[key] ?? null)}
         </div>
       ) : null}
     </div>

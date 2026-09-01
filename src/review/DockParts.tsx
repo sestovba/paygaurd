@@ -2,8 +2,62 @@
 // edge and a desktop stands them in a rail down the side, but a tool is a tool
 // and a section is a section, and they behave the same in both.
 
+import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
-import { ChevronDown, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronDown, GripVertical, Maximize2, Minimize2 } from 'lucide-react';
+
+/** Dragging the sections into the order you want them in.
+ *
+ *  The grip is its own control rather than the header being press-and-hold:
+ *  a header that is sometimes a button and sometimes a handle is a header you
+ *  have to be careful with, and these are pressed constantly. */
+export function useReorder(
+  order: string[],
+  onOrder: (next: string[]) => void,
+  axis: 'y' | 'x'
+) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (event: PointerEvent) => {
+      const root = rootRef.current;
+      if (!root) return;
+      event.preventDefault();
+      const at = axis === 'y' ? event.clientY : event.clientX;
+      const mids = order.map((key) => {
+        const box = root.querySelector(`[data-section="${key}"]`)?.getBoundingClientRect();
+        if (!box) return { key, mid: Number.POSITIVE_INFINITY };
+        return { key, mid: axis === 'y' ? box.top + box.height / 2 : box.left + box.width / 2 };
+      });
+      const over = mids.findIndex((item) => at < item.mid);
+      const target = over < 0 ? order.length - 1 : over;
+      const next = order.filter((key) => key !== dragging);
+      next.splice(Math.min(Math.max(target, 0), next.length), 0, dragging);
+      if (next.join('|') !== order.join('|')) onOrder(next);
+    };
+    const stop = () => setDragging(null);
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+    };
+  }, [dragging, order, onOrder, axis]);
+
+  return {
+    rootRef,
+    dragging,
+    grip: (key: string) => (event: React.PointerEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setDragging(key);
+    }
+  };
+}
 
 export function Tool({
   icon: Icon,
@@ -59,6 +113,9 @@ export function Fold({
   big,
   onBig,
   action,
+  section,
+  onGrip,
+  dragging,
   children
 }: {
   icon: ComponentType<{ className?: string }>;
@@ -78,18 +135,34 @@ export function Fold({
   onBig?: () => void;
   /** Anything else that belongs in the band, left of the controls. */
   action?: ReactNode;
+  /** This section's key, for putting the sections in your own order. */
+  section?: string;
+  onGrip?: (event: React.PointerEvent) => void;
+  dragging?: boolean;
   children: ReactNode;
 }) {
   return (
     <section
       className="review-fold"
+      data-section={section}
       data-tone={tone}
       data-open={open || undefined}
       data-big={(open && big) || undefined}
+      data-dragging={dragging || undefined}
     >
       {/* A band, not one big button: it has controls of its own in it, and a
           button cannot hold another button. */}
       <div className="review-fold-head">
+        {onGrip ? (
+          <span
+            className="review-fold-grip"
+            onPointerDown={onGrip}
+            title={`Drag to move ${name}`}
+            aria-hidden="true"
+          >
+            <GripVertical className="size-3.5" />
+          </span>
+        ) : null}
         <button
           type="button"
           className="review-fold-face"
