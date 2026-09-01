@@ -65,6 +65,26 @@ export function displayMonths(
   return [...currentAndPast, ...all.filter((month) => month > current)];
 }
 
+/**
+ * Which months a dashboard should list.
+ *
+ * Focus mode collapses every month list in the app to the one you are in —
+ * the current month when the year on screen is this year, otherwise that
+ * year's last month, so a list is never empty. One helper rather than the
+ * same conditional in nine components, which is how they would drift.
+ */
+export function listedMonths(
+  year: number,
+  hideFuture: boolean,
+  focus: boolean,
+  now: Date = new Date()
+): MonthKey[] {
+  if (!focus) return displayMonths(year, hideFuture, now);
+  const all = monthsOfYear(year);
+  const current = todayMonth(now);
+  return [all.includes(current) ? current : all[all.length - 1]];
+}
+
 export function monthOfDate(date: DateKey): MonthKey {
   return date.slice(0, 7);
 }

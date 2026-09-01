@@ -24,16 +24,17 @@ export function StatusSection() {
   const rules = rulesFor(ui.year);
   const overMonths = monthsOfYear(ui.year).filter((m) => monthStatus(data, m).overSga);
 
+  /* One limit is named on every branch, and never the other one. */
   const title = phase === 'trialWork'
     ? 'Trial work'
     : phase === 'sga'
-      ? 'SGA this year'
-      : 'Benefit phase';
+      ? 'Your limit this year'
+      : 'Where you stand';
   const meta = phase === 'trialWork'
-    ? `TWP month ${money(rules.trialWork)}`
+    ? `Your limit ${money(rules.trialWork)}`
     : phase === 'sga'
-      ? `SGA ${money(rules.sga)}`
-      : 'Confirm TWP status before relying on a limit';
+      ? `Your limit ${money(rules.sga)}`
+      : 'No limit yet — tell us where you stand';
 
   return (
     <div className="totals-card">
@@ -55,9 +56,10 @@ export function StatusSection() {
             <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} showLabel={false} />
           </div>
           <p className="help-note">
-            Countable earnings over {money(rules.trialWork)} use one TWP month.
-            Self-employment over {TWP_SELF_EMPLOYMENT_HOURS} hours can also count.
-            {' '}{TRIAL_MONTH_LIMIT} service months in {ROLLING_WINDOW} complete TWP.
+            Counted pay over {money(rules.trialWork)} uses one trial work month.
+            Working for yourself more than {TWP_SELF_EMPLOYMENT_HOURS} hours in a month
+            can use one too, even on small pay.
+            {' '}You have {TRIAL_MONTH_LIMIT} of them, over any {ROLLING_WINDOW} months.
             {twp.nextExpiry
               ? ` Oldest recorded month leaves the window in ${formatMonth(twp.nextExpiry)}.`
               : ''}
@@ -67,7 +69,7 @@ export function StatusSection() {
         <>
           <div className="sheet-hero">
             <div className="grow">
-              <div className="eyebrow">Months over SGA</div>
+              <div className="eyebrow">Months over your limit</div>
               <div className={'hero-figure' + (overMonths.length ? ' hero-figure--over' : '')}>
                 {overMonths.length}
               </div>
@@ -75,15 +77,15 @@ export function StatusSection() {
           </div>
           <p className="help-note">
             {overMonths.length
-              ? `Countable earnings over ${money(rules.sga)} in the months below.`
-              : `Nothing above the ${money(rules.sga)} working limit this year.`}
+              ? `Counted pay over ${money(rules.sga)} in the months below.`
+              : `Nothing over your ${money(rules.sga)} limit this year.`}
           </p>
         </>
       ) : (
         <div className="phase-warning">
           {phase === 'verifyComplete'
-            ? 'Nine possible TWP months are recorded. Verify them in App settings before switching the tracker to SGA mode.'
-            : 'TWP status is not confirmed, so limit warnings and the hours planner stay paused.'}
+            ? 'Nine trial work months are on record. Check them in App settings against your own paperwork — after that your limit changes.'
+            : 'Until you tell us where you stand there is no limit to warn you about, and the hours planner stays off.'}
         </div>
       )}
 
@@ -105,7 +107,7 @@ export function StatusSection() {
       <div className="rows">
         {phase === 'trialWork' ? (
           <div className="rows__row">
-            <span className="rows__label grow">TWP months recorded</span>
+            <span className="rows__label grow">Trial work months recorded</span>
             <span className="rows__value">{twp.used}</span>
           </div>
         ) : null}

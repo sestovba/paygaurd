@@ -183,3 +183,45 @@ export function anchorId(anchor: ReviewAnchor): string {
   for (let i = 0; i < seed.length; i += 1) hash = ((hash * 33) ^ seed.charCodeAt(i)) >>> 0;
   return `el-${hash.toString(36)}`;
 }
+
+/* --- Widening and narrowing the aim ----------------------------------------
+ * The arrow keys walk the DOM one node at a time, which is exact and slow: a
+ * card in this app is usually four or five nested elements that all draw the
+ * same box, so four presses can change nothing you can see. `[` and `]` move
+ * in *visible* steps instead — the next ancestor or descendant whose box is
+ * actually a different size — so one press is one change on the screen.
+ */
+
+/** Same box to the eye. Sub-pixel layout means these are never exactly equal. */
+function sameBox(a: DOMRect, b: DOMRect): boolean {
+  return Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
+}
+
+/** Out to the first ancestor that is bigger than `el`. Falls back to the plain
+ *  parent when everything above draws the same box, so the key always moves. */
+export function widerThan(el: Element): Element | null {
+  const box = el.getBoundingClientRect();
+  let node = el.parentElement;
+  let wrapper: Element | null = null;
+  while (node && node !== document.body) {
+    if (node.closest('[data-review-ui]')) return null;
+    if (!sameBox(node.getBoundingClientRect(), box)) return node;
+    wrapper = wrapper ?? node;
+    node = node.parentElement;
+  }
+  return wrapper;
+}
+
+/** In to the first thing inside `el` that is smaller than it. Used only when
+ *  there is no remembered way back down — a selection that was never widened. */
+export function insideOf(el: Element): Element | null {
+  const box = el.getBoundingClientRect();
+  let node: Element | null = el.firstElementChild;
+  let wrapper: Element | null = null;
+  while (node && !node.closest('[data-review-ui]')) {
+    if (!sameBox(node.getBoundingClientRect(), box)) return node;
+    wrapper = wrapper ?? node;
+    node = node.firstElementChild;
+  }
+  return wrapper;
+}

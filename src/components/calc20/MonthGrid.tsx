@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
 import type { MonthEntry, MonthKey, Stream } from '../../domain/types';
 import { useTracker } from './state';
 import { layoutFor, type UiState } from './state';
-import { displayMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { listedMonths, shortMonthName, todayMonth } from '../../domain/months';
 import { isActive, countableFor, estimatedGrossFromHours } from '../../domain/earnings';
 import { money } from '../../domain/format';
 import { gridColumns } from './gridColumns';
@@ -84,7 +84,7 @@ export function MonthGrid({
     if (focusMonth && firstInputRef.current) firstInputRef.current.focus();
   }, [focusMonth]);
 
-  const months = displayMonths(ui.year, ui.hideFuture);
+  const months = listedMonths(ui.year, ui.hideFuture, ui.focusMode);
 
   return (
     <div

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { ArrowRight, ChevronDown, Pause } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
+import { copyFor } from '../domain/copy';
 import { money } from '../domain/format';
 import { streamYearTotal } from '../domain/earnings';
 import { frequencyLabel, payPlan } from '../domain/paySchedule';
 import { todayMonth, yearOf } from '../domain/months';
-import { AddJobButton, Chip } from './ui';
+import { AddJobButton, ButtonRow, Chip } from './ui';
 import type { Stream } from '../domain/types';
 
 export function StreamsPanel({
@@ -18,12 +19,18 @@ export function StreamsPanel({
   fill?: boolean;
 }) {
   const { data, ui, addStream } = useTracker();
+  const words = copyFor(ui.layout);
   const streams = data.streams.filter((s) => s.lifecycle === 'active');
   const archived = data.streams.filter((s) => s.lifecycle !== 'active');
 
   return (
     <section className={compact ? (fill ? 'flex h-full flex-col' : 'flex flex-col') : 'panel p-5 sm:p-6 xl:col-span-6'}>
-      {compact ? null : <h2 className="text-lg font-semibold">Income sources</h2>}
+      {/* Review note: "Income sources, my mind goes blank, just call it
+          Income." A source of income is an income; the extra word named the
+          category the list belongs to rather than the list.
+          The word itself comes from src/domain/copy.ts now, so the next time
+          it changes it changes in the six places it is written. */}
+      {compact ? null : <h2 className="text-lg font-semibold">{words.income}</h2>}
 
       <div className={compact ? (fill ? 'min-h-0 flex-1 overflow-y-auto p-4' : 'p-4') : ''}>
         {streams.length === 0 ? (
@@ -62,10 +69,10 @@ export function StreamsPanel({
         )}
       </div>
 
-      <div className={compact ? 'grid shrink-0 gap-3 border-t border-border p-4 sm:grid-cols-2' : 'mt-4 grid gap-3 sm:grid-cols-2'}>
+      <ButtonRow className={compact ? 'shrink-0 border-t border-border p-4' : 'mt-4'}>
         <AddJobButton type="w2" onClick={() => onOpenStream(addStream('w2'))} />
         <AddJobButton type="ten99" onClick={() => onOpenStream(addStream('ten99'))} />
-      </div>
+      </ButtonRow>
 
       {!compact && archived.length ? (
         <div className="mt-5 border-t border-border pt-4">

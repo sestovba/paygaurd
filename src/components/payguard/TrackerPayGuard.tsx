@@ -14,6 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
+import { copyFor } from '../../domain/copy';
 import { countableFor, streamYearGross } from '../../domain/earnings';
 import { benefitPhase } from '../../domain/trialWork';
 import { attentionFlags } from '../../domain/attention';
@@ -36,9 +37,9 @@ import { ReviewTarget } from '../../review/ReviewTarget';
 type MobileTab = 'jobs' | 'overview' | 'analysis';
 
 const MOBILE_TABS: { id: MobileTab; label: string; Icon: typeof Briefcase }[] = [
-  { id: 'jobs', label: 'Jobs', Icon: Briefcase },
+  { id: 'analysis', label: 'Months', Icon: ShieldCheck },
   { id: 'overview', label: 'TWP / SGA', Icon: PieChart },
-  { id: 'analysis', label: 'Months', Icon: ShieldCheck }
+  { id: 'jobs', label: 'Jobs', Icon: Briefcase }
 ];
 
 export function TrackerPayGuard() {
@@ -54,7 +55,12 @@ export function TrackerPayGuard() {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const [addingMenuOpen, setAddingMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<MobileTab>('jobs');
+  /* Same note, on a phone: the tab you land on is the months, not the job
+     editor — unless there are no jobs yet, in which case adding one is the
+     only thing the months could tell you. */
+  const [mobileTab, setMobileTab] = useState<MobileTab>(
+    () => data.streams.length > 0 ? 'analysis' : 'jobs'
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useTheme(ui.theme);
@@ -120,17 +126,34 @@ export function TrackerPayGuard() {
   // Each mobile tab owns one section; on sm+ every section is always visible.
   const sectionVisibility = (owner: MobileTab) => mobileTab === owner ? 'flex' : 'hidden sm:flex';
 
+  /* Review note: "This whole hero says three things where one would do —
+     show the month, the limit, and the room left."
+     It did say three: a badge reading "$310 above TWP", a headline figure
+     reading "$1,520 this month", and a panel down the right-hand side
+     repeating the limit as a second big number with a paragraph under it.
+     Three readings of one fact, and none of them was the answer.
+     The hero now makes one statement: the month it is about, the room left
+     as the figure, and the limit and the running total as the single line
+     that shows the working. */
   const phaseNeedsReview = phase === 'unknown' || phase === 'verifyComplete';
   const thresholdName = phase === 'trialWork' ? 'TWP' : 'SGA';
   const activeThreshold = phaseNeedsReview ? null : phase === 'trialWork' ? rules.trialWork : rules.sga;
   const currentCountable = combinedFor(asOf);
   const thresholdGap = activeThreshold == null ? null : activeThreshold - currentCountable;
-  const statusTone = phaseNeedsReview ? 'info' : (thresholdGap ?? 0) < 0 ? 'over' : phase === 'trialWork' ? 'twp' : 'safe';
-  const statusText = phaseNeedsReview
-    ? 'Benefit phase needs review'
-    : (thresholdGap ?? 0) < 0
-      ? `${money(Math.abs(thresholdGap!))} above ${thresholdName}`
-      : `${money(thresholdGap ?? 0)} below ${thresholdName}`;
+  const isOver = (thresholdGap ?? 0) < 0;
+  const statusTone = phaseNeedsReview ? 'info' : isOver ? 'over' : phase === 'trialWork' ? 'twp' : 'safe';
+  /* The figure is the room left, not the running total: "how much more can I
+     work" is the question the month is actually asked. The total that got you
+     there is the line underneath. */
+  const heroFigure = phaseNeedsReview ? money(currentCountable) : money(Math.abs(thresholdGap ?? 0));
+  const heroPhrase = phaseNeedsReview
+    ? 'counted so far — no limit is being applied yet'
+    : isOver
+      ? `over your ${thresholdName} limit this month`
+      : `left before you reach the ${thresholdName} limit`;
+  const heroWorking = phaseNeedsReview
+    ? 'Confirm your Trial Work Period status and this becomes a limit you can work to.'
+    : `${money(currentCountable)} counted against the ${money(activeThreshold!)} ${thresholdName} limit.`;
   const thresholdProgress = activeThreshold
     ? Math.min(100, (currentCountable / activeThreshold) * 100)
     : 0;
@@ -139,7 +162,7 @@ export function TrackerPayGuard() {
       : statusTone === 'safe' ? 'var(--pg-safe)' : 'var(--pg-info)';
 
   return (
-    <div className="pg-payguard pg-page-pad min-h-dvh" data-payguard-theme={currentTheme}>
+    <div className="pg-payguard pg-page-pad min-h-dvh" data-chrome-root data-payguard-theme={currentTheme}>
       <a href="#pg-main" className="pg-skip-link">Skip to main content</a>
       <input
         ref={fileInputRef}
@@ -233,27 +256,20 @@ export function TrackerPayGuard() {
         {/* ---------------- Current safety snapshot ---------------- */}
         <section className="pg-status-hero" aria-labelledby="pg-current-status-title">
           <div className="pg-status-hero-main">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="pg-label">{longMonthName(asOf)} countable earnings</span>
-              <span className={`pg-badge pg-badge-${statusTone}`} aria-live="polite">
-                <span className="size-1.5 rounded-full" style={{ background: statusMeterColor }} />
-                {statusText}
-              </span>
-            </div>
+            <h1 id="pg-current-status-title" className="pg-label">
+              {longMonthName(asOf)}
+            </h1>
 
-            <div className="mt-3 flex flex-wrap items-end justify-between gap-x-5 gap-y-2">
-              <div className="min-w-0">
-                <h1 id="pg-current-status-title" className="pg-status-title">Current countable income</h1>
-                <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  <span className="pg-status-amount">{money(currentCountable)}</span>
-                  <span className="text-xs font-semibold pg-muted">this month</span>
-                </div>
-              </div>
-            </div>
+            <p className="mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1" aria-live="polite">
+              <span className="pg-status-amount" style={{ color: statusMeterColor }}>{heroFigure}</span>
+              <span className="pg-status-phrase">{heroPhrase}</span>
+            </p>
 
             <div className="pg-status-track mt-3" aria-hidden="true">
               <span style={{ width: `${thresholdProgress}%`, background: statusMeterColor }} />
             </div>
+
+            <p className="mt-2 text-xs font-semibold pg-muted">{heroWorking}</p>
 
             {/* How much the figure above can be trusted, and the one thing
                 that would improve it. A line under the number, not a panel:
@@ -265,22 +281,9 @@ export function TrackerPayGuard() {
               reading={precisionFor(data, asOf)}
               onFix={(gap) => focusStream(gap.streamId)}
             />
-          </div>
 
-          <div className="pg-status-hero-side">
-            <div>
-              <span className="pg-label">{phaseNeedsReview ? 'Benefit phase' : `${thresholdName} monthly threshold`}</span>
-              <div className="mt-1 pg-figure pg-figure-md">
-                {activeThreshold == null ? 'Review needed' : money(activeThreshold)}
-              </div>
-            </div>
-            <p className="text-xs leading-relaxed pg-muted">
-              {phaseNeedsReview
-                ? 'Confirm your Trial Work Period status before relying on threshold warnings.'
-                : `Based on your selected benefit phase. This is a planning estimate, not an SSA decision.`}
-            </p>
-            <button type="button" className="pg-status-link" onClick={openAnalysis}>
-              Review monthly analysis <ArrowRight className="size-3.5" />
+            <button type="button" className="pg-status-link mt-3" onClick={openAnalysis}>
+              {phaseNeedsReview ? 'Confirm your status' : 'See every month'} <ArrowRight className="size-3.5" />
             </button>
           </div>
         </section>
@@ -294,6 +297,26 @@ export function TrackerPayGuard() {
             workrecord strip; see src/domain/attention.ts. */}
         <MonthAttention onOpenMonth={openAnalysis} />
 
+        {/* ---------------- Analysis ---------------- */}
+        {/* Review note: "This is the most useful thing on the layout — it has
+            the month, the countable figure, the status and the by-hours
+            column. It sits below a chart and two duplicate stat rows. It
+            should be what you land on."
+            So it does. On a wide screen it is the first thing under the
+            status hero and the attention strip; the chart and the job editors
+            follow it rather than gate it. */}
+        <div id="pg-analysis" className={`flex-col scroll-mt-20 ${sectionVisibility('analysis')}`}>
+          <ReviewTarget
+            id="payguard-monthly-analysis"
+            label="Full monthly analysis"
+            reason="Cards, table modes, summary totals, and the simulator repeat the same TWP / SGA facts; this should become a short risk-month list."
+            certainty="sure"
+            layout="payguard"
+          >
+            <PayGuardAnalysis data={data} year={year} focusMode={ui.focusMode} />
+          </ReviewTarget>
+        </div>
+
         {/* ---------------- Overview: chart ---------------- */}
         <div id="pg-overview" className={`flex-col gap-3 sm:gap-4 ${sectionVisibility('overview')}`}>
           <ReviewTarget
@@ -303,7 +326,7 @@ export function TrackerPayGuard() {
             certainty="hunch"
             layout="payguard"
           >
-            <PayGuardChart streams={streams} year={year} />
+            {ui.focusMode ? null : <PayGuardChart streams={streams} year={year} />}
           </ReviewTarget>
         </div>
 
@@ -313,9 +336,16 @@ export function TrackerPayGuard() {
             className={tabsMode && streams.length > 0 ? 'pg-tabgroup' : undefined}
             data-type={tabsMode && selected ? selected.type : undefined}
           >
+          {/* Review note cut this bar. With no jobs yet it was a lone "Add Job"
+              tab sitting an inch above an empty-state card offering the same
+              two buttons in words — the switcher for a set of one thing, which
+              is nothing. It appears when there is something to switch between;
+              until then the empty state below is the only way in, and it is
+              the better one. */}
+          {streams.length > 0 ? (
           <div className="pg-tabbar">
-            <div className="pg-tabs flex-1" role="group" aria-label="Income sources">
-              {tabsMode && streams.length > 0 ? streams.map((s) => {
+            <div className="pg-tabs flex-1" role="group" aria-label={copyFor('payguard').income}>
+              {tabsMode ? streams.map((s) => {
                 const isSelected = selected?.id === s.id;
                 return (
                   <button
@@ -377,6 +407,7 @@ export function TrackerPayGuard() {
               )}
             </div>
           </div>
+          ) : null}
 
           {streams.length ? (
             <div className={tabsMode ? undefined : 'flex flex-col gap-3'}>
@@ -415,18 +446,6 @@ export function TrackerPayGuard() {
           </div>
         </div>
 
-        {/* ---------------- Analysis ---------------- */}
-        <div id="pg-analysis" className={`flex-col scroll-mt-20 ${sectionVisibility('analysis')}`}>
-          <ReviewTarget
-            id="payguard-monthly-analysis"
-            label="Full monthly analysis"
-            reason="Cards, table modes, summary totals, and the simulator repeat the same TWP / SGA facts; this should become a short risk-month list."
-            certainty="sure"
-            layout="payguard"
-          >
-            <PayGuardAnalysis data={data} year={year} />
-          </ReviewTarget>
-        </div>
       </main>
 
       {/* ---------------- Mobile navigation ---------------- */}
@@ -475,9 +494,14 @@ export function TrackerPayGuard() {
 function MonthAttention({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
   const now = todayMonth();
-  const months = monthsOfYear(ui.year).filter((month) => (
-    yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
-  ));
+  /* This strip is about months that have not happened yet, so focus mode
+     narrows it to the one you are in. It renders nothing when that month is
+     fine, which is the same as it always did. */
+  const months = ui.focusMode
+    ? [yearOf(now) === ui.year ? now : `${ui.year}-12`]
+    : monthsOfYear(ui.year).filter((month) => (
+      yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
+    ));
   const flags = attentionFlags(data, months);
   if (!flags.length) return null;
 

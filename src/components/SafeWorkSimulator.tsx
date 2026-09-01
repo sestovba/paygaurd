@@ -41,7 +41,7 @@ function groupPaydayRisks(risks: PaydayRisk[]): string[] {
   });
 }
 
-export function SafeWorkSimulator() {
+export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {
   const { data, ui } = useTracker();
   const asOf = monthsOfYear(ui.year)[11];
   const phase = benefitPhase(data, asOf);
@@ -103,18 +103,30 @@ export function SafeWorkSimulator() {
     }));
   });
 
+  /*
+   * Review notes: "How much more redundant can we be? Holy moly, bad bad bad
+   * design", and "I dont understand at a glance what is the problem I clicked
+   * on simulator and this what the heck as a user".
+   *
+   * Both are the same fault. You press a control that says Open simulator and
+   * get a panel that says WORK PAY SIMULATOR, then a heading saying it cannot
+   * work, then a paragraph saying the same thing a third way — and no way to
+   * fix it from here. The eyebrow is gone (the thing you pressed named it),
+   * the explanation is one clause, and the ask is now a button that opens the
+   * questions rather than a sentence telling you to go and find them.
+   */
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
     return (
       <section className="panel p-4 sm:p-5">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="size-4 shrink-0 text-good" />
-          <p className="label-caps">Safe work simulator</p>
-        </div>
-        <h2 className="display-figure mt-1.5">Confirm TWP status first</h2>
+        <h2 className="display-figure">We need your limit first</h2>
         <p className="type-muted mt-1.5 max-w-prose">
-          A safe-hours calculation needs to know whether your goal is preserving trial work months
-          or staying below SGA.
+          Hours only mean something measured against a limit.
         </p>
+        {onOpenStatus ? (
+          <button type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
+            Answer a few questions
+          </button>
+        ) : null}
       </section>
     );
   }
@@ -123,58 +135,95 @@ export function SafeWorkSimulator() {
     <section className="panel p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 shrink-0 text-good" />
-        <p className="label-caps">Safe work simulator</p>
+        <p className="label-caps">Work pay simulator</p>
       </div>
+      {/* Review notes: "Stay below SGA — Duh", and of the subtitle, "is this
+          helpful?". Both were the panel restating its own job instead of
+          doing it. The heading is the answer now: the number of hours a week
+          to aim for. */}
       <h2 className="display-figure mt-1.5">
-        {phase === 'trialWork' ? 'Preserve a TWP month' : 'Stay below SGA'}
+        Aim for {safeFiveWeekHours.toFixed(1)} hours a week
       </h2>
       <p className="type-muted mt-1 max-w-prose">
-        Safe weekly hours for a five-week stress month. Other countable income comes off first.
+        That holds even in a month that pays you an extra time.
+        {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already taken off.` : ''}
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+      {/* Five fields, three of which nobody can answer. Review note: "this is
+          a simulator, we dont need other income; what is a variance; put
+          there recommended so that user feels assured they dont need to think
+          about that number, same for safety buffer; Planned h/wk is Weekly
+          hours."
+
+          Two questions are left in the open, and they are the two a person
+          actually knows about their own job. Other income is taken from the
+          1099 sources already recorded rather than asked for. The buffer and
+          the variance keep their maths and move behind a disclosure that
+          states its own recommended values, so the answer to "do I need to
+          think about this" is visible without opening it. */}
+      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:max-w-sm">
         <label className="flex flex-col gap-1.5">
           <span className="field-label">Hourly rate</span>
           <NumericInput prefix="$" className="num field-input w-full" value={rate} onCommit={setRate} />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">Planned h/wk</span>
+          <span className="field-label">Weekly hours</span>
           <NumericInput className="num field-input w-full" placeholder="0" value={hoursPerWeek} onCommit={setHoursPerWeek} />
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="field-label">Other income</span>
-          <NumericInput
-            prefix="$"
-            className="num field-input w-full"
-            value={otherIncome}
-            onCommit={(next) => { setOtherIncomeTouched(true); setOtherIncome(next); }}
-          />
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="field-label">Safety buffer %</span>
-          <NumericInput className="num field-input w-full" placeholder="10" value={buffer} onCommit={setBuffer} />
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="field-label">Variance %</span>
-          <NumericInput className="num field-input w-full" placeholder="5" value={variance} onCommit={setVariance} />
         </label>
       </div>
 
-      <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+      <details className="mt-3">
+        <summary className="type-muted cursor-pointer list-none text-base">
+          Safety margins — recommended {bufferValue}% under the limit, {varianceValue}% for a
+          bigger-than-usual paycheck. You do not need to change these.
+        </summary>
+        <div className="mt-3 grid grid-cols-2 gap-2.5 sm:max-w-sm">
+          <label className="flex flex-col gap-1.5">
+            <span className="field-label">Stay this far under</span>
+            <NumericInput className="num field-input w-full" placeholder="10" value={buffer} onCommit={setBuffer} />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="field-label">Allow for a bigger check</span>
+            <NumericInput className="num field-input w-full" placeholder="5" value={variance} onCommit={setVariance} />
+          </label>
+          <label className="col-span-2 flex flex-col gap-1.5">
+            <span className="field-label">Self-employment pay counted this month</span>
+            <NumericInput
+              prefix="$"
+              className="num field-input w-full"
+              value={otherIncome}
+              onCommit={(next) => { setOtherIncomeTouched(true); setOtherIncome(next); }}
+            />
+          </label>
+        </div>
+      </details>
+
+      {/* Review note: "Stress Total is not like the first two sections, its
+          confusing me but communicating some other category." It is not the
+          same kind of thing — the first two are answers about hours, and the
+          third is a consequence of the hours you typed. Sitting all three in
+          one row of identical tiles said they were siblings. Two tiles for
+          the answer; the consequence gets its own line and says out loud that
+          it is about the number you entered. */}
+      <div className="mt-4 grid gap-2.5 sm:grid-cols-2 sm:max-w-md">
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
-          <span className="label-caps">Safest · 5-week month</span>
+          <span className="label-caps">Safest — a month that pays extra</span>
           <span className="display-figure text-good">{safeFiveWeekHours.toFixed(1)} h/wk</span>
         </div>
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
-          <span className="label-caps">Average · 4.35 weeks</span>
+          <span className="label-caps">Acceptable — an ordinary month</span>
           <span className="display-figure">{safeAverageHours.toFixed(1)} h/wk</span>
         </div>
-        <div className={`flex flex-col gap-1 rounded-lg border p-3 ${over ? 'border-destructive/40 bg-destructive/10' : 'border-border bg-surface-2'}`}>
-          <span className="label-caps">5-week stress total</span>
-          <span className={`display-figure ${over ? 'text-destructive' : ''}`}>{money(fiveWeekProjection)}</span>
-          <span className="type-muted text-xs">of {money(safeTarget)} target</span>
-        </div>
       </div>
+
+      <p className={
+        'mt-3 rounded-lg border p-3 text-base '
+        + (over ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-surface-2')
+      }>
+        At <strong>{hoursValue} hours a week</strong>, a month that pays you an extra time comes
+        to <strong>{money(fiveWeekProjection)}</strong> — {over ? 'over' : 'under'} the
+        {' '}{money(safeTarget)} we aim for.
+      </p>
 
       {paydayRisks.length ? (
         <div className="mt-3 flex items-start gap-2 rounded-lg border border-warn/40 bg-warn-soft/60 p-3 text-warn-foreground">

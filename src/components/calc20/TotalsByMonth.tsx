@@ -11,7 +11,7 @@ import type { MonthKey } from '../../domain/types';
 import { useTracker } from './state';
 import { layoutFor } from './state';
 import { money } from '../../domain/format';
-import { displayMonths, formatMonth, shortMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit, yearTotal } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { rulesFor } from '../../domain/rules';
@@ -34,7 +34,7 @@ export function TotalsByMonth({
   const rules = rulesFor(ui.year);
   const phase = benefitPhase(data, `${ui.year}-12`);
 
-  const months = displayMonths(ui.year, ui.hideFuture);
+  const months = listedMonths(ui.year, ui.hideFuture, ui.focusMode);
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
   return (
@@ -42,11 +42,13 @@ export function TotalsByMonth({
       <div className="totals-card__head">
         <span className="totals-card__title">Countable by month</span>
         <span className="stream-card__meta">
+          {/* One limit, never named as a rule — the same wording every other
+              layout uses for this row. */}
           {phase === 'trialWork'
-            ? `TWP month ${money(rules.trialWork)}`
+            ? `Your limit ${money(rules.trialWork)}`
             : phase === 'sga'
-              ? `SGA ${money(rules.sga)}`
-              : 'Confirm TWP status before relying on a limit'}
+              ? `Your limit ${money(rules.sga)}`
+              : 'No limit yet — tell us where you stand'}
         </span>
       </div>
 
@@ -73,7 +75,7 @@ export function TotalsByMonth({
           // The gap to the next line you would cross, when it is close.
           const nearHit = nearLimit(status, phase);
           const near = nearHit
-            ? { text: money(nearHit.room) + (nearHit.kind === 'trial' ? ' to TWP' : ' to SGA'), kind: nearHit.kind }
+            ? { text: `${money(nearHit.room)} to your limit`, kind: nearHit.kind }
             : null;
 
           const extra = extraPay.get(month);
@@ -107,16 +109,16 @@ export function TotalsByMonth({
       <div className="legend">
         {phase === 'trialWork' ? (
           <>
-            <span className="legend__item"><span className="legend__swatch legend__swatch--keep" />TWP month preserved</span>
-            <span className="legend__item"><span className="legend__swatch legend__swatch--spent" />one TWP month used</span>
+            <span className="legend__item"><span className="legend__swatch legend__swatch--keep" />trial work month kept</span>
+            <span className="legend__item"><span className="legend__swatch legend__swatch--spent" />one trial work month used</span>
           </>
         ) : phase === 'sga' ? (
           <>
-            <span className="legend__item"><span className="legend__swatch legend__swatch--keep" />under SGA</span>
-            <span className="legend__item"><span className="legend__swatch legend__swatch--over" />over SGA</span>
+            <span className="legend__item"><span className="legend__swatch legend__swatch--keep" />under your limit</span>
+            <span className="legend__item"><span className="legend__swatch legend__swatch--over" />over your limit</span>
           </>
         ) : (
-          <span className="legend__item">Limits paused until TWP status is confirmed</span>
+          <span className="legend__item">No limit is shown until you tell us where you stand</span>
         )}
         <span className="grow" />
         <span className="legend__item">

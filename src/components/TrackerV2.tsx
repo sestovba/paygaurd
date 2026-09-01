@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Menu, Settings } from 'lucide-react';
 import { BrandMark } from './ui';
 import { useTracker } from '../state/TrackerProvider';
+import { copyFor } from '../domain/copy';
 import { useTheme } from '../theme';
 import { knownYears } from '../domain/rules';
 import { SafetyHero } from './SafetyHero';
@@ -100,7 +101,7 @@ export function TrackerV2() {
     ) : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" data-chrome-root>
       <header className="sticky top-0 z-10 border-b border-border/70 bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-10">
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -163,7 +164,10 @@ export function TrackerV2() {
           ) : page === 'overview' ? (
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
-                <p className="label-caps text-accent-foreground">TWP, SGA &amp; 3-/5-paycheck months</p>
+                {/* Review note: "I cant follow that title, its jargon and
+                    abbreviations." It was three of them in a row over the one
+                    screen someone opens when they are worried. */}
+                <p className="label-caps text-accent-foreground">Where you stand this month</p>
                 <ActionBanner
                   onSetPayday={(id) => setDetail({ kind: 'payday', streamId: id })}
                   onReviewStream={(id) => setDetail({ kind: 'stream', streamId: id })}
@@ -177,7 +181,11 @@ export function TrackerV2() {
                       ? { kind: 'payday', streamId: gap.streamId }
                       : { kind: 'stream', streamId: gap.streamId })}
                   />
-                  <PaycheckRadar onOpenMonth={(m) => setDetail({ kind: 'month', month: m })} onCheckNotifications={() => setNotificationsOpen(true)} />
+                  <PaycheckRadar
+                    onOpenMonth={(m) => setDetail({ kind: 'month', month: m })}
+                    onCheckNotifications={() => setNotificationsOpen(true)}
+                    onSetPayday={(streamId) => setDetail({ kind: 'payday', streamId })}
+                  />
                 </div>
               </div>
               <ReviewTarget
@@ -188,7 +196,12 @@ export function TrackerV2() {
                 layout="v2"
               >
                 <div className="flex flex-col gap-3">
-                  <p className="label-caps text-accent-foreground">Full-year history</p>
+                  {/* "Full-year history" over a single tile is a lie focus mode
+                      tells; MonthGrid names the month itself in that mode, so
+                      this caption steps aside rather than contradict it. */}
+                  {ui.focusMode ? null : (
+                    <p className="label-caps text-accent-foreground">Full-year history</p>
+                  )}
                   <MonthGrid onOpenMonth={(m) => setDetail({ kind: 'month', month: m })} />
                   <YearTotal />
                 </div>
@@ -207,7 +220,7 @@ export function TrackerV2() {
                 </div>
                 <div className={(incomeSelectedId ? '' : 'hidden ') + 'min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-surface sm:block'}>
                   {incomeSelectedId ? (
-                    <StreamSheet streamId={incomeSelectedId} onClose={() => setIncomeSelectedId(null)} variant="inline" backLabel="Income sources" />
+                    <StreamSheet streamId={incomeSelectedId} onClose={() => setIncomeSelectedId(null)} variant="inline" backLabel={copyFor(ui.layout).income} />
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-1 p-8 text-center">
                       <p className="text-base font-medium">Select or add an income source.</p>

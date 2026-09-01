@@ -158,49 +158,6 @@ body.review-picking * {
   gap: 0.25rem;
 }
 
-/* The path from the audited card down to what is selected. Clicking a step
- * widens the aim to it, so a flag lands on the stat and not on the card. */
-.review-aim {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
-  overflow-x: auto;
-  border-bottom: 1px solid rgb(255 255 255 / 0.12);
-  padding: 0 0.15rem 0.25rem;
-}
-
-.review-aim button {
-  flex: none;
-  border-radius: 0.3rem;
-  padding: 0.1rem 0.3rem;
-  color: rgb(255 255 255 / 0.5);
-  font: 600 0.6875rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-  cursor: pointer;
-}
-
-.review-aim button + button::before {
-  margin-right: 0.25rem;
-  content: '›';
-  opacity: 0.45;
-}
-
-.review-aim button:hover {
-  background: rgb(255 255 255 / 0.12);
-  color: white;
-}
-
-.review-aim button[data-on='true'] {
-  background: var(--review-blue);
-  color: white;
-}
-
-.review-aim-size {
-  margin-left: auto;
-  padding-left: 0.4rem;
-  color: rgb(255 255 255 / 0.4);
-  font: 500 0.625rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
 .review-actions kbd {
   border-radius: 0.2rem;
   background: rgb(255 255 255 / 0.16);
@@ -8960,7 +8917,10 @@ body.review-picking * {
  */
 
 .review-actions {
-  max-width: min(24rem, calc(100vw - 1rem));
+  /* 24rem left the path a 140px window once the label, the two step buttons
+     and the size were on the row — two steps visible out of eight, on the one
+     control whose whole job is showing where the aim sits in the chain. */
+  max-width: min(27rem, calc(100vw - 1rem));
   gap: 0;
   border: 1px solid var(--review-line-2);
   border-radius: 0.625rem;
@@ -8983,16 +8943,6 @@ body.review-picking * {
   overflow: visible;
   border-bottom: 1px solid var(--review-line);
   padding: 0.3rem 0.3rem 0.3rem 0.55rem;
-}
-
-.review-aim-label {
-  flex: none;
-  color: var(--review-text-3);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 .review-aim-path {
@@ -9026,15 +8976,6 @@ body.review-picking * {
 .review-aim button[data-on='true'] {
   background: var(--review-blue);
   color: #fff;
-}
-
-.review-aim-size {
-  flex: none;
-  margin: 0;
-  padding: 0;
-  color: var(--review-text-3);
-  font: 500 0.625rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-variant-numeric: tabular-nums;
 }
 
 .review-actions .review-aim-close {
@@ -12235,3 +12176,208 @@ body.review-picking * {
   white-space: nowrap;
 }
 .review-closeall:hover { background: color-mix(in oklab, currentColor 20%, transparent); }
+
+/* "N more on other screens". Shown under the list, not only when the list is
+   empty: a screen holding two notes out of eighty-seven looks complete until
+   you count them. Reads as a quiet aside, not a warning — nothing is wrong,
+   the other notes are simply filed under another layout. */
+.review-panel-elsewhere {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #64748b;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.review-panel-elsewhere:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+/* The selection bar is a handle. Grab anywhere on it that is not a button. */
+.review-aim { cursor: grab; touch-action: none; }
+.review-aim:active { cursor: grabbing; }
+.review-aim button { cursor: pointer; }
+
+/* Once moved it is furniture the reviewer placed, so it stops re-deciding
+   where it should be and simply stays there. */
+.review-actions[data-moved] { transition: none; }
+
+/* The card grows out of the point that was clicked. Short and eased-out: it
+   is a hand-off from the thing you pressed to the thing that opened, not an
+   entrance. The origin itself is set inline, in the card's own coordinates. */
+@keyframes review-compose-in {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.review-composer-scrim[data-anchored] .review-compose {
+  animation: review-compose-in 150ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-composer-scrim[data-anchored] .review-compose { animation: none; }
+}
+
+/* --- The outline on the page, on any page ---------------------------------
+ *
+ * These two are drawn over the app, not over the console's own chrome, so
+ * they cannot use the palette the chrome uses. `--review-blue-lit` is lifted
+ * for a near-black ground and goes pale and uncertain on the light layouts —
+ * which is most of them.
+ *
+ * The fix is not another colour per theme, because the console has no idea
+ * what it is floating over: a white hairline outside the coloured one gives
+ * the same edge two contrasts at once, so it separates from a dark surface
+ * and a light one without either being named.
+ */
+.review-outline-hover {
+  outline: 2px dashed var(--review-blue);
+  background: rgb(47 102 245 / 0.08);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.8), 0 0 0 3px rgb(15 23 42 / 0.12);
+}
+
+.review-outline-picked {
+  outline: 2px solid var(--review-blue);
+  background: rgb(47 102 245 / 0.12);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.85), 0 0 0 3px rgb(15 23 42 / 0.16);
+}
+
+/* The label rides the same edge, so it needs the same separation. */
+.review-outline-tag {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.8);
+}
+
+/* --- Every console surface states its own text colour ---------------------
+ *
+ * The console floats over the app, so anything it does not set it inherits
+ * from whatever layout is underneath. Its own chrome is near-black, and the
+ * light layouts hand down near-black text — so any element in here without an
+ * explicit colour rendered black on black, and the exact failure moved around
+ * as you switched screens, because each layout inherits a different colour.
+ *
+ * Set on the floating roots rather than on every element: an inherited value
+ * only applies where the child has none of its own, so nothing that already
+ * chose a colour is touched by this.
+ */
+.review-actions,
+.review-compose,
+.review-composer,
+.review-composer-scrim,
+.review-dock,
+.review-dock-tools,
+.review-drag-chip,
+.review-mdock,
+.review-nest,
+.review-outline,
+.review-panel,
+.review-rail,
+.review-rail-tab,
+.review-stack,
+.review-stash-float,
+.review-toast,
+.review-tray,
+.review-walkthrough-hud,
+/* The audit bar sits inside `.review-target`, which deliberately does not
+   appear in this list: that wrapper holds the app's own content and must go
+   on inheriting the app's colour. Its toolbar is console chrome and must
+   not. */
+.review-target-tools {
+  color: var(--review-text, rgb(255 255 255 / 0.92));
+}
+
+/* --- Wider / Back: the two keys as buttons ---------------------------------
+ *
+ * The pair sits at the head of the path, before the steps it moves between,
+ * and wears its own key face. It is one control with two ends, so it is drawn
+ * as one pill split down the middle rather than two loose buttons — the same
+ * shape as the archive group further down the bar.
+ */
+
+.review-aim-step {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.05rem;
+  border: 1px solid var(--review-line, rgb(255 255 255 / 0.14));
+  border-radius: 0.3rem;
+  padding: 0.05rem;
+}
+
+.review-actions .review-aim-step button {
+  display: flex;
+  min-height: 1.25rem;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 0.2rem;
+  padding: 0 0.25rem;
+  color: var(--review-text-3, rgb(255 255 255 / 0.55));
+}
+
+/* The path draws a `›` between adjacent steps, which is right there and wrong
+   here: these two are one control, not two steps in a chain. */
+.review-aim-step button + button::before {
+  content: none;
+}
+
+.review-actions .review-aim-step button:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+
+/* At the top or the bottom of the chain. Still drawn, because the pair is
+   also the label that says these two keys exist. */
+.review-actions .review-aim-step button:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.review-actions .review-aim-step kbd {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: 600 0.625rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.8;
+}
+
+/* The route back down, past the current step: where [ will land, in order.
+   Faint, because it is history rather than the aim — but a real button, so
+   the whole walk can be undone in one click instead of several presses. */
+.review-actions .review-aim-path button[data-back] {
+  color: var(--review-text-3, rgb(255 255 255 / 0.4));
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.review-actions .review-aim-path button[data-back]:hover {
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+  opacity: 1;
+}
+
+/* A finger cannot press a bracket key, so on a phone these two are the only
+   way to widen and narrow: give them the same target size as the path steps. */
+@media (max-width: 40rem) {
+  .review-actions .review-aim-step button {
+    min-height: 1.75rem;
+    padding: 0 0.4rem;
+  }
+}
+
+/* The two aim keys, on the hover label. Faint, and after the name — the label
+   answers "what is this?" first, and only then offers the way to change it. */
+.review-outline-keys {
+  margin-left: 0.35rem;
+  border-left: 1px solid rgb(255 255 255 / 0.35);
+  padding-left: 0.35rem;
+  font-size: 0.9em;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}

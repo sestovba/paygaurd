@@ -42,7 +42,7 @@ export function TrackerClassic() {
   const yearIndex = years.indexOf(ui.year);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" data-chrome-root>
       <header className="sticky top-0 z-10 border-b border-border/70 bg-background/85 backdrop-blur">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6 lg:px-10">
           <BrandMark onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
@@ -98,7 +98,11 @@ export function TrackerClassic() {
                 ? setPaydayStreamId(gap.streamId)
                 : setOpenStreamId(gap.streamId))}
             />
-            <PaycheckRadar onOpenMonth={setOpenMonth} onCheckNotifications={() => setNotificationsOpen(true)} />
+            <PaycheckRadar
+              onOpenMonth={setOpenMonth}
+              onCheckNotifications={() => setNotificationsOpen(true)}
+              onSetPayday={setPaydayStreamId}
+            />
           </div>
           <ReviewTarget
             id="classic-month-grid"

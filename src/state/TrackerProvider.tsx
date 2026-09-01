@@ -92,7 +92,13 @@ function newActivity(message: string) {
 function newStream(type: StreamType): Stream {
   return {
     id: newId(),
-    name: type === 'w2' ? 'New job' : 'New 1099 work',
+    /* Review note: "'1099' is on our own banned list and here it is as the
+       default name we hand people... 'Delivery or gig work' is what I tapped
+       to create it, and that is what it should be called until I rename it."
+       Both defaults now echo the button that made them (see AddJobButton in
+       components/ui.tsx). This is the only place a stream is created —
+       calc20's store delegates to it — so the other layouts get it too. */
+    name: type === 'w2' ? 'New job' : 'Delivery or gig work',
     type,
     activeFrom: todayMonth(),
     activeTo: null,

@@ -16,9 +16,13 @@ export function TwpStatusForm() {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Review note: "this is making me tired to read... they dont want to
+          think hard and want an easy explanation, we are failing in
+          communication." Two clauses: where to look it up, and why it is
+          worth looking up rather than guessing. */}
       <InfoNote>
-        Base this on your benefit letters, SSA record, or personal history
-        rather than memory alone — it drives every limit warning from here.
+        Check a benefit letter if you have one. A guess here makes every limit
+        on the other screens a guess too.
       </InfoNote>
 
       <TwpStatusPicker

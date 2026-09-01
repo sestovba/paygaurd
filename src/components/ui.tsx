@@ -79,10 +79,10 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div
-      className={
-        'seg '
-        + (columns === 5 ? 'grid-cols-2 sm:grid-cols-5' : columns === 4 ? 'grid-cols-2 sm:grid-cols-4' : columns === 3 ? 'grid-cols-3' : 'grid-cols-2')
-      }
+      className="seg"
+      /* How many across it would like to be. Whether it gets that many is
+         settled by the labels and the width — see `seg` in index.css. */
+      style={{ '--seg-cols': columns ?? 2 } as React.CSSProperties}
     >
       {options.map((option) => (
         <button
@@ -179,20 +179,39 @@ export function SwatchPicker<T extends string>({
   );
 }
 
+/**
+ * A row of buttons that decides for itself whether to sit side by side or
+ * stack, from the length of the labels rather than from a breakpoint. See
+ * `.btn-row` in index.css for the reasoning; this is just the element so
+ * call sites stop hand-rolling a grid each.
+ */
+export function ButtonRow({ children, className = '' }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <div className={'btn-row ' + className}>{children}</div>;
+}
+
 export function AddJobButton({
   type, onClick
 }: {
   type: 'w2' | 'ten99';
   onClick: () => void;
 }) {
+  /* Not "W-2 job" and "1099 work". Those are categories on a tax form, and
+     somebody delivering for DoorDash does not know they are the second one —
+     so they pick the first, and lose the mileage deduction that only the
+     second one has. */
+  const label = type === 'w2' ? 'A job that pays me' : 'Delivery or gig work';
   return (
     <button
       type="button"
       onClick={onClick}
+      title={label}
       className={'add-job ' + (type === 'w2' ? 'text-good hover:bg-good-soft' : 'text-info hover:bg-info-soft')}
     >
-      <Plus className="size-5" />
-      {type === 'w2' ? 'W-2 job' : '1099 work'}
+      <Plus className="size-5 shrink-0" />
+      <span className="btn-label">{label}</span>
     </button>
   );
 }

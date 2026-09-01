@@ -6,7 +6,11 @@ import type { ReactNode } from 'react';
  *  something else in the app. */
 export function InfoNote({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-lg bg-accent/60 p-3.5 text-base text-accent-foreground">
+    <div
+      /* A stable hook so a layout can dress its own notes — see plan.css. */
+      data-note=""
+      className="flex items-start gap-2.5 rounded-lg bg-accent/60 p-3.5 text-base text-accent-foreground"
+    >
       <Info className="mt-0.5 size-5 shrink-0" />
       <p className="leading-relaxed">{children}</p>
     </div>

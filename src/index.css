@@ -316,9 +316,26 @@
   transform: translateX(0);
 }
 
+/*
+ * Segmented control.
+ *
+ * It was a grid of N equal columns, N fixed by the caller. At a phone's
+ * width — and the root font is 18px there, not 16 — three columns leaves
+ * about 75px a segment, and "I work here" came out as three stacked words
+ * in a box twice the height of its neighbours. A control cannot be told how
+ * many columns it has, because that depends on the labels and the width.
+ *
+ * So: the caller says how many columns it would *like* (--seg-cols), each
+ * segment asks for that share, and no segment is ever narrower than its own
+ * label — it wraps to the next line instead. Same rule as .btn-row, and no
+ * breakpoints, for the same reason.
+ */
 @utility seg {
-  display: grid;
-  gap: 0.25rem;
+  --seg-cols: 2;
+  --seg-gap: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--seg-gap);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background-color: var(--surface-2);
@@ -326,12 +343,21 @@
 }
 
 @utility seg-item {
+  flex: 1 1 calc((100% - (var(--seg-cols) - 1) * var(--seg-gap)) / var(--seg-cols));
+  /* The floor is the label itself: a segment never gets narrower than the
+     words in it, it moves to the next line instead. (`max-content` is a
+     keyword, not a length, so it cannot be wrapped in a min() with 100% —
+     that whole declaration would be dropped and the floor would silently
+     become min-content, which is one word wide. A label longer than the
+     whole control is a copy problem, and this app has a rule about that.) */
+  min-width: max-content;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   padding: 0.625rem 0.75rem;
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.25;
+  text-align: center;
   color: var(--muted-foreground);
   transition: color 150ms, background-color 150ms, border-color 150ms;
 }
@@ -458,6 +484,51 @@
   transition: background-color 150ms;
 }
 
+/*
+ * A row of buttons that takes the shape of its content.
+ *
+ * Review note: "buttons should take shape of content and stack if too long so
+ * that if its one word button it can be side by side but when more content is
+ * added it stacks — min width max width, ellipsis, all that stuff should be
+ * standard across."
+ *
+ * Every call site was solving this by hand and solving it differently:
+ * `grid sm:grid-cols-2` puts two buttons side by side at a fixed breakpoint
+ * whatever their labels say, so "Add" and "Add" get a whole row each on a
+ * phone while "A job that pays me" and "Delivery or gig work" are jammed into
+ * halves on a tablet. Neither decision has anything to do with the screen; it
+ * is the words that do or do not fit.
+ *
+ * So the rule is written once, in content terms. Each button asks for its own
+ * natural width, is allowed to grow into free space, and refuses to go below
+ * a readable minimum — at which point flex-wrap does the stacking. No
+ * breakpoints, because there is no width at which the answer is the same for
+ * every label.
+ */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.btn-row > * {
+  flex: 1 1 auto;
+  /* The floor. Narrower than this and a label is not worth reading, so the
+     row wraps instead. */
+  min-width: min(11rem, 100%);
+  max-width: 100%;
+}
+
+/* Long single labels truncate rather than reflow a button into three lines.
+   The full text stays reachable through the element's own title. */
+.btn-row > * > .btn-label,
+.btn-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @utility icon-btn {
   height: 2.75rem;
   width: 2.75rem;
@@ -580,118 +651,18 @@
 
 /* --- How much the figure above is worth ------------------------------------
  *
- * A line under the headline number saying what the app can actually promise
- * about it, and the one thing that would improve it. Not a panel: precision
- * is a property of an answer, not a room in the app, and a data-quality card
- * would be one more section competing with the month.
- *
- * It sits back on purpose. This is a footnote on a number until you want it,
- * and then it is a button that opens the field it is asking for.
+ * Moved to styles/chrome.css with the toast and the bell, and for the same
+ * reason: every layout renders it, so it cannot be painted in this file's
+ * tokens. It had grown four copies of one rule — here, ledger, payguard and
+ * calc20 — and calc20's asked for --pg-fg-dim, which does not exist there, so
+ * it was falling back to a hardcoded slate that belongs to no layout at all.
  */
-.precision-line {
-  display: flex;
-  width: 100%;
-  align-items: baseline;
-  gap: 0.4rem;
-  border: 0;
-  border-radius: var(--radius-sm);
-  margin-top: 0.75rem;
-  background: transparent;
-  padding: 0.25rem 0;
-  color: var(--color-muted-foreground);
-  font-size: 0.75rem;
-  line-height: 1.45;
-  text-align: left;
-}
-
-.precision-line > svg {
-  position: relative;
-  top: 0.15rem;
-}
-
-.precision-level {
-  flex: none;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.precision-why {
-  min-width: 0;
-}
-
-/* Estimated is the one worth acting on, so it is the one that carries any
-   colour at all. The other two are statements of fact. */
-.precision-line[data-level='estimated'] .precision-level {
-  color: var(--color-warn);
-}
-
-.precision-line[data-level='exact'] .precision-level {
-  color: var(--color-good);
-}
-
-/* Pressable, where there is a source editor to open. */
-.precision-line[data-fix] {
-  padding-inline: 0.5rem;
-  margin-inline: -0.5rem;
-  cursor: pointer;
-  transition: background-color 140ms, color 140ms;
-}
-
-.precision-line[data-fix]:hover {
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  color: var(--color-foreground);
-}
 
 /* ------------------------------------------------------------------ */
-/* Toasts                                                              */
+/* Toasts, the bell, the notifications panel                           */
 /* ------------------------------------------------------------------ */
 /*
- * Transient confirmation of an edit. This existed only in calc20, styled
- * inside that layout's header flow; the other six layouts render it at the
- * root, so they need a fixed plate. calc20 keeps its own placement — see the
- * `position: static` override in calc20.css — and only the six inherit this.
+ * Moved to styles/chrome.css. They are not base-theme components — they are
+ * rendered inside all ten layouts, so they draw from the --chrome-* contract
+ * each layout answers rather than from this file's tokens.
  */
-.toast-stack {
-  position: fixed;
-  z-index: 60;
-  left: 50%;
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: min(26rem, calc(100vw - 2rem));
-  pointer-events: none;
-}
-
-.toast-stack > * { pointer-events: auto; }
-
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg, 0.75rem);
-  background: var(--color-popover, var(--color-card));
-  color: var(--color-popover-foreground, var(--color-foreground));
-  font-size: 0.875rem;
-  line-height: 1.45;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
-}
-
-.toast__text { flex: 1 1 auto; min-width: 0; }
-
-.toast__action {
-  flex: 0 0 auto;
-  min-height: 2rem;
-  padding: 0 0.7rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--color-foreground);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-.toast__action:hover { background: var(--color-accent); }

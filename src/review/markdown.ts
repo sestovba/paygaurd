@@ -68,8 +68,14 @@ function renderNote(note: ReviewNote): string {
     note.tray?.name ? `\n  - Stash named "${note.tray.name}"` : '',
     note.stow ? `\n  - Archived on the ${note.stow.edge} shelf (off the page in the app, still in the code)` : '',
     note.hidden ? '\n  - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.' : '',
+    /* `reason` is why the note exists at all, and only a delete note is
+       proposing a cut. Saying "I propose cutting it" over a task or a comment
+       claimed something the note never said — and the notepad convention in
+       CLAUDE.md puts a `reason` on every task Claude files for itself, so it
+       said it about most of them. */
     note.reason
-      ? `\n  - I propose cutting it${note.certainty ? ` (${note.certainty})` : ''}: ${note.reason}`
+      ? `\n  - ${note.kind === 'delete' ? 'I propose cutting it' : 'Raised by'}`
+        + `${note.certainty ? ` (${note.certainty})` : ''}: ${note.reason}`
       : '',
     note.effort ? `\n  - Effort: ${note.effort}` : '',
     // Listed as plain repo paths so a code pass can open them directly.

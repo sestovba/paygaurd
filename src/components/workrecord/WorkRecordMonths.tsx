@@ -8,7 +8,7 @@
 import type { MonthKey } from '../../domain/types';
 import { useTracker } from '../../state/TrackerProvider';
 import { money } from '../../domain/format';
-import { displayMonths, formatMonth, shortMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit, yearTotal } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { rulesFor } from '../../domain/rules';
@@ -28,14 +28,16 @@ export function WorkRecordMonths({
   const now = todayMonth();
   const rules = rulesFor(ui.year);
   const phase = benefitPhase(data, `${ui.year}-12`);
-  const months = displayMonths(ui.year, ui.hideFuture);
+  const months = listedMonths(ui.year, ui.hideFuture, ui.focusMode);
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
+  /* One limit, never named as a rule. Which regime is in force decides the
+     figure; the reader is never told there are two. */
   const limitLabel = phase === 'trialWork'
-    ? `TWP month ${money(rules.trialWork)}`
+    ? `Your limit ${money(rules.trialWork)}`
     : phase === 'sga'
-      ? `SGA ${money(rules.sga)}`
-      : 'Confirm TWP status before relying on a limit';
+      ? `Your limit ${money(rules.sga)}`
+      : 'No limit yet — tell us where you stand';
 
   return (
     <div className="pg-card overflow-hidden">
@@ -65,7 +67,7 @@ export function WorkRecordMonths({
             const extraText = extra ? extraPaycheckLabel(extra.counts) : null;
 
             const note = near
-              ? { kind: near.kind, text: money(near.room) + (near.kind === 'trial' ? ' to TWP' : ' to SGA') }
+              ? { kind: near.kind, text: `${money(near.room)} to your limit` }
               : extraText
                 ? { kind: 'pay' as const, text: extraText }
                 : null;
@@ -105,23 +107,23 @@ export function WorkRecordMonths({
         {phase === 'trialWork' ? (
           <>
             <span className="wr-legend-item">
-              <span className="wr-legend-swatch" data-fill="keep" />TWP month preserved
+              <span className="wr-legend-swatch" data-fill="keep" />trial work month kept
             </span>
             <span className="wr-legend-item">
-              <span className="wr-legend-swatch" data-fill="spent" />one TWP month used
+              <span className="wr-legend-swatch" data-fill="spent" />one trial work month used
             </span>
           </>
         ) : phase === 'sga' ? (
           <>
             <span className="wr-legend-item">
-              <span className="wr-legend-swatch" data-fill="keep" />under SGA
+              <span className="wr-legend-swatch" data-fill="keep" />under your limit
             </span>
             <span className="wr-legend-item">
-              <span className="wr-legend-swatch" data-fill="over" />over SGA
+              <span className="wr-legend-swatch" data-fill="over" />over your limit
             </span>
           </>
         ) : (
-          <span className="wr-legend-item">Limits paused until TWP status is confirmed</span>
+          <span className="wr-legend-item">No limit is shown until you tell us where you stand</span>
         )}
 
         <span className="flex-1" />
@@ -129,7 +131,7 @@ export function WorkRecordMonths({
         <ReviewTarget
           id="workrecord-months-year-total"
           label="Monthly-history year total"
-          reason="The total repeats the headline and can hide a single risky TWP or SGA month."
+          reason="The total repeats the headline and can hide the one month that went over."
           certainty="sure"
           layout="workrecord"
         >

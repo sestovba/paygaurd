@@ -3671,6 +3671,10 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   font-size: 13px;
   line-height: 1.45;
   box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
+  /* The shared rule draws a hairline in --chrome-border, which is this
+     layout's page line — a light stroke meant for paper, on a dark ink
+     plate. Say what the edge is here instead of inheriting one. */
+  border-color: rgba(255, 255, 255, .12);
 }
 
 /* Same --ink base as .topbar itself, so undifferentiated there — a
@@ -6108,26 +6112,9 @@ html.pg-calc20, .pg-calc20 body, .pg-calc20 .app-shell {
    with every other layout; only the paint is calc20's. */
 .calc20-precision { padding: 0.25rem 0.75rem 0.5rem; }
 
-.pg-calc20 .precision-line,
-.calc20-precision .precision-line {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  text-align: left;
-  color: var(--pg-fg-dim, #64748b);
-}
-.calc20-precision .precision-level {
-  flex: 0 0 auto;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-.calc20-precision .precision-line[data-level='estimated'] { color: var(--pg-warn-text, #b45309); }
-.calc20-precision .precision-line[data-level='scheduled'] { color: var(--pg-info-text, #2563eb); }
-.calc20-precision .precision-line[data-level='exact'] { color: var(--pg-safe-text, #15803d); }
+/* Structure and colour come from styles/chrome.css, which this layout
+   answers with its own tokens. This block used to ask for --pg-fg-dim and
+   --pg-warn-text — payguard's, undefined here — and so painted itself in the
+   hex fallbacks beside them, which belong to no theme in the app. */
+.pg-calc20 .precision-line { font-size: 0.6875rem; line-height: 1.4; }
+.pg-calc20 .precision-level { text-transform: uppercase; }

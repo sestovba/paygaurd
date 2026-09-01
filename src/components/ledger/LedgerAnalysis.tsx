@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
-import { longMonthName, monthsOfYear, todayMonth } from '../../domain/months';
+import { longMonthName, listedMonths, todayMonth } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
 import { paycheckContextForMonth } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
@@ -29,18 +29,21 @@ function statusKind(status: MonthStatus, phase: BenefitPhase): StatusKind {
   return 'safe';
 }
 
+/* One limit at a time, and named without its abbreviation: the reader is
+   only ever under one regime and does not need the other one's initials. */
 function remainingLabel(status: MonthStatus, phase: BenefitPhase): string {
   if (status.countable <= 0 && !status.isServiceMonth) return '';
-  if (phase === 'unknown' || phase === 'verifyComplete') return 'Confirm TWP status';
+  if (phase === 'unknown' || phase === 'verifyComplete') return 'Status not set';
   if (phase === 'sga') {
-    return status.overSga ? 'Over SGA' : status.roomToSga != null ? `${money0(status.roomToSga)} to SGA` : '';
+    return status.overSga ? 'Over your limit'
+      : status.roomToSga != null ? `${money0(status.roomToSga)} left` : '';
   }
-  if (status.isServiceMonth) return 'TWP month used';
-  return status.roomToTrialWork != null ? `${money0(status.roomToTrialWork)} to TWP` : '';
+  if (status.isServiceMonth) return 'Trial work month used';
+  return status.roomToTrialWork != null ? `${money0(status.roomToTrialWork)} left` : '';
 }
 
 const KIND_LABEL: Record<StatusKind, string> = {
-  none: 'No Income', review: 'Status Pending', safe: 'Safe', warn: 'Near Limit', twp: 'TWP Used', over: 'Over SGA'
+  none: 'No income', review: 'Status not set', safe: 'Under', warn: 'Close', twp: 'Trial work month', over: 'Over limit'
 };
 
 function statusColor(kind: StatusKind): string {
@@ -58,17 +61,27 @@ function deltaToLimit(value: number, limit: number): string {
 
 type Mode = 'table' | 'cards' | 'activeOnly';
 
-export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number }) {
+export function LedgerAnalysis({ data, year, focusMode = false }: {
+  data: TrackerData; year: number; focusMode?: boolean;
+}) {
   const [mode, setMode] = useState<Mode>('table');
   const [simulatorOpen, setSimulatorOpen] = useState(false);
-  const view = mode === 'cards' ? 'cards' : 'table';
-  const onlyIncome = mode === 'activeOnly';
+  /* Review note: "now that we have only september, I am not sure what should
+     be here."
+     Table, Cards and Active Only are three ways of reading twelve months.
+     Focus mode leaves one, and all three collapse onto the same single row —
+     a switch with three positions and one outcome. So in focus mode the
+     switch is not offered and the month is drawn as the card, which is the
+     rendering that reads well on its own; a one-row table is a header with a
+     row under it. */
+  const view = focusMode ? 'cards' : mode === 'cards' ? 'cards' : 'table';
+  const onlyIncome = !focusMode && mode === 'activeOnly';
   const rules = rulesFor(year);
   const now = todayMonth();
   const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
   const analysisPhase = benefitPhase(data, asOf);
 
-  const cards = useMemo(() => monthsOfYear(year).map((month) => {
+  const cards = useMemo(() => listedMonths(year, false, focusMode).map((month) => {
     const status = monthStatus(data, month);
     const phase = benefitPhase(data, month);
     const w2 = data.streams.filter((s) => s.type === 'w2').reduce((sum, s) => sum + countableFor(s, month), 0);
@@ -78,29 +91,33 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
     const threshold = phase === 'trialWork' ? rules.trialWork : rules.sga;
     const pct = threshold ? Math.min(100, (status.countable / threshold) * 100) : 0;
     return { month, status, kind, w2, se, context, pct, label: remainingLabel(status, phase) };
-  }), [data, year, rules]);
+  }), [data, year, rules, focusMode]);
 
   const visible = onlyIncome ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth) : cards;
 
   return (
     <div className="lg-analysis">
       <div className="lg-analysis-pad flex flex-wrap items-center gap-2.5 pb-3 pt-5">
-        <span className="lg-sans text-lg font-semibold">Monthly SSDI Analysis</span>
+        <span className="lg-sans text-lg font-semibold">
+          {focusMode && visible.length === 1 ? longMonthName(visible[0].month) : 'Month by month'}
+        </span>
         <span className="lg-label">All streams combined</span>
-        <ReviewTarget
-          id="ledger-analysis-view-modes"
-          label="Three views of one table"
-          reason="Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question."
-          certainty="sure"
-          layout="ledger"
-          className="ml-auto w-full sm:w-auto"
-        >
-          <div className="lg-seg w-full sm:w-auto">
-            <button type="button" data-on={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</button>
-            <button type="button" data-on={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</button>
-            <button type="button" data-on={mode === 'activeOnly'} className="lg-seg-item" onClick={() => setMode('activeOnly')}>Active Only</button>
-          </div>
-        </ReviewTarget>
+        {focusMode ? null : (
+          <ReviewTarget
+            id="ledger-analysis-view-modes"
+            label="Three views of one table"
+            reason="Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question."
+            certainty="sure"
+            layout="ledger"
+            className="ml-auto w-full sm:w-auto"
+          >
+            <div className="lg-seg w-full sm:w-auto">
+              <button type="button" data-on={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</button>
+              <button type="button" data-on={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</button>
+              <button type="button" data-on={mode === 'activeOnly'} className="lg-seg-item" onClick={() => setMode('activeOnly')}>Active Only</button>
+            </div>
+          </ReviewTarget>
+        )}
       </div>
 
       <div className="lg-analysis-pad flex flex-wrap gap-x-5 gap-y-1.5 pb-1">
@@ -109,19 +126,26 @@ export function LedgerAnalysis({ data, year }: { data: TrackerData; year: number
             <span className="lg-swatch lg-swatch-muted" /> Confirm TWP status to turn limit warnings on
           </span>
         ) : (
+          /* One limit at a time — the same rule the overview layouts follow.
+             This legend named both regimes at once, so half of it was always
+             about a rule that does not apply to the reader. */
           <>
             <span className="lg-legend-item">
-              <span className="lg-swatch lg-swatch-safe" /> Safe &lt;{money2(rules.trialWork)}
+              <span className="lg-swatch lg-swatch-safe" /> Under{' '}
+              {money2(analysisPhase === 'trialWork' ? rules.trialWork : rules.sga)}
             </span>
             <span className="lg-legend-item">
-              <span className="lg-swatch lg-swatch-warn" /> Near Limit
+              <span className="lg-swatch lg-swatch-warn" /> Close to it
             </span>
-            <span className="lg-legend-item">
-              <span className="lg-swatch lg-swatch-twp" /> TWP Used
-            </span>
-            <span className="lg-legend-item">
-              <span className="lg-swatch lg-swatch-over" /> Exceeded SGA &ge;{money2(rules.sga)}
-            </span>
+            {analysisPhase === 'trialWork' ? (
+              <span className="lg-legend-item">
+                <span className="lg-swatch lg-swatch-twp" /> Uses a trial work month
+              </span>
+            ) : (
+              <span className="lg-legend-item">
+                <span className="lg-swatch lg-swatch-over" /> Over your limit
+              </span>
+            )}
           </>
         )}
       </div>

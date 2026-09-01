@@ -3,7 +3,7 @@
 import type { MonthKey } from '../../domain/types';
 import { useTracker } from './state';
 import { money } from '../../domain/format';
-import { displayMonths, formatMonth, shortMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
@@ -16,7 +16,7 @@ export function MonthSquares({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =
 
   return (
     <div className="month-squares">
-      {displayMonths(ui.year, ui.hideFuture).map((month) => {
+      {listedMonths(ui.year, ui.hideFuture, ui.focusMode).map((month) => {
         const status = monthStatus(data, month);
         const empty = status.countable === 0;
         const extra = extraPay.get(month);
@@ -24,7 +24,7 @@ export function MonthSquares({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =
 
         const nearHit = nearLimit(status, phase);
         const near = nearHit
-          ? { text: money(nearHit.room) + (nearHit.kind === 'trial' ? ' to TWP' : ' to SGA'), kind: nearHit.kind }
+          ? { text: `${money(nearHit.room)} to your limit`, kind: nearHit.kind }
           : null;
 
         let cls = 'month-square';

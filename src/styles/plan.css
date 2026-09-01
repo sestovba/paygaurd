@@ -1,0 +1,1550 @@
+/* ===================================================================
+ * Plan — the decision layout
+ * ===================================================================
+ *
+ * THE VISUAL ARGUMENT
+ *
+ * Eight of the nine layouts in this app are made of cards: a rounded box with
+ * a border and a shadow, stacked on more of them. Cards are how you say "here
+ * are several things of equal weight, pick one". This screen is not that. It
+ * has one answer and everything else is evidence for it, so it is built from
+ * rules and space instead — a column of text with hairlines between its
+ * parts, and exactly one bounded object on the page: the answer.
+ *
+ * That single boxed thing carries a 4px spine in the tone colour. It is the
+ * only saturated area on a light screen, so on a page read at arm's length in
+ * a break room the eye lands on the answer before it lands on anything else.
+ * Nothing else competes for that.
+ *
+ * WHAT IS DELIBERATELY NOT HERE
+ *
+ *   color-mix()      Chrome 111. Used 265 times elsewhere in this app; an
+ *                    older WebView drops the whole declaration, so a border
+ *                    silently vanishes on the screens that most need it.
+ *                    Every colour below is literal.
+ *   backdrop-filter  A compositor pass per frame, for decoration, on phones
+ *                    that cannot spare one.
+ *   Blurred shadows  Expensive to paint down a long list. Hairlines instead.
+ *   Web fonts        No download, no invisible-text flash, no layout shift.
+ *
+ * Touch targets are 44px, the layout holds at 320px, and nothing you have to
+ * read is under 15px — these screens get used outdoors, in a hurry, by people
+ * whose eyes are not twenty.
+ */
+
+.pl {
+  --ink: #16191f;
+  --ink-soft: #5b6470;
+  --paper: #faf9f7;
+  --paper-2: #ffffff;
+  --rule: #e2e0da;
+  --rule-strong: #c9c6be;
+
+  --clear: #146c43;
+  --near: #8a5a00;
+  --over: #b3261e;
+  --unknown: #6b7280;
+  /* Sprite ink. Every drawn thing gets the same hard outline, the way a
+     2D tile does — it is what makes a block read as an object rather than a
+     coloured area, and it survives a cheap panel in daylight far better than
+     a tint does. */
+  --px-ink: #101319;
+  --px-hi: rgba(255, 255, 255, 0.38);
+  --px-lo: rgba(0, 0, 0, 0.26);
+  /* The side of a key you see because it is standing up off the page. */
+  --key-edge: #cbc7bd;
+  --key-edge-primary: #0b4a2e;
+  /* The band on a treasure frame. One gold, both themes. */
+  --gilt: #c9a227;
+  --gilt-hi: #f0d271;
+  --parch: #fdfaf1;
+  /* Every figure on the screen. A readout face, not a headline face. */
+  --figures: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  /* 1999 bevels: a light edge up-left, a dark edge down-right. */
+  --bev-hi: #ffffff;
+  --bev-lo: #a9a49a;
+
+  --clear-bg: #eef6f1;
+  --near-bg: #fbf4e6;
+  --over-bg: #fbeeed;
+  --unknown-bg: #f1f2f4;
+
+  min-height: 100%;
+  padding-bottom: 48px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+.dark .pl {
+  --ink: #eef1f5;
+  --ink-soft: #98a2b1;
+  --paper: #101319;
+  --paper-2: #171b22;
+  --rule: #262b34;
+  --rule-strong: #39404d;
+
+  --clear: #4ec07f;
+  --near: #e8b45c;
+  --over: #ff8a80;
+  --unknown: #98a2b1;
+  --px-ink: #05070a;
+  --px-hi: rgba(255, 255, 255, 0.26);
+  --px-lo: rgba(0, 0, 0, 0.4);
+  --key-edge: #2b313b;
+  --key-edge-primary: #0d5233;
+  --gilt: #b8912a;
+  --gilt-hi: #e0bc57;
+  --parch: #1a1f28;
+  --bev-hi: #333b48;
+  --bev-lo: #05070a;
+
+  --clear-bg: #12211a;
+  --near-bg: #221c0f;
+  --over-bg: #241618;
+  --unknown-bg: #1a1e25;
+}
+
+/* ---- header ----
+ * Two controls. The year, because the data is multi-year and the rolling
+ * window crosses calendar years; and Settings. Nothing else has earned a
+ * place in the strip above the answer.
+ */
+
+.pl-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 14px 16px 4px;
+}
+
+/* The month is the subject of the whole screen, so it is sized like one. */
+.pl-top-month {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.pl-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 42px;
+  margin-bottom: 4px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--paper-2);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: inset 0 2px 0 var(--px-hi), 0 0 0 2px var(--px-ink), 0 4px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-icon:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 2px 0 var(--px-hi), 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+.pl-icon:disabled { opacity: 0.35; cursor: default; }
+
+/* ---- the two columns ----
+ * One column on a phone, in the order the questions get asked. On a wide
+ * screen the decision column sticks: everything in the right-hand column is
+ * being read against the answer, and scrolling the answer off the top is
+ * scrolling away the thing the page is for.
+ */
+
+/* One column, at reading width, on every screen.
+ *
+ * An earlier draft put the answer in a sticky rail with a record beside it.
+ * That was worth doing when there was a year of record to put there. There
+ * is not any more — this screen is one month — and a two-column desktop
+ * layout of the same six blocks would only mean the phone and the computer
+ * teach two different shapes for the same thing. One shape, learned once. */
+.pl-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 12px 16px 0;
+}
+
+@media (min-width: 40em) {
+  .pl-frame { padding-top: 32px; }
+}
+
+/* ---- the answer ----
+ * The only bounded object on the page, and the only saturated colour.
+ */
+
+.pl-answer {
+  position: relative;
+  padding: 18px;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-2);
+  box-shadow:
+    inset 6px 0 0 var(--unknown),
+    inset 0 0 0 2px var(--px-ink),
+    3px 3px 0 0 var(--bev-lo);
+}
+.pl-answer[data-tone='clear'] { box-shadow: inset 6px 0 0 var(--clear), inset 0 0 0 2px var(--px-ink), 3px 3px 0 0 var(--bev-lo); }
+.pl-answer[data-tone='near']  { box-shadow: inset 6px 0 0 var(--near),  inset 0 0 0 2px var(--px-ink), 3px 3px 0 0 var(--bev-lo); }
+.pl-answer[data-tone='over']  { box-shadow: inset 6px 0 0 var(--over),  inset 0 0 0 2px var(--px-ink), 3px 3px 0 0 var(--bev-lo); }
+
+/* The figure. Tabular numerals so it does not jump width as it changes, and
+   a negative tracking that only large text can carry. */
+/* The figure, at the size the one number on a screen deserves. A monospace
+   face, which reads as a readout rather than a headline and keeps every digit
+   the same width as it counts down. */
+.pl-answer-big {
+  margin: 0;
+  font-family: var(--figures);
+  font-size: 58px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 22.5em) { .pl-answer-big { font-size: 48px; } }
+.pl-answer[data-tone='over'] .pl-answer-big { color: var(--over); }
+
+.pl-answer-lead {
+  margin: 4px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* The clause under the lead in the unknown state: what the gap costs you,
+   before the offer to close it. */
+.pl-answer-sub {
+  margin: 6px 0 10px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.pl-answer-meter-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ---- quests ----
+ * The two one-off fields, as little errands that pay. The reward is printed
+ * on the button because that is the honest version of a nudge: here is the
+ * job, here is what it is worth, take it or do not.
+ */
+.pl-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+.pl-quest {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  margin-bottom: 4px;
+  padding: 0 8px 0 6px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--parch);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 4px var(--gilt),
+    inset 0 0 0 6px var(--px-ink),
+    0 4px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-quest:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 4px var(--gilt),
+    inset 0 0 0 6px var(--px-ink),
+    0 0 0 0 var(--key-edge);
+}
+
+.pl-quest-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  background: var(--gilt);
+  color: var(--px-ink);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: inset 0 2px 0 var(--gilt-hi);
+}
+
+.pl-quest-label { padding-right: 2px; }
+
+.pl-chip {
+  min-height: 38px;
+  margin-bottom: 3px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-chip:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+
+
+/* ---- the gauge ----
+ * A row of chunks that fills up, which is a thing people already know how to
+ * read without being taught. Three patterns carry three different meanings,
+ * so none of it rests on colour: solid is money we are sure of, stripes are
+ * the margin of error, an outline is what you are trying out. Hue is the
+ * first thing to go on a cheap panel in daylight, and roughly one man in
+ * twelve cannot separate the red from the green on any panel at all.
+ */
+
+.pl-gauge {
+  display: flex;
+  gap: 4px;
+  /* Room above for the safety line's own tag — see .pl-line-tag. */
+  margin-top: 34px;
+  /* Nothing here is a photograph, but a browser asked to scale any of it
+     should step rather than smooth. */
+  image-rendering: pixelated;
+}
+
+/* A block, not a bar segment: square corners, a hard outline, and a two-tone
+   bevel — light along the top edge, dark along the bottom. That bevel is the
+   entire reason a 16-bit meter reads as a physical thing you are filling up
+   rather than a percentage you are being shown. */
+.pl-chunk {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--rule-strong);
+}
+
+/* ZONES.
+ *
+ * A chunk is coloured by where it sits, not by how the month is going, so an
+ * empty gauge already teaches the two lines before there is anything in it.
+ * Green up to a thousand dollars — the safety line — then amber up to the
+ * limit SSA actually applies, then red past it. Nothing in the amber band is
+ * wrong; it is the band where one extra paycheck would be, which is a
+ * different thing and is written that way everywhere it is mentioned.
+ */
+
+/* Empty blocks still show their zone, so the shape of the run is visible
+   before anything is in it. */
+.pl-chunk[data-zone='careful'] { box-shadow: inset 0 0 0 2px #cbb583; }
+.dark .pl-chunk[data-zone='careful'] { box-shadow: inset 0 0 0 2px #5a4c2c; }
+.pl-chunk[data-zone='over'] { box-shadow: inset 0 0 0 2px #dda29e; }
+.dark .pl-chunk[data-zone='over'] { box-shadow: inset 0 0 0 2px #5e3330; }
+
+/* Money we are sure about: solid, outlined, bevelled. */
+.pl-chunk[data-state='full'] {
+  box-shadow:
+    inset 0 4px 0 var(--px-hi),
+    inset 0 -4px 0 var(--px-lo),
+    inset 0 0 0 2px var(--px-ink);
+}
+.pl-chunk[data-state='full'][data-zone='safe']    { background: var(--clear); }
+.pl-chunk[data-state='full'][data-zone='careful'] { background: var(--near); }
+.pl-chunk[data-state='full'][data-zone='over']    { background: var(--over); }
+
+/* The margin of error, as a dither.
+ *
+ * A checkerboard of the fill colour is literally how a display with two
+ * values per pixel has always drawn a half value, and it carries exactly the
+ * right meaning here without a word: the block is neither on nor off, so the
+ * truth is somewhere inside it. Two stacked linear-gradients rather than a
+ * conic one, because this has to paint on a WebView that has not been
+ * updated in five years. */
+.pl-chunk[data-state='band'] {
+  background-image:
+    linear-gradient(45deg, currentColor 25%, transparent 25% 75%, currentColor 75%),
+    linear-gradient(45deg, currentColor 25%, transparent 25% 75%, currentColor 75%);
+  background-size: 6px 6px;
+  background-position: 0 0, 3px 3px;
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+}
+.pl-chunk[data-state='band'][data-zone='safe']    { color: var(--clear); }
+.pl-chunk[data-state='band'][data-zone='careful'] { color: var(--near); }
+.pl-chunk[data-state='band'][data-zone='over']    { color: var(--over); }
+
+/* Hours being tried: an empty container. Outlined in the fill colour, unfilled
+   because it has not happened. */
+.pl-chunk[data-state='try'][data-zone='safe'] {
+  background: var(--clear-bg);
+  box-shadow: inset 0 0 0 3px var(--clear);
+}
+.pl-chunk[data-state='try'][data-zone='careful'] {
+  background: var(--near-bg);
+  box-shadow: inset 0 0 0 3px var(--near);
+}
+.pl-chunk[data-state='try'][data-zone='over'] {
+  background: var(--over-bg);
+  box-shadow: inset 0 0 0 3px var(--over);
+}
+
+/* THE TWO LINES.
+ *
+ * The safety line is the number this app answers to, so it is drawn on the
+ * bar rather than described underneath it. The limit is drawn the same way,
+ * heavier, at the end. A bar that simply keeps growing never tells you which
+ * chunk was the one too many.
+ */
+.pl-chunk[data-safety-line] { margin-left: 9px; position: relative; }
+.pl-chunk[data-safety-line]::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: -6px;
+  width: 2px;
+  background: var(--clear);
+}
+
+/* The line's own name, sitting on top of it. A rule drawn across a gauge is
+   a mark with no meaning until you have found the legend and matched it by
+   colour; this is the one label on the screen that has to be readable before
+   anything else on it is. */
+.pl-line-tag {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: -7px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--clear);
+}
+
+.pl-chunk[data-first-over] { margin-left: 13px; position: relative; }
+.pl-chunk[data-first-over]::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -8px;
+  width: 3px;
+  background: var(--ink);
+}
+
+/* THE REWARD.
+ *
+ * Precision gets a mark on the screen; the lack of it never gets a scolding,
+ * only a quieter bar and one small offer underneath. A benefits tracker that
+ * tells somebody off for not having a paystub will simply stop being opened.
+ */
+.pl-exact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--clear);
+}
+.pl-exact svg { flex: 0 0 auto; }
+
+/* A little gloss along the top of a filled chunk, and only when the whole
+   month is exact. It is the one purely pleasing thing on the screen, and it
+   belongs to the one habit worth encouraging. */
+.pl-gauge[data-exact] .pl-chunk[data-state='full'] {
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.pl-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.pl-key-item { display: inline-flex; align-items: center; gap: 6px; }
+.pl-key .pl-chunk { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 3px; margin: 0; }
+.pl-key .pl-chunk::before { display: none; }
+.pl-key .pl-line-tag { display: none; }
+
+/* The two lines, as a HUD strip.
+ *
+ * Each badge carries the same mark it refers to on the bar — a green rule for
+ * the safety line, a heavy dark one for the limit — so the legend is read
+ * once and the bar is self-explanatory from then on. */
+.pl-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.pl-line-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 5px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.pl-line-key i { display: block; width: 3px; height: 15px; }
+.pl-line-key[data-mark='safe'] i { background: var(--clear); }
+.pl-line-key[data-mark='limit'] i { width: 4px; background: var(--px-ink); }
+.dark .pl-line-key[data-mark='limit'] i { background: var(--ink); }
+
+.pl-line-key b {
+  color: var(--ink);
+  font-size: 14px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- try it ---- */
+
+.pl-try {
+  position: relative;
+  padding: 16px 18px 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 2px var(--px-ink), 3px 3px 0 0 var(--bev-lo);
+}
+
+.pl-heading {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* TITLE PLATE.
+ *
+ * A title bar, in the sense a 1999 window had one: a solid strip the width of
+ * the thing it names, with light text stamped into it and a gilt rule under
+ * it. It is doing the same job the grey uppercase heading did and doing it
+ * without asking the reader to work out where one section stops. */
+.pl-plate {
+  display: block;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  background: var(--px-ink);
+  color: var(--parch);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: inset 0 -3px 0 var(--gilt);
+}
+
+.pl-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The two keys that drive the gauge, and therefore the two most pressed
+   things on the screen. Biggest travel, squarest shape. */
+.pl-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 50px;
+  margin-bottom: 5px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 4px;
+  background: var(--paper-2);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: inset 0 3px 0 var(--px-hi), 0 0 0 2px var(--px-ink), 0 5px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-step:active {
+  transform: translateY(5px);
+  box-shadow: inset 0 3px 0 var(--px-hi), 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+.pl-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+  box-shadow: 0 0 0 2px var(--rule-strong), 0 5px 0 0 var(--key-edge);
+}
+
+.pl-stepper-value {
+  flex: 1 1 auto;
+  text-align: center;
+  line-height: 1.15;
+}
+.pl-stepper-value b {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pl-stepper-value span {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.pl-try-verdict {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.pl-try[data-tone='over'] .pl-try-verdict { color: var(--over); }
+.pl-try[data-tone='near'] .pl-try-verdict { color: var(--near); }
+.pl-try[data-tone='idle'] .pl-try-verdict { font-weight: 400; color: var(--ink-soft); }
+
+
+/* ---- actions ----
+ * One primary action per screen, full width, 52px. It is a button you press
+ * with a thumb while holding a phone in the other hand and a paystub in your
+ * teeth.
+ */
+
+/* KEYS.
+ *
+ * Every pressable thing stands up off the page on a hard edge and travels the
+ * full height of that edge when pressed, then stops dead — no easing out, no
+ * bounce. That is the whole trick behind a control that feels good under a
+ * thumb: the movement is short, it is the same distance every time, and it
+ * ends where the finger expects it to.
+ *
+ * It also does real work here. The one thing this app needs is for somebody
+ * to keep typing numbers into it for months, and a control that is pleasant
+ * to press is not decoration when that is the goal.
+ */
+.pl-do {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-bottom: 4px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--px-ink), 0 4px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-do:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+
+/* THE ONE CALL.
+ *
+ * Gilt-framed, because it is the action the whole screen exists to collect.
+ * The whole ornament is drawn with inset shadows so the only outer shadow
+ * left is the key edge — which means it keeps its travel and still presses
+ * like everything else. */
+.pl-do-primary {
+  width: 100%;
+  min-height: 56px;
+  background: #146c43;
+  color: #ffffff;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  margin-bottom: 5px;
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 5px var(--gilt),
+    inset 0 0 0 7px var(--px-ink),
+    inset 0 13px 0 -7px var(--px-hi),
+    0 5px 0 0 var(--key-edge-primary);
+}
+.pl-do-primary:active {
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 5px var(--gilt),
+    inset 0 0 0 7px var(--px-ink),
+    inset 0 13px 0 -7px var(--px-hi),
+    0 0 0 0 var(--key-edge-primary);
+}
+.pl-do-primary:disabled {
+  background: #9aa5b1;
+  cursor: default;
+  transform: none;
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 5px #b7b2a6,
+    inset 0 0 0 7px var(--px-ink),
+    0 5px 0 0 var(--key-edge);
+}
+.dark .pl-do-primary { background: #17794b; }
+.dark .pl-do-primary:disabled { background: #39404d; }
+
+.pl-answer .pl-do,
+
+.pl-plain {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pl-row { display: flex; gap: 10px; margin-top: 14px; }
+.pl-row .pl-do-primary { flex: 1 1 auto; width: auto; }
+
+/* Where the number came from. A segmented control rather than three links:
+   the choice is visible before it is needed, which is what stops somebody
+   hunting for the number they do not have. */
+/* Three keys, one down. The selected one is pressed *in* — sunken bevel,
+   dark field — so the control reads as a physical switch rather than a
+   highlighted word. */
+.pl-seg {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.pl-seg-btn {
+  flex: 1 1 0;
+  min-height: 42px;
+  margin-bottom: 3px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 2px 0 var(--px-hi), 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-seg-btn:active { transform: translateY(3px); box-shadow: 0 0 0 2px var(--px-ink); }
+.pl-seg-btn[data-on] {
+  transform: translateY(3px);
+  background: var(--px-ink);
+  color: var(--gilt-hi);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.45), 0 0 0 2px var(--px-ink);
+}
+
+/* ---- add a payment ---- */
+
+/* THE PAY PANEL.
+ *
+ * A framed box rather than a card: a dark rule, a gold band, a dark rule
+ * again. It is the one place on the screen you put something in, so it is the
+ * one thing framed like it holds something — the same reason a menu in a
+ * fantasy game does not look like the map screen.
+ *
+ * The frame is drawn entirely in shadows, so it costs no elements and no
+ * layout, and the 7px it occupies is paid for with margin. */
+.pl-log {
+  margin: 7px;
+  padding: 18px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--parch);
+  box-shadow:
+    0 0 0 2px var(--px-ink),
+    0 0 0 5px var(--gilt),
+    0 0 0 7px var(--px-ink);
+}
+
+.pl-field { display: block; margin-top: 14px; }
+.pl-field:first-of-type { margin-top: 0; }
+
+.pl-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* A readout, not a caption: it reports what the app worked out from what was
+   just typed, so it is set like the figures it is talking about. */
+.pl-help {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 3px 8px;
+  background: var(--unknown-bg);
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+  font-family: var(--figures);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.pl-help[data-warn] { color: var(--near); font-weight: 600; }
+.pl-help[data-good] { color: var(--clear); font-weight: 600; }
+
+/* The unit, welded to the field rather than written in the label. A "$" you
+   can see beside the box you are typing in removes the only real question a
+   bare number field asks. */
+/* The gap above the field belongs to the wrapper, so the adornment can be
+   positioned against the field's own box rather than guessing past a margin. */
+.pl-money { position: relative; display: block; margin-top: 8px; }
+.pl-money .pl-input { margin-top: 0; padding-left: 46px; }
+.pl-money[data-unit='hrs'] .pl-input,
+.pl-money[data-unit='mi'] .pl-input { padding-left: 12px; padding-right: 56px; }
+
+.pl-money::before {
+  content: attr(data-unit);
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  background: var(--px-ink);
+  color: var(--gilt-hi);
+  font-family: var(--figures);
+  font-size: 17px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.pl-money[data-unit='hrs']::before,
+.pl-money[data-unit='mi']::before {
+  left: auto;
+  right: 2px;
+  width: 50px;
+  font-size: 14px;
+}
+
+/* A sunken field: light edge down-right, dark edge up-left — the exact
+   inverse of a key. A control you type into should look like a hole, and a
+   control you press should look like it is standing up. Nothing else on the
+   screen needs to be said about which is which. */
+.pl-input {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--figures);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    inset 2px 2px 0 var(--bev-lo),
+    inset -2px -2px 0 var(--bev-hi),
+    inset 0 0 0 2px var(--px-ink);
+}
+.pl-input:focus { outline: 3px solid var(--gilt); outline-offset: 0; }
+
+
+/* ---- sections ----
+ * Separated by space alone. A heading and a gap already say "new thing"; a
+ * rule on top of that is a second, louder way of saying it, and the page ends
+ * up looking like a form to fill in rather than a screen to read.
+ */
+
+.pl-section { padding-top: 0; }
+
+/* THE VAULT.
+ *
+ * Nine months you cannot get back, framed like the pay panel because it is
+ * the other thing on this screen that holds something. It is the only place
+ * the app explains itself, and it does so in two sentences because a
+ * non-renewable allowance nobody told you about is worth two sentences.
+ */
+.pl-vault {
+  margin: 7px;
+  padding: 18px;
+  background: var(--parch);
+  box-shadow:
+    0 0 0 2px var(--px-ink),
+    0 0 0 5px var(--gilt),
+    0 0 0 7px var(--px-ink);
+}
+
+.pl-vault-why {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+/* ---- the nine trial work months ----
+ * Squares, not dots. Nine of something you are spending, laid out like
+ * tokens on a table — a row of circles reads as progress through a task,
+ * and using one of these is not progress.
+ */
+
+/* Nine across, always. A grid rather than a wrapping row: eight tokens and
+   then a lonely ninth on its own line reads as "eight and something else"
+   rather than as nine of one thing, which is the only thing this row has to
+   say. */
+.pl-tokens {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 5px;
+  max-width: 320px;
+}
+
+.pl-token {
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--px-ink), inset 0 0 0 4px var(--parch);
+}
+/* Spent. Bevelled like a coin pressed into the slot it came from. */
+.pl-token[data-used] {
+  background: var(--near);
+  box-shadow:
+    inset 0 4px 0 var(--px-hi),
+    inset 0 -4px 0 var(--px-lo),
+    inset 0 0 0 2px var(--px-ink);
+}
+
+.pl-tokens-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+.pl-tokens-line b { font-size: 19px; }
+.pl-tokens-line b span { font-family: var(--figures); }
+.pl-tokens-line span { color: var(--ink-soft); }
+
+
+/* ---- the log ----
+ * What you added, newest first. A list, not a grid: a calendar asks you to
+ * find a cell and hold the shape of a year in your head, and plenty of people
+ * find that genuinely hard. This asks nothing.
+ */
+
+.pl-log-list { display: flex; flex-direction: column; gap: 8px; }
+
+.pl-log-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  margin-bottom: 3px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--paper-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-log-row:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+
+.pl-log-chest {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--parch);
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+}
+
+.pl-log-what { min-width: 0; flex: 1 1 auto; }
+.pl-log-top { display: flex; align-items: center; gap: 8px; }
+
+.pl-log-amount {
+  font-family: var(--figures);
+  font-size: 21px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The month, stamped right after the figure — the one thing this list is
+   scanned for, so it sits where the eye already is. */
+.pl-log-date {
+  padding: 2px 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--px-ink);
+  color: var(--gilt-hi);
+  font-family: var(--figures);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.pl-log-when {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+/* ---- sources ---- */
+
+/* ---- work, as chests ----
+ * One slot per source of money. The chest is shut until something has been
+ * collected from it this month, which answers "have I logged this one yet"
+ * before a word of the row is read.
+ */
+.pl-sources { display: flex; flex-direction: column; gap: 8px; }
+
+.pl-source {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 62px;
+  margin-bottom: 3px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--parch);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 4px var(--gilt),
+    inset 0 0 0 6px var(--px-ink),
+    0 3px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-source:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 4px var(--gilt),
+    inset 0 0 0 6px var(--px-ink),
+    0 0 0 0 var(--key-edge);
+}
+
+.pl-source-chest {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-left: 4px;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+}
+
+.pl-source-body { min-width: 0; flex: 1 1 auto; }
+.pl-source-name { display: block; font-size: 16px; font-weight: 700; }
+.pl-source-note {
+  display: block;
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+/* What this chest has given up this month. */
+.pl-source-take {
+  flex: 0 0 auto;
+  margin-right: 4px;
+  padding: 3px 8px;
+  background: var(--px-ink);
+  color: var(--gilt-hi);
+  font-family: var(--figures);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inverted, so it cannot be mistaken for one more chest. Gilt on ink, a
+   plus, and letterspaced caps: the vocabulary of a control rather than of a
+   thing that holds money. */
+.pl-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--px-ink);
+  color: var(--gilt-hi);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset 0 -3px 0 var(--gilt), 0 4px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-add:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 -3px 0 var(--gilt), 0 0 0 0 var(--key-edge);
+}
+
+/* ---- choosing what kind of work ---- */
+
+.pl-choices { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+.pl-choice {
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 12px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--paper-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--px-ink), 0 4px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl-choice:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+.pl-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.pl-choice > svg { flex: 0 0 auto; }
+.pl-choice > span { min-width: 0; }
+.pl-choice i {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ---- the footnote ----
+ * Said once, at the bottom, in the same voice as everything else. It is the
+ * one legally material sentence on the screen and it does not get a box, a
+ * warning triangle or a colour — those would make it look like an alert about
+ * this month rather than a statement about the whole app.
+ */
+
+/* A strip of parchment at the foot of the map, lettered rather than typed.
+   A system serif in italic — no web font, so no download and no flash of
+   invisible text on a slow connection. */
+.pl-footnote {
+  max-width: 34rem;
+  margin: 36px auto 0;
+  padding: 12px 16px;
+  background: var(--parch);
+  box-shadow: inset 0 0 0 2px var(--px-ink), inset 0 0 0 4px var(--gilt);
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: var(--ink);
+}
+
+/* ---- the cheer ----
+ * Coins fall past the screen when a payment is saved. Fixed, pointer-events
+ * none, torn out of the tree on a timer — it can never sit between a finger
+ * and the button that produced it.
+ */
+.pl-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Upward, not down. Coins falling on you is what happens when something
+   breaks; coins rising off the screen is collecting. */
+.pl-rain-coin {
+  position: absolute;
+  bottom: -40px;
+  animation: pl-rise 1200ms steps(12, end) forwards;
+}
+
+/* steps(), not a smooth curve: a sprite that eases is a sprite from the
+   wrong decade. */
+@keyframes pl-rise {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-104vh); opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-rain { display: none; }
+}
+
+/* Keyboard focus is visible everywhere, on one rule. */
+.pl :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl * { transition: none !important; animation: none !important; }
+}
+
+/* ===================================================================
+ * POPUPS
+ * ===================================================================
+ *
+ * The sheets are shared with eight other layouts, so nothing here changes
+ * their markup — the hooks are three data attributes on the shared Sheet and
+ * everything below is scoped inside `.pl`. Another layout sees none of it.
+ *
+ * The point is that tapping a chest on a 16-bit screen should not open a
+ * modern modal. A popup here is a menu: dark dither behind it, gilt frame
+ * around it, title on a plate, keys inside.
+ */
+
+/* The dim, as a dither rather than a translucent wash. It is how a menu has
+   always been opened over a game screen, it needs no compositing pass, and it
+   dims without smearing the numbers underneath into unreadability. */
+.pl [data-sheet-scrim] {
+  background-color: rgba(6, 8, 12, 0.55);
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.55) 25%, transparent 25% 75%, rgba(0, 0, 0, 0.55) 75%),
+    linear-gradient(45deg, rgba(0, 0, 0, 0.55) 25%, transparent 25% 75%, rgba(0, 0, 0, 0.55) 75%);
+  background-size: 6px 6px;
+  background-position: 0 0, 3px 3px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The card: parchment, square, triple-framed. */
+.pl [data-sheet]:not([data-sheet-inline]) {
+  border: 0;
+  border-radius: 0;
+  margin: 7px;
+  background: var(--parch);
+  box-shadow:
+    0 0 0 2px var(--px-ink),
+    0 0 0 5px var(--gilt),
+    0 0 0 7px var(--px-ink);
+}
+
+/* The title, on the same plate every section on the page below wears. */
+.pl [data-sheet] [data-sheet-head] {
+  border: 0;
+  background: var(--px-ink);
+  box-shadow: inset 0 -3px 0 var(--gilt);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pl [data-sheet] [data-sheet-head] h2 {
+  color: var(--parch);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pl [data-sheet] [data-sheet-head] p {
+  color: var(--gilt-hi);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.pl [data-sheet] [data-sheet-head] .icon-btn {
+  border-radius: 3px;
+  background: var(--paper-2);
+  color: var(--ink);
+  box-shadow: 0 0 0 2px var(--gilt);
+}
+
+.pl [data-sheet] [data-sheet-body],
+.pl [data-sheet] [data-sheet-foot] {
+  background: var(--parch);
+  border: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pl [data-sheet] [data-sheet-foot] { box-shadow: inset 0 3px 0 var(--gilt); }
+
+/* Fields inside a popup are holes, like the ones on the page. */
+.pl [data-sheet] .field-input,
+.pl [data-sheet] input[type='text'],
+.pl [data-sheet] input[type='date'],
+.pl [data-sheet] input[type='number'],
+.pl [data-sheet] select {
+  border: 0;
+  border-radius: 0;
+  background: var(--paper);
+  font-family: var(--figures);
+  font-weight: 700;
+  box-shadow:
+    inset 2px 2px 0 var(--bev-lo),
+    inset -2px -2px 0 var(--bev-hi),
+    inset 0 0 0 2px var(--px-ink);
+}
+
+.pl [data-sheet] .field-label,
+.pl [data-sheet] .label-caps {
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* And the controls are keys, with the same travel as everything else. */
+.pl [data-sheet] .btn-primary,
+.pl [data-sheet] .add-job,
+.pl [data-sheet] .option-row {
+  border: 0;
+  border-radius: 3px;
+  margin-bottom: 4px;
+  box-shadow: inset 0 0 0 2px var(--px-ink), 0 4px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl [data-sheet] .btn-primary:active,
+.pl [data-sheet] .add-job:active,
+.pl [data-sheet] .option-row:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+.pl [data-sheet] .btn-primary {
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 5px var(--gilt),
+    inset 0 0 0 7px var(--px-ink),
+    0 4px 0 0 var(--key-edge-primary);
+}
+.pl [data-sheet] .btn-primary:active {
+  box-shadow:
+    inset 0 0 0 2px var(--px-ink),
+    inset 0 0 0 5px var(--gilt),
+    inset 0 0 0 7px var(--px-ink),
+    0 0 0 0 var(--key-edge-primary);
+}
+.pl [data-sheet] .option-row[data-selected='true'] {
+  background: var(--px-ink);
+  color: var(--parch);
+}
+
+/* Panels inside a popup are slabs, not cards. */
+.pl [data-sheet] .panel {
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+}
+
+/* The body rows arrive from the shared sheet wearing pill shapes and soft
+   greys. Nothing in here is round, and anything you can press is a key. */
+.pl [data-sheet-body] button,
+.pl [data-sheet-body] a,
+.pl [data-sheet-body] label,
+.pl [data-sheet-body] > div,
+.pl [data-sheet-body] > div > div {
+  border-radius: 3px;
+}
+
+.pl [data-sheet-body] button:not(.icon-btn):not(.seg-item):not(.swatch):not(.switch) {
+  border: 0;
+  margin-bottom: 3px;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+}
+.pl [data-sheet-body] button:not(.icon-btn):not(.seg-item):not(.swatch):not(.switch):active {
+  transform: translateY(3px);
+  box-shadow: inset 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
+}
+
+.pl [data-sheet-body] .seg {
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--px-ink);
+}
+.pl [data-sheet-body] .seg-item { border-radius: 0; font-weight: 700; }
+.pl [data-sheet-body] .seg-item-on,
+.pl [data-sheet-body] .seg-item[data-on='true'] {
+  border: 0;
+  background: var(--px-ink);
+  color: var(--gilt-hi);
+}
+
+/* ---- shake ----
+ * The panel jolts once when the month crosses the limit. It fires because the
+ * element starts matching a rule that carries an animation, so it happens on
+ * the change and never on a re-render — and `steps()` keeps it a jolt rather
+ * than a wobble.
+ *
+ * It is doing a job, not being cute: the figure and the colour both change at
+ * the same moment as several other things on the screen, and movement is the
+ * one signal a person catches without looking straight at it.
+ */
+@keyframes pl-shake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-4px); }
+  40%  { transform: translateX(4px); }
+  60%  { transform: translateX(-3px); }
+  80%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+.pl-answer[data-tone='over'] { animation: pl-shake 260ms steps(3, end) 2; }
+
+/* The blocks past the limit flicker twice as they appear, the way a bar does
+   when it has been pushed past where it is meant to go. */
+@keyframes pl-flicker {
+  0%, 100% { opacity: 1; }
+  30%, 70% { opacity: 0.35; }
+}
+.pl-chunk[data-zone='over'][data-state='full'],
+.pl-chunk[data-zone='over'][data-state='try'] {
+  animation: pl-flicker 220ms steps(2, end) 3;
+}
+
+/* The drag handle merges into the title plate rather than sitting on a white
+   shelf above it, so the top of a popup is one block instead of three. */
+.pl [data-sheet] [data-sheet-grab] {
+  background: var(--px-ink);
+  padding-top: 8px;
+  padding-bottom: 2px;
+}
+.pl [data-sheet] [data-sheet-grab] > div {
+  border-radius: 0;
+  height: 4px;
+  width: 44px;
+  background: var(--gilt);
+}
+
+/* Section titles inside a popup: gilt-underlined rather than plated. A full
+   ink plate on every one of them would out-shout the controls underneath,
+   which is the opposite of what a heading is for.
+   Direct children only — a Section's title sits one level down, while the
+   field labels inside an editor sit inside their own <label>. Underlining
+   fifteen field labels in a job editor would be a gold fence, not a design. */
+.pl [data-sheet-body] > div > .field-label {
+  display: block;
+  width: fit-content;
+  margin-bottom: 2px;
+  padding-bottom: 3px;
+  border-bottom: 3px solid var(--gilt);
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+/* ---- notes ----
+ * The tinted callouts arrive as a soft green pill. Here they are a strip of
+ * parchment with a gilt spine — the same thing every other aside on this
+ * layout is made of.
+ */
+.pl [data-note] {
+  border-radius: 0;
+  background: var(--parch);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--px-ink), inset 5px 0 0 var(--gilt);
+  padding-left: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pl [data-note] svg { color: var(--gilt); }
+
+/* Collapsible group headers in the editors: gilt caps with the rule beside
+   them, rather than a faint tinted word. */
+.pl [data-sheet-body] .label-caps {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.pl [data-sheet-body] .rule-line {
+  height: 3px;
+  border: 0;
+  background: var(--gilt);
+}
+
+/* A collapsible group header is a divider with a title on it, not a key. The
+   generic button rule above would give it a box and a travel, which makes a
+   heading look like something you type into. */
+.pl [data-sheet-body] button[aria-expanded] {
+  background: transparent;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+.pl [data-sheet-body] button[aria-expanded]:active {
+  transform: none;
+  box-shadow: none;
+}
+
+/* The dashed ring that means "estimated" everywhere in this app — the same
+   mark the precision gauge uses, so the unknown-limit state reads as a grade
+   rather than as an error. */
+.pl-estimated-mark {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.4em;
+  border: 2px dashed var(--unknown);
+  border-radius: 999px;
+  vertical-align: baseline;
+}

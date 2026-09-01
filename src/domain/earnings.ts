@@ -5,7 +5,7 @@
 
 import type { MonthEntry, MonthKey, MonthStatus, Stream, TrackerData } from './types';
 import {
-  mileageRateFor, rulesFor, TWP_SELF_EMPLOYMENT_HOURS
+  mileageRateFor, rulesFor, safeTargetFor, TWP_SELF_EMPLOYMENT_HOURS
 } from './rules';
 import { monthIndex, monthsOfYear, todayMonth, yearOf } from './months';
 import type { BenefitPhase } from './trialWork';
@@ -155,27 +155,39 @@ export function monthStatus(data: TrackerData, month: MonthKey): MonthStatus {
   };
 }
 
-/** Dollars away from a limit, at or under which a month counts as "near" it. */
-export const NEAR_LIMIT_MARGIN = 200;
-
 export interface NearLimit {
   kind: 'trial' | 'sga';
+  /** Dollars still available before the real limit. */
   room: number;
 }
 
 /**
- * A month that hasn't crossed a line yet, but is close enough that it is
- * not safe to coast — being near SGA or a TWP month is a real risk.
+ * A month that has not crossed a line yet, but is past the point where
+ * coasting is safe.
+ *
+ * The trigger used to be a flat $200 from the cliff. That is too late to be
+ * useful: a fortnightly schedule can drop a whole extra paycheck into a month
+ * — several hundred dollars — after which $200 of warning is a warning you
+ * receive on the way past. The trigger is now the safety line (see
+ * SAFE_MONTHLY), which is where the room to absorb that extra paycheck starts
+ * running out.
+ *
+ * `room` still reports the distance to the real limit, because that is the
+ * figure every layout prints beside it and it is the one that is true.
  */
 export function nearLimit(status: MonthStatus, phase: BenefitPhase): NearLimit | null {
   if (status.countable === 0) return null;
-  if (phase === 'trialWork' && !status.isServiceMonth
-    && status.roomToTrialWork !== null && status.roomToTrialWork <= NEAR_LIMIT_MARGIN) {
-    return { kind: 'trial', room: status.roomToTrialWork };
+  const rules = rulesFor(yearOf(status.month));
+
+  if (phase === 'trialWork') {
+    if (status.isServiceMonth) return null;
+    if (status.countable <= safeTargetFor(rules.trialWork)) return null;
+    return { kind: 'trial', room: round2(rules.trialWork - status.countable) };
   }
-  if (phase === 'sga' && !status.overSga
-    && status.roomToSga !== null && status.roomToSga <= NEAR_LIMIT_MARGIN) {
-    return { kind: 'sga', room: status.roomToSga };
+  if (phase === 'sga') {
+    if (status.overSga) return null;
+    if (status.countable <= safeTargetFor(rules.sga)) return null;
+    return { kind: 'sga', room: round2(rules.sga - status.countable) };
   }
   return null;
 }

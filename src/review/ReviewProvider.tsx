@@ -3,10 +3,12 @@ import type { ReactNode } from 'react';
 import {
   Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown,
   ChevronsDownUp, ChevronsUpDown, Copy, Crosshair, Expand, Eye, EyeOff, FileCode2,
-  MessageSquarePlus, Minus, Plus, SquareCheck, Tag, Trash2, X
+  MessageSquarePlus, Minus, Plus, Shrink, SquareCheck, Tag, Trash2, X
 } from 'lucide-react';
 import type { LayoutMode } from '../state/storage';
-import { anchorId, describeElement, elementPath, labelFor, shortName } from './anchor';
+import {
+  anchorId, describeElement, elementPath, insideOf, labelFor, shortName, widerThan
+} from './anchor';
 import { actionable, notesToMarkdown } from './markdown';
 import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal, uploadShot } from './store';
 import type {
@@ -96,6 +98,11 @@ interface ComposerState {
    *  editor can close immediately; a real draft asks before it is discarded. */
   initialDraft: string;
   initialTags: string[];
+  /** Viewport point the card should appear to come from — the last place the
+   *  pointer went down. The card still lands in the middle of the screen; this
+   *  only sets where it grows from, so the eye is carried from the thing that
+   *  was clicked to the thing that opened instead of having to find it. */
+  origin?: { x: number; y: number };
 }
 
 /** The kinds of change a note usually asks for. Picking one is faster than
@@ -154,7 +161,11 @@ interface Panels {
  * 'journal' keeps its key because it is persisted in localStorage and named
  * in the stylesheet; what changed is the word on it, which is "Notes".
  */
-export const SECTIONS = ['tools', 'journal'] as const;
+/* Not exported, and neither is DO below — nothing outside this file uses
+   either, and a module that exports anything but components is one React
+   Fast Refresh will not hot-patch: every edit to the console became a full
+   page reload of the app it is reviewing, which throws away an open note. */
+const SECTIONS = ['tools', 'journal'] as const;
 
 const PANELS: Panels = {
   open: false,
@@ -228,10 +239,25 @@ function isReply(note: ReviewNote, read: ReadMarks): boolean {
   return last?.from === 'claude' && isUnread(note, read);
 }
 
-/** Beside the element, never over it — clamped so the composer is always
- *  fully on screen even when the element is at a corner. */
-function composerAt(at: Box, width = 376, height = 520): { top: number; left: number } {
-  const gap = 14;
+/**
+ * Middle of the screen, lifted a little.
+ *
+ * It used to open beside its element, on the theory that a comment should
+ * never cover the thing it is about. In practice the element is anywhere —
+ * a chip in a corner, a row behind the dock — so the card landed somewhere
+ * different every time and the first thing you did on opening it was find it.
+ * A dialog that moves is a dialog you have to look for.
+ *
+ * The element does not need the card next to it to be identifiable: it keeps
+ * its outline and its spotlight the whole time the composer is open, and the
+ * card can still be dragged off anything it covers.
+ *
+ * Lifted a little — a sixteenth of the viewport — because dead centre is not
+ * where the eye rests, and because the card grows downward as a thread or a
+ * screenshot is added, so centring it empty puts it low once it is full. A
+ * tenth was enough to read as "up there" rather than "in the middle".
+ */
+function composerAt(_at: Box, width = 376, height = 520): { top: number; left: number } {
   const root = getComputedStyle(document.documentElement);
   const inset = (name: string) => Number.parseFloat(root.getPropertyValue(name)) || 0;
   const bounds = {
@@ -240,20 +266,32 @@ function composerAt(at: Box, width = 376, height = 520): { top: number; left: nu
     top: 10,
     bottom: window.innerHeight - inset('--review-rail-bottom') - 10
   };
-  const right = at.left + at.width + gap;
-  const left = right + width <= bounds.right
-    ? right
-    : at.left - gap - width >= bounds.left
-      ? at.left - gap - width
-      : Math.max(bounds.left, Math.min(at.left, bounds.right - width));
+  const lift = Math.round(window.innerHeight * 0.0625);
   return {
-    top: Math.max(bounds.top, Math.min(at.top, bounds.bottom - height)),
-    left
+    top: Math.max(
+      bounds.top,
+      Math.min(bounds.top + (bounds.bottom - bounds.top - height) / 2 - lift, bounds.bottom - height)
+    ),
+    left: Math.max(bounds.left, bounds.left + (bounds.right - bounds.left - width) / 2)
   };
 }
 
 function isReviewUi(node: EventTarget | null): boolean {
   return node instanceof Element && Boolean(node.closest('[data-review-ui]'));
+}
+
+/** Anything with a caret in it, or any part of the card built around one.
+ *
+ *  Every command in this console is a single letter, so a field that has
+ *  focus has to own every key it is sent — otherwise writing the word "cut"
+ *  in a note arms Comment, Undo and Remove on the way past. The composer
+ *  counts as a whole: a key pressed on its Tag button or its attach menu
+ *  belongs to the note being written, not to the board behind it. */
+function isTyping(node: EventTarget | null): boolean {
+  if (!(node instanceof HTMLElement)) return false;
+  if (node.isContentEditable) return true;
+  if (/^(input|textarea|select)$/i.test(node.tagName)) return true;
+  return Boolean(node.closest('.review-composer'));
 }
 
 export function ReviewProvider({
@@ -335,6 +373,11 @@ function ReviewConsole({
   const [triage, setTriage] = useState<{ ids: string[]; at: number } | null>(null);
   const [hovered, setHovered] = useState<Element | null>(null);
   const [picked, setPicked] = useState<Element | null>(null);
+  /** The way back down. Widening the aim to a parent remembers the element it
+   *  was on, so `[` lands back on exactly that one instead of guessing at a
+   *  first child. Kept as state as well as a ref because the path bar draws
+   *  it: the steps you can return to are visible, not just pressable. */
+  const [trail, setTrail] = useState<Element[]>([]);
   /** Select is the precision workshop. Comment is the fast path: it borrows
    *  the same hit-testing, then opens the note card on the very next click. */
   const [commentIntent, setCommentIntent] = useState(false);
@@ -347,6 +390,12 @@ function ReviewConsole({
    *  move it. Cleared when a new one opens, so it never comes back somewhere
    *  you cannot see. */
   const [composerMoved, setComposerMoved] = useState<{ top: number; left: number } | null>(null);
+  /** Where the selection toolbar has been dragged to. Cleared whenever the
+   *  selection changes, so it returns to the new element rather than staying
+   *  parked where the last one happened to need it. */
+  const [actionsMoved, setActionsMoved] = useState<{ top: number; left: number } | null>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const actionsGrab = useRef<{ x: number; y: number; top: number; left: number } | null>(null);
   const composerGrab = useRef<{ x: number; y: number; top: number; left: number } | null>(null);
   const [composerLayout, setComposerLayout] = useState<{
     top: number;
@@ -399,7 +448,18 @@ function ReviewConsole({
   const advanceRef = useRef<(() => void) | null>(null);
   /** Read by the global key handler, which must not re-bind on every hover. */
   const pickedRef = useRef<Element | null>(null);
+  const trailRef = useRef<Element[]>([]);
+  /** The same two, for the highlight that is only under the pointer. Aiming
+   *  starts before anything is locked on: you are already hovering the thing,
+   *  and the element you want is usually its parent. */
+  const hoverRef = useRef<Element | null>(null);
+  const hoverTrail = useRef<Element[]>([]);
   const composerRef = useRef<HTMLFormElement>(null);
+  /** Last pointer-down in the window, review UI included. */
+  const lastPointer = useRef<{ x: number; y: number } | null>(null);
+  /** The current dismiss, reachable from the picker's key handler without
+   *  re-registering that listener on every keystroke of the draft. */
+  const dismissRef = useRef<(force?: boolean) => void>(() => {});
   /** The attach menu on the composer, and the file input it drives. */
   const [attachOpen, setAttachOpen] = useState(false);
   const shotInput = useRef<HTMLInputElement>(null);
@@ -485,6 +545,53 @@ function ReviewConsole({
   notesRef.current = notes;
   readRef.current = read;
   pickedRef.current = picked;
+  hoverRef.current = hovered;
+
+  /** Every change of aim goes through here, whatever moved it — a click, an
+   *  arrow, a bracket, a step on the path bar. Widening records the element
+   *  being left behind; narrowing spends that record. One router, so the way
+   *  back down cannot go stale behind a selection made some other way. */
+  const aimAt = useCallback((next: Element | null) => {
+    const current = pickedRef.current;
+    if (next === current) return;
+    const back = trailRef.current;
+    let kept: Element[];
+    if (!next) kept = [];
+    // Widened: keep what is still inside the new aim, and add the step just
+    // left, which is now the nearest way back.
+    else if (current && next.contains(current)) {
+      kept = [...back.filter((node) => node !== next && next.contains(node)), current];
+    // Narrowed: whatever is no longer inside the aim is not a way back to it.
+    } else if (current && current.contains(next)) {
+      kept = back.filter((node) => node !== next && next.contains(node));
+    // Somewhere else entirely: this is a new selection, not a step in a walk.
+    } else kept = [];
+    trailRef.current = kept;
+    setTrail(kept);
+    setPicked(next);
+  }, []);
+
+  /** Where `[` goes: back down the way it came, or into the first thing
+   *  smaller than the aim when nothing was remembered. */
+  const narrowerThan = useCallback((el: Element): Element | null => {
+    const back = trailRef.current[trailRef.current.length - 1];
+    if (back && back.isConnected && el.contains(back)) return back;
+    return insideOf(el);
+  }, []);
+
+  /** The path is longer than the bar on anything but a shallow page, and it
+   *  now grows at both ends — the route back down is drawn past the current
+   *  step. Keep the step you are on in the middle of it, or one press of `]`
+   *  scrolls the only thing you are looking at off the edge. */
+  useLayoutEffect(() => {
+    if (!picked) return;
+    const on = document.querySelector<HTMLElement>('.review-aim-path button[data-on]');
+    const bar = on?.parentElement;
+    if (!on || !bar) return;
+    const rail = bar.getBoundingClientRect();
+    const step = on.getBoundingClientRect();
+    bar.scrollLeft += step.left - rail.left - (rail.width - step.width) / 2;
+  }, [picked]);
 
   /** Every action says what it did, briefly, the way a game confirms a pickup
    *  instead of leaving you to check an inventory screen. */
@@ -617,7 +724,7 @@ function ReviewConsole({
     history.current = history.current.slice(0, -1);
     setUndoDepth(history.current.length);
     setNotes(previous);
-    setPicked(null);
+    aimAt(null);
     say('Undone', 'good');
   }, [say]);
 
@@ -763,9 +870,23 @@ function ReviewConsole({
       tags,
       initialDraft: draft,
       initialTags: tags,
-      thread: prior?.thread
+      thread: prior?.thread,
+      // Keyboard-opened composers have no click to grow from, so they fall
+      // back to the middle of the element they are about.
+      origin: lastPointer.current ?? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
     });
   }, [layout]);
+
+  /** A comment about the screen rather than about a thing on it.
+   *
+   *  Anchored to the layout's own root element, so it carries a DOM path and a
+   *  layout like every other note and a code pass can find what it refers to.
+   *  One per layout: pressing it again reopens the note instead of starting a
+   *  second one. */
+  const commentOnScreen = useCallback(() => {
+    const root = document.querySelector('#root > *') ?? document.body;
+    commentOn('This screen', root);
+  }, [commentOn]);
 
   /** Restore, then record where it was dropped. The app can only honour a
    *  move inside one container; anything else is an instruction in the notes
@@ -836,6 +957,7 @@ function ReviewConsole({
       return;
     }
     const panel = composerRef.current;
+
     let frame = 0;
     const place = () => {
       cancelAnimationFrame(frame);
@@ -876,7 +998,7 @@ function ReviewConsole({
       window.removeEventListener('scroll', place, true);
       window.visualViewport?.removeEventListener('resize', place);
     };
-  }, [composer?.id, composer?.at, composer?.target]);
+  }, [composer?.id, composer?.at, composer?.target, composer?.origin]);
 
   const decide = useCallback((
     target: SuggestedTarget,
@@ -990,7 +1112,12 @@ function ReviewConsole({
 
     const onOver = (event: PointerEvent) => {
       if (isReviewUi(event.target)) return;
-      setHovered(event.target instanceof Element ? event.target : null);
+      const under = event.target instanceof Element ? event.target : null;
+      // Moving the mouse is a new aim, so the walk taken from the last one is
+      // spent. Landing back on the same element is not a move.
+      if (under === hoverRef.current) return;
+      hoverTrail.current = [];
+      setHovered(under);
     };
     const onDown = (event: PointerEvent) => {
       if (isReviewUi(event.target) || !(event.target instanceof HTMLElement)) return;
@@ -1007,53 +1134,113 @@ function ReviewConsole({
         return;
       }
       if (event.target instanceof Element) {
-        if (commentIntent) commentOn(labelFor(event.target), event.target);
-        else setPicked(event.target);
+        /* The arrows can have walked the highlight out to an ancestor before
+           the click. Clicking then has to mean the element that is lit up,
+           not the one the pointer happens to be over inside it — otherwise
+           aiming by eye is undone by the act of taking it. */
+        const lit = hoverRef.current;
+        const aim = lit && lit !== event.target && lit.contains(event.target) ? lit : event.target;
+        if (commentIntent) commentOn(labelFor(aim), aim);
+        else aimAt(aim);
       }
     };
     const onKey = (event: KeyboardEvent) => {
       // The composer is a text box that opens straight out of this mode, so
-      // its keystrokes must never double as picker commands.
-      const target = event.target as HTMLElement | null;
-      if (target && (target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName))) {
-        return;
-      }
+      // its keystrokes must never double as picker commands. Same test as the
+      // board uses, so there is one answer to "is this person typing?".
+      if (isTyping(event.target)) return;
       if (event.key === 'Escape') {
-        if (picked) setPicked(null);
+        /* Innermost first. Comment mode *is* pick mode, so the global handler
+           skips Escape entirely while it is on (`mode !== 'pick'`) — which
+           left this branch turning comment mode off and abandoning an open
+           card on the screen. */
+        if (composerRef.current) {
+          dismissRef.current();
+          return;
+        }
+        if (picked) aimAt(null);
         else {
           setCommentIntent(false);
           setMode('off');
         }
         return;
       }
-      if (!picked) return;
+      /* Aiming does not wait for a click. The element you want is almost
+         never the one the pointer is on — it is the card around it — so the
+         same keys steer the highlight that is merely under the cursor, and
+         the click that follows takes whatever ended up lit. Locked on, they
+         steer the selection instead. */
+      const aim = picked ?? hoverRef.current;
+      if (!aim) return;
+
       // Shift turns the aiming arrows into "throw it that way".
       if (event.shiftKey) {
         const edge = ({
           ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'top', ArrowDown: 'bottom'
         } as const)[event.key as 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown'];
-        if (edge) {
+        if (edge && picked) {
           event.preventDefault();
           stow(picked, edge);
-          setPicked(null);
+          aimAt(null);
         }
         return;
       }
-      // Aim without the mouse: out to the parent, in to the first child, and
-      // along the row of siblings. Getting to the exact element is the whole
-      // job here, so all four directions have to do something.
-      const aim: Record<string, Element | null | undefined> = {
-        ArrowUp: picked.parentElement,
-        ArrowDown: picked.firstElementChild,
-        ArrowLeft: picked.previousElementSibling,
-        ArrowRight: picked.nextElementSibling
+
+      /** Move the aim, whichever of the two highlights is being steered. */
+      const moveTo = (next: Element | null | undefined, miss: string) => {
+        if (!next) { say(miss, 'warn'); return; }
+        if (picked) { aimAt(next); return; }
+        // Walking the hover: remember the step, so the way back down is the
+        // route taken rather than a guess at a first child.
+        hoverTrail.current = next.contains(aim)
+          ? [...hoverTrail.current.filter((node) => node !== next && next.contains(node)), aim]
+          : hoverTrail.current.filter((node) => node !== next && next.contains(node));
+        setHovered(next);
       };
-      const next = aim[event.key];
-      if (next) {
+
+      /* Out and in, in visible steps. ArrowUp and ] are the same key twice on
+         purpose: ↑↓ is what a hand already on the arrows reaches for, and [ ]
+         is what a hand on the mouse reaches for without looking. Either way
+         one press is one change on the screen — a stat in this app sits
+         inside four elements that all draw the same box, so stepping the DOM
+         node by node could be pressed four times and change nothing. The way
+         back down is the route that was taken, not a first child, so widening
+         is always reversible. */
+      /* Stopped here, not just prevented: the arrows also walk the journal
+         board, and one press must move one thing. */
+      if (event.key === ']' || event.key === 'ArrowUp') {
         event.preventDefault();
-        setPicked(next);
+        event.stopPropagation();
+        moveTo(widerThan(aim), 'Nothing wider to aim at');
         return;
       }
+      if (event.key === '[' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        event.stopPropagation();
+        const back = picked
+          ? narrowerThan(aim)
+          : (() => {
+              const last = hoverTrail.current[hoverTrail.current.length - 1];
+              return last && last.isConnected && aim.contains(last) ? last : insideOf(aim);
+            })();
+        moveTo(back, 'Nothing inside this to aim at');
+        return;
+      }
+      // Along the row: the sibling either side, which is how you get from one
+      // card to the next one without going out through their parent.
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const next = event.key === 'ArrowLeft'
+          ? aim.previousElementSibling
+          : aim.nextElementSibling;
+        if (next) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (picked) aimAt(next);
+          else { hoverTrail.current = []; setHovered(next); }
+        }
+        return;
+      }
+      if (!picked) return;
       if (event.key === 'f') {
         event.preventDefault();
         markPicked();
@@ -1177,12 +1364,19 @@ function ReviewConsole({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      // Dialog controls are review UI too. Once focus is in the composer its
-      // letters must describe the note, never switch a tool behind it.
-      if (target?.closest('.review-composer')) return;
-      const typing = target
-        && (target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName));
-      if (typing) return;
+      /* Writing is writing: with the caret in a field, nothing in here is a
+         command. One key still has to be caught on the way out — ⌘R. Left to
+         the browser it reloads the page and takes the half-written note with
+         it, and a reload in the middle of a sentence is exactly the thing
+         this guard exists to prevent. Swallowed, and said out loud, because
+         a key that silently does nothing reads as a broken keyboard. */
+      if (isTyping(target)) {
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'r') {
+          event.preventDefault();
+          say('Nothing reloaded — what you were writing is still here');
+        }
+        return;
+      }
 
       // ⌘R / Ctrl+R summons the console. It costs the page reload, which on a
       // dev server is one click away anyway, and this is dev-only code.
@@ -1223,7 +1417,10 @@ function ReviewConsole({
           toggleHidden(triageNote);
           return;
         }
-        if (event.key === 'l') {
+        /* S is Second look everywhere the journal documents filing keys.
+           L stays Select even while this one-at-a-time queue is open, so a
+           tool key never silently files the card in front of it. */
+        if (event.key === 's') {
           event.preventDefault();
           triageFile('second');
           return;
@@ -1249,11 +1446,16 @@ function ReviewConsole({
         setCommentIntent(false);
         setMode((current) => (current === 'audit' ? 'off' : 'audit'));
       }
-      if (event.key === 'p' || event.key === '2') {
+      /* Select is on L, by the reviewer's hand rather than by argument — it
+         has been P and it has been V, and the rule that survived both is
+         only this: a key must never be *named* for a word the button does
+         not say. P failed that ("pick" is the internal name of the mode, not
+         the label on it); L claims nothing, so it cannot. V is free again. */
+      if (event.key === 'l' || event.key === '2') {
         setCommentIntent(false);
         setMode((current) => (current === 'pick' ? 'off' : 'pick'));
       }
-      if ((event.key === 'v' || event.key === '3') && variantSets.length) {
+      if ((event.key === 'b' || event.key === '3') && variantSets.length) {
         setCommentIntent(false);
         setMode((current) => (current === 'variants' ? 'off' : 'variants'));
       }
@@ -1262,13 +1464,22 @@ function ReviewConsole({
 
       // On whatever is selected. A key is named for the word on the button
       // it stands in for, or it is a second vocabulary to learn.
+      /* Writing a comment is the most valuable thing anyone does in here, so
+         C never fails. With something selected it comments on that. With
+         nothing selected it arms comment mode. Pressed again in comment mode
+         it comments on the screen itself — because a thought about a page
+         should not have to be pinned to whichever div happens to be under the
+         cursor, and the alternative was the "Not anchored to anything"
+         section of the notes file, where remarks with no element go to be
+         unactionable. */
       if (event.key === 'c') {
         const chosen = pickedRef.current;
         if (chosen) commentOn(labelFor(chosen), chosen);
+        else if (commentIntent) commentOnScreen();
         else {
           setMode('pick');
           setCommentIntent(true);
-          say('Comment mode · click anything on the page');
+          say('Comment mode · click anything, or press C again for the whole screen');
         }
       }
       if (event.key === 'x' && pickedRef.current) markPicked();
@@ -1454,6 +1665,16 @@ function ReviewConsole({
     ? hovered.getBoundingClientRect()
     : null;
   const pickedRect = picked ? picked.getBoundingClientRect() : null;
+  /** The route back down, minus anything React has since unmounted or that a
+   *  hand-made selection has left behind. Drawn on the path bar, so where `[`
+   *  goes is visible rather than remembered. */
+  const backSteps = picked
+    ? trail.filter((node) => node.isConnected && picked.contains(node)).slice().reverse()
+    : [];
+  /** What the two step buttons would do, worked out once: they need it to
+   *  name their destination, and to grey themselves out at the ends. */
+  const canWiden = picked ? widerThan(picked) : null;
+  const canNarrow = picked ? narrowerThan(picked) : null;
 
   /** Switch off whatever is selected, from the selection itself. */
   function hidePicked() {
@@ -1468,7 +1689,7 @@ function ReviewConsole({
       hidden: true,
       anchor
     });
-    setPicked(null);
+    aimAt(null);
     say('Hidden — the eye in the journal puts it back', 'info');
   }
 
@@ -1484,7 +1705,7 @@ function ReviewConsole({
       status: 'open',
       anchor
     });
-    setPicked(null);
+    aimAt(null);
   }
 
   function returnComposerFocus() {
@@ -1506,6 +1727,8 @@ function ReviewConsole({
     setComposer(null);
     returnComposerFocus();
   }
+
+  dismissRef.current = dismissComposer;
 
   function saveComment() {
     // Tags alone are a note: "cut · spacing" on the right element says plenty.
@@ -1536,7 +1759,7 @@ function ReviewConsole({
     });
     setConfirmDiscard(false);
     setComposer(null);
-    setPicked(null);
+    aimAt(null);
     returnComposerFocus();
     say(existing
       ? 'Comment updated'
@@ -1862,7 +2085,7 @@ function ReviewConsole({
                         >
                           ‹ Back
                         </button>
-                        <span className="review-queue-hint">files it and moves on</span>
+                        <span className="review-queue-hint"><kbd>s</kbd> Second look · files it and moves on</span>
                         <button type="button" onClick={() => triageStep(1)}>Skip ›</button>
                       </div>
                       {/* The same six answers as everywhere else, in the
@@ -2247,6 +2470,22 @@ function ReviewConsole({
                     );
                   })}
                 </ul>
+
+                {/* Said even when the list is not empty.
+                    The scope tab already carries both counts, but a screen
+                    with two notes on it looks like the whole board until you
+                    read them — and the notes for this project sit almost
+                    entirely on layouts nobody is looking at any more. A list
+                    that quietly holds two of eighty-seven reads as loss. */}
+                {journalScope === 'screen' && findings.length > journalNotes.length ? (
+                  <button
+                    type="button"
+                    className="review-panel-elsewhere"
+                    onClick={() => setJournalScope('all')}
+                  >
+                    {findings.length - journalNotes.length} more on other screens · show everywhere
+                  </button>
+                ) : null}
               </>
             )}
 
@@ -2288,7 +2527,10 @@ function ReviewConsole({
 
     // In the queue the keys act on the card in front of you.
     if (triage) {
-      const acts: Record<string, ReviewLane> = { d: 'done', s: 'second', l: 'parked' };
+      /* L belongs to the Select tool globally. S is the queue's explicit
+         Second look key; leaving L out also prevents one press from both
+         opening Select above and filing this card as Not now here. */
+      const acts: Record<string, ReviewLane> = { d: 'done', s: 'second' };
       if (acts[event.key]) { event.preventDefault(); triageFile(acts[event.key]); return true; }
       if (event.key === 'ArrowRight') { event.preventDefault(); triageStep(1); return true; }
       if (event.key === 'ArrowLeft') { event.preventDefault(); triageStep(-1); return true; }
@@ -2709,13 +2951,14 @@ function ReviewConsole({
                 }}
                 onKeyDown={(event) => {
                   if (event.key === 'Escape') setOpenRow(null);
-                  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                    event.preventDefault();
                     event.currentTarget.form?.requestSubmit();
                   }
                 }}
               />
               <div className="review-row-reply-foot">
-                <span>⌘↵ to send</span>
+                <span>↵ send · ⇧↵ newline</span>
                 <button type="button" className="review-ghost" onClick={() => setOpenRow(null)}>Close</button>
                 <button type="submit" className="review-primary">Send</button>
               </div>
@@ -3088,6 +3331,44 @@ function ReviewConsole({
     window.addEventListener('pointercancel', stop);
   }
 
+  useEffect(() => { setActionsMoved(null); }, [picked]);
+
+  useEffect(() => {
+    const mark = (event: PointerEvent) => {
+      lastPointer.current = { x: event.clientX, y: event.clientY };
+    };
+    window.addEventListener('pointerdown', mark, true);
+    return () => window.removeEventListener('pointerdown', mark, true);
+  }, []);
+
+  /** Grab the bar and move it. Same clamp as the composer, for the same
+   *  reason: it can never be dragged somewhere it cannot be dragged back
+   *  from. */
+  function startActionsDrag(event: React.PointerEvent) {
+    if ((event.target as HTMLElement).closest('button')) return;
+    const box = actionsRef.current?.getBoundingClientRect();
+    if (!box) return;
+    event.preventDefault();
+    actionsGrab.current = { x: event.clientX, y: event.clientY, top: box.top, left: box.left };
+    const onMove = (move: PointerEvent) => {
+      const held = actionsGrab.current;
+      if (!held) return;
+      setActionsMoved({
+        top: Math.max(4, Math.min(held.top + (move.clientY - held.y), window.innerHeight - 48)),
+        left: Math.max(4, Math.min(held.left + (move.clientX - held.x), window.innerWidth - 120))
+      });
+    };
+    const stop = () => {
+      actionsGrab.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+  }
+
   return (
     <ReviewContext.Provider value={value}>
       {children}
@@ -3097,7 +3378,14 @@ function ReviewConsole({
           className="review-outline review-outline-hover"
           style={{ top: hoverRect.top, left: hoverRect.left, width: hoverRect.width, height: hoverRect.height }}
         >
-          <span className="review-outline-tag">{labelFor(hovered)}</span>
+          {/* The keys are on the label because this is the moment they are
+              useful: the pointer is on a word inside the card, and the card
+              is what the note is about. Nothing clickable here — reaching for
+              a button would move the pointer and change what is aimed at. */}
+          <span className="review-outline-tag">
+            {labelFor(hovered)}
+            <span className="review-outline-keys" aria-hidden="true">↑↓</span>
+          </span>
         </div>
       ) : null}
 
@@ -3110,19 +3398,59 @@ function ReviewConsole({
             <span className="review-outline-tag">{labelFor(picked)}</span>
           </div>
           <div
+            ref={actionsRef}
             data-review-ui
             className="review-actions"
-            style={{
+            data-moved={actionsMoved ? true : undefined}
+            style={actionsMoved ?? {
               top: pickedRect.bottom + 8 + ACTIONS_H > window.innerHeight
                 ? Math.max(8, pickedRect.top - ACTIONS_H - 8)
                 : pickedRect.bottom + 8,
-              left: Math.max(8, Math.min(pickedRect.left, window.innerWidth - 380))
+              left: Math.max(8, Math.min(pickedRect.left, window.innerWidth - 440))
             }}
           >
             {/* The path is the aim: click a step to widen the selection to it,
                 so a flag lands on the stat rather than on the card holding it. */}
-            <div className="review-aim">
-              <span className="review-aim-label">Selected</span>
+            {/* The bar is the handle. It lands under the element it is about,
+                which is right until the element is at the bottom of the
+                screen or the thing you need to see is directly beneath it —
+                so it moves, and the buttons on it still work because the drag
+                bails out on anything inside a button. */}
+            <div
+              className="review-aim"
+              onPointerDown={startActionsDrag}
+              title={`Drag to move · ${Math.round(pickedRect.width)}×${Math.round(pickedRect.height)}`}
+            >
+              {/* The two keys, as buttons, because a shortcut nobody is told
+                  about is a shortcut nobody has. They sit before the path and
+                  carry their own key faces: Wider walks left along it, Back
+                  walks right, and pressing them is the same act as pressing
+                  the key. Back greys out when there is nothing inside to go
+                  to, which is also how you can tell the aim is on a leaf. */}
+              <span className="review-aim-step">
+                <button
+                  type="button"
+                  disabled={!canWiden}
+                  title={canWiden
+                    ? `Wider · out to ${shortName(canWiden)} · ↑ or ]`
+                    : 'Nothing wider to aim at'}
+                  onClick={() => canWiden && aimAt(canWiden)}
+                >
+                  <Expand className="size-3" />
+                  <kbd>↑ ]</kbd>
+                </button>
+                <button
+                  type="button"
+                  disabled={!canNarrow}
+                  title={canNarrow
+                    ? `${backSteps.length ? 'Back down to' : 'Narrower · in to'} ${shortName(canNarrow)} · ↓ or [`
+                    : 'Nothing inside this to aim at'}
+                  onClick={() => canNarrow && aimAt(canNarrow)}
+                >
+                  <Shrink className="size-3" />
+                  <kbd>↓ [</kbd>
+                </button>
+              </span>
               <span className="review-aim-path">
                 {elementPath(picked).map((node, index) => (
                   <button
@@ -3130,14 +3458,26 @@ function ReviewConsole({
                     type="button"
                     data-on={node === picked || undefined}
                     title={`Select ${shortName(node)}`}
-                    onClick={() => setPicked(node)}
+                    onClick={() => aimAt(node)}
                   >
                     {shortName(node)}
                   </button>
                 ))}
-              </span>
-              <span className="review-aim-size">
-                {Math.round(pickedRect.width)}×{Math.round(pickedRect.height)}
+                {/* The route back down, drawn faintly past the current step.
+                    Widening otherwise threw the path away and left you with a
+                    bar that could only go further out. These are the steps [
+                    will retrace, in order, and any of them can be jumped to. */}
+                {backSteps.map((node, index) => (
+                  <button
+                    key={`back-${index}`}
+                    type="button"
+                    data-back="true"
+                    title={`Back down to ${shortName(node)}`}
+                    onClick={() => aimAt(node)}
+                  >
+                    {shortName(node)}
+                  </button>
+                ))}
               </span>
               {/* A bare ✕ at the end of a row of verbs reads as a sixth verb,
                   and nobody could say which of the two things it did: shut
@@ -3148,7 +3488,7 @@ function ReviewConsole({
                 className="review-aim-close"
                 title="Nothing selected · Esc"
                 aria-label="Clear the selection"
-                onClick={() => setPicked(null)}
+                onClick={() => aimAt(null)}
               >
                 <X className="size-3.5" />
               </button>
@@ -3184,7 +3524,7 @@ function ReviewConsole({
                     type="button"
                     aria-label={`Archive on the ${edge} shelf`}
                     title={`Archive · ${edge} shelf`}
-                    onClick={() => { stow(picked, edge); setPicked(null); }}
+                    onClick={() => { stow(picked, edge); aimAt(null); }}
                   >
                     <Icon className="size-3.5" />
                   </button>
@@ -3197,7 +3537,7 @@ function ReviewConsole({
                   title="Select the whole audited section around this"
                   onClick={() => {
                     const section = picked.closest('[data-review-id]');
-                    if (section) setPicked(section);
+                    if (section) aimAt(section);
                   }}
                 >
                   <Expand className="size-4" /> Section
@@ -3236,19 +3576,57 @@ function ReviewConsole({
             aria-labelledby="review-compose-title"
             aria-describedby="review-compose-help"
             data-moved={composerMoved ? true : undefined}
+            /* Lands in the middle, grows from the click.
+               The origin is derived from the very value that positions the
+               card, so the two can never disagree — measuring the node
+               instead looked more accurate and was not: the entrance
+               animation scales the card, and a scaled box is what
+               getBoundingClientRect reports. */
             style={composerPosition
-              ? { top: composerPosition.top, left: composerPosition.left }
+              ? {
+                  top: composerPosition.top,
+                  left: composerPosition.left,
+                  ...(composer.origin && !composerMoved
+                    ? {
+                        transformOrigin:
+                          `${composer.origin.x - composerPosition.left}px `
+                          + `${composer.origin.y - composerPosition.top}px`
+                      }
+                    : null)
+                }
               : undefined}
             onClick={(event) => event.stopPropagation()}
             onSubmit={(event) => { event.preventDefault(); saveComment(); }}
             onKeyDown={(event) => {
+              /* Nothing typed in here reaches the board — which also means
+                 the board's guard never sees ⌘R, so this card has to swallow
+                 it. Reloading the page mid-note is the one keystroke that
+                 could throw away work that exists nowhere else yet. */
               event.stopPropagation();
-              if (event.key === 'Escape') {
+              if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'r') {
                 event.preventDefault();
-                dismissComposer();
+                say('Nothing reloaded — your note is still here');
                 return;
               }
-              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                /* Once it is already asking, Escape answers. Without the
+                   force, every press re-raised the same question and a draft
+                   with anything typed in it could not be escaped at all. */
+                dismissComposer(confirmDiscard);
+                return;
+              }
+              if (event.key === 'Enter' && !event.shiftKey) {
+                /* Enter saves. This is a one-box form and writing the note is
+                   the whole point of the console, so the most reachable key
+                   on the board does the thing — a chord for the main verb is
+                   a chord you have to be told about. Shift+Enter is the
+                   newline for the note that needs a second paragraph, and a
+                   focused button keeps Enter for itself, because there Enter
+                   already means "press this". */
+                const control = (event.target as HTMLElement | null)
+                  ?.closest('button, summary, a[href], select');
+                if (control) return;
                 event.preventDefault();
                 if (composerCanSave) saveComment();
                 return;
@@ -3495,7 +3873,7 @@ function ReviewConsole({
               </div>
             ) : (
               <footer className="review-compose-foot">
-                <span className="review-composer-keys">⌘↵ save · esc close</span>
+                <span className="review-composer-keys">↵ save · ⇧↵ new line · esc close</span>
                 <button type="button" className="review-compose-cancel" onClick={() => dismissComposer()}>Cancel</button>
                 <button type="submit" className="review-compose-submit" disabled={!composerCanSave}>
                   <MessageSquarePlus className="size-4" /> {composerCta}
@@ -3591,7 +3969,7 @@ function ReviewConsole({
             setOpen(false);
             setMode('off');
             setCommentIntent(false);
-            setPicked(null);
+            aimAt(null);
           }}
           min={dockMin}
           onMin={setDockMin}
@@ -3601,16 +3979,24 @@ function ReviewConsole({
           onOrder={setOrder}
           mode={mode}
           commenting={mode === 'pick' && commentIntent}
+          /* First press arms comment mode; a second press, with nothing
+             chosen, comments on the screen itself. Same behaviour as the C
+             key, so the button and the shortcut do not teach two things. */
           onCommentMode={() => {
+            if (mode === 'pick' && commentIntent && !pickedRef.current) {
+              commentOnScreen();
+              return;
+            }
             const next = !(mode === 'pick' && commentIntent);
             setCommentIntent(next);
             setMode(next ? 'pick' : 'off');
-            setPicked(null);
+            aimAt(null);
+            if (next) say('Comment mode · click anything, or press again for the whole screen');
           }}
           onMode={(next) => {
             setCommentIntent(false);
             setMode(next);
-            setPicked(null);
+            aimAt(null);
             if (next === 'audit') setTimeout(() => stepProposal(1), 60);
             else setFocusId(null);
           }}
@@ -3635,23 +4021,31 @@ function ReviewConsole({
             setOpen(false);
             setMode('off');
             setCommentIntent(false);
-            setPicked(null);
+            aimAt(null);
           }}
           order={order}
           onOrder={setOrder}
           openCount={openCount}
           mode={mode}
           commenting={mode === 'pick' && commentIntent}
+          /* First press arms comment mode; a second press, with nothing
+             chosen, comments on the screen itself. Same behaviour as the C
+             key, so the button and the shortcut do not teach two things. */
           onCommentMode={() => {
+            if (mode === 'pick' && commentIntent && !pickedRef.current) {
+              commentOnScreen();
+              return;
+            }
             const next = !(mode === 'pick' && commentIntent);
             setCommentIntent(next);
             setMode(next ? 'pick' : 'off');
-            setPicked(null);
+            aimAt(null);
+            if (next) say('Comment mode · click anything, or press again for the whole screen');
           }}
           onMode={(next) => {
             setCommentIntent(false);
             setMode(next);
-            setPicked(null);
+            aimAt(null);
             if (next === 'audit') setTimeout(() => stepProposal(1), 60);
             else setFocusId(null);
           }}
@@ -3800,7 +4194,7 @@ const TAG_AS_ACT: Record<string, string> = {
   move: 'Move'
 };
 
-export const DO: Record<string, string> = {
+const DO: Record<string, string> = {
   /* A proposed cut you agreed with. ("Cut" read as cut-and-paste beside Move
      and Archive, and never said what was being cut — the element, or the
      note about it.) */

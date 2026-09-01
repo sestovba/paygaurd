@@ -11,8 +11,9 @@
 //
 // A reviewer reading four surfaces has to hold four things in their head to
 // answer one question: what is coming. So they are one track here, read left
-// to right, and the pace warning — "at this pace you cross SGA in November" —
-// is a mark on that track rather than a sentence in a sheet nobody opens.
+// to right, and the pace warning — "at this pace you cross the limit in
+// November" — is a mark on that track rather than a sentence in a sheet
+// nobody opens.
 //
 // Only the months ahead are drawn. What already happened is in the table
 // below; a runway that starts in January is a history, and the product's
@@ -30,24 +31,42 @@ import type { MonthKey } from '../../domain/types';
 type Fill = 'over' | 'used' | 'near' | 'clear' | 'empty';
 
 const FILL_MEANING: Record<Fill, string> = {
-  over: 'at or over SGA',
+  over: 'over your limit',
   used: 'uses a trial work month',
   near: 'close to the limit',
   clear: 'under the limit',
   empty: 'nothing recorded yet'
 };
 
+/* The legend, in reading order. `over` and `used` are the two regimes and
+ * they are mutually exclusive — a month is judged against one limit or the
+ * other, never both — so listing them together taught the reader a rule the
+ * app has decided never to explain. It is built from the fills actually on
+ * the track instead, which makes that impossible by construction. */
+const KEY_ORDER: ReadonlyArray<{ fill: Fill; label: string }> = [
+  { fill: 'over', label: 'Over your limit' },
+  { fill: 'used', label: 'Trial work month' },
+  { fill: 'near', label: 'Close' },
+  { fill: 'clear', label: 'Under' }
+];
+
 export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
   const now = todayMonth();
   const thisYear = yearOf(now) === ui.year;
 
-  const months = monthsOfYear(ui.year).filter((m) => !thisYear || m >= now);
+  /* Focus mode leaves one month standing. The runway is the most
+     forward-looking surface in the app, which is precisely what focus mode
+     exists to put away. */
+  const months = ui.focusMode
+    ? [thisYear ? now : monthsOfYear(ui.year)[11]]
+    : monthsOfYear(ui.year).filter((m) => !thisYear || m >= now);
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
   // Where the year is heading, said as a month rather than a rate. The first
   // month ahead that crosses the line is the whole content of a pace warning
-  // — "you cross SGA in November" is actionable; "trending 8% over" is not.
+  // — "you cross the limit in November" is actionable; "trending 8% over"
+  // is not.
   const crossing = months.find((month) => {
     const phase = benefitPhase(data, month);
     const status = monthStatus(data, month);
@@ -55,6 +74,36 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
   });
 
   if (!months.length) return null;
+
+  /* Worked out before anything is drawn, because the legend below is built
+     from what actually ended up on the track. */
+  const stops = months.map((month) => {
+    const status = monthStatus(data, month);
+    const phase = benefitPhase(data, month);
+    const near = nearLimit(status, phase);
+    const extra = extraPay.get(month);
+    const limit = activeThreshold(data, month);
+
+    /* No confirmed phase means no limit, and no limit means there is
+       nothing to be under. Reading 'clear' here would paint the whole
+       runway green for someone whose status the app has never been
+       told — safe-looking by construction, which is the exact failure
+       the review caught in the averages elsewhere. */
+    const fill: Fill = !limit ? 'empty'
+      : phase === 'sga' && status.overSga ? 'over'
+        : phase === 'trialWork' && status.isServiceMonth ? 'used'
+          : near ? 'near'
+            : status.countable === 0 ? 'empty' : 'clear';
+
+    // The number that answers "how much room is left", not "how much
+    // have I earned" — the second is a total, and no limit is annual.
+    const room = limit?.amount != null ? limit.amount - status.countable : null;
+
+    return { month, fill, extra, room };
+  });
+
+  const onTrack = new Set(stops.map((stop) => stop.fill));
+  const key = KEY_ORDER.filter((entry) => onTrack.has(entry.fill));
 
   return (
     <section className="hz-runway" aria-label={`The rest of ${ui.year}`}>
@@ -71,70 +120,49 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
       </header>
 
       <ol className="hz-track">
-        {months.map((month) => {
-          const status = monthStatus(data, month);
-          const phase = benefitPhase(data, month);
-          const near = nearLimit(status, phase);
-          const extra = extraPay.get(month);
-          const limit = activeThreshold(data, month);
+        {stops.map(({ month, fill, extra, room }) => (
+          <li key={month} className="hz-stop" data-fill={fill} data-now={month === now || undefined}>
+            <button
+              type="button"
+              className="hz-stop-btn"
+              onClick={onOpenMonth ? () => onOpenMonth(month) : undefined}
+              aria-label={
+                `${formatMonth(month)}: ${FILL_MEANING[fill]}`
+                + (month === now ? ', current month' : '')
+                + (extra ? `, ${extra.counts.join(' or ')} paychecks` : '')
+                + (room != null && room > 0 ? `, ${money(room)} of room left` : '')
+              }
+            >
+              <span className="hz-stop-month">{shortMonthName(month).toUpperCase()}</span>
 
-          /* No confirmed phase means no limit, and no limit means there is
-             nothing to be under. Reading 'clear' here would paint the whole
-             runway green for someone whose status the app has never been
-             told — safe-looking by construction, which is the exact failure
-             the review caught in the averages elsewhere. */
-          const fill: Fill = !limit ? 'empty'
-            : phase === 'sga' && status.overSga ? 'over'
-              : phase === 'trialWork' && status.isServiceMonth ? 'used'
-                : near ? 'near'
-                  : status.countable === 0 ? 'empty' : 'clear';
-
-          // The number that answers "how much room is left", not "how much
-          // have I earned" — the second is a total, and no limit is annual.
-          const room = limit?.amount != null ? limit.amount - status.countable : null;
-
-          return (
-            <li key={month} className="hz-stop" data-fill={fill} data-now={month === now || undefined}>
-              <button
-                type="button"
-                className="hz-stop-btn"
-                onClick={onOpenMonth ? () => onOpenMonth(month) : undefined}
-                aria-label={
-                  `${formatMonth(month)}: ${FILL_MEANING[fill]}`
-                  + (extra ? `, ${extra.counts.join(' or ')} paychecks` : '')
-                  + (room != null && room > 0 ? `, ${money(room)} of room left` : '')
-                }
-              >
-                <span className="hz-stop-month">{shortMonthName(month).toUpperCase()}</span>
-
-                {/* The paycheck count is the fact that catches people out, so
-                    it is the loudest thing on a stop that has one. */}
-                {extra ? (
-                  <span className="hz-stop-checks">
-                    <Zap className="size-3" aria-hidden="true" />{extra.counts.join('/')}
-                  </span>
-                ) : null}
-
-                <span className="hz-stop-room">
-                  {room == null ? '—'
-                    : room > 0 ? `${money(room)} left`
-                      : `${money(Math.abs(room))} over`}
+              {/* The paycheck count is the fact that catches people out, so
+                  it is the loudest thing on a stop that has one. */}
+              {extra ? (
+                <span className="hz-stop-checks">
+                  <Zap className="size-3" aria-hidden="true" />{extra.counts.join('/')}
                 </span>
-              </button>
-            </li>
-          );
-        })}
+              ) : null}
+
+              <span className="hz-stop-room">
+                {room == null ? '—'
+                  : room > 0 ? `${money(room)} left`
+                    : `${money(Math.abs(room))} over`}
+              </span>
+            </button>
+          </li>
+        ))}
       </ol>
 
       {/* The key is spelled out rather than left to colour alone: four fills
           on a strip is exactly the point where a legend stops being clutter
-          and starts being the only way to read it. */}
-      <ul className="hz-key" aria-hidden="true">
-        <li data-fill="over">At or over SGA</li>
-        <li data-fill="used">Trial work month</li>
-        <li data-fill="near">Close</li>
-        <li data-fill="clear">Under</li>
-      </ul>
+          and starts being the only way to read it. Only the fills that are
+          actually on the track get a line — a key entry for a state nothing
+          is in is a rule being taught for no reason. */}
+      {key.length ? (
+        <ul className="hz-key" aria-hidden="true">
+          {key.map(({ fill, label }) => <li key={fill} data-fill={fill}>{label}</li>)}
+        </ul>
+      ) : null}
     </section>
   );
 }

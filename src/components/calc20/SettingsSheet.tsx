@@ -129,18 +129,18 @@ function SettingsMainContent({
                 <div className="warning__body">
                   <div className="warning__title">Confirm this before relying on it</div>
                   <div className="warning__text">
-                    Do not choose “TWP remains” from memory alone. Review earlier
-                    work years, benefit letters, or your SSA record — the app
-                    will not infer status from an empty history, and getting
-                    this wrong risks a bad SGA/TWP recommendation later.
+                    Do not pick “Trial months left” from memory alone. Check
+                    earlier work years, a benefit letter, or your Social
+                    Security record — the app will not guess from an empty
+                    history, and every limit after this one depends on it.
                   </div>
                 </div>
               </div>
             ) : (
               <p className="help-note">
-                Do not choose “TWP remains” from memory alone. Review earlier work
-                years, benefit letters, or your SSA record. The app will not infer
-                status from an empty history.
+                Do not pick “Trial months left” from memory alone. Check earlier
+                work years, a benefit letter, or your Social Security record. The
+                app will not guess from an empty history.
               </p>
             )}
           </div>
@@ -232,13 +232,16 @@ function SettingsMainContent({
               </div>
             </button>
             <p className="help-note">
-              To complete the trial work period, {TRIAL_MONTH_LIMIT} service months
-              {' '}must fall inside a rolling {ROLLING_WINDOW}-month window. Older months
-              can stop counting only before the ninth is reached. Once completed, the
-              trial work period does not restart.
+              You have {TRIAL_MONTH_LIMIT} trial work months, and they only count
+              {' '}while they fall inside the same rolling {ROLLING_WINDOW} months. An old
+              one can drop back out, but only before the ninth is reached. After
+              that they are gone for good.
             </p>
           </div> : phase === 'complete' ? (
-            <p className="help-note">TWP used up · SGA mode is active.</p>
+            /* Nothing here. Once the trial months are spent the app never
+               mentions them again — a line reporting that a resource is gone
+               is exactly the stranded copy the review asked to cut. */
+            null
           ) : null}
 
           <button
@@ -575,7 +578,7 @@ function PriorMonthsContent({
                 type="text"
                 inputMode="numeric"
                 placeholder="0"
-                aria-label="TWP months already used"
+                aria-label="Trial work months already used"
                 value={quickCount}
                 onChange={(e) => setQuickCount(e.target.value.replace(/[^0-9]/g, ''))}
               />
@@ -592,7 +595,7 @@ function PriorMonthsContent({
           </div>
 
           <p className="help-note">
-            Tap months where earnings exceeded that year's TWP amount, or where
+            Tap months where earnings went over that year's limit, or where
             self-employment exceeded {TWP_SELF_EMPLOYMENT_HOURS} hours. Your benefit
             letters or SSA record can help verify them.
           </p>

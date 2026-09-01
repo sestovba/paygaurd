@@ -3,12 +3,29 @@ import { countableFor } from '../../domain/earnings';
 import { money } from '../../domain/format';
 import { longMonthName, monthKey, shortMonthName } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
+import { extraPaycheckMonths } from '../../domain/paySchedule';
 import type { Stream } from '../../domain/types';
 
+/**
+ * Review note: "it is currently a picture of income. It earns its height when
+ * the SGA and TWP lines are what you read first, the bars over them are
+ * marked, and the 3- and 5-paycheck months are called out on the axis. Right
+ * now the threshold lines are decoration on a chart rather than the point of
+ * it."
+ *
+ * Three changes, one per clause. The limits are solid rules with the ground
+ * above SGA tinted, so the eye lands on them before any bar; the dashed grid
+ * they used to compete with is now the quieter of the two. A bar that crosses
+ * a limit is capped in that limit's colour, so a breach is a mark rather than
+ * something you measure by eye. And the months a weekly or fortnightly
+ * schedule pays an extra check are stamped on the axis — before they arrive,
+ * because that is the whole use of knowing.
+ */
 export function PayGuardChart({ streams, year }: { streams: Stream[]; year: number }) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const rules = rulesFor(year);
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => monthKey(year, i + 1)), [year]);
+  const extraPay = useMemo(() => extraPaycheckMonths(streams, year), [streams, year]);
 
   const byMonth = useMemo(() => months.map((month) => {
     const w2 = streams
@@ -128,14 +145,25 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
             })}
           </div>
 
-          {/* Threshold Lines */}
+          {/* The limits, drawn as the subject of the chart rather than as
+              annotation on it: a solid rule each, and the ground above SGA
+              tinted so "over" is a place on the chart, not a comparison the
+              reader has to make. */}
+          {rules.sga <= ceiling ? (
+            <div
+              className="pg-chart-over-band pointer-events-none absolute left-9 right-0 sm:left-14"
+              style={{ top: 0, height: `${(1 - rules.sga / ceiling) * 100}%` }}
+              aria-hidden="true"
+            />
+          ) : null}
+
           {/* SGA Line */}
           {rules.sga <= ceiling ? (
             <div
               className="pointer-events-none absolute left-9 sm:left-14 right-0 flex items-center z-10"
               style={{ top: `${(1 - rules.sga / ceiling) * 100}%` }}
             >
-              <div className="flex-1 border-t-2 border-dashed pg-border-over" />
+              <div className="pg-chart-limit flex-1" data-limit="over" />
               <span className="pg-badge pg-badge-over ml-1.5 shrink-0 sm:ml-2">
                 SGA {money(rules.sga)}
               </span>
@@ -148,7 +176,7 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
               className="pointer-events-none absolute left-9 sm:left-14 right-0 flex items-center z-10"
               style={{ top: `${(1 - rules.trialWork / ceiling) * 100}%` }}
             >
-              <div className="flex-1 border-t-2 border-dashed pg-border-twp" />
+              <div className="pg-chart-limit flex-1" data-limit="twp" />
               <span className="pg-badge pg-badge-twp ml-1.5 shrink-0 sm:ml-2">
                 TWP {money(rules.trialWork)}
               </span>
@@ -198,7 +226,12 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                   onBlur={() => setSelectedMonth(null)}
                   aria-pressed={isSelected}
                   aria-describedby="pg-chart-thresholds"
-                  aria-label={`${longMonthName(item.month)}: ${money(item.total)} countable income. W-2 ${money(item.w2)}. 1099 ${money(item.se)}.`}
+                  aria-label={
+                    `${longMonthName(item.month)}: ${money(item.total)} countable income.`
+                    + ` W-2 ${money(item.w2)}. 1099 ${money(item.se)}.`
+                    + (isOverSga ? ' Over the SGA limit.' : isOverTwp ? ' Over the TWP limit.' : '')
+                    + (extraPay.get(item.month) ? ` ${extraPay.get(item.month)!.counts.join(' or ')} paychecks this month.` : '')
+                  }
                   className="pg-chart-bar-trigger group relative flex h-full flex-1 flex-col items-center justify-end"
                 >
                   {/* Floating Desktop Tooltip */}
@@ -254,9 +287,11 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                     </div>
                   ) : null}
 
-                  {/* Stacked bar */}
+                  {/* Stacked bar. A bar that crosses a limit wears that
+                      limit's colour as a cap, so a breach is something you
+                      see rather than something you measure. */}
                   <div
-                    className={`w-full max-w-[28px] sm:max-w-[32px] rounded-t-md flex flex-col justify-end overflow-hidden transition-all duration-150 ${
+                    className={`pg-chart-bar relative w-full max-w-[28px] sm:max-w-[32px] rounded-t-md flex flex-col justify-end overflow-hidden transition-all duration-150 ${
                       isSelected ? 'scale-105 shadow-md brightness-110 pg-ring-selected' : 'group-hover:brightness-105'
                     }`}
                     style={{ height: `${Math.max(totalPct, 0)}%` }}
@@ -273,6 +308,9 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                         className="w-full pg-fill-w2 transition-all"
                       />
                     ) : null}
+                    {isOverSga || isOverTwp ? (
+                      <span className="pg-chart-cap" data-breach={isOverSga ? 'over' : 'twp'} aria-hidden="true" />
+                    ) : null}
                   </div>
                 </button>
               );
@@ -280,14 +318,32 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
           </div>
         </div>
 
-        {/* X Axis Month Labels */}
+        {/* X Axis Month Labels. The months a weekly or fortnightly schedule
+            drops an extra check into are stamped here — the one fact about a
+            future month that is knowable before it happens. */}
         <div className="mr-16 ml-11 mt-2 flex min-w-[20rem] justify-between text-[0.625rem] font-bold uppercase tracking-wider pg-muted sm:mr-24 sm:ml-16 sm:min-w-0 sm:text-[0.6875rem]" aria-hidden="true">
-          {months.map((m) => (
-            <span key={m} className="flex-1 text-center">
-              {shortMonthName(m)}
-            </span>
-          ))}
+          {months.map((m) => {
+            const extra = extraPay.get(m);
+            return (
+              <span key={m} className="flex flex-1 flex-col items-center gap-0.5">
+                <span data-extra-pay={extra ? true : undefined} className={extra ? 'pg-text-info' : undefined}>
+                  {shortMonthName(m)}
+                </span>
+                {extra ? (
+                  <span className="pg-axis-pay" title={`${extra.counts.join(' or ')} paychecks`}>
+                    {extra.counts.join('/')}&times;
+                  </span>
+                ) : null}
+              </span>
+            );
+          })}
         </div>
+        {extraPay.size > 0 ? (
+          <p className="mr-16 ml-11 mt-1.5 text-[0.625rem] font-semibold pg-muted sm:mr-24 sm:ml-16">
+            <span className="pg-axis-pay align-middle">3&times;</span>
+            <span className="ml-1.5 align-middle">marks a month your pay schedule lands an extra paycheck in.</span>
+          </p>
+        ) : null}
       </div>
     </div>
   );

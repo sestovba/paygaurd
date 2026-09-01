@@ -6,11 +6,10 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
-  Moon,
+  PanelLeft,
   Plus,
   Settings,
   ShieldCheck,
-  Sun,
   TrendingUp,
   WalletCards,
   Zap
@@ -18,8 +17,9 @@ import {
 import { BrandMark, Chip } from './ui';
 import type { LucideIcon } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
+import { copyFor } from '../domain/copy';
 import type { LayoutMode } from '../state/storage';
-import { resolveTheme, useTheme } from '../theme';
+import { useTheme } from '../theme';
 import { knownYears } from '../domain/rules';
 import { actionItems } from '../domain/notifications';
 import { formatMonth } from '../domain/months';
@@ -64,18 +64,29 @@ export function TrackerV3() {
   const { data, ui, setUi, addStream, resetAll } = useTracker();
   useTheme(ui.theme);
 
-  const isDark = resolveTheme(
-    ui.theme,
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  ) === 'dark';
+  /* Review note: "great location for settings, but our sidebar hides with no
+     way to bring it back out — no show sidebar toggle anywhere. Only if that
+     exists can this setting stay here."
 
+     The sidebar was presentation only: it appeared at lg and vanished below
+     it, with no control at any width. It is a thing you own now, and — this
+     is the part worth getting right — the button means the same thing at
+     every width. A toggle whose label is true on a laptop and false on a
+     tablet is worse than no toggle. So the state is a plain boolean that only
+     *starts* from the viewport (open on a wide screen, closed on a narrow
+     one); after that the button decides, and the sidebar floats over the page
+     where there is no room for it in the flow. */
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => window.matchMedia('(min-width: 1024px)').matches
+  );
   const [page, setPage] = useState<PageId>('overview');
   const [panes, setPanes] = useState<PaneRequest[]>([]);
   const activeRegionRef = useRef<HTMLElement | null>(null);
   const years = knownYears();
   const yearIndex = years.indexOf(ui.year);
 
-  const statusLabel = 'TWP / SGA';
+  /* Named for what it tells you, not for the two rules behind it. */
+  const statusLabel = 'Your limit';
 
   const navItems: { id: PageId; label: string; icon: LucideIcon }[] = useMemo(() => [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
@@ -101,6 +112,12 @@ export function TrackerV3() {
     if (pane.kind === 'settings') return 'Settings';
     if (pane.kind === 'notifications') return 'Activity';
     return 'New income source';
+  }
+
+  /* The sidebar is in the page flow at lg and above and over the page below
+     it. Only the second kind should close itself when you use it. */
+  function closeIfFloating() {
+    if (!window.matchMedia('(min-width: 1024px)').matches) setSidebarOpen(false);
   }
 
   function navigate(next: PageId) {
@@ -149,18 +166,36 @@ export function TrackerV3() {
       : 'grid-cols-1 md:grid-cols-[minmax(17rem,0.72fr)_minmax(24rem,1.28fr)] xl:grid-cols-[minmax(16rem,0.62fr)_minmax(18rem,0.72fr)_minmax(25rem,1.66fr)]';
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-background">
+    <div className="flex h-dvh overflow-hidden bg-background" data-chrome-root>
       <DesktopSidebar
         page={page}
         navItems={navItems}
-        onNavigate={navigate}
-        onNewEntry={() => openPane({ kind: 'newSource' })}
-        onSettings={() => openPane({ kind: 'settings' })}
+        open={sidebarOpen}
+        {...{
+          /* Picking something closes the sidebar only when it is covering the
+             page. On a wide screen it is part of the layout, and having it
+             vanish because you used it would be a bug wearing a feature's
+             clothes. */
+        }}
+        onNavigate={(next) => { closeIfFloating(); navigate(next); }}
+        onNewEntry={() => { closeIfFloating(); openPane({ kind: 'newSource' }); }}
+        onSettings={() => { closeIfFloating(); openPane({ kind: 'settings' }); }}
+        onClose={() => setSidebarOpen(false)}
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="relative z-10 shrink-0 border-b border-border bg-background/95 backdrop-blur">
           <div className="flex min-h-16 items-center gap-3 px-3 sm:px-5 lg:px-6">
+            <button
+              type="button"
+              aria-label={sidebarOpen ? 'Hide the sidebar' : 'Show the sidebar'}
+              aria-expanded={sidebarOpen}
+              onClick={() => setSidebarOpen((v) => !v)}
+              className="icon-btn grid shrink-0 border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <PanelLeft className="size-5" />
+            </button>
+
             <div className="flex min-w-0 flex-1 items-center gap-2.5 lg:hidden">
               <BrandMark onClick={() => navigate('overview')} />
             </div>
@@ -202,20 +237,23 @@ export function TrackerV3() {
               <NotificationDot />
             </button>
 
-            <button
-              type="button"
-              aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-              onClick={() => setUi({ theme: isDark ? 'light' : 'dark' })}
-              className="icon-btn hidden border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground sm:grid"
-            >
-              {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
-            </button>
+            {/* Review note: "the theme switcher should be removed but the gear
+                icon should stay", and the gear "is there at a wider view but
+                disappears at a narrow view". Light/dark is a preference, and
+                it already has a home in Settings; a benefits tracker's header
+                is not the place to spend a slot on it.
 
+                The gear's own gap was real and narrow: it was `lg:grid`, and
+                the bottom bar that carries Settings on a phone is `md:hidden`,
+                so between those two widths there was no way into Settings at
+                all. It starts at `md` now, which closes that band without
+                putting a second Settings button next to the one in the bottom
+                bar on a phone. */}
             <button
               type="button"
               aria-label="Settings"
               onClick={() => openPane({ kind: 'settings' })}
-              className="icon-btn hidden border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground lg:grid"
+              className="icon-btn hidden border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground md:grid"
             >
               <Settings className="size-5" />
             </button>
@@ -328,7 +366,7 @@ function RootPane({
       <section
         ref={activeRef}
         role="region"
-        aria-label="Income sources"
+        aria-label={copyFor('responsive').income}
         tabIndex={activeRef ? -1 : undefined}
         className={`${rootVisibility} min-h-0 min-w-0 flex-col bg-background focus:outline-none ${hasDetail ? 'overflow-hidden' : 'overflow-y-auto'}`}
       >
@@ -365,8 +403,8 @@ function RootPane({
           eyebrow={page === 'overview' ? 'Home' : 'Limits'}
           title={page === 'overview' ? 'Overview' : statusLabel}
           description={page === 'overview'
-            ? 'TWP, SGA, and 3-/5-paycheck months.'
-            : 'Confirm TWP status and review the active monthly limit.'}
+            ? 'What you have earned, what is left, and the months that pay you extra.'
+            : 'Your limit, and where you are against it.'}
           compact={hasDetail}
         />
 
@@ -387,6 +425,7 @@ function RootPane({
             <PaycheckRadar
               onOpenMonth={(month) => onOpen({ kind: 'month', month })}
               onCheckNotifications={() => onOpen({ kind: 'notifications' })}
+              onSetPayday={(streamId) => onOpen({ kind: 'payday', streamId })}
             />
             <ReviewTarget
               id="v3-overview-month-grid"
@@ -523,18 +562,40 @@ function PaneContent({
 function DesktopSidebar({
   page,
   navItems,
+  open,
   onNavigate,
   onNewEntry,
-  onSettings
+  onSettings,
+  onClose
 }: {
   page: PageId;
   navItems: { id: PageId; label: string; icon: LucideIcon }[];
+  /** Opened by the header's toggle. Below lg it floats over the page; at lg
+   *  and above the sidebar is shown by default and this hides it. */
+  open: boolean;
   onNavigate: (page: PageId) => void;
   onNewEntry: () => void;
   onSettings: () => void;
+  onClose: () => void;
 }) {
   return (
-    <aside className="hidden h-dvh w-60 shrink-0 flex-col border-r border-border bg-surface lg:flex 2xl:w-64">
+    <>
+      {open ? (
+        <button
+          type="button"
+          aria-label="Close the sidebar"
+          onClick={onClose}
+          className="fixed inset-0 z-20 bg-black/30 lg:hidden"
+        />
+      ) : null}
+      <aside
+        className={
+          'h-dvh w-60 shrink-0 flex-col border-r border-border bg-surface 2xl:w-64 '
+          + (open
+            ? 'fixed inset-y-0 left-0 z-30 flex lg:static lg:z-auto '
+            : 'hidden ')
+        }
+      >
       <div className="flex h-20 items-center border-b border-border px-5">
         <BrandMark onClick={() => onNavigate('overview')} subtitle="Stay under the limit" />
       </div>
@@ -581,7 +642,8 @@ function DesktopSidebar({
           <Settings className="size-[18px]" /> Settings
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 
@@ -872,7 +934,7 @@ function ActivityPane({
   onOpen: (pane: PaneRequest) => void;
 }) {
   const { data, ui } = useTracker();
-  const items = actionItems(data, ui.year);
+  const items = actionItems(data, ui.year, ui.focusMode);
   const activity = [...data.activity].reverse();
 
   function resolve(item: ReturnType<typeof actionItems>[number]) {
@@ -921,14 +983,26 @@ function ActivityPane({
         )}
       </section>
 
+      {/* Review note: "What you changed is not what you owe. Useful for
+          trusting the record — which matters — but it is a subpage, not a
+          section on the screen where you check whether you are over."
+          It was already off the overview and in here, but it was still a
+          second open section competing with the alerts above it for the first
+          screenful. It is kept, and it is folded: the record is there for
+          anyone who wants to check it, and it asks for nothing until then. */}
       <ReviewTarget
         id="v3-recent-activity"
         label="Recent activity log"
         reason="The audit trail repeats completed actions and does not change the current TWP, SGA, or paycheck decision."
         layout="responsive"
       >
-        <section className="border-t border-border pt-4">
-          <h2 className="text-base font-semibold">Recent activity</h2>
+        <details className="mt-4 border-t border-border pt-4">
+          <summary className="cursor-pointer list-none text-base font-semibold">
+            Recent activity
+            <span className="type-muted ml-2 font-normal">
+              {activity.length ? `${activity.length} entries` : 'nothing yet'}
+            </span>
+          </summary>
           {activity.length ? (
             <ul className="mt-3 space-y-2">
               {activity.slice(0, 10).map((entry) => (
@@ -940,7 +1014,7 @@ function ActivityPane({
           ) : (
             <p className="type-muted mt-3">Nothing yet.</p>
           )}
-        </section>
+        </details>
       </ReviewTarget>
     </Sheet>
   );
@@ -948,7 +1022,7 @@ function ActivityPane({
 
 function NotificationDot() {
   const { data, ui } = useTracker();
-  const items = actionItems(data, ui.year);
+  const items = actionItems(data, ui.year, ui.focusMode);
   const latestAt = data.activity.length ? data.activity[data.activity.length - 1].at : null;
   const hasUnseenActivity = Boolean(latestAt) && (!ui.notificationsViewedAt || latestAt! > ui.notificationsViewedAt);
   const showDot = items.length > 0 || hasUnseenActivity;

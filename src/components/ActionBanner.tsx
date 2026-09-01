@@ -23,7 +23,7 @@ export function ActionBanner({
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [flight, setFlight] = useState<{ from: DOMRect; to: DOMRect } | null>(null);
 
-  const items = actionItems(data, ui.year);
+  const items = actionItems(data, ui.year, ui.focusMode);
   const urgent = items.filter((i) => i.severity === 'warn');
   const shown = (urgent.length ? urgent : items.slice(0, 1)).filter((i) => !dismissed.has(i.id));
   if (!shown.length && !flight) return null;

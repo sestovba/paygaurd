@@ -20,10 +20,13 @@ import { yearOf } from './months';
 
 export type Precision = 'estimated' | 'scheduled' | 'exact';
 
+/* One word each. The three pips beside them carry the scale now, so the name
+   only has to say which rung this is — "Pay Schedule Set" and "Exact (From
+   Paystubs)" were explaining the rung as well as naming it. */
 export const PRECISION_NAME: Record<Precision, string> = {
   estimated: 'Estimated',
-  scheduled: 'Pay Schedule Set',
-  exact: 'Exact (From Paystubs)'
+  scheduled: 'Scheduled',
+  exact: 'Exact'
 };
 
 /** Which field is missing — so a layout can send you to the fastest way of

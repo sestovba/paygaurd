@@ -109,11 +109,11 @@ export function SafeWorkSimulator() {
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
     return (
       <div className="simulator simulator--paused">
-        <div className="simulator__eyebrow">Safe work simulator</div>
-        <div className="simulator__title">Confirm TWP status first</div>
+        <div className="simulator__eyebrow">Work pay simulator</div>
+        <div className="simulator__title">We need your limit first</div>
         <p className="help-note">
-          A safe-hours recommendation needs to know whether the goal is preserving
-          TWP months or staying under SGA. The app will not guess.
+          Hours only mean something against a limit, and yours is not set yet.
+          Answer the status questions and this fills itself in.
         </p>
       </div>
     );
@@ -121,12 +121,16 @@ export function SafeWorkSimulator() {
 
   return (
     <div className="simulator">
-      <div className="simulator__eyebrow">Safe work simulator</div>
+      <div className="simulator__eyebrow">Work pay simulator</div>
+      {/* The heading is the answer, not the panel's job description — the
+          same change the shared simulator got for "Stay below SGA — Duh".
+          It also stops this layout naming a regime the reader is not in. */}
       <div className="simulator__title">
-        {phase === 'trialWork' ? 'Preserve a TWP month' : 'Stay below SGA'}
+        Aim for {safeFiveWeekHours.toFixed(1)} hours a week
       </div>
       <p className="help-note">
-        Based on a five-week stress month. Other countable income comes off first.
+        That holds even in a month that pays you an extra time. Other counted
+        pay comes off first.
       </p>
 
       <div className="simulator__inputs">
@@ -189,8 +193,9 @@ export function SafeWorkSimulator() {
 
       <p className="help-note">
         Estimate only — unearned income, subsidies, IRWE, and SSA averaging can
-        shift the real total. Self-employment can also earn a TWP month by
-        hours alone, even under the dollar line.
+        shift the real total.{phase === 'trialWork'
+          ? ' Working for yourself can use a trial work month on hours alone, even under the dollar line.'
+          : ''}
       </p>
     </div>
   );

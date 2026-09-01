@@ -57,13 +57,13 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
             >
               {phase === 'sga'
                 ? (status.overSga
-                    ? money(status.countable - rules.sga) + ' over SGA'
-                    : money(status.roomToSga ?? 0) + ' below SGA')
+                    ? money(status.countable - rules.sga) + ' over your limit'
+                    : money(status.roomToSga ?? 0) + ' under your limit')
                 : phase === 'trialWork'
                   ? (status.isServiceMonth
-                      ? 'one TWP month used'
-                      : money(status.roomToTrialWork ?? 0) + ' until TWP')
-                  : 'limit not confirmed'}
+                      ? 'one trial work month used'
+                      : money(status.roomToTrialWork ?? 0) + ' to your limit')
+                  : 'no limit yet'}
             </span>
           </div>
 
@@ -171,12 +171,12 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
               <div className="warning__bar" />
               <div className="warning__body">
                 <div className="warning__title">
-                  {phase === 'trialWork' ? 'This month uses one TWP month' : 'This month is over SGA'}
+                  {phase === 'trialWork' ? 'This month uses one trial work month' : 'This month is over your limit'}
                 </div>
                 <div className="warning__text">
                   {phase === 'trialWork'
-                    ? `Over ${money(rules.trialWork)}. Additional earnings in this same month do not use another TWP month.`
-                    : `${money(status.countable - rules.sga)} over the ${money(rules.sga)} working limit.`}
+                    ? `Over ${money(rules.trialWork)}. Earning more in this same month does not use another one.`
+                    : `${money(status.countable - rules.sga)} over your ${money(rules.sga)} limit.`}
                 </div>
               </div>
             </div>

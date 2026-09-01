@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import {
-  ArrowRight, Cloud, CloudOff, Download, FileText, HelpCircle, LayoutGrid, LogOut,
-  Trash2, Upload
+  ArrowRight, Cloud, CloudOff, Crosshair, Download, FileText, HelpCircle, LayoutTemplate,
+  LogOut, ShieldCheck, Trash2, Upload
 } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { displayNameFor, initialsFor } from '../auth/session';
@@ -136,7 +136,7 @@ export function SettingsPanel({
   subTheme?: LedgerTheme;
   onSubThemeChange?: (theme: LedgerTheme) => void;
 }) {
-  const { data, ui, replaceAll } = useTracker();
+  const { data, ui, setUi, replaceAll } = useTracker();
   const [helpSpreadOpen, setHelpSpreadOpen] = useState(false);
   /* The layout list is seven options with a line of prose each — a screenful
      inside a sheet you opened to do something else. It is a choice you make
@@ -180,7 +180,6 @@ export function SettingsPanel({
   return (
     <Sheet
       title="Settings"
-      eyebrow="Preferences"
       onClose={onClose}
       variant={variant === 'inline' ? 'inline' : 'modal'}
       backLabel={variant === 'inline' ? backLabel : undefined}
@@ -197,46 +196,80 @@ export function SettingsPanel({
         }}
       />
 
-      {/* First, because it is the only thing in here that changes the
-          numbers: which limit applies to you — $1,210 a month against your
-          nine trial months, or $1,690 once they are gone — is decided by
-          this and nothing else on the page. */}
-      <Section title="Benefit status">
-        <LinkRow label="Trial work period, SGA, and the simulator" onClick={onOpenStatus} />
-      </Section>
+      {/* Review note: "why is benefit status then layout then how income
+          works? ... benefit status has no icon? focus mode has no icon? ...
+          this one needs refactoring and cleanup", and separately, of the
+          layout row, "layout icon can be better".
+
+          Order is by what the reviewer said they reach for: the two things
+          that change what the app tells you, then the two that change how it
+          looks, then their data. "How income works" is reference reading —
+          "I am ignoring that section" — so it goes to the foot with the other
+          reference material rather than sitting third in the list of things
+          you came here to do. Every row carries an icon now; a list where
+          some rows have one and some do not reads as a list with something
+          missing. */}
+      <div className="flex flex-col gap-2">
+        <LinkRow
+          icon={<ShieldCheck className="size-5 text-muted-foreground" />}
+          label="Benefit status"
+          onClick={onOpenStatus}
+        />
+      </div>
+
+      {/* Review note: "no need to be so descriptive, just explain the benefits
+          of this mode." It was listing what the mode removes, which is a
+          changelog. What it is for is the one line worth having. */}
+      <label className="flex items-start justify-between gap-3 rounded-lg border border-border bg-surface-2 px-4 py-3.5">
+        <span className="flex min-w-0 gap-2">
+          <Crosshair className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+          <span className="min-w-0">
+            <span className="block text-base font-semibold">Focus mode</span>
+            <span className="type-muted mt-0.5 block text-sm leading-snug">
+              This month only, and nothing else to read.
+            </span>
+          </span>
+        </span>
+        <Switch
+          checked={ui.focusMode}
+          label="Focus mode"
+          onChange={() => setUi({ focusMode: !ui.focusMode })}
+        />
+      </label>
+
+      <LinkRow
+        icon={<LayoutTemplate className="size-5 text-muted-foreground" />}
+        label={`Layout · ${layoutName}`}
+        onClick={() => setLayoutOpen(true)}
+      />
+
+      {/* Unlabelled: three buttons reading System, Light and Dark do not need
+          a word above them saying Appearance. */}
+      <Segmented
+        value={theme}
+        columns={3}
+        onChange={onTheme}
+        options={[
+          { id: 'system', label: 'System' },
+          { id: 'light', label: 'Light' },
+          { id: 'dark', label: 'Dark' }
+        ]}
+      />
+      {subTheme && onSubThemeChange ? (
+        <SwatchPicker
+          label="Colour"
+          value={subTheme}
+          onChange={onSubThemeChange}
+          options={SUB_THEMES}
+        />
+      ) : null}
 
       <Section title="Account">
         <AccountSection />
       </Section>
 
-      {/* Theme, palette and layout were three headings for one question:
-          how this should look. */}
-      <Section title="Appearance">
-        <Segmented
-          value={theme}
-          columns={3}
-          onChange={onTheme}
-          options={[
-            { id: 'system', label: 'System' },
-            { id: 'light', label: 'Light' },
-            { id: 'dark', label: 'Dark' }
-          ]}
-        />
-        {subTheme && onSubThemeChange ? (
-          <SwatchPicker
-            label="Colour"
-            value={subTheme}
-            onChange={onSubThemeChange}
-            options={SUB_THEMES}
-          />
-        ) : null}
-        <LinkRow
-          icon={<LayoutGrid className="size-5 text-muted-foreground" />}
-          label={`Layout · ${layoutName}`}
-          onClick={() => setLayoutOpen(true)}
-        />
-      </Section>
-
+      {/* This one keeps its heading: it is the only place in the sheet that
+          can destroy something, and the rows alone do not say so. */}
       <Section title="Your data">
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -264,18 +297,20 @@ export function SettingsPanel({
         </button>
       </Section>
 
-      <Section title="Help">
+      {/* Review note: "labels need consolidation like the notification center
+          in apple, I don't need to see them always". The tinted callout was
+          permanent furniture stating a fact that never changes. It reads as a
+          quiet line at the foot with the other reference material. */}
+      <div className="flex flex-col gap-2">
         <LinkRow
           icon={<HelpCircle className="size-5 text-muted-foreground" />}
-          label="How income spreads & mileage"
+          label="How income works"
           onClick={() => setHelpSpreadOpen(true)}
         />
-      </Section>
-
-      <InfoNote>
-        Earnings data is stored only on this device. Turning on sync above copies it to your signed-in
-        account so your other devices can see it too.
-      </InfoNote>
+        <p className="type-muted px-1 text-sm">
+          Earnings stay on this device unless you turn on sync.
+        </p>
+      </div>
 
       {layoutOpen ? (
         <Sheet title="Layout" eyebrow="Appearance" onClose={() => setLayoutOpen(false)}>

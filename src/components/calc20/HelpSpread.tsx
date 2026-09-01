@@ -76,9 +76,9 @@ export function HelpSpreadContent() {
               <div className="warning__title">Switching changes the past</div>
               <div className="warning__text">
                 {phase === 'trialWork'
-                  ? `Spread decides which months cross ${money(rules.trialWork)}. Moving from Average to Per month can change whether a month uses TWP.`
+                  ? `Spread decides which months cross ${money(rules.trialWork)}. Moving from Average to Per month can change whether a month uses a trial work month.`
                   : phase === 'sga'
-                    ? `Spread decides which months cross the ${money(rules.sga)} SGA line.`
+                    ? `Spread decides which months cross your ${money(rules.sga)} limit.`
                     : 'Spread can change which months cross the applicable line once benefit phase is confirmed.'}
               </div>
             </div>

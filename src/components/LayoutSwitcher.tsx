@@ -23,6 +23,16 @@ export interface LayoutGroup {
  */
 export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
   {
+    title: 'Deciding what to do next',
+    options: [
+      {
+        id: 'plan',
+        label: 'Plan',
+        description: 'How many more hours you can work, what a shift would cost you, and which months pay you extra.'
+      }
+    ]
+  },
+  {
     title: 'Small screens and slow phones',
     options: [
       {

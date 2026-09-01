@@ -1,4 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+// The bell, and the panel of things that need doing behind it.
+//
+// This is chrome, not a layout: ten layouts render it and none of them owns
+// it. It used to be written in Tailwind utilities plus payguard's --pg-*
+// tokens, which are only defined under .pg-payguard — so on classic, v2,
+// ledger and the workspace every colour it asked for resolved to nothing and
+// the panel came out with unfilled badges and inherited text. That is what
+// "unfinished design" was.
+//
+// Now it draws from the --chrome-* contract in styles/chrome.css, which each
+// layout answers with its own palette. Nothing here knows a layout exists.
+
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, Bell, CalendarClock, CheckCircle2, ChevronDown, TrendingUp, Zap } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { actionItems } from '../domain/notifications';
@@ -16,14 +29,73 @@ export function NotificationsBell({
 }) {
   const { data, ui, setUi } = useTracker();
   const [showActivity, setShowActivity] = useState(false);
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const items = actionItems(data, ui.year);
+  const items = actionItems(data, ui.year, ui.focusMode);
   const activity = [...data.activity].reverse();
   const latestAt = data.activity.length ? data.activity[data.activity.length - 1].at : null;
   const hasUnseenActivity = Boolean(latestAt) && (!ui.notificationsViewedAt || latestAt! > ui.notificationsViewedAt);
   const showDot = items.length > 0 || hasUnseenActivity;
+
+  /*
+   * Where the panel is rendered, and why it is not rendered here.
+   *
+   * Every header this bell sits in is `position: sticky` with a backdrop
+   * blur. A backdrop-filter makes its subtree a containing block for
+   * `position: fixed`, so the scrim — `inset: 0`, meant to cover the screen
+   * and catch the tap that closes the panel — was being sized to the header
+   * instead. It came out 375x76 on a phone: the page underneath was never
+   * dimmed, and a tap on a card behind the open panel hit the card and did
+   * whatever that card does.
+   *
+   * So the panel moves out to the layout root, which carries
+   * `data-chrome-root`. That element is also the one that answers the
+   * --chrome-* contract, so the panel keeps the palette it is supposed to
+   * have; portalling to document.body would escape the header and the theme
+   * with it.
+   */
+  useEffect(() => {
+    if (!open) { setHost(null); return; }
+    setHost(triggerRef.current?.closest<HTMLElement>('[data-chrome-root]') ?? document.body);
+  }, [open]);
+
+  /* Out of the header, the panel is no longer positioned by being next to
+   * the button, so it is measured from it instead — and re-measured while it
+   * is open, because a sticky header moves under the panel when the page
+   * scrolls. */
+  useLayoutEffect(() => {
+    if (!open || !host) { setAnchor(null); return; }
+    const place = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      // The panel's width is read rather than recomputed: it is set in rem,
+      // and the root font size is 18px on phones and 16px above 40rem, so
+      // any copy of the sum here would be wrong on one of them.
+      const width = popoverRef.current?.offsetWidth ?? 0;
+      const edge = 12;
+      // Right-align under the bell, but never past either edge of the
+      // screen — on a narrow phone the bell sits far enough right that
+      // hanging the panel off it alone puts its left side off-screen.
+      const ideal = window.innerWidth - rect.right;
+      const furthest = Math.max(edge, window.innerWidth - width - edge);
+      setAnchor({
+        top: Math.round(rect.bottom + 8),
+        right: Math.round(Math.min(Math.max(edge, ideal), furthest))
+      });
+    };
+    place();
+    window.addEventListener('resize', place);
+    // Capture, because the thing that moves the bell is usually a scroll
+    // inside the page rather than on the window.
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open, host]);
 
   useEffect(() => {
     if (!open) return;
@@ -44,12 +116,14 @@ export function NotificationsBell({
   }, [open, onOpenChange]);
 
   return (
-    <div className="relative">
+    <div className="notice">
       <button
         ref={triggerRef}
         type="button"
         id="notifications-bell-anchor"
-        aria-label={items.length ? `${items.length} notice${items.length === 1 ? '' : 's'} need attention` : 'Notifications and recent activity'}
+        aria-label={items.length
+          ? `${items.length} notice${items.length === 1 ? ' needs' : 's need'} attention`
+          : 'Notifications and recent activity'}
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-controls="notifications-popover"
@@ -59,9 +133,8 @@ export function NotificationsBell({
             setUi({ notificationsViewedAt: new Date().toISOString() });
           }
         }}
-        className={variant === 'summary'
-          ? `pg-notice-trigger ${items.length ? 'pg-notice-trigger-active' : ''}`
-          : 'pg-icon-btn pg-icon-btn-bordered relative'}
+        data-active={items.length > 0}
+        className={variant === 'summary' ? 'notice-trigger notice-trigger--summary' : 'notice-trigger'}
       >
         {variant === 'summary' ? (
           <>
@@ -72,96 +145,92 @@ export function NotificationsBell({
             <span className="sm:hidden">{items.length || '•'}</span>
           </>
         ) : <Bell className="size-4" />}
-        {showDot ? (
-          <span className={variant === 'summary' ? 'sr-only' : 'absolute top-1.5 right-1.5 flex size-2'}>
-            <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-[var(--pg-over)] opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-[var(--pg-over)]" />
-          </span>
-        ) : null}
+        {/* The summary trigger already says the count in words, so the dot
+            there would be a second copy of the same fact. */}
+        {showDot && variant !== 'summary' ? <span className="notice-trigger__dot" /> : null}
       </button>
 
-      {open ? (
-        <>
-          <div
-            className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[2px] sm:bg-transparent sm:backdrop-blur-none"
-            aria-hidden="true"
-            onClick={() => onOpenChange(false)}
-          />
+      {open && host ? createPortal(
+        <div className="notice-popover">
+          <div className="notice-scrim" aria-hidden="true" onClick={() => onOpenChange(false)} />
           <div
             ref={popoverRef}
             id="notifications-popover"
             role="dialog"
             aria-modal="false"
             aria-labelledby="notifications-heading"
-            className="fixed top-16 left-3 right-3 z-40 w-auto max-w-sm mx-auto sm:absolute sm:top-full sm:right-0 sm:left-auto sm:mt-2 sm:w-80 sm:max-w-none rounded-[var(--pg-radius)] border border-[var(--pg-border)] bg-[var(--pg-surface)] p-3.5 shadow-[var(--pg-shadow-lg)]"
+            className="notice-panel"
+            style={anchor ? { top: anchor.top, right: anchor.right } : undefined}
           >
-            <div className="flex items-center justify-between px-1 pb-1">
-              <h2 id="notifications-heading" className="pg-label font-bold">Needs attention</h2>
+            <div className="notice-panel__head">
+              <h2 id="notifications-heading" className="notice-panel__title">Needs attention</h2>
               {items.length > 0 ? (
-                <span className="pg-badge pg-badge-warn text-[0.625rem]">
+                <span className="notice-panel__count">
                   {items.length} action{items.length === 1 ? '' : 's'}
                 </span>
               ) : null}
             </div>
 
-            {items.length ? (
-              <ul className="mt-2 flex flex-col gap-1.5">
-                {items.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onOpenChange(false);
-                        if (item.action.kind === 'setPayday') onSetPayday(item.action.streamId);
-                        else if (item.action.kind === 'reviewStream') onReviewStream(item.action.streamId);
-                        else onOpenMonth(item.action.month);
-                      }}
-                      className={`flex w-full items-start gap-2.5 rounded-[var(--pg-radius-md)] border p-2.5 text-left text-xs font-medium transition-all ${
-                        item.severity === 'warn'
-                          ? 'border-[var(--pg-warn-border)] bg-[var(--pg-warn-bg)] text-[var(--pg-warn-text)] hover:brightness-95'
-                          : 'border-[var(--pg-info-border)] bg-[var(--pg-info-bg)] text-[var(--pg-info-text)] hover:brightness-95'
-                      }`}
-                    >
-                      {item.action.kind === 'setPayday' ? <CalendarClock className="mt-0.5 size-4 shrink-0" />
-                        : item.action.kind === 'reviewStream' ? <TrendingUp className="mt-0.5 size-4 shrink-0" />
-                        : <Zap className="mt-0.5 size-4 shrink-0" />}
-                      <span className="flex-1 leading-snug">{item.message}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="my-2 flex items-center gap-2 rounded-[var(--pg-radius-md)] bg-[var(--pg-surface-2)] px-3 py-2.5 text-xs pg-muted">
-                <CheckCircle2 className="size-4 shrink-0 text-[var(--pg-safe)]" />
-                <span>All paychecks and income sources are up to date.</span>
-              </div>
-            )}
+            {/* Only the list scrolls. On a short screen the heading and the
+                activity toggle staying put is the difference between a panel
+                and a runaway column. */}
+            <div className="notice-panel__body">
+              {items.length ? (
+                <ul className="notice-list">
+                  {items.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenChange(false);
+                          if (item.action.kind === 'setPayday') onSetPayday(item.action.streamId);
+                          else if (item.action.kind === 'reviewStream') onReviewStream(item.action.streamId);
+                          else onOpenMonth(item.action.month);
+                        }}
+                        className="notice-item"
+                        data-severity={item.severity}
+                      >
+                        {item.action.kind === 'setPayday' ? <CalendarClock className="notice-item__icon size-4" />
+                          : item.action.kind === 'reviewStream' ? <TrendingUp className="notice-item__icon size-4" />
+                          : <Zap className="notice-item__icon size-4" />}
+                        <span className="notice-item__text">{item.message}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="notice-clear">
+                  <CheckCircle2 className="notice-clear__icon size-4" />
+                  <span>All paychecks and income sources are up to date.</span>
+                </div>
+              )}
+            </div>
 
-            <div className="mt-3 border-t border-[var(--pg-rule)] pt-2">
+            <div className="notice-activity">
               <button
                 type="button"
                 onClick={() => setShowActivity((v) => !v)}
-                className="flex w-full items-center justify-between rounded-[var(--pg-radius-sm)] px-1.5 py-1 text-left text-xs font-semibold pg-muted transition-colors hover:bg-[var(--pg-hover)] hover:text-[var(--pg-fg)]"
+                className="notice-activity__toggle"
+                aria-expanded={showActivity}
               >
-                <span className="pg-label">Recent activity</span>
-                <ChevronDown className={`size-3.5 transition-transform duration-150 ${showActivity ? 'rotate-180' : ''}`} />
+                <span>Recent activity</span>
+                <ChevronDown className="notice-activity__chevron size-3.5" />
               </button>
               {showActivity ? (
                 activity.length ? (
-                  <ul className="mt-1.5 max-h-48 overflow-y-auto flex flex-col gap-1 pr-1">
+                  <ul className="notice-activity__list">
                     {activity.slice(0, 8).map((entry) => (
-                      <li key={entry.id} className="truncate rounded px-1.5 py-1 text-[0.6875rem] pg-dim hover:bg-[var(--pg-surface-2)]">
-                        {entry.message}
-                      </li>
+                      <li key={entry.id} className="notice-activity__item">{entry.message}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="px-1.5 py-1 text-[0.6875rem] pg-dim">No recent changes logged.</p>
+                  <p className="notice-activity__empty">No recent changes logged.</p>
                 )
               ) : null}
             </div>
           </div>
-        </>
+        </div>,
+        host
       ) : null}
     </div>
   );

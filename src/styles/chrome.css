@@ -1,0 +1,715 @@
+/*
+ * Chrome — the parts of the app that are not a layout.
+ * ===================================================================
+ *
+ * The toast stack, the notifications bell and the notifications panel are
+ * one system, written once, rendered inside all ten layouts. Until now they
+ * were also *drawn* once: the toast against index.css's --color-* tokens and
+ * the bell against payguard's --pg-* ones. So on ledger the toast arrived as
+ * a slab of the wrong paper, and on classic, v2 and workrecord the bell asked
+ * for --pg-fg-muted and --pg-warn-bg — variables that are only defined under
+ * .pg-payguard. An undefined custom property is not an error; the declaration
+ * is simply dropped. That is why the panel read as unfinished rather than as
+ * broken: the labels inherited whatever colour was around them and the badges
+ * came out with no fill at all.
+ *
+ * The fix is a contract, not a fork. Chrome asks for --chrome-* and never for
+ * a layout's own tokens; every layout root answers with its own palette in a
+ * mapping block below. Adding a layout means adding one block here — nothing
+ * in ToastStack.tsx or NotificationsBell.tsx knows a layout exists.
+ *
+ * Two rules for anything written against this contract:
+ *
+ *   1. The rules below never call color-mix(). Pocket bans it on purpose
+ *      (see pocket.css: on an old WebView the whole declaration is dropped,
+ *      so a subtle fill silently becomes transparent). The mapping blocks may
+ *      use it — pocket's answers in literal hex — but the shared rules that
+ *      every layout renders may not.
+ *   2. Every soft state ships all three of bg / border / fg. A layout that
+ *      supplies a fill without the ink to go on it is how the panel got here.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1. The contract, answered by the base theme                        */
+/* ------------------------------------------------------------------ */
+/*
+ * Classic, v2, the workspace and horizon all render on index.css's tokens,
+ * so the defaults are the base theme and those four need no mapping block.
+ */
+:root {
+  --chrome-font: var(--font-sans);
+  --chrome-radius: 0.75rem;
+  --chrome-radius-sm: 0.5rem;
+
+  /* The bell has to sit in a header next to that layout's own buttons, so
+   * it takes their height and their corner rather than a shape of its own.
+   * Base is index.css's `icon-btn`: a 2.75rem circle. */
+  --chrome-trigger-h: 2.75rem;
+  --chrome-trigger-radius: 999px;
+
+  --chrome-surface: var(--color-popover);
+  --chrome-surface-2: var(--color-muted);
+  --chrome-fg: var(--color-popover-foreground);
+  --chrome-muted: var(--color-muted-foreground);
+  --chrome-border: var(--color-border);
+  --chrome-rule: var(--color-border);
+  --chrome-hover: var(--color-accent);
+  --chrome-shadow: var(--shadow-lift);
+  --chrome-ring: var(--color-ring);
+
+  /* The scrim behind the panel on a phone, where it is a dialog rather
+   * than a popover. */
+  --chrome-scrim: oklch(0 0 0 / 0.28);
+
+  /* Status. --chrome-alert is the unread dot and nothing else. */
+  --chrome-safe: var(--color-good);
+  --chrome-alert: var(--color-destructive);
+
+  --chrome-warn-bg: var(--color-warn-soft);
+  --chrome-warn-border: color-mix(in oklab, var(--color-warn) 38%, transparent);
+  --chrome-warn-fg: var(--color-warn-foreground);
+
+  --chrome-info-bg: var(--color-info-soft);
+  --chrome-info-border: color-mix(in oklab, var(--color-info) 34%, transparent);
+  --chrome-info-fg: var(--color-info);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Mapping blocks — one per palette family                         */
+/* ------------------------------------------------------------------ */
+
+/* PayGuard, and Work Record with it: workrecord always renders inside
+ * .pg-payguard and borrows the whole token set, so one block covers both
+ * and every payguard sub-theme, because these all resolve at use. */
+.pg-payguard {
+  --chrome-font: 'DM Sans', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --chrome-radius: var(--pg-radius);
+  --chrome-radius-sm: var(--pg-radius-md);
+  --chrome-trigger-h: var(--pg-h);
+  --chrome-trigger-radius: var(--pg-radius-md);
+
+  --chrome-surface: var(--pg-surface);
+  --chrome-surface-2: var(--pg-surface-2);
+  --chrome-fg: var(--pg-fg);
+  --chrome-muted: var(--pg-fg-muted);
+  --chrome-border: var(--pg-border);
+  --chrome-rule: var(--pg-rule);
+  --chrome-hover: var(--pg-hover);
+  --chrome-shadow: var(--pg-shadow-lg);
+  --chrome-ring: var(--pg-ring);
+  --chrome-scrim: rgb(15 23 42 / 0.32);
+
+  --chrome-safe: var(--pg-safe);
+  --chrome-alert: var(--pg-over);
+
+  --chrome-warn-bg: var(--pg-warn-bg);
+  --chrome-warn-border: var(--pg-warn-border);
+  --chrome-warn-fg: var(--pg-warn-text);
+
+  --chrome-info-bg: var(--pg-info-bg);
+  --chrome-info-border: var(--pg-info-border);
+  --chrome-info-fg: var(--pg-info-text);
+}
+
+/* Ledger — monospace paper. The font is the whole identity of this layout,
+ * so the chrome takes it too; a proportional toast over a ledger page is
+ * exactly the foreign object being complained about. */
+.pg-ledger {
+  --chrome-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --chrome-radius: var(--lg-radius);
+  --chrome-radius-sm: var(--lg-radius);
+  --chrome-trigger-h: 2.25rem;
+  --chrome-trigger-radius: var(--lg-radius);
+
+  --chrome-surface: var(--lg-surface);
+  --chrome-surface-2: var(--lg-surface-2);
+  --chrome-fg: var(--lg-fg);
+  --chrome-muted: var(--lg-muted);
+  --chrome-border: var(--lg-border);
+  --chrome-rule: var(--lg-border-soft);
+  --chrome-hover: var(--lg-surface-2);
+  --chrome-shadow: var(--lg-shadow);
+  --chrome-ring: var(--lg-ring);
+  --chrome-scrim: rgb(20 20 30 / 0.3);
+
+  --chrome-safe: var(--lg-safe);
+  --chrome-alert: var(--lg-over);
+
+  --chrome-warn-bg: color-mix(in oklab, var(--lg-warn) 12%, var(--lg-surface));
+  --chrome-warn-border: color-mix(in oklab, var(--lg-warn) 36%, transparent);
+  --chrome-warn-fg: color-mix(in oklab, var(--lg-warn) 62%, var(--lg-fg));
+
+  --chrome-info-bg: color-mix(in oklab, var(--lg-w2) 10%, var(--lg-surface));
+  --chrome-info-border: color-mix(in oklab, var(--lg-w2) 32%, transparent);
+  --chrome-info-fg: color-mix(in oklab, var(--lg-w2) 66%, var(--lg-fg));
+}
+
+/* calc20 puts its tokens on <html> so portaled menus inherit them; the
+ * mapping goes to the same place for the same reason. */
+html.pg-calc20 {
+  --chrome-font: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --chrome-radius: 0.5rem;
+  --chrome-radius-sm: 0.375rem;
+  --chrome-trigger-h: 2.25rem;
+  --chrome-trigger-radius: 0.375rem;
+
+  --chrome-surface: var(--card);
+  --chrome-surface-2: var(--paper-3);
+  --chrome-fg: var(--ink);
+  --chrome-muted: var(--ink-3);
+  --chrome-border: var(--line);
+  --chrome-rule: var(--line-3);
+  --chrome-hover: var(--paper-2);
+  --chrome-shadow: 0 6px 18px -10px rgb(0 0 0 / 0.35);
+  --chrome-ring: var(--ring);
+  --chrome-scrim: rgb(10 14 24 / 0.3);
+
+  --chrome-safe: var(--keep-label);
+  --chrome-alert: var(--over-label);
+
+  --chrome-warn-bg: var(--spent-bg);
+  --chrome-warn-border: var(--spent-line);
+  --chrome-warn-fg: var(--spent-label);
+
+  --chrome-info-bg: var(--badge-w2-bg);
+  --chrome-info-border: var(--line-strong);
+  --chrome-info-fg: var(--badge-w2-ink);
+}
+
+/* Plan — paper, hard rules, no soft anything. */
+.pl {
+  --chrome-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --chrome-radius: 6px;
+  --chrome-radius-sm: 4px;
+  --chrome-trigger-h: 40px;
+  --chrome-trigger-radius: 6px;
+
+  --chrome-surface: var(--paper-2);
+  --chrome-surface-2: var(--paper);
+  --chrome-fg: var(--ink);
+  --chrome-muted: var(--ink-soft);
+  --chrome-border: var(--rule-strong);
+  --chrome-rule: var(--rule);
+  --chrome-hover: var(--paper);
+  --chrome-shadow: 0 3px 0 var(--rule-strong);
+  --chrome-ring: var(--clear);
+  --chrome-scrim: rgb(22 25 31 / 0.34);
+
+  --chrome-safe: var(--clear);
+  --chrome-alert: var(--over);
+
+  --chrome-warn-bg: var(--near-bg);
+  --chrome-warn-border: var(--near);
+  --chrome-warn-fg: var(--near);
+
+  --chrome-info-bg: var(--unknown-bg);
+  --chrome-info-border: var(--rule-strong);
+  --chrome-info-fg: var(--ink);
+}
+
+/*
+ * Pocket — the cheap-Android layout. Literal values only: pocket.css bans
+ * color-mix() because an old WebView drops the whole declaration, and bans
+ * blurred shadows because they cost a compositor pass per frame on a weak
+ * GPU. A border does the same job here.
+ */
+.pk {
+  /* Same system stack as the rest of pocket: no webfont, no download, no
+   * FOIT on a metered connection. */
+  --chrome-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --chrome-radius: 8px;
+  --chrome-radius-sm: 6px;
+  /* 44px, because this is the phone layout and that is the touch target. */
+  --chrome-trigger-h: 44px;
+  --chrome-trigger-radius: 8px;
+
+  --chrome-surface: #ffffff;
+  --chrome-surface-2: #f3f5f8;
+  --chrome-fg: #16191f;
+  --chrome-muted: #5c6572;
+  --chrome-border: #c9cfd8;
+  --chrome-rule: #dfe3e9;
+  --chrome-hover: #f3f5f8;
+  --chrome-shadow: none;
+  --chrome-ring: #1f6f43;
+  --chrome-scrim: rgba(10, 12, 16, 0.42);
+
+  --chrome-safe: #1f6f43;
+  --chrome-alert: #b3261e;
+
+  --chrome-warn-bg: #fdf3e0;
+  --chrome-warn-border: #d9a441;
+  --chrome-warn-fg: #7a4b06;
+
+  --chrome-info-bg: #eaf1fb;
+  --chrome-info-border: #9dbbe4;
+  --chrome-info-fg: #1d4b8f;
+}
+
+.dark .pk {
+  --chrome-surface: #1a1f27;
+  --chrome-surface-2: #232936;
+  --chrome-fg: #eef1f5;
+  --chrome-muted: #a3adbb;
+  --chrome-border: #3a4250;
+  --chrome-rule: #2a2f39;
+  --chrome-hover: #232936;
+  --chrome-ring: #6fd39b;
+
+  --chrome-safe: #6fd39b;
+  --chrome-alert: #f2837c;
+
+  --chrome-warn-bg: #3a2f16;
+  --chrome-warn-border: #8a6a24;
+  --chrome-warn-fg: #f3d08a;
+
+  --chrome-info-bg: #1c2b42;
+  --chrome-info-border: #3f5b85;
+  --chrome-info-fg: #a8c7f0;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Toasts                                                          */
+/* ------------------------------------------------------------------ */
+/*
+ * Transient confirmation of an edit, and the last chance to take it back.
+ * calc20 keeps its own placement — it parks the stack in the header flow
+ * rather than on a fixed plate; see the `position: static` override in
+ * calc20.css. Everything else here is shared.
+ */
+.toast-stack {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(26rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.toast-stack > * { pointer-events: auto; }
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--chrome-radius);
+  background: var(--chrome-surface);
+  color: var(--chrome-fg);
+  font-family: var(--chrome-font);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  box-shadow: var(--chrome-shadow);
+}
+
+.toast__text { flex: 1 1 auto; min-width: 0; }
+
+.toast__action {
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--chrome-radius-sm);
+  background: transparent;
+  color: var(--chrome-fg);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toast__action:hover { background: var(--chrome-hover); }
+
+.toast__action:focus-visible {
+  outline: 2px solid var(--chrome-ring);
+  outline-offset: 1px;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. The bell, and what it opens                                     */
+/* ------------------------------------------------------------------ */
+
+.notice {
+  position: relative;
+  font-family: var(--chrome-font);
+}
+
+/* Two triggers, one button. `icon` is a bell in a header of icons;
+ * `summary` says how many notices there are, for the layouts whose header
+ * is a row of labelled controls rather than glyphs. */
+.notice-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  height: var(--chrome-trigger-h);
+  min-width: var(--chrome-trigger-h);
+  padding: 0 0.5rem;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--chrome-trigger-radius);
+  background: var(--chrome-surface);
+  color: var(--chrome-muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.notice-trigger:hover {
+  background: var(--chrome-hover);
+  color: var(--chrome-fg);
+}
+
+.notice-trigger:focus-visible {
+  outline: 2px solid var(--chrome-ring);
+  outline-offset: 1px;
+}
+
+.notice-trigger--summary {
+  min-width: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 0.55rem;
+}
+
+/* Only the summary trigger changes colour when there is something to do —
+ * the icon trigger says the same thing with the dot, and doing both makes a
+ * bell that is permanently amber. */
+.notice-trigger--summary[data-active='true'] {
+  border-color: var(--chrome-warn-border);
+  background: var(--chrome-warn-bg);
+  color: var(--chrome-warn-fg);
+}
+
+.notice-trigger__dot {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--chrome-alert);
+}
+
+/* The ping is decoration and the motion-safe guard is not optional here:
+ * a permanent pulse in the corner of the screen is a genuine problem for
+ * part of this audience. */
+.notice-trigger__dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .notice-trigger__dot::before {
+    animation: notice-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+@keyframes notice-ping {
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* The scrim and the panel are portalled to the layout root, out of the
+ * sticky blurred header that was containing them — see the comment in
+ * NotificationsBell.tsx. This wrapper is only a handle for the pair; it
+ * takes no box of its own. */
+.notice-popover { display: contents; }
+
+.notice-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--chrome-scrim);
+}
+
+/* `top` and `right` are set from the trigger's own position, so the panel
+ * hangs off the button whatever header it is sitting in. */
+.notice-panel {
+  position: fixed;
+  z-index: 40;
+  /* Replaced inline the moment the panel is measured; these are only what
+   * it looks like for the one frame before that. */
+  top: 4rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  width: min(20rem, calc(100vw - 1.5rem));
+  /* The list inside can be long, so the panel is capped against the viewport
+   * and scrolls its own body rather than running off the bottom of a short
+   * screen. */
+  max-height: min(30rem, calc(100dvh - 5.5rem));
+  padding: 0.75rem;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--chrome-radius);
+  background: var(--chrome-surface);
+  color: var(--chrome-fg);
+  box-shadow: var(--chrome-shadow);
+}
+
+/* On a phone the panel is a dialog: the page behind it dims. On a wider
+ * screen it is a popover hanging off the bell, and dimming the whole page
+ * for four lines of text would be theatre. */
+@media (min-width: 640px) {
+  .notice-scrim { background: transparent; }
+}
+
+.notice-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.25rem 0.5rem;
+}
+
+.notice-panel__title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--chrome-muted);
+}
+
+.notice-panel__count {
+  flex: 0 0 auto;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--chrome-warn-border);
+  border-radius: var(--chrome-radius-sm);
+  background: var(--chrome-warn-bg);
+  color: var(--chrome-warn-fg);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The scrolling part. Head and activity footer stay put. */
+.notice-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notice-item {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem;
+  border: 1px solid var(--chrome-info-border);
+  border-radius: var(--chrome-radius-sm);
+  background: var(--chrome-info-bg);
+  color: var(--chrome-info-fg);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notice-item[data-severity='warn'] {
+  border-color: var(--chrome-warn-border);
+  background: var(--chrome-warn-bg);
+  color: var(--chrome-warn-fg);
+}
+
+.notice-item:hover { border-color: currentColor; }
+
+.notice-item:focus-visible {
+  outline: 2px solid var(--chrome-ring);
+  outline-offset: 1px;
+}
+
+.notice-item__icon { flex: 0 0 auto; margin-top: 0.1rem; }
+.notice-item__text { flex: 1 1 auto; min-width: 0; }
+
+.notice-clear {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--chrome-radius-sm);
+  background: var(--chrome-surface-2);
+  color: var(--chrome-muted);
+  font-size: 0.75rem;
+}
+
+.notice-clear__icon { flex: 0 0 auto; color: var(--chrome-safe); }
+
+.notice-activity {
+  flex: 0 0 auto;
+  margin-top: 0.625rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--chrome-rule);
+}
+
+.notice-activity__toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.375rem;
+  border: 0;
+  border-radius: var(--chrome-radius-sm);
+  background: transparent;
+  color: var(--chrome-muted);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.notice-activity__toggle:hover {
+  background: var(--chrome-hover);
+  color: var(--chrome-fg);
+}
+
+.notice-activity__toggle:focus-visible {
+  outline: 2px solid var(--chrome-ring);
+  outline-offset: 1px;
+}
+
+.notice-activity__chevron { transition: transform 150ms; }
+.notice-activity__toggle[aria-expanded='true'] .notice-activity__chevron { transform: rotate(180deg); }
+
+.notice-activity__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  max-height: 9rem;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.notice-activity__item,
+.notice-activity__empty {
+  padding: 0.25rem 0.375rem;
+  color: var(--chrome-muted);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+
+.notice-activity__item {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notice-activity__empty { margin: 0.25rem 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .notice-activity__chevron { transition: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. The precision line                                              */
+/* ------------------------------------------------------------------ */
+/*
+ * How far the figure above it can be trusted, and the one thing that would
+ * sharpen it. A line under the number, never a card: precision is a property
+ * of a claim, not a room in the app.
+ *
+ * Review note: "I have seen this in other layouts, we should make it a
+ * common re-usable item across layouts styled by that layout's theme". It
+ * was already one component — and four copies of its stylesheet, in
+ * index.css, ledger.css, payguard.css and calc20.css, differing only in
+ * which palette they named. calc20's named payguard's (--pg-fg-dim,
+ * --pg-warn-text) with hardcoded hex fallbacks, because those tokens are not
+ * defined on that layout, so the line was painted in a slate that belongs to
+ * no theme in the app. That is the drift this file exists to stop.
+ *
+ * Structure and colour are here, once. A layout may still set its own
+ * register — the dense monospace ones say ESTIMATED in small caps — and that
+ * is two declarations, not twelve.
+ */
+.precision-line {
+  display: flex;
+  width: 100%;
+  /* Centre, not baseline. The pips are a drawn glyph rather than text, so
+     baseline alignment sat them a pixel or two low against the label — the
+     "bad alignment" caught on the ledger. */
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  border-radius: var(--chrome-radius-sm);
+  background: transparent;
+  padding: 0.25rem 0;
+  color: var(--chrome-muted);
+  font-family: var(--chrome-font);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+/* The gauge: three pips, filled to the grade. Drawn rather than described —
+   see PrecisionLine.tsx for why the sentence went away. */
+.precision-pips {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.precision-pip {
+  width: 0.4rem;
+  height: 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.35;
+}
+
+.precision-pip[data-on] {
+  background: currentColor;
+  opacity: 1;
+}
+
+.precision-level {
+  flex: none;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.precision-why { min-width: 0; }
+
+/* Estimated is the one worth acting on, so it is the one that carries any
+   colour at all. The other two are statements of fact. */
+.precision-line[data-level='estimated'] { color: var(--chrome-warn-fg); }
+.precision-line[data-level='exact'] { color: var(--chrome-safe); }
+
+/* Pressable, where there is a source editor to open. */
+.precision-line[data-fix] {
+  padding-inline: 0.5rem;
+  margin-inline: -0.5rem;
+  cursor: pointer;
+  transition: background-color 140ms, color 140ms;
+}
+
+.precision-line[data-fix]:hover { background: var(--chrome-hover); }

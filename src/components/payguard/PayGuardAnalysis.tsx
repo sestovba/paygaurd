@@ -2,15 +2,14 @@ import { useMemo, useState } from 'react';
 import { CalendarOff, ShieldCheck } from 'lucide-react';
 import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
 import { money } from '../../domain/format';
-import { longMonthName, monthsOfYear, shortMonthName, todayMonth } from '../../domain/months';
+import { longMonthName, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
 import type { YearRules } from '../../domain/rules';
 import { paycheckContextForMonth } from '../../domain/paySchedule';
-import { benefitPhase, trialWorkStatus } from '../../domain/trialWork';
+import { benefitPhase } from '../../domain/trialWork';
 import type { BenefitPhase } from '../../domain/trialWork';
 import type { MonthStatus, TrackerData } from '../../domain/types';
 import { SafeWorkSimulator } from '../SafeWorkSimulator';
-import { Tile } from './PayGuardPrimitives';
 
 type StatusKind = 'none' | 'review' | 'safe' | 'warn' | 'twp' | 'over';
 
@@ -33,13 +32,16 @@ const KIND_TEXT_CLASS: Record<StatusKind, string> = {
   over: 'pg-text-over'
 };
 
+/* One limit at a time, named without initials. Under the review rule the app
+   never mentions the regime the reader is not in, so these say "your limit"
+   rather than naming which of the two rules produced it. */
 const KIND_LABEL: Record<StatusKind, string> = {
   none: 'No income',
-  review: 'TWP status needed',
-  safe: 'Below threshold',
-  warn: 'Near threshold',
-  twp: 'TWP month',
-  over: 'Over SGA'
+  review: 'Status not set',
+  safe: 'Under your limit',
+  warn: 'Close to your limit',
+  twp: 'Trial work month used',
+  over: 'Over your limit'
 };
 
 function statusKind(status: MonthStatus, phase: BenefitPhase): StatusKind {
@@ -60,20 +62,20 @@ function statusKind(status: MonthStatus, phase: BenefitPhase): StatusKind {
 
 function remainingLabel(status: MonthStatus, phase: BenefitPhase, rules: YearRules): string {
   if (status.countable <= 0 && !status.isServiceMonth) return 'No income';
-  if (phase === 'unknown' || phase === 'verifyComplete') return 'Confirm TWP status';
+  if (phase === 'unknown' || phase === 'verifyComplete') return 'Status not set';
   if (phase === 'sga') {
     return status.overSga
-      ? `${money(status.countable - rules.sga)} over SGA`
+      ? `${money(status.countable - rules.sga)} over`
       : status.roomToSga != null
-        ? status.roomToSga === 0 ? 'At SGA threshold' : `${money(status.roomToSga)} below SGA`
-        : 'Below SGA threshold';
+        ? status.roomToSga === 0 ? 'At your limit' : `${money(status.roomToSga)} left`
+        : 'Under your limit';
   }
-  if (status.isServiceMonth) return 'TWP month';
+  if (status.isServiceMonth) return 'Trial work month used';
   return status.roomToTrialWork != null
     ? status.roomToTrialWork === 0
-      ? 'At TWP threshold'
-      : `${money(status.roomToTrialWork)} below TWP`
-    : 'Below TWP threshold';
+      ? 'At your limit'
+      : `${money(status.roomToTrialWork)} left`
+    : 'Under your limit';
 }
 
 function thresholdGapLabel(value: number, threshold: number): string {
@@ -99,7 +101,12 @@ function StatusDot({ kind, size = 'sm' }: { kind: StatusKind; size?: 'sm' | 'md'
   );
 }
 
-export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: number }) {
+export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }: {
+  data: TrackerData;
+  year: number;
+  focusMode?: boolean;
+  onOpenStatus?: () => void;
+}) {
   const [mode, setMode] = useState<Mode>('cards');
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const rules = rulesFor(year);
@@ -108,7 +115,7 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
   const analysisPhase = benefitPhase(data, asOf);
   const needsTwpConfirmation = analysisPhase === 'unknown' || analysisPhase === 'verifyComplete';
 
-  const cards = useMemo(() => monthsOfYear(year).map((month) => {
+  const cards = useMemo(() => listedMonths(year, false, focusMode).map((month) => {
     const status = monthStatus(data, month);
     const phase = benefitPhase(data, month);
     const w2 = data.streams.filter((s) => s.type === 'w2').reduce((sum, s) => sum + countableFor(s, month), 0);
@@ -124,21 +131,12 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
       pct: threshold ? Math.min(100, (status.countable / threshold) * 100) : 0,
       label: remainingLabel(status, phase, rules)
     };
-  }), [data, year, rules]);
+  }), [data, year, rules, focusMode]);
 
   const visible = mode === 'activeOnly'
     ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth)
     : cards;
-
-  const elapsed = cards.filter((card) => card.month <= asOf);
-  const yearTotalCountable = elapsed.reduce((sum, card) => sum + card.status.countable, 0);
-  const w2Year = elapsed.reduce((sum, c) => sum + c.w2, 0);
-  const seYear = elapsed.reduce((sum, c) => sum + c.se, 0);
-  const totalYearIncome = w2Year + seYear;
-  const w2Pct = totalYearIncome > 0 ? Math.round((w2Year / totalYearIncome) * 100) : 0;
-  const sePct = totalYearIncome > 0 ? 100 - w2Pct : 0;
-  const twp = trialWorkStatus(data, asOf);
-  const overSgaMonths = elapsed.filter((c) => c.status.overSga).length;
+  const focused = focusMode ? cards[0] : undefined;
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
@@ -153,53 +151,108 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
           <div className="grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
             <div className="flex min-w-0 flex-col gap-1.5">
               <h2 className="pg-section-title pg-fg sm:text-[0.8125rem]">
-                Monthly work-limit status
+                {focused ? longMonthName(focused.month) : 'Month by month'}
               </h2>
 
-              {needsTwpConfirmation ? (
+              {focused ? (
+                <span className={`flex items-center gap-1.5 text-[0.6875rem] font-bold leading-snug ${KIND_TEXT_CLASS[focused.kind]}`}>
+                  <StatusDot kind={focused.kind} /> {KIND_LABEL[focused.kind]}
+                </span>
+              ) : needsTwpConfirmation ? (
                 <span className="pg-muted flex items-center gap-1.5 text-[0.6875rem] font-bold leading-snug">
-                  <StatusDot kind="review" /> Confirm your TWP status to enable threshold warnings.
+                  <StatusDot kind="review" /> Set your status and these months get a limit to be measured against.
                 </span>
               ) : (
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.6875rem] font-bold leading-snug">
                   <span className="flex items-center gap-1.5 pg-text-safe">
-                    <StatusDot kind="safe" /> Below threshold
+                    <StatusDot kind="safe" /> Under{' '}
+                    {money(analysisPhase === 'trialWork' ? rules.trialWork : rules.sga)}
                   </span>
                   <span className="flex items-center gap-1.5 pg-text-warn">
-                    <StatusDot kind="warn" /> Near threshold
+                    <StatusDot kind="warn" /> Close to it
                   </span>
-                  <span className="flex items-center gap-1.5 pg-text-twp">
-                    <StatusDot kind="twp" /> TWP month
-                  </span>
-                  <span className="flex items-center gap-1.5 pg-text-over">
-                    <StatusDot kind="over" /> Over SGA (&gt;{money(rules.sga)})
-                  </span>
+                  {/* The regime you are not in is not drawn. */}
+                  {analysisPhase === 'trialWork' ? (
+                    <span className="flex items-center gap-1.5 pg-text-twp">
+                      <StatusDot kind="twp" /> Uses a trial work month
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 pg-text-over">
+                      <StatusDot kind="over" /> Over your limit
+                    </span>
+                  )}
                 </div>
               )}
             </div>
 
-            <div
-              className="pg-seg w-fit justify-self-start sm:justify-self-end"
-              role="group"
-              aria-label="Monthly analysis view"
-            >
-              {MODES.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  data-on={mode === m.id}
-                  aria-pressed={mode === m.id}
-                  onClick={() => setMode(m.id)}
-                  className="pg-seg-item"
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
+            {focused ? null : (
+              <div
+                className="pg-seg w-fit justify-self-start sm:justify-self-end"
+                role="group"
+                aria-label="Monthly analysis view"
+              >
+                {MODES.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    data-on={mode === m.id}
+                    aria-pressed={mode === m.id}
+                    onClick={() => setMode(m.id)}
+                    className="pg-seg-item"
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </header>
 
-        {visible.length === 0 ? (
+        {focused ? (
+          <div className="pg-surface p-3.5 sm:p-5">
+            {focused.status.countable > 0 || focused.status.isServiceMonth ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-end justify-between gap-2">
+                  <span className="flex items-baseline gap-2">
+                    <span className="pg-figure">{money(focused.status.countable)}</span>
+                    <span className="pg-label">Counted</span>
+                  </span>
+                  <span className={`text-xs font-bold ${KIND_TEXT_CLASS[focused.kind]}`}>
+                    {focused.label}
+                  </span>
+                </div>
+
+                <div className="pg-meter" aria-label={`${Math.round(focused.pct)} percent of your monthly limit`}>
+                  <span
+                    className="pg-meter-seg"
+                    style={{ width: `${focused.pct}%`, background: KIND_COLOR[focused.kind] }}
+                  />
+                </div>
+
+                {focused.context.length ? (
+                  <p className="text-[0.6875rem] font-bold pg-text-warn">
+                    {focused.context.map((ctx) => `${ctx.count} paychecks from ${ctx.streamName}`).join(' · ')}
+                  </p>
+                ) : null}
+
+                <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--pg-radius-md)] pg-rule">
+                  <div className="pg-surface-2 p-2.5 sm:p-3">
+                    <dt className="pg-label">W-2 gross</dt>
+                    <dd className="pg-mono mt-1 text-sm font-bold pg-fg">{money(focused.w2)}</dd>
+                  </div>
+                  <div className="pg-surface-2 p-2.5 sm:p-3">
+                    <dt className="pg-label">1099 net</dt>
+                    <dd className="pg-mono mt-1 text-sm font-bold pg-fg">{money(focused.se)}</dd>
+                  </div>
+                </dl>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 py-2 text-sm pg-muted">
+                <CalendarOff className="size-4" /> No income added for {longMonthName(focused.month)}.
+              </div>
+            )}
+          </div>
+        ) : visible.length === 0 ? (
           <div className="pg-empty">
             <CalendarOff className="size-5 pg-dim" />
             <span className="pg-empty-title">No activity recorded for {year}</span>
@@ -224,11 +277,14 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
                 <caption className="sr-only">
                   Monthly countable income, threshold status, and income sources for {year}
                 </caption>
+                {/* One room column, not two. It carried "SGA room" and "TWP
+                    room" side by side, so every reader was reading one column
+                    about their own limit and one about a rule that either has
+                    not started or is already over. */}
                 <colgroup>
                   <col className="pg-analysis-col-month" />
                   <col className="pg-analysis-col-countable" />
                   <col className="pg-analysis-col-status" />
-                  <col className="pg-analysis-col-gap" />
                   <col className="pg-analysis-col-gap" />
                   <col className="pg-analysis-col-source" />
                   <col className="pg-analysis-col-source" />
@@ -240,17 +296,10 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
                     <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-left sm:px-4">Status</th>
                     <th
                       scope="col"
-                      title="Room below or amount over the SGA threshold"
+                      title="Room left below your limit, or the amount over it"
                       className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4"
                     >
-                      SGA room
-                    </th>
-                    <th
-                      scope="col"
-                      title="Room below or amount over the TWP earnings threshold"
-                      className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4"
-                    >
-                      TWP room
+                      Room left
                     </th>
                     <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4">W-2 gross</th>
                     <th scope="col" className="px-3.5 py-2.5 text-right sm:px-4">1099 net</th>
@@ -275,29 +324,21 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
                         </span>
                       </td>
                       <td className="pg-mono pg-rule-r px-3.5 py-2 text-right pg-muted sm:px-4">
-                        {c.status.countable > 0 ? (
-                          c.status.overSga ? (
-                            <span className="font-bold pg-text-over">
-                              {thresholdGapLabel(c.status.countable, rules.sga)}
-                            </span>
-                          ) : (
-                            <span className="pg-text-safe">
-                              {thresholdGapLabel(c.status.countable, rules.sga)}
-                            </span>
-                          )
-                        ) : '—'}
-                      </td>
-                      <td className="pg-mono pg-rule-r px-3.5 py-2 text-right pg-muted sm:px-4">
                         {c.status.isServiceMonth && c.status.countable <= rules.trialWork ? (
+                          /* The 80-hour rule: a month can be spent on time
+                             alone, and no dollar figure explains that. */
                           <span className="font-bold pg-text-twp">Used by hours</span>
                         ) : c.status.countable > 0 ? (
-                          c.status.countable > rules.trialWork ? (
-                            <span className="font-bold pg-text-twp">
-                              {thresholdGapLabel(c.status.countable, rules.trialWork)}
-                            </span>
-                          ) : (
-                            <span>{thresholdGapLabel(c.status.countable, rules.trialWork)}</span>
-                          )
+                          <span className={
+                            c.kind === 'over' ? 'font-bold pg-text-over'
+                              : c.kind === 'twp' ? 'font-bold pg-text-twp'
+                                : 'pg-text-safe'
+                          }>
+                            {thresholdGapLabel(
+                              c.status.countable,
+                              analysisPhase === 'trialWork' ? rules.trialWork : rules.sga
+                            )}
+                          </span>
                         ) : '—'}
                       </td>
                       <td className="pg-mono pg-rule-r px-3.5 py-2 text-right pg-muted sm:px-4">
@@ -346,74 +387,49 @@ export function PayGuardAnalysis({ data, year }: { data: TrackerData; year: numb
         )}
       </section>
 
-      {/* ---------------- Summary deck ---------------- */}
+      {/* ---------------- Work planning ---------------- */}
       <section className="pg-card overflow-hidden">
-        <div className="pg-tile-grid">
-          <Tile
-            label="YTD countable income"
-            value={money(yearTotalCountable)}
-            valueColor="var(--pg-safe-text)"
-            note={`Through ${longMonthName(asOf)}`}
-          />
-
-          <Tile
-            label="Income by source"
-            value={
-              <>
-                <span className="pg-text-w2">{money(w2Year)}</span>
-                <span className="mx-1.5 font-normal pg-dim">·</span>
-                <span className="pg-text-se">{money(seYear)}</span>
-              </>
-            }
-          >
-            <div className="pg-meter mt-0.5">
-              <span className="pg-meter-seg pg-fill-w2" style={{ width: `${w2Pct}%` }} />
-              <span className="pg-meter-seg pg-fill-se" style={{ width: `${sePct}%` }} />
-            </div>
-            <span className="pg-tile-note">W-2 {w2Pct}% · 1099 {sePct}%</span>
-          </Tile>
-
-          <Tile
-            label="TWP months used"
-            value={<>{twp.used}<span className="ml-1 text-sm font-semibold pg-dim">of 9</span></>}
-            valueColor="var(--pg-twp-text)"
-            note={9 - twp.used > 0 ? `${9 - twp.used} remaining` : 'All 9 used'}
-          />
-
-          <Tile
-            label="Months over SGA"
-            value={<>{overSgaMonths}<span className="ml-1 text-sm font-semibold pg-dim">{overSgaMonths === 1 ? 'month' : 'months'}</span></>}
-            valueColor={overSgaMonths > 0 ? 'var(--pg-over-text)' : 'var(--pg-safe-text)'}
-            note={`SGA threshold: ${money(rules.sga)}/month`}
-          />
-        </div>
-
-        {/* Simulator */}
-        <div className="flex items-center justify-between gap-3 pg-rule-t px-3.5 py-3 sm:px-5">
-          <span className="hidden text-xs pg-muted sm:block">
-            Test a hypothetical month against the {year} thresholds.
-          </span>
+        <div className="grid gap-3 px-3.5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5 sm:py-4">
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold pg-fg">
+              {needsTwpConfirmation ? 'Set your limit before planning hours' : 'How many hours could I work?'}
+            </h2>
+            <p className="mt-0.5 text-xs leading-relaxed pg-muted">
+              {needsTwpConfirmation
+                ? 'The calculator needs to know which monthly limit applies to you.'
+                : 'Use your hourly rate to find a weekly target, including an extra-paycheck month.'}
+            </p>
+          </div>
           <button
             type="button"
-            onClick={() => setSimulatorOpen((v) => !v)}
+            onClick={() => {
+              if (needsTwpConfirmation && onOpenStatus) onOpenStatus();
+              else setSimulatorOpen((v) => !v);
+            }}
             aria-expanded={simulatorOpen}
             className="pg-btn"
           >
             <ShieldCheck className="size-3.5 pg-accent" />
-            {simulatorOpen ? 'Hide simulator' : 'Open simulator'}
+            {needsTwpConfirmation && onOpenStatus
+              ? 'Set my limit'
+              : simulatorOpen ? 'Close' : 'Plan my hours'}
           </button>
         </div>
 
         {simulatorOpen ? (
           <div className="pg-rule-t">
-            <SafeWorkSimulator />
+            <SafeWorkSimulator onOpenStatus={onOpenStatus} />
           </div>
         ) : null}
 
+        {/* Review note: "I dont even want to read this its so wordy". Three
+            sentences, two subjects, and nobody reads any of it — which makes
+            it worse than useless, because the one line that actually matters
+            was buried in the middle of the other two. Kept: check with Social
+            Security before you act on a number. The privacy sentence is a
+            different subject and lives in Settings with the rest of it. */}
         <p className="pg-rule-t pg-surface-2 px-3.5 py-2.5 text-[0.6875rem] leading-relaxed pg-muted sm:px-5 sm:py-3">
-          These Social Security thresholds are for planning only. Report wages and verify current
-          figures with SSA before making work decisions. Your data stays on this device unless you
-          enable cloud sync.
+          These figures are for planning. Check with Social Security before you act on one.
         </p>
       </section>
     </div>

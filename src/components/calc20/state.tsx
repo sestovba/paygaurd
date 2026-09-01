@@ -79,6 +79,7 @@ export const DEFAULT_VIEWPORTS: Record<ViewportBand, ViewportPrefs> = {
 export interface UiState extends Calc20Ui {
   year: number;
   hideFuture: boolean;
+  focusMode: boolean;
   theme: ThemePref;
   cloudSyncEnabled: boolean;
   cloudSyncConsentedAt?: string;
@@ -90,13 +91,14 @@ export const DEFAULT_UI: UiState = {
   ...DEFAULT_CALC20_UI,
   year: new Date().getFullYear(),
   hideFuture: true,
+  focusMode: true,
   theme: 'system',
   cloudSyncEnabled: false
 };
 
 /** Keys that belong to the shared record rather than to `ui.calc20`. */
 const SHARED_KEYS = [
-  'year', 'hideFuture', 'theme', 'cloudSyncEnabled', 'cloudSyncConsentedAt',
+  'year', 'hideFuture', 'focusMode', 'theme', 'cloudSyncEnabled', 'cloudSyncConsentedAt',
   'termsAcceptedVersion', 'termsAcceptedAt'
 ] as const;
 
@@ -216,6 +218,7 @@ export function Calc20Store({ children }: { children: ReactNode }) {
     ...pgUi.calc20,
     year: pgUi.year,
     hideFuture: pgUi.hideFuture,
+    focusMode: pgUi.focusMode,
     theme: pgUi.theme,
     cloudSyncEnabled: pgUi.cloudSyncEnabled,
     cloudSyncConsentedAt: pgUi.cloudSyncConsentedAt,
@@ -383,8 +386,8 @@ export function Calc20Store({ children }: { children: ReactNode }) {
     pg.setTwpAssessment(assessment);
     pushToast(
       assessment.state === 'unknown' ? 'Trial work status set to unsure'
-        : assessment.state === 'complete' ? 'Tracker switched to SGA mode'
-          : 'Tracker switched to TWP mode',
+        : assessment.state === 'complete' ? 'Your trial work months are used up'
+          : 'You still have trial work months',
       true
     );
   }, [pg, pushToast]);

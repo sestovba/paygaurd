@@ -44,6 +44,7 @@ const LAYOUTS = {
   workrecord: lazy(() => import('./components/workrecord/TrackerWorkRecord').then((m) => ({ default: m.TrackerWorkRecord }))),
   horizon: lazy(() => import('./components/horizon/TrackerHorizon').then((m) => ({ default: m.TrackerHorizon }))),
   pocket: lazy(() => import('./components/pocket/TrackerPocket').then((m) => ({ default: m.TrackerPocket }))),
+  plan: lazy(() => import('./components/plan/TrackerPlan').then((m) => ({ default: m.TrackerPlan }))),
   calc20: lazy(() => import('./components/calc20/TrackerCalc20').then((m) => ({ default: m.TrackerCalc20 })))
 } as const;
 
@@ -102,7 +103,7 @@ function Root({ session }: { session: Session | null }) {
       : <Onboarding />;
   }
 
-  const Layout = LAYOUTS[ui.layout] ?? LAYOUTS.responsive;
+  const Layout = LAYOUTS[ui.layout] ?? LAYOUTS.plan;
   const tracker = (
     <Suspense fallback={null}>
       <Layout />

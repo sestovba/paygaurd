@@ -342,7 +342,7 @@ export function DesktopDock({
               <Tool
                 icon={MousePointerSquareDashed}
                 label="Select"
-                hint="p"
+                hint="l"
                 on={mode === 'pick'}
                 onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
               />
@@ -350,7 +350,7 @@ export function DesktopDock({
                 <Tool
                   icon={Columns2}
                   label="A / B"
-                  hint="v"
+                  hint="b"
                   on={mode === 'variants'}
                   badge={variants}
                   onClick={() => onMode(mode === 'variants' ? 'off' : 'variants')}

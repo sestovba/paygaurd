@@ -238,9 +238,9 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
                       Payday forecast only. SSA generally assigns W-2 wages to
                       the month earned using the pay period, not just the pay date.
                       {' '}{phase === 'trialWork' && heavyTotal > rules.trialWork
-                        ? 'If that work was earned in one month, it could use a TWP month.'
+                        ? 'If that work was earned in one month, it could use a trial work month.'
                         : phase === 'sga' && heavyTotal > rules.sga
-                          ? 'If that work was earned in one month, it could exceed SGA.'
+                          ? 'If that work was earned in one month, it could go over your limit.'
                           : 'Use this as an extra-paycheck warning, then enter earned monthly gross.'}
                     </div>
                     <div className="warning__figures">
@@ -330,7 +330,7 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
             </select>
             <p className="help-note">
               A stream that ended contributes nothing after that month to
-              {' '}{phase === 'trialWork' ? 'TWP tracking' : phase === 'sga' ? 'SGA tracking' : 'limit calculations'}.
+              {' '}{phase === 'trialWork' ? 'your trial work months' : 'your limit'}.
             </p>
           </label>
           </fieldset>

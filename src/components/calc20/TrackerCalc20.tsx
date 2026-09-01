@@ -11,7 +11,6 @@ import { StatusSection } from './StatusSection';
 import { SettingsSheet } from './SettingsSheet';
 import { StreamSettingsSheet } from './StreamSettingsSheet';
 import { MonthSheet } from './MonthSheet';
-import { ToastStack } from '../ToastStack';
 import {
   CheckIcon, ChevronDownIcon, CollapseAllIcon, ExpandAllIcon,
   GridIcon, PlusIcon
@@ -80,9 +79,12 @@ function TrackerApp({
   const statusAsOf = yearOf(todayMonth()) === ui.year ? todayMonth() : monthsOfYear(ui.year)[11];
   const statusPhase = benefitPhase(data, statusAsOf);
   const statusAside = statusPhase === 'trialWork'
-    ? trialWorkStatus(data, statusAsOf).remaining + ' TWP left'
+    ? trialWorkStatus(data, statusAsOf).remaining + ' trial months left'
     : statusPhase === 'sga'
-      ? monthsOfYear(ui.year).filter((m) => monthStatus(data, m).overSga).length + ' over SGA'
+      // A count across the year is exactly what focus mode puts away.
+      ? (ui.focusMode
+        ? (monthStatus(data, statusAsOf).overSga ? 'Over your limit' : 'Under your limit')
+        : monthsOfYear(ui.year).filter((m) => monthStatus(data, m).overSga).length + ' over your limit')
       : 'Not confirmed';
 
   // Mixed state behaves like a true hide/show toggle: if anything is visible,
@@ -114,7 +116,7 @@ function TrackerApp({
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-chrome-root>
       <Header
         session={session}
         onSignOut={onSignOut}
@@ -216,7 +218,7 @@ function TrackerApp({
         ) : (
           <div className="app-empty">
             <div>
-              <div className="app-empty__title">Start with your benefit phase</div>
+              <div className="app-empty__title">Start with where you stand</div>
               <p className="app-empty__note">
                 The tracker should not guess whether trial work months remain.
                 Choose what your records support, then add income.
@@ -237,9 +239,9 @@ function TrackerApp({
                   <div className="warning__body">
                     <div className="warning__title">Confirm this before relying on it</div>
                     <div className="warning__text">
-                      “TWP remains” should be based on prior work years, benefit
-                      letters, or an SSA record — not an empty tracker. Choosing
-                      it from memory risks a wrong SGA/TWP recommendation later.
+                      “Trial months left” should come from your own paperwork —
+                      old pay years, a benefit letter, your Social Security
+                      record. Chosen from memory, every limit after it is wrong.
                     </div>
                   </div>
                 </div>
@@ -265,8 +267,6 @@ function TrackerApp({
         <StreamSettingsSheetById id={streamSettingsId} onClose={() => setStreamSettingsId(null)} />
       ) : null}
       {openMonth ? <MonthSheet month={openMonth} onClose={() => setOpenMonth(null)} /> : null}
-
-      <ToastStack />
     </div>
   );
 }

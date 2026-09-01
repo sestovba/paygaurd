@@ -7,7 +7,7 @@ const DATA_KEY = 'pg-data-v1';
 const UI_KEY = 'pg-ui-v1';
 
 export type ThemePref = 'system' | 'light' | 'dark';
-export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket';
+export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket' | 'plan';
 export type LedgerTheme = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
 
 /**
@@ -100,6 +100,17 @@ export interface UiState {
   wrStatusOpen: boolean;
   /** Everything the Calc20 layout remembers for itself. */
   calc20: Calc20Ui;
+  /**
+   * Show only the month you are in.
+   *
+   * Every calendar, chart and year figure comes off the screen; month lists
+   * collapse to a single row. On by default, because a twelve-cell grid is a
+   * wall for the reader this app is for and it assumes somebody keeps a
+   * benefits tracker current for a year — a few weeks is the honest
+   * expectation. Turning it off restores the full-year view every layout
+   * was originally built around.
+   */
+  focusMode: boolean;
   /** Set once someone adds a stream or explicitly skips — after that, an
    *  empty tracker shows the real (empty) dashboard, not onboarding again. */
   onboarded: boolean;
@@ -119,7 +130,7 @@ export const DEFAULT_UI: UiState = {
   year: new Date().getFullYear(),
   hideFuture: true,
   theme: 'system',
-  layout: 'payguard',
+  layout: 'plan',
   ledgerTheme: 'paper',
   payguardTheme: 'paper',
   workRecordTheme: 'calc20',
@@ -128,6 +139,7 @@ export const DEFAULT_UI: UiState = {
   wrStatusOpen: false,
   calc20: DEFAULT_CALC20_UI,
   onboarded: false,
+  focusMode: true,
   cloudSyncEnabled: false
 };
 

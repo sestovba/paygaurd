@@ -748,7 +748,54 @@
 
 /* One-offs that would otherwise be arbitrary utilities in JSX */
 .pg-tooltip-rule { border-color: var(--pg-invert-border); }
-.pg-gridline { border-color: var(--pg-rule-strong); }
+/* The grid is scenery behind the two lines that matter, so it steps back a
+   shade. Before this it was drawn at the same weight as the SGA and TWP
+   rules, which is how a limit ends up looking like a gridline. */
+.pg-gridline { border-color: var(--pg-rule); }
+
+/* The two limits, and the ground above SGA. */
+.pg-chart-limit {
+  height: 0;
+  border-top: 2px solid var(--pg-twp);
+  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--pg-surface) 60%, transparent);
+}
+
+.pg-chart-limit[data-limit='over'] { border-top-color: var(--pg-over); }
+.pg-chart-limit[data-limit='twp'] { border-top-color: var(--pg-twp); }
+
+.pg-chart-over-band {
+  background: color-mix(in oklab, var(--pg-over) 7%, transparent);
+  border-bottom: 0;
+}
+
+/* A bar that crossed a limit is capped in that limit's colour. An element
+   rather than an inset shadow: the shadow would paint under the W-2 and 1099
+   fills stacked inside the bar, which is to say nowhere. */
+.pg-chart-cap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--pg-twp);
+}
+
+.pg-chart-cap[data-breach='over'] { background: var(--pg-over); }
+.pg-chart-cap[data-breach='twp'] { background: var(--pg-twp); }
+
+/* The extra-paycheck stamp under a month on the axis. */
+.pg-axis-pay {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--pg-info-bg);
+  padding: 0 0.3rem;
+  color: var(--pg-info-text);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
 .pg-ring-selected { box-shadow: 0 0 0 2px var(--pg-ring); }
 .pg-focus-underline {
   border-bottom: 1px solid transparent;
@@ -802,11 +849,14 @@
 /* Current-month status: the one decision-oriented readout above the denser
  * chart and editor surfaces. It uses a split instrument-card layout on wide
  * screens and becomes a calm two-part stack on phones. */
+/* One statement, so one column. The right-hand panel that used to sit here
+   repeated the limit as a second big figure with a paragraph under it; the
+   limit is now the line under the figure it qualifies. */
 .pg-status-hero {
   position: relative;
   display: grid;
   overflow: hidden;
-  grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem);
+  grid-template-columns: minmax(0, 1fr);
   border: 1px solid var(--pg-border);
   border-radius: var(--pg-radius-xl);
   background: var(--pg-surface);
@@ -830,21 +880,13 @@
     var(--pg-surface);
 }
 
-.pg-status-hero-side {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.7rem;
-  border-left: 1px solid var(--pg-rule);
-  padding: 1rem 1.125rem;
-  background: color-mix(in oklab, var(--pg-surface-2) 58%, var(--pg-surface));
-}
-
-.pg-status-title {
-  font-size: 0.875rem;
+/* The words that finish the figure's sentence — "$310 over your TWP limit".
+   Sized to be read with the number rather than under it. */
+.pg-status-phrase {
+  font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  line-height: 1.25;
   color: var(--pg-fg-muted);
 }
 
@@ -857,15 +899,6 @@
   letter-spacing: -0.055em;
   line-height: 1;
   color: var(--pg-fg);
-}
-
-.pg-status-ytd {
-  display: flex;
-  min-width: 10rem;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-  text-align: right;
 }
 
 .pg-status-track {
@@ -901,25 +934,8 @@
 
 .pg-status-link:hover { border-bottom-color: var(--pg-ring); }
 
-@media (max-width: 767.98px) {
-  .pg-status-hero { grid-template-columns: minmax(0, 1fr); }
-  .pg-status-hero-side {
-    border-top: 1px solid var(--pg-rule);
-    border-left: 0;
-  }
-}
-
 @media (max-width: 419.98px) {
-  .pg-status-hero-main,
-  .pg-status-hero-side { padding-inline: 0.875rem; }
-  .pg-status-ytd {
-    width: 100%;
-    min-width: 0;
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    text-align: left;
-  }
+  .pg-status-hero-main { padding-inline: 0.875rem; }
 }
 
 .pg-card-quiet {
@@ -1034,8 +1050,7 @@
 .pg-tab:focus-visible,
 .pg-bottom-nav-item:focus-visible,
 .pg-status-link:focus-visible,
-.pg-chart-bar-trigger:focus-visible,
-.pg-notice-trigger:focus-visible {
+.pg-chart-bar-trigger:focus-visible {
   outline: 2px solid var(--pg-ring);
   outline-offset: 2px;
 }
@@ -2108,37 +2123,14 @@
   display: none;
 }
 
-.pg-notice-trigger {
-  position: relative;
-  display: inline-flex;
-  height: var(--pg-h);
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  border: 1px solid var(--pg-border);
-  border-radius: var(--pg-radius-md);
-  background: var(--pg-surface);
-  padding: 0 0.55rem;
-  color: var(--pg-fg-muted);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.pg-notice-trigger:hover {
-  border-color: var(--pg-border-strong);
-  background: var(--pg-hover);
-  color: var(--pg-fg);
-}
-
-.pg-notice-trigger-active {
-  border-color: var(--pg-warn-border);
-  background: var(--pg-warn-bg);
-  color: var(--pg-warn-text);
-}
+/*
+ * The notices trigger used to be styled here, against this layout's private
+ * --pg-* tokens — which is why it came out unstyled on every layout that
+ * borrows the component but not the palette. It lives in styles/chrome.css
+ * now and asks for --chrome-*, which the block at the top of that file
+ * answers with these same tokens. Only the narrow-screen squeeze below is
+ * still payguard's business.
+ */
 
 @media (max-width: 639.98px) {
   .pg-bottom-nav {
@@ -2264,7 +2256,7 @@
     padding-inline: 0.5rem;
   }
   .pg-topbar .pg-field { margin-left: 0; }
-  .pg-topbar .pg-notice-trigger {
+  .pg-topbar .notice-trigger {
     width: var(--pg-h);
     padding-inline: 0;
   }
@@ -2442,7 +2434,10 @@
   border-color: var(--pg-border);
   background: var(--pg-surface-2);
   padding: 3px;
-  gap: 3px;
+  /* Through the token, not over the top of it: the segments size themselves
+   * off --seg-gap, so setting `gap` alone would leave their arithmetic
+   * running on the value this layout does not use. */
+  --seg-gap: 3px;
 }
 
 .pg-payguard .seg-item {
@@ -2586,35 +2581,11 @@
  * family. A line under the number, never a card: precision is a property of
  * a claim, not a room in the app.
  */
-.pg-payguard .precision-line {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  text-align: left;
-  color: var(--pg-fg-dim);
-}
-
-.pg-payguard .precision-line[data-fix] { cursor: pointer; }
+/* Structure and colour come from styles/chrome.css, which this layout
+   answers with --pg-*. Only the register is payguard's. */
+.pg-payguard .precision-line { margin-top: 0.5rem; font-size: 0.6875rem; line-height: 1.4; }
+.pg-payguard .precision-level { text-transform: uppercase; }
 .pg-payguard .precision-line[data-fix]:hover .precision-why { text-decoration: underline; }
-
-.pg-payguard .precision-level {
-  flex: 0 0 auto;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-.pg-payguard .precision-line[data-level='estimated'] { color: var(--pg-warn-text); }
-.pg-payguard .precision-line[data-level='scheduled'] { color: var(--pg-info-text); }
-.pg-payguard .precision-line[data-level='exact'] { color: var(--pg-safe-text); }
-
-.pg-payguard .precision-why { min-width: 0; color: var(--pg-fg-dim); }
 
 /* workrecord shares the payguard palette and sits on a sheet, so it gets a
    rule above it rather than a colour of its own. */

@@ -108,7 +108,11 @@ export function TrackerPocket() {
    * you scroll past; the months that are fine do not need a row each. This
    * month is always shown because it is the one you are working in. */
   const flagged = attentionFlags(data, monthsOfYear(ui.year).filter((m) => m >= asOf));
-  const shown: MonthKey[] = Array.from(new Set<MonthKey>([asOf, ...flagged.map((f) => f.month)])).sort();
+  /* Focus mode drops the later months that need something and leaves the one
+     you are in. Pocket was already close to this; the switch makes it exact. */
+  const shown: MonthKey[] = ui.focusMode
+    ? [asOf]
+    : Array.from(new Set<MonthKey>([asOf, ...flagged.map((f) => f.month)])).sort();
   const flagFor = (month: MonthKey) => flagged.find((f) => f.month === month);
 
   /* The most common edit in the app, as one field. The full editor is a
@@ -127,7 +131,7 @@ export function TrackerPocket() {
   }
 
   return (
-    <div className="pk">
+    <div className="pk" data-chrome-root>
       <header className="pk-top">
         <div className="pk-top-when">
           <b>{longMonthName(asOf)} {ui.year}</b>
@@ -307,7 +311,11 @@ export function TrackerPocket() {
                             <dd>{seHours(data, month)}</dd>
                           </>
                         ) : null}
-                        {s.isServiceMonth ? (
+                        {/* Only while the trial months are the thing being
+                            spent. After they are gone this row would be the
+                            app naming a rule that no longer applies to you,
+                            which is the one thing it has decided not to do. */}
+                        {s.isServiceMonth && benefitPhase(data, month) === 'trialWork' ? (
                           <>
                             <dt>Trial work months used</dt>
                             {/* Why it counted, not just that it did — the
@@ -362,13 +370,17 @@ export function TrackerPocket() {
  *    an undo step, and one per character makes Undo useless.
  */
 function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
-  const { commit, pushToast } = useTracker();
+  const { data, commit, pushToast } = useTracker();
   const checks = stream.type === 'w2'
     ? stream.checks.filter((c) => c.month === month && !c.projected)
     : [];
   const gross = grossFor(stream, month);
   const hours = hoursFor(stream, month);
   const selfEmployed = stream.type === 'ten99';
+  /* The hours rule is a trial-work rule. Once those months are spent, hours
+     no longer decide anything, and a note about them would be this layout
+     explaining a limit that is not yours any more. */
+  const trial = benefitPhase(data, month) === 'trialWork';
 
   const [amountDraft, setAmountDraft] = useState<string | null>(null);
   const [hoursDraft, setHoursDraft] = useState<string | null>(null);
@@ -440,11 +452,13 @@ function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
             onBlur={saveHours}
             onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }}
           />
-          <p className="pk-edit-note" data-warn={hours > TWP_SELF_EMPLOYMENT_HOURS || undefined}>
-            {hours > TWP_SELF_EMPLOYMENT_HOURS
-              ? `You worked more than ${TWP_SELF_EMPLOYMENT_HOURS} hours. That uses 1 of your 9 trial work months, even though you did not earn much.`
-              : `If you work more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in a month, it uses 1 of your 9 trial work months. This happens even if you did not earn much.`}
-          </p>
+          {trial ? (
+            <p className="pk-edit-note" data-warn={hours > TWP_SELF_EMPLOYMENT_HOURS || undefined}>
+              {hours > TWP_SELF_EMPLOYMENT_HOURS
+                ? `You worked more than ${TWP_SELF_EMPLOYMENT_HOURS} hours. That uses 1 of your 9 trial work months, even though you did not earn much.`
+                : `If you work more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in a month, it uses 1 of your 9 trial work months. This happens even if you did not earn much.`}
+            </p>
+          ) : null}
         </>
       ) : null}
 

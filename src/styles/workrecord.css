@@ -291,6 +291,18 @@
 
 .wr-slab-body { padding: 0 var(--wr-pad) 1.25rem; }
 
+/* Full bleed: the job cards have their own border and fill, so the slab's
+   side padding was a frame drawn inside a frame. Their side edges go with
+   it — a card that reaches both edges is a band, and a band does not need
+   a vertical rule to say where it starts. */
+.wr-slab-body[data-bleed] { padding-inline: 0; }
+
+.wr-slab-body[data-bleed] > .pg-card {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+
 /* ------------------------------------------------------------------ */
 /* 5. Month cells                                                     */
 /* ------------------------------------------------------------------ */

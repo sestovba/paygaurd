@@ -5,6 +5,12 @@ import type { ReactNode } from 'react';
 const DISMISS_PX = 80;
 const DISMISS_VELOCITY = 0.45;
 
+/* How much room the header gives back when it collapses — padding, the
+ * eyebrow, and a step down in title size. Measured off the classes below
+ * and rounded up: below this much overflow, collapsing would remove the
+ * very scroll that triggered it. */
+const COLLAPSE_MIN_OVERFLOW = 56;
+
 /** Shared modal chrome for every bottom/center sheet in the app — also
  *  reusable as a plain inline pane (variant="inline") for a persistent
  *  detail column instead of a popup. */
@@ -128,6 +134,10 @@ export function Sheet({
     <div
       ref={cardRef}
       tabIndex={inline ? undefined : -1}
+      /* A stable hook so a layout can restyle its own popups. Purely an
+         attribute — it changes nothing for layouts that do not use it. */
+      data-sheet=""
+      data-sheet-inline={inline ? '' : undefined}
       className={
         inline
           ? 'flex h-full min-h-0 w-full flex-col bg-surface'
@@ -141,6 +151,7 @@ export function Sheet({
       {/* Mobile Slide-Down Grab Handle */}
       {inline ? null : (
         <div
+          data-sheet-grab=""
           className="flex shrink-0 cursor-grab touch-none select-none flex-col items-center pt-2.5 pb-1 active:cursor-grabbing sm:hidden"
           {...swipeHandlers}
         >
@@ -160,6 +171,7 @@ export function Sheet({
 
       {/* Header with swipe-to-dismiss support on mobile */}
       <div
+        data-sheet-head=""
         className={
           'sticky top-0 z-10 flex shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-surface/95 backdrop-blur-md transition-[padding] duration-200 '
           + (scrolled ? 'px-4 py-3 sm:px-6 sm:py-3.5' : 'p-4 sm:px-6 sm:py-4')
@@ -167,10 +179,15 @@ export function Sheet({
         {...(!inline && !scrolled ? swipeHandlers : undefined)}
       >
         <div className="min-w-0 flex-1">
+          {/* Collapsing used to clamp the eyebrow to `max-h-5` — one line —
+              while leaving it able to wrap. At a phone's width "A job that
+              pays me" is two lines, and the second one came out on top of
+              the title. Nothing clamps it while it is open now; the clamp is
+              only what closes it. */}
           {eyebrow ? (
             <p className={
-              'text-xs font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 '
-              + (scrolled ? 'max-h-0 opacity-0' : 'max-h-5 opacity-100')
+              'overflow-hidden text-xs font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 '
+              + (scrolled ? 'max-h-0 opacity-0' : 'opacity-100')
             }>
               {eyebrow}
             </p>
@@ -201,18 +218,39 @@ export function Sheet({
 
       {/* Scrollable Body */}
       <div
+        data-sheet-body=""
         className={
           'flex flex-1 flex-col gap-4 sm:gap-5 overflow-y-auto px-4 sm:px-6 text-sm sm:text-base '
           + (footer ? 'py-4 sm:py-5' : 'py-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-6')
         }
-        onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}
+        onScroll={(e) => {
+          const body = e.currentTarget;
+          const overflow = body.scrollHeight - body.clientHeight;
+          setScrolled((was) => {
+            /*
+             * The header shrinks once you scroll, which makes the body
+             * taller, which can take the scroll away again — and then the
+             * header grows back, and the browser clamps the scroll, and it
+             * happens again. That loop is the jitter reported on short
+             * windows: "little scroll happens, this thing glitches out".
+             *
+             * Two guards. The collapse never engages unless there is more
+             * to scroll than the collapse itself gives back, so on a body
+             * that barely overflows nothing moves at all. And once it has
+             * engaged it only lets go at the very top, so a few pixels of
+             * clamped scroll cannot flip it back.
+             */
+            if (overflow < COLLAPSE_MIN_OVERFLOW) return false;
+            return was ? body.scrollTop > 2 : body.scrollTop > 24;
+          });
+        }}
       >
         {children}
       </div>
 
       {/* Sticky Footer */}
       {footer ? (
-        <div className="sticky bottom-0 z-10 flex shrink-0 items-center justify-between gap-3 border-t border-border/60 bg-surface/95 backdrop-blur-md px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4">
+        <div data-sheet-foot="" className="sticky bottom-0 z-10 flex shrink-0 items-center justify-between gap-3 border-t border-border/60 bg-surface/95 backdrop-blur-md px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4">
           {footer}
         </div>
       ) : null}
@@ -223,6 +261,7 @@ export function Sheet({
 
   return (
     <div
+      data-sheet-scrim=""
       className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6 bg-black/50 backdrop-blur-xs transition-opacity duration-200"
       role="dialog"
       aria-modal="true"

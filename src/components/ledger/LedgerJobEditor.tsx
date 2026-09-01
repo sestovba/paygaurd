@@ -5,7 +5,7 @@ import {
   activeMonthsInYear, evenSplit, grossFor, hoursFor
 } from '../../domain/earnings';
 import {
-  longMonthName, monthIndex, monthKey, monthsOfYear, parseMonth, shortMonthName, todayMonth
+  longMonthName, monthIndex, monthKey, listedMonths, parseMonth, shortMonthName, todayMonth
 } from '../../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/rules';
 import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
@@ -106,13 +106,16 @@ export function LedgerJobEditor({
   sectionOpen: (section: JobSection) => boolean;
   onToggleSection: (section: JobSection) => void;
 }) {
-  const { updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
+  const { ui, updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
   const settingsOpen = sectionOpen('settings');
   const ledgerOpen = sectionOpen('ledger');
   const [helpOpen, setHelpOpen] = useState(false);
 
   const now = todayMonth();
-  const months = monthsOfYear(year);
+  /* The twelve-field entry grid is the calendar this layout puts on its main
+     screen, so focus mode leaves the one month you are in. Turning focus off
+     brings the year back. */
+  const months = listedMonths(year, false, ui.focusMode);
   const activeMonths = activeMonthsInYear(stream, year);
   const eligibleMonths = activeMonths.filter((m) => m <= now);
   const isYearToDate = eligibleMonths.length > 0 && eligibleMonths.length < activeMonths.length;
@@ -137,11 +140,20 @@ export function LedgerJobEditor({
         >
           <ChevronDown className="size-5 transition-transform lg-chevron" data-collapsed={!cardOpen} />
         </button>
+        {/* Review note: "I understand the importance of the lock icon but is
+            it really that important to be there always?" No — when the card
+            is unlocked the lock is a control you might use, and it was drawn
+            as a bordered button competing with the job's own name. It keeps
+            its box only when it is locked, where it is not a control but the
+            reason every field below is disabled. It is still always present:
+            on a touch screen there is no hover to reveal it, and a lock you
+            cannot find is how somebody loses an edit they meant to make. */}
         <button
           type="button"
           onClick={() => updateStream(stream.id, { locked: !stream.locked })}
           aria-label={stream.locked ? 'Unlock' : 'Lock'}
-          className="grid size-8 shrink-0 place-items-center lg-border lg-lock-btn"
+          data-locked={stream.locked || undefined}
+          className="grid size-8 shrink-0 place-items-center lg-lock-btn"
         >
           {stream.locked ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
         </button>

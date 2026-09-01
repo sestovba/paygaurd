@@ -44,11 +44,12 @@
 import { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
+import { LIMIT_NAME, copyFor } from '../../domain/copy';
 import { useTheme } from '../../theme';
 import { money } from '../../domain/format';
 import { longMonthName, todayMonth, yearOf } from '../../domain/months';
 import { monthStatus } from '../../domain/earnings';
-import { activeThreshold, benefitPhase } from '../../domain/trialWork';
+import { activeThreshold } from '../../domain/trialWork';
 import { precisionFor } from '../../domain/precision';
 import { actionItems } from '../../domain/notifications';
 import type { MonthKey } from '../../domain/types';
@@ -72,27 +73,30 @@ export function TrackerHorizon() {
   const asOf: MonthKey = yearOf(now) === ui.year ? now : `${ui.year}-12`;
 
   const status = monthStatus(data, asOf);
-  const phase = benefitPhase(data, asOf);
   const threshold = activeThreshold(data, asOf);
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
-  const limitName = phase === 'trialWork' ? 'TWP' : 'SGA';
 
-  const items = actionItems(data, ui.year);
+  const items = actionItems(data, ui.year, ui.focusMode);
 
   /* One sentence, which is the variant that won the A/B on this exact row.
    * An amount with a percent beside it makes the reader do the comparison
    * the app already did. */
+  /* One limit is named, and it is never named as a rule. Which of the two
+   * regimes is in force decides the number; it is not something the reader
+   * is asked to hold. This row used to print "the TWP limit" or "the SGA
+   * limit" depending on the phase, which is both an abbreviation and the
+   * one thing the app has decided not to explain. */
   const answer = !threshold
-    ? 'Confirm your Trial Work Period status before this can mean anything.'
+    ? 'This is an estimate until you tell us where you stand. A few questions and it becomes your own number.'
     : over
-      ? `${money(status.countable - threshold.amount)} over the ${limitName} limit this month`
-      : `${money(room)} left before the ${limitName} limit this month`;
+      ? `${money(status.countable - threshold.amount)} over ${LIMIT_NAME}`
+      : `${money(room)} left before ${LIMIT_NAME}`;
 
   const tone = !threshold ? 'unknown' : over ? 'over' : room <= 200 ? 'near' : 'clear';
 
   return (
-    <div className="hz">
+    <div className="hz" data-chrome-root>
       {/* The header carries the year and where you stand. Nothing else: the
           notes caught palette switchers, theme toggles and import/export all
           sitting in the highest-value strip on their layouts. */}
@@ -142,7 +146,7 @@ export function TrackerHorizon() {
         {/* 4 — the record. Called "the most useful thing on the layout" in
             the review, where it sat under a chart and two duplicate stat
             rows. Here nothing is above it but the answer and the forecast. */}
-        <section className="hz-sources" aria-label="Income sources">
+        <section className="hz-sources" aria-label={copyFor('horizon').income}>
           <h2 className="hz-label">Your income</h2>
           <StreamsPanel onOpenStream={setOpenStream} selectedId={openStream ?? undefined} />
         </section>

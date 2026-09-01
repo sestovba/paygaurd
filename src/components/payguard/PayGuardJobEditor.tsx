@@ -12,8 +12,7 @@ import {
   longMonthName,
   monthIndex,
   monthKey,
-  monthsOfYear,
-  parseMonth,
+  listedMonths, parseMonth,
   shortMonthName,
   todayMonth
 } from '../../domain/months';
@@ -111,13 +110,16 @@ export function PayGuardJobEditor({
   onToggleOpen: () => void;
   onRemove?: () => void;
 }) {
-  const { data, updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
+  const { data, ui, updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [ledgerOpen, setLedgerOpen] = useState(true);
   const [helpOpen, setHelpOpen] = useState(false);
 
   const now = todayMonth();
-  const months = monthsOfYear(year);
+  /* The twelve-field entry grid is the calendar this layout puts on its main
+     screen, so focus mode leaves the one month you are in. Turning focus off
+     brings the year back. */
+  const months = listedMonths(year, false, ui.focusMode);
   const rules = rulesFor(year);
   const activeMonths = activeMonthsInYear(stream, year);
   const eligibleMonths = activeMonths.filter((m) => m <= now);
@@ -127,6 +129,10 @@ export function PayGuardJobEditor({
   const ytdHours = eligibleMonths.reduce((sum, month) => sum + hoursFor(stream, month), 0);
 
   const plan = stream.payFrequency && stream.anchorDate ? payPlan(year, stream.payFrequency, stream.anchorDate) : null;
+  const heavyShown = !plan ? []
+    : ui.focusMode
+      ? plan.heavyMonths.filter((m) => monthKey(year, m) === months[0])
+      : plan.heavyMonths;
   const scheduleSummary = stream.payFrequency
     ? `${frequencyLabel(stream.payFrequency)} · ${stream.lifecycle === 'active' && !stream.activeTo ? 'Active all year' : 'Date range set'}`
     : 'Not scheduled';
@@ -390,13 +396,16 @@ export function PayGuardJobEditor({
                     </FieldCell>
                   </div>
 
-                  {plan && plan.heavyMonths.length ? (
+                  {/* A list of heavy months across the year is a forecast, so
+                      focus mode narrows it to the month you are in and says
+                      nothing when that month is ordinary. */}
+                  {plan && heavyShown.length ? (
                     <div className="flex items-start gap-2 border-b px-3 py-2 text-xs font-semibold sm:px-4 pg-callout-warn">
                       <Zap className="mt-0.5 size-3.5 shrink-0" />
                       <span>
                         <strong>Extra paycheck month:</strong>{' '}
                         {plan.typicalCount + 1} paychecks expected in{' '}
-                        {plan.heavyMonths.map((m) => longMonthName(monthKey(year, m))).join(' and ')} this year.
+                        {heavyShown.map((m) => longMonthName(monthKey(year, m))).join(' and ')}.
                       </span>
                     </div>
                   ) : null}

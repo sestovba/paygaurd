@@ -10,6 +10,7 @@ import {
   X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
+import { copyFor } from '../../domain/copy';
 import { attentionFlags } from '../../domain/attention';
 import { precisionFor } from '../../domain/precision';
 import { PrecisionLine } from '../PrecisionLine';
@@ -130,15 +131,23 @@ export function TrackerWorkRecord() {
   const streamsAside = streams.length
     ? `${streams.length} ${streams.length === 1 ? 'job' : 'jobs'}`
     : 'None yet';
-  const monthsAside = `${money(yearTotal(data, year))} this year`;
+  /* Both of these count across a whole year, so focus mode replaces them with
+     the one month on screen. The trial-months figure stays either way: nine
+     months over a rolling five years is not a year statistic, it is the
+     reason this month's limit is what it is. */
+  const monthsAside = ui.focusMode
+    ? longMonthName(focusMonth)
+    : `${money(yearTotal(data, year))} this year`;
   const statusAside = phase === 'trialWork'
-    ? `${twp.remaining} TWP left`
+    ? `${twp.remaining} trial months left`
     : phase === 'sga'
-      ? `${monthsOfYear(year).filter((m) => monthStatus(data, m).overSga).length} over SGA`
+      ? (ui.focusMode
+        ? (monthStatus(data, focusMonth).overSga ? 'Over your limit' : 'Under your limit')
+        : `${monthsOfYear(year).filter((m) => monthStatus(data, m).overSga).length} over your limit`)
       : 'Not confirmed';
 
   return (
-    <div className="pg-payguard pg-workrecord min-h-dvh" data-payguard-theme={theme}>
+    <div className="pg-payguard pg-workrecord min-h-dvh" data-chrome-root data-payguard-theme={theme}>
       <a href="#wr-main" className="pg-skip-link">Skip to main content</a>
       <input
         ref={fileInputRef}
@@ -227,10 +236,10 @@ export function TrackerWorkRecord() {
               </div>
               {threshold ? (
                 <div className="wr-headline-of mt-1.5">
-                  of {money(threshold.amount)} {threshold.kind === 'trialWork' ? 'TWP' : 'SGA'}
+                  of {money(threshold.amount)}
                   {' · '}
                   {over
-                    ? (threshold.kind === 'trialWork' ? 'one TWP month used' : 'over SGA')
+                    ? (threshold.kind === 'trialWork' ? 'one trial work month used' : 'over your limit')
                     : `${money(room)} of room`}
                 </div>
               ) : (
@@ -239,7 +248,7 @@ export function TrackerWorkRecord() {
                   className="pg-btn mt-2.5"
                   onClick={() => setStatusOpen(true)}
                 >
-                  Confirm TWP status
+                  Tell us where you stand
                 </button>
               )}
             </div>
@@ -248,7 +257,7 @@ export function TrackerWorkRecord() {
               <div className="wr-standing">
                 <span className="pg-label">
                   {phase === 'trialWork' ? 'Trial months left'
-                    : phase === 'sga' ? 'Working limit' : 'TWP status'}
+                    : phase === 'sga' ? 'Your limit' : 'Your status'}
                 </span>
                 <span className="pg-figure pg-figure-md pg-accent">
                   {phase === 'trialWork' ? (
@@ -266,13 +275,18 @@ export function TrackerWorkRecord() {
             <PrecisionLine reading={precisionFor(data, yearOf(now) === year ? now : `${year}-12`)} />
           </div>
 
-          {/* Phase warning shown only when status is not confirmed */}
-          {phase === 'unknown' || phase === 'verifyComplete' ? (
+          {/* Review note: "We are repeating ourselves multiple times this is
+              bad design, which one is it". When the status is simply unknown
+              the headline above already carries the ask, as a button, in the
+              highest-value spot on the screen — so this band said the same
+              sentence a second time with a second button beside it. It is
+              kept only for the one state the headline cannot say, which is
+              that nine months are on record and want checking. */}
+          {phase === 'verifyComplete' ? (
             <div className="wr-phase-warning">
               <span className="min-w-[16rem] flex-1">
-                {phase === 'verifyComplete'
-                  ? 'Nine possible TWP months are recorded. Confirm them against your records or SSA before switching phases.'
-                  : 'This tracker does not know whether TWP months remain, so it will not recommend a limit yet.'}
+                Nine trial work months are on record. Check them against your own
+                paperwork — after that your limit changes.
               </span>
               <button type="button" className="pg-btn pg-btn-sm" onClick={() => setStatusOpen(true)}>
                 Review status
@@ -284,7 +298,8 @@ export function TrackerWorkRecord() {
 
           {/* ---------------- Slabs ---------------- */}
           <Slab
-            title="Income sources"
+            title={copyFor('workrecord').income}
+            bleed
             open={ui.wrStreamsOpen}
             onToggle={() => setUi({ wrStreamsOpen: !ui.wrStreamsOpen })}
             aside={streamsAside}
@@ -339,14 +354,16 @@ export function TrackerWorkRecord() {
                   className="pg-btn w-full justify-center"
                   onClick={() => setAddingOpen(true)}
                 >
-                  <Plus className="size-3.5" /> Add another income source
+                  {/* Review note: "That is a long button". It is the word
+                      from the shared vocabulary now, so the next time you
+                      want it changed it changes in one file. */}
+                  <Plus className="size-3.5" /> {copyFor('workrecord').incomeAdd}
                 </button>
               ) : (
                 <div className="pg-card flex flex-col items-center gap-3 p-6 text-center">
-                  <span className="pg-empty-title">No income sources yet</span>
+                  <span className="pg-empty-title">Nothing here yet</span>
                   <span className="pg-empty-body max-w-md">
-                    Add a W-2 job or 1099 work to start tracking countable income against
-                    the SSA thresholds.
+                    Add what pays you and we can start counting it against your limit.
                   </span>
                   <div className="mt-1 flex flex-wrap justify-center gap-2">
                     <button type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndOpen('w2')}>
@@ -381,7 +398,7 @@ export function TrackerWorkRecord() {
           </Slab>
 
           <Slab
-            title="TWP / SGA"
+            title="Where you stand"
             open={ui.wrStatusOpen}
             onToggle={() => setUi({ wrStatusOpen: !ui.wrStatusOpen })}
             aside={statusAside}
@@ -421,13 +438,17 @@ export function TrackerWorkRecord() {
  * and it must not swallow the click that opens the slab.
  */
 function Slab({
-  title, open, onToggle, aside, action, children
+  title, open, onToggle, aside, action, bleed, children
 }: {
   title: string;
   open: boolean;
   onToggle: () => void;
   aside: string;
   action?: React.ReactNode;
+  /** Review note: "This should full bleed edge to edge". The job cards carry
+   *  their own edges, so the slab's side padding was a second frame drawn
+   *  inside the first one. */
+  bleed?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -440,7 +461,7 @@ function Slab({
         </button>
         {action}
       </div>
-      {open ? <div className="wr-slab-body">{children}</div> : null}
+      {open ? <div className="wr-slab-body" data-bleed={bleed || undefined}>{children}</div> : null}
     </section>
   );
 }
@@ -452,9 +473,14 @@ function Slab({
 function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
   const now = todayMonth();
-  const months = monthsOfYear(ui.year).filter((month) => (
-    yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
-  ));
+  /* This strip is about months that have not happened yet, so focus mode
+     narrows it to the one you are in. It renders nothing when that month is
+     fine, which is the same as it always did. */
+  const months = ui.focusMode
+    ? [yearOf(now) === ui.year ? now : `${ui.year}-12`]
+    : monthsOfYear(ui.year).filter((month) => (
+      yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
+    ));
   // The rule for what needs attention is shared with the ledger, payguard and
   // calc20 — see src/domain/attention.ts. Only the clothes are local.
   const flags = attentionFlags(data, months);

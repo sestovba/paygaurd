@@ -1,6 +1,6 @@
 // The Status slab: what phase you are in, which months are spent, and the
 // planner. Ported from sga_calc20's StatusSection — same progression (trial
-// work → SGA → unconfirmed), rebuilt on the PayGuard tokens so it retheme
+// work → after it → unconfirmed), rebuilt on the PayGuard tokens so it retheme
 // with the rest of the layout.
 
 import type { MonthKey } from '../../domain/types';
@@ -31,11 +31,14 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
   const rules = rulesFor(ui.year);
   const overMonths = monthsOfYear(ui.year).filter((m) => monthStatus(data, m).overSga);
 
+  /* One limit is named and the other never is, on every branch here. Which
+     regime you are in decides the figure and the words; it is not something
+     the reader is told about. */
   const title = phase === 'trialWork' ? 'Trial work'
-    : phase === 'sga' ? 'SGA this year' : 'Benefit phase';
-  const meta = phase === 'trialWork' ? `TWP month ${money(rules.trialWork)}`
-    : phase === 'sga' ? `SGA ${money(rules.sga)}`
-      : 'Confirm TWP status before relying on a limit';
+    : phase === 'sga' ? 'Your limit this year' : 'Where you stand';
+  const meta = phase === 'trialWork' ? `Your limit ${money(rules.trialWork)}`
+    : phase === 'sga' ? `Your limit ${money(rules.sga)}`
+      : 'No limit yet — tell us where you stand';
 
   return (
     <div className="flex flex-col gap-3">
@@ -63,9 +66,10 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
                 </div>
               </div>
               <p className="wr-note">
-                Countable earnings over {money(rules.trialWork)} use one TWP month.
-                Self-employment over {TWP_SELF_EMPLOYMENT_HOURS} hours can also count.
-                {' '}{TRIAL_MONTH_LIMIT} service months in {ROLLING_WINDOW} complete the TWP.
+                Counted pay over {money(rules.trialWork)} uses one trial work month.
+                Working for yourself more than {TWP_SELF_EMPLOYMENT_HOURS} hours in a month
+                can use one too, even on small pay.
+                {' '}You have {TRIAL_MONTH_LIMIT} of them, over any {ROLLING_WINDOW} months.
                 {twp.nextExpiry
                   ? ` The oldest recorded month leaves the window in ${formatMonth(twp.nextExpiry)}.`
                   : ''}
@@ -81,7 +85,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
           ) : phase === 'sga' ? (
             <>
               <div>
-                <span className="pg-label">Months over SGA</span>
+                <span className="pg-label">Months over your limit</span>
                 <div
                   className="pg-figure pg-figure-lg mt-1"
                   style={overMonths.length ? { color: 'var(--pg-over-text)' } : undefined}
@@ -91,8 +95,8 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
               </div>
               <p className="wr-note">
                 {overMonths.length
-                  ? `Countable earnings over ${money(rules.sga)} in the months below.`
-                  : `Nothing above the ${money(rules.sga)} working limit this year.`}
+                  ? `Counted pay over ${money(rules.sga)} in the months below.`
+                  : `Nothing over your ${money(rules.sga)} limit this year.`}
               </p>
               {overMonths.length ? (
                 <div className="wr-chip-row">
@@ -106,8 +110,8 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
             <div className="flex flex-wrap items-center gap-3">
               <p className="wr-note min-w-[16rem] flex-1">
                 {phase === 'verifyComplete'
-                  ? 'Nine possible TWP months are recorded. Verify them before the tracker switches to SGA mode.'
-                  : 'TWP status is not confirmed, so limit warnings and the hours planner stay paused.'}
+                  ? 'Nine trial work months are on record. Check them against your own paperwork — after that your limit changes.'
+                  : 'Until you tell us where you stand there is no limit to warn you about, and the hours planner stays off.'}
               </p>
               <button type="button" className="pg-btn" onClick={onReviewStatus}>
                 Review status
@@ -118,14 +122,14 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
           <div className="wr-rows">
             {phase === 'trialWork' ? (
               <div className="wr-row">
-                <span className="wr-row-label flex-1">TWP months recorded</span>
+                <span className="wr-row-label flex-1">Trial work months recorded</span>
                 <span className="pg-figure pg-figure-sm">{twp.used}</span>
               </div>
             ) : null}
             <ReviewTarget
               id="workrecord-status-year-total"
               label="Status year total"
-              reason="The TWP / SGA panel should show the active monthly rule, not a repeated annual total."
+              reason="This panel should show the limit in force this month, not a repeated annual total."
               certainty="sure"
               layout="workrecord"
             >
@@ -148,7 +152,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
         certainty="hunch"
         layout="workrecord"
       >
-        <SafeWorkSimulator />
+        <SafeWorkSimulator onOpenStatus={onReviewStatus} />
       </ReviewTarget>
     </div>
   );

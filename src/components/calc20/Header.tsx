@@ -1,5 +1,7 @@
-// Progressive headline: establish TWP status first, protect TWP months while
-// they remain, then switch the working layout to SGA once TWP is confirmed done.
+// Progressive headline: find out where the reader stands first, protect the
+// trial work months while they remain, then switch the working layout to the
+// limit that applies once those months are confirmed spent. Only ever one of
+// the two regimes is named on screen.
 
 import { useTracker } from './state';
 import { money } from '../../domain/format';
@@ -95,17 +97,17 @@ export function Header({
           {threshold ? (
             <>
               <div className="headline__of">
-                of {money(threshold.amount)} {threshold.kind === 'trialWork' ? 'TWP' : 'SGA'}
+                of {money(threshold.amount)}
               </div>
               <div className="headline__room">
                 {over
-                  ? (threshold.kind === 'trialWork' ? 'one TWP month used' : 'over SGA')
+                  ? (threshold.kind === 'trialWork' ? 'one trial work month used' : 'over your limit')
                   : money(room) + ' of room'}
               </div>
             </>
           ) : (
             <button className="tonal-button" type="button" onClick={onOpenSettings}>
-              Confirm TWP status
+              Tell us where you stand
             </button>
           )}
         </div>
@@ -117,8 +119,8 @@ export function Header({
               {phase === 'trialWork'
                 ? 'Trial months left'
                 : phase === 'sga'
-                  ? 'Working limit'
-                  : 'TWP status'}
+                  ? 'Your limit'
+                  : 'Your status'}
             </div>
             <div className="standing__value standing__value--accent">
               {phase === 'trialWork' ? (
@@ -137,17 +139,23 @@ export function Header({
       {phase === 'trialWork' ? (
         <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
       ) : phase === 'sga' ? (
-        <div className="twp-quiet">TWP used up · SGA is the working limit now</div>
-      ) : (
+        /* Nothing. This row used to say "TWP used up · SGA is the working
+           limit now", which names both regimes in one line to a reader who
+           is only ever shown one — and reports a resource being gone as
+           though it were news. The limit itself is in the standings above. */
+        null
+      ) : phase === 'verifyComplete' ? (
+        /* Only the state the headline cannot say. When the status is simply
+           unknown the headline above already asks, as a button — saying it
+           again here was the same sentence and a second button. */
         <div className="phase-warning">
           <span>
-            {phase === 'verifyComplete'
-              ? 'The app found nine possible TWP months. Confirm with your records or SSA before switching phases.'
-              : 'The app does not know whether TWP remains. It will not make a confident limit recommendation yet.'}
+            Nine trial work months are on record. Check them against your own
+            paperwork — after that your limit changes.
           </span>
           <button className="text-button" type="button" onClick={onOpenSettings}>Review status</button>
         </div>
-      )}
+      ) : null}
 
       <MonthHotbar onOpenMonth={onOpenMonth} />
       {/* The seventh layout gets the same reading as the other six: how far

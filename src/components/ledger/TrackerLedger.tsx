@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, Download, Plus, Rows, Settings, Undo2, Upload, X
+  ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, Plus, Rows, Settings, Undo2, X
 } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
 import { countableFor, streamYearGross } from '../../domain/earnings';
-import { trialWorkStatus } from '../../domain/trialWork';
+import { activeThreshold, benefitPhase, trialWorkStatus } from '../../domain/trialWork';
 import { attentionFlags } from '../../domain/attention';
 import { precisionFor } from '../../domain/precision';
 import { PrecisionLine } from '../PrecisionLine';
@@ -20,21 +20,9 @@ import { LedgerAnalysis } from './LedgerAnalysis';
 import { money0 } from './ledgerFormat';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
-function StatTile({ label, value, sub, last }: { label: string; value: string; sub?: React.ReactNode; last?: boolean }) {
-  return (
-    <div
-      className={`flex flex-1 flex-col gap-1.5 p-3 sm:p-4 border-t sm:border-t-0 lg-stat-tile${last ? '' : ' lg-border-r'}`}
-    >
-      <span className="lg-label">{label}</span>
-      <span className="text-2xl font-semibold leading-none tracking-tight sm:text-[1.75rem]">{value}</span>
-      {sub ? <span className="text-[0.8125rem] leading-snug lg-text-muted">{sub}</span> : null}
-    </div>
-  );
-}
-
 export function TrackerLedger() {
   const {
-    data, ui, setUi, addStream, updateStream, removeStream, resetAll, replaceAll, undoCount, undo
+    data, ui, setUi, addStream, updateStream, removeStream, resetAll, undoCount, undo
   } = useTracker();
   const canUndo = undoCount > 0;
   const year = ui.year;
@@ -46,7 +34,6 @@ export function TrackerLedger() {
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const [addingType, setAddingType] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const streams = data.streams;
   const selected = streams.find((s) => s.id === selectedId) ?? streams[0] ?? null;
@@ -54,11 +41,10 @@ export function TrackerLedger() {
   const rules = rulesFor(year);
   const now = todayMonth();
   const gradedMonth: MonthKey = yearOf(now) === year ? now : `${year}-12`;
-  const months = monthsOfYear(year);
-
-  const overSgaCount = months.filter((m) =>
+  const overSgaCount = monthsOfYear(year).filter((m) =>
     data.streams.reduce((s2, s) => s2 + countableFor(s, m), 0) > rules.sga).length;
   const twp = trialWorkStatus(data);
+  const phase = benefitPhase(data, gradedMonth);
   const priorInWindow = twp.inWindow.filter((m) => data.priorTrialMonths.includes(m)).length;
 
   // Ledger sub-themes replace the app-wide light/dark toggle. Strip .dark on
@@ -72,36 +58,9 @@ export function TrackerLedger() {
     if (meta) meta.setAttribute('content', ui.ledgerTheme === 'carbon' ? '#0a0a0c' : '#f9f9f7');
   }, [ui.ledgerTheme]);
 
-  function exportJson() {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `paycheck-guard-${year}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function importJson(file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result));
-        if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.streams)) {
-          alert('That file does not look like a PayGuard export.');
-          return;
-        }
-        if (confirm('Import this file? It replaces every job and month currently on this device.')) {
-          replaceAll(parsed);
-        }
-      } catch {
-        alert('Could not read that file as JSON.');
-      }
-    };
-    reader.readAsText(file);
-  }
+  /* Import and export used to be a second header bar of their own. The
+     settings sheet has offered both all along, so the buttons here were a
+     duplicate rather than a home — see the note on the header below. */
 
   function addAndSelect(type: 'w2' | 'ten99') {
     const id = addStream(type);
@@ -132,26 +91,46 @@ export function TrackerLedger() {
   }
 
   return (
-    <div className="pg-ledger min-h-dvh" data-ledger-theme={ui.ledgerTheme}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/json,.json"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) importJson(file);
-          e.target.value = '';
-        }}
-      />
+    <div className="pg-ledger min-h-dvh" data-chrome-root data-ledger-theme={ui.ledgerTheme}>
 
       <div className="lg-app-card mx-auto flex w-full max-w-[80rem] flex-col pb-6">
+      {/* Review note: "after making those changes we need to refactor the
+          headers into one header", and "Import and export in the settings,
+          collapse all is legit". Both are here. The second bar existed to
+          hold Import and Export, which the settings sheet has offered all
+          along — so they were not moved, they were deleted, and the year
+          stepper and Collapse All came up into the one bar that is left. */}
       <header className="sticky top-0 z-20 lg-border-b">
         <div className="lg-header-bar">
-          <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex min-w-0 items-center gap-2">
             <span className="lg-header-title truncate">SSDI Income Tracker</span>
+            <span className="hidden sm:inline-block h-5 w-px lg-divider-v" />
+            <div className="lg-year-stepper">
+              <button
+                type="button"
+                disabled={years.indexOf(year) <= 0}
+                onClick={() => setUi({ year: years[years.indexOf(year) - 1] })}
+                aria-label="Previous year"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="min-w-10 px-1 text-center text-sm font-bold">{year}</span>
+              <button
+                type="button"
+                disabled={years.indexOf(year) >= years.length - 1}
+                onClick={() => setUi({ year: years[years.indexOf(year) + 1] })}
+                aria-label="Next year"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
           </div>
-          <div className="lg-header-actions flex items-center gap-2">
+
+          <div className="lg-header-actions flex flex-wrap items-center gap-1.5">
+            <button type="button" className="lg-btn" onClick={toggleCollapseAll}>
+              {allCollapsed ? <ChevronsDown className="size-4" /> : <ChevronsUp className="size-4" />}
+              {allCollapsed ? 'Expand all' : 'Collapse all'}
+            </button>
             <NotificationsBell
               open={notificationsOpen}
               onOpenChange={setNotificationsOpen}
@@ -161,85 +140,40 @@ export function TrackerLedger() {
                 document.querySelector('.lg-analysis')?.scrollIntoView({ behavior: 'smooth' });
               }}
             />
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                className="lg-btn disabled:opacity-40 disabled:pointer-events-none"
-                disabled={!canUndo}
-                onClick={undo}
-                title="Undo last change"
-              >
-                <Undo2 className="size-4" /> Undo ({undoCount})
-              </button>
-              <ReviewTarget
-                id="ledger-scroll-top"
-                label="Scroll-to-top button"
-                reason="Duplicates what the scrollbar and Home key already do."
-                certainty="hunch"
-                layout="ledger"
-              >
-                <button
-                  type="button"
-                  className="lg-btn"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  title="Scroll to top"
-                >
-                  <ChevronsUp className="size-4" /> Top
-                </button>
-              </ReviewTarget>
+            <button
+              type="button"
+              className="lg-btn disabled:opacity-40 disabled:pointer-events-none"
+              disabled={!canUndo}
+              onClick={undo}
+              title="Undo last change"
+            >
+              <Undo2 className="size-4" /> Undo ({undoCount})
+            </button>
+            <ReviewTarget
+              id="ledger-scroll-top"
+              label="Scroll-to-top button"
+              reason="Duplicates what the scrollbar and Home key already do."
+              certainty="hunch"
+              layout="ledger"
+            >
               <button
                 type="button"
                 className="lg-btn"
-                onClick={() => setSettingsOpen(true)}
-                aria-label="Settings"
-                title="Settings"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                title="Scroll to top"
               >
-                <Settings className="size-4" />
+                <ChevronsUp className="size-4" /> Top
               </button>
-            </div>
-          </div>
-        </div>
-        <div className="lg-header-tools">
-          <div className="lg-header-tools-inner flex flex-wrap items-center justify-between gap-2.5">
-            {/* Cluster 1: Navigation & View Controls */}
-            <div className="flex items-center gap-2">
-              <div className="lg-year-stepper">
-                <button
-                  type="button"
-                  disabled={years.indexOf(year) <= 0}
-                  onClick={() => setUi({ year: years[years.indexOf(year) - 1] })}
-                  aria-label="Previous year"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <span className="min-w-10 px-1 text-center text-sm font-bold">{year}</span>
-                <button
-                  type="button"
-                  disabled={years.indexOf(year) >= years.length - 1}
-                  onClick={() => setUi({ year: years[years.indexOf(year) + 1] })}
-                  aria-label="Next year"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-
-              <span className="hidden sm:inline-block h-5 w-px lg-divider-v" />
-
-              <button type="button" className="lg-btn" onClick={toggleCollapseAll}>
-                {allCollapsed ? <ChevronsDown className="size-4" /> : <ChevronsUp className="size-4" />}
-                {allCollapsed ? 'Expand All' : 'Collapse All' }
-              </button>
-            </div>
-
-            {/* Cluster 2: Data Import / Export */}
-            <div className="flex items-center gap-1.5">
-              <button type="button" className="lg-btn" onClick={() => fileInputRef.current?.click()} title="Import JSON">
-                <Upload className="size-4" /> Import
-              </button>
-              <button type="button" className="lg-btn lg-btn-solid" onClick={exportJson} title="Export JSON">
-                <Download className="size-4" /> Export JSON
-              </button>
-            </div>
+            </ReviewTarget>
+            <button
+              type="button"
+              className="lg-btn"
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Settings"
+              title="Settings"
+            >
+              <Settings className="size-4" />
+            </button>
           </div>
         </div>
       </header>
@@ -252,30 +186,38 @@ export function TrackerLedger() {
           src/domain/attention.ts. */}
       <MonthAttention />
 
-      <div className="flex flex-wrap lg-border-b">
-        <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-4 border-t sm:border-t-0 lg-stat-tile lg-border-r">
-          <span className="lg-label">TWP Months Used</span>
-          <span className={`text-2xl font-semibold leading-none sm:text-[1.75rem] ${twp.used >= 9 ? 'lg-text-over' : 'lg-text-safe'}`}>
-            {twp.used}<span className="text-sm font-normal lg-text-muted">/9</span>
+      {/* Review notes: "I like this honestly but its taking up too much
+          space for what it is", and the one-limit rule this layout was
+          supposed to have already. It was two tall tiles side by side —
+          "TWP Months Used" and "Months ≥ SGA" — which is both regimes named
+          at once, in abbreviations, in the two largest figures on the page.
+          One line now, and it says whichever one is actually yours: the
+          trial months while they are being spent, the count over your limit
+          once they are not, and neither until you have told us where you
+          stand. */}
+      {phase === 'trialWork' ? (
+        <div className="lg-standing lg-border-b">
+          <span className="lg-label">Trial months left</span>
+          <span className="lg-standing-figure">
+            {twp.remaining}<span className="lg-standing-of">of 9</span>
           </span>
-          <div className="flex h-1.5 gap-1" role="img" aria-label={`${twp.used} of 9 trial work months used`}>
+          <div className="lg-standing-meter" role="img" aria-label={`${twp.used} of 9 trial work months used`}>
             {Array.from({ length: 9 }, (_, i) => (
               <span
                 key={i}
-                className="flex-1 rounded-full"
                 style={{ background: i < priorInWindow ? 'var(--lg-muted)' : i < twp.used ? 'var(--lg-twp)' : 'var(--lg-border)' }}
                 title={i < priorInWindow ? 'Recorded before this tracker' : i < twp.used ? 'Used' : undefined}
               />
             ))}
           </div>
         </div>
-        <StatTile
-          label="Months ≥ SGA"
-          value={String(overSgaCount)}
-          sub={`SGA ${money0(rules.sga)} / month`}
-          last
-        />
-      </div>
+      ) : phase === 'sga' ? (
+        <div className="lg-standing lg-border-b">
+          <span className="lg-label">Months over your limit</span>
+          <span className={`lg-standing-figure${overSgaCount ? ' lg-text-over' : ''}`}>{overSgaCount}</span>
+          <span className="lg-standing-sub">Your limit is {money0(rules.sga)} a month</span>
+        </div>
+      ) : null}
 
       {/* Same reading as every other layout: how far the figures above can be
           trusted, and the single thing that would sharpen them. Graded on the
@@ -294,7 +236,7 @@ export function TrackerLedger() {
         layout="ledger"
         className="lg-border-b"
       >
-        <LedgerChart streams={streams} year={year} />
+        {ui.focusMode ? null : <LedgerChart streams={streams} year={year} limit={activeThreshold(data, gradedMonth)} />}
       </ReviewTarget>
 
       <div className="lg-border-b">
@@ -422,7 +364,7 @@ export function TrackerLedger() {
         )}
       </div>
 
-      <LedgerAnalysis data={data} year={year} />
+      <LedgerAnalysis data={data} year={year} focusMode={ui.focusMode} />
       </div>
 
       <ToastStack />
@@ -452,9 +394,14 @@ export function TrackerLedger() {
 function MonthAttention() {
   const { data, ui } = useTracker();
   const now = todayMonth();
-  const months = monthsOfYear(ui.year).filter((month) => (
-    yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
-  ));
+  /* This strip is about months that have not happened yet, so focus mode
+     narrows it to the one you are in. It renders nothing when that month is
+     fine, which is the same as it always did. */
+  const months = ui.focusMode
+    ? [yearOf(now) === ui.year ? now : `${ui.year}-12`]
+    : monthsOfYear(ui.year).filter((month) => (
+      yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
+    ));
   const flags = attentionFlags(data, months);
   if (!flags.length) return null;
 

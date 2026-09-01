@@ -1,12 +1,8 @@
-import { CircleDashed, CircleDot, CircleCheckBig } from 'lucide-react';
 import type { Precision, PrecisionGap, PrecisionReading } from '../domain/precision';
 import { PRECISION_NAME, precisionSentence } from '../domain/precision';
 
-const MARK: Record<Precision, typeof CircleDashed> = {
-  estimated: CircleDashed,
-  scheduled: CircleDot,
-  exact: CircleCheckBig
-};
+/** The scale, in order. Three states is a scale, and a scale can be drawn. */
+const LEVELS: Precision[] = ['estimated', 'scheduled', 'exact'];
 
 /**
  * How much the figure above this line can be trusted, and the one thing that
@@ -17,8 +13,19 @@ const MARK: Record<Precision, typeof CircleDashed> = {
  * be one more section competing with the month — and the whole point is to
  * qualify a specific claim at the moment someone is reading it.
  *
- * It names one gap, not all of them. A list of everything missing is a chore;
- * one sentence with a button on it is a trade you can take or leave.
+ * Review note: "this one is hazy, how can we design it better so that the
+ * design communicates the thought visually to the user without writing
+ * descriptive text? What is the best visual? Least amount of text."
+ *
+ * The haze was that it argued its case in a sentence — a name, a job, a
+ * missing field and a parenthetical about what that costs — where three
+ * states is a *scale*, and a scale is a picture. So the scale is drawn: three
+ * pips, filled to the grade this reading is at, which says "two of three" at a
+ * glance and needs no legend to be felt. The words left are the grade and the
+ * ask, both of them short, and the ask is a verb rather than a diagnosis:
+ * "add a paystub", not "is missing your actual paystub amount for this month
+ * (this total is estimated, not from a real paystub)". The full sentence is
+ * still there for anyone who wants it, on the element's own title.
  */
 export function PrecisionLine({
   reading, onFix
@@ -29,21 +36,29 @@ export function PrecisionLine({
    *  rather than the whole editor when that is all it needs. */
   onFix?: (gap: PrecisionGap) => void;
 }) {
-  const Mark = MARK[reading.level];
   const gap = reading.gaps[0];
   const fixable = Boolean(gap && onFix);
+  const filled = LEVELS.indexOf(reading.level) + 1;
 
   const body = (
     <>
-      <Mark className="size-3.5 shrink-0" />
+      {/* The gauge. Three pips, filled to the grade — the whole reading in
+          one glyph, before a word of it is read. */}
+      <span className="precision-pips" aria-hidden="true">
+        {LEVELS.map((level, i) => (
+          <span key={level} className="precision-pip" data-on={i < filled || undefined} />
+        ))}
+      </span>
       <span className="precision-level">{PRECISION_NAME[reading.level]}</span>
-      <span className="precision-why">{precisionSentence(reading)}</span>
+      {gap ? <span className="precision-why">{gap.streamName} · {askFor(gap)}</span> : null}
     </>
   );
 
   if (!fixable) {
     return (
-      <p className="precision-line" data-level={reading.level}>{body}</p>
+      <p className="precision-line" data-level={reading.level} title={precisionSentence(reading)}>
+        {body}
+      </p>
     );
   }
 
@@ -54,9 +69,16 @@ export function PrecisionLine({
       data-level={reading.level}
       data-fix
       onClick={() => onFix?.(gap!)}
-      title={`Open ${gap!.streamName} and add ${gap!.missing}`}
+      title={precisionSentence(reading)}
     >
       {body}
     </button>
   );
+}
+
+/** The ask, as a thing to do rather than a thing that is wrong. */
+function askFor(gap: PrecisionGap): string {
+  if (gap.kind === 'schedule') return 'add a payday';
+  if (gap.kind === 'checks') return 'add a paystub';
+  return 'add hours worked';
 }

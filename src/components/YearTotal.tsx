@@ -2,11 +2,13 @@ import { Check } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
 import { yearTotal } from '../domain/earnings';
-import { activeThreshold, benefitPhase } from '../domain/trialWork';
+import { activeThreshold } from '../domain/trialWork';
 
 export function YearTotal() {
   const { data, ui } = useTracker();
-  const phase = benefitPhase(data, `${ui.year}-12`);
+  // A year total is the definition of what focus mode removes: no SSA limit
+  // is annual, so the figure cannot be over or under anything.
+  if (ui.focusMode) return null;
   const threshold = activeThreshold(data, `${ui.year}-12`);
   const total = yearTotal(data, ui.year);
   const active = data.streams.filter((s) => s.lifecycle === 'active').length;
@@ -22,7 +24,11 @@ export function YearTotal() {
         {threshold ? (
           <p className="num mt-0.5 flex items-center gap-1 text-sm text-muted-foreground sm:justify-end">
             <Check className="size-4 shrink-0 text-good" />
-            {Math.round((total / (threshold.amount * 12)) * 100)}% of {phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} threshold, annualized
+            {/* One limit at a time: which rule produced the number is the
+                app's business, not the reader's. Naming the regime here was
+                the last place on the overview that made somebody hold two of
+                them in their head to read one line. */}
+            {Math.round((total / (threshold.amount * 12)) * 100)}% of your limit for a whole year
           </p>
         ) : null}
       </div>

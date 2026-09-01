@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Calendar, Check, ChevronDown, Lock, LockOpen, TriangleAlert, Trash2, Zap } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
+import { copyFor } from '../domain/copy';
 import { money } from '../domain/format';
 import { longMonthName, monthIndex, monthKey, monthsOfYear, parseMonth, shortMonthName, todayMonth } from '../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../domain/rules';
@@ -56,7 +57,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
   const ytdHours = round2(eligibleMonths.reduce((sum, m) => sum + hoursFor(stream, m), 0));
 
   return (
-    <CollapsibleSection label="What you earned (1099 / Self-employment)">
+    <CollapsibleSection label="What you earned">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="field-label">{isYearToDate ? `Year to date total, ${year}` : `Total for ${year}`}</span>
         <div className="flex items-center gap-2">
@@ -79,7 +80,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">{isYearToDate ? 'Total money earned (YTD)' : 'Total money earned'}</span>
+          <span className="field-label">Earned</span>
           <NumericInput
             className="num field-input w-full"
             prefix="$"
@@ -94,7 +95,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">{isYearToDate ? 'Business miles (YTD)' : 'Business miles'}</span>
+          <span className="field-label">Miles</span>
           <NumericInput
             className="num field-input w-full"
             prefix="mi"
@@ -109,7 +110,7 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">{isYearToDate ? 'Hours worked (YTD)' : 'Hours worked'}</span>
+          <span className="field-label">Hours</span>
           <NumericInput
             className="num field-input w-full"
             value={ytdHours || undefined}
@@ -152,7 +153,7 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
   }
 
   return (
-    <CollapsibleSection label="Paycheck amounts (W-2 job)">
+    <CollapsibleSection label="Paychecks">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented
           value={mode}
@@ -230,7 +231,7 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
 }
 
 export function StreamSheet({
-  streamId, onClose, variant = 'sheet', backLabel = 'Income sources'
+  streamId, onClose, variant = 'sheet', backLabel
 }: {
   streamId: string;
   onClose: () => void;
@@ -238,6 +239,9 @@ export function StreamSheet({
   backLabel?: string;
 }) {
   const { data, ui, setUi, updateStream, removeStream } = useTracker();
+  /* The default back label is the name of the list you came from, and that
+     name belongs to the layout you are in — see src/domain/copy.ts. */
+  const backTo = backLabel ?? copyFor(ui.layout).income;
   const stream = data.streams.find((s) => s.id === streamId);
   if (!stream) return null;
 
@@ -252,10 +256,10 @@ export function StreamSheet({
   return (
     <Sheet
       title={stream.name}
-      eyebrow={stream.type === 'w2' ? 'W-2 job' : '1099 self-employment'}
+      eyebrow={stream.type === 'w2' ? 'A job that pays me' : 'Work I do for myself'}
       size="lg"
       variant={variant === 'inline' ? 'inline' : 'modal'}
-      backLabel={variant === 'inline' ? backLabel : undefined}
+      backLabel={variant === 'inline' ? backTo : undefined}
       onClose={onClose}
       headerActions={
         <>
@@ -286,9 +290,9 @@ export function StreamSheet({
         </button>
       }
     >
-      <CollapsibleSection label="Job details">
+      <CollapsibleSection label="Details">
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">Job or company name</span>
+          <span className="field-label">Name</span>
           <input
             className="field-input"
             type="text"
@@ -297,9 +301,14 @@ export function StreamSheet({
           />
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5">
-            <span className="field-label">When you started working here</span>
+        {/* Not a two-column grid. Half of a sheet is not enough for three
+            segments, so the status control was being squeezed to 47px a
+            side and stacking its labels a word at a time. These sit side by
+            side while both of them fit and stack when they do not — the
+            status control asks for the room three labels actually need. */}
+        <div className="flex flex-wrap gap-4">
+          <label className="flex min-w-[9rem] flex-1 flex-col gap-1.5">
+            <span className="field-label">Started</span>
             <input
               className="field-input"
               type="month"
@@ -309,7 +318,7 @@ export function StreamSheet({
             />
           </label>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex min-w-[19rem] flex-1 flex-col gap-1.5">
             <span className="field-label">Status</span>
             <Segmented
               value={stream.lifecycle}
@@ -368,9 +377,9 @@ export function StreamSheet({
       </CollapsibleSection>
 
       {stream.type === 'w2' ? (
-        <CollapsibleSection label="When you get your paychecks">
+        <CollapsibleSection label="Pay days">
           <div className="flex flex-col gap-1.5">
-            <span className="field-label">Pay schedule (How often you are paid)</span>
+            <span className="field-label">How often you are paid</span>
             <Segmented
               value={stream.payFrequency}
               columns={4}
@@ -421,10 +430,10 @@ export function StreamSheet({
       <IncomeEntrySection stream={stream} year={ui.year} onYearChange={(year) => setUi({ year })} />
 
       {stream.type === 'w2' ? (
-        <CollapsibleSection label="Estimated pay (Hourly wage & hours)">
+        <CollapsibleSection label="Hourly pay">
           <div className="flex flex-wrap gap-3">
             <label className="flex w-full flex-col gap-1.5 sm:w-40">
-              <span className="field-label">Hourly wage (Pay per hour)</span>
+              <span className="field-label">Hourly wage</span>
               <NumericInput
                 className="num field-input w-full"
                 prefix="$"

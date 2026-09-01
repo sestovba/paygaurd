@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { Plugin } from 'vite';
 import { notesToMarkdown } from './src/review/markdown';
@@ -41,15 +41,78 @@ function resolveSource(root: string, note: ReviewNote): string | undefined {
   return `${file} (near line ${source.split(':')[1] ?? '?'}, unverified)`;
 }
 
+/** Every .ts/.tsx under src, read once per write. Fifty files is a couple of
+ *  milliseconds and it is the only way to answer "is this still in the code". */
+function sourceFiles(root: string, dir = 'src', out: string[] = []): string[] {
+  let entries;
+  try {
+    entries = readdirSync(resolve(root, dir), { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const entry of entries) {
+    const path = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) sourceFiles(root, path, out);
+    else if (/\.tsx?$/.test(entry.name)) out.push(path);
+  }
+  return out;
+}
+
+/**
+ * Is the thing this note points at still in the code?
+ *
+ * This exists because a note can claim to be Done and be wrong, and until now
+ * nothing checked. Three answers, and `unknown` is used freely — a guess
+ * dressed as a verdict is exactly the failure being fixed here.
+ *
+ *   present  a handle for this element was found in the source
+ *   absent   the note had a usable handle and it is no longer there
+ *   unknown  no handle worth searching for; nothing can be concluded
+ */
+function locate(corpus: string, note: ReviewNote): 'present' | 'absent' | 'unknown' {
+  // The id, when the element is wrapped by ReviewTarget. The strongest handle
+  // there is: it is written in the source on purpose and survives reformatting.
+  if (corpus.includes(`id="${note.id}"`)) return 'present';
+
+  // The source line as it read when the note was taken. Exact, and immune to
+  // the CSS that uppercases half the rendered text.
+  const line = note.anchor.sourceLine?.trim();
+  if (line && line.length > 12) return corpus.includes(line) ? 'present' : 'absent';
+
+  // Rendered text is a weak handle — CSS transforms it — so it only ever
+  // confirms presence here, never absence.
+  const words = (note.anchor.text ?? '').split(/\s+/).filter(Boolean);
+  if (words.length >= 3) {
+    const needle = words.slice(0, 4).join(' ').toLowerCase();
+    if (corpus.toLowerCase().includes(needle)) return 'present';
+  }
+
+  if (note.id.startsWith('el-')) return 'unknown';
+  return corpus.includes(note.id) ? 'present' : 'unknown';
+}
+
 function withResolvedSources(root: string, notes: ReviewNotes): ReviewNotes {
+  const corpus = sourceFiles(root)
+    .map((file) => { try { return readFileSync(resolve(root, file), 'utf8'); } catch { return ''; } })
+    .join('\n');
+
   const out: ReviewNotes = {};
   for (const [id, note] of Object.entries(notes)) {
-    out[id] = { ...note, anchor: { ...note.anchor, source: resolveSource(root, note) } };
+    out[id] = {
+      ...note,
+      found: locate(corpus, note),
+      anchor: { ...note.anchor, source: resolveSource(root, note) }
+    };
   }
   return out;
 }
 
 const JSON_PATH = 'review/review-notes.json';
+/* Screenshots go to disk as real files, never into review-notes.json. That
+ * file is read whole by every AI pass; a handful of base64 PNGs would bury
+ * fifty notes under a megabyte of pixels nobody can grep. The note keeps the
+ * filename, the file keeps the image. */
+const SHOTS_DIR = 'review/shots';
 const MD_PATH = 'review/REVIEW-NOTES.md';
 const BACKUP_PATH = 'review/review-notes.backup.json';
 
@@ -89,6 +152,53 @@ export function reviewNotes(): Plugin {
     configureServer(server) {
       const jsonFile = resolve(server.config.root, JSON_PATH);
       const mdFile = resolve(server.config.root, MD_PATH);
+
+      /* Paste or drop an image onto a note and it lands here: the body is the
+       * raw image, the note id and extension ride in the query string, and
+       * what comes back is the path to write onto the note. */
+      server.middlewares.use('/__review/shot', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end();
+          return;
+        }
+        const url = new URL(req.url ?? '/', 'http://localhost');
+        // The id reaches the filesystem, so it is reduced to characters that
+        // cannot climb out of the directory it is meant to land in.
+        const id = (url.searchParams.get('id') ?? 'shot').replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 60);
+        const ext = (url.searchParams.get('ext') ?? 'png').replace(/[^a-z0-9]/gi, '').slice(0, 5) || 'png';
+
+        const chunks: Buffer[] = [];
+        let size = 0;
+        let aborted = false;
+        req.on('data', (chunk: Buffer) => {
+          size += chunk.length;
+          // A screenshot that will not fit in ten megabytes is not a
+          // screenshot; refusing early keeps a runaway paste out of memory.
+          if (size > 10_000_000) {
+            aborted = true;
+            res.statusCode = 413;
+            res.end(JSON.stringify({ ok: false, error: 'Image over 10MB' }));
+            req.destroy();
+            return;
+          }
+          chunks.push(chunk);
+        });
+        req.on('end', () => {
+          if (aborted) return;
+          try {
+            const dir = resolve(server.config.root, SHOTS_DIR);
+            mkdirSync(dir, { recursive: true });
+            const name = `${id}-${Date.now().toString(36)}.${ext}`;
+            writeFileSync(resolve(dir, name), Buffer.concat(chunks));
+            res.setHeader('content-type', 'application/json');
+            res.end(JSON.stringify({ ok: true, path: `${SHOTS_DIR}/${name}` }));
+          } catch (error) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ ok: false, error: String(error) }));
+          }
+        });
+      });
 
       server.middlewares.use('/__review/notes', (req, res) => {
         if (req.method === 'GET') {

@@ -6,7 +6,7 @@
 
 import type { MonthKey } from '../../domain/types';
 import { useTracker } from './state';
-import { displayMonths, formatMonth, shortMonthName } from '../../domain/months';
+import { formatMonth, listedMonths, shortMonthName } from '../../domain/months';
 import { attentionFlags } from '../../domain/attention';
 import { WarningIcon } from './Icons';
 
@@ -14,9 +14,9 @@ export function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =>
   const { data, ui } = useTracker();
   // The rule is shared with the ledger, payguard and workrecord — see
   // src/domain/attention.ts. This file used to carry its own copy, which
-  // resolved the benefit phase once at year end; a TWP completing in June
+  // resolved the benefit phase once at year end; a trial work period completing in June
   // made every month after it judged against the wrong limit.
-  const flags = attentionFlags(data, displayMonths(ui.year, ui.hideFuture));
+  const flags = attentionFlags(data, listedMonths(ui.year, ui.hideFuture, ui.focusMode));
 
   if (!flags.length) return null;
 

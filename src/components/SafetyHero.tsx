@@ -1,9 +1,10 @@
-import { CircleAlert, CircleCheck, TriangleAlert } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleDashed, TriangleAlert } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
 import { longMonthName, todayMonth, yearOf } from '../domain/months';
 import { monthStatus } from '../domain/earnings';
-import { activeThreshold, benefitPhase, trialWorkStatus, TRIAL_MONTH_LIMIT } from '../domain/trialWork';
+import { capacityFor } from '../domain/capacity';
+import { benefitPhase, trialWorkStatus, TRIAL_MONTH_LIMIT } from '../domain/trialWork';
 import { TrialMeter } from './TrialMeter';
 import { PrecisionLine } from './PrecisionLine';
 import { precisionFor } from '../domain/precision';
@@ -24,31 +25,46 @@ export function SafetyHero({
   const now = todayMonth();
   const asOf = yearOf(now) === ui.year ? now : `${ui.year}-12`;
   const phase = benefitPhase(data, asOf);
-  const threshold = activeThreshold(data, asOf);
   const status = monthStatus(data, asOf);
   const twp = trialWorkStatus(data, asOf);
   const precision = precisionFor(data, asOf);
 
+  /* Review note: "we should spend massive effort and time thinking about the
+     best way to communicate this... not make it seem like a computer warning
+     or almost error. This is an emotional thing, we are trying to help you
+     have the most accurate picture of your finances, without this we are
+     guessing and we are not as accurate. This in fact is the precision
+     gauge."
+
+     It was written as a fault report: a warning triangle, an imperative, and
+     "We need this to show you...". Nothing is wrong here and the person has
+     done nothing. What is true is that the app is guessing, which is the
+     precision line's own idea — so it wears the precision line's own mark
+     (the dashed circle that means Estimated) and says what the trade is:
+     answer this, and the numbers stop being averages and start being yours.
+     The reason is one clause, not a paragraph about Social Security. */
   if (phase === 'unknown' || phase === 'verifyComplete') {
     return (
       <section className="panel overflow-hidden p-5 sm:p-6 xl:col-span-6">
         <div className="flex items-start gap-3">
-          <TriangleAlert className="size-6 shrink-0 text-warn" />
+          <CircleDashed className="mt-0.5 size-6 shrink-0 text-muted-foreground" />
           <div className="min-w-0">
             <div className="text-lg font-semibold">
-              {phase === 'unknown' ? 'Confirm your Trial Work Period status' : 'Review 9 possible Trial Work months'}
+              {phase === 'unknown'
+                ? 'Every figure here is an estimate so far'
+                : 'Nine months left to check'}
             </div>
             <p className="type-muted mt-1.5">
               {phase === 'unknown'
-                ? 'We need this to show you the correct monthly earnings limit.'
-                : 'Check these 9 months against your records before switching to the SGA limit.'}
+                ? 'Your monthly limit depends on where you are in your Trial Work Period, and you have not told us yet. A few questions and these numbers become yours instead of an average.'
+                : 'Check these nine months against your own records. Once they agree, the limit shown here is the one that actually applies to you.'}
             </p>
             <button
               type="button"
               onClick={phase === 'unknown' ? onTakeQuiz : onReviewStatus}
               className="btn-primary mt-4"
             >
-              {phase === 'unknown' ? 'Answer questions' : 'Review months'}
+              {phase === 'unknown' ? 'Answer a few questions' : 'Check the months'}
             </button>
           </div>
         </div>
@@ -56,9 +72,15 @@ export function SafetyHero({
     );
   }
 
-  const over = threshold ? status.countable > threshold.amount : false;
-  const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
-  const tone = phase === 'sga' && over ? 'over' : (over || room <= 200) ? 'caution' : 'safe';
+  /* Read through capacityFor so this hero answers to the same safety line as
+     the rest of the app: a thousand dollars a month, with the real limit
+     beyond it. Aiming at the limit itself leaves no room for the extra
+     paycheck a fortnightly schedule drops into some months, which is the most
+     common way somebody goes over without meaning to. */
+  const capacity = capacityFor(data, asOf);
+  const tone = capacity
+    ? (capacity.stage === 'over' ? 'over' : capacity.stage === 'careful' ? 'caution' : 'safe')
+    : 'safe';
 
   const toneClasses = {
     safe: { value: 'text-good', badgeBg: 'bg-good-soft', badgeFg: 'text-good', bar: 'bg-good' },
@@ -70,7 +92,12 @@ export function SafetyHero({
     <section className="panel overflow-hidden p-5 sm:p-6 xl:col-span-6">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
         <div className="min-w-0">
-          <p className="label-caps">What Social Security counts for {longMonthName(asOf)}</p>
+          {/* Review note: "I dont need to know about social securities
+              opinions, I just need to be able to generate my own opinion."
+              The figure is this month's countable pay. Naming whose opinion
+              it is puts an institution between the reader and their own
+              number, on the one line where that is least welcome. */}
+          <p className="label-caps">{longMonthName(asOf)} so far</p>
           <p className={'display-figure mt-1 text-5xl sm:text-6xl ' + toneClasses.value}>
             {money(status.countable)}
           </p>
@@ -79,31 +106,60 @@ export function SafetyHero({
           {tone === 'safe' ? <CircleCheck className="size-4" />
             : tone === 'caution' ? <TriangleAlert className="size-4" />
             : <CircleAlert className="size-4" />}
-          {tone === 'safe' ? `Below ${phase === 'trialWork' ? 'TWP' : 'SGA'} limit`
-            : tone === 'over' ? 'Over monthly limit'
-            : over ? '1 TWP month used' : 'Close to limit'}
+          {tone === 'safe' ? 'Safe'
+            : tone === 'over' ? 'Over your limit'
+            : 'Getting close'}
         </span>
       </div>
 
       <PrecisionLine reading={precision} onFix={onFixStream} />
 
-      {threshold ? (
-        <p className="mt-6 text-lg font-semibold">
-          {over
-            ? `${money(status.countable - threshold.amount)} over your ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit ($${money(threshold.amount)}) this month`
-            : `${money(room)} left before reaching your ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit ($${money(threshold.amount)}) this month`}
-        </p>
+      {/* money() already carries the dollar sign; this line used to wrap it
+          in another one and print "($$1,210)" on three layouts. */}
+      {capacity ? (
+        <>
+          <p className="mt-6 text-lg font-semibold">
+            {capacity.over > 0
+              ? `${money(capacity.over)} over your limit of ${money(capacity.threshold)} this month`
+              : capacity.stage === 'careful'
+                ? `Past the ${money(capacity.safeTarget)} we aim for. ${money(capacity.roomToLimit)} left before your limit of ${money(capacity.threshold)}.`
+                : `${money(capacity.room)} left before the ${money(capacity.safeTarget)} we aim for. Your limit is ${money(capacity.threshold)}.`}
+          </p>
+          {/* Hours, when we know what an hour is worth here. Dollars are the
+              unit the rule is written in; hours are the unit the decision is
+              made in. */}
+          {capacity.hours !== null && capacity.over === 0 ? (
+            <p className="type-muted mt-1">
+              About {capacity.hours} more {capacity.hours === 1 ? 'hour' : 'hours'} of work
+              {capacity.rate ? ` at ${money(capacity.rate.rate)} an hour` : ''}.
+            </p>
+          ) : null}
+        </>
       ) : null}
 
-      <div className="mt-6 border-t border-border pt-5">
-        <p className="type-muted min-w-0">
-          {phase === 'trialWork'
-            ? `Trial Work Period: ${twp.used} of ${TRIAL_MONTH_LIMIT} months used · ${twp.remaining} remaining`
-            : 'Substantial Gainful Activity (SGA) limit applies · 9 Trial Work months complete'}
-        </p>
-      </div>
+      {/* One limit at a time. Review note: "I dont need to even hear about TWP
+          anywhere... we must cut ruthlessly any stranded lines that serve no
+          purpose."
 
-      {phase === 'trialWork' ? <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} /> : null}
+          The old foot printed "Substantial Gainful Activity (SGA) limit
+          applies · 9 Trial Work months complete" to somebody whose trial work
+          months finished — a line naming two rules, one of which is over, and
+          telling them nothing they can do anything about. It is gone. The
+          limit that applies is already stated in the sentence above it.
+
+          While the trial work months are still running they are the opposite
+          of stranded: they are a countable resource being spent, and how many
+          are left changes what this month is worth risking. That stays — with
+          the name spelled out once and the abbreviation nowhere. */}
+      {phase === 'trialWork' ? (
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="type-muted min-w-0">
+            Trial Work Period · {twp.used} of {TRIAL_MONTH_LIMIT} months used,
+            {' '}{twp.remaining} left
+          </p>
+          <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
+        </div>
+      ) : null}
     </section>
   );
 }
