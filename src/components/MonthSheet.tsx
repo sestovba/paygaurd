@@ -3,8 +3,9 @@ import { Trash2 } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
 import { formatMonth, monthsOfYear, shortMonthName, yearOf } from '../domain/months';
-import { countableFor, isActive, monthStatus } from '../domain/earnings';
+import { countableFor, hoursFor, isActive, monthStatus } from '../domain/earnings';
 import { benefitPhase } from '../domain/trialWork';
+import { TWP_SELF_EMPLOYMENT_HOURS } from '../domain/rules';
 import { InfoNote } from './InfoNote';
 import { NumericInput } from './NumericInput';
 import { Sheet } from './Sheet';
@@ -40,7 +41,7 @@ export function MonthSheet({
       }>
         <span className="display-figure text-3xl">{money(status.countable)}</span>
         <span className="label-caps">
-          What Social Security counts{phase === 'trialWork' ? ' · TWP month' : phase === 'sga' ? ' · SGA' : ''}
+          What Social Security counts{phase === 'trialWork' ? ' · TWP month' : phase === 'sga' ? ' · SGA limit' : ''}
         </span>
       </div>
 
@@ -50,6 +51,7 @@ export function MonthSheet({
         <div className="flex flex-col gap-4">
           {streams.map((stream) => {
             const checked = Boolean(wholeYear[stream.id]);
+            const hrs = hoursFor(stream, month);
             return (
               <div className="flex flex-col gap-3 rounded-lg border border-border p-4" key={stream.id}>
                 <div className="flex items-center justify-between gap-3">
@@ -71,18 +73,31 @@ export function MonthSheet({
                   </button>
                 </div>
                 {stream.type === 'ten99' ? (
-                  <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2.5">
-                    <div>
-                      <p className="num text-base font-semibold">{money(countableFor(stream, month))}</p>
-                      <p className="type-muted text-sm">This month's share of your total earnings</p>
+                  <div className="flex flex-col gap-2 rounded-lg bg-surface-2 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="num text-base font-semibold">{money(countableFor(stream, month))}</p>
+                        <p className="type-muted text-sm">Profit counted for this month (Earnings minus mileage)</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onOpenStream(stream.id)}
+                        className="shrink-0 text-sm font-medium text-primary hover:underline"
+                      >
+                        Edit total
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => onOpenStream(stream.id)}
-                      className="shrink-0 text-sm font-medium text-primary hover:underline"
-                    >
-                      Edit total
-                    </button>
+                    {hrs > 0 ? (
+                      <div className="flex items-center justify-between border-t border-border/60 pt-2 text-sm">
+                        <span className="text-muted-foreground">Hours worked this month:</span>
+                        <span className="font-semibold">{hrs} hrs</span>
+                      </div>
+                    ) : null}
+                    {hrs > TWP_SELF_EMPLOYMENT_HOURS ? (
+                      <div className="rounded border border-warn/40 bg-warn-soft/60 p-2 text-xs text-warn-foreground">
+                        <strong>80-Hour Rule:</strong> You worked over {TWP_SELF_EMPLOYMENT_HOURS} hours this month. Social Security counts this as 1 of your 9 Trial Work Period months, even if profit was low.
+                      </div>
+                    ) : null}
                   </div>
                 ) : (
                   <>
@@ -112,7 +127,7 @@ export function MonthSheet({
                       </div>
                     ) : (
                       <label className="flex items-center gap-2">
-                        <span className="field-label">Pay before taxes (Gross)</span>
+                        <span className="field-label">Pay before taxes (Gross Pay on paystub)</span>
                         <NumericInput
                           className="num field-input min-w-0 flex-1"
                           prefix="$"
@@ -137,7 +152,7 @@ export function MonthSheet({
 
       {streams.length > 0 ? (
         <InfoNote>
-          Social Security counts Gross pay (the amount before taxes and deductions). Social Security counts your earnings in the month the paycheck was paid to you.
+          Social Security counts your Gross pay (the amount before taxes or deductions). Earnings count in the month your paycheck was paid to you.
         </InfoNote>
       ) : null}
     </Sheet>
