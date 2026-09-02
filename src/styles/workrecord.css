@@ -58,68 +58,87 @@
 .wr-headline {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.75rem 1.25rem;
-  align-items: end;
-  padding: 1.125rem var(--wr-pad);
+  gap: 1rem;
+  padding: 1.125rem var(--wr-pad) 0.875rem;
   border-bottom: 1px solid var(--pg-rule);
-  background: color-mix(in oklab, var(--pg-surface-2) 40%, var(--pg-surface));
+  background: var(--pg-surface);
+}
+
+.wr-headline-main { min-width: 0; }
+
+.wr-headline-answer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.625rem 1rem;
+}
+
+.wr-headline-figure {
+  flex: 0 0 auto;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  font-size: clamp(2.25rem, 10vw, 3.5rem);
+  color: var(--pg-fg);
+}
+
+.wr-headline-figure[data-over='true'] { color: var(--pg-over-text); }
+
+.wr-headline-state {
+  margin: 0 0 0.2rem;
+  font-size: 0.9375rem;
+  font-weight: 750;
+  line-height: 1.25;
+  color: var(--pg-fg);
+}
+
+.wr-headline-state[data-tone='review'] { color: var(--pg-info-text); }
+.wr-headline-state[data-tone='safe'] { color: var(--pg-safe-text); }
+.wr-headline-state[data-tone='trial'] { color: var(--pg-twp-text); }
+.wr-headline-state[data-tone='over'] { color: var(--pg-over-text); }
+
+.wr-headline-of {
+  max-width: 34rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--pg-fg-muted);
+}
+
+.wr-standing {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--pg-rule);
+}
+
+.wr-headline-precision {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--pg-rule);
 }
 
 @media (min-width: 780px) {
   .wr-headline {
     grid-template-columns: minmax(0, 1fr) auto;
-    padding: 1.375rem var(--wr-pad);
+    align-items: end;
+    padding: 1.5rem var(--wr-pad) 1rem;
   }
-}
 
-.wr-headline-figure {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  font-size: 2.125rem;
-  color: var(--pg-fg);
-}
-
-@media (min-width: 640px) {
-  .wr-headline-figure { font-size: 2.5rem; }
-}
-
-.wr-headline-figure[data-over='true'] { color: var(--pg-over-text); }
-
-/* The "of $1,690 SGA · $412 of room" line under the figure. */
-.wr-headline-of {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--pg-fg-muted);
-}
-
-/*
- * Standings. Two small readouts to the right of the figure, divided by rules
- * rather than boxed — they are context for the headline, not cards of their
- * own. They wrap under it on a phone.
- */
-.wr-standings {
-  display: flex;
-  align-items: stretch;
-  gap: 1rem;
-}
-
-.wr-standing {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-  padding-left: 1rem;
-  border-left: 1px solid var(--pg-rule);
-}
-
-.wr-standing:first-child { padding-left: 0; border-left: 0; }
-
-@media (min-width: 780px) {
-  .wr-standing:first-child {
-    padding-left: 1rem;
+  .wr-standing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-width: 9rem;
+    padding: 0 0 0 1.25rem;
+    border-top: 0;
     border-left: 1px solid var(--pg-rule);
   }
 }
@@ -205,7 +224,7 @@
 }
 
 .wr-hotbar-chip-month {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   letter-spacing: 0.04em;
   opacity: 0.75;
 }
@@ -279,7 +298,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   font-weight: 600;
@@ -334,7 +353,7 @@
 }
 
 .wr-month-cell[data-fill='empty'] {
-  background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
+  background: var(--pg-surface-2);
 }
 
 .wr-month-cell[data-fill='keep'] { background: var(--pg-safe-bg); }
@@ -359,7 +378,7 @@
 }
 
 .wr-month-value {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-variant-numeric: tabular-nums;
   font-size: 0.9375rem;
   font-weight: 700;
@@ -386,7 +405,7 @@
   gap: 0.5rem 1rem;
   padding: 0.625rem 0.875rem;
   border-top: 1px solid var(--pg-rule);
-  background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
+  background: var(--pg-surface-2);
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--pg-fg-muted);

@@ -82,6 +82,16 @@ export function TrackerWorkRecord() {
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
 
+  const usedTrialMonth = phase === 'trialWork' && status.isServiceMonth;
+  const headlineStatus = !threshold
+    ? 'Set your status'
+    : over
+      ? 'Over your limit'
+      : usedTrialMonth
+        ? 'Trial work month used'
+        : 'Under your limit';
+  const headlineTone = !threshold ? 'review' : over ? 'over' : usedTrialMonth ? 'trial' : 'safe';
+
   // Drop stale ids so a removed stream can't hold a collapsed slot forever.
   useEffect(() => {
     setCollapsedIds((current) => {
@@ -235,52 +245,54 @@ export function TrackerWorkRecord() {
       <main id="wr-main" className="wr-shell px-0 py-0 sm:px-5 sm:py-6">
         <div className="wr-sheet">
           {/* ---------------- Progressive headline ---------------- */}
-          <div className="wr-headline">
-            <div className="min-w-0">
-              <span className="pg-label">{longMonthName(focusMonth)} countable</span>
-              <div className="wr-headline-figure mt-1.5" data-over={over}>
-                {money(status.countable)}
-              </div>
-              {threshold ? (
-                <div className="wr-headline-of mt-1.5">
-                  of {money(threshold.amount)}
-                  {' · '}
-                  {over
-                    ? (threshold.kind === 'trialWork' ? 'one trial work month used' : 'over your limit')
-                    : `${money(room)} of room`}
+          {/* One answer, then the two facts that qualify it. The previous
+              version split this across a large number, an “of” sentence, a
+              second standings column, and a separate precision band. */}
+          <section className="wr-headline" aria-labelledby="wr-current-month">
+            <div className="wr-headline-main">
+              <span id="wr-current-month" className="pg-label">{longMonthName(focusMonth)}</span>
+              <div className="wr-headline-answer mt-1.5">
+                <div className="wr-headline-figure" data-over={over}>
+                  {money(status.countable)}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  className="pg-btn mt-2.5"
-                  onClick={() => setStatusOpen(true)}
-                >
-                  Tell us where you stand
-                </button>
-              )}
-            </div>
-
-            <div className="wr-standings">
-              <div className="wr-standing">
-                <span className="pg-label">
-                  {phase === 'trialWork' ? 'Trial work months left'
-                    : phase === 'sga' ? 'Your limit' : 'Your status'}
-                </span>
-                <span className="pg-figure pg-figure-md pg-accent">
-                  {phase === 'trialWork' ? (
-                    <>{twp.remaining}<span className="ml-1 text-xs font-semibold pg-dim">of {TRIAL_MONTH_LIMIT}</span></>
-                  ) : phase === 'sga' ? money(threshold?.amount ?? 0)
-                    : phase === 'verifyComplete' ? 'Check 9 months' : 'Not set yet'}
-                </span>
+                <div className="min-w-0">
+                  <p className="wr-headline-state" data-tone={headlineTone} aria-live="polite">
+                    {headlineStatus}
+                  </p>
+                  {threshold ? (
+                    <p className="wr-headline-of">
+                      {over
+                        ? `${money(status.countable - threshold.amount)} over your ${money(threshold.amount)} monthly limit`
+                        : usedTrialMonth
+                          ? `${money(status.countable)} counted against your ${money(threshold.amount)} monthly limit`
+                          : `${money(room)} left before your ${money(threshold.amount)} monthly limit`}
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      className="pg-btn mt-2"
+                      onClick={() => setStatusOpen(true)}
+                    >
+                      Tell us where you stand
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* How far the headline figure can be trusted, and the one thing
-              that would sharpen it. Same reading as every other layout. */}
-          <div className="wr-precision">
-            <PrecisionLine reading={precisionFor(data, yearOf(now) === year ? now : `${year}-12`)} />
-          </div>
+            {phase === 'trialWork' ? (
+              <div className="wr-standing">
+                <span className="pg-label">Trial work months left</span>
+                <span className="pg-figure pg-figure-md pg-accent">
+                  {twp.remaining}<span className="ml-1 text-xs font-semibold pg-dim">of {TRIAL_MONTH_LIMIT}</span>
+                </span>
+              </div>
+            ) : null}
+
+            <div className="wr-headline-precision">
+              <PrecisionLine reading={precisionFor(data, yearOf(now) === year ? now : `${year}-12`)} />
+            </div>
+          </section>
 
           {/* Review note: "We are repeating ourselves multiple times this is
               bad design, which one is it". When the status is simply unknown

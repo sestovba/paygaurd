@@ -6456,5 +6456,27 @@
     "createdAt": "2026-09-02T16:08:10.811Z",
     "updatedAt": "2026-09-02T16:08:10.811Z",
     "found": "unknown"
+  },
+  "task-workrecord-quiet-first-screen": {
+    "id": "task-workrecord-quiet-first-screen",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Work Record first screen reduced to one monthly answer",
+    "status": "done",
+    "anchor": {
+      "layout": "workrecord",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx"
+    },
+    "createdAt": "2026-09-02T19:18:55.967Z",
+    "updatedAt": "2026-09-02T19:18:55.967Z",
+    "reason": "The first screen split one monthly answer across a figure, an “of” line, a separate standings block, a separate precision band, and an open month history. That made the layout the noisiest alternative even though its record-book structure is sound.",
+    "found": "present",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/components/workrecord/TrackerWorkRecord.tsx now presents one monthly status beside the amount, with the exact limit relationship directly beneath it; trial-month capacity and precision remain as supporting facts inside the same band. src/styles/workrecord.css establishes that hierarchy without color-mix or a web font, and src/state/storage.ts leaves Monthly history closed by default so the same month is not immediately repeated below the headline.",
+        "at": "2026-09-02T19:18:55.967Z"
+      }
+    ]
   }
 }

@@ -144,7 +144,7 @@ export const DEFAULT_UI: UiState = {
   payguardTheme: 'paper',
   workRecordTheme: 'calc20',
   wrStreamsOpen: true,
-  wrMonthsOpen: true,
+  wrMonthsOpen: false,
   wrStatusOpen: false,
   calc20: DEFAULT_CALC20_UI,
   onboarded: false,
