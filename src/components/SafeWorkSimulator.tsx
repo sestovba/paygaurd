@@ -103,18 +103,19 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     }));
   });
 
+  /* el-o3yk3y: "Another explanation, this is bad UI." The paragraph is gone
+     and the question is the heading. And where there is no onOpenStatus the
+     whole panel goes: without a button this is a heading in an empty box, and
+     the only screen that mounts it that way is the status page, where the
+     questions it would send you to are already the next thing down. */
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
+    if (!onOpenStatus) return null;
     return (
       <section className="panel p-4 sm:p-5">
-        <h2 className="display-figure">Select your benefit phase to calculate safe hours</h2>
-        <p className="type-muted mt-1.5 max-w-prose">
-          Safe hours are calculated based on your active Trial Work or SGA monthly earnings limit.
-        </p>
-        {onOpenStatus ? (
-          <button type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
-            Confirm benefit phase
-          </button>
-        ) : null}
+        <h2 className="display-figure">How many hours can you work?</h2>
+        <button type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
+          Answer a few questions
+        </button>
       </section>
     );
   }
@@ -123,14 +124,14 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     <section className="panel p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 shrink-0 text-good" />
-        <p className="label-caps">Safe Hours &amp; Pay Calculator</p>
+        <p className="label-caps">Safe hours</p>
       </div>
       <h2 className="display-figure mt-1.5">
-        Aim for {safeFiveWeekHours.toFixed(1)} hours a week
+        Aim for {Math.floor(safeFiveWeekHours)} hours a week
       </h2>
       <p className="type-muted mt-1 max-w-prose">
-        That keeps you safe even in months with 3 paychecks.
-        {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already deducted.` : ''}
+        That keeps you safe even in a month that pays you an extra time.
+        {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already taken off.` : ''}
       </p>
 
       <div className="mt-4 grid grid-cols-2 gap-2.5 sm:max-w-sm">
@@ -146,15 +147,16 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
 
       <details className="mt-3">
         <summary className="type-muted cursor-pointer list-none text-base">
-          Safety margin: 15% buffer under monthly limit (preset).
+          Safety margin: {bufferValue + varianceValue}% under your limit — recommended. You do
+          not need to change this.
         </summary>
         <div className="mt-3 grid grid-cols-2 gap-2.5 sm:max-w-sm">
           <label className="flex flex-col gap-1.5">
-            <span className="field-label">Stay this far under</span>
+            <span className="field-label">Stay this far under (%)</span>
             <NumericInput className="num field-input w-full" placeholder="10" value={buffer} onCommit={setBuffer} />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="field-label">Allow for a bigger check</span>
+            <span className="field-label">Allow for a bigger check (%)</span>
             <NumericInput className="num field-input w-full" placeholder="5" value={variance} onCommit={setVariance} />
           </label>
           <label className="col-span-2 flex flex-col gap-1.5">
@@ -169,14 +171,16 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         </div>
       </details>
 
-      <div className="mt-4 grid gap-2.5 sm:grid-cols-2 sm:max-w-md">
+      <div className="mt-4 grid gap-2.5 sm:grid-cols-2 sm:max-w-xl">
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
-          <span className="label-caps">Recommended (3-paycheck months)</span>
-          <span className="display-figure text-good">{safeFiveWeekHours.toFixed(1)} h/wk</span>
+          <span className="label-caps">Recommended</span>
+          <span className="display-figure text-good">{Math.floor(safeFiveWeekHours)} hours a week</span>
         </div>
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
-          <span className="label-caps">Standard (2-paycheck months)</span>
-          <span className="display-figure">{safeAverageHours.toFixed(1)} h/wk</span>
+          {/* "closer to the line" is a figure of speech for a limit the
+               reader has never been shown a line for. */}
+          <span className="label-caps">Also safe, closer to your limit</span>
+          <span className="display-figure">{Math.floor(safeAverageHours)} hours a week</span>
         </div>
       </div>
 
@@ -193,7 +197,7 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         <div className="mt-3 flex items-start gap-2 rounded-lg border border-warn/40 bg-warn-soft/60 p-3 text-warn-foreground">
           <TriangleAlert className="mt-0.5 size-4 shrink-0" />
           <span>
-            <strong>Extra-paycheck warning:</strong> {groupPaydayRisks(paydayRisks).join(' · ')}.
+            <strong>Watch out:</strong> {groupPaydayRisks(paydayRisks).join(' · ')}.
           </span>
         </div>
       ) : null}

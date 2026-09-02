@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react';
 import {
   ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, Plus, Rows, Settings, Undo2, X
 } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { countableFor, streamYearGross } from '../../domain/earnings';
 import { activeThreshold, benefitPhase, trialWorkStatus } from '../../domain/trialWork';
 import { attentionFlags } from '../../domain/attention';
+import { SOURCE_CHOICE } from '../../domain/copy';
 import { precisionFor } from '../../domain/precision';
 import { PrecisionLine } from '../PrecisionLine';
 import type { MonthKey } from '../../domain/types';
 import { rulesFor, knownYears } from '../../domain/rules';
-import { formatMonth, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
+import {
+  formatMonth, monthsOfYear, scopedMonths, shortMonthName, todayMonth, yearOf
+} from '../../domain/months';
+import { MonthScopePicker } from '../MonthScopePicker';
 import { SettingsPanel } from '../SettingsPanel';
 import { ToastStack } from '../ToastStack';
 import { NotificationsBell } from '../NotificationsBell';
@@ -26,6 +30,7 @@ export function TrackerLedger() {
   } = useTracker();
   const canUndo = undoCount > 0;
   const year = ui.year;
+  const { scope, setScope } = useMonthScope('many');
   const years = knownYears();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -127,6 +132,11 @@ export function TrackerLedger() {
           </div>
 
           <div className="lg-header-actions flex flex-wrap items-center gap-1.5">
+            {/* How much of the year everything below shows. A ledger drawn
+                around twelve rows reads as broken with one in it, so this
+                layout gets to say how much it wants rather than being
+                collapsed by a switch in Settings you cannot see from here. */}
+            <MonthScopePicker scope={scope} onChange={setScope} className="lg-scope" />
             <button type="button" className="lg-btn" onClick={toggleCollapseAll}>
               {allCollapsed ? <ChevronsDown className="size-4" /> : <ChevronsUp className="size-4" />}
               {allCollapsed ? 'Expand all' : 'Collapse all'}
@@ -153,7 +163,6 @@ export function TrackerLedger() {
               id="ledger-scroll-top"
               label="Scroll-to-top button"
               reason="Duplicates what the scrollbar and Home key already do."
-              certainty="hunch"
               layout="ledger"
             >
               <button
@@ -197,7 +206,7 @@ export function TrackerLedger() {
           stand. */}
       {phase === 'trialWork' ? (
         <div className="lg-standing lg-border-b">
-          <span className="lg-label">Trial months left</span>
+          <span className="lg-label">Trial work months left</span>
           <span className="lg-standing-figure">
             {twp.remaining}<span className="lg-standing-of">of 9</span>
           </span>
@@ -232,11 +241,10 @@ export function TrackerLedger() {
         id="ledger-year-chart"
         label="Annual income chart"
         reason="Twelve bars against two threshold lines; the monthly analysis below states the same thing in words."
-        certainty="hunch"
         layout="ledger"
         className="lg-border-b"
       >
-        {ui.focusMode ? null : <LedgerChart streams={streams} year={year} limit={activeThreshold(data, gradedMonth)} />}
+        {scope === 'month' ? null : <LedgerChart streams={streams} year={year} limit={activeThreshold(data, gradedMonth)} />}
       </ReviewTarget>
 
       <div className="lg-border-b">
@@ -354,17 +362,22 @@ export function TrackerLedger() {
           </>
         ) : (
           <div className="lg-border flex flex-col items-center gap-3 p-10 text-center">
-            <p className="lg-sans text-base font-semibold">No income sources yet</p>
-            <p className="max-w-sm text-sm lg-text-muted">Add a W-2 job or 1099 work to start tracking countable income against TWP and SGA.</p>
+            {/* The empty state named four things the reader has not been
+                taught — W-2, 1099, countable, TWP and SGA — in the two
+                sentences that are supposed to get them started. The buttons
+                offered the tax-form pair that SOURCE_CHOICE exists to
+                prevent: a driver does not know they are the second one. */}
+            <p className="lg-sans text-base font-semibold">Nothing here yet</p>
+            <p className="max-w-sm text-sm lg-text-muted">Add where your money comes from, and we will keep track of what counts toward your monthly limit.</p>
             <div className="flex gap-2">
-              <button type="button" className="lg-btn lg-btn-solid" onClick={() => addAndSelect('w2')}>+ W-2 job</button>
-              <button type="button" className="lg-btn" onClick={() => addAndSelect('ten99')}>+ 1099 work</button>
+              <button type="button" className="lg-btn lg-btn-solid" onClick={() => addAndSelect('w2')}>{SOURCE_CHOICE.w2.label}</button>
+              <button type="button" className="lg-btn" onClick={() => addAndSelect('ten99')}>{SOURCE_CHOICE.ten99.label}</button>
             </div>
           </div>
         )}
       </div>
 
-      <LedgerAnalysis data={data} year={year} focusMode={ui.focusMode} />
+      <LedgerAnalysis data={data} year={year} scope={scope} />
       </div>
 
       <ToastStack />
@@ -393,15 +406,12 @@ export function TrackerLedger() {
  */
 function MonthAttention() {
   const { data, ui } = useTracker();
-  const now = todayMonth();
-  /* This strip is about months that have not happened yet, so focus mode
-     narrows it to the one you are in. It renders nothing when that month is
-     fine, which is the same as it always did. */
-  const months = ui.focusMode
-    ? [yearOf(now) === ui.year ? now : `${ui.year}-12`]
-    : monthsOfYear(ui.year).filter((month) => (
-      yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
-    ));
+  const { scope } = useMonthScope('many');
+  /* This strip is about months that have not happened yet, so it looks
+     forward whatever else is on screen — the one exception is "This month",
+     where the reader has asked for one month and nothing else. It renders
+     nothing when those months are fine, as it always did. */
+  const months = scopedMonths(ui.year, scope === 'month' ? 'month' : 'ahead');
   const flags = attentionFlags(data, months);
   if (!flags.length) return null;
 

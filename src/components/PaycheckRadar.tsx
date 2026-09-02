@@ -3,10 +3,10 @@
 // usually the month closest to a TWP or SGA line.
 
 import { Bell, Zap } from 'lucide-react';
-import { useTracker } from '../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
-import { monthsOfYear, shortMonthName, todayMonth } from '../domain/months';
-import { extraPaycheckMonths, frequencyLabel, payPlan, weeksPerCheck } from '../domain/paySchedule';
+import { scopedMonths, shortMonthName, todayMonth } from '../domain/months';
+import { checksPerYear, extraPaycheckMonths, payPlan, weeksPerCheck } from '../domain/paySchedule';
 import { activeThreshold } from '../domain/trialWork';
 import { actionItems } from '../domain/notifications';
 import type { MonthKey, Stream } from '../domain/types';
@@ -33,6 +33,7 @@ export function PaycheckRadar({
   onSetPayday?: (streamId: string) => void;
 }) {
   const { data, ui } = useTracker();
+  const { scope } = useMonthScope('many');
 
   const w2Streams = data.streams.filter((s) => s.type === 'w2' && s.lifecycle === 'active');
   const frequent = w2Streams.filter((s) => s.payFrequency === 'weekly' || s.payFrequency === 'biweekly');
@@ -42,9 +43,11 @@ export function PaycheckRadar({
 
   const heavy = extraPaycheckMonths(confirmed, ui.year);
   const now = todayMonth();
-  const upcoming = ui.focusMode
-    ? monthsOfYear(ui.year).filter((m) => m === now)
-    : monthsOfYear(ui.year).filter((m) => m >= now);
+  /* The radar is about months that have not happened yet, so it looks
+     forward whatever else is on screen — the one exception is "This month",
+     where the reader has asked for one month and nothing else. Same rule as
+     the attention strips in the ledger, payguard and workrecord. */
+  const upcoming = scopedMonths(ui.year, scope === 'month' ? 'month' : 'ahead');
 
   const threshold = activeThreshold(data, now);
 
@@ -107,7 +110,7 @@ export function PaycheckRadar({
         </div>
       ) : confirmed.length ? (
         <div className="mt-4 rounded-lg border border-good/30 bg-good-soft/60 p-3 sm:p-4">
-          <p className="text-base font-semibold">Every month ahead pays you the usual number of times</p>
+          <p className="text-base font-semibold">No month ahead pays you an extra time</p>
         </div>
       ) : (
         <UnscheduledExplainer
@@ -124,17 +127,26 @@ export function PaycheckRadar({
           className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-base hover:underline"
         >
           <Bell className="size-4 shrink-0 text-muted-foreground" />
-          {urgentCount ? <span className="font-semibold text-destructive">{urgentCount} urgent</span> : null}
+          {/* "1 urgent, 2 important — check notifications" counted two kinds
+               of thing without saying what either kind was, and then named a
+               part of the app rather than what pressing it does. */}
+          {urgentCount ? <span className="font-semibold text-destructive">{urgentCount} need{urgentCount === 1 ? 's' : ''} you now</span> : null}
           {urgentCount && importantCount ? <span className="text-muted-foreground">,</span> : null}
-          {importantCount ? <span className="font-semibold text-info">{importantCount} important</span> : null}
-          <span className="text-muted-foreground">— check notifications</span>
+          {importantCount ? <span className="font-semibold text-info">{importantCount} worth a look</span> : null}
+          <span className="text-muted-foreground">— see what they are</span>
         </button>
       ) : null}
     </section>
   );
 }
 
-function UnscheduledExplainer({ streams, limit: _limit, onSetPayday }: {
+/* Review note el-1t5lfuy: "I dont even want to read this." It was three
+   paragraphs. It is two lines now — but it still has to carry the beat the
+   earlier note asked for ("simulate or show why its bad"), so the money
+   stays. The count is computed, never written down: a weekly schedule has
+   four heavy months, not two, and this panel is the one that has to be
+   believed. */
+function UnscheduledExplainer({ streams, limit, onSetPayday }: {
   streams: Stream[];
   limit: number | null;
   onSetPayday?: (streamId: string) => void;
@@ -144,15 +156,20 @@ function UnscheduledExplainer({ streams, limit: _limit, onSetPayday }: {
 
   const usual = job.payFrequency === 'weekly' ? 4 : 2;
   const extra = usual + 1;
+  const heavyCount = checksPerYear(job.payFrequency) - usual * 12;
+  const value = extraCheckValue(job);
 
   return (
     <div className="mt-4 flex flex-col gap-3">
       <div className="rounded-lg border border-info/30 bg-info-soft/40 p-3 text-base">
         <p className="font-semibold text-foreground">
-          {frequencyLabel(job.payFrequency)} jobs have 2 months each year with {extra} paychecks instead of {usual}.
+          {heavyCount} months this year pay you {extra} times instead of {usual}.
         </p>
-        <p className="type-muted mt-1 text-sm">
-          An extra check can push you over your monthly limit even if your hours did not change.
+        <p className="type-muted mt-1">
+          {value
+            ? <>That is about <strong>{money(Math.round(value))}</strong> more in those months.
+                {limit ? <> Your limit is {money(limit)}.</> : null}</>
+            : <>Those months can put you over your limit on the same hours.</>}
         </p>
       </div>
 

@@ -47,7 +47,7 @@ export function StatusSection() {
         <>
           <div className="sheet-hero">
             <div className="grow">
-              <div className="eyebrow">Trial months left</div>
+              <div className="eyebrow">Trial work months left</div>
               <div className="hero-figure">
                 {twp.remaining}
                 <span className="hero-figure__of"> of {TRIAL_MONTH_LIMIT}</span>
@@ -55,13 +55,15 @@ export function StatusSection() {
             </div>
             <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} showLabel={false} />
           </div>
+          {/* The same paragraph as workrecord's, fixed the same way: one
+               idea a sentence, and "leaves the window" says what happens to
+               the reader rather than what happens to our record. */}
           <p className="help-note">
-            Counted pay over {money(rules.trialWork)} uses one trial work month.
-            Working for yourself more than {TWP_SELF_EMPLOYMENT_HOURS} hours in a month
-            can use one too, even on small pay.
-            {' '}You have {TRIAL_MONTH_LIMIT} of them, over any {ROLLING_WINDOW} months.
+            Earning more than {money(rules.trialWork)} in a month uses one trial work month.
+            So does working more than {TWP_SELF_EMPLOYMENT_HOURS} hours for yourself, even if you earned very little.
+            {' '}You get {TRIAL_MONTH_LIMIT} of them across any {ROLLING_WINDOW} months.
             {twp.nextExpiry
-              ? ` Oldest recorded month leaves the window in ${formatMonth(twp.nextExpiry)}.`
+              ? ` Your oldest one stops counting in ${formatMonth(twp.nextExpiry)}.`
               : ''}
           </p>
         </>
@@ -77,15 +79,15 @@ export function StatusSection() {
           </div>
           <p className="help-note">
             {overMonths.length
-              ? `Counted pay over ${money(rules.sga)} in the months below.`
-              : `Nothing over your ${money(rules.sga)} limit this year.`}
+              ? `These months counted more than your ${money(rules.sga)} limit.`
+              : `No month has gone over your ${money(rules.sga)} limit this year.`}
           </p>
         </>
       ) : (
         <div className="phase-warning">
           {phase === 'verifyComplete'
-            ? 'Nine trial work months are on record. Check them in App settings against your own paperwork — after that your limit changes.'
-            : 'Until you tell us where you stand there is no limit to warn you about, and the hours planner stays off.'}
+            ? 'We have nine trial work months on record. Check them in App settings against your own paperwork. After that, your limit changes.'
+            : 'We cannot warn you about a limit until you tell us where you stand. The hours planner stays off until then, too.'}
         </div>
       )}
 
@@ -113,8 +115,8 @@ export function StatusSection() {
         ) : null}
         <div className="rows__row">
           <div className="grow">
-            <div className="rows__label">{ui.year} countable total</div>
-            <div className="help-note">all sources, after tracked deductions</div>
+            <div className="rows__label">Counted toward your limit in {ui.year}</div>
+            <div className="help-note">every job, after your miles come off</div>
           </div>
           <span className="rows__value">{money(yearTotal(data, ui.year))}</span>
         </div>

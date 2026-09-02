@@ -45,10 +45,15 @@ export function attentionFlags(data: TrackerData, months: MonthKey[]): Attention
     const status = monthStatus(data, month);
     const phase = benefitPhase(data, month);
 
+    /* The words are the reader's, not SSA's. These four strings were "over
+       SGA", "TWP used", "$162 to TWP" and "$162 to SGA" — every one of them
+       an abbreviation, and the last two saying a distance without saying
+       what it is a distance to. A chip is short, but "to SGA" is not short,
+       it is unfinished. */
     if (phase === 'sga' && status.overSga) {
-      flags.push({ month, text: 'over SGA', kind: 'over' });
+      flags.push({ month, text: 'over your limit', kind: 'over' });
     } else if (phase === 'trialWork' && status.isServiceMonth) {
-      flags.push({ month, text: 'TWP used', kind: 'over' });
+      flags.push({ month, text: 'uses a trial work month', kind: 'over' });
     } else {
       const near = nearLimit(status, phase);
       if (near) {
@@ -57,7 +62,7 @@ export function attentionFlags(data: TrackerData, months: MonthKey[]): Attention
         // warning and the reason for it.
         flags.push({
           month,
-          text: money(near.room) + (near.kind === 'trial' ? ' to TWP' : ' to SGA'),
+          text: `${money(near.room)} left before your limit`,
           kind: 'near'
         });
         continue;

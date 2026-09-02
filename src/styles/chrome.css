@@ -713,3 +713,149 @@ html.pg-calc20 {
 }
 
 .precision-line[data-fix]:hover { background: var(--chrome-hover); }
+
+/* ------------------------------------------------------------------ */
+/* 5b. The precision gauge                                            */
+/* ------------------------------------------------------------------ */
+/*
+ * The same reading as the line above, at the size of the claim it is
+ * judging. Review note el-1nzt64v: "I skip over this because I mentally
+ * dont want to look at it and i don't know what it is", with a confidence
+ * dial attached as the reference.
+ *
+ * Structure and colour live here once, like the line — a layout that wants
+ * its own register overrides two declarations rather than forking the block.
+ */
+.precision-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  font-family: var(--chrome-font);
+}
+
+.precision-gauge-dial {
+  position: relative;
+  width: 100%;
+  max-width: 15rem;
+  /* Room under the arc for the two end labels, so they sit below the track
+     instead of on top of its terminals. */
+  padding-bottom: 1.2rem;
+}
+
+.precision-gauge-dial svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.precision-gauge-track,
+.precision-gauge-fill {
+  fill: none;
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.precision-gauge-track { stroke: var(--chrome-surface-2); }
+
+.precision-gauge-fill {
+  stroke: var(--chrome-info-fg);
+  transition: stroke-dasharray 420ms ease, stroke 200ms;
+}
+
+/* The compact line paints Estimated in the warn colour, because there it is
+   one grade word among others and needs to be picked out. The gauge does not
+   follow that rule, on purpose: at this size a warn-coloured dial reads as
+   something having gone wrong, and nothing has — a low reading means we have
+   not been told something yet. That is an offer, which is the same call made
+   on the trial-work prompt. Only the earned state changes colour. */
+.precision-gauge[data-level='exact'] .precision-gauge-fill { stroke: var(--chrome-safe); }
+
+/* The read sits in the bowl of the arc, not under it. */
+.precision-gauge-read {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  pointer-events: none;
+}
+
+.precision-gauge-pct {
+  color: var(--chrome-fg);
+  font-size: clamp(1.9rem, 9cqw, 2.6rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.precision-gauge-pct small {
+  font-size: 0.5em;
+  font-weight: 700;
+}
+
+.precision-gauge-word {
+  color: var(--chrome-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.precision-gauge-end {
+  position: absolute;
+  bottom: 0;
+  color: var(--chrome-muted);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.precision-gauge-end[data-end='lo'] { inset-inline-start: 0; }
+.precision-gauge-end[data-end='hi'] { inset-inline-end: 0; }
+
+.precision-gauge-note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  border-radius: var(--chrome-radius-sm);
+  background: var(--chrome-surface-2);
+  padding: 0.7rem 0.85rem;
+  text-align: start;
+}
+
+.precision-gauge-note strong {
+  color: var(--chrome-fg);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.precision-gauge-note span {
+  color: var(--chrome-muted);
+  font-size: 0.8rem;
+}
+
+.precision-gauge-go {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--chrome-radius-sm);
+  background: var(--chrome-surface);
+  padding: 0.7rem 1rem;
+  color: var(--chrome-fg);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 140ms, border-color 140ms;
+}
+
+.precision-gauge-go:hover {
+  background: var(--chrome-hover);
+  border-color: var(--chrome-ring);
+}

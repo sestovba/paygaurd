@@ -44,9 +44,12 @@ export function Header({
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
 
+  /* "Verify 9 recorded months" and "Not confirmed" both describe the state
+     of our record. What the reader needs is what they should do, or that we
+     do not know yet. */
   const assessmentLabel = phase === 'verifyComplete'
-    ? 'Verify 9 recorded months'
-    : 'Not confirmed';
+    ? 'Check the 9 months we have'
+    : 'Not set yet';
 
   return (
     <header className="topbar">
@@ -117,7 +120,7 @@ export function Header({
           <div className="standing">
             <div className="standing__label">
               {phase === 'trialWork'
-                ? 'Trial months left'
+                ? 'Trial work months left'
                 : phase === 'sga'
                   ? 'Your limit'
                   : 'Your status'}

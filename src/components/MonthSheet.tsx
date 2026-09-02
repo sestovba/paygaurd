@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
+import { copyFor, SOURCE_SHORT } from '../domain/copy';
 import { money } from '../domain/format';
 import { formatMonth, monthsOfYear, shortMonthName, yearOf } from '../domain/months';
 import {
-  countableFor, grossFor, grossFromNet, hoursFor, isActive, mileageDeduction, monthStatus
+  countableFor, grossFor, hoursFor, isActive, mileageDeduction, monthStatus
 } from '../domain/earnings';
 import { benefitPhase } from '../domain/trialWork';
 import { mileageRateFor, TWP_SELF_EMPLOYMENT_HOURS } from '../domain/rules';
 import { InfoNote } from './InfoNote';
 import { NumericInput } from './NumericInput';
+import { PayAmountField, PayBasisProvider, PayBasisSwitch } from './PayAmount';
 import { Sheet } from './Sheet';
 import { AddJobButton, ButtonRow, Chip, Switch } from './ui';
 import type { MonthKey, Stream } from '../domain/types';
@@ -35,7 +37,8 @@ function SelfEmployedMonth({ stream, month, onOpenStream }: {
   month: MonthKey;
   onOpenStream: (id: string) => void;
 }) {
-  const { data, updateMonthEntry } = useTracker();
+  const { data, ui, updateMonthEntry } = useTracker();
+  const words = copyFor(ui.layout);
   const entry = stream.months[month];
   const miles = entry?.miles ?? 0;
   const hrs = hoursFor(stream, month);
@@ -46,21 +49,27 @@ function SelfEmployedMonth({ stream, month, onOpenStream }: {
       <div className="flex items-baseline justify-between gap-3">
         <div>
           <p className="num text-base font-semibold">{money(countableFor(stream, month))}</p>
-          <p className="type-muted text-sm">Counted this month, after mileage</p>
+          <p className="type-muted text-sm">Counts toward your limit, after your miles come off</p>
         </div>
         <button
           type="button"
           onClick={() => onOpenStream(stream.id)}
           className="shrink-0 text-sm font-medium text-primary hover:underline"
         >
-          Whole year
+          See every month
         </button>
       </div>
 
-      <label className="flex items-center gap-2">
-        <span className="field-label w-16 shrink-0">Earned</span>
+      {/* Three labels one word long — Earned, Miles, Hours — where each word
+          was doing the work of a question. "Miles" is the expensive one:
+          personal miles are not deductible, so a reader who reads it as "how
+          far did you drive" claims a deduction they are not owed. The labels
+          stack above their fields now, because a complete label does not fit
+          in a four-rem gutter. */}
+      <label className="flex flex-col gap-1">
+        <span className="field-label">{words.paidToYouAsk}</span>
         <NumericInput
-          className="num field-input min-w-0 flex-1"
+          className="num field-input w-full"
           prefix="$"
           value={grossFor(stream, month) || undefined}
           placeholder="Numbers only"
@@ -68,28 +77,27 @@ function SelfEmployedMonth({ stream, month, onOpenStream }: {
         />
       </label>
 
-      <label className="flex items-center gap-2">
-        <span className="field-label w-16 shrink-0">Miles</span>
+      <label className="flex flex-col gap-1">
+        <span className="field-label">{words.workMiles}</span>
         <NumericInput
-          className="num field-input min-w-0 flex-1"
-          prefix="mi"
+          className="num field-input w-full"
           value={miles || undefined}
-          placeholder="0"
+          placeholder="Numbers only"
           onCommit={(next) => updateMonthEntry(stream.id, month, { miles: next })}
         />
+        <span className="type-muted text-sm">
+          {off > 0
+            ? `Your ${miles.toLocaleString('en-US')} miles take ${money(off)} off what counts.`
+            : `Miles you drive for work come off what counts, at about ${(mileageRateFor(month) * 100).toFixed(0)} cents each. Miles you drive for yourself do not.`}
+        </span>
       </label>
-      <p className="type-muted -mt-1 text-sm">
-        {off > 0
-          ? `Your ${miles.toLocaleString('en-US')} miles take ${money(off)} off what counts.`
-          : `Miles you drive for work come off what counts, at about ${(mileageRateFor(month) * 100).toFixed(0)} cents each.`}
-      </p>
 
-      <label className="flex items-center gap-2">
-        <span className="field-label w-16 shrink-0">Hours</span>
+      <label className="flex flex-col gap-1">
+        <span className="field-label">{words.hoursWorked}</span>
         <NumericInput
-          className="num field-input min-w-0 flex-1"
+          className="num field-input w-full"
           value={hrs || undefined}
-          placeholder="0"
+          placeholder="Numbers only"
           onCommit={(next) => updateMonthEntry(stream.id, month, { hours: next })}
         />
       </label>
@@ -100,75 +108,6 @@ function SelfEmployedMonth({ stream, month, onOpenStream }: {
           months — even though you did not earn much.
         </div>
       ) : null}
-    </div>
-  );
-}
-
-/**
- * The way in for somebody who does not have the before-tax figure.
- *
- * Gross is what SSA counts and it lives on a document plenty of people cannot
- * find. What they do have is the amount that reached the bank, because it is
- * in their banking app. Recorded as an estimate, never as an entered figure,
- * so nothing downstream reports a confidence it did not earn.
- */
-function FromBank({ stream, month }: { stream: Stream; month: MonthKey }) {
-  const { updateMonthEntry } = useTracker();
-  const [open, setOpen] = useState(false);
-  const [net, setNet] = useState<number | undefined>(undefined);
-  const estimate = grossFromNet(net ?? 0);
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="self-start text-sm font-medium text-primary hover:underline"
-      >
-        I only know what went into my bank
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-2 rounded-lg bg-surface-2 p-3">
-      <label className="flex items-center gap-2">
-        <span className="field-label">Into my bank</span>
-        <NumericInput
-          className="num field-input min-w-0 flex-1"
-          prefix="$"
-          value={net}
-          placeholder="Numbers only"
-          onCommit={setNet}
-        />
-      </label>
-      <p className="type-muted text-sm">
-        {estimate
-          ? `Before taxes that is about ${money(estimate)}. A guess, so we leave room to be safe.`
-          : 'The amount you actually received.'}
-      </p>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={!estimate}
-          onClick={() => {
-            if (!estimate) return;
-            updateMonthEntry(stream.id, month, { gross: estimate, basis: 'fromNet' });
-            setOpen(false);
-            setNet(undefined);
-          }}
-          className="btn-primary disabled:opacity-40"
-        >
-          Use about {estimate ? money(estimate) : '—'}
-        </button>
-        <button
-          type="button"
-          onClick={() => { setOpen(false); setNet(undefined); }}
-          className="text-sm font-medium text-muted-foreground hover:underline"
-        >
-          Cancel
-        </button>
-      </div>
     </div>
   );
 }
@@ -189,9 +128,12 @@ export function MonthSheet({
   const [wholeYear, setWholeYear] = useState<Record<string, boolean>>({});
 
   return (
+    <PayBasisProvider>
     <Sheet
       title={formatMonth(month)}
-      eyebrow="Monthly earnings"
+      /* "Monthly earnings" named the genre of the screen. The month is
+         already the title; the eyebrow says what the figure under it is. */
+      eyebrow="What counts toward your limit"
       onClose={onClose}
       variant={variant === 'inline' ? 'inline' : 'modal'}
       backLabel={variant === 'inline' ? backLabel : undefined}
@@ -201,13 +143,24 @@ export function MonthSheet({
         + (streams.length === 0 ? 'flex-col items-center text-center' : 'items-baseline')
       }>
         <span className="display-figure text-3xl">{money(status.countable)}</span>
+        {/* el-wmahw2. The reviewer said "needs styling", and it does — but the
+            words were the worse half. "What Social Security counts" is the
+            phrasing an earlier note in this pass took out of the hero for
+            explaining Social Security's opinions back at the reader, and
+            "TWP"/"SGA" are both on the no-jargon list. It says what the number
+            is, and names only the rule that applies to this month. */}
         <span className="label-caps">
-          What Social Security counts{phase === 'trialWork' ? ' · TWP month' : phase === 'sga' ? ' · SGA limit' : ''}
+          Counted so far in {formatMonth(month)}{phase === 'trialWork' ? ' · uses a trial work month' : ''}
         </span>
       </div>
 
+      {/* One switch for every wage job in the month, above the list rather
+          than inside each card: the question "which number do you have" is
+          answered once by a person, not once per job. */}
+      {streams.some((s) => s.type === 'w2') ? <PayBasisSwitch /> : null}
+
       {streams.length === 0 ? (
-        <p className="type-muted text-center">No active jobs cover this month yet.</p>
+        <p className="type-muted text-center">None of your jobs were running in {formatMonth(month)}.</p>
       ) : (
         <div className="flex flex-col gap-4">
           {streams.map((stream) => {
@@ -216,8 +169,11 @@ export function MonthSheet({
               <div className="flex flex-col gap-3 rounded-lg border border-border p-4" key={stream.id}>
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2.5">
+                    {/* "Job" and "Self-employed" were two different kinds of
+                        word — one about who pays you, one about a tax status.
+                        SOURCE_SHORT says both of them the same way. */}
                     <Chip tone={stream.type === 'w2' ? 'good' : 'info'}>
-                      {stream.type === 'w2' ? 'Job' : 'Self-employed'}
+                      {SOURCE_SHORT[stream.type]}
                     </Chip>
                     <span className="truncate text-base font-semibold">{stream.name}</span>
                   </div>
@@ -244,7 +200,7 @@ export function MonthSheet({
                       className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2.5"
                       hidden={ui.focusMode}
                     >
-                      <span className="text-base font-medium">Show all months for this job</span>
+                      <span className="text-base font-medium">Show every month of {yearOf(month)}</span>
                       <Switch
                         checked={checked}
                         label={`Show every month for ${stream.name}`}
@@ -255,32 +211,27 @@ export function MonthSheet({
                     {checked && !ui.focusMode ? (
                       <div className="month-year-grid grid grid-cols-2 gap-x-3 gap-y-3">
                         {monthsOfYear(yearOf(month)).map((m) => (
-                          <div key={m} className="flex items-center gap-2">
-                            <span className="field-label w-8 shrink-0 text-right">{shortMonthName(m)}</span>
-                            <NumericInput
-                              className="num field-input min-w-0 flex-1"
-                              prefix="$"
-                              value={stream.months[m]?.gross}
-                              placeholder="Numbers only"
-                              onCommit={(next) => updateMonthEntry(stream.id, m, { gross: next })}
-                            />
-                          </div>
+                          <PayAmountField
+                            key={m}
+                            label={shortMonthName(m)}
+                            entry={stream.months[m]}
+                            className="num field-input min-w-0 w-full"
+                            onCommit={(patch) => updateMonthEntry(stream.id, m, patch)}
+                          />
                         ))}
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2">
-                          <span className="field-label">Pay before taxes</span>
-                          <NumericInput
-                            className="num field-input min-w-0 flex-1"
-                            prefix="$"
-                            value={stream.months[month]?.gross}
-                            placeholder="Numbers only"
-                            onCommit={(next) => updateMonthEntry(stream.id, month, { gross: next })}
-                          />
-                        </label>
-                        <FromBank stream={stream} month={month} />
-                      </div>
+                      /* One field, and the switch above the list says which
+                         number goes in it. This used to be a "Pay before
+                         taxes" box with a link under it reading "I only know
+                         what went into my bank" — a second door, opening on
+                         a different question, for anyone who did not have
+                         the figure the first door asked for. */
+                      <PayAmountField
+                        entry={stream.months[month]}
+                        className="num field-input min-w-0 w-full"
+                        onCommit={(patch) => updateMonthEntry(stream.id, month, patch)}
+                      />
                     )}
                   </>
                 )}
@@ -300,8 +251,9 @@ export function MonthSheet({
           itself — and for self-employment it was wrong anyway, since what
           counts there is earnings minus mileage. */}
       {streams.length > 0 ? (
-        <InfoNote>Earnings count in the month you were paid.</InfoNote>
+        <InfoNote>Pay counts in the month it reached you, not the month you worked for it.</InfoNote>
       ) : null}
     </Sheet>
+    </PayBasisProvider>
   );
 }

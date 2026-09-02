@@ -41,10 +41,15 @@ export function Onboarding() {
         <BrandMark />
         <div>
           <h1 className="display-figure text-4xl">PayGuard</h1>
+          {/* The first sentence anyone reads, and it had three jobs in it,
+               a "how much room you have left in it" with two pronouns, and
+               "fortnightly" — a British word, in an app for people on United
+               States disability benefits. Three short sentences instead. */}
           <p className="type-muted mt-3">
-            Know your monthly limit, know how much room you have left in it, and
-            catch the months a weekly or fortnightly job quietly pays you an
-            extra time.
+            See how much you can earn this month without putting your benefits at
+            risk. We work it out in hours, not just dollars. And we tell you which
+            months pay you an extra time, because those are the ones that catch
+            people out.
           </p>
         </div>
 
@@ -67,8 +72,8 @@ export function Onboarding() {
         ) : (
           <div className="flex w-full flex-col items-center gap-3">
             <p className="type-muted">
-              First, a few questions — they decide which monthly limit applies
-              to you, and nothing here means much until they are answered.
+              First, a few questions. Your answers decide which monthly limit
+              applies to you.
             </p>
             <button
               type="button"

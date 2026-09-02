@@ -94,8 +94,8 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
           </div>
         ) : (
           <p className="ledger__empty">
-            No paychecks logged yet. Once one exists for a month, it replaces
-            that month's Gross and Hours figures above.
+            No paychecks yet. Once you add one for a month, it replaces whatever
+            you typed for that month above.
           </p>
         )}
 
@@ -111,8 +111,8 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
             <span className="ledger__prefix" aria-hidden="true">$</span>
             <NumericExprInput
               className="ledger__num-input"
-              aria-label="Paycheck gross"
-              placeholder="Gross"
+              aria-label="Paycheck amount before taxes"
+              placeholder="Before taxes"
               value={gross}
               onCommit={setGross}
             />
@@ -143,8 +143,9 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
         </div>
         {stream.hourlyRate ? (
           <p className="help-note">
-            Enter hours and Gross fills in from ${stream.hourlyRate}/hr — edit it if
-            the actual paystub differs. Fields also take expressions like 8×5.
+            Type your hours and we will work the pay out at ${stream.hourlyRate} an hour.
+            Change it if your paystub says something different. You can also type sums
+            like 8×5.
           </p>
         ) : null}
       </div>

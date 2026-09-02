@@ -67,7 +67,7 @@ export function LedgerChart({
   return (
     <div className="border-t px-3 pt-4 pb-2 sm:px-5 lg-label-border">
       <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="lg-label">{year} Countable Income by Month</span>
+        <span className="lg-label">What counted toward your limit, month by month</span>
         <span className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] lg-text-muted">
           <span className="inline-flex items-center gap-1.5">
             <span className="lg-swatch lg-swatch-w2" /> W2
@@ -103,7 +103,9 @@ export function LedgerChart({
               </span>
               <span className="text-base font-semibold">{money2(hovered.total)}</span>
               <span className="text-[0.625rem] lg-text-muted">
-                {hovered.total > 0 ? `W2 ${money0(hovered.w2)} · SE ${money0(hovered.se)}` : 'No income'}
+                {/* "W2 $900 · SE $300" — two abbreviations, one of which
+                    ("SE") appears nowhere else in the product. */}
+                {hovered.total > 0 ? `Employer ${money0(hovered.w2)} · Gig work ${money0(hovered.se)}` : 'No income'}
               </span>
             </div>
           </>

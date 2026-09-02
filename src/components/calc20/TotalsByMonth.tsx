@@ -1,4 +1,4 @@
-// Countable by month, across every stream.
+// Counted each month, across every stream.
 //
 // This is what "combined by month" was reaching for. It does not need to be
 // a separate section: hovering a month here lights the same month in every
@@ -8,10 +8,10 @@
 // month that nearly crossed must not look like one that did.
 
 import type { MonthKey } from '../../domain/types';
-import { useTracker } from './state';
+import { useMonthScope, useTracker } from './state';
 import { layoutFor } from './state';
 import { money } from '../../domain/format';
-import { formatMonth, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit, yearTotal } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { rulesFor } from '../../domain/rules';
@@ -34,13 +34,13 @@ export function TotalsByMonth({
   const rules = rulesFor(ui.year);
   const phase = benefitPhase(data, `${ui.year}-12`);
 
-  const months = listedMonths(ui.year, ui.hideFuture, ui.focusMode);
+  const { months } = useMonthScope('many');
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
   return (
     <div className="totals-card">
       <div className="totals-card__head">
-        <span className="totals-card__title">Countable by month</span>
+        <span className="totals-card__title">Counted each month</span>
         <span className="stream-card__meta">
           {/* One limit, never named as a rule — the same wording every other
               layout uses for this row. */}

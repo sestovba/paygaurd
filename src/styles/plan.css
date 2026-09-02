@@ -832,8 +832,11 @@
    positioned against the field's own box rather than guessing past a margin. */
 .pl-money { position: relative; display: block; margin-top: 8px; }
 .pl-money .pl-input { margin-top: 0; padding-left: 46px; }
-.pl-money[data-unit='hrs'] .pl-input,
-.pl-money[data-unit='mi'] .pl-input { padding-left: 12px; padding-right: 56px; }
+/* The unit adornment sits on the right for a unit that follows the number,
+   and its width is set for a word rather than an abbreviation — "hours" and
+   "miles" spelled out, per the no-abbreviations rule in domain/copy.ts. */
+.pl-money[data-unit='hours'] .pl-input,
+.pl-money[data-unit='miles'] .pl-input { padding-left: 12px; padding-right: 76px; }
 
 .pl-money::before {
   content: attr(data-unit);
@@ -852,11 +855,11 @@
   font-weight: 700;
   pointer-events: none;
 }
-.pl-money[data-unit='hrs']::before,
-.pl-money[data-unit='mi']::before {
+.pl-money[data-unit='hours']::before,
+.pl-money[data-unit='miles']::before {
   left: auto;
   right: 2px;
-  width: 50px;
+  width: 70px;
   font-size: 14px;
 }
 

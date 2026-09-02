@@ -1,22 +1,23 @@
 // Months, as squares. Mobile's version of the totals grid.
 
 import type { MonthKey } from '../../domain/types';
-import { useTracker } from './state';
+import { useMonthScope, useTracker } from './state';
 import { money } from '../../domain/format';
-import { formatMonth, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
 
 export function MonthSquares({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
+  const { months } = useMonthScope('many');
   const now = todayMonth();
   const phase = benefitPhase(data, `${ui.year}-12`);
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
   return (
     <div className="month-squares">
-      {listedMonths(ui.year, ui.hideFuture, ui.focusMode).map((month) => {
+      {months.map((month) => {
         const status = monthStatus(data, month);
         const empty = status.countable === 0;
         const extra = extraPay.get(month);

@@ -9,7 +9,7 @@ import {
   Undo2,
   X
 } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { copyFor } from '../../domain/copy';
 import { attentionFlags } from '../../domain/attention';
 import { precisionFor } from '../../domain/precision';
@@ -20,7 +20,10 @@ import {
   activeThreshold, benefitPhase, trialWorkStatus, TRIAL_MONTH_LIMIT
 } from '../../domain/trialWork';
 import { knownYears } from '../../domain/rules';
-import { formatMonth, longMonthName, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
+import {
+  formatMonth, longMonthName, monthsOfYear, scopedMonths, shortMonthName, todayMonth, yearOf
+} from '../../domain/months';
+import { MonthScopePicker } from '../MonthScopePicker';
 import { money } from '../../domain/format';
 import type { MonthKey } from '../../domain/types';
 import { SettingsPanel } from '../SettingsPanel';
@@ -54,6 +57,7 @@ export function TrackerWorkRecord() {
   } = useTracker();
   useTheme(ui.theme);
 
+  const { scope, setScope } = useMonthScope('many');
   const theme = ui.workRecordTheme ?? 'calc20';
   const year = ui.year;
   const years = knownYears();
@@ -131,20 +135,23 @@ export function TrackerWorkRecord() {
   const streamsAside = streams.length
     ? `${streams.length} ${streams.length === 1 ? 'job' : 'jobs'}`
     : 'None yet';
-  /* Both of these count across a whole year, so focus mode replaces them with
-     the one month on screen. The trial-months figure stays either way: nine
-     months over a rolling five years is not a year statistic, it is the
-     reason this month's limit is what it is. */
-  const monthsAside = ui.focusMode
+  /* This one summarises the list inside the slab, so it follows the month
+     dropdown rather than focus mode: naming a single month above nine rows
+     of them was the old behaviour telling the truth about the wrong thing. */
+  const monthsAside = scope === 'month'
     ? longMonthName(focusMonth)
     : `${money(yearTotal(data, year))} this year`;
+  /* This one counts across a whole year, so focus mode replaces it with the
+     one month on screen. The trial-months figure stays either way: nine
+     months over a rolling five years is not a year statistic, it is the
+     reason this month's limit is what it is. */
   const statusAside = phase === 'trialWork'
     ? `${twp.remaining} trial months left`
     : phase === 'sga'
       ? (ui.focusMode
         ? (monthStatus(data, focusMonth).overSga ? 'Over your limit' : 'Under your limit')
         : `${monthsOfYear(year).filter((m) => monthStatus(data, m).overSga).length} over your limit`)
-      : 'Not confirmed';
+      : 'Not set yet';
 
   return (
     <div className="pg-payguard pg-workrecord min-h-dvh" data-chrome-root data-payguard-theme={theme}>
@@ -256,14 +263,14 @@ export function TrackerWorkRecord() {
             <div className="wr-standings">
               <div className="wr-standing">
                 <span className="pg-label">
-                  {phase === 'trialWork' ? 'Trial months left'
+                  {phase === 'trialWork' ? 'Trial work months left'
                     : phase === 'sga' ? 'Your limit' : 'Your status'}
                 </span>
                 <span className="pg-figure pg-figure-md pg-accent">
                   {phase === 'trialWork' ? (
                     <>{twp.remaining}<span className="ml-1 text-xs font-semibold pg-dim">of {TRIAL_MONTH_LIMIT}</span></>
                   ) : phase === 'sga' ? money(threshold?.amount ?? 0)
-                    : phase === 'verifyComplete' ? 'Verify 9' : 'Not confirmed'}
+                    : phase === 'verifyComplete' ? 'Check 9 months' : 'Not set yet'}
                 </span>
               </div>
             </div>
@@ -380,18 +387,19 @@ export function TrackerWorkRecord() {
 
           <Slab
             title="Monthly history"
+            bleed
             open={ui.wrMonthsOpen}
             onToggle={() => setUi({ wrMonthsOpen: !ui.wrMonthsOpen })}
             aside={monthsAside}
             action={ui.wrMonthsOpen ? (
-              <button
-                type="button"
-                className="pg-btn pg-btn-sm"
-                onClick={() => setUi({ hideFuture: !ui.hideFuture })}
-                aria-pressed={!ui.hideFuture}
-              >
-                {ui.hideFuture ? 'Show future' : 'Hide future'}
-              </button>
+              /* "Show future" was two of the four things a reader wants to
+                 say about this list. It is the whole set now, and it moves
+                 every month list on the layout rather than this one. */
+              <MonthScopePicker
+                scope={scope}
+                onChange={setScope}
+                className="pg-field pg-field-sm"
+              />
             ) : null}
           >
             <WorkRecordMonths hovered={hovered} onHover={setHovered} onOpenMonth={setOpenMonth} />
@@ -399,6 +407,7 @@ export function TrackerWorkRecord() {
 
           <Slab
             title="Where you stand"
+            bleed
             open={ui.wrStatusOpen}
             onToggle={() => setUi({ wrStatusOpen: !ui.wrStatusOpen })}
             aside={statusAside}
@@ -472,15 +481,11 @@ function Slab({
  */
 function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
-  const now = todayMonth();
-  /* This strip is about months that have not happened yet, so focus mode
-     narrows it to the one you are in. It renders nothing when that month is
-     fine, which is the same as it always did. */
-  const months = ui.focusMode
-    ? [yearOf(now) === ui.year ? now : `${ui.year}-12`]
-    : monthsOfYear(ui.year).filter((month) => (
-      yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
-    ));
+  const { scope } = useMonthScope('many');
+  /* This strip is about months that have not happened yet, so it looks
+     forward whatever else is on screen — the one exception is "This month",
+     where the reader has asked for one month and nothing else. */
+  const months = scopedMonths(ui.year, scope === 'month' ? 'month' : 'ahead');
   // The rule for what needs attention is shared with the ledger, payguard and
   // calc20 — see src/domain/attention.ts. Only the clothes are local.
   const flags = attentionFlags(data, months);

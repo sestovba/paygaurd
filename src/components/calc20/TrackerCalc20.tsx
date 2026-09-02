@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { MonthKey } from '../../domain/types';
-import { Calc20Store, useTracker } from './state';
+import { Calc20Store, useMonthScope, useTracker } from './state';
 import { useTracker as usePayGuard } from '../../state/TrackerProvider';
 import { Header } from './Header';
 import { StreamsSection, ArchivedStreams } from './StreamsSection';
@@ -9,8 +9,10 @@ import { TotalsByMonth } from './TotalsByMonth';
 import { MonthSquares } from './MonthSquares';
 import { StatusSection } from './StatusSection';
 import { SettingsSheet } from './SettingsSheet';
+import type { SettingsSectionId } from '../settingsModel';
 import { StreamSettingsSheet } from './StreamSettingsSheet';
 import { MonthSheet } from './MonthSheet';
+import { MonthScopePicker } from '../MonthScopePicker';
 import {
   CheckIcon, ChevronDownIcon, CollapseAllIcon, ExpandAllIcon,
   GridIcon, PlusIcon
@@ -61,6 +63,7 @@ function TrackerApp({
   const {
     data, ui, setUi, hasData, addStream, setAllCollapsed, setTwpAssessment
   } = useTracker();
+  const { scope, setScope } = useMonthScope('many');
 
   // Theme + glass live on <html> so portaled menus/sheets inherit them.
   useAppearance(ui);
@@ -72,8 +75,10 @@ function TrackerApp({
 
   // Collapsed-section glance summaries — only ever shown while closed, so a
   // reader can tell what's inside without opening it.
+  /* "stream" is the word the state layer uses for a job. It reached the
+     screen here and nowhere else, which is how a data-model noun gets in. */
   const activeAside = ongoing.length
-    ? ongoing.length + (ongoing.length === 1 ? ' stream' : ' streams')
+    ? ongoing.length + (ongoing.length === 1 ? ' job' : ' jobs')
     : 'None yet';
   const monthsAside = money(yearTotal(data, ui.year)) + ' this year';
   const statusAsOf = yearOf(todayMonth()) === ui.year ? todayMonth() : monthsOfYear(ui.year)[11];
@@ -85,7 +90,7 @@ function TrackerApp({
       ? (ui.focusMode
         ? (monthStatus(data, statusAsOf).overSga ? 'Over your limit' : 'Under your limit')
         : monthsOfYear(ui.year).filter((m) => monthStatus(data, m).overSga).length + ' over your limit')
-      : 'Not confirmed';
+      : 'Not told us yet';
 
   // Mixed state behaves like a true hide/show toggle: if anything is visible,
   // Hide all closes it; Show all appears only when every stream is closed.
@@ -93,6 +98,7 @@ function TrackerApp({
     && ongoing.every((s) => ui.collapsed[s.id] === true);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsSectionId | undefined>(undefined);
   const [streamSettingsId, setStreamSettingsId] = useState<string | null>(null);
   const [openMonth, setOpenMonth] = useState<MonthKey | null>(null);
   const [hovered, setHovered] = useState<MonthKey | null>(null);
@@ -120,7 +126,10 @@ function TrackerApp({
       <Header
         session={session}
         onSignOut={onSignOut}
-        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenSettings={() => {
+          setSettingsTab(undefined);
+          setSettingsOpen(true);
+        }}
         onOpenMonth={setOpenMonth}
       />
 
@@ -197,6 +206,19 @@ function TrackerApp({
               open={ui.monthsOpen}
               onToggle={() => setUi({ monthsOpen: !ui.monthsOpen })}
               aside={!ui.monthsOpen ? monthsAside : undefined}
+              /* How much of the year every month list on the screen shows —
+                 this card and the grids inside the job cards above. It is
+                 here rather than in the header because it holds a phrase,
+                 and a phone's header row has no width for one. The button
+                 it replaces said "Hiding future" and repeated on the foot of
+                 every job card; this says all four things and appears once. */
+              action={(
+                <MonthScopePicker
+                  scope={scope}
+                  onChange={setScope}
+                  className="stream-panel-edit"
+                />
+              )}
             >
               {wide ? (
                 <TotalsByMonth hovered={hovered} onHover={setHovered} onOpenMonth={setOpenMonth} />
@@ -219,9 +241,11 @@ function TrackerApp({
           <div className="app-empty">
             <div>
               <div className="app-empty__title">Start with where you stand</div>
+              {/* "The tracker should not guess" is the app talking about
+                   itself, in the first sentence anyone reads on this layout. */}
               <p className="app-empty__note">
-                The tracker should not guess whether trial work months remain.
-                Choose what your records support, then add income.
+                We will not guess how many trial work months you have left. Pick
+                what your own records show, then add where your money comes from.
               </p>
               <TwpStatusControl
                 variant="seg"
@@ -239,9 +263,9 @@ function TrackerApp({
                   <div className="warning__body">
                     <div className="warning__title">Confirm this before relying on it</div>
                     <div className="warning__text">
-                      “Trial months left” should come from your own paperwork —
-                      old pay years, a benefit letter, your Social Security
-                      record. Chosen from memory, every limit after it is wrong.
+                      This should come from your own paperwork — old pay years, a
+                      benefit letter, or your Social Security record. If you pick it
+                      from memory and get it wrong, every limit after it is wrong too.
                     </div>
                   </div>
                 </div>
@@ -254,7 +278,14 @@ function TrackerApp({
               <button className="tonal-button" type="button" onClick={() => setStreamSettingsId(addStream('ten99'))}>
                 <PlusIcon size={16} /> 1099 work
               </button>
-              <button className="text-button" type="button" onClick={() => setSettingsOpen(true)}>
+              <button
+                className="text-button"
+                type="button"
+                onClick={() => {
+                  setSettingsTab('data');
+                  setSettingsOpen(true);
+                }}
+              >
                 Import tracker JSON
               </button>
             </div>
@@ -262,7 +293,13 @@ function TrackerApp({
         )}
       </div>
 
-      {settingsOpen ? <SettingsSheet onClose={() => setSettingsOpen(false)} session={session} /> : null}
+      {settingsOpen ? (
+        <SettingsSheet
+          onClose={() => setSettingsOpen(false)}
+          session={session}
+          initialTab={settingsTab}
+        />
+      ) : null}
       {streamSettingsId ? (
         <StreamSettingsSheetById id={streamSettingsId} onClose={() => setStreamSettingsId(null)} />
       ) : null}

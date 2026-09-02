@@ -1,50 +1,36 @@
 import type { LayoutMode } from '../state/storage';
 
-export type ReviewKind = 'delete' | 'comment' | 'choice' | 'stow';
-
-/** The board's lanes, in the order a note is cycled through them. 'parked'
- *  is the honest answer to most triage — not "this never happened", which is
- *  what deleting the note would say, but "I am not looking at this now". */
-export type ReviewLane = 'open' | 'commented' | 'second' | 'done' | 'parked';
-
-export const LANES: ReviewLane[] = ['open', 'commented', 'second', 'done', 'parked'];
-
-export const LANE_NAME: Record<ReviewLane, string> = {
-  open: 'To do',
-  commented: 'Commented',
-  second: 'Second look',
-  done: 'Done',
-  parked: 'Not now'
-};
-
-/** Lanes still asking for something. Work left, as opposed to work filed. */
-export const LANE_OPEN: ReviewLane[] = ['open', 'commented', 'second'];
-
-/** Both sides write this field, and one of them is a text editor. A value
- *  the app does not know must not make a note vanish off the board — it
- *  lands back in To do, where it can be seen and moved.
+/* One note, one shape.
  *
- *  Archiving is the exception, and it is not really an exception at all:
- *  carrying an element onto a shelf is a thing you have finished doing, not
- *  a thing you are going to do. Every archived note was landing in To do and
- *  being dragged straight to Done, which is a step the board can take
- *  itself. */
-export function laneOf(note: { status?: string; stow?: unknown }): ReviewLane {
-  const lane = LANES.includes(note.status as ReviewLane) ? note.status as ReviewLane : 'open';
-  return note.stow && lane === 'open' ? 'done' : lane;
-}
+ * This file used to carry a second state vocabulary — five `ReviewLane`s with
+ * their own names and their own `laneOf()` — running alongside the eight
+ * `NoteState`s in state.ts, with `verdict` as a third axis and a derived Do
+ * column as a fourth. `status` was typed as the lane, documented as the
+ * state, stored lane values, and was translated on every read. Four
+ * taxonomies, 61 labels, and five notes in the file carrying a `certainty`
+ * value no enumeration defined.
+ *
+ * There is one now, it is defined here because it is part of the note's
+ * shape, and state.ts owns what it means.
+ */
 
-/** What the user decided about something the audit proposed.
+export type ReviewKind = 'delete' | 'comment';
+
+/**
+ * Where a note has got to — which is the same question as whose move it is,
+ * so it is stored once and answers both.
  *
- *  'rejected' is a dismissal: the proposal is off the board. It is still
- *  stored, because that is what stops the same section being proposed again
- *  — but it is not a finding, so it does not sit in the journal as a row
- *  asking for nothing.
+ *     yours ──→ sent ──→ closed
+ *       ↑        │          │
+ *       └────────┘          │   (a reply comes back to you)
+ *       └───────────────────┘   (reopen)
  *
- *  'unsure' is the answer that was missing. Before it, a proposal you had
- *  looked at and could not call had nowhere to go but back into the pile of
- *  ones you had not looked at yet. */
-export type ReviewVerdict = 'approved' | 'rejected' | 'revise' | 'unsure';
+ * `closed` covers every way a note stops asking for something: acted on,
+ * deferred, or looked at and kept. Those were three states, and across 222
+ * notes all 178 closed ones were the first — so the distinction was costing
+ * three labels to record something nobody ever recorded.
+ */
+export type NoteState = 'yours' | 'sent' | 'closed';
 
 /** The palette a note was taken under, so returning to it looks the same. */
 export interface ReviewTheme {
@@ -61,7 +47,9 @@ export interface ReviewAnchor {
   /** Best-effort page/tab name inside that layout. */
   page?: string;
   theme?: ReviewTheme;
-  /** "src/components/TrackerV3.tsx:388" — from React's dev source map. */
+  /** "src/components/TrackerV3.tsx:388" — resolved against the real file by
+   *  the dev server on every write, because React's dev source positions
+   *  count lines in the transformed module. */
   source?: string;
   /** Component stack, outermost last: "MonthGrid › OverviewPage". */
   components?: string;
@@ -71,38 +59,18 @@ export interface ReviewAnchor {
   reviewId?: string;
   /** Class names worth grepping (pg-card, wr-slab, …). */
   hooks?: string;
-  /** First ~140 characters of visible text — the strongest grep handle. */
+  /** First ~140 characters of visible text — a strong grep handle, though CSS
+   *  has often uppercased or truncated it. */
   text?: string;
-  /** The source line as it actually read when the note was taken, trimmed.
+  /**
+   * The source line as it actually read when the note was taken, trimmed.
    *
-   *  `text` is what the *browser* rendered, which CSS has often uppercased or
-   *  truncated, so it frequently matches nothing in the file. This is the
-   *  line itself. It gives a code pass two things nothing else does: an exact
-   *  string to grep for when the line number has drifted, and a way to tell
-   *  "this element is gone" from "this element moved" — if the line is still
-   *  in the file somewhere, the work was not done. */
+   * Written once, by the dev server, and then never touched again — it is
+   * evidence, and evidence that updates itself is not evidence. It gives a
+   * code pass the one thing nothing else here does: a way to tell "this
+   * element moved" from "this element is gone".
+   */
   sourceLine?: string;
-}
-
-/** Where the reviewer dropped a stowed element when putting it back. The app
- *  can only satisfy this when it is a reorder inside one container; otherwise
- *  it is an instruction for the next code pass. */
-export interface ReviewPlacement {
-  /** DOM path of the element it was dropped against. */
-  anchor: string;
-  anchorLabel?: string;
-  position: 'before' | 'after';
-  /** True when the running app could actually put it there. */
-  applied: boolean;
-}
-
-export type TrayEdge = 'left' | 'right' | 'top' | 'bottom';
-
-/** Storage, not judgement: which edge tray the element is parked in. Stowing
- *  something says nothing about whether it should go — the verdict does. */
-export interface ReviewStow {
-  edge: TrayEdge;
-  at: string;
 }
 
 /** Back-and-forth on one note. The app writes 'you'; a code pass writes
@@ -114,74 +82,32 @@ export interface ReviewReply {
   at: string;
 }
 
-export type TraySort = 'newest' | 'oldest' | 'label' | 'flagged';
-
-/** Per-side stash settings, kept on that side's group note so they persist
- *  and travel with everything else in review-notes.json. */
-export interface TraySettings {
-  name?: string;
-  color?: string;
-  sort?: TraySort;
-  /** Collapsed to a handle by the reviewer. Undefined means open. */
-  open?: boolean;
-  /** Where along its edge the shelf was dragged, in pixels from the top (for
-   *  the side shelves) or from the left (for the flat ones). Undefined is the
-   *  shelf's home position. */
-  offset?: number;
-}
-
 export interface ReviewNote {
   id: string;
   kind: ReviewKind;
-  /** 'suggested' = an AI-proposed deletion the user approved.
-   *  'user' = the user picked this element themselves. */
+  /** 'suggested' = an AI-proposed change. 'user' = the reviewer picked this
+   *  element themselves. */
   origin: 'suggested' | 'user';
   /** Short human name for the thing. */
   label: string;
-  /** Why the AI proposed deleting it (suggested deletes only). */
+  /** Why the AI proposed it (suggested notes only). */
   reason?: string;
-  /** How sure the AI was when it proposed this — 'sure' | 'likely' | 'hunch'.
-   *  Absent on notes the reviewer raised themselves: it qualifies a proposal,
-   *  and the reviewer's own notes are not proposals. See state.ts. */
-  certainty?: 'sure' | 'likely' | 'hunch';
-  /** How big the change is — 'small' | 'medium' | 'large'. The other half of
-   *  the estimate: certainty is about the diagnosis, effort about the fix. */
-  effort?: 'small' | 'medium' | 'large';
-  /** Repo-relative paths of screenshots pasted onto this note, e.g.
-   *  "review/shots/el-abc123-mf2k1.png". Paths only — the images live on
-   *  disk so review-notes.json stays a file a person can read. */
-  shots?: string[];
-  /** The user's comment (comment notes only). */
+  /** The reviewer's own words. The most valuable field in the file, and the
+   *  one the console should be fastest at collecting. */
   comment?: string;
-  /** Short intent tags picked in the composer — 'cut', 'reword', 'spacing'.
-   *  Prose says what they mean; these say what kind of change it is, so a
-   *  code pass can sort a screenful of notes without reading every one. */
+  /** What kind of change this is — 'cut', 'move', 'reword', 'redesign'. Prose
+   *  says what is wanted; these say what shape it is, so a screenful can be
+   *  sorted without reading every one. */
   tags?: string[];
-  /** Which alternative won, and what it was up against (choice notes only). */
-  choice?: string;
-  options?: string[];
-  verdict?: ReviewVerdict;
-  /** Parked out of the page. Independent of the verdict. */
-  stow?: ReviewStow;
-  /** Taken off the page to see whether the page is better without it — a
-   *  layer switched off, nothing more. Distinct from `stow`: stowing carries
-   *  the thing into a shelf you can drag it back out of, and hiding just
-   *  turns it off where it stands. Neither is a verdict, and neither touches
-   *  the code. */
+  /** Switched off on the page to see whether the page is better without it.
+   *  Not a verdict, and it never touches the code. */
   hidden?: boolean;
-  /** For a tray-group note: what was parked on that side when it was written. */
-  members?: string[];
-  tray?: TraySettings;
   thread?: ReviewReply[];
-  /** Set when the element was restored by dropping it somewhere new. */
-  placement?: ReviewPlacement;
-  /** Which lane of the board this sits in. Not an inbox to be cleared — a
-   *  to-do that gets moved: said, answered, worth another look, done, or
-   *  deliberately not now. Either side can move it. */
-  status: ReviewLane;
+  /** Whose move it is. Either side writes it. */
+  status: NoteState;
   /** Set by the dev server on every write, never by the app: whether the
    *  element this note points at can still be found in the source.
-   *  'present' | 'absent' | 'unknown'. Read it with `claimCheck()`. */
+   *  Read it with `claimCheck()`. */
   found?: 'present' | 'absent' | 'unknown';
   anchor: ReviewAnchor;
   createdAt: string;

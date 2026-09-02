@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 import type {
   MonthEntry, MonthKey, Paycheck, Stream, StreamType, TrackerData, TwpAssessment
 } from '../domain/types';
-import { todayMonth } from '../domain/months';
+import { resolveScope, scopedMonths, todayMonth } from '../domain/months';
+import type { MonthScope, MonthShape } from '../domain/months';
 import { EMPTY_DATA } from '../domain/types';
 import {
   loadData, loadUi, saveData, saveUi
@@ -237,7 +238,7 @@ export function TrackerProvider({ children, session, onSignOut }: {
       streams: [...current.streams, stream],
       activity: [
         ...current.activity,
-        newActivity(`Added ${type === 'w2' ? 'W-2 job' : '1099 work'} — ${stream.name}`)
+        newActivity(`Added ${type === 'w2' ? 'a job' : 'gig work'} — ${stream.name}`)
       ].slice(-50)
     }));
     return stream.id;
@@ -324,13 +325,17 @@ export function TrackerProvider({ children, session, onSignOut }: {
     snapshot();
     setData((current) => {
       const changed = current.twpAssessment.state !== assessment.state;
-      const label = assessment.state === 'remaining' ? 'TWP remains'
-        : assessment.state === 'complete' ? 'TWP used up' : 'Not sure';
+      /* The activity log is on screen, so it obeys the same rule as every
+         other line: no abbreviations, and it says what happened rather than
+         which field was set. */
+      const label = assessment.state === 'remaining' ? 'you still have trial work months left'
+        : assessment.state === 'complete' ? 'your trial work months are used up'
+        : 'you are not sure about your trial work months';
       return {
         ...current,
         twpAssessment: assessment,
         activity: changed
-          ? [...current.activity, newActivity(`Set TWP status: ${label}`)].slice(-50)
+          ? [...current.activity, newActivity(`You told us ${label}`)].slice(-50)
           : current.activity
       };
     });
@@ -352,7 +357,7 @@ export function TrackerProvider({ children, session, onSignOut }: {
   }, [snapshot]);
 
   const resetAll = useCallback(() => {
-    if (!confirm('Clear everything on this device? This cannot be undone.')) return;
+    if (!confirm('Delete every job, every month and your trial work record from this device? This cannot be undone.')) return;
     setHistory([]);
     setData({
       version: 1, streams: [], priorTrialMonths: [],
@@ -395,5 +400,28 @@ export function useTracker(): TrackerContextValue {
   if (!ctx) throw new Error('useTracker must be used within TrackerProvider');
   return ctx;
 }
+
+/**
+ * Which months this screen should list, and the setter its dropdown needs.
+ *
+ * `shape` is what the layout is for — one month at a time, or a year of rows
+ * (see MonthShape in domain/months.ts). It only decides the default: focus
+ * mode leaves one month standing on a layout built for one, and the months
+ * behind you on a layout built for twelve, because a one-row ledger reads as
+ * a page that failed to load. Once the reader picks from the dropdown their
+ * choice is what is in force, on every layout, until they change it.
+ */
+export function useMonthScope(shape: MonthShape): {
+  scope: MonthScope;
+  months: MonthKey[];
+  setScope: (scope: MonthScope) => void;
+} {
+  const { ui, setUi } = useTracker();
+  const scope = resolveScope(ui.monthScope, ui.focusMode, shape);
+  const months = useMemo(() => scopedMonths(ui.year, scope), [ui.year, scope]);
+  const setScope = useCallback((next: MonthScope) => setUi({ monthScope: next }), [setUi]);
+  return { scope, months, setScope };
+}
+
 
 export type { ThemePref };

@@ -7,8 +7,8 @@ export type TwpState = 'unknown' | 'remaining' | 'complete';
    where the reader is asked about it directly. */
 const OPTIONS: Array<{ state: TwpState; label: string }> = [
   { state: 'unknown', label: 'Not sure' },
-  { state: 'remaining', label: 'Trial months left' },
-  { state: 'complete', label: 'All used up' }
+  { state: 'remaining', label: 'I have trial work months left' },
+  { state: 'complete', label: 'They are all used up' }
 ];
 
 export function TwpStatusPicker({

@@ -14,6 +14,7 @@ import { BadgeCheck, Minus, Plus } from 'lucide-react';
 import { useTracker } from '../../state/TrackerProvider';
 import { useTheme } from '../../theme';
 import { money } from '../../domain/format';
+import { SOURCE_SHORT } from '../../domain/copy';
 import { longMonthName, todayMonth } from '../../domain/months';
 import {
   estimatedGrossFromHours, grossFor, grossFromNet, hoursFor, isActive,
@@ -347,7 +348,7 @@ function Answer({
         {capacity.guessed && counted > 0
           ? `${money(counted)}–${money(capacity.safeCounted)}`
           : money(counted)}
-        {rate ? ` · ${rate.basis === 'observed' ? '≈' : ''}${hourly(rate.rate)}/hr` : ''}
+        {rate ? ` · ${rate.basis === 'observed' ? 'about ' : ''}${hourly(rate.rate)} an hour` : ''}
       </p>
       {/* Each badge wears the mark it names, in the colour it is drawn in on
           the bar above.
@@ -358,7 +359,7 @@ function Answer({
           asks somebody to hold two regimes in their head to read one bar. */}
       <p className="pl-lines">
         <span className="pl-line-key" data-mark="safe">
-          <i aria-hidden="true" />Play it safe<b>{money(safeTarget)}</b>
+          <i aria-hidden="true" />Aim for this<b>{money(safeTarget)}</b>
         </span>
         <span className="pl-line-key" data-mark="limit">
           <i aria-hidden="true" />Do not cross<b>{money(threshold)}</b>
@@ -452,7 +453,10 @@ function Gauge({ low, high, threshold, safeTarget, tryExtra, exact }: {
               label." It was a green rule with nothing on it, named only in a
               legend below that you had to match up by colour. The line says
               what it is, where it is. */}
-          {i === nSafe ? <b className="pl-line-tag" aria-hidden="true">Play it safe</b> : null}
+          {/* The tag over the safety rule. "Play it safe" is an idiom, and
+              this product's copy rule says there are none — it also never
+              said what the number under it *was*. */}
+          {i === nSafe ? <b className="pl-line-tag" aria-hidden="true">Aim for this</b> : null}
         </span>
       ))}
     </div>
@@ -536,13 +540,16 @@ function TryIt({ capacity, hours: extra, onHours: setExtra }: {
       {extra > 0 ? (
         <p className="pl-try-verdict">
           {money(outcome.total)}
+          {/* Four verdicts, three of them distances with the destination
+              left off — "$210 to limit", "$150 to safe". "to safe" is not
+              a phrase; safe is not a place with a name. */}
           {outcome.breaksHoursRule
-            ? ` · past ${TWP_SELF_EMPLOYMENT_HOURS} hrs, uses a trial month`
+            ? ` · past ${TWP_SELF_EMPLOYMENT_HOURS} hours, uses a trial work month`
             : outcome.over > 0
-              ? ` · ${money(outcome.over)} over`
+              ? ` · ${money(outcome.over)} over your limit`
               : outcome.pastSafe
-                ? ` · ${money(capacity.threshold - outcome.total)} to limit`
-                : ` · ${money(outcome.room)} to safe`}
+                ? ` · ${money(capacity.threshold - outcome.total)} left before your limit`
+                : ` · ${money(outcome.room)} left before what we aim for`}
         </p>
       ) : null}
     </section>
@@ -697,8 +704,15 @@ function LogPay({ month, onOpenStream, onSaved }: {
       </div>
 
       <label className="pl-field">
-        <span className="pl-label">{route === 'hours' ? 'Hours worked' : 'Amount'}</span>
-        <span className="pl-money" data-unit={route === 'hours' ? 'hrs' : '$'}>
+        {/* "Amount" is the label that answers none of the four questions —
+            which number, over what period, of what, so what. Each route now
+            names the figure the person is holding. */}
+        <span className="pl-label">
+          {route === 'hours' ? 'Hours worked'
+            : route === 'net' ? 'What reached your bank'
+              : 'What your paystub says before taxes'}
+        </span>
+        <span className="pl-money" data-unit={route === 'hours' ? 'hours' : '$'}>
           <input
             className="pl-input"
             /* `decimal`, not `numeric`: Android gives a keypad with a decimal
@@ -732,7 +746,7 @@ function LogPay({ month, onOpenStream, onSaved }: {
         <>
           <label className="pl-field">
             <span className="pl-label">Miles driven</span>
-            <span className="pl-money" data-unit="mi">
+            <span className="pl-money" data-unit="miles">
               <input
                 className="pl-input"
                 inputMode="decimal"
@@ -754,7 +768,7 @@ function LogPay({ month, onOpenStream, onSaved }: {
           {route !== 'hours' ? (
             <label className="pl-field">
               <span className="pl-label">Hours worked</span>
-              <span className="pl-money" data-unit="hrs">
+              <span className="pl-money" data-unit="hours">
                 <input
                   className="pl-input"
                   inputMode="decimal"
@@ -796,7 +810,7 @@ function TrialMonths({ month }: { month: MonthKey }) {
 
   return (
     <section className="pl-vault">
-      <Plate>Trial months</Plate>
+      <Plate>Trial work months</Plate>
       {/* The one thing on this screen that cannot be undone or earned back,
           so it says what it is for. Two sentences is the whole explanation
           the app gives anywhere. */}
@@ -913,8 +927,8 @@ function EntryLog({ month, onOpenMonth }: {
               </span>
               <span className="pl-log-when">
                 {row.job}
-                {row.hours > 0 ? ` · ${row.hours} hrs` : ''}
-                {row.miles > 0 ? ` · ${row.miles} mi` : ''}
+                {row.hours > 0 ? ` · ${row.hours} hours` : ''}
+                {row.miles > 0 ? ` · ${row.miles} work miles` : ''}
               </span>
             </span>
           </button>
@@ -967,11 +981,11 @@ function Sources({ month, onOpenStream }: {
 }
 
 function describe(stream: Stream, month: MonthKey): string {
-  const bits: string[] = [stream.type === 'ten99' ? 'Self-employed' : 'W-2'];
-  if (stream.hourlyRate) bits.push(`${hourly(stream.hourlyRate)}/hr`);
+  const bits: string[] = [SOURCE_SHORT[stream.type]];
+  if (stream.hourlyRate) bits.push(`${hourly(stream.hourlyRate)} an hour`);
   if (stream.type === 'ten99') {
     const miles = stream.months[month]?.miles ?? 0;
-    if (miles > 0) bits.push(`${miles} mi · −${money(mileageDeduction(stream, month))}`);
+    if (miles > 0) bits.push(`${miles} work miles take off ${money(mileageDeduction(stream, month))}`);
   }
   return bits.join(' · ');
 }

@@ -17,7 +17,7 @@ import {
 import { BrandMark, Chip } from './ui';
 import type { LucideIcon } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
-import { copyFor } from '../domain/copy';
+import { copyFor, SOURCE_CHOICE } from '../domain/copy';
 import type { LayoutMode } from '../state/storage';
 import { useTheme } from '../theme';
 import { knownYears } from '../domain/rules';
@@ -107,7 +107,7 @@ export function TrackerV3() {
     if (pane.kind === 'month') return formatMonth(pane.month);
     if (pane.kind === 'stream') return streamNameById.get(pane.streamId) ?? 'Income source';
     if (pane.kind === 'payday') return 'Set a payday';
-    if (pane.kind === 'quiz') return 'TWP check-in';
+    if (pane.kind === 'quiz') return 'Where you stand';
     if (pane.kind === 'verify') return 'Review status';
     if (pane.kind === 'settings') return 'Settings';
     if (pane.kind === 'notifications') return 'Activity';
@@ -374,7 +374,7 @@ function RootPane({
           <RootHeading
             eyebrow="Jobs"
             title="Income"
-            description={hasDetail ? 'Pick another source.' : 'Add or edit W-2 and 1099 income.'}
+            description={hasDetail ? 'Pick another job.' : 'Everything that pays you, and what you have earned from each.'}
             compact={hasDetail}
           />
         </div>
@@ -400,11 +400,13 @@ function RootPane({
     >
       <div className={hasDetail ? 'p-4 sm:p-5' : 'p-4 sm:p-6 xl:p-8'}>
         <RootHeading
-          eyebrow={page === 'overview' ? 'Home' : 'Limits'}
+          eyebrow={page === 'overview' ? 'Home' : undefined}
           title={page === 'overview' ? 'Overview' : statusLabel}
+          /* "what is left" left out what it was left of, on the sentence
+             that introduces the whole screen. */
           description={page === 'overview'
-            ? 'What you have earned, what is left, and the months that pay you extra.'
-            : 'Your limit, and where you are against it.'}
+            ? 'What you have earned this month, how much more you can earn, and the months that pay you extra.'
+            : 'What you can earn this month, and what you have earned so far.'}
           compact={hasDetail}
         />
 
@@ -740,7 +742,7 @@ function JourneyTrail({
   panes,
   paneLabel,
   onStep,
-  statusLabel = 'TWP & SGA',
+  statusLabel = 'Your limit',
   compact = false
 }: {
   page: PageId;
@@ -824,14 +826,14 @@ function RootHeading({
   description,
   compact
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description: string;
   compact: boolean;
 }) {
   return (
     <div className={compact ? '' : 'max-w-2xl'}>
-      <p className="label-caps text-accent-foreground">{eyebrow}</p>
+      {eyebrow ? <p className="label-caps text-accent-foreground">{eyebrow}</p> : null}
       <h1 className={`display-figure mt-1 ${compact ? 'text-3xl' : 'text-4xl sm:text-5xl'}`}>{title}</h1>
       <p className="type-muted mt-2">{description}</p>
     </div>
@@ -848,46 +850,40 @@ function NewSourcePane({
   onChoose: (type: StreamType) => void;
 }) {
   return (
+    /* v3-new-source-tutorial, and the reviewer could not find it: "I cant see
+       it, I am not sure what is being talked about." It is the Add income
+       sheet, and it carried four layers of narration over two buttons — an
+       eyebrow naming the genre, a title, a subtitle restating the two buttons
+       below it, and a numbered list whose step 01 was the thing you were
+       being asked to do at that moment and whose step 03 was not an action at
+       all. The eyebrow, the subtitle and the list are gone.
+
+       The labels mattered more than any of that. They read "W-2 employee" and
+       "1099 contract" — the pair SOURCE_CHOICE exists to prevent, because a
+       driver does not know which one they are, picks the first, and loses the
+       mileage deduction only the second one has. */
     <Sheet
       title="Add income"
-      eyebrow="Choose a source"
       variant="inline"
       backLabel={backLabel}
       onClose={onClose}
     >
-      <p className="type-muted">Choose W-2 or 1099 income.</p>
       <div className="v3-source-choices grid gap-3">
         <SourceChoice
           icon={WalletCards}
-          label="W-2 employee"
-          description="Regular paychecks from an employer."
+          label={SOURCE_CHOICE.w2.label}
+          description={SOURCE_CHOICE.w2.description}
           tone="good"
           onClick={() => onChoose('w2')}
         />
         <SourceChoice
           icon={BriefcaseBusiness}
-          label="1099 contract"
-          description="Freelance, gig, or client income."
+          label={SOURCE_CHOICE.ten99.label}
+          description={SOURCE_CHOICE.ten99.description}
           tone="info"
           onClick={() => onChoose('ten99')}
         />
       </div>
-      <ReviewTarget
-        id="v3-new-source-tutorial"
-        label="Three-step tutorial"
-        reason="The choices already make the flow clear; this repeats interface instructions."
-        certainty="hunch"
-        layout="responsive"
-      >
-        <div className="rounded-xl border border-border bg-surface-2 p-4">
-          <p className="label-caps">What happens next</p>
-          <ol className="type-muted mt-3 space-y-2">
-            <li className="flex gap-2"><span className="num font-bold text-foreground">01</span> Choose the source type.</li>
-            <li className="flex gap-2"><span className="num font-bold text-foreground">02</span> Add schedule and earnings details.</li>
-            <li className="flex gap-2"><span className="num font-bold text-foreground">03</span> Return to the overview.</li>
-          </ol>
-        </div>
-      </ReviewTarget>
     </Sheet>
   );
 }
@@ -945,7 +941,7 @@ function ActivityPane({
 
   return (
     <Sheet
-      title="Alerts"
+      title="What needs you"
       variant="inline"
       backLabel={backLabel}
       onClose={onClose}

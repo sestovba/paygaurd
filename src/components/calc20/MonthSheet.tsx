@@ -87,10 +87,10 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
               const heavy = plan.heavyMonths.includes(Number(month.slice(5, 7)));
               note = 'Payday forecast: ' + count + (count === 1 ? ' scheduled check' : ' scheduled checks');
               if (heavy) note += ' — one more than usual';
-              note += '. Enter gross earned during this month; pay-period dates control attribution.';
+              note += '. Type what you were paid before taxes for this month.';
             } else if (stream.type === 'ten99') {
-              note = 'Counts against this month alone. The annual total on the '
-                + 'card spreads a year figure evenly instead.';
+              note = 'This counts in this month only. The year total on the card '
+                + 'spreads one figure evenly across every month instead.';
             }
 
             return (
@@ -134,8 +134,8 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
                 {note ? <div className="help-note">{note}</div> : null}
                 {stream.type === 'w2' && stream.hourlyRate && !entry.gross ? (
                   <div className="help-note">
-                    Gross fills in from hours × ${stream.hourlyRate}/hr when you enter
-                    hours here — edit it if the actual paystub differs.
+                    Type your hours and we will work the pay out at ${stream.hourlyRate} an
+                    hour. Change it if your paystub says something different.
                   </div>
                 ) : null}
                 {checkDriven ? (
@@ -149,19 +149,22 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
 
           {active.length ? (
             <div className="field">
-              <span className="eyebrow">Impairment-related work expenses</span>
+              {/* "Impairment-related work expenses" is SSA's name for it and
+                   "IRWE" is SSA's abbreviation for that. The reader knows it
+                   as money they have to spend in order to be able to work. */}
+              <span className="eyebrow">Things you pay for so you can work</span>
               <NumericExprInput
                 className="num-input"
                 value={irwe || undefined}
                 placeholder="0"
-                aria-label={`IRWE ${formatMonth(month)}`}
+                aria-label={`Things you pay for so you can work, ${formatMonth(month)}`}
                 onCommit={(next) => setIrwe(month, next)}
               />
               <div className="help-note">
-                Costs your impairment requires for you to work — specialized transport,
-                attendant care, adaptive equipment. Comes off the combined total above,
-                not any one source.
-                {irwe > 0 ? ` ${money(streamsTotal)} − ${money(irwe)} IRWE = ${money(status.countable)}.` : ''}
+                Costs your disability makes you pay in order to work — special transport,
+                someone to help you, equipment you need. These come off your total, not
+                off one job.
+                {irwe > 0 ? ` ${money(streamsTotal)} minus ${money(irwe)} leaves ${money(status.countable)}.` : ''}
               </div>
             </div>
           ) : null}
@@ -175,8 +178,8 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
                 </div>
                 <div className="warning__text">
                   {phase === 'trialWork'
-                    ? `Over ${money(rules.trialWork)}. Earning more in this same month does not use another one.`
-                    : `${money(status.countable - rules.sga)} over your ${money(rules.sga)} limit.`}
+                    ? `You went over ${money(rules.trialWork)}. Earning more this same month does not use another one.`
+                    : `You are ${money(status.countable - rules.sga)} over your limit of ${money(rules.sga)}.`}
                 </div>
               </div>
             </div>

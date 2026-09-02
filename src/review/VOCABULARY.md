@@ -54,7 +54,8 @@ a note, said nothing at all.
 | **Delete** | Throw away the note and its thread. The element is untouched. | Remove. |
 | **Hide** | Switch the element off on screen to see whether you miss it. Reversible, code untouched. Puts the note in **Trying**. | Cut; Delete. |
 | **Move** | Reposition the element in the layout. | Changing a note's state. |
-| **Close** | Leave the console, or shut an open row. | Done. |
+| **Approve** | Accept work that came back: the change was made and it is right. The one act that may set **Done**. | Close; Keep. |
+| **Close** | Leave the console, or shut an open row. | Done; Approve. |
 | **Dismiss** | Take a note off the board. A proposal I made is remembered as dismissed so it is not made again; a note you wrote has nothing to remember, so it goes. Undo brings either back. | Remove; Delete. |
 | **Restore** | Put a hidden element back on the page. The answer to a trial you did miss. | Undo. |
 | **Undo** | Step back through decisions. Never touches the app's own data. | Delete; Restore. |
@@ -153,6 +154,16 @@ left, and a row is only ever wearing one of each.
   watching. They are not the same: Second look is *filed, come back to it*;
   Unsure is *not filed, cannot call it*. If they start being used
   interchangeably, one of them is wrong.
+- **Close** was doing the job **Approve** does now. The button on an answered
+  note said Close, which this file had already defined as leaving the console
+  or shutting a row — so the one act that files work as Done was wearing the
+  word for the act that files nothing. Accepting an answer is **Approve**.
+- **Keep** was on the card after Claude had replied, where it read as
+  "staying as it is" about an element that had just been changed — a sentence
+  with two meanings and no way to pick one. An answered note offers four
+  verbs and Keep is not among them: Approve, Cut, Rework, Ask. The set for
+  each state is `decisionsFor` in `state.ts`, and it is the only place that
+  decides which verbs a note is asked with.
 
 ## Where the words live
 

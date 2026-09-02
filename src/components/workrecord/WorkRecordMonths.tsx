@@ -1,4 +1,4 @@
-// Countable by month, across every stream — the Months slab's whole content.
+// Counted each month, across every stream — the Months slab's whole content.
 //
 // Ported from sga_calc20's TotalsByMonth. The rule it exists to enforce is
 // kept: a fill says what happened, and proximity to a limit is a small figure
@@ -6,9 +6,9 @@
 // not look like one that did.
 
 import type { MonthKey } from '../../domain/types';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { money } from '../../domain/format';
-import { formatMonth, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { formatMonth, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit, yearTotal } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { rulesFor } from '../../domain/rules';
@@ -28,7 +28,7 @@ export function WorkRecordMonths({
   const now = todayMonth();
   const rules = rulesFor(ui.year);
   const phase = benefitPhase(data, `${ui.year}-12`);
-  const months = listedMonths(ui.year, ui.hideFuture, ui.focusMode);
+  const { months } = useMonthScope('many');
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
   /* One limit, never named as a rule. Which regime is in force decides the
@@ -43,7 +43,7 @@ export function WorkRecordMonths({
     <div className="pg-card overflow-hidden">
       <header className="pg-section-head">
         <span className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="pg-section-title">Countable by month</span>
+          <span className="pg-section-title">Counted each month</span>
           <span className="pg-section-meta hidden truncate xs:block">{limitLabel}</span>
         </span>
       </header>
@@ -107,10 +107,10 @@ export function WorkRecordMonths({
         {phase === 'trialWork' ? (
           <>
             <span className="wr-legend-item">
-              <span className="wr-legend-swatch" data-fill="keep" />trial work month kept
+              <span className="wr-legend-swatch" data-fill="keep" />no trial work month used
             </span>
             <span className="wr-legend-item">
-              <span className="wr-legend-swatch" data-fill="spent" />one trial work month used
+              <span className="wr-legend-swatch" data-fill="spent" />used one trial work month
             </span>
           </>
         ) : phase === 'sga' ? (
@@ -132,7 +132,6 @@ export function WorkRecordMonths({
           id="workrecord-months-year-total"
           label="Monthly-history year total"
           reason="The total repeats the headline and can hide the one month that went over."
-          certainty="sure"
           layout="workrecord"
         >
           <span className="wr-legend-item">

@@ -188,9 +188,9 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
                 </label>
               </div>
               <p className="help-note">
-                Used to estimate a per-check gross for the paycheck forecast below,
-                and to suggest a starting Gross whenever you enter Hours for a month —
-                edit it if the actual paystub differs.
+                We use this to work out what each paycheck is worth, and to fill in
+                your pay when you type hours for a month. Change it if your paystub
+                says something different.
               </p>
 
               {plan ? (
@@ -279,7 +279,7 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
                     </span>
                     <span className="rows__value">
                       ${period.rate.toFixed(3).replace(/0$/, '')}
-                      <span className="rows__unit">/mi</span>
+                      <span className="rows__unit"> a mile</span>
                     </span>
                   </div>
                 ))}

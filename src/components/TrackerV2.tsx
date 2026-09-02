@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Menu, Settings } from 'lucide-react';
 import { BrandMark } from './ui';
-import { useTracker } from '../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../state/TrackerProvider';
 import { copyFor } from '../domain/copy';
 import { useTheme } from '../theme';
 import { knownYears } from '../domain/rules';
@@ -26,7 +26,7 @@ import type { MonthKey } from '../domain/types';
 import { ReviewTarget } from '../review/ReviewTarget';
 
 function pageLabel(page: PageId): string {
-  return page === 'overview' ? 'Overview' : page === 'income' ? 'Income' : 'TWP & SGA';
+  return page === 'overview' ? 'Overview' : page === 'income' ? 'Income' : 'Your limit';
 }
 
 type DetailRequest =
@@ -46,6 +46,7 @@ type DetailRequest =
  *  several independent booleans silently piling up. */
 export function TrackerV2() {
   const { ui, setUi, resetAll } = useTracker();
+  const { scope } = useMonthScope('many');
   useTheme(ui.theme);
 
   const [page, setPage] = useState<PageId>('overview');
@@ -192,15 +193,16 @@ export function TrackerV2() {
                 id="v2-year-history"
                 label="Full-year history"
                 reason="The full month grid and annual total repeat the monthly risk signals and distract from TWP, SGA, and 3-/5-paycheck months."
-                certainty="hunch"
                 layout="v2"
               >
                 <div className="flex flex-col gap-3">
-                  {/* "Full-year history" over a single tile is a lie focus mode
-                      tells; MonthGrid names the month itself in that mode, so
-                      this caption steps aside rather than contradict it. */}
-                  {ui.focusMode ? null : (
-                    <p className="label-caps text-accent-foreground">Full-year history</p>
+                  {/* "Full-year history" over a single tile is a lie, and so
+                      is it over the nine months of "so far this year".
+                      MonthGrid names the month itself when the scope leaves
+                      one, so the caption steps aside then; otherwise it says
+                      the one thing true of every wider scope. */}
+                  {scope === 'month' ? null : (
+                    <p className="label-caps text-accent-foreground">History</p>
                   )}
                   <MonthGrid onOpenMonth={(m) => setDetail({ kind: 'month', month: m })} />
                   <YearTotal />

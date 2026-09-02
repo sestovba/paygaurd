@@ -1,8 +1,10 @@
 import { Zap } from 'lucide-react';
-import { Chip, Switch } from './ui';
-import { useTracker } from '../state/TrackerProvider';
+import { Chip } from './ui';
+import { useMonthScope, useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
-import { formatMonth, listedMonths, longMonthName, shortMonthName, todayMonth, yearOf } from '../domain/months';
+import { formatMonth, longMonthName, shortMonthName, todayMonth, yearOf } from '../domain/months';
+import { MonthScopePicker } from './MonthScopePicker';
+import type { MonthScope } from '../domain/months';
 import { monthStatus, nearLimit } from '../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths, payPlan } from '../domain/paySchedule';
 import { benefitPhase } from '../domain/trialWork';
@@ -40,10 +42,10 @@ function stateLabel(status: MonthStatus, phase: BenefitPhase): string | null {
 }
 
 export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
-  const { data, ui, setUi } = useTracker();
+  const { data, ui } = useTracker();
+  const { scope, months: listed, setScope } = useMonthScope('many');
   const now = todayMonth();
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
-  const checked = ui.hideFuture;
 
   /* Review note: "maybe hide the calendar and have something else made
      instead of converting it to what its not meant to do."
@@ -55,9 +57,15 @@ export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => v
      this one. What it shows is the half of the month the hero does not: the
      hero answers "am I safe", and this answers "what actually lands in this
      month" — the paydays, on the days they fall. */
-  if (ui.focusMode) {
-    const month = yearOf(now) === ui.year ? now : `${ui.year}-12`;
-    return <MonthUpClose month={month} onOpenMonth={onOpenMonth} />;
+  if (scope === 'month') {
+    return (
+      <MonthUpClose
+        month={listed[0]}
+        onOpenMonth={onOpenMonth}
+        scope={scope}
+        onScopeChange={setScope}
+      />
+    );
   }
 
   /* Hide future is on by default, which meant a 3- or 5-paycheck month was
@@ -66,22 +74,25 @@ export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => v
      the one thing about the future this app can state as fact, so they stay
      in the grid whatever Hide future says, and they lead it: what is coming,
      then what has happened. */
-  const listed = listedMonths(ui.year, ui.hideFuture, false);
   const upcoming = [...extraPay.keys()].filter((m) => m > now && !listed.includes(m)).sort();
   const months = [...upcoming, ...listed];
 
   return (
     <section className="panel p-5 sm:p-6 xl:col-span-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold">Every month this year</h2>
-        <label className="flex items-center justify-between gap-3 text-base text-muted-foreground sm:justify-end">
-          Hide future
-          <Switch
-            checked={checked}
-            label="Hide future months"
-            onChange={() => setUi({ hideFuture: !checked })}
-          />
-        </label>
+        {/* "Every month this year" was true when the only alternative was
+            all twelve or one. With four positions beside it, the heading is
+            the noun and the dropdown is the qualifier — one idea each. */}
+        <h2 className="text-lg font-semibold">Months</h2>
+        {/* "Hide future" was a two-position switch on a four-position
+            question. Same axis, all of it: one month, the months behind you,
+            the months ahead, or the whole year. */}
+        <MonthScopePicker
+          scope={scope}
+          onChange={setScope}
+          className="flex items-center justify-between gap-3 text-base text-muted-foreground sm:justify-end"
+          selectClassName="field-input w-48"
+        />
       </div>
 
       {upcoming.length ? (
@@ -161,7 +172,10 @@ export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => v
               {near ? (
                 <p className="mt-2">
                   <Chip tone={near.kind === 'sga' ? 'danger' : 'warn'}>
-                    {money(near.room)} below {near.kind === 'trial' ? 'TWP' : 'SGA'}
+                    {/* Was "$162 below TWP" / "$162 below SGA": an
+                        abbreviation, and a distance to a thing the reader
+                        has never been shown. */}
+                    {money(near.room)} left before your limit
                   </Chip>
                 </p>
               ) : null}
@@ -186,8 +200,15 @@ export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => v
  * That is the calendar fact this whole product exists for, and at one-month
  * range it can be shown as actual dates rather than as a badge on a tile.
  */
-function MonthUpClose({ month, onOpenMonth }: {
-  month: MonthKey; onOpenMonth: (month: MonthKey) => void;
+/* The month picker travels with this panel, not just with the grid it
+   replaces. Without it, choosing "This month" is a door that locks behind
+   you: the control that made the choice is in the grid, and the grid is what
+   just went away. */
+function MonthUpClose({ month, onOpenMonth, scope, onScopeChange }: {
+  month: MonthKey;
+  onOpenMonth: (month: MonthKey) => void;
+  scope: MonthScope;
+  onScopeChange: (scope: MonthScope) => void;
 }) {
   const { data } = useTracker();
   const status = monthStatus(data, month);
@@ -215,8 +236,16 @@ function MonthUpClose({ month, onOpenMonth }: {
 
   return (
     <section className="panel p-5 sm:p-6 xl:col-span-6">
-      {/* The month is the heading, not a label above one. */}
-      <h2 className="display-figure text-3xl sm:text-4xl">{longMonthName(month)}</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        {/* The month is the heading, not a label above one. */}
+        <h2 className="display-figure text-3xl sm:text-4xl">{longMonthName(month)}</h2>
+        <MonthScopePicker
+          scope={scope}
+          onChange={onScopeChange}
+          className="sm:shrink-0"
+          selectClassName="field-input w-48"
+        />
+      </div>
       <p className="type-muted mt-1">
         {status.countable > 0 ? money(status.countable) : 'Nothing'} counted so far
         {state ? ` · ${state}` : ''}

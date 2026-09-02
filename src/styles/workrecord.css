@@ -234,7 +234,13 @@
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding-right: var(--wr-pad);
+  padding-right: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .wr-slab-head {
+    padding-right: 0.875rem;
+  }
 }
 
 .wr-slab-head-toggle {
@@ -297,7 +303,10 @@
    a vertical rule to say where it starts. */
 .wr-slab-body[data-bleed] { padding-inline: 0; }
 
-.wr-slab-body[data-bleed] > .pg-card {
+.wr-slab-body[data-bleed] > .pg-card,
+.wr-slab-body[data-bleed] .pg-card,
+.pg-workrecord .pg-card,
+.pg-workrecord .panel {
   border-left: 0;
   border-right: 0;
   border-radius: 0;

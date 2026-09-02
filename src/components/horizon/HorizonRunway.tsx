@@ -20,9 +20,9 @@
 // question is not what happened.
 
 import { AlertTriangle, Zap } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { money } from '../../domain/format';
-import { formatMonth, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
+import { formatMonth, scopedMonths, shortMonthName, todayMonth } from '../../domain/months';
 import { monthStatus, nearLimit } from '../../domain/earnings';
 import { extraPaycheckMonths } from '../../domain/paySchedule';
 import { activeThreshold, benefitPhase } from '../../domain/trialWork';
@@ -33,8 +33,8 @@ type Fill = 'over' | 'used' | 'near' | 'clear' | 'empty';
 const FILL_MEANING: Record<Fill, string> = {
   over: 'over your limit',
   used: 'uses a trial work month',
-  near: 'close to the limit',
-  clear: 'under the limit',
+  near: 'close to your limit',
+  clear: 'under your limit',
   empty: 'nothing recorded yet'
 };
 
@@ -44,23 +44,25 @@ const FILL_MEANING: Record<Fill, string> = {
  * app has decided never to explain. It is built from the fills actually on
  * the track instead, which makes that impossible by construction. */
 const KEY_ORDER: ReadonlyArray<{ fill: Fill; label: string }> = [
+  /* Each entry finishes its own sentence. "Close" and "Under" were
+     comparatives with the thing compared to left out, on the key whose whole
+     job is explaining the colours. */
   { fill: 'over', label: 'Over your limit' },
-  { fill: 'used', label: 'Trial work month' },
-  { fill: 'near', label: 'Close' },
-  { fill: 'clear', label: 'Under' }
+  { fill: 'used', label: 'Uses a trial work month' },
+  { fill: 'near', label: 'Close to your limit' },
+  { fill: 'clear', label: 'Under your limit' }
 ];
 
 export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
+  const { scope } = useMonthScope('many');
   const now = todayMonth();
-  const thisYear = yearOf(now) === ui.year;
 
-  /* Focus mode leaves one month standing. The runway is the most
-     forward-looking surface in the app, which is precisely what focus mode
-     exists to put away. */
-  const months = ui.focusMode
-    ? [thisYear ? now : monthsOfYear(ui.year)[11]]
-    : monthsOfYear(ui.year).filter((m) => !thisYear || m >= now);
+  /* The runway is the months you have left, so it looks forward whatever
+     else is on screen — "up to this month" and "all year" both mean the
+     runway ahead here, because a runway behind you is not one. The one
+     scope it does obey is "This month": the reader asked for one month. */
+  const months = scopedMonths(ui.year, scope === 'month' ? 'month' : 'ahead');
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 
   // Where the year is heading, said as a month rather than a rate. The first
@@ -112,10 +114,10 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
         {crossing ? (
           <p className="hz-runway-lede" data-tone="warn">
             <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
-            At this pace you cross the limit in {formatMonth(crossing).split(' ')[0]}.
+            If you keep earning this much, you go over your limit in {formatMonth(crossing).split(' ')[0]}.
           </p>
         ) : (
-          <p className="hz-runway-lede">Nothing ahead crosses a limit on what you have entered.</p>
+          <p className="hz-runway-lede">Nothing you have entered takes you over your limit this year.</p>
         )}
       </header>
 
@@ -130,7 +132,7 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
                 `${formatMonth(month)}: ${FILL_MEANING[fill]}`
                 + (month === now ? ', current month' : '')
                 + (extra ? `, ${extra.counts.join(' or ')} paychecks` : '')
-                + (room != null && room > 0 ? `, ${money(room)} of room left` : '')
+                + (room != null && room > 0 ? `, ${money(room)} left before your limit` : '')
               }
             >
               <span className="hz-stop-month">{shortMonthName(month).toUpperCase()}</span>
@@ -144,6 +146,9 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
               ) : null}
 
               <span className="hz-stop-room">
+                {/* Inside a track of months, under a heading that names the
+                     limit — so "left" and "over" have their subject from the
+                     surface rather than repeating it twelve times. */}
                 {room == null ? '—'
                   : room > 0 ? `${money(room)} left`
                     : `${money(Math.abs(room))} over`}

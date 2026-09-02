@@ -3,11 +3,48 @@
 > ## ▶ START HERE: `review/REVIEW-NOTES.md`
 >
 > **That file is the brief.** It is the product owner talking about this app,
-> screen by screen, in their own words. Read it before you read any code and
-> before you propose anything — most of what looks like a free choice in this
-> codebase has already been decided there, and the reasoning is in the note.
+> screen by screen, in their own words. Most of what looks like a free choice
+> in this codebase has already been decided there, and the reasoning is in the
+> note.
 >
-> The **"Owed to Claude"** section at the top of it is the work queue.
+> **Read the first ~50 lines, not the file.** It is ~1,900 lines and the body
+> is mostly closed items. Everything you need on a cold start is in three
+> generated sections at the top:
+>
+> | Section | Is |
+> |---|---|
+> | **Owed to Claude** | the work queue. If it says *nothing is waiting*, there is none. |
+> | **Claims that do not match the code** | notes filed as done whose element is still in the source. One of the two is lying — check before trusting either. |
+> | **Not anchored to anything** | comments with no element. Not actionable until they point at something. |
+>
+> Read a layout's own section in the body only when you are about to work on
+> that layout. To search the whole set, query `review/review-notes.json`
+> (~180 notes, 266KB) rather than reading the Markdown.
+
+## Where things stand right now
+
+`npm run state` regenerates [`docs/STATE.md`](docs/STATE.md) — branch,
+uncommitted work grouped by area, recent commits, and the open queue count.
+**Run it at the start of a session.** It reports facts; the *why* behind
+anything in flight lives in the review notes, per the notepad rule below.
+
+## ▶ Also read: `docs/WORKING-WITH-SERGEY.md`
+
+How to read a request and answer it, what is locked, and where being wrong is
+expensive. It is clustered by impact — the first section applies to every
+message. Four things from it before you touch anything:
+
+- **Never start what you cannot finish.** Finished = code changed + typecheck
+  passes + verified in the running app + review note replied. If all four do
+  not fit in the budget left, split it or write it down and ask.
+- **"Why is …" is a change request, not a question.** Answering with the
+  reason and stopping is a non-answer.
+- **A comment is a direction, not a local edit.** Fix the rule, then carry it
+  to the cousin layouts.
+- **Never call visual work done from a passing typecheck.** Open the app.
+
+If the code and that file disagree, one is wrong. Fix it — never leave a
+contradictory rule standing.
 
 ## Answering a review note
 
@@ -23,12 +60,32 @@ catch people out:
 
 - **Do not hand-edit either file while the dev server is running.** The app
   owns them and will overwrite you. Stop the server first.
-- **`done` is never asserted, only earned.** It is a claim about the code, so
-  a note that still owes a change and has no reply saying it was made reads
-  back as `sent`, whatever the word says.
+- **Stopping it is not enough — the browser holds a copy.** The page loaded
+  the notes once and pushes its whole in-memory set back on the next run, so
+  notes you added while the server was down are wiped the moment you start it
+  again, not just while it is up. Write notes **last**, after the final
+  verification pass, and do not start the server again afterwards. If you must
+  (re-verify, another round of feedback), expect to re-add them and check with
+  `git diff review/review-notes.json` before committing.
+- **`done` is never asserted, only earned — but the earning closes it.** It
+  is a claim about the code, so a note that still owes a change and has no
+  reply naming the file it changed reads back as `sent`, whatever the word
+  says. A reply that *does* name a file closes the note itself and marks it
+  "by Claude": the reviewer pointed at a thing and said what to do, and work
+  they asked for and received is not work left in their queue. Reopen is one
+  press away, and the evidence is re-checked on every read.
+
+- **The reviewer's words overrule the labels.** A verdict is a button pressed
+  once and a tag is a chip picked off a list; the sentence is what they
+  meant. A note whose comment opens with an instruction takes its verb from
+  that sentence, above any verdict or tag. Only when it is unambiguous — the
+  patterns are anchored to a leading imperative, so "remove the border" is an
+  ask and "I would not remove this" is not. Anything unclear falls through to
+  the labels rather than being guessed at.
 
 `src/review/VOCABULARY.md` is the console's own dictionary — one word, one
-meaning. If you add or rename a label, it goes there first.
+meaning. If you add or rename a label, it goes there first. The *product's*
+dictionary is a different file: [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
 
 ## The review file is also the notepad
 
@@ -70,10 +127,20 @@ Not a general-purpose finance app. Every user is on SSDI/SSI — disabled, low
 income, often on a cheap Android with an old WebView. Many do gig work.
 These are constraints, not preferences:
 
-- **This month only.** `UiState.focusMode` (default **on**) collapses every
-  layout to the current month — no calendars, no charts, no year totals. A
-  twelve-cell grid is a wall for this reader, and nobody keeps a benefits
-  tracker current for a year.
+- **This month only.** `UiState.focusMode` (default **on**) takes the
+  calendars, the charts and the year totals off every layout. A twelve-cell
+  grid is a wall for this reader, and nobody keeps a benefits tracker current
+  for a year.
+- **How many months is a separate question.** `UiState.monthScope` owns it —
+  `month` / `sofar` / `ahead` / `year`, in `domain/months.ts`. Unset means
+  "whatever focus mode implies", and that is not the same answer everywhere:
+  the layouts built for one month (`plan`, `pocket`) show one, and the ones
+  built to hold a year (`ledger`, `payguard`, `workrecord`, `calc20`, and the
+  shared `MonthGrid`) start at this month and keep what is behind it. One row
+  in a layout drawn around twelve reads as a page that failed to load, not as
+  a deliberately quiet screen. Those layouts each carry a `MonthScopePicker`
+  so the reader can say; `plan` and `pocket` do not, and `resolveScope`
+  ignores the setting for them.
 - **The number people have is net.** Gross is what SSA counts and what almost
   nobody can find. Ask for what reached the bank and convert, out loud.
 - **Answer in hours where you can.** Dollars are the unit the rule is written
@@ -83,11 +150,26 @@ These are constraints, not preferences:
 - **Miles are the 1099 lever.** $1,000 from a delivery app can be under $300
   countable once mileage comes off, and almost no driver knows it.
 - **Say it plainly.** No jargon ("TWP", "1099", "gross"), no idioms, one idea
-  per sentence, one-word labels where possible. The copy rules are written
-  out at the foot of `src/components/pocket/TrackerPocket.tsx`.
+  per sentence. The words themselves — the master vocabulary, the four
+  questions every label has to answer, the banned list, and the per-layout
+  tone variants — are [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md), with
+  `src/domain/copy.ts` as its executable half.
 - **If it needs explaining, it is designed wrong.** Prefer teaching by
   interaction — typing miles and watching the deduction appear beats a
   paragraph about the mileage rule.
+
+### The device is the constraint
+
+Old Android WebViews. These are not preferences and a polish pass must not
+introduce them:
+
+- no `color-mix()`
+- no `backdrop-filter`
+- no web fonts
+- no blurred shadows
+
+Prefer flat fills, hard edges and precomputed values. `plan/` and `pocket/`
+are built to this and are the reference.
 
 ## Where the truth lives
 
@@ -100,7 +182,7 @@ things there, not in a layout, and every screen gets it at once.
 | `earnings.ts` | What counts: gross, mileage, `nearLimit` |
 | `trialWork.ts` | The 9 months in a rolling 60, and which limit applies |
 | `capacity.ts` | Room in **hours**, the three stages, the estimate band |
-| `months.ts` | `listedMonths()` — the one helper focus mode goes through |
+| `months.ts` | `scopedMonths()` — the one helper every month list goes through |
 
 There are ten layouts in `src/components/`. `plan/` and `pocket/` are the
 reference shape; the older ones are being peeled back toward them. Shared

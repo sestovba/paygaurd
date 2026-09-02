@@ -14,6 +14,26 @@ Working on this with an AI assistant? [`CLAUDE.md`](CLAUDE.md) is the
 orientation: the review protocol, the audience constraints that are not
 negotiable, and where in `src/domain/` the truth actually lives.
 
+## How to work on this
+
+**[docs/WORKING-WITH-SERGEY.md](docs/WORKING-WITH-SERGEY.md)** — one file,
+clustered by impact, holding only what changes a decision.
+
+1. **Before you answer anything** — what his words mean (*"Why is …"* is a
+   change request, not a question), the answer shape, and the rule that you
+   never start what you cannot finish in the session budget left.
+2. **Before you change anything** — a comment is a direction, not a local
+   edit: fix the rule in `src/domain/`, then carry it to the cousin layouts.
+3. **Where being wrong is expensive** — the trial-work and self-employment
+   calculation questions that need a decision rather than a guess.
+4. **Craft rules for this product** — alignment measured from the viewport
+   edge, flat structure, reversible over interruptive.
+5. **Settled, and rejected** — what not to reopen and what not to re-propose.
+
+It replaces the SGA Tracker context packs that preceded this codebase, and is
+meant to be updated in the same pass as the code rather than in a follow-up
+that never happens.
+
 ## Running it
 
 ```bash

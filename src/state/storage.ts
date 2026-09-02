@@ -1,6 +1,7 @@
 // Persistence. Local-only, one key, one dataset, multi-year.
 
 import type { MonthKey, TrackerData } from '../domain/types';
+import type { MonthScope } from '../domain/months';
 import { EMPTY_DATA } from '../domain/types';
 
 const DATA_KEY = 'pg-data-v1';
@@ -16,7 +17,7 @@ export type LedgerTheme = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
  * It is nested rather than flattened because that layout arrived with two
  * dozen of its own switches, and spreading them across the shared record
  * would make it impossible to see which preference belongs to which screen.
- * Everything the layouts genuinely share — year, hideFuture, theme, sync,
+ * Everything the layouts genuinely share — year, monthScope, theme, sync,
  * terms — stays on UiState below and is read straight from there.
  *
  * Note `layout` here is the Calc20 *stream arrangement*, not UiState.layout
@@ -81,7 +82,16 @@ export const DEFAULT_CALC20_UI: Calc20Ui = {
 
 export interface UiState {
   year: number;
-  hideFuture: boolean;
+  /**
+   * How much of the year the month lists show, when the reader has said.
+   *
+   * Unset means "whatever focus mode implies" — see `defaultScope` in
+   * domain/months.ts — so the switch in Settings still moves every screen,
+   * and picking from a layout's own dropdown takes over from it. One field
+   * rather than two: this replaced `hideFuture`, which was the same axis
+   * with two of the four positions.
+   */
+  monthScope?: MonthScope;
   theme: ThemePref;
   /** Layout selection is kept beside the other device-local preferences so
    *  comparing modes does not reset on every refresh. */
@@ -128,7 +138,6 @@ export interface UiState {
 
 export const DEFAULT_UI: UiState = {
   year: new Date().getFullYear(),
-  hideFuture: true,
   theme: 'system',
   layout: 'plan',
   ledgerTheme: 'paper',
@@ -161,12 +170,17 @@ export function loadUi(): UiState {
   try {
     const raw = localStorage.getItem(UI_KEY);
     if (!raw) return { ...DEFAULT_UI };
-    const saved = JSON.parse(raw) as Partial<UiState>;
+    const saved = JSON.parse(raw) as Partial<UiState> & { hideFuture?: boolean };
+    // `hideFuture: false` was the old way of saying "show me the whole year",
+    // and it is one of the four positions monthScope now has. Carry it over
+    // once; anything saved after this reads monthScope and ignores it.
+    const carried = saved.monthScope ?? (saved.hideFuture === false ? 'year' : undefined);
     // The top-level spread is one level deep, so a nested slice saved before
     // a switch existed would arrive missing that switch. Merge it by hand.
     return {
       ...DEFAULT_UI,
       ...saved,
+      monthScope: carried,
       calc20: { ...DEFAULT_CALC20_UI, ...(saved.calc20 ?? {}) }
     };
   } catch {

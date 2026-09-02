@@ -31,6 +31,7 @@ import { useState } from 'react';
 import { useTracker } from '../../state/TrackerProvider';
 import { useTheme } from '../../theme';
 import { money } from '../../domain/format';
+import { SOURCE_SHORT } from '../../domain/copy';
 import { longMonthName, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
 import {
   monthStatus, grossFor, grossFromNet, hoursFor, isActive,
@@ -420,7 +421,9 @@ function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
   return (
     <div className="pk-edit">
       <label className="pk-edit-name" htmlFor={`pk-${stream.id}-${month}`}>
-        {stream.name} <span>{selfEmployed ? '1099' : 'W-2'}</span>
+        {/* The two tax-form names, on the smallest screen in the product,
+            beside the name of the job they describe. */}
+        {stream.name} <span>{SOURCE_SHORT[stream.type]}</span>
       </label>
       <input
         id={`pk-${stream.id}-${month}`}
@@ -488,47 +491,17 @@ function seHours(data: TrackerData, month: MonthKey): number {
  * The person reading this screen is, by definition, disabled — that is what
  * the benefit is. Some will be autistic, some will have a cognitive or
  * learning disability, and many will be doing this while worried about
- * money. The copy here follows a few rules because of that. They are cheap
- * to keep and easy to break by accident.
+ * money. That is why this file asks questions instead of naming fields, and
+ * why it says "the paper or email your job sends you when they pay you"
+ * rather than "paystub".
  *
- *   Ask a question. Do not name a field.
- *     "How much did you get paid from Cafe shift?" — not "Gross earnings".
- *     A label names a database column; a question tells you what to do.
+ * The rules themselves used to be written out here, at length. They are not
+ * any more, because they are not this file's rules — they are the product's,
+ * and three other places had their own copy of them. They live in
+ * docs/DESIGN-SYSTEM.md (the master vocabulary, the four questions every
+ * label answers, the anti-vocabulary, and the tone variants), and in
+ * src/domain/copy.ts, which is the executable half of that document.
  *
- *   Describe the thing, do not assume the word.
- *     "the paper or email your job sends you when they pay you" — not
- *     "paystub". Plenty of people have never been taught that word, and
- *     someone who does not know it cannot ask, because the form does not
- *     know it is confusing.
- *
- *   Say which number.
- *     "the amount before taxes are taken out". Gross versus net is the
- *     single most common way a form like this gets filled in wrong, and
- *     getting it wrong here means a wrong answer about their benefits.
- *
- *   Say what will happen, before it happens.
- *     "If you type one total here, those 4 will be deleted." Surprise is
- *     the expensive thing, not the deletion.
- *
- *   One idea per sentence, and short ones.
- *     "September is $100 over your limit." then "This month uses 1 of your
- *     9 trial work months." Not one sentence carrying both.
- *
- *   No idioms, no metaphors, no figurative language.
- *     Nothing is "on track", nothing "burns" a month, there is no "runway".
- *     Say the literal thing.
- *
- *   Expand the jargon or drop it.
- *     "1 of your 9 trial work months" — never "TWP" alone. "What Social
- *     Security counts" — not "countable". The acronyms are SSA's, and the
- *     reader did not agree to learn them to use this app.
- *
- *   Name the real stake, plainly and without drama.
- *     "Earning this much can stop your monthly payments." That is what is
- *     actually at risk. Softening it is not kindness.
- *
- *   Numbers only, and say so.
- *     The placeholder reads "Numbers only", and inputMode is `decimal` so
- *     Android offers a keypad with a decimal point rather than a full
- *     keyboard the user has to fight.
+ * This layout reads in the `spoken` tone. What that means, and what it is
+ * allowed to change, is Part 2 of the design system.
  */

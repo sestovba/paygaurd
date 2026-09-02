@@ -26,6 +26,15 @@ export interface Paycheck {
 
 export interface MonthEntry {
   gross?: number;
+  /** What the person said reached their bank, when that is how they entered
+   *  it. `gross` is still the figure everything downstream reads; this is
+   *  kept so the field they typed into can show them back what they typed.
+   *
+   *  Deriving it by running the conversion backwards would very nearly work
+   *  and would be wrong in the one case that matters: a month entered from a
+   *  paystub has no bank figure at all, and inventing one would put a number
+   *  the person never gave into a field labelled with their own bank. */
+  net?: number;
   /** Where `gross` came from. Absent means it was typed in as-is.
    *
    *  This exists so the precision gauge can tell the truth about a figure the

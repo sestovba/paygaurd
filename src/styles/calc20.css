@@ -427,6 +427,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .year-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+
 .pg-calc20 .icon-button {
   width: 34px;
   height: 34px;
@@ -1731,6 +1732,28 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* The month-scope dropdown wears this same shell: the label carries the
+ * chrome and the native <select> inside draws none of its own, so the menu
+ * that opens is still the platform's — one tap, and legible on a WebView
+ * that has never heard of a custom listbox. 16px so a phone does not zoom
+ * the page when it takes focus. */
+.pg-calc20 label.stream-panel-edit { padding-right: 4px; }
+
+.pg-calc20 .stream-panel-edit select {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (min-width: 48rem) {
+  .pg-calc20 .stream-panel-edit select { font-size: 12px; }
 }
 
 .pg-calc20 .stream-panel-edit:hover { background: var(--paper-2); color: var(--ink); }
@@ -6078,6 +6101,13 @@ html.pg-calc20, .pg-calc20 body, .pg-calc20 .app-shell {
 
 .pg-calc20 .stream-add__row > .filled-button, .pg-calc20 .app-empty__actions > .filled-button {
   box-shadow: none;
+}
+
+.pg-calc20 .stream-add__row > .tonal-button:hover,
+.pg-calc20 .app-empty__actions > .tonal-button:hover {
+  box-shadow: none;
+  background: var(--paper-2);
+  border-color: var(--line-strong);
 }
 
 

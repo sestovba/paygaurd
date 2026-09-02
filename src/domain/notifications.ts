@@ -37,8 +37,12 @@ export function actionItems(
     items.push({
       id: `payday-${s.id}`,
       /* Review note: "too wordy". The banner's own button reads Add payday,
-         so the line only has to say which job and what it buys. */
-      message: `${s.name} has no payday on file — we cannot spot its extra-paycheck months`,
+         so the line only has to say which job and what it buys.
+
+         "has no payday on file" is a filing-cabinet sentence about the app,
+         and "extra-paycheck months" is a term the reader has not been taught
+         yet. Both are replaced by the plain fact and the plain consequence. */
+      message: `We do not know when ${s.name} pays you, so we cannot tell you which months pay you extra`,
       severity: 'warn',
       action: { kind: 'setPayday', streamId: s.id }
     });
@@ -54,7 +58,7 @@ export function actionItems(
     .forEach(([month, info]) => {
       items.push({
         id: `heavy-${month}`,
-        message: `${formatMonth(month)} pays you ${info.counts.join(' or ')} times`,
+        message: `${formatMonth(month)} pays you ${info.counts.join(' or ')} times, which is more than usual`,
         severity: 'info',
         action: { kind: 'month', month }
       });
@@ -69,9 +73,12 @@ export function actionItems(
         if (!pw) return;
         items.push({
           id: `pace-${s.id}`,
+          /* "on course to" is a figure of speech, and this file is read by
+             people who were told not to be given any. It says what the pay
+             does, not where it is sailing. */
           message: pw.level === 'over'
-            ? `${pw.checks} paychecks in one month would put ${s.name} over your limit`
-            : `${s.name} is on course to come close to your limit`,
+            ? `${pw.checks} paychecks in one month would put ${s.name} over your monthly limit`
+            : `${s.name} pays enough to bring you close to your monthly limit`,
           severity: pw.level === 'over' ? 'warn' : 'info',
           action: { kind: 'reviewStream', streamId: s.id }
         });

@@ -13,13 +13,23 @@ export interface LayoutGroup {
 }
 
 /**
- * Grouped by the thing a person choosing actually cares about: how much of
- * the year is in front of you at once.
+ * Grouped by what you want out of the screen, which is the only thing a
+ * person choosing between ten of them can act on.
  *
- * They used to be grouped by where they came from — two groups both titled
+ * They were grouped by where they came from — two groups both titled
  * "Variants", then "Calc20 (derivative)" and "Calc20 (as built)", with a
- * sibling repository named in the description. That is the project's own
+ * sibling repository named in a description. That is the project's own
  * history, and it is a heading only the person who wrote it can read.
+ *
+ * The second failure was subtler and worth naming, because it will happen
+ * again as layouts are added: three new ones arrived and each took a heading
+ * of its own, so the list grew six groups for ten options and half of them
+ * held one item. A group of one is not a group — it is a heading with an
+ * option under it, and the reader still has to read every line.
+ *
+ * So: four headings, none of them fewer than two, and every one of them a
+ * sentence about what you are trying to do rather than about how the screen
+ * is built. A new layout joins the group whose job it does.
  */
 export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
   {
@@ -29,22 +39,7 @@ export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
         id: 'plan',
         label: 'Plan',
         description: 'How many more hours you can work, what a shift would cost you, and which months pay you extra.'
-      }
-    ]
-  },
-  {
-    title: 'Small screens and slow phones',
-    options: [
-      {
-        id: 'pocket',
-        label: 'Pocket',
-        description: 'Big text, one action, no chart. Built for a cheap phone on slow data.'
-      }
-    ]
-  },
-  {
-    title: 'Looking ahead',
-    options: [
+      },
       {
         id: 'horizon',
         label: 'Horizon',
@@ -53,25 +48,30 @@ export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
     ]
   },
   {
-    title: 'All on one page',
+    title: 'The least on screen',
+    options: [
+      {
+        id: 'pocket',
+        label: 'Pocket',
+        description: 'Big text, one action, no chart. Built for a cheap phone on slow data.'
+      },
+      { id: 'workrecord', label: 'Work Record', description: 'The year as a grid, with the months that need you on top.' },
+      { id: 'calc20', label: 'Calc20', description: 'Twelve squares and a running total.' }
+    ]
+  },
+  {
+    title: 'Typing income in',
+    options: [
+      { id: 'ledger', label: 'Ledger', description: 'Every month as a row. Fastest for entering amounts.' },
+      { id: 'payguard', label: 'PayGuard', description: 'Cards you edit in place, with a bar to switch sections.' }
+    ]
+  },
+  {
+    title: 'The whole picture',
     options: [
       { id: 'classic', label: 'Classic', description: 'The month, the year and your jobs, in one scroll.' },
-      { id: 'ledger', label: 'Ledger', description: 'Every month as a row. Fastest for typing amounts in.' }
-    ]
-  },
-  {
-    title: 'One section at a time',
-    options: [
-      { id: 'payguard', label: 'PayGuard', description: 'Cards you edit in place, with a bar to switch sections.' },
       { id: 'v2', label: 'Sidebar', description: 'Overview, income and trial-work status as separate pages.' },
       { id: 'responsive', label: 'Workspace', description: 'Open a job beside the overview instead of on top of it.' }
-    ]
-  },
-  {
-    title: 'Compact',
-    options: [
-      { id: 'workrecord', label: 'Work Record', description: 'The year as a grid, with the months that need you on top.' },
-      { id: 'calc20', label: 'Calc20', description: 'Twelve squares and a running total. The least on screen.' }
     ]
   }
 ];

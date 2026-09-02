@@ -2,15 +2,16 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Calendar, Check, ChevronDown, Lock, LockOpen, TriangleAlert, Trash2, Zap } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
-import { copyFor } from '../domain/copy';
+import { copyFor, periodLabel } from '../domain/copy';
 import { money } from '../domain/format';
 import { longMonthName, monthIndex, monthKey, monthsOfYear, parseMonth, shortMonthName, todayMonth } from '../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../domain/rules';
 import { activeMonthsInYear, evenSplit, grossFor, hoursFor } from '../domain/earnings';
 import { frequencyLabel, paceWarning, payPlan } from '../domain/paySchedule';
-import { activeThreshold, benefitPhase } from '../domain/trialWork';
+import { activeThreshold } from '../domain/trialWork';
 import { InfoNote } from './InfoNote';
 import { NumericInput } from './NumericInput';
+import { PayAmountField, PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, usePayBasis } from './PayAmount';
 import { Sheet } from './Sheet';
 import { Segmented } from './ui';
 import { HelpSpread } from './HelpSpread';
@@ -46,7 +47,8 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
   year: number;
   onYearChange: (year: number) => void;
 }) {
-  const { updateMonthEntries } = useTracker();
+  const { ui, updateMonthEntries } = useTracker();
+  const words = copyFor(ui.layout);
   const [helpOpen, setHelpOpen] = useState(false);
   const activeMonths = activeMonthsInYear(stream, year);
   const now = todayMonth();
@@ -57,9 +59,15 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
   const ytdHours = round2(eligibleMonths.reduce((sum, m) => sum + hoursFor(stream, m), 0));
 
   return (
-    <CollapsibleSection label="What you earned">
+    /* "What you earned" over three fields, one of which is miles and one of
+       which is hours. The section is what this work brought in, and the money
+       field says so on its own label — see the money words in domain/copy.ts.
+       Nothing here asks for a before-tax figure, because gig work has no tax
+       taken out of it and a "before taxes" question would invent a
+       distinction the reader would then have to resolve. */
+    <CollapsibleSection label="What this work brought in">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="field-label">{isYearToDate ? `Year to date total, ${year}` : `Total for ${year}`}</span>
+        <span className="field-label">{periodLabel(year, isYearToDate)}</span>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -78,9 +86,15 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
         </div>
       </div>
 
+      {/* Three labels that named database columns — Earned, Miles, Hours —
+          on the three fields where naming the column is most expensive.
+          "Miles" is the one that costs real money: personal miles do not come
+          off, and a reader who types every mile they drove gets a deduction
+          they are not owed. The unit moved out of the input prefix and into
+          the label, where it can be a word rather than "mi". */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">Earned</span>
+          <span className="field-label">{words.paidToYouAsk}</span>
           <NumericInput
             className="num field-input w-full"
             prefix="$"
@@ -95,12 +109,11 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">Miles</span>
+          <span className="field-label">{words.workMiles}</span>
           <NumericInput
             className="num field-input w-full"
-            prefix="mi"
-            value={ytdMiles}
-            placeholder="0"
+            value={ytdMiles || undefined}
+            placeholder="Numbers only"
             disabled={!eligibleMonths.length}
             onCommit={(total) => {
               if (!eligibleMonths.length) return;
@@ -110,11 +123,11 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">Hours</span>
+          <span className="field-label">{words.hoursWorked}</span>
           <NumericInput
             className="num field-input w-full"
             value={ytdHours || undefined}
-            placeholder="0"
+            placeholder="Numbers only"
             disabled={!eligibleMonths.length}
             onCommit={(total) => {
               if (!eligibleMonths.length) return;
@@ -125,9 +138,13 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
         </label>
       </div>
 
+      {/* Was one sentence carrying two rules, opening with "Social Security
+          rule:" and closing with "Trial Work Period months". Two rules are
+          two sentences, and the reader is told what happens to them rather
+          than which rule it is filed under. */}
       <InfoNote>
         {eligibleMonths.length
-          ? `Social Security rule: Your profit (earnings minus business mileage) counts toward your monthly limit. Also, if you work more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in any month, that month uses 1 of your 9 Trial Work Period months, even if you did not earn much.`
+          ? `Your miles come off before anything counts. Whatever is left is what counts toward your monthly limit. Working more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in one month uses 1 of your 9 trial work months, even if you earned very little.`
           : `No active months in ${year} yet to split this across.`}
       </InfoNote>
       {helpOpen ? <HelpSpread onClose={() => setHelpOpen(false)} /> : null}
@@ -141,12 +158,20 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
   onYearChange: (year: number) => void;
 }) {
   const { updateMonthEntry, updateMonthEntries, updateStream } = useTracker();
+  const { basis } = usePayBasis();
   const [mode, setMode] = useState<'monthly' | 'yearly'>('monthly');
   const activeMonths = activeMonthsInYear(stream, year);
   const now = todayMonth();
   const eligibleMonths = activeMonths.filter((m) => m <= now);
   const isYearToDate = eligibleMonths.length > 0 && eligibleMonths.length < activeMonths.length;
   const ytdGross = round2(eligibleMonths.reduce((sum, m) => sum + grossFor(stream, m), 0));
+  const ytdNet = round2(eligibleMonths.reduce((sum, m) => sum + (stream.months[m]?.net ?? 0), 0));
+  /* The year total stands in for twelve months, so it inherits their basis:
+     if any of them came through the bank door, the total did too, and the
+     paystub field must not offer a figure nobody entered. */
+  const ytdBasis = eligibleMonths.some((m) => stream.months[m]?.basis === 'fromNet')
+    ? 'fromNet' as const
+    : undefined;
 
   if (stream.type === 'ten99') {
     return <TenNinetyNineIncomeSection stream={stream} year={year} onYearChange={onYearChange} />;
@@ -172,6 +197,15 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
         </select>
       </div>
 
+      {/* One door, asked once. The twelve fields below used to be twelve bare
+          dollar boxes labelled with a month, and the only thing telling you
+          which number went in them was a paragraph underneath saying "the pay
+          before tax helps us most" — a request for the figure most people
+          cannot find, made after they had already typed the one they had.
+          See PayAmount.tsx: the switch says which number, the fields say it
+          again on themselves, and the conversion happens in front of you. */}
+      <PayBasisSwitch />
+
       {mode === 'monthly' ? (
         <div className="month-year-grid grid grid-cols-2 gap-x-3 gap-y-3">
           {monthsOfYear(year).map((m) => {
@@ -182,48 +216,51 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
               if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
             };
             return (
-              <div key={m} className="flex flex-col gap-1">
-                <span className="field-label px-0.5">{shortMonthName(m)}</span>
-                <NumericInput
-                  className="num field-input min-w-0 w-full"
-                  prefix="$"
-                  value={stream.months[m]?.gross}
-                  placeholder="Numbers only"
-                  disabled={disabled}
-                  onCommit={(next) => {
-                    if (next !== undefined) extendIfEarly();
-                    updateMonthEntry(stream.id, m, { gross: next });
-                  }}
-                />
-              </div>
+              <PayAmountField
+                key={m}
+                label={shortMonthName(m)}
+                entry={stream.months[m]}
+                disabled={disabled}
+                className="num field-input min-w-0 w-full"
+                onCommit={(patch) => {
+                  if (patch.gross !== undefined) extendIfEarly();
+                  updateMonthEntry(stream.id, m, patch);
+                }}
+              />
             );
           })}
         </div>
       ) : (
-        <label className="flex flex-col gap-1.5">
-          <span className="field-label">
-            {isYearToDate ? `Total pay before taxes so far in ${year}` : `Total pay before taxes for ${year}`}
-          </span>
-          <NumericInput
-            className="num field-input w-40"
-            prefix="$"
-            value={ytdGross}
-            placeholder="Numbers only"
-            disabled={!eligibleMonths.length}
-            onCommit={(total) => {
-              if (!eligibleMonths.length) return;
-              updateMonthEntries(stream.id, evenSplit(total ?? 0, eligibleMonths.length)
-                .map((gross, i) => ({ month: eligibleMonths[i], patch: { gross } })));
-            }}
-          />
-        </label>
+        <PayAmountField
+          label={`${PAY_BASIS_WORDS[basis].field}, ${periodLabel(year, isYearToDate).toLowerCase()}`}
+          entry={{ gross: ytdGross, net: ytdNet, basis: ytdBasis }}
+          disabled={!eligibleMonths.length}
+          className="num field-input w-40"
+          onCommit={(patch) => {
+            if (!eligibleMonths.length) return;
+            const grossParts = evenSplit(patch.gross ?? 0, eligibleMonths.length);
+            const netParts = evenSplit(patch.net ?? 0, eligibleMonths.length);
+            updateMonthEntries(stream.id, eligibleMonths.map((month, i) => ({
+              month,
+              patch: {
+                gross: patch.gross === undefined ? undefined : grossParts[i],
+                net: patch.net === undefined ? undefined : netParts[i],
+                basis: patch.basis
+              }
+            })));
+          }}
+        />
       )}
 
+      {/* The gross/net half of this note is now on the control itself, which
+          is where the decision is made. What is left is the one thing the
+          fields cannot say about themselves: what happens to what you type
+          when a real paycheck arrives later. */}
       <InfoNote>
         {mode === 'monthly'
-          ? 'Type the Gross pay amount before taxes and deductions from your paystub. Do not use your take-home pay. Real paychecks you enter will override this grid.'
+          ? 'Real paychecks you enter later replace whatever you put here.'
           : eligibleMonths.length
-            ? `Splits evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'so far' : 'active'} in ${year}. Switch to Month by month to fine-tune.`
+            ? `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Switch to Month by month to change one of them.`
             : `No active months in ${year} yet to split this across.`}
       </InfoNote>
     </CollapsibleSection>
@@ -249,7 +286,6 @@ export function StreamSheet({
     ? payPlan(ui.year, stream.payFrequency, stream.anchorDate)
     : null;
 
-  const phase = benefitPhase(data, `${ui.year}-12`);
   const threshold = activeThreshold(data, `${ui.year}-12`);
   const pace = threshold ? paceWarning(stream, threshold.amount, ui.year) : null;
 
@@ -290,7 +326,7 @@ export function StreamSheet({
         </button>
       }
     >
-      <CollapsibleSection label="Details">
+      <CollapsibleSection label="About this job">
         <label className="flex flex-col gap-1.5">
           <span className="field-label">Name</span>
           <input
@@ -319,7 +355,7 @@ export function StreamSheet({
           </label>
 
           <div className="flex min-w-[19rem] flex-1 flex-col gap-1.5">
-            <span className="field-label">Status</span>
+            <span className="field-label">Are you still doing this work?</span>
             <Segmented
               value={stream.lifecycle}
               columns={3}
@@ -341,7 +377,7 @@ export function StreamSheet({
             ? 'Paused jobs stay in your records but do not count toward future month estimates.'
             : stream.lifecycle === 'completed'
               ? 'Ended jobs stop counting after the date below. Past months keep whatever was entered.'
-              : 'Active jobs count toward this month and upcoming months.'}
+              : 'Money from this job counts in the months it was earned. Active means we also expect more of it in the months ahead.'}
         </InfoNote>
 
         {stream.lifecycle === 'completed' ? (
@@ -395,7 +431,7 @@ export function StreamSheet({
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-base font-semibold">
                 <Calendar className="size-5 shrink-0" />
-                Recent payday (from paystub preferred)
+                Any payday (from a paystub, preferred)
               </span>
               {stream.anchorDate ? (
                 <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-good">
@@ -427,7 +463,12 @@ export function StreamSheet({
         </CollapsibleSection>
       ) : null}
 
-      <IncomeEntrySection stream={stream} year={ui.year} onYearChange={(year) => setUi({ year })} />
+      {/* One switch for the whole editor, not one per field: somebody who
+          has paystubs has them for every month, and asking that question
+          twelve times is twelve chances to answer it differently. */}
+      <PayBasisProvider>
+        <IncomeEntrySection stream={stream} year={ui.year} onYearChange={(year) => setUi({ year })} />
+      </PayBasisProvider>
 
       {stream.type === 'w2' ? (
         <CollapsibleSection label="Hourly pay">
@@ -443,7 +484,7 @@ export function StreamSheet({
               />
             </label>
             <label className="flex w-full flex-col gap-1.5 sm:w-40">
-              <span className="field-label">Typical hours / week</span>
+              <span className="field-label">Hours in a usual week</span>
               <NumericInput
                 className="num field-input w-full"
                 value={stream.plannedHoursPerWeek}
@@ -452,6 +493,10 @@ export function StreamSheet({
               />
             </label>
           </div>
+
+          <p className="type-muted">
+            Hours move about. A rough number is fine — we only use it to guess a paycheck.
+          </p>
 
           {pace ? (
             <div className={
@@ -462,8 +507,14 @@ export function StreamSheet({
               <p className="leading-relaxed">
                 <span className="font-semibold">
                   {pace.level === 'over'
-                    ? `In a month with ${pace.checks} paychecks, you would earn about ${money(pace.amount)}. This is over the ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`
-                    : `In a normal month, you would earn about ${money(pace.amount)}, close to the ${phase === 'trialWork' ? 'Trial Work Period' : 'SGA'} limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`}
+                    /* One limit at a time, and it is never named after the
+                       rule it came from. This printed "over the Trial Work
+                       Period limit" or "over the SGA limit" depending on the
+                       phase — the one place left in this file where the app
+                       told the reader which of Social Security's two rules
+                       it was quoting at them. */
+                    ? `In a month with ${pace.checks} paychecks, you would earn about ${money(pace.amount)}. That is over your monthly limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`
+                    : `In a normal month, you would earn about ${money(pace.amount)}. That is close to your monthly limit${threshold ? ` of ${money(threshold.amount)}` : ''}.`}
                 </span>
                 {' '}This is a planning estimate. Type the exact amount from your paystubs each month for the number that counts.
               </p>

@@ -152,10 +152,10 @@
 
 .lg-header-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   margin-left: auto;
-  flex-shrink: 0;
 }
 
 .lg-header-tools {
@@ -256,6 +256,34 @@
 
 .lg-btn:hover {
   background: var(--lg-surface-2);
+}
+
+/* The month-scope dropdown. Same shell as the .lg-btn beside it, minus the
+ * uppercasing: the other controls in that bar are one-word commands and
+ * these are four short sentences about which months are on screen. */
+.lg-scope {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--lg-border);
+  background: var(--lg-surface);
+  border-radius: var(--lg-radius);
+  cursor: pointer;
+}
+
+.lg-scope:hover {
+  background: var(--lg-surface-2);
+}
+
+.lg-scope select {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 500 0.75rem/1 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  letter-spacing: 0.04em;
+  color: var(--lg-fg);
+  cursor: pointer;
 }
 
 .lg-btn-solid {

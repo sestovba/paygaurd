@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, Lock, LockOpen, Sparkles, Trash2, Zap } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import {
   activeMonthsInYear,
   countableFor,
@@ -12,7 +12,7 @@ import {
   longMonthName,
   monthIndex,
   monthKey,
-  listedMonths, parseMonth,
+  parseMonth,
   shortMonthName,
   todayMonth
 } from '../../domain/months';
@@ -20,6 +20,7 @@ import { knownYears, rulesFor, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/ru
 import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
 import { money } from '../../domain/format';
+import { copyFor, periodLabel } from '../../domain/copy';
 import type { PayFrequency, Stream } from '../../domain/types';
 import { HelpSpread } from '../HelpSpread';
 import { SectionHead } from './PayGuardPrimitives';
@@ -111,15 +112,16 @@ export function PayGuardJobEditor({
   onRemove?: () => void;
 }) {
   const { data, ui, updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
+  const words = copyFor(ui.layout);
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [ledgerOpen, setLedgerOpen] = useState(true);
   const [helpOpen, setHelpOpen] = useState(false);
 
   const now = todayMonth();
-  /* The twelve-field entry grid is the calendar this layout puts on its main
-     screen, so focus mode leaves the one month you are in. Turning focus off
-     brings the year back. */
-  const months = listedMonths(year, false, ui.focusMode);
+  /* The twelve-field entry grid is the calendar this layout puts on its
+     main screen, so it lists exactly what the header's month dropdown says
+     — one month, the months behind you, the months ahead, or all twelve. */
+  const { months } = useMonthScope('many');
   const rules = rulesFor(year);
   const activeMonths = activeMonthsInYear(stream, year);
   const eligibleMonths = activeMonths.filter((m) => m <= now);
@@ -129,10 +131,10 @@ export function PayGuardJobEditor({
   const ytdHours = eligibleMonths.reduce((sum, month) => sum + hoursFor(stream, month), 0);
 
   const plan = stream.payFrequency && stream.anchorDate ? payPlan(year, stream.payFrequency, stream.anchorDate) : null;
+  /* Only badge the extra-paycheck months the reader can actually see —
+     whichever months the scope left on screen. */
   const heavyShown = !plan ? []
-    : ui.focusMode
-      ? plan.heavyMonths.filter((m) => monthKey(year, m) === months[0])
-      : plan.heavyMonths;
+    : plan.heavyMonths.filter((m) => months.includes(monthKey(year, m)));
   const scheduleSummary = stream.payFrequency
     ? `${frequencyLabel(stream.payFrequency)} · ${stream.lifecycle === 'active' && !stream.activeTo ? 'Active all year' : 'Date range set'}`
     : 'Not scheduled';
@@ -163,31 +165,35 @@ export function PayGuardJobEditor({
       alert('All months already have income entered.');
       return;
     }
-    if (confirm(`Autofill ${updates.length} empty month(s) based on $${stream.hourlyRate}/hr at ${stream.plannedHoursPerWeek} hrs/wk?`)) {
+    if (confirm(`Fill in ${updates.length} empty month${updates.length === 1 ? '' : 's'} from ${stream.plannedHoursPerWeek} hours a week at $${stream.hourlyRate} an hour?`)) {
       updateMonthEntries(stream.id, updates);
     }
   }
 
+  /* Three labels wearing "YTD", and three hints written in the language of
+     a tax return: "1099 receipts", "Standard mileage deduction applies",
+     "Over 80 hrs/mo uses a TWP month". Every one of them is a sentence about
+     the rule; none said what to type or what it does to the reader. */
   const selfEmploymentFields = [
     {
       key: 'gross' as const,
-      label: isYearToDate ? 'YTD gross earnings' : 'Annual gross earnings',
-      hint: 'Total 1099 receipts before expenses.',
+      label: words.paidToYou,
+      hint: `Everything they paid you ${isYearToDate ? `so far in ${year}` : `in all of ${year}`}, before your miles come off.`,
       prefix: '$',
       placeholder: '0.00',
       value: ytdGross
     },
     {
       key: 'miles' as const,
-      label: isYearToDate ? 'YTD business miles' : 'Annual business miles',
-      hint: 'Standard mileage deduction applies.',
+      label: words.workMiles,
+      hint: 'Miles you drove for yourself do not count.',
       placeholder: '0',
       value: ytdMiles
     },
     {
       key: 'hours' as const,
-      label: isYearToDate ? 'YTD work hours' : 'Annual work hours',
-      hint: `Over ${TWP_SELF_EMPLOYMENT_HOURS} hrs/mo uses a TWP month.`,
+      label: words.hoursWorked,
+      hint: `More than ${TWP_SELF_EMPLOYMENT_HOURS} hours in one month uses a trial work month, even if you earned very little.`,
       placeholder: '0',
       value: ytdHours
     }
@@ -233,7 +239,7 @@ export function PayGuardJobEditor({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <span className="hidden items-baseline gap-2 xs:flex">
-            <span className="pg-label">YTD gross</span>
+            <span className="pg-label">{periodLabel(year, isYearToDate)}</span>
             <span className="pg-figure pg-figure-md">{money(ytdGross)}</span>
           </span>
           {onRemove ? (
@@ -368,7 +374,7 @@ export function PayGuardJobEditor({
                             onChange={(e) => updateStream(stream.id, { hourlyRate: e.target.value ? Number(e.target.value) : undefined })}
                             className="pg-mono w-full text-right"
                           />
-                          <span className="pg-mono text-[0.625rem] pg-dim">/hr</span>
+                          <span className="pg-mono text-[0.625rem] pg-dim">an hour</span>
                         </span>
                         <span className="pg-field">
                           <input
@@ -381,7 +387,7 @@ export function PayGuardJobEditor({
                             onChange={(e) => updateStream(stream.id, { plannedHoursPerWeek: e.target.value ? Number(e.target.value) : undefined })}
                             className="pg-mono w-full text-right"
                           />
-                          <span className="pg-mono text-[0.625rem] pg-dim">h/wk</span>
+                          <span className="pg-mono text-[0.625rem] pg-dim">hours a week</span>
                         </span>
                       </div>
                     </FieldCell>
@@ -444,8 +450,8 @@ export function PayGuardJobEditor({
                   <div className="pg-ledger-grid pg-table-head" role="row">
                     <div className="pg-frozen pg-rule-r px-2.5 py-2" role="columnheader">Month</div>
                     <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Hours</div>
-                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Gross</div>
-                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Countable</div>
+                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Before taxes</div>
+                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Counted</div>
                     <div className="pg-rule-r px-2 py-2 text-center" role="columnheader">Status</div>
                     <div className="px-1 py-2 text-center" role="columnheader"><span className="sr-only">Clear month</span>—</div>
                   </div>
@@ -489,7 +495,7 @@ export function PayGuardJobEditor({
                           </span>
                           {isOver ? (
                             <span className="text-[0.625rem] font-bold pg-text-over">
-                              Over {phase === 'trialWork' ? 'TWP' : 'SGA'}
+                              Over your limit
                             </span>
                           ) : null}
                         </div>
@@ -558,8 +564,8 @@ export function PayGuardJobEditor({
             <>
               {/* ---------------- 1099 self-employment ---------------- */}
               <SectionHead
-                label="Self-employment earnings & expenses"
-                meta={isYearToDate ? `Year to date, ${year}` : `Total for ${year}`}
+                label="What this work brought in"
+                meta={periodLabel(year, isYearToDate)}
                 open={ledgerOpen}
                 onToggle={() => setLedgerOpen((v) => !v)}
               />
@@ -572,7 +578,7 @@ export function PayGuardJobEditor({
                         <div className="pg-field w-full px-0">
                           <CellInput
                             prefix={field.prefix}
-                            ariaLabel={`1099 ${field.label}`}
+                            ariaLabel={`${stream.name}: ${field.label}`}
                             placeholder={field.placeholder}
                             disabled={stream.locked || !eligibleMonths.length}
                             value={field.value || undefined}
@@ -590,7 +596,7 @@ export function PayGuardJobEditor({
                   <div className="pg-rule-t pg-surface-inset flex flex-col items-start gap-2 p-3 sm:p-3.5">
                     <p className="text-xs leading-relaxed pg-muted">
                       {eligibleMonths.length
-                        ? `SSA rules split your net annual self-employment profit evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'elapsed so far' : 'active'} in ${year}. Net countable income is gross minus business mileage expenses (${ytdMiles.toLocaleString()} miles logged).`
+                        ? `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Your ${ytdMiles.toLocaleString()} miles come off first, and what is left is what counts toward your monthly limit.`
                         : `No elapsed active months in ${year} yet to split this across.`}
                     </p>
                     <button

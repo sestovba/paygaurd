@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, ChevronDown, Pause } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
-import { copyFor } from '../domain/copy';
+import { copyFor, periodLabel } from '../domain/copy';
 import { money } from '../domain/format';
 import { streamYearTotal } from '../domain/earnings';
 import { frequencyLabel, payPlan } from '../domain/paySchedule';
@@ -179,7 +179,7 @@ function StreamStats({
     <div className="grid grid-cols-2 gap-2">
       <Stat label="Pay period" value={payPeriod} />
       <Stat label="Last paycheck" value={lastPaycheck} />
-      <Stat label={isCurrentYear ? 'YTD total' : `${year} total`} value={money(total)} />
+      <Stat label={periodLabel(year, isCurrentYear)} value={money(total)} />
       <Stat label="This month" value={thisMonthCount === null ? '—' : `${thisMonthCount} checks`} />
     </div>
   );

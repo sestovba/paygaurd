@@ -1,34 +1,26 @@
 // Shared by the browser ("Copy for AI") and the dev server, which writes the
 // same text to review/REVIEW-NOTES.md so a code pass can just read the file.
+//
+// This file is the actual interface between the two people using the console:
+// the reviewer points and types, and I read this. It is worth more care than
+// the board is.
 
 import type { ReviewNote, ReviewNotes } from './types';
-import { laneOf } from './types';
-import { bucketOf, claimCheck, priorityOf, stateOf } from './state';
+import { claimCheck, stateOf, tagsOf } from './state';
 
-/** A note a code pass can act on.
- *
- *  Group and shelf notes used to qualify by carrying `members` or `stow`.
- *  Those were the edge trays' own bookkeeping — a shelf's name, colour and
- *  folded state — and with the trays retired they are records of a feature
- *  that no longer exists, asking for nothing. They stay in the file, and they
- *  stop reaching the report. */
 /** Can this note's element be found at all?
  *
  *  A note with prose and no anchor reads like work and is not: there is no
- *  file, no text, no path — nothing to act on. "right tray · 2 items" carried
- *  a real sentence about year-level summaries and pointed at a layout, which
- *  is not a place. These are worth seeing and fixing; they are not worth
- *  putting in a list of things to go and do. */
+ *  file, no text, no path — nothing to act on. These are worth seeing and
+ *  fixing; they are not worth putting in a list of things to go and do. */
 export function locatable(note: ReviewNote): boolean {
   return Boolean(note.anchor.source || note.anchor.text || note.anchor.domPath || note.anchor.reviewId);
 }
 
+/** A note that asks for something. A bare selection is a thing you pointed
+ *  at, not a thing you asked for, and it does not reach the report. */
 export function actionable(note: ReviewNote): boolean {
-  return Boolean(
-    note.verdict || note.comment || note.tags?.length
-    || note.placement || note.hidden || note.shots?.length
-    || note.kind === 'choice'
-  );
+  return Boolean(note.comment || note.tags?.length || note.hidden);
 }
 
 function line(label: string, value?: string): string {
@@ -36,52 +28,35 @@ function line(label: string, value?: string): string {
 }
 
 function headline(note: ReviewNote): string {
-  if (note.members) return `GROUP — ${note.tray?.name ?? note.label}`;
-  if (note.kind === 'choice') return `PICKED "${note.choice}" — ${note.label}`;
-  if (note.verdict === 'approved') return `REMOVE — ${note.label}`;
-  if (note.verdict === 'unsure') return `UNSURE — ${note.label}`;
-  if (note.verdict === 'rejected') return `DISMISSED (not doing this) — ${note.label}`;
-  if (note.placement) return `MOVE — ${note.label}`;
-  if (note.stow) return `ARCHIVED — ${note.label}`;
+  const tags = tagsOf(note);
+  if (tags.includes('cut')) return `CUT — ${note.label}`;
+  if (tags.includes('move')) return `MOVE — ${note.label}`;
   if (note.hidden) return `HIDDEN — ${note.label}`;
   return `COMMENT — ${note.label}`;
 }
 
 function renderNote(note: ReviewNote): string {
-  const lane = laneOf(note);
-  const box = lane === 'done' ? '[x]'
-    : lane === 'second' ? '[~]'
-      : lane === 'parked' ? '[-]'
-        : lane === 'commented' ? '[!]' : '[ ]';
-  const move = note.placement
-    ? `place it ${note.placement.position} ${note.placement.anchorLabel ?? note.placement.anchor}`
-      + `${note.placement.applied ? ' (the running app already shows it there)' : ' (not satisfiable at runtime — needs a code change)'}`
-    : undefined;
+  const state = stateOf(note);
+  const box = state === 'closed' ? '[x]' : state === 'sent' ? '[!]' : '[ ]';
+  const tags = tagsOf(note);
 
   return [
     `- ${box} **${headline(note)}**`,
     // What the reviewer wants changed comes first: it is the point of the note.
     note.comment ? `\n  - Needs: "${note.comment}"` : '',
-    note.tags?.length ? `\n  - Kind: ${note.tags.join(', ')}` : '',
-    line('Move', move),
-    note.members ? `\n  - Applies to: ${note.members.join(' · ')}` : '',
-    note.tray?.name ? `\n  - Stash named "${note.tray.name}"` : '',
-    note.stow ? `\n  - Archived on the ${note.stow.edge} shelf (off the page in the app, still in the code)` : '',
+    tags.length ? `\n  - Kind: ${tags.join(', ')}` : '',
     note.hidden ? '\n  - Switched off on the page — the reviewer wanted to see the screen without it. Still in the code.' : '',
     /* `reason` is why the note exists at all, and only a delete note is
        proposing a cut. Saying "I propose cutting it" over a task or a comment
-       claimed something the note never said — and the notepad convention in
-       CLAUDE.md puts a `reason` on every task Claude files for itself, so it
-       said it about most of them. */
+       claimed something the note never said. */
     note.reason
-      ? `\n  - ${note.kind === 'delete' ? 'I propose cutting it' : 'Raised by'}`
-        + `${note.certainty ? ` (${note.certainty})` : ''}: ${note.reason}`
+      ? `\n  - ${note.kind === 'delete' ? 'I propose cutting it' : 'Raised by'}: ${note.reason}`
       : '',
-    note.effort ? `\n  - Effort: ${note.effort}` : '',
-    // Listed as plain repo paths so a code pass can open them directly.
-    note.shots?.length ? `\n  - Screenshots: ${note.shots.join(', ')}` : '',
-    note.options ? `\n  - Alternatives shown: ${note.options.join(', ')}` : '',
     line('Source', note.anchor.source),
+    /* The line as it read when the note was taken. This is what tells a pass
+       "moved" from "gone" when the number has drifted, so it is printed
+       beside the number rather than left in the JSON. */
+    note.anchor.sourceLine ? `\n  - Line was: \`${note.anchor.sourceLine.slice(0, 120)}\`` : '',
     line('Section id', note.anchor.reviewId),
     line('Component', note.anchor.components),
     line('Page', note.anchor.page),
@@ -104,9 +79,7 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     .filter(locatable)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const layouts = Array.from(new Set(all.map((n) => n.anchor.layout))).sort();
-  const deletes = all.filter((n) => n.verdict === 'approved').length;
-  const choices = all.filter((n) => n.kind === 'choice').length;
-  const parked = all.filter((n) => n.stow).length;
+  const cuts = all.filter((n) => tagsOf(n).includes('cut')).length;
 
   const body = layouts.map((layout) => {
     const mine = all.filter((n) => n.anchor.layout === layout);
@@ -119,31 +92,27 @@ export function notesToMarkdown(notes: ReviewNotes): string {
   });
 
   /* What a code pass needs first, before any of the prose: the short list of
-   * what is actually owed to it, in the order worth doing, with the anchor on
-   * the same line. Reading fifty-three notes to find fourteen was the tax on
-   * every pass; this is that answer, precomputed. */
-  const owed = all
-    .filter((note) => bucketOf(stateOf(note)) === 'withClaude')
-    .sort((a, b) => priorityOf(a) - priorityOf(b));
-
+   * what is actually owed to it, with the anchor on the same line. Reading
+   * two hundred notes to find fourteen was the tax on every pass.
+   *
+   * Sorted oldest first. It used to be sorted by a certainty × effort
+   * estimate that only I ever wrote and only I ever read — I can sort my own
+   * queue, and the reviewer should not be maintaining metadata for it. */
+  const owed = all.filter((note) => stateOf(note) === 'sent');
   const suspect = all.filter((note) => claimCheck(note) === 'suspect');
 
   const digest = [
     '## Owed to Claude',
     '',
     owed.length
-      ? 'Sorted by certainty then size — the checkable and contained first.'
+      ? 'Oldest first. The anchor is on the line under each one.'
       : 'Nothing is waiting on a code pass.',
     '',
-    ...owed.map((note) => {
-      const marks = [
-        note.certainty ? `certainty: ${note.certainty}` : null,
-        note.effort ? `effort: ${note.effort}` : null
-      ].filter(Boolean).join(' · ');
-      return `- **${note.label}** — ${note.anchor.layout}${marks ? ` (${marks})` : ''}`
-        + `${note.anchor.source ? `\n  \`${note.anchor.source}\`` : ''}`
-        + `${note.comment ? `\n  > ${note.comment.replace(/\n+/g, ' ')}` : ''}`;
-    }),
+    ...owed.map((note) => (
+      `- **${note.label}** — ${note.anchor.layout}`
+      + `${note.anchor.source ? `\n  \`${note.anchor.source}\`` : ''}`
+      + `${note.comment ? `\n  > ${note.comment.replace(/\n+/g, ' ')}` : ''}`
+    )),
     ''
   ];
 
@@ -166,33 +135,31 @@ export function notesToMarkdown(notes: ReviewNotes): string {
     'button bottom right). Do not hand-edit while the app is open: the app',
     'overwrites this file.',
     '',
-    'One state per note, in `"status"`. Exactly one is true at a time, and each',
-    'belongs to a group, which is whose move it is:',
+    'One field says where a note has got to, and it is the same question as',
+    'whose move it is:',
     '',
-    '| State | Group | Means |',
-    '|---|---|---|',
-    '| `new` | Yours | Not looked at yet. |',
-    '| `needsYou` | Yours | Looked at; the reviewer says what they want. |',
-    '| `trial` | Yours | Off the page while they see whether they miss it. |',
-    '| `sent` | **Claude** | Handed over. Your move. |',
-    '| `answered` | Yours | Claude replied; the reviewer confirms. |',
-    '| `done` | Closed | Acted on in the code, and confirmed. |',
-    '| `later` | Closed | Deliberately deferred. |',
-    '| `wontDo` | Closed | Looked at and kept as it is. |',
+    '| `status` | Means |',
+    '|---|---|',
+    '| `yours` | The reviewer has it. |',
+    '| `sent` | **Handed over. Your move.** |',
+    '| `closed` | Settled. Nothing owed. |',
     '',
-    '**`done` is never taken at face value.** It is a claim about the code, and',
-    'three things write this file. An item that still owes a change and has no',
-    'reply saying it was made is read back as `sent`, whatever the word says.',
+    '**`closed` is never taken at face value.** It is a claim about the code,',
+    'and three things write this file — the app, a code pass, and a person with',
+    'an editor. An item that still asks for a change and has no reply naming',
+    'the file it changed reads back as `sent`, whatever the word says. The',
+    'reverse also holds: a reply that *does* name a file closes the note, so',
+    'work the reviewer asked for and received is not left in their queue.',
     '',
-    '`certainty` (sure / likely / hunch) is how confident the proposal was.',
-    '`effort` (small / medium / large) is how big the change is. `found` is set',
-    'by the dev server on every write: whether the element is still in the',
-    'source. HIDDEN means switched off on the page to see whether it is missed',
-    '— a question, not an answer, and the code is untouched.',
+    '`tags` say what kind of change is wanted — cut, move, reword, redesign.',
+    '`found` is set by the dev server on every write: whether the element is',
+    'still in the source, checked against `anchor.sourceLine`, the line as it',
+    'read when the note was taken. HIDDEN means switched off on the page to see',
+    'whether it is missed — a question, not an answer, and the code is untouched.',
     '',
     'To answer a note, append to its `thread` array in review-notes.json with',
-    '`{"from":"claude","text":"…","at":"<ISO>"}`, set its `"status"`, and bump',
-    '`updatedAt` — the app merges it in and shows the reply next to the comment.',
+    '`{"from":"claude","text":"…","at":"<ISO>"}` — name the file you changed —',
+    'and bump `updatedAt`. The app merges it in on the next load.',
     '',
     ...digest,
     ...flags,
@@ -206,7 +173,7 @@ export function notesToMarkdown(notes: ReviewNotes): string {
       ...unlocatable.map((note) => `- ${note.label}${note.comment ? ` — "${note.comment.replace(/\n+/g, ' ')}"` : ''}`),
       ''
     ] : []),
-    `${all.length} note(s) · ${deletes} to delete · ${parked} parked · ${choices} A/B pick(s)`,
+    `${all.length} note(s) · ${owed.length} owed to Claude · ${cuts} cut(s)`,
     `Updated ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`,
     '',
     ...body

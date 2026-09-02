@@ -595,6 +595,14 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+/* Small variant, so a field can sit beside a .pg-btn-sm and match it. It has
+ * to be declared here rather than reusing .pg-btn-sm: that class is defined
+ * above .pg-field, so its height loses the cascade on a field. */
+.pg-field-sm {
+  height: var(--pg-h-sm);
+  font-size: 0.6875rem;
+}
+
 .pg-field:focus-within {
   border-color: var(--pg-ring);
   box-shadow: 0 0 0 2px var(--pg-focus-ring);

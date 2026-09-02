@@ -55,7 +55,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
             <>
               <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
                 <div className="min-w-0">
-                  <span className="pg-label">Trial months left</span>
+                  <span className="pg-label">Trial work months left</span>
                   <div className="pg-figure pg-figure-lg mt-1">
                     {twp.remaining}
                     <span className="ml-1 text-sm font-semibold pg-dim">of {TRIAL_MONTH_LIMIT}</span>
@@ -65,13 +65,15 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
                   <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
                 </div>
               </div>
+              {/* Four facts in one paragraph, joined by full stops that were
+                   doing the work of paragraph breaks. One idea a sentence, and
+                   the two that are rules come before the two that are counts. */}
               <p className="wr-note">
-                Counted pay over {money(rules.trialWork)} uses one trial work month.
-                Working for yourself more than {TWP_SELF_EMPLOYMENT_HOURS} hours in a month
-                can use one too, even on small pay.
-                {' '}You have {TRIAL_MONTH_LIMIT} of them, over any {ROLLING_WINDOW} months.
+                Earning more than {money(rules.trialWork)} in a month uses one trial work month.
+                So does working more than {TWP_SELF_EMPLOYMENT_HOURS} hours for yourself, even if you earned very little.
+                {' '}You get {TRIAL_MONTH_LIMIT} of them across any {ROLLING_WINDOW} months.
                 {twp.nextExpiry
-                  ? ` The oldest recorded month leaves the window in ${formatMonth(twp.nextExpiry)}.`
+                  ? ` Your oldest one stops counting in ${formatMonth(twp.nextExpiry)}.`
                   : ''}
               </p>
               {twp.inWindow.length ? (
@@ -95,8 +97,8 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
               </div>
               <p className="wr-note">
                 {overMonths.length
-                  ? `Counted pay over ${money(rules.sga)} in the months below.`
-                  : `Nothing over your ${money(rules.sga)} limit this year.`}
+                  ? `These months counted more than your ${money(rules.sga)} limit.`
+                  : `No month has gone over your ${money(rules.sga)} limit this year.`}
               </p>
               {overMonths.length ? (
                 <div className="wr-chip-row">
@@ -110,8 +112,8 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
             <div className="flex flex-wrap items-center gap-3">
               <p className="wr-note min-w-[16rem] flex-1">
                 {phase === 'verifyComplete'
-                  ? 'Nine trial work months are on record. Check them against your own paperwork — after that your limit changes.'
-                  : 'Until you tell us where you stand there is no limit to warn you about, and the hours planner stays off.'}
+                  ? 'We have nine trial work months on record. Check them against your own paperwork. After that, your limit changes.'
+                  : 'We cannot warn you about a limit until you tell us where you stand. The hours planner stays off until then, too.'}
               </p>
               <button type="button" className="pg-btn" onClick={onReviewStatus}>
                 Review status
@@ -122,7 +124,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
           <div className="wr-rows">
             {phase === 'trialWork' ? (
               <div className="wr-row">
-                <span className="wr-row-label flex-1">Trial work months recorded</span>
+                <span className="wr-row-label flex-1">Trial work months we have on record</span>
                 <span className="pg-figure pg-figure-sm">{twp.used}</span>
               </div>
             ) : null}
@@ -130,13 +132,16 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
               id="workrecord-status-year-total"
               label="Status year total"
               reason="This panel should show the limit in force this month, not a repeated annual total."
-              certainty="sure"
               layout="workrecord"
             >
               <div className="wr-row">
                 <span className="flex-1">
-                  <span className="wr-row-label block">{ui.year} countable total</span>
-                  <span className="wr-row-note">all sources, after tracked deductions</span>
+                  {/* "2026 countable total / all sources, after tracked
+                       deductions" — three pieces of accounting language in
+                       nine words, on the row the reviewer said they were lost
+                       in. */}
+                  <span className="wr-row-label block">Counted toward your limit in {ui.year}</span>
+                  <span className="wr-row-note">every job, after your miles come off</span>
                 </span>
                 <span className="pg-figure pg-figure-sm">{money(yearTotal(data, ui.year))}</span>
               </div>
@@ -149,7 +154,6 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
         id="workrecord-safe-work-simulator"
         label="Safe-work simulator"
         reason="The multi-input planner overwhelms the core status view and belongs in an optional advanced tool."
-        certainty="hunch"
         layout="workrecord"
       >
         <SafeWorkSimulator onOpenStatus={onReviewStatus} />

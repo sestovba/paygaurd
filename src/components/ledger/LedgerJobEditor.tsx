@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, Lock, LockOpen, TriangleAlert, Zap } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import {
   activeMonthsInYear, evenSplit, grossFor, hoursFor
 } from '../../domain/earnings';
 import {
-  longMonthName, monthIndex, monthKey, listedMonths, parseMonth, shortMonthName, todayMonth
+  longMonthName, monthIndex, monthKey, parseMonth, shortMonthName, todayMonth
 } from '../../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/rules';
 import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
 import type { PayFrequency, Stream } from '../../domain/types';
 import { HelpSpread } from '../HelpSpread';
 import { miles0, money2 } from './ledgerFormat';
+import { periodLabel } from '../../domain/copy';
 
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
 
@@ -84,12 +85,16 @@ function SectionToggle({ label, meta, open, onToggle }: {
   );
 }
 
-function SettingTile({ label, help, children }: { label: string; help: string; children: React.ReactNode }) {
+/* `help` is optional on purpose. It was required, which meant a tile whose
+   label already says everything had to invent a sentence to satisfy the type
+   — and "Pay Cycle" above "How often this job pays" is the label explained
+   twice. Where there is nothing to add, the row is not drawn at all. */
+function SettingTile({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col gap-2 p-2.5 sm:p-3 lg-bg-surface lg-summary-tile">
       <span className="lg-label">{label}</span>
       {children}
-      <span className="text-[0.8125rem] leading-snug lg-text-muted">{help}</span>
+      {help ? <span className="text-[0.8125rem] leading-snug lg-text-muted">{help}</span> : null}
     </div>
   );
 }
@@ -106,16 +111,16 @@ export function LedgerJobEditor({
   sectionOpen: (section: JobSection) => boolean;
   onToggleSection: (section: JobSection) => void;
 }) {
-  const { ui, updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
+  const { updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
   const settingsOpen = sectionOpen('settings');
   const ledgerOpen = sectionOpen('ledger');
   const [helpOpen, setHelpOpen] = useState(false);
 
   const now = todayMonth();
-  /* The twelve-field entry grid is the calendar this layout puts on its main
-     screen, so focus mode leaves the one month you are in. Turning focus off
-     brings the year back. */
-  const months = listedMonths(year, false, ui.focusMode);
+  /* The twelve-field entry grid is the calendar this layout puts on its
+     main screen, so it lists exactly what the header's month dropdown says
+     — one month, the months behind you, the months ahead, or all twelve. */
+  const { months } = useMonthScope('many');
   const activeMonths = activeMonthsInYear(stream, year);
   const eligibleMonths = activeMonths.filter((m) => m <= now);
   const isYearToDate = eligibleMonths.length > 0 && eligibleMonths.length < activeMonths.length;
@@ -168,7 +173,7 @@ export function LedgerJobEditor({
           className="lg-name-input lg-name-input-visible lg-sans min-w-0 flex-1 text-lg font-semibold disabled:cursor-not-allowed disabled:opacity-60 lg-text-fg"
         />
         <div className="flex shrink-0 flex-col items-end gap-0.5">
-          <span className="lg-label">{isYearToDate ? 'YTD Gross' : `${year} Gross`}</span>
+          <span className="lg-label">Before taxes, {periodLabel(year, isYearToDate).toLowerCase()}</span>
           <span className="text-lg font-semibold">{money2(ytdGross)}</span>
         </div>
       </div>
@@ -243,10 +248,10 @@ export function LedgerJobEditor({
 
       {stream.type === 'w2' ? (
         <>
-          <SectionToggle label="Settings & date range" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} />
+          <SectionToggle label="How you are paid" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} />
           {settingsOpen ? (
             <div className="flex flex-wrap lg-settings-grid">
-              <SettingTile label="Pay Cycle" help="How often this job pays.">
+              <SettingTile label="How often">
                 <select
                   value={stream.payFrequency}
                   disabled={stream.locked}
@@ -257,8 +262,8 @@ export function LedgerJobEditor({
                 </select>
               </SettingTile>
               <SettingTile
-                label="Recent Payday"
-                help={stream.anchorDate ? 'Payday set. Used to forecast extra check dates.' : 'From paystub preferred — needed to find extra check months.'}
+                label="Payday"
+                help={stream.anchorDate ? 'We work out every other payday from this one.' : 'Any one payday will do. We need it to find the months that pay you extra.'}
               >
                 <input
                   type="date"
@@ -268,7 +273,7 @@ export function LedgerJobEditor({
                   className="lg-field"
                 />
               </SettingTile>
-              <SettingTile label="Estimated Wage & Hours" help="Optional — forecasts your pay in 3-paycheck months.">
+              <SettingTile label="Your pay rate" help="Optional. It lets us work out what a month with an extra paycheck would pay you.">
                 <div className="grid grid-cols-2 gap-1.5">
                   <span className="lg-field flex min-w-0 items-center gap-1">
                     <span className="lg-text-muted">$</span>
@@ -280,7 +285,7 @@ export function LedgerJobEditor({
                       onCommit={(hourlyRate) => updateStream(stream.id, { hourlyRate })}
                       className="min-w-0 flex-1 bg-transparent text-right outline-none"
                     />
-                    <span className="text-[0.625rem] lg-text-muted">/hr</span>
+                    <span className="text-[0.625rem] lg-text-muted">an hour</span>
                   </span>
                   <span className="lg-field flex min-w-0 items-center gap-1">
                     <LedgerNumberInput
@@ -291,13 +296,13 @@ export function LedgerJobEditor({
                       onCommit={(plannedHoursPerWeek) => updateStream(stream.id, { plannedHoursPerWeek })}
                       className="min-w-0 flex-1 bg-transparent text-right outline-none"
                     />
-                    <span className="text-[0.625rem] lg-text-muted">h/wk</span>
+                    <span className="text-[0.625rem] lg-text-muted">hours a week</span>
                   </span>
                 </div>
               </SettingTile>
               <SettingTile
                 label={'Paychecks in ' + year}
-                help={plan ? (plan.heavyMonths.length ? `${plan.heavyMonths.length} month(s) have extra checks.` : 'Consistent schedule.') : 'Set payday to forecast.'}
+                help={plan ? (plan.heavyMonths.length ? `${plan.heavyMonths.length} ${plan.heavyMonths.length === 1 ? 'month has' : 'months have'} an extra check.` : 'Same number every month.') : 'Set a payday to forecast.'}
               >
                 <span className="text-lg font-semibold">{plan ? plan.total : '—'}</span>
               </SettingTile>
@@ -311,7 +316,12 @@ export function LedgerJobEditor({
           ) : null}
 
           <SectionToggle
-            label={year + ' monthly ledger'}
+            /* "Month by month" is what the analysis panel already calls this
+               same idea one screen over, so the two now say it with the same
+               words — which is the "more global labels where possible" half
+               of el-kmzpns. "Ledger" is an accounting word; the year is
+               already in the meta beside it. */
+            label="Month by month"
             meta={activeMonths.length + ' of 12 months'}
             open={ledgerOpen}
             onToggle={() => onToggleSection('ledger')}
@@ -321,8 +331,8 @@ export function LedgerJobEditor({
               <div className="lg-ledger-scroll">
                 <div className="lg-ledger-head flex">
                   <div className="lg-label w-24 shrink-0 border-r px-2 py-2 lg-label-border">Month</div>
-                  <div className="lg-label flex-1 border-r px-2 py-2 text-right lg-label-border">Hours</div>
-                  <div className="lg-label flex-[1.3] border-r px-2 py-2 text-right lg-label-border">Gross Income</div>
+                  <div className="lg-label flex-1 border-r px-2 py-2 text-right lg-label-border">Hours worked</div>
+                  <div className="lg-label flex-[1.3] border-r px-2 py-2 text-right lg-label-border">Before taxes</div>
                   <div className="lg-label w-14 shrink-0 px-2 py-2 text-center">Clear</div>
                 </div>
 
@@ -392,15 +402,15 @@ export function LedgerJobEditor({
         </>
       ) : (
         <>
-          <SectionToggle label="What you earned" meta={isYearToDate ? `Year to date, ${year}` : `Total for ${year}`} open={ledgerOpen} onToggle={() => onToggleSection('ledger')} />
+          <SectionToggle label="What this work brought in" meta={periodLabel(year, isYearToDate)} open={ledgerOpen} onToggle={() => onToggleSection('ledger')} />
           {ledgerOpen ? (
             <div className="flex flex-wrap gap-3 p-3 sm:p-4">
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className="lg-label">{isYearToDate ? 'YTD Gross' : 'Gross'}</span>
+                <span className="lg-label">Paid to you</span>
                 <span className="lg-field flex items-center gap-1">
                   <span className="lg-text-muted">$</span>
                   <LedgerNumberInput
-                    ariaLabel={isYearToDate ? '1099 year-to-date gross' : `1099 gross for ${year}`}
+                    ariaLabel={`Money they paid you, ${periodLabel(year, isYearToDate).toLowerCase()}`}
                     placeholder="0.00"
                     disabled={stream.locked || !eligibleMonths.length}
                     value={ytdGross || undefined}
@@ -414,10 +424,10 @@ export function LedgerJobEditor({
                 </span>
               </label>
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className="lg-label">{isYearToDate ? 'YTD Miles' : 'Miles'}</span>
+                <span className="lg-label">Work miles</span>
                 <span className="lg-field flex items-center gap-1">
                   <LedgerNumberInput
-                    ariaLabel={isYearToDate ? '1099 year-to-date business miles' : `1099 business miles for ${year}`}
+                    ariaLabel={`Miles you drove for work, ${periodLabel(year, isYearToDate).toLowerCase()}`}
                     placeholder="0"
                     disabled={stream.locked || !eligibleMonths.length}
                     value={ytdMiles || undefined}
@@ -428,14 +438,14 @@ export function LedgerJobEditor({
                     }}
                     className="min-w-0 flex-1 bg-transparent text-right outline-none"
                   />
-                  <span className="text-[0.625rem] lg-text-muted">mi</span>
+                  <span className="text-[0.625rem] lg-text-muted">miles</span>
                 </span>
               </label>
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className="lg-label">{isYearToDate ? 'YTD Hours' : 'Hours'}</span>
+                <span className="lg-label">Hours worked</span>
                 <span className="lg-field flex items-center gap-1">
                   <LedgerNumberInput
-                    ariaLabel={isYearToDate ? '1099 year-to-date hours worked' : `1099 hours worked for ${year}`}
+                    ariaLabel={`Hours you worked, ${periodLabel(year, isYearToDate).toLowerCase()}`}
                     placeholder="0"
                     disabled={stream.locked || !eligibleMonths.length}
                     value={ytdHours || undefined}
@@ -446,7 +456,7 @@ export function LedgerJobEditor({
                     }}
                     className="min-w-0 flex-1 bg-transparent text-right outline-none"
                   />
-                  <span className="text-[0.625rem] lg-text-muted">h</span>
+                  <span className="text-[0.625rem] lg-text-muted">hours</span>
                 </span>
               </label>
               <div className="flex w-full items-center justify-between pt-1">
@@ -455,13 +465,13 @@ export function LedgerJobEditor({
                   onClick={() => setHelpOpen(true)}
                   className="text-xs font-semibold hover:underline lg-text-w2"
                 >
-                  How spread &amp; mileage deductions work →
+                  How your miles change what counts →
                 </button>
               </div>
               <p className="w-full text-[0.8125rem] leading-relaxed lg-text-muted">
                 {eligibleMonths.length
-                  ? `Splits each total evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} ${isYearToDate ? 'elapsed so far' : 'active'} in ${year}. Countable income is Gross minus mileage (${miles0(ytdMiles)} logged); more than ${TWP_SELF_EMPLOYMENT_HOURS} self-employment hours in one month can also use a TWP month.`
-                  : `No elapsed active months in ${year} yet to split this across.`}
+                  ? `Each total is split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Your ${miles0(ytdMiles)} come off first, and what is left counts toward your monthly limit. Working more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in one month uses a trial work month too.`
+                  : `No active months in ${year} yet to split this across.`}
               </p>
             </div>
           ) : null}

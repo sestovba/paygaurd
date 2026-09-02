@@ -26,13 +26,17 @@ interface PendingAssessment {
 const LONG_AGO_MONTHS = 60;
 const RECENT_MONTHS = 11;
 
+/* Every title is a question the reader can answer, except the last, which is
+   the answer. "Typical monthly pay" was a noun phrase on a form; "Do you know
+   your Trial Work status?" asked about a proper noun rather than about their
+   own life. */
 const STEP_COPY: Record<Step, { eyebrow: string; title: string }> = {
-  start: { eyebrow: 'Check-in · 1 of 3', title: 'When did benefits start?' },
-  worked: { eyebrow: 'Check-in · 2 of 3', title: 'Any paid work since then?' },
-  estimate: { eyebrow: 'Check-in · 3 of 3', title: 'Typical monthly pay' },
-  knowsTwp: { eyebrow: 'Check-in · 3 of 3', title: 'Do you know your Trial Work status?' },
-  count: { eyebrow: 'Check-in · almost done', title: 'How many months?' },
-  conclusion: { eyebrow: 'Your result', title: 'Here is where you stand' }
+  start: { eyebrow: 'Question 1 of 3', title: 'When did your benefits start?' },
+  worked: { eyebrow: 'Question 2 of 3', title: 'Have you done any paid work since then?' },
+  estimate: { eyebrow: 'Question 3 of 3', title: 'How much do you usually make in a month?' },
+  knowsTwp: { eyebrow: 'Question 3 of 3', title: 'How many of your 9 trial work months have you used?' },
+  count: { eyebrow: 'Almost done', title: 'How many months?' },
+  conclusion: { eyebrow: 'Your answer', title: 'Here is where you stand' }
 };
 
 /**
@@ -104,16 +108,19 @@ export function TwpWizard({
 
   function notWorkedYet() {
     land('remaining', 'personal-records', 0, {
-      headline: 'You are starting with a clean slate',
-      detail: 'No work yet means all 9 Trial Work months are still available. Add a job when you are ready and we will watch the limits from here.'
+      /* "a clean slate" is an idiom, and the ones in this file are the
+         worst-placed ones in the app: this is the screen where somebody is
+         being told what their benefits situation is. */
+      headline: 'All 9 of your trial work months are still yours',
+      detail: 'You have not worked yet, so none of them are used. Add a job when you are ready and we will watch your limit from there.'
     });
   }
 
   function hasWorked() {
     if (monthsSince >= LONG_AGO_MONTHS) {
       land('complete', 'unconfirmed', null, {
-        headline: 'Your Trial Work Period has most likely already passed',
-        detail: 'Benefits that started this long ago almost always have. We will track the Substantial Gainful Activity (SGA) limit instead — that is the number that matters now. Confirm with Social Security when you can.',
+        headline: 'Your 9 trial work months have most likely been used',
+        detail: 'Benefits that started this long ago almost always have. We will watch the other limit instead — that is the one that matters for you now. Check with Social Security when you can.',
         showCountEscape: true
       });
     } else if (monthsSince <= RECENT_MONTHS) {
@@ -129,21 +136,21 @@ export function TwpWizard({
     const guessedUsed = earnings > threshold ? Math.min(monthsSince, 9) : 0;
     const remaining = 9 - guessedUsed;
     land(remaining <= 0 ? 'complete' : 'remaining', 'unconfirmed', guessedUsed, guessedUsed === 0 ? {
-      headline: 'You are likely still early in your Trial Work Period',
-      detail: `At ${money(earnings)} a month, you probably have not used any Trial Work months yet. A quick check with Social Security can confirm you are starting clean.`
+      headline: 'You have most likely used none of your 9 months yet',
+      detail: `At ${money(earnings)} a month, you probably have not used any trial work months. Social Security can confirm that for you.`
     } : remaining <= 0 ? {
-      headline: 'Best guess: all 9 Trial Work months are used',
-      detail: 'That is only an estimate from what you told us. The real count depends on your pay stubs — worth confirming with Social Security before you rely on it.'
+      headline: 'Our best guess: all 9 of your trial work months are used',
+      detail: 'This is a guess from what you told us. The real count comes from your paystubs. Check with Social Security before you rely on it.'
     } : {
-      headline: `Best guess: about ${remaining} of 9 Trial Work months left`,
-      detail: 'That is an estimate, not a certainty. Social Security can confirm the exact count.'
+      headline: `Our best guess: about ${remaining} of your 9 trial work months are left`,
+      detail: 'This is a guess, not a fact. Social Security can tell you the exact count.'
     });
   }
 
   function dontKnowStatus() {
     land('unknown', 'unconfirmed', null, {
-      headline: 'We will not guess on this one',
-      detail: 'A wrong count here could point you the wrong way at the wrong moment. Check your benefits letter or call Social Security, then come back and we will take it from there.'
+      headline: 'We will not guess at this one',
+      detail: 'Getting this wrong could point you the wrong way at the worst moment. Check your benefits letter or call Social Security, then come back and we will take it from there.'
     });
   }
 
@@ -152,8 +159,8 @@ export function TwpWizard({
     const used = countMode === 'used' ? n : 9 - n;
     const remaining = 9 - used;
     land(remaining <= 0 ? 'complete' : 'remaining', 'personal-records', used, {
-      headline: remaining <= 0 ? 'All 9 Trial Work months are used' : `${remaining} of 9 Trial Work months left`,
-      detail: 'Got it — we will track your limits from here based on what you told us.'
+      headline: remaining <= 0 ? 'All 9 of your trial work months are used' : `${remaining} of your 9 trial work months are left`,
+      detail: 'Got it. We will watch your limit from here, using what you told us.'
     });
   }
 
@@ -223,7 +230,10 @@ export function TwpWizard({
     body = (
       <>
         <p className="type-muted">
-          The Trial Work Period is 9 months — they do not have to be in a row — when you can test working without it counting against benefits.
+          You get 9 months when you can try working without it counting against your benefits. They do not have to be one after another.
+        </p>
+        <p className="type-muted">
+          Do you know how many you have used?
         </p>
         <div className="grid grid-cols-2 gap-3">
           <button type="button" onClick={() => goTo('count')} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">

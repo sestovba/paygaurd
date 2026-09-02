@@ -21,14 +21,14 @@ export function importTrackerFile(file: File, replaceAll: (data: TrackerData) =>
     try {
       const parsed = JSON.parse(String(reader.result));
       if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.streams)) {
-        alert('That file does not look like a PayGuard export.');
+        alert('That file is not one of your saved copies.');
         return;
       }
-      if (confirm('Import this file? It replaces every job and month currently on this device.')) {
+      if (confirm('Load this copy? It replaces every job and every month on this device.')) {
         replaceAll(parsed);
       }
     } catch {
-      alert('Could not read that file as JSON.');
+      alert('We could not read that file.');
     }
   };
   reader.readAsText(file);

@@ -13,7 +13,7 @@ import {
   Undo2,
   X
 } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { copyFor } from '../../domain/copy';
 import { countableFor, streamYearGross } from '../../domain/earnings';
 import { benefitPhase } from '../../domain/trialWork';
@@ -21,7 +21,10 @@ import { attentionFlags } from '../../domain/attention';
 import { precisionFor } from '../../domain/precision';
 import { PrecisionLine } from '../PrecisionLine';
 import { rulesFor, knownYears } from '../../domain/rules';
-import { formatMonth, longMonthName, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
+import {
+  formatMonth, longMonthName, scopedMonths, shortMonthName, todayMonth
+} from '../../domain/months';
+import { MonthScopePicker } from '../MonthScopePicker';
 import { money } from '../../domain/format';
 import type { MonthKey } from '../../domain/types';
 import { SettingsPanel } from '../SettingsPanel';
@@ -38,7 +41,7 @@ type MobileTab = 'jobs' | 'overview' | 'analysis';
 
 const MOBILE_TABS: { id: MobileTab; label: string; Icon: typeof Briefcase }[] = [
   { id: 'analysis', label: 'Months', Icon: ShieldCheck },
-  { id: 'overview', label: 'TWP / SGA', Icon: PieChart },
+  { id: 'overview', label: 'Your limit', Icon: PieChart },
   { id: 'jobs', label: 'Jobs', Icon: Briefcase }
 ];
 
@@ -49,6 +52,7 @@ export function TrackerPayGuard() {
   const canUndo = undoCount > 0;
   const year = ui.year;
   const years = knownYears();
+  const { scope, setScope } = useMonthScope('many');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [tabsMode, setTabsMode] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(data.streams[0]?.id ?? null);
@@ -136,7 +140,6 @@ export function TrackerPayGuard() {
      as the figure, and the limit and the running total as the single line
      that shows the working. */
   const phaseNeedsReview = phase === 'unknown' || phase === 'verifyComplete';
-  const thresholdName = phase === 'trialWork' ? 'TWP' : 'SGA';
   const activeThreshold = phaseNeedsReview ? null : phase === 'trialWork' ? rules.trialWork : rules.sga;
   const currentCountable = combinedFor(asOf);
   const thresholdGap = activeThreshold == null ? null : activeThreshold - currentCountable;
@@ -146,14 +149,19 @@ export function TrackerPayGuard() {
      work" is the question the month is actually asked. The total that got you
      there is the line underneath. */
   const heroFigure = phaseNeedsReview ? money(currentCountable) : money(Math.abs(thresholdGap ?? 0));
+  /* The limit is never named after the rule it came from. `thresholdName`
+     resolved to "TWP" or "SGA" and was dropped into all three of these
+     lines, which is the whole one-limit rule failing in the loudest place on
+     the layout: the reader was told which of Social Security's two rules
+     they were being measured by, in initials, on the hero. */
   const heroPhrase = phaseNeedsReview
     ? 'counted so far — no limit is being applied yet'
     : isOver
-      ? `over your ${thresholdName} limit this month`
-      : `left before you reach the ${thresholdName} limit`;
+      ? 'over your monthly limit'
+      : 'left before you reach your monthly limit';
   const heroWorking = phaseNeedsReview
-    ? 'Confirm your Trial Work Period status and this becomes a limit you can work to.'
-    : `${money(currentCountable)} counted against the ${money(activeThreshold!)} ${thresholdName} limit.`;
+    ? 'Tell us where you stand and this becomes a limit you can work to.'
+    : `${money(currentCountable)} counted, against a limit of ${money(activeThreshold!)}.`;
   const thresholdProgress = activeThreshold
     ? Math.min(100, (currentCountable / activeThreshold) * 100)
     : 0;
@@ -214,6 +222,11 @@ export function TrackerPayGuard() {
               <ChevronRight className="size-3.5" />
             </button>
           </div>
+
+          {/* How much of the year the month lists below show. Beside the
+              year stepper because it answers the same question one size
+              down: which months am I looking at. */}
+          <MonthScopePicker scope={scope} onChange={setScope} className="pg-field pg-field-sm ml-1" />
 
           <div className="flex-1" />
 
@@ -310,10 +323,9 @@ export function TrackerPayGuard() {
             id="payguard-monthly-analysis"
             label="Full monthly analysis"
             reason="Cards, table modes, summary totals, and the simulator repeat the same TWP / SGA facts; this should become a short risk-month list."
-            certainty="sure"
             layout="payguard"
           >
-            <PayGuardAnalysis data={data} year={year} focusMode={ui.focusMode} />
+            <PayGuardAnalysis data={data} year={year} scope={scope} />
           </ReviewTarget>
         </div>
 
@@ -323,10 +335,9 @@ export function TrackerPayGuard() {
             id="payguard-year-chart"
             label="Annual income chart"
             reason="The chart duplicates monthly history and presents TWP and SGA as simultaneous targets."
-            certainty="hunch"
             layout="payguard"
           >
-            {ui.focusMode ? null : <PayGuardChart streams={streams} year={year} />}
+            {scope === 'month' ? null : <PayGuardChart streams={streams} year={year} limit={activeThreshold == null ? null : { kind: phase === 'trialWork' ? 'trialWork' : 'sga', amount: activeThreshold }} />}
           </ReviewTarget>
         </div>
 
@@ -493,15 +504,12 @@ export function TrackerPayGuard() {
  */
 function MonthAttention({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
-  const now = todayMonth();
-  /* This strip is about months that have not happened yet, so focus mode
-     narrows it to the one you are in. It renders nothing when that month is
-     fine, which is the same as it always did. */
-  const months = ui.focusMode
-    ? [yearOf(now) === ui.year ? now : `${ui.year}-12`]
-    : monthsOfYear(ui.year).filter((month) => (
-      yearOf(now) < ui.year || (yearOf(now) === ui.year && month >= now)
-    ));
+  const { scope } = useMonthScope('many');
+  /* This strip is about months that have not happened yet, so it looks
+     forward whatever else is on screen — the one exception is "This month",
+     where the reader has asked for one month and nothing else. It renders
+     nothing when those months are fine, as it always did. */
+  const months = scopedMonths(ui.year, scope === 'month' ? 'month' : 'ahead');
   const flags = attentionFlags(data, months);
   if (!flags.length) return null;
 

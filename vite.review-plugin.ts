@@ -9,19 +9,28 @@ import type { ReviewNote, ReviewNotes } from './src/review/types';
  * they sit ~19 lines below the truth. The file itself is right here, so pin
  * the note to a line that actually exists: the review id, then a scrap of the
  * text the reviewer saw, then a class hook.
+ *
+ * Returns the line's *text* alongside its number, because a number alone
+ * rots. `sourceLine` is what lets the next pass tell "this moved" from "this
+ * is gone", and it is captured here rather than in the browser for the reason
+ * this function exists at all: the browser only knows the transformed line,
+ * and the file is sitting right here.
  */
-function resolveSource(root: string, note: ReviewNote): string | undefined {
+function resolveSource(root: string, note: ReviewNote): { source: string; line?: string } {
   const source = note.anchor.source;
-  if (!source) return undefined;
+  if (!source) return { source: '' };
   const [file] = source.split(':');
   let lines: string[];
   try {
     lines = readFileSync(resolve(root, file), 'utf8').split('\n');
   } catch {
-    return source;
+    return { source };
   }
 
-  const at = (index: number) => `${file}:${index + 1}`;
+  const at = (index: number) => ({
+    source: `${file}:${index + 1}`,
+    line: lines[index]?.trim() || undefined
+  });
 
   const byId = lines.findIndex((line) => line.includes(`id="${note.id}"`));
   if (byId >= 0) return at(byId);
@@ -38,7 +47,25 @@ function resolveSource(root: string, note: ReviewNote): string | undefined {
     if (hit >= 0) return at(hit);
   }
 
-  return `${file} (near line ${source.split(':')[1] ?? '?'}, unverified)`;
+  /* The component the element came out of, which the fiber walk already
+   * recorded and nothing was reading.
+   *
+   * It is the handle that works when the visible text is a prop rather than a
+   * literal — a segmented control whose label says "Ended" is declared in
+   * ui.tsx, which contains that word nowhere. Innermost first: `components`
+   * is built walking up from the element, so the first name is the closest
+   * thing to it. */
+  for (const name of (note.anchor.components ?? '').split('›').map((part) => part.trim())) {
+    if (!/^[A-Z][A-Za-z0-9_]*$/.test(name)) continue;
+    const declared = new RegExp(`\\b(?:function|const|class)\\s+${name}\\b`);
+    const hit = lines.findIndex((line) => declared.test(line));
+    if (hit >= 0) return at(hit);
+  }
+
+  /* Nothing in the file matched. Deliberately no `line`: capturing one here
+   * would freeze a guess as evidence, which is the failure this whole check
+   * exists to prevent. */
+  return { source: `${file} (near line ${source.split(':')[1] ?? '?'}, unverified)` };
 }
 
 /** Every .ts/.tsx under src, read once per write. Fifty files is a couple of
@@ -74,10 +101,22 @@ function locate(corpus: string, note: ReviewNote): 'present' | 'absent' | 'unkno
   // there is: it is written in the source on purpose and survives reformatting.
   if (corpus.includes(`id="${note.id}"`)) return 'present';
 
-  // The source line as it read when the note was taken. Exact, and immune to
-  // the CSS that uppercases half the rendered text.
+  /* The source line as it read when the note was taken. Exact, and immune to
+   * the CSS that uppercases half the rendered text.
+   *
+   * A line only counts as a handle if it is distinctive. `<div className="flex
+   * items-center">` is thirty characters and says nothing about which element
+   * this is; treating its disappearance as evidence would report `absent` for
+   * a note whose element never moved. So a line that occurs more than a few
+   * times in the corpus is not evidence either way, and falls through to the
+   * weaker checks below rather than answering with a guess. */
   const line = note.anchor.sourceLine?.trim();
-  if (line && line.length > 12) return corpus.includes(line) ? 'present' : 'absent';
+  if (line && line.length > 12) {
+    let seen = 0;
+    for (let at = corpus.indexOf(line); at >= 0 && seen < 4; at = corpus.indexOf(line, at + 1)) seen += 1;
+    if (seen === 1) return 'present';
+    if (seen === 0) return 'absent';
+  }
 
   // Rendered text is a weak handle — CSS transforms it — so it only ever
   // confirms presence here, never absence.
@@ -98,21 +137,27 @@ function withResolvedSources(root: string, notes: ReviewNotes): ReviewNotes {
 
   const out: ReviewNotes = {};
   for (const [id, note] of Object.entries(notes)) {
+    const { source, line } = resolveSource(root, note);
     out[id] = {
       ...note,
+      /* Checked against the line the note already carried, never the one just
+       * read out of the file — otherwise every write would re-capture the
+       * current text and the check would confirm itself forever. */
       found: locate(corpus, note),
-      anchor: { ...note.anchor, source: resolveSource(root, note) }
+      anchor: {
+        ...note.anchor,
+        source: source || note.anchor.source,
+        /* Written once and then left alone. It is the line as it read when
+         * the note was taken; a note whose element has since moved must keep
+         * the old text or there is nothing left to notice the move with. */
+        sourceLine: note.anchor.sourceLine ?? line
+      }
     };
   }
   return out;
 }
 
 const JSON_PATH = 'review/review-notes.json';
-/* Screenshots go to disk as real files, never into review-notes.json. That
- * file is read whole by every AI pass; a handful of base64 PNGs would bury
- * fifty notes under a megabyte of pixels nobody can grep. The note keeps the
- * filename, the file keeps the image. */
-const SHOTS_DIR = 'review/shots';
 const MD_PATH = 'review/REVIEW-NOTES.md';
 const BACKUP_PATH = 'review/review-notes.backup.json';
 
@@ -152,53 +197,6 @@ export function reviewNotes(): Plugin {
     configureServer(server) {
       const jsonFile = resolve(server.config.root, JSON_PATH);
       const mdFile = resolve(server.config.root, MD_PATH);
-
-      /* Paste or drop an image onto a note and it lands here: the body is the
-       * raw image, the note id and extension ride in the query string, and
-       * what comes back is the path to write onto the note. */
-      server.middlewares.use('/__review/shot', (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405;
-          res.end();
-          return;
-        }
-        const url = new URL(req.url ?? '/', 'http://localhost');
-        // The id reaches the filesystem, so it is reduced to characters that
-        // cannot climb out of the directory it is meant to land in.
-        const id = (url.searchParams.get('id') ?? 'shot').replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 60);
-        const ext = (url.searchParams.get('ext') ?? 'png').replace(/[^a-z0-9]/gi, '').slice(0, 5) || 'png';
-
-        const chunks: Buffer[] = [];
-        let size = 0;
-        let aborted = false;
-        req.on('data', (chunk: Buffer) => {
-          size += chunk.length;
-          // A screenshot that will not fit in ten megabytes is not a
-          // screenshot; refusing early keeps a runaway paste out of memory.
-          if (size > 10_000_000) {
-            aborted = true;
-            res.statusCode = 413;
-            res.end(JSON.stringify({ ok: false, error: 'Image over 10MB' }));
-            req.destroy();
-            return;
-          }
-          chunks.push(chunk);
-        });
-        req.on('end', () => {
-          if (aborted) return;
-          try {
-            const dir = resolve(server.config.root, SHOTS_DIR);
-            mkdirSync(dir, { recursive: true });
-            const name = `${id}-${Date.now().toString(36)}.${ext}`;
-            writeFileSync(resolve(dir, name), Buffer.concat(chunks));
-            res.setHeader('content-type', 'application/json');
-            res.end(JSON.stringify({ ok: true, path: `${SHOTS_DIR}/${name}` }));
-          } catch (error) {
-            res.statusCode = 500;
-            res.end(JSON.stringify({ ok: false, error: String(error) }));
-          }
-        });
-      });
 
       server.middlewares.use('/__review/notes', (req, res) => {
         if (req.method === 'GET') {

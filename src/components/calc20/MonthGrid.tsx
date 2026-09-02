@@ -6,9 +6,9 @@
 
 import { useEffect, useRef } from 'react';
 import type { MonthEntry, MonthKey, Stream } from '../../domain/types';
-import { useTracker } from './state';
+import { useMonthScope, useTracker } from './state';
 import { layoutFor, type UiState } from './state';
-import { listedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { shortMonthName, todayMonth } from '../../domain/months';
 import { isActive, countableFor, estimatedGrossFromHours } from '../../domain/earnings';
 import { money } from '../../domain/format';
 import { gridColumns } from './gridColumns';
@@ -20,15 +20,20 @@ type FieldId = 'gross' | 'hours' | 'miles';
 
 interface FieldDef { id: FieldId; label: string; placeholder: string; suffix?: string }
 
+/* The compact tone from domain/copy.ts, typed out here because this grid is
+   a fixed table of column definitions rather than a component with `ui` in
+   scope. "Gross" is the word the whole audit is about: it does not say which
+   number, on the field where getting the number wrong is what costs people
+   their benefits. Same for a bare "Miles" — personal miles do not come off. */
 const W2_FIELDS: FieldDef[] = [
-  { id: 'gross', label: 'Gross', placeholder: 'Gross' },
-  { id: 'hours', label: 'Hours', placeholder: 'Hours', suffix: 'h' }
+  { id: 'gross', label: 'Before taxes', placeholder: 'Before taxes' },
+  { id: 'hours', label: 'Hours worked', placeholder: 'Hours', suffix: 'h' }
 ];
 
 const TEN99_FIELDS: FieldDef[] = [
-  { id: 'gross', label: 'Gross', placeholder: 'Gross' },
-  { id: 'miles', label: 'Miles', placeholder: 'Miles', suffix: 'mi' },
-  { id: 'hours', label: 'Hours', placeholder: 'Hours', suffix: 'h' }
+  { id: 'gross', label: 'Paid to you', placeholder: 'Paid to you' },
+  { id: 'miles', label: 'Work miles', placeholder: 'Work miles', suffix: 'mi' },
+  { id: 'hours', label: 'Hours worked', placeholder: 'Hours', suffix: 'h' }
 ];
 
 export function fieldsFor(stream: Stream): FieldDef[] {
@@ -84,7 +89,7 @@ export function MonthGrid({
     if (focusMonth && firstInputRef.current) firstInputRef.current.focus();
   }, [focusMonth]);
 
-  const months = listedMonths(ui.year, ui.hideFuture, ui.focusMode);
+  const { months } = useMonthScope('many');
 
   return (
     <div

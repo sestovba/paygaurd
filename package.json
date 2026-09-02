@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "state": "node scripts/state.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

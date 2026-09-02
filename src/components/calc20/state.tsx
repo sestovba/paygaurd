@@ -11,7 +11,7 @@
 //
 //   * The seam between two `ui` shapes. Calc20's components expect one flat
 //     record of ~30 switches; PayGuard keeps the shared preferences (year,
-//     hideFuture, theme, sync, terms) at the top level and this layout's own
+//     monthScope, theme, sync, terms) at the top level and this layout's own
 //     switches in `ui.calc20`. `setUi` routes each key back to the side it
 //     came from, so a component can keep writing `setUi({ statusOpen: true })`
 //     and `setUi({ year })` without knowing there are two homes.
@@ -28,6 +28,8 @@ import type {
   MonthEntry, MonthKey, Paycheck, Stream, StreamType, TrackerData, TwpAssessment
 } from '../../domain/types';
 import { hasMeaningfulData } from '../../domain/earnings';
+import { resolveScope, scopedMonths } from '../../domain/months';
+import type { MonthScope, MonthShape } from '../../domain/months';
 import { useTracker as usePayGuard } from '../../state/TrackerProvider';
 import type { Calc20Ui, LayoutMode, ThemePref, UiState as PgUiState } from '../../state/storage';
 import { DEFAULT_CALC20_UI } from '../../state/storage';
@@ -78,7 +80,7 @@ export const DEFAULT_VIEWPORTS: Record<ViewportBand, ViewportPrefs> = {
  */
 export interface UiState extends Calc20Ui {
   year: number;
-  hideFuture: boolean;
+  monthScope?: MonthScope;
   focusMode: boolean;
   theme: ThemePref;
   cloudSyncEnabled: boolean;
@@ -90,7 +92,6 @@ export interface UiState extends Calc20Ui {
 export const DEFAULT_UI: UiState = {
   ...DEFAULT_CALC20_UI,
   year: new Date().getFullYear(),
-  hideFuture: true,
   focusMode: true,
   theme: 'system',
   cloudSyncEnabled: false
@@ -98,7 +99,7 @@ export const DEFAULT_UI: UiState = {
 
 /** Keys that belong to the shared record rather than to `ui.calc20`. */
 const SHARED_KEYS = [
-  'year', 'hideFuture', 'focusMode', 'theme', 'cloudSyncEnabled', 'cloudSyncConsentedAt',
+  'year', 'monthScope', 'focusMode', 'theme', 'cloudSyncEnabled', 'cloudSyncConsentedAt',
   'termsAcceptedVersion', 'termsAcceptedAt'
 ] as const;
 
@@ -217,7 +218,7 @@ export function Calc20Store({ children }: { children: ReactNode }) {
     ...DEFAULT_CALC20_UI,
     ...pgUi.calc20,
     year: pgUi.year,
-    hideFuture: pgUi.hideFuture,
+    monthScope: pgUi.monthScope,
     focusMode: pgUi.focusMode,
     theme: pgUi.theme,
     cloudSyncEnabled: pgUi.cloudSyncEnabled,
@@ -430,13 +431,13 @@ export function Calc20Store({ children }: { children: ReactNode }) {
     try {
       const parsed = JSON.parse(await file.text());
       if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.streams)) {
-        pushToast('That file could not be read as a tracker export.');
+        pushToast('We could not read that file.');
         return;
       }
       pg.replaceAll(parsed);
       pushToast('Tracker imported');
     } catch {
-      pushToast('That file could not be read as a tracker export.');
+      pushToast('We could not read that file.');
     }
   }, [pg, pushToast]);
 
@@ -494,3 +495,26 @@ export function useTracker(): TrackerContextValue {
   if (!ctx) throw new Error('useTracker must be used inside Calc20Store');
   return ctx;
 }
+
+/**
+ * Which months this screen should list, and the setter its dropdown needs.
+ *
+ * `shape` is what the layout is for — one month at a time, or a year of rows
+ * (see MonthShape in domain/months.ts). It only decides the default: focus
+ * mode leaves one month standing on a layout built for one, and the months
+ * behind you on a layout built for twelve, because a one-row ledger reads as
+ * a page that failed to load. Once the reader picks from the dropdown their
+ * choice is what is in force, on every layout, until they change it.
+ */
+export function useMonthScope(shape: MonthShape): {
+  scope: MonthScope;
+  months: MonthKey[];
+  setScope: (scope: MonthScope) => void;
+} {
+  const { ui, setUi } = useTracker();
+  const scope = resolveScope(ui.monthScope, ui.focusMode, shape);
+  const months = useMemo(() => scopedMonths(ui.year, scope), [ui.year, scope]);
+  const setScope = useCallback((next: MonthScope) => setUi({ monthScope: next }), [setUi]);
+  return { scope, months, setScope };
+}
+

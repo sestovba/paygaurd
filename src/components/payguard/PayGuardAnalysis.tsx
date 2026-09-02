@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { CalendarOff, ShieldCheck } from 'lucide-react';
 import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
 import { money } from '../../domain/format';
-import { longMonthName, listedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { longMonthName, scopedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import type { MonthScope } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
 import type { YearRules } from '../../domain/rules';
 import { paycheckContextForMonth } from '../../domain/paySchedule';
@@ -101,10 +102,10 @@ function StatusDot({ kind, size = 'sm' }: { kind: StatusKind; size?: 'sm' | 'md'
   );
 }
 
-export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }: {
+export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
   data: TrackerData;
   year: number;
-  focusMode?: boolean;
+  scope?: MonthScope;
   onOpenStatus?: () => void;
 }) {
   const [mode, setMode] = useState<Mode>('cards');
@@ -114,8 +115,9 @@ export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }
   const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
   const analysisPhase = benefitPhase(data, asOf);
   const needsTwpConfirmation = analysisPhase === 'unknown' || analysisPhase === 'verifyComplete';
+  const months = useMemo(() => scopedMonths(year, scope), [year, scope]);
 
-  const cards = useMemo(() => listedMonths(year, false, focusMode).map((month) => {
+  const cards = useMemo(() => months.map((month) => {
     const status = monthStatus(data, month);
     const phase = benefitPhase(data, month);
     const w2 = data.streams.filter((s) => s.type === 'w2').reduce((sum, s) => sum + countableFor(s, month), 0);
@@ -131,12 +133,15 @@ export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }
       pct: threshold ? Math.min(100, (status.countable / threshold) * 100) : 0,
       label: remainingLabel(status, phase, rules)
     };
-  }), [data, year, rules, focusMode]);
+  }), [data, months, rules]);
 
   const visible = mode === 'activeOnly'
     ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth)
     : cards;
-  const focused = focusMode ? cards[0] : undefined;
+  /* One month listed is drawn as the month itself rather than as a
+     one-row table — the test is the number of months on screen, not which
+     setting produced it. */
+  const focused = cards.length === 1 ? cards[0] : undefined;
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
@@ -237,11 +242,11 @@ export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }
 
                 <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--pg-radius-md)] pg-rule">
                   <div className="pg-surface-2 p-2.5 sm:p-3">
-                    <dt className="pg-label">W-2 gross</dt>
+                    <dt className="pg-label">From an employer</dt>
                     <dd className="pg-mono mt-1 text-sm font-bold pg-fg">{money(focused.w2)}</dd>
                   </div>
                   <div className="pg-surface-2 p-2.5 sm:p-3">
-                    <dt className="pg-label">1099 net</dt>
+                    <dt className="pg-label">From gig work</dt>
                     <dd className="pg-mono mt-1 text-sm font-bold pg-fg">{money(focused.se)}</dd>
                   </div>
                 </dl>
@@ -257,8 +262,8 @@ export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }
             <CalendarOff className="size-5 pg-dim" />
             <span className="pg-empty-title">No activity recorded for {year}</span>
             <span className="pg-empty-body">
-              Activity shows months with countable income or a TWP month. Add earnings above, or
-              choose Cards to see all 12 months.
+              This shows the months you earned in, and the months that used a trial work
+              month. Add earnings above, or choose Cards to see all 12 months.
             </span>
             <button type="button" className="pg-btn mt-1" onClick={() => setMode('cards')}>
               Show all months
@@ -292,17 +297,20 @@ export function PayGuardAnalysis({ data, year, focusMode = false, onOpenStatus }
                 <thead>
                   <tr className="pg-table-head">
                     <th scope="col" className="pg-frozen pg-rule-r px-3.5 py-2.5 text-left sm:px-4">Month</th>
-                    <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4">Countable</th>
+                    <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4">Counted</th>
                     <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-left sm:px-4">Status</th>
                     <th
                       scope="col"
                       title="Room left below your limit, or the amount over it"
                       className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4"
                     >
-                      Room left
+                      Left before your limit
                     </th>
-                    <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4">W-2 gross</th>
-                    <th scope="col" className="px-3.5 py-2.5 text-right sm:px-4">1099 net</th>
+                    {/* "W-2 gross" and "1099 net" name two tax forms and two
+                        accounting words in four syllables, on the two columns
+                        that say where the money came from. */}
+                    <th scope="col" className="pg-rule-r px-3.5 py-2.5 text-right sm:px-4">From an employer</th>
+                    <th scope="col" className="px-3.5 py-2.5 text-right sm:px-4">From gig work</th>
                   </tr>
                 </thead>
                 <tbody>

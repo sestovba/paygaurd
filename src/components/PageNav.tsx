@@ -7,7 +7,10 @@ export function useNavItems(): { id: PageId; label: string; icon: LucideIcon }[]
   return [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
     { id: 'income', label: 'Income', icon: Briefcase },
-    { id: 'status', label: 'TWP / SGA', icon: ShieldCheck }
+    /* "TWP / SGA" was two abbreviations and a slash on a tab bar, in the
+       one place the reader is choosing where to go. The page sets what their
+       limit is, so that is what the tab is called. */
+    { id: 'status', label: 'Your limit', icon: ShieldCheck }
   ];
 }
 

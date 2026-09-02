@@ -22,10 +22,17 @@ export type Precision = 'estimated' | 'scheduled' | 'exact';
 
 /* One word each. The three pips beside them carry the scale now, so the name
    only has to say which rung this is — "Pay Schedule Set" and "Exact (From
-   Paystubs)" were explaining the rung as well as naming it. */
+   Paystubs)" were explaining the rung as well as naming it.
+
+   "Scheduled" was the odd one and the content audit took it out: it named a
+   state of our data ("a pay schedule is on file") rather than a state of the
+   reader's number, so on a scale about how sure a figure is, the middle rung
+   was answering a different question from the two either side. Three words,
+   three distinct meanings, all of them about the figure: it was guessed, it
+   was worked out from your pay days, or it came off your paystubs. */
 export const PRECISION_NAME: Record<Precision, string> = {
-  estimated: 'Estimated',
-  scheduled: 'Scheduled',
+  estimated: 'Guessed',
+  scheduled: 'Predicted',
   exact: 'Exact'
 };
 
@@ -53,6 +60,25 @@ export interface PrecisionReading {
   gaps: PrecisionGap[];
   /** Streams active in the month. Zero means there is nothing to grade. */
   streams: number;
+  /** Every fact this month's figure could rest on, whether we have it or not:
+   *  two per W-2 job (a pay schedule, and this month's real paystub), one per
+   *  1099 job (hours worked). */
+  details: number;
+  /** How many of those we actually have. */
+  filled: number;
+  /** `details - filled`. The number of things that would sharpen the figure,
+   *  which is the count worth showing someone — nobody wants to be told what
+   *  is already known. */
+  missing: number;
+  /** filled / details as a whole percentage.
+   *
+   *  Derived from the same count as `missing`, deliberately, so the gauge and
+   *  the sentence beside it can never disagree. It is a real fraction of real
+   *  facts rather than a rung mapped onto a number — this app does not invent
+   *  figures to fill a slot, and a confidence score is the last place to
+   *  start. It moves in visible steps, and that is honest: with one job there
+   *  genuinely are only three answers. */
+  confidence: number;
 }
 
 const RANK: Record<Precision, number> = { estimated: 0, scheduled: 1, exact: 2 };
@@ -96,7 +122,10 @@ function ten99Gap(stream: Stream, month: MonthKey): PrecisionGap | null {
       streamName: stream.name,
       kind: 'hours',
       missing: 'hours worked this month',
-      cost: 'we cannot check the 80-hour Trial Work rule',
+      /* "the 80-hour Trial Work rule" names a rule the reader has never been
+         shown and puts a number on it that means nothing without it. What
+         they need to know is what the app cannot tell them. */
+      cost: 'we cannot tell you whether your hours use a trial work month',
       level: 'estimated'
     };
   }
@@ -107,7 +136,9 @@ function ten99Gap(stream: Stream, month: MonthKey): PrecisionGap | null {
 export function precisionFor(data: TrackerData, month: MonthKey): PrecisionReading {
   const now = `${yearOf(month)}-12`;
   const live = data.streams.filter((stream) => isActive(stream, month, now));
-  if (!live.length) return { level: 'estimated', gaps: [], streams: 0 };
+  if (!live.length) {
+    return { level: 'estimated', gaps: [], streams: 0, details: 0, filled: 0, missing: 0, confidence: 0 };
+  }
 
   const gaps: PrecisionGap[] = [];
   for (const stream of live) {
@@ -116,16 +147,47 @@ export function precisionFor(data: TrackerData, month: MonthKey): PrecisionReadi
   }
   gaps.sort((a, b) => RANK[a.level] - RANK[b.level]);
 
+  /* Counted separately from `gaps`, and not derived from it: a stream reports
+     only its weakest gap, so a W-2 job with no schedule yields one gap while
+     two facts are actually missing. The gauge has to count facts. */
+  let details = 0;
+  let filled = 0;
+  for (const stream of live) {
+    if (stream.type === 'w2') {
+      details += 2;
+      if (stream.payFrequency && stream.anchorDate) filled += 1;
+      if (stream.checks.some((check) => check.date.startsWith(month) && !check.projected)) filled += 1;
+    } else {
+      details += 1;
+      if (stream.months[month]?.hours !== undefined) filled += 1;
+    }
+  }
+
   const level: Precision = gaps.length ? gaps[0].level : 'exact';
-  return { level, gaps, streams: live.length };
+  return {
+    level,
+    gaps,
+    streams: live.length,
+    details,
+    filled,
+    missing: details - filled,
+    confidence: details ? Math.round((filled / details) * 100) : 0
+  };
 }
 
-/** The whole sentence, so every layout says it the same way. */
+/** The whole sentence, so every layout says it the same way.
+ *
+ *  It used to hang the consequence in brackets — "Cafe shift is missing your
+ *  actual paystub amount for this month (this total is estimated, not from a
+ *  real paystub)" — and end with "2 more jobs to complete", which reads as an
+ *  instruction to finish something rather than a count. A bracket is where a
+ *  reader's eye goes last, and the consequence is the half worth reading, so
+ *  it is joined on with "so" and the count says what it is counting. */
 export function precisionSentence(reading: PrecisionReading): string {
   if (!reading.streams) return 'Add a job to start tracking.';
   const gap = reading.gaps[0];
-  if (!gap) return 'All earnings are verified with exact paystub amounts.';
+  if (!gap) return 'Every amount here came off a real paystub.';
   const more = reading.gaps.length - 1;
-  return `${gap.streamName} is missing ${gap.missing} (${gap.cost})`
-    + (more ? ` · ${more} more job${more === 1 ? '' : 's'} to complete` : '');
+  return `${gap.streamName} is missing ${gap.missing}, so ${gap.cost}.`
+    + (more ? ` ${more} other job${more === 1 ? '' : 's'} ${more === 1 ? 'is' : 'are'} missing something too.` : '');
 }

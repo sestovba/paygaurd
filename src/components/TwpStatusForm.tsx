@@ -21,8 +21,8 @@ export function TwpStatusForm() {
           communication." Two clauses: where to look it up, and why it is
           worth looking up rather than guessing. */}
       <InfoNote>
-        Check a benefit letter if you have one. A guess here makes every limit
-        on the other screens a guess too.
+        Check a benefit letter if you have one. Guess here and every number we
+        show you is a guess too.
       </InfoNote>
 
       <TwpStatusPicker
@@ -63,9 +63,8 @@ export function TwpStatusForm() {
             </button>
           </div>
           <InfoNote>
-            Fills the most recent months before now. These count toward the
-            rolling 60-month window like any other recorded month, so they
-            age out correctly over time — a stored number alone cannot do that.
+            Fills the most recent months before now. You can change any of them
+            after.
           </InfoNote>
         </div>
       ) : null}

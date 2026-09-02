@@ -109,11 +109,11 @@ export function SafeWorkSimulator() {
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
     return (
       <div className="simulator simulator--paused">
-        <div className="simulator__eyebrow">Work pay simulator</div>
+        <div className="simulator__eyebrow">Safe hours</div>
         <div className="simulator__title">We need your limit first</div>
         <p className="help-note">
           Hours only mean something against a limit, and yours is not set yet.
-          Answer the status questions and this fills itself in.
+          Answer a few questions and this fills itself in.
         </p>
       </div>
     );
@@ -121,7 +121,7 @@ export function SafeWorkSimulator() {
 
   return (
     <div className="simulator">
-      <div className="simulator__eyebrow">Work pay simulator</div>
+      <div className="simulator__eyebrow">Safe hours</div>
       {/* The heading is the answer, not the panel's job description — the
           same change the shared simulator got for "Stay below SGA — Duh".
           It also stops this layout naming a regime the reader is not in. */}
@@ -139,11 +139,11 @@ export function SafeWorkSimulator() {
           <NumericExprInput className="num-input" value={rate} onCommit={setRate} />
         </label>
         <label className="entry-field">
-          <span className="entry-field__label">Planned hours/week</span>
+          <span className="entry-field__label">Hours a week</span>
           <NumericExprInput className="num-input" value={hoursPerWeek} onCommit={setHoursPerWeek} />
         </label>
         <label className="entry-field">
-          <span className="entry-field__label">Other monthly income</span>
+          <span className="entry-field__label">Other pay counted this month</span>
           <NumericExprInput
             className="num-input"
             value={otherIncome}
@@ -151,50 +151,53 @@ export function SafeWorkSimulator() {
           />
           <span className="entry-field__hint">
             {otherIncomeTouched
-              ? 'Edited — no longer following this month’s entries.'
-              : `From non-W-2 sources entered for ${formatMonth(currentMonth)} so far.`}
+              ? 'You changed this, so it no longer follows what you entered.'
+              : `From your gig work in ${formatMonth(currentMonth)} so far.`}
           </span>
         </label>
         <label className="entry-field">
-          <span className="entry-field__label">Safety buffer %</span>
+          <span className="entry-field__label">Stay this far under (%)</span>
           <NumericExprInput className="num-input" value={buffer} onCommit={setBuffer} />
         </label>
         <label className="entry-field">
-          <span className="entry-field__label">Pay variance %</span>
+          <span className="entry-field__label">Allow for a bigger check (%)</span>
           <NumericExprInput className="num-input" value={variance} onCommit={setVariance} />
         </label>
       </div>
 
       <div className="simulator__results">
         <div>
-          <span className="simulator__result-label">Safest · 5-week month</span>
-          <strong>{safeFiveWeekHours.toFixed(1)} h/week</strong>
+          {/* Was "Safest · 5-week month" and "Average · 4.35 weeks" — one
+               naming a calendar arithmetic the reader has never met, the
+               other a decimal. And "h/week" twice, on a screen with no
+               abbreviations anywhere else. */}
+          <span className="simulator__result-label">Recommended</span>
+          <strong>{Math.floor(safeFiveWeekHours)} hours a week</strong>
         </div>
         <div>
-          <span className="simulator__result-label">Average · 4.35 weeks</span>
-          <strong>{safeAverageHours.toFixed(1)} h/week</strong>
+          <span className="simulator__result-label">Also safe, closer to your limit</span>
+          <strong>{Math.floor(safeAverageHours)} hours a week</strong>
         </div>
         <div className={fiveWeekProjection > safeTarget ? 'simulator__projection simulator__projection--over' : 'simulator__projection'}>
-          Your five-week stress estimate: <strong>{money(fiveWeekProjection)}</strong>
-          {' '}of a {money(safeTarget)} buffered target.
+          In a month that pays you an extra time, that comes to <strong>{money(fiveWeekProjection)}</strong>
+          {' '}against the {money(safeTarget)} we aim for.
         </div>
       </div>
 
       {paydayRisks.length ? (
         <div className="simulator__paydays">
-          <strong>Extra-paycheck cash-flow warning</strong>
+          <strong>Watch out</strong>
           <span>
-            {groupPaydayRisks(paydayRisks).join(' · ')}. Payday count is a
-            planning signal; pay-period dates determine the earned month used
-            for tracking.
+            {groupPaydayRisks(paydayRisks).join(' · ')}. These months pay you more
+            times than usual, on the same hours.
           </span>
         </div>
       ) : null}
 
       <p className="help-note">
-        Estimate only — unearned income, subsidies, IRWE, and SSA averaging can
-        shift the real total.{phase === 'trialWork'
-          ? ' Working for yourself can use a trial work month on hours alone, even under the dollar line.'
+        This is a careful guess. Other money you get, and things you pay for so you
+        can work, can move the real total.{phase === 'trialWork'
+          ? ' Working for yourself can use a trial work month on hours alone, even if you earned very little.'
           : ''}
       </p>
     </div>

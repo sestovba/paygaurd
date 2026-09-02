@@ -51,38 +51,103 @@ export function monthsOfYear(year: number): MonthKey[] {
   return Array.from({ length: 12 }, (_, i) => monthKey(year, i + 1));
 }
 
-/** Current/latest month first, then earlier months in reverse order.
- * Future months stay hidden unless explicitly requested. */
-export function displayMonths(
+/**
+ * How much of the year a screen is listing.
+ *
+ * One switch, four positions, and it replaces two: `focusMode` used to
+ * collapse every month list to a single row and `hideFuture` used to chop
+ * the far end off, which is the same axis decided twice in two places with
+ * no way to say "this month and what is left of the year".
+ *
+ * The names are the reader's, not the calendar's:
+ *
+ * | Scope    | Shows                          | Order |
+ * |----------|--------------------------------|-------|
+ * | `month`  | the month you are in           | one row |
+ * | `sofar`  | this month and everything before | newest first |
+ * | `ahead`  | this month and everything after  | oldest first |
+ * | `year`   | all twelve                      | this month, back, then ahead |
+ *
+ * `sofar` is the honest default for a layout built to hold a year: the months
+ * with anything in them are the ones behind you, so the screen is never empty
+ * and nothing about the future is being guessed at.
+ */
+export type MonthScope = 'month' | 'sofar' | 'ahead' | 'year';
+
+/**
+ * Whether a layout is built for one month at a time or for several.
+ *
+ * `plan` and `pocket` answer one question about the month you are in; a
+ * twelve-cell grid was never part of them. `ledger`, `payguard`, `workrecord`
+ * and `calc20` are ledgers — a year of rows is the shape they were drawn to,
+ * and one row in them reads as a page that failed to load rather than as a
+ * deliberately quiet screen. So focus mode means different things to the two
+ * families, and this is which family a layout is in.
+ */
+export type MonthShape = 'single' | 'many';
+
+export const MONTH_SCOPES: readonly MonthScope[] = ['month', 'sofar', 'ahead', 'year'];
+
+/**
+ * The month a scope is measured from: the one you are in when the year on
+ * screen is this year, otherwise that year's December, so a list is never
+ * empty and a finished year opens at its end.
+ */
+export function anchorMonth(year: number, now: Date = new Date()): MonthKey {
+  const current = todayMonth(now);
+  return yearOf(current) === year ? current : monthKey(year, 12);
+}
+
+/** Which months a screen should list, given how much of the year it wants. */
+export function scopedMonths(
   year: number,
-  hideFuture: boolean,
+  scope: MonthScope,
   now: Date = new Date()
 ): MonthKey[] {
   const all = monthsOfYear(year);
-  const current = todayMonth(now);
-  const currentAndPast = all.filter((month) => month <= current).reverse();
-  if (hideFuture) return currentAndPast;
-  return [...currentAndPast, ...all.filter((month) => month > current)];
+  const anchor = anchorMonth(year, now);
+  const before = all.filter((month) => month < anchor).reverse();
+  const after = all.filter((month) => month > anchor);
+  switch (scope) {
+    case 'month': return [anchor];
+    case 'sofar': return [anchor, ...before];
+    /* A year you are past has no rest: the anchor is its December, so "from
+       here forward" would be one row, and the reader would have picked an
+       option that does nothing. The whole year read forwards is what "the
+       rest of 2025" amounts to once 2025 is over. */
+    case 'ahead': return yearOf(todayMonth(now)) === year ? [anchor, ...after] : all;
+    case 'year': return [anchor, ...before, ...after];
+  }
 }
 
 /**
- * Which months a dashboard should list.
+ * What focus mode means on this kind of layout.
  *
- * Focus mode collapses every month list in the app to the one you are in —
- * the current month when the year on screen is this year, otherwise that
- * year's last month, so a list is never empty. One helper rather than the
- * same conditional in nine components, which is how they would drift.
+ * Focus mode stays the one switch in Settings — it is what takes the charts,
+ * the year totals and the calendars off the screen. What it does to the month
+ * list depends on the layout: one month on the two built for one month, and
+ * the months behind you on the ones built to hold a year.
  */
-export function listedMonths(
-  year: number,
-  hideFuture: boolean,
+export function defaultScope(focus: boolean, shape: MonthShape): MonthScope {
+  if (!focus) return 'year';
+  return shape === 'single' ? 'month' : 'sofar';
+}
+
+/**
+ * The scope in force: what the reader picked, or what focus mode implies.
+ *
+ * The dropdown belongs to the layouts built to hold a year — it is the answer
+ * to "one month looks wrong on this screen". A layout built for one month has
+ * nowhere to put eleven more, so it keeps following focus mode however the
+ * dropdown on the ledger was left.
+ */
+export function resolveScope(
+  chosen: MonthScope | undefined,
   focus: boolean,
-  now: Date = new Date()
-): MonthKey[] {
-  if (!focus) return displayMonths(year, hideFuture, now);
-  const all = monthsOfYear(year);
-  const current = todayMonth(now);
-  return [all.includes(current) ? current : all[all.length - 1]];
+  shape: MonthShape
+): MonthScope {
+  if (shape === 'single') return defaultScope(focus, shape);
+  return chosen ?? defaultScope(focus, shape);
 }
 
 export function monthOfDate(date: DateKey): MonthKey {

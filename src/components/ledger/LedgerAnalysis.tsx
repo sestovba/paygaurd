@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
-import { longMonthName, listedMonths, todayMonth } from '../../domain/months';
+import { longMonthName, scopedMonths, todayMonth } from '../../domain/months';
+import type { MonthScope } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
 import { paycheckContextForMonth } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
@@ -33,17 +34,26 @@ function statusKind(status: MonthStatus, phase: BenefitPhase): StatusKind {
    only ever under one regime and does not need the other one's initials. */
 function remainingLabel(status: MonthStatus, phase: BenefitPhase): string {
   if (status.countable <= 0 && !status.isServiceMonth) return '';
-  if (phase === 'unknown' || phase === 'verifyComplete') return 'Status not set';
+  if (phase === 'unknown' || phase === 'verifyComplete') return 'Limit not known yet';
   if (phase === 'sga') {
     return status.overSga ? 'Over your limit'
-      : status.roomToSga != null ? `${money0(status.roomToSga)} left` : '';
+      : status.roomToSga != null ? `${money0(status.roomToSga)} left before your limit` : '';
   }
-  if (status.isServiceMonth) return 'Trial work month used';
-  return status.roomToTrialWork != null ? `${money0(status.roomToTrialWork)} left` : '';
+  if (status.isServiceMonth) return 'Uses a trial work month';
+  return status.roomToTrialWork != null ? `${money0(status.roomToTrialWork)} left before your limit` : '';
 }
 
+/* Six one-word verdicts, three of which said nothing on their own. "Under"
+   and "Close" are comparatives with the thing they compare to left out, and
+   "Status not set" named a field of ours rather than anything the reader
+   did. Each one now finishes its own sentence. */
 const KIND_LABEL: Record<StatusKind, string> = {
-  none: 'No income', review: 'Status not set', safe: 'Under', warn: 'Close', twp: 'Trial work month', over: 'Over limit'
+  none: 'No income',
+  review: 'Limit not known yet',
+  safe: 'Under your limit',
+  warn: 'Close to your limit',
+  twp: 'Uses a trial work month',
+  over: 'Over your limit'
 };
 
 function statusColor(kind: StatusKind): string {
@@ -52,36 +62,43 @@ function statusColor(kind: StatusKind): string {
       : `var(--lg-${kind})`;
 }
 
+/* Inside a column headed "Against your limit", so "over" and "below" have
+   their subject supplied by the header rather than repeating it twelve
+   times. "At limit" was the exception and read as a label rather than a
+   reading. */
 function deltaToLimit(value: number, limit: number): string {
   if (value <= 0) return '—';
   const delta = value - limit;
-  if (Math.abs(delta) < 0.005) return 'At limit';
-  return delta > 0 ? `${money0(delta)} over` : `${money0(Math.abs(delta))} below`;
+  if (Math.abs(delta) < 0.005) return 'Exactly at it';
+  return delta > 0 ? `${money0(delta)} over` : `${money0(Math.abs(delta))} under`;
 }
 
 type Mode = 'table' | 'cards' | 'activeOnly';
 
-export function LedgerAnalysis({ data, year, focusMode = false }: {
-  data: TrackerData; year: number; focusMode?: boolean;
+export function LedgerAnalysis({ data, year, scope = 'year' }: {
+  data: TrackerData; year: number; scope?: MonthScope;
 }) {
   const [mode, setMode] = useState<Mode>('table');
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   /* Review note: "now that we have only september, I am not sure what should
      be here."
      Table, Cards and Active Only are three ways of reading twelve months.
-     Focus mode leaves one, and all three collapse onto the same single row —
-     a switch with three positions and one outcome. So in focus mode the
-     switch is not offered and the month is drawn as the card, which is the
-     rendering that reads well on its own; a one-row table is a header with a
-     row under it. */
-  const view = focusMode ? 'cards' : mode === 'cards' ? 'cards' : 'table';
-  const onlyIncome = !focusMode && mode === 'activeOnly';
+     With one month listed all three collapse onto the same single row — a
+     switch with three positions and one outcome. So when the scope leaves
+     one month the switch is not offered and the month is drawn as the card,
+     which is the rendering that reads well on its own; a one-row table is a
+     header with a row under it. The test is how many months are listed, not
+     which setting produced them. */
+  const months = useMemo(() => scopedMonths(year, scope), [year, scope]);
+  const single = months.length === 1;
+  const view = single ? 'cards' : mode === 'cards' ? 'cards' : 'table';
+  const onlyIncome = !single && mode === 'activeOnly';
   const rules = rulesFor(year);
   const now = todayMonth();
   const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
   const analysisPhase = benefitPhase(data, asOf);
 
-  const cards = useMemo(() => listedMonths(year, false, focusMode).map((month) => {
+  const cards = useMemo(() => months.map((month) => {
     const status = monthStatus(data, month);
     const phase = benefitPhase(data, month);
     const w2 = data.streams.filter((s) => s.type === 'w2').reduce((sum, s) => sum + countableFor(s, month), 0);
@@ -91,7 +108,7 @@ export function LedgerAnalysis({ data, year, focusMode = false }: {
     const threshold = phase === 'trialWork' ? rules.trialWork : rules.sga;
     const pct = threshold ? Math.min(100, (status.countable / threshold) * 100) : 0;
     return { month, status, kind, w2, se, context, pct, label: remainingLabel(status, phase) };
-  }), [data, year, rules, focusMode]);
+  }), [data, months, rules]);
 
   const visible = onlyIncome ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth) : cards;
 
@@ -99,15 +116,20 @@ export function LedgerAnalysis({ data, year, focusMode = false }: {
     <div className="lg-analysis">
       <div className="lg-analysis-pad flex flex-wrap items-center gap-2.5 pb-3 pt-5">
         <span className="lg-sans text-lg font-semibold">
-          {focusMode && visible.length === 1 ? longMonthName(visible[0].month) : 'Month by month'}
+          {single && visible.length === 1 ? longMonthName(visible[0].month) : 'Month by month'}
         </span>
-        <span className="lg-label">All streams combined</span>
-        {focusMode ? null : (
+        {/* el-13x6gfw, filed as a vote on the same theme as the other layouts:
+            a caption that names the genre of the panel rather than saying
+            anything about it. In focus mode the heading is already a single
+            month, so "All streams combined" is a second label on one number.
+            It earns its place only across the twelve-month table, where the
+            figures really are several jobs added together. */}
+        {single ? null : <span className="lg-label">All streams combined</span>}
+        {single ? null : (
           <ReviewTarget
             id="ledger-analysis-view-modes"
             label="Three views of one table"
             reason="Cards, Table and Active Only show the same twelve months three ways — pick the one that answers the SGA question."
-            certainty="sure"
             layout="ledger"
             className="ml-auto w-full sm:w-auto"
           >
@@ -123,7 +145,7 @@ export function LedgerAnalysis({ data, year, focusMode = false }: {
       <div className="lg-analysis-pad flex flex-wrap gap-x-5 gap-y-1.5 pb-1">
         {analysisPhase === 'unknown' || analysisPhase === 'verifyComplete' ? (
           <span className="lg-legend-item">
-            <span className="lg-swatch lg-swatch-muted" /> Confirm TWP status to turn limit warnings on
+            <span className="lg-swatch lg-swatch-muted" /> Tell us where you stand to turn limit warnings on
           </span>
         ) : (
           /* One limit at a time — the same rule the overview layouts follow.
@@ -203,7 +225,12 @@ export function LedgerAnalysis({ data, year, focusMode = false }: {
           <table className="w-full lg-analysis-table">
             <thead>
               <tr>
-                {['Month', 'Combined', 'Status', 'vs SGA', 'vs TWP'].map((h, i) => (
+                {/* Four abbreviations and a preposition became two columns.
+                    "vs SGA" and "vs TWP" sat side by side, so half of every
+                    row was a distance to a limit that does not apply to this
+                    reader — the one-limit rule, unfinished on this layout.
+                    One column now, against the limit in force. */}
+                {['Month', 'Counted', 'Status', 'Against your limit'].map((h, i) => (
                   <th key={h} className={`lg-label border-b px-3 py-3 sm:px-4 lg-label-border ${i === 0 ? 'text-left' : 'text-right'}`}>{h}</th>
                 ))}
               </tr>
@@ -222,13 +249,16 @@ export function LedgerAnalysis({ data, year, focusMode = false }: {
                       <span className="lg-status-badge" style={{ color: statusColor(c.kind) }}>{KIND_LABEL[c.kind]}</span>
                     )}
                   </td>
-                  <td className={`px-3 py-3.5 sm:px-4 text-right text-base ${c.status.overSga ? 'lg-text-over' : 'lg-text-muted'}`}>
-                    {deltaToLimit(c.status.countable, rules.sga)}
-                  </td>
-                  <td className={`px-3 py-3.5 sm:px-4 text-right text-base ${c.status.isServiceMonth ? 'lg-text-twp' : 'lg-text-muted'}`}>
-                    {c.status.isServiceMonth && c.status.countable <= rules.trialWork
-                      ? 'Used by hours'
-                      : deltaToLimit(c.status.countable, rules.trialWork)}
+                  <td className={`px-3 py-3.5 sm:px-4 text-right text-base ${
+                    analysisPhase === 'sga'
+                      ? (c.status.overSga ? 'lg-text-over' : 'lg-text-muted')
+                      : (c.status.isServiceMonth ? 'lg-text-twp' : 'lg-text-muted')
+                  }`}>
+                    {analysisPhase === 'sga'
+                      ? deltaToLimit(c.status.countable, rules.sga)
+                      : c.status.isServiceMonth && c.status.countable <= rules.trialWork
+                        ? 'Used by your hours'
+                        : deltaToLimit(c.status.countable, rules.trialWork)}
                   </td>
                 </tr>
               ))}

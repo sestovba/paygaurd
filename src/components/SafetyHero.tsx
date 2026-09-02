@@ -1,6 +1,7 @@
 import { CircleAlert, CircleCheck, CircleDashed, TriangleAlert } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
+import { roomToTargetLine, trialMonthsLine } from '../domain/copy';
 import { longMonthName, todayMonth, yearOf } from '../domain/months';
 import { monthStatus } from '../domain/earnings';
 import { capacityFor } from '../domain/capacity';
@@ -50,14 +51,18 @@ export function SafetyHero({
           <CircleDashed className="mt-0.5 size-6 shrink-0 text-muted-foreground" />
           <div className="min-w-0">
             <div className="text-lg font-semibold">
+              {/* "Nine months left to check" reads first as "you have nine
+                   months left" — which is a claim about the reader's
+                   benefits, made by accident, on the largest line of the
+                   screen. It is a list of months waiting to be checked. */}
               {phase === 'unknown'
-                ? 'Every figure here is an estimate so far'
-                : 'Nine months left to check'}
+                ? 'Every number here is a guess so far'
+                : 'Nine months are waiting for you to check them'}
             </div>
             <p className="type-muted mt-1.5">
               {phase === 'unknown'
-                ? 'Your monthly limit depends on where you are in your Trial Work Period, and you have not told us yet. A few questions and these numbers become yours instead of an average.'
-                : 'Check these nine months against your own records. Once they agree, the limit shown here is the one that actually applies to you.'}
+                ? 'We do not know your monthly limit yet. A few questions, and these numbers become yours instead of an average.'
+                : 'Check these nine months against your own records. Once they agree, the limit shown here is the one that really applies to you.'}
             </p>
             <button
               type="button"
@@ -108,11 +113,9 @@ export function SafetyHero({
             : <CircleAlert className="size-4" />}
           {tone === 'safe' ? 'Safe'
             : tone === 'over' ? 'Over your limit'
-            : 'Getting close'}
+            : 'Close to your limit'}
         </span>
       </div>
-
-      <PrecisionLine reading={precision} onFix={onFixStream} />
 
       {/* money() already carries the dollar sign; this line used to wrap it
           in another one and print "($$1,210)" on three layouts. */}
@@ -123,7 +126,7 @@ export function SafetyHero({
               ? `${money(capacity.over)} over your limit of ${money(capacity.threshold)} this month`
               : capacity.stage === 'careful'
                 ? `Past the ${money(capacity.safeTarget)} we aim for. ${money(capacity.roomToLimit)} left before your limit of ${money(capacity.threshold)}.`
-                : `${money(capacity.room)} left before the ${money(capacity.safeTarget)} we aim for. Your limit is ${money(capacity.threshold)}.`}
+                : roomToTargetLine(capacity.room, capacity.safeTarget, capacity.threshold)}
           </p>
           {/* Hours, when we know what an hour is worth here. Dollars are the
               unit the rule is written in; hours are the unit the decision is
@@ -151,11 +154,17 @@ export function SafetyHero({
           of stranded: they are a countable resource being spent, and how many
           are left changes what this month is worth risking. That stays — with
           the name spelled out once and the abbreviation nowhere. */}
+      <div className="mt-6 border-t border-border pt-5">
+        <PrecisionLine reading={precision} onFix={onFixStream} variant="gauge" />
+      </div>
+
       {phase === 'trialWork' ? (
         <div className="mt-6 border-t border-border pt-5">
+          {/* Was "Trial Work Period · 3 of 9 months used, 6 left" — a proper
+               noun the reader has not been taught, then the same fact stated
+               twice in two directions. */}
           <p className="type-muted min-w-0">
-            Trial Work Period · {twp.used} of {TRIAL_MONTH_LIMIT} months used,
-            {' '}{twp.remaining} left
+            {trialMonthsLine(twp.used, TRIAL_MONTH_LIMIT)}
           </p>
           <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
         </div>

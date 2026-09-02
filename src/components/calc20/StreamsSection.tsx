@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import type { MonthKey, Stream } from '../../domain/types';
 import { useTracker } from './state';
 import { money, hours as fmtHours, miles as fmtMiles } from '../../domain/format';
+import { SOURCE_SHORT } from '../../domain/copy';
 import {
   streamYearTotal, streamYearHours, streamYearMiles, streamsMissingMonth
 } from '../../domain/earnings';
@@ -19,7 +20,7 @@ import { PaycheckLedger } from './PaycheckLedger';
 import { AnnualTotalEntry } from './AnnualTotalEntry';
 import {
   ArchiveIcon, ArchiveRestoreIcon, CheckIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon,
-  CloseIcon, CompactIcon, CopyIcon, FutureMonthsIcon, HideFutureIcon, ListIcon, LockIcon, MonthColumnsIcon, MoreIcon,
+  CloseIcon, CompactIcon, CopyIcon, ListIcon, LockIcon, MonthColumnsIcon, MoreIcon,
   PauseIcon, PlusIcon, RoomyIcon, SlidersIcon, TrashIcon, UnlockIcon, WarningIcon
 } from './Icons';
 import { AnchoredPopover, useAnchoredPopover } from './Popover';
@@ -34,10 +35,14 @@ const DEFAULT_FIELDS: Record<Stream['type'], FieldId[]> = {
   ten99: ['gross', 'miles']
 };
 
+/* "W-2 · 120 hrs" and "1099 · net of expenses" — two tax-form names and one
+   accounting phrase, on the line under every job's name. */
 function subLine(stream: Stream, year: number): string {
-  if (stream.type === 'w2') return 'W-2 · ' + fmtHours(streamYearHours(stream, year));
+  if (stream.type === 'w2') return 'Employer · ' + fmtHours(streamYearHours(stream, year));
   const miles = streamYearMiles(stream, year);
-  return miles > 0 ? '1099 · ' + fmtMiles(miles) + ' deducted' : '1099 · net of expenses';
+  return miles > 0
+    ? 'Gig work · ' + fmtMiles(miles) + ' taken off'
+    : 'Gig work · after your miles come off';
 }
 
 function totalLabel(stream: Stream): string {
@@ -76,8 +81,8 @@ function TypeBadge({ stream }: { stream: Stream }) {
         anchor={anchor}
         width={160}
         className="stream-menu"
-        label="Income type"
-        title="Type"
+        label="What kind of work is this?"
+        title="What kind of work"
         role="menu"
       >
         <button
@@ -85,7 +90,7 @@ function TypeBadge({ stream }: { stream: Stream }) {
           role="menuitem"
           onClick={() => { anchor.close(); updateStream(stream.id, { type: 'w2' }); }}
         >
-          <span className="menu-label">W-2</span>
+          <span className="menu-label">{SOURCE_SHORT.w2}</span>
           {stream.type === 'w2' ? <CheckIcon size={15} /> : null}
         </button>
         <button
@@ -93,7 +98,7 @@ function TypeBadge({ stream }: { stream: Stream }) {
           role="menuitem"
           onClick={() => { anchor.close(); updateStream(stream.id, { type: 'ten99' }); }}
         >
-          <span className="menu-label">1099</span>
+          <span className="menu-label">{SOURCE_SHORT.ten99}</span>
           {stream.type === 'ten99' ? <CheckIcon size={15} /> : null}
         </button>
       </AnchoredPopover>
@@ -157,11 +162,11 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
               <ChevronLeftIcon size={16} /><span>Back</span>
             </button>
             <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { type: 'w2' }); }}>
-              <span className="menu-label">W-2</span>
+              <span className="menu-label">{SOURCE_SHORT.w2}</span>
               {stream.type === 'w2' ? <CheckIcon size={15} /> : null}
             </button>
             <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { type: 'ten99' }); }}>
-              <span className="menu-label">1099</span>
+              <span className="menu-label">{SOURCE_SHORT.ten99}</span>
               {stream.type === 'ten99' ? <CheckIcon size={15} /> : null}
             </button>
           </>
@@ -519,15 +524,10 @@ export function StreamsSection({
             {density === 'compact' ? <CompactIcon size={14} /> : <RoomyIcon size={14} />}
             {density === 'compact' ? 'Compact' : 'Cozy'}
           </button>
-          <button
-            className={'stream-panel-edit' + (ui.hideFuture ? ' stream-panel-edit--on' : '')}
-            type="button"
-            aria-pressed={ui.hideFuture}
-            onClick={() => setUi({ hideFuture: !ui.hideFuture })}
-          >
-            {ui.hideFuture ? <HideFutureIcon size={14} /> : <FutureMonthsIcon size={14} />}
-            {ui.hideFuture ? 'Hiding future' : 'Showing future'}
-          </button>
+          {/* "Hiding future" used to sit here, on the foot of every stream
+              card — one app-wide preference drawn once per job. It is one
+              control in the header now, and it says all four things it can
+              do rather than two. */}
         </div>
       </div>
     );
@@ -699,7 +699,7 @@ export function StreamsSection({
                     >
                       <WarningIcon size={11} />
                       <span className="stream-card__badge-text">
-                        No payday set — can't warn about extra-paycheck months
+                        No payday set
                       </span>
                     </span>
                   ) : null}

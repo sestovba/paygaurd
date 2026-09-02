@@ -31,7 +31,7 @@ export function StatusPage() {
         <section className="panel p-5 sm:p-6">
           <h2 className="display-figure text-2xl">{money(rules.sga)} a month</h2>
           <p className="type-muted mt-2">
-            That is your SGA earnings limit. Earning more than this in any calendar month can affect your benefits.
+            Earn more than that in one calendar month and your benefits are at risk.
           </p>
         </section>
       ) : null}
@@ -39,8 +39,9 @@ export function StatusPage() {
       <SafeWorkSimulator />
 
       <section className="panel p-5 sm:p-6">
-        <h2 className="display-figure text-2xl">Trial Work Period &amp; Rules</h2>
-        <p className="type-muted mt-2">Choose whether you are in your 9 Trial Work months or subject to the SGA limit.</p>
+        <h2 className="display-figure text-2xl">
+          {phase === 'sga' ? 'Where you are now' : 'Your trial work months'}
+        </h2>
         <div className="mt-4">
           <TwpStatusForm />
         </div>

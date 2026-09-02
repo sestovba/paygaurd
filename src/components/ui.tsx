@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Check, DollarSign, Plus } from 'lucide-react';
+import { SOURCE_CHOICE } from '../domain/copy';
 
 export function BrandMark({
   onClick, subtitle
@@ -198,11 +199,10 @@ export function AddJobButton({
   type: 'w2' | 'ten99';
   onClick: () => void;
 }) {
-  /* Not "W-2 job" and "1099 work". Those are categories on a tax form, and
-     somebody delivering for DoorDash does not know they are the second one —
-     so they pick the first, and lose the mileage deduction that only the
-     second one has. */
-  const label = type === 'w2' ? 'A job that pays me' : 'Delivery or gig work';
+  /* The reasoning moved to SOURCE_CHOICE in domain/copy.ts, because the
+     workspace's Add income sheet was offering the tax-form pair for the very
+     same decision. One door, one set of words. */
+  const label = SOURCE_CHOICE[type].label;
   return (
     <button
       type="button"

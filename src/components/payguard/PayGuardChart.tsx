@@ -21,7 +21,16 @@ import type { Stream } from '../../domain/types';
  * schedule pays an extra check are stamped on the axis — before they arrive,
  * because that is the whole use of knowing.
  */
-export function PayGuardChart({ streams, year }: { streams: Stream[]; year: number }) {
+export function PayGuardChart({ streams, year, limit }: {
+  streams: Stream[];
+  year: number;
+  /* The limit in force, or null while the app has not been told — the same
+     prop LedgerChart already takes. This chart drew both lines, labelled
+     "SGA $1,690" and "TWP $1,210": two abbreviations and two limits, one of
+     which never applies to the reader. The ledger's chart was fixed for that
+     and this one was not, so the two layouts contradicted each other. */
+  limit: { kind: 'trialWork' | 'sga'; amount: number } | null;
+}) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const rules = rulesFor(year);
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => monthKey(year, i + 1)), [year]);
@@ -39,7 +48,7 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
   }), [months, streams]);
 
   const maxIncome = Math.max(...byMonth.map((m) => m.total), 0);
-  const ceiling = Math.max(rules.sga * 1.25, maxIncome * 1.15, 2000);
+  const ceiling = Math.max((limit?.amount ?? rules.sga) * 1.25, maxIncome * 1.15, 2000);
 
   // Compute 4-5 nice Y-axis grid markers
   const ySteps = useMemo(() => {
@@ -77,17 +86,17 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
       {/* Chart Header */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pg-rule-b px-3.5 py-3 sm:px-5 sm:py-3.5">
         <h2 className="pg-section-title pg-fg sm:text-[0.8125rem]">
-          {year} countable income by month
+          What counted toward your limit, month by month
         </h2>
         <p id="pg-chart-thresholds" className="sr-only">
-          SGA threshold {money(rules.sga)} per month. Trial Work Period threshold {money(rules.trialWork)} per month.
+          {limit ? `Your monthly limit is ${money(limit.amount)}.` : 'No limit is set yet.'}
         </p>
         <div className="flex flex-wrap items-center gap-2.5 text-[0.6875rem] font-semibold sm:gap-4 sm:text-xs">
           <span className="flex items-center gap-1.5 pg-muted">
-            <span className="size-2 sm:size-2.5 rounded-full pg-fill-w2" /> W-2
+            <span className="size-2 sm:size-2.5 rounded-full pg-fill-w2" /> Employer
           </span>
           <span className="flex items-center gap-1.5 pg-muted">
-            <span className="size-2 sm:size-2.5 rounded-full pg-fill-se" /> 1099
+            <span className="size-2 sm:size-2.5 rounded-full pg-fill-se" /> Gig work
           </span>
           <span className="pg-dim font-mono">
             Peak: {money(maxIncome)}
@@ -149,36 +158,23 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
               annotation on it: a solid rule each, and the ground above SGA
               tinted so "over" is a place on the chart, not a comparison the
               reader has to make. */}
-          {rules.sga <= ceiling ? (
+          {limit && limit.amount <= ceiling ? (
             <div
               className="pg-chart-over-band pointer-events-none absolute left-9 right-0 sm:left-14"
-              style={{ top: 0, height: `${(1 - rules.sga / ceiling) * 100}%` }}
+              style={{ top: 0, height: `${(1 - limit.amount / ceiling) * 100}%` }}
               aria-hidden="true"
             />
           ) : null}
 
-          {/* SGA Line */}
-          {rules.sga <= ceiling ? (
+          {/* One line, named in words. */}
+          {limit && limit.amount <= ceiling ? (
             <div
               className="pointer-events-none absolute left-9 sm:left-14 right-0 flex items-center z-10"
-              style={{ top: `${(1 - rules.sga / ceiling) * 100}%` }}
+              style={{ top: `${(1 - limit.amount / ceiling) * 100}%` }}
             >
-              <div className="pg-chart-limit flex-1" data-limit="over" />
-              <span className="pg-badge pg-badge-over ml-1.5 shrink-0 sm:ml-2">
-                SGA {money(rules.sga)}
-              </span>
-            </div>
-          ) : null}
-
-          {/* TWP Line */}
-          {rules.trialWork <= ceiling ? (
-            <div
-              className="pointer-events-none absolute left-9 sm:left-14 right-0 flex items-center z-10"
-              style={{ top: `${(1 - rules.trialWork / ceiling) * 100}%` }}
-            >
-              <div className="pg-chart-limit flex-1" data-limit="twp" />
-              <span className="pg-badge pg-badge-twp ml-1.5 shrink-0 sm:ml-2">
-                TWP {money(rules.trialWork)}
+              <div className="pg-chart-limit flex-1" data-limit={limit.kind === 'trialWork' ? 'twp' : 'over'} />
+              <span className={`pg-badge ml-1.5 shrink-0 sm:ml-2 ${limit.kind === 'trialWork' ? 'pg-badge-twp' : 'pg-badge-over'}`}>
+                Your limit {money(limit.amount)}
               </span>
             </div>
           ) : null}
@@ -206,8 +202,8 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
               const sePct = (item.se / ceiling) * 100;
               const totalPct = Math.min(100, w2Pct + sePct);
               const isSelected = selectedMonth === item.month;
-              const isOverSga = item.total > rules.sga;
-              const isOverTwp = item.total > rules.trialWork;
+              const isOverLimit = limit != null && item.total > limit.amount;
+              const usesTrialMonth = limit?.kind === 'trialWork' && isOverLimit;
               // Keep the tooltip inside the plot box: it used to be anchored
               // above the full-height column, which put it outside the card
               // entirely and got it clipped. Pin it to whichever end of the
@@ -226,10 +222,13 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                   onBlur={() => setSelectedMonth(null)}
                   aria-pressed={isSelected}
                   aria-describedby="pg-chart-thresholds"
+                  /* A screen reader gets the same words as a screen: this
+                     said "countable income", "W-2", "1099", "the SGA limit"
+                     and "the TWP limit" in one label. */
                   aria-label={
-                    `${longMonthName(item.month)}: ${money(item.total)} countable income.`
-                    + ` W-2 ${money(item.w2)}. 1099 ${money(item.se)}.`
-                    + (isOverSga ? ' Over the SGA limit.' : isOverTwp ? ' Over the TWP limit.' : '')
+                    `${longMonthName(item.month)}: ${money(item.total)} counted toward your limit.`
+                    + ` ${money(item.w2)} from an employer. ${money(item.se)} from gig work.`
+                    + (isOverLimit ? ' Over your monthly limit.' : '')
                     + (extraPay.get(item.month) ? ` ${extraPay.get(item.month)!.counts.join(' or ')} paychecks this month.` : '')
                   }
                   className="pg-chart-bar-trigger group relative flex h-full flex-1 flex-col items-center justify-end"
@@ -258,7 +257,7 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                           {item.se > 0 ? (
                             <div className="pg-tip-row">
                               <span className="pg-tip-key">
-                                <span className="pg-tip-swatch pg-fill-se" /> 1099 self-emp.
+                                <span className="pg-tip-swatch pg-fill-se" /> Gig work
                               </span>
                               <span className="pg-tip-val">{money(item.se)}</span>
                             </div>
@@ -266,24 +265,26 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                         </div>
                       ) : null}
 
-                      <div className="pg-tip-foot">
-                        <div className="pg-tip-row">
-                          <span className="pg-tip-key">SGA {money(rules.sga)}</span>
-                          <span className={`pg-tip-val ${isOverSga ? 'pg-text-over' : 'pg-text-safe'}`}>
-                            {isOverSga
-                              ? `+${money(item.total - rules.sga)} over`
-                              : `${money(rules.sga - item.total)} left`}
-                          </span>
+                      {/* One row, not two. The tooltip stated the reader's
+                          distance to both limits at once, each of them named
+                          by its initials. */}
+                      {limit ? (
+                        <div className="pg-tip-foot">
+                          <div className="pg-tip-row">
+                            <span className="pg-tip-key">Your limit {money(limit.amount)}</span>
+                            <span
+                              className={`pg-tip-val ${isOverLimit && !usesTrialMonth ? 'pg-text-over' : 'pg-text-safe'}`}
+                              style={usesTrialMonth ? { color: 'var(--pg-twp)' } : undefined}
+                            >
+                              {usesTrialMonth
+                                ? `${money(item.total - limit.amount)} over · uses a trial work month`
+                                : isOverLimit
+                                  ? `${money(item.total - limit.amount)} over`
+                                  : `${money(limit.amount - item.total)} left`}
+                            </span>
+                          </div>
                         </div>
-                        <div className="pg-tip-row">
-                          <span className="pg-tip-key">TWP {money(rules.trialWork)}</span>
-                          <span className="pg-tip-val" style={isOverTwp ? { color: 'var(--pg-twp)' } : undefined}>
-                            {isOverTwp
-                              ? `+${money(item.total - rules.trialWork)} · uses a month`
-                              : `${money(rules.trialWork - item.total)} left`}
-                          </span>
-                        </div>
-                      </div>
+                      ) : null}
                     </div>
                   ) : null}
 
@@ -308,8 +309,8 @@ export function PayGuardChart({ streams, year }: { streams: Stream[]; year: numb
                         className="w-full pg-fill-w2 transition-all"
                       />
                     ) : null}
-                    {isOverSga || isOverTwp ? (
-                      <span className="pg-chart-cap" data-breach={isOverSga ? 'over' : 'twp'} aria-hidden="true" />
+                    {isOverLimit ? (
+                      <span className="pg-chart-cap" data-breach={usesTrialMonth ? 'twp' : 'over'} aria-hidden="true" />
                     ) : null}
                   </div>
                 </button>
