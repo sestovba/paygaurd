@@ -325,3 +325,104 @@
 
 .pk-log:disabled { background: #9aa5b1; cursor: default; }
 .dark .pk-log:disabled { background: #39404d; }
+
+/* ---- basis switch in log pay ---- */
+.pk-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pk-switch-btn {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #c9cfd8;
+  border-radius: 8px;
+  background: #f7f8fa;
+  color: #5c6572;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.dark .pk-switch-btn {
+  border-color: #39404d;
+  background: #171c24;
+  color: #98a2b1;
+}
+
+.pk-switch-btn[data-active] {
+  background: #ffffff;
+  border-color: #17693a;
+  border-width: 2px;
+  color: #17693a;
+  font-weight: 700;
+  padding: 7px 11px;
+}
+.dark .pk-switch-btn[data-active] {
+  background: #1a1f27;
+  border-color: #43d692;
+  color: #43d692;
+}
+
+/* ---- future preference prompt ---- */
+.pk-prompt {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #dfe3e9;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+.dark .pk-prompt {
+  border-color: #2a2f39;
+  background: #171c24;
+}
+
+.pk-prompt-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: inherit;
+}
+
+.pk-prompt-choices {
+  display: flex;
+  gap: 8px;
+}
+
+.pk-prompt-btn {
+  flex: 1 1 0;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid #c9cfd8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #5c6572;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.dark .pk-prompt-btn {
+  border-color: #39404d;
+  background: #1a1f27;
+  color: #98a2b1;
+}
+
+.pk-prompt-btn[data-selected] {
+  border-color: #17693a;
+  border-width: 2px;
+  background: #ffffff;
+  color: #17693a;
+  font-weight: 700;
+  padding: 5px 9px;
+}
+.dark .pk-prompt-btn[data-selected] {
+  border-color: #43d692;
+  background: #1a1f27;
+  color: #43d692;
+}

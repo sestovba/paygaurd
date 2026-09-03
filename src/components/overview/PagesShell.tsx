@@ -1,53 +1,41 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Menu, Settings } from 'lucide-react';
-import { BrandMark } from './ui';
-import { useMonthScope, useTracker } from '../state/TrackerProvider';
-import { copyFor } from '../domain/copy';
-import { useTheme } from '../theme';
-import { knownYears } from '../domain/rules';
-import { SafetyHero } from './SafetyHero';
-import { ActionBanner } from './ActionBanner';
-import { PaycheckRadar } from './PaycheckRadar';
-import { MonthGrid } from './MonthGrid';
-import { MonthSheet } from './MonthSheet';
-import { StreamSheet } from './StreamSheet';
-import { QuickPaydaySheet } from './QuickPaydaySheet';
-import { TwpWizard } from './TwpWizard';
-import { VerifyCompleteSheet } from './VerifyCompleteSheet';
-import { StreamsPanel } from './StreamsPanel';
-import { StatusPage } from './StatusPage';
-import { SettingsPanel } from './SettingsPanel';
-import { ToastStack } from './ToastStack';
-import { NotificationsBell } from './NotificationsBell';
-import { YearTotal } from './YearTotal';
-import { Sidebar, TabBar } from './PageNav';
-import type { PageId } from './PageNav';
-import type { MonthKey } from '../domain/types';
-import { ReviewTarget } from '../review/ReviewTarget';
+import { BrandMark } from '../ui';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
+import { copyFor } from '../../domain/copy';
+import { useTheme } from '../../theme';
+import { knownYears } from '../../domain/rules';
+import { SafetyHero } from '../SafetyHero';
+import { ActionBanner } from '../ActionBanner';
+import { PaycheckRadar } from '../PaycheckRadar';
+import { MonthGrid } from '../MonthGrid';
+import { StreamSheet } from '../StreamSheet';
+import { StreamsPanel } from '../StreamsPanel';
+import { StatusPage } from '../StatusPage';
+import { ToastStack } from '../ToastStack';
+import { NotificationsBell } from '../NotificationsBell';
+import { YearTotal } from '../YearTotal';
+import { Sidebar, TabBar } from '../PageNav';
+import type { PageId } from '../PageNav';
+import { Detail } from './detail';
+import type { DetailRequest } from './detail';
+import { ReviewTarget } from '../../review/ReviewTarget';
 
 function pageLabel(page: PageId): string {
   return page === 'overview' ? 'Overview' : page === 'income' ? 'Income' : 'Your limit';
 }
 
-type DetailRequest =
-  | { kind: 'month'; month: MonthKey }
-  | { kind: 'stream'; streamId: string }
-  | { kind: 'payday'; streamId: string }
-  | { kind: 'quiz' }
-  | { kind: 'verify' }
-  | { kind: 'settings' };
-
-/** The sidebar-on-desktop / tabs-on-mobile shell — a navigational restyle
- *  on top of the same domain logic and sheets TrackerClassic uses. Every
+/** The sidebar-on-desktop / tabs-on-mobile shell — the same surfaces the
+ *  scroll shell draws, split across three pages. Every
  *  detail view (a month, a job, the TWP quiz, settings) renders inline in
  *  the main content area with a breadcrumb back — never as a popup.
  *  `detail` holds at most one request at a time, so opening a new one
  *  (e.g. Settings) always supersedes whatever was open before, instead of
  *  several independent booleans silently piling up. */
-export function TrackerV2() {
-  const { ui, setUi, resetAll } = useTracker();
+export function PagesShell() {
+  const { ui, setUi } = useTracker();
   const { scope } = useMonthScope('many');
-  useTheme(ui.theme);
+  useTheme(ui.theme, ui.palette);
 
   const [page, setPage] = useState<PageId>('overview');
   const [incomeSelectedId, setIncomeSelectedId] = useState<string | null>(null);
@@ -64,46 +52,23 @@ export function TrackerV2() {
     setPage(next);
   }
 
-  const detailNode =
-    detail?.kind === 'stream' ? (
-      <StreamSheet streamId={detail.streamId} onClose={() => setDetail(null)} variant="inline" backLabel={backLabel} />
-    ) : detail?.kind === 'month' ? (
-      <MonthSheet
-        month={detail.month}
-        onClose={() => setDetail(null)}
-        onOpenStream={(id) => setDetail({ kind: 'stream', streamId: id })}
-        variant="inline"
-        backLabel={backLabel}
-      />
-    ) : detail?.kind === 'payday' ? (
-      <QuickPaydaySheet
-        streamId={detail.streamId}
-        onClose={() => setDetail(null)}
-        onEditFull={(id) => setDetail({ kind: 'stream', streamId: id })}
-        variant="inline"
-        backLabel={backLabel}
-      />
-    ) : detail?.kind === 'quiz' ? (
-      <TwpWizard onClose={() => setDetail(null)} variant="inline" backLabel={backLabel} />
-    ) : detail?.kind === 'verify' ? (
-      <VerifyCompleteSheet onClose={() => setDetail(null)} variant="inline" backLabel={backLabel} />
-    ) : detail?.kind === 'settings' ? (
-      <SettingsPanel
-        theme={ui.theme}
-        onTheme={(theme) => setUi({ theme })}
-        onOpenStatus={() => { setDetail(null); setPage('status'); }}
-        onReset={() => { resetAll(); setDetail(null); }}
-        onClose={() => setDetail(null)}
-        variant="inline"
-        backLabel={backLabel}
-        layout={ui.layout}
-        onLayoutChange={(layout) => setUi({ layout })}
-      />
-    ) : null;
+  /* Six detail views, rendered by one component shared with the other two
+     shells — see ./detail.tsx. Here a detail REPLACES the page, so a child
+     request (a month opening a source) replaces it too. */
+  const detailNode = detail ? (
+    <Detail
+      request={detail}
+      variant="inline"
+      backLabel={backLabel}
+      onClose={() => setDetail(null)}
+      onChild={setDetail}
+      onOpenStatus={() => { setDetail(null); setPage('status'); }}
+    />
+  ) : null;
 
   return (
     <div className="min-h-screen bg-background" data-chrome-root>
-      <header className="sticky top-0 z-10 border-b border-border/70 bg-background/85 backdrop-blur">
+      <header className="app-bar sticky top-0 z-10 border-b">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-10">
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <button

@@ -22,7 +22,7 @@ export function HelpSpread({ onClose }: { onClose: () => void }) {
       <p className="type-muted">
         Gig work is counted differently from a job with an employer. What counts is
         what you were paid, minus what it cost you to drive. That is usually a lot
-        less than what the app paid you.
+        less than the amount that landed in your account.
       </p>
 
       <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2 p-4">
@@ -45,7 +45,7 @@ export function HelpSpread({ onClose }: { onClose: () => void }) {
           Miles you drive for work — deliveries, rides, driving to a job you are paid
           for. Not miles you drive for yourself. In {ui.year} they are worth:{' '}
           {mileage.map((period) =>
-            `${period.fromMonth === 1 ? 'Jan–Jun' : 'Jul–Dec'} $${period.rate.toFixed(3).replace(/0$/, '')}/mile`
+            `${period.fromMonth === 1 ? 'January to June' : 'July to December'}: $${period.rate.toFixed(3).replace(/0$/, '')} a mile`
           ).join(' · ')}. Write your miles down, or let your driving app record them.
         </p>
       </div>

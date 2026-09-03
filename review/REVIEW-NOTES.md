@@ -35,7 +35,7 @@ and bump `updatedAt`. The app merges it in on the next load.
 Oldest first. The anchor is on the line under each one.
 
 - **August countable earnings** — payguard
-  `src/components/payguard/TrackerPayGuard.tsx:270`
+  `src/components/payguard/TrackerPayGuard.tsx:285`
   > This whole hero says three things where one would do — show the month, the limit, and the room left.
 - **Benefit phase** — payguard
   `src/components/payguard/TrackerPayGuard.tsx (near line 130, unverified)`
@@ -46,7 +46,7 @@ Oldest first. The anchor is on the line under each one.
   `src/components/payguard/TrackerPayGuard.tsx (near line 259, unverified)`
   > Housekeeping in the highest-value strip on the screen. Settings already exists two icons along and is where anyone would look.
 - **Annual income chart** — payguard
-  `src/components/payguard/TrackerPayGuard.tsx:335`
+  `src/components/payguard/TrackerPayGuard.tsx:353`
   > Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it.
 - **Duplicate overview statistics** — payguard
   `src/components/payguard/TrackerPayGuard.tsx (near line 339, unverified)`
@@ -68,7 +68,7 @@ Oldest first. The anchor is on the line under each one.
   `src/components/ledger/TrackerLedger.tsx (near line 274, unverified)`
   > Four palettes in the header of a benefits tracker. If they stay at all they belong in Settings — the header is where the year and the current phase should be.
 - **Scroll-to-top button** — ledger
-  `src/components/ledger/TrackerLedger.tsx:163`
+  `src/components/ledger/TrackerLedger.tsx:169`
   > on IOS I would agree that theres a shortcut to go up quickly on android there isn't I defend this choice, not sure about desktop there isn't much scrolling on desktop, but hiding for desktop why? So leave it.
 - **Notice counter** — ledger
   `src/components/ledger/TrackerLedger.tsx (near line 194, unverified)`
@@ -91,7 +91,7 @@ Oldest first. The anchor is on the line under each one.
 - **Three-step tutorial** — responsive
   `src/components/TrackerV3.tsx (near line 876, unverified)`
 - **Recent activity log** — responsive
-  `src/components/TrackerV3.tsx:990`
+  `src/components/TrackerV3.tsx:970`
   > What you changed is not what you owe. Useful for trusting the record — which matters — but it is a subpage, not a section on the screen where you check whether you are over.
 - **Duplicate income sources** — responsive
   `src/components/TrackerV3.tsx (near line 398, unverified)`
@@ -129,7 +129,7 @@ Oldest first. The anchor is on the line under each one.
   `src/components/TermsGate.tsx (near line 18, unverified)`
   > It has to be there and it has to be honest. Worth checking that the one line that actually matters — this is not legal or benefits advice, and SSA's determination is the one that counts — is readable without opening anything.
 - **Annual income chart** — ledger
-  `src/components/ledger/TrackerLedger.tsx:241`
+  `src/components/ledger/TrackerLedger.tsx:247`
   > Do what you think is best I trust your judgement
 - **Numbered workspace trail** — responsive
   `src/components/TrackerV3.tsx:205`
@@ -177,7 +177,7 @@ Oldest first. The anchor is on the line under each one.
   `src/components/Sheet.tsx (near line 228, unverified)`
   > I have never taken the time to understand the organization of this, layout icon can be better.  Whats very useful is the layout changer and themes and export and import and clear all data  i labels they need consolidation like the notification center in apple, I don't need to see them always, but these are persistent labels need some more design here i think  how income works, I am ignoring that section benefit status has no icon? focus mode has no icon? Why is benefit status then layout then how income works? This one needs refactoring and ceanup
 - **Where you stand** — v2
-  `src/components/StatusPage.tsx:43`
+  `src/components/StatusPage.tsx:46`
   > Mute point, when TWP is exhausted I don't need any explanation or mention of it this section is reminding me about something thats no longer there redesign this or remove
 - **Safe work simulator** — v2
   `src/components/SafeWorkSimulator.tsx (near line 111, unverified)`
@@ -189,7 +189,7 @@ Oldest first. The anchor is on the line under each one.
   `src/components/SafeWorkSimulator.tsx (near line 132, unverified)`
   > Is this helpful?
 - **Stay below SGA** — v2
-  `src/components/SafeWorkSimulator.tsx:44`
+  `src/components/SafeWorkSimulator.tsx:47`
   > Duh
 - **UPDATE** — v2
   `src/components/StatusPage.tsx (near line 59, unverified)`
@@ -245,52 +245,52 @@ Oldest first. The anchor is on the line under each one.
   `src/components/PrecisionLine.tsx (near line 78, unverified)`
   > Not sure what this is not self explaining and dont use text to compensate for lack of self explanation, just come up with a redesign alternative also I have seen this in other layouts we should make it a common re-usable item across layouts styled by that layouts theme and such layout specific css
 - **Confirm TWP status** — workrecord
-  `src/components/workrecord/TrackerWorkRecord.tsx:255`
+  `src/components/workrecord/TrackerWorkRecord.tsx:272`
   > Bad copy, we need content strategist mindset combined with senior product designer thinking and UX architect
 - **This tracker does not know whether TWP months re** — workrecord
-  `src/components/workrecord/TrackerWorkRecord.tsx:293`
+  `src/components/workrecord/TrackerWorkRecord.tsx:304`
   > We are repeating ourselves multiple times this is bad design, which one is it Bad copy, we need content strategist mindset combined with senior product designer thinking and UX architect
 - **New job** — workrecord
   `src/components/workrecord/TrackerWorkRecord.tsx (near line 331, unverified)`
   > This should full bleed edge to edge
 - **New job** — workrecord
-  `src/components/workrecord/TrackerWorkRecord.tsx:473`
+  `src/components/workrecord/TrackerWorkRecord.tsx:488`
   > Now that we are only focused on the month only, I wonder how we can simplify W-2 and 1099 we should be able to hide unnecessary fields like hours and why do we need countable? isnt it Gross?  For 1099 yes we need countable, not for W2 But But, to high level thinking in the latest layouts like pocket etc We are doing NET + guesswork so, how can we redesign this entirely with that in mind?
 - **2026 countable total** — workrecord
   `src/components/workrecord/WorkRecordStatus.tsx (near line 69, unverified)`
   > How many times must we ask the same thing, I dont even know what to comment, I am lost in the noise of the entire layout.
 - **Work pay simulator** — workrecord
-  `src/components/SafeWorkSimulator.tsx:44`
+  `src/components/SafeWorkSimulator.tsx:47`
   > How much more redundant can we be? Holy moly, bad bad bad design
 - **Monthly work-limit status** — payguard
-  `src/components/payguard/PayGuardAnalysis.tsx:149`
+  `src/components/payguard/PayGuardAnalysis.tsx:153`
   > I have commented in other layouts, its the same comment
 - **YTD countable income** — payguard
-  `src/components/payguard/PayGuardAnalysis.tsx:149`
+  `src/components/payguard/PayGuardAnalysis.tsx:153`
   > Glassy eyes, what is this, how important is it, what is necessary and what is a waste of my time.
 - **These Social Security thresholds are for plannin** — payguard
-  `src/components/payguard/PayGuardAnalysis.tsx:428`
+  `src/components/payguard/PayGuardAnalysis.tsx:446`
   > I dont even want to read this its so wordy
 - **Work pay simulator** — payguard
-  `src/components/SafeWorkSimulator.tsx:44`
+  `src/components/SafeWorkSimulator.tsx:47`
   > I dont understand at a glance what is the problem I clicked on simulator and this what the heck as a user
 - **New job** — payguard
-  `src/components/payguard/PayGuardJobEditor.tsx:203`
+  `src/components/payguard/PayGuardJobEditor.tsx:204`
   > already commented on a cousin theme about a high level issue
 - **2026 COLLAPSE ALL IMPORT EXPORT JSON** — ledger
   `src/components/ledger/TrackerLedger.tsx (near line 201, unverified)`
   > Import and export in the settings, collapse all is legit,
 - **SSDI Income Tracker UNDO (4) TOP** — ledger
-  `src/components/ledger/TrackerLedger.tsx:111`
+  `src/components/ledger/TrackerLedger.tsx:117`
   > Undo I understand top yeah nice touch
 - **SSDI Income Tracker UNDO (4) TOP 2026 COLLAPSE A** — ledger
-  `src/components/ledger/TrackerLedger.tsx:111`
+  `src/components/ledger/TrackerLedger.tsx:117`
   > after making those changes we need to refactor the headers into one header
 - **Months ≥ SGA** — ledger
-  `src/components/ledger/TrackerLedger.tsx:201`
+  `src/components/ledger/TrackerLedger.tsx:207`
   > I like this honestly but its taking up too much space for what it is
 - **ESTIMATED New job · add a payday** — ledger
-  `src/components/ledger/TrackerLedger.tsx:236`
+  `src/components/ledger/TrackerLedger.tsx:242`
   > wow, bad alignment also see other comments
 - **YTD Gross** — ledger
   `src/components/ledger/LedgerJobEditor.tsx:139`
@@ -441,41 +441,91 @@ Oldest first. The anchor is on the line under each one.
   `src/components/PrecisionLine.tsx (near line 84, unverified)`
   > This should be styled same as the current theme
 - **Add** — workrecord
-  `src/components/workrecord/TrackerWorkRecord.tsx:255`
+  `src/components/workrecord/TrackerWorkRecord.tsx:272`
   > This button deserves margin on left and right
 - **This screen** — workrecord
-  `src/components/workrecord/TrackerWorkRecord.tsx:158`
+  `src/components/workrecord/TrackerWorkRecord.tsx:167`
   > Do we need this?
 - **0 of your 9 trial work months used** — responsive
   `src/components/SafetyHero.tsx (near line 181, unverified)`
   > Why is there a divider line here
 - **Autofill empty months** — payguard
-  `src/components/payguard/PayGuardJobEditor.tsx:435`
+  `src/components/payguard/PayGuardJobEditor.tsx:439`
   > This is a silly button in focus mode
 - **This screen** — payguard
-  `src/components/payguard/TrackerPayGuard.tsx:174`
+  `src/components/payguard/TrackerPayGuard.tsx:189`
   > more like the screenshot
 - **How many hours could I work?** — payguard
-  `src/components/payguard/PayGuardAnalysis.tsx:403`
+  `src/components/payguard/PayGuardAnalysis.tsx:421`
   > more like the screenshot
 - **September** — payguard
-  `src/components/payguard/PayGuardAnalysis.tsx:155`
+  `src/components/payguard/PayGuardAnalysis.tsx:172`
   > no background or line and less padding bottom
 - **$1,203 left** — payguard
   `src/components/payguard/PayGuardAnalysis.tsx:30`
   > put this at the top right header align to under your limit
 - **This screen** — ledger
-  `src/components/ledger/TrackerLedger.tsx:111`
+  `src/components/ledger/TrackerLedger.tsx:117`
   > Maybe keep, I know I said remove but lets cool it on all layouts about this section
 - **1 of 12 months · Month by month** — ledger
   `src/components/ledger/LedgerJobEditor.tsx:319`
   > makes no sense in focus mode we need variables for global labels in such a case
 - **OPEN SAFE WORK SIMULATOR** — ledger
-  `src/components/ledger/LedgerAnalysis.tsx:277`
+  `src/components/ledger/LedgerAnalysis.tsx:274`
   > This is the worst name I mentioned my frustration before, we are not confusing our users, what does safe mean? what does that have to do with anything
 - **Are you still doing this work? · Ended** — plan
   `src/components/ui.tsx (near line 108, unverified)`
   > Verifying the rebuilt console captures a source line.
+- **2026 work record** — workrecord
+  `src/components/workrecord/TrackerWorkRecord.tsx:187`
+  > For mobile attached is current on left and desired on right, mostly scaling input sizes by about 30%
+- **Tell us where you stand** — workrecord
+  `src/components/workrecord/TrackerWorkRecord.tsx:275`
+  > increase height by 30%
+- **Since** — workrecord
+  `src/components/payguard/PayGuardJobEditor.tsx:207`
+  > height of all elements should increase by 30% in mobile
+- **Collapse all jobs** — workrecord
+  `src/components/workrecord/TrackerWorkRecord.tsx:222`
+  > make it as tall as the bar no padding around  in mobile
+- **Answer a few questions** — workrecord
+  `src/components/SafeWorkSimulator.tsx:120`
+  > taller in mobile
+- **Review status** — workrecord
+  `src/components/workrecord/WorkRecordStatus.tsx:119`
+  > taller iin mobile
+- **This month So far this year Rest of the year All** — workrecord
+  `src/components/MonthScopePicker.tsx:21`
+  > taler in mobile Monthly history should have option of none on all layouts Default should be for all as rest of the year
+- **Add** — workrecord
+  `src/components/workrecord/TrackerWorkRecord.tsx:272`
+  > taller in mobile
+- **Your limit** — workrecord
+  `src/components/Sheet.tsx:17`
+  > spasams in low scroll window
+- **September countable** — workrecord
+  `src/components/workrecord/TrackerWorkRecord.tsx:250`
+  > we dont need this round chocolate bar header, it should just feel like its floating there in this area no shadows or rounding or outline
+- **1 notice needs attention** — workrecord
+  `src/components/NotificationsBell.tsx:20`
+  > contrast issues
+- **Sep** — workrecord
+  `src/components/workrecord/WorkRecordMonths.tsx:52`
+  > If calendars have fill background containers needs a similar shade fill so that it doesn’t look weird all themes
+- **The reference's third ink tier, deliberately not adopted** — classic
+  `src/index.css (near line ?, unverified)`
+- **overlay.css and index.css disagree about radius** — classic
+  `src/styles/overlay.css (near line ?, unverified)`
+- **The polish overlay ADDS a backdrop-filter to payguard's sticky chrome** — payguard
+  `src/styles/overlay.css (near line 396, unverified)`
+- **The base theme and calc20 still have their own palettes** — classic
+  `src/index.css (near line 69, unverified)`
+- **Status colours are identical in light and dark** — payguard
+  `src/styles/palette.css (near line 120, unverified)`
+- **calc20 and pocket are the two files left** — calc20
+  `src/styles/calc20.css (near line 23, unverified)`
+- **64 color-mix() uses left, mostly now replaceable** — payguard
+  `src/styles/payguard.css (near line 300, unverified)`
 
 ## Not anchored to anything
 
@@ -485,8 +535,8 @@ something. Kept here so they are not lost.
 
 - right tray · 2 items — "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
 
-218 note(s) · 156 owed to Claude · 17 cut(s)
-Updated 2026-09-02 16:47
+257 note(s) · 175 owed to Claude · 19 cut(s)
+Updated 2026-09-03 05:46
 
 ## Layout: calc20
 
@@ -511,7 +561,7 @@ Raised by: seen while verifying the settings order change. Pre-existing — the 
   - Noted: 2026-09-02 03:40
 - [x] **COMMENT — W-2 1099**
   - Needs: "very different hover on these buttons"
-  - Source: src/components/calc20/StreamsSection.tsx:798
+  - Source: src/components/calc20/StreamsSection.tsx:804
   - Line was: `<div className="stream-add__row">`
   - Component: AddButtons › StreamsSection › Section › TrackerApp
   - Text: "W-2 1099"
@@ -545,7 +595,7 @@ Raised by: seen while verifying the settings order change. Pre-existing — the 
   - Noted: 2026-09-02 03:50
 - [x] **COMMENT — No payday set — can't warn about extra-paycheck **
   - Needs: "Lets make it concise"
-  - Source: src/components/calc20/StreamsSection.tsx:698
+  - Source: src/components/calc20/StreamsSection.tsx:704
   - Line was: `title="No payday set — can't warn about extra-paycheck months"`
   - Component: StreamCardFrame › StreamsSection › Section › TrackerApp
   - Text: "No payday set — can't warn about extra-paycheck months"
@@ -587,6 +637,38 @@ Raised by: listing what each settings screen can draw while unifying them.
   - Claude replied: "Added, in calc20's own primitives — a lock-toggle reading "This month only" / "Every month" under the Appearance tab, in src/components/calc20/SettingsSheet.tsx. It is the 'focusMode' row of the shared settings model, so it carries the same label and the same line of help as the nine other layouts.
 
 Verified in the running app: toggling it writes focusMode to pg-ui-v1 and toggling back restores it."
+- [x] **COMMENT — Calc20 as a standalone HTML page**
+  - Needs: "export calc20 as a standalone html page"
+  - Kind: redesign
+  - Raised by: Asked for directly. Nothing in the repo produced one: layouts/calc/calc20.html is a saved snapshot of a rendered page, not something that runs, and `npm run build` emits the whole app across forty-odd files.
+  - Source: vite.calc20.config.ts (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:02
+  - Claude replied: "`npm run build:calc20` writes one file, dist-calc20/calc20.html (483kB, 120kB gzipped), with the script, the stylesheet and every asset inlined. It opens by double-click, off a USB stick or from any static host. Files: vite.calc20.config.ts (the build, plus a singleFile() plugin that folds the chunk and the CSS into the HTML and throws if anything would ship beside it); calc20.html (the page, index.html's pre-paint block with the branching removed since this page is only ever Calc20); src/standalone/calc20.tsx (the entry — TrackerProvider + TrackerCalc20 and the four stylesheets that reach this layout, no auth, no other layouts, no review console); src/standalone/firebase-absent.ts (aliased over firebase/app|auth|firestore, so the single-file build cannot inline ~400kB of an SDK the page can never call); package.json (the script); .gitignore (dist-calc20/); .claude/launch.json (a `calc20-export` entry that serves the built file with `vite preview`, so checking the export never means starting the dev server). One shared file changed: src/components/calc20/SettingsSheet.tsx drops the layout row when VITE_STANDALONE is set — left in, it offered eight screens the page cannot draw AND rewrote the shared `layout` preference, so switching layouts in the export would have changed which layout the real app opened on next. Verified in a browser on the built file: renders, adds a job, takes $1,200 into September, totals it, survives a reload from localStorage, follows the theme switch light/dark through the pre-paint block, and holds up at 375px. No console errors. The data is the same `pg-data-v1` record the full app reads, so a browser that has used PayGuard opens this page on the months it already has. Two known gaps, each with its own note: [[task-calc20-standalone-signout]] and [[task-calc20-phone-stream-name-clipped]]. The one network reference left is the Google Fonts link, kept for parity with index.html; offline it falls back to the system stacks already in the tokens."
+- [ ] **COMMENT — Sign out in the standalone export does nothing**
+  - Needs: "In dist-calc20/calc20.html the avatar reads 'Not signed in' and its menu offers App settings and Sign out. There is no session and no Firebase in that build, so Sign out is a button that does nothing. Left alone rather than fixed: the same menu behaves the same way on localhost, where auth is bypassed, so this is the app's rule and not the export's. The fix is one condition — render Sign out only when there is a session — but it changes what the dev machine sees, which is a call for the owner."
+  - Raised by: Found while checking the export ([[task-calc20-standalone-export]]). The account menu is also the only way into App settings, so it has to stay — but its second item is dead there.
+  - Source: src/components/calc20/AccountMenu.tsx (near line 44, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:02
+- [ ] **COMMENT — Job name hidden behind its badge at 375px**
+  - Needs: "At 375px the stream card header shows the chevron, then a clipped 'Employe…' badge, then the money. The job's own name — the thing the card is about — is not on screen. stream-card__name and TypeBadge share .stream-card__name-row, and at that width the name loses the fight. The name should win it: badge truncates or wraps, name never does."
+  - Raised by: Seen while checking the export at phone width ([[task-calc20-standalone-export]]). Not caused by it — the three stylesheets the export leaves out are each scoped to their own layout class and cannot reach this card.
+  - Source: src/components/calc20/StreamsSection.tsx (near line 673, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:02
+- [!] **COMMENT — calc20 and pocket are the two files left**
+  - Kind: redesign
+  - Raised by: The two stylesheets still picking their own colours.
+
+calc20.css: 101 colours across html.pg-calc20 and [data-theme='dark'], plus a --glass-* system with its own axis. It is a self-contained design system that already handles its own light/dark, so it works — it just does not follow `palette`, and picking Midnight leaves it alone.
+
+pocket.css: no tokens at all. Its colours are hardcoded inside about thirty `.dark .pk-*` rules, so it follows the ink axis but not the variant. Migrating it means rewriting rules rather than a token block, which is why it is separate from the rest of this pass.
+
+Both are listed in `npm run theme:check`'s PENDING output so the debt stays visible without blocking a build. Remove a name from that set when it migrates.
+  - Source: src/styles/calc20.css (near line 23, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:39
 
 ## Layout: classic
 
@@ -759,6 +841,61 @@ Raised by: v2 el-4qdi9e ("this one needs refactoring and cleanup"), el-1cu2rx4 (
   - Claude replied: "Done. Every row has an icon now — Benefit status and Focus mode were the two without one. The layout row's icon is a layout rather than a generic grid. Order follows what you said you reach for: the two things that change what the app tells you, then appearance, then your data. "How income works" moves to the foot with the other reference material, since you said you ignore it, and the permanent tinted callout about local storage is a quiet line there rather than furniture. Focus mode is sold rather than described: "This month only, and nothing else to read.""
   - Reviewer replied: "Why is this the order, account and layout should go first. Benefit and how income works should be last in the settings."
   - Claude replied: "Done, and the earlier reply above is the thing you overruled — it put the two rules links first. Order in src/components/SettingsPanel.tsx is now Account, Appearance (focus mode, layout, theme, palette), Your data, The rules. The comment that argued for rules-first went with it: the rule is now written as how often you touch a thing, not how important it sounds — you change your account and the look, you read the rules once and then know them. Carried to the one cousin that does not use this panel: src/components/calc20/SettingsSheet.tsx tabs are Appearance, Data, Status, About, and it opens on Appearance instead of Status. Verified in the running app in Plan and in Ledger. Terms & privacy is left where it is, inside the account block — it is reference material like the rules, so say the word and it moves to the foot with them."
+- [x] **COMMENT — Status colours get an ink, not just a fill**
+  - Kind: redesign
+  - Raised by: --good / --good-soft and --info / --info-soft had no ink to go on the fill, so `text-good` was doing double duty: the right colour on paper, and 4.68:1 on --good-soft — over the AA line by a hair, and under it wherever the fill is served at /40 or /60, which is how half the call sites use it. Only warn had an ink, under the name --warn-foreground, which on --info-foreground and --destructive-foreground means the opposite thing (light ink on the SOLID fill). Everyone reading this app has a disability and many are reading it on a phone in daylight.
+
+Raised by: the Improve CSS Design export in layouts/, which carries --color-good-text / --color-warn-text / --color-info-text.
+  - Source: src/index.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:55
+  - Claude replied: "Done. src/index.css adds --good-text / --warn-text / --info-text as one named contract — the ink that goes ON the matching -soft fill — in both themes, and repoints --warn-foreground at --warn-text so its eight existing call sites keep working against one value rather than two. Measured in the running app: good on good-soft 4.68 -> 7.94 (light) and 5.24 -> 8.60 (dark); info on info-soft 5.06 -> 8.45 and 4.99 -> 8.19; warn was already 8.41 and is unchanged. `chip-good` / `chip-info` / `chip-warn` now all take the ink. Call sites moved: src/components/SafetyHero.tsx (the Safe badge), src/components/TrackerV3.tsx, src/components/StreamSheet.tsx (x2), src/components/MonthGrid.tsx, src/components/Onboarding.tsx, src/components/ui.tsx."
+- [x] **COMMENT — Base theme gets the border tiers the pg-* palette already had**
+  - Kind: redesign
+  - Raised by: index.css had one --border. The three shells each wanted a lighter one for chrome edges and were mixing it by hand as border-border/70 and border-border/60, and nothing had an emphasis tier at all — the pg-* palette has had --pg-border-strong for a while and this one did not, so the scrollbar was the only chrome on the page nobody could theme.
+  - Source: src/index.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:55
+  - Claude replied: "Done. src/index.css adds --border-soft and --border-strong in both themes, exposed as --color-border-soft / --color-border-strong. --border-soft is what `app-bar` draws its edge with, replacing four hand-mixed alpha slices; --border-strong themes the scrollbar (scrollbar-width: thin plus the ::-webkit-scrollbar trio, added in @layer base). Verified in the running app in both themes."
+- [!] **COMMENT — The reference's third ink tier, deliberately not adopted**
+  - Kind: reword
+  - Raised by: The Improve CSS Design export carries --color-dim (#8a9e87) as a third text tier below muted, used for axis end-caps and redundant hints. It measures about 2.9:1 on its own background. I did not bring it across: this app's reader is disabled, often low-vision, and often reading a cheap phone in daylight, and a sub-3:1 text tier is a regression for them whatever it does for the mockup. Writing it down so the next pass does not read the export and adopt it as an oversight.
+
+If a third tier is wanted, it should be a WEIGHT or a SIZE step, not a lightness step.
+  - Source: src/index.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:55
+- [!] **CUT — overlay.css and index.css disagree about radius**
+  - Kind: cut
+  - Raised by: src/styles/overlay.css is imported last in src/main.tsx, so it wins, and it re-declares `.panel { border-radius: var(--pg-radius-xl) }` = 1rem while src/index.css sets --radius-xl: 1.25rem. Every panel on every layout is drawn at the pg-* scale, not the base one, and neither file says so. The same file also sets `.panel { box-shadow: none }` globally, which is the right answer under the device constraint but means index.css's `@utility panel { box-shadow: var(--shadow-card) }` is dead code that reads as live.
+
+One of the two is wrong. Found while adding the app-bar and nav-item rules to index.css — I did not touch it, because picking the winner changes every layout and is a decision, not a cleanup.
+  - Source: src/styles/overlay.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:55
+- [!] **COMMENT — The base theme and calc20 still have their own palettes**
+  - Kind: redesign
+  - Raised by: The merge covers the three layouts that already had variants — payguard, workrecord, ledger. src/index.css (classic, v2, workspace, horizon, plan, pocket) and src/styles/calc20.css still declare their own light/dark palettes and ignore `palette` entirely, so picking Midnight moves three layouts and not the other seven. index.css is oklch and semantically different (--background/--foreground/--muted-foreground against --t-bg/--t-fg/--t-fg-muted); calc20.css is 105 tokens plus a --glass-* system.
+
+I stopped here on purpose. Mapping index.css onto the palette changes how classic, v2 and the workspace look completely — from the lime-and-emerald oklch system to the merged hex one — and that is a decision to see before it is locked in, not a cleanup to slip into a refactor. The contract, the check and the one setting are in place, so the remaining work is per-file and each file can land on its own.
+  - Source: src/index.css (near line 69, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:13
+- [x] **COMMENT — Every stylesheet on one palette, each with an override layer**
+  - Kind: redesign
+  - Raised by: "I feel like all css should be, and all themes have their own override layer can you do that" — extending [[task-one-palette-five-variants]] from the three layouts that already had variants to the whole app.
+
+Five stylesheets were picking their own colours: index.css (39 + 39 dark, a green oklch family nothing else shared), payguard.css, ledger.css, calc20.css and plan.css. chrome.css then answered the same 23-token contract six times over because each family spelled its colours differently. overlay.css re-declared the paper palette a sixth time at :root and, loading last, silently won — its --pg-radius-xl of 1rem beat index.css's 1.25rem for every .panel in the app.
+  - Source: src/styles/palette.css (near line 1, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:39
+  - Claude replied: "Done. src/styles/palette.css grew from 23 choices to 39: the status families are now symmetric (safe/warn/over/info each with -soft, -text and -fg), plus accent/accent-fg and primary/primary-fg. The 8 derived roles were computed per variant rather than hand-picked — a hue-preserving tint for each -soft, then the ink darkened or lightened until it cleared 7:1 on it — and every one of the 45 resulting pairs was measured: worst 7.0:1 for ink-on-soft, worst 4.54:1 for ink-on-solid. primary/primary-fg are chosen rather than derived, because a call-to-action colour is a pick; paper keeps the base theme's existing pair.
+
+Bridged: src/index.css (the .dark block is gone entirely — dark is an axis of the palette, so there was nothing left for it to say), src/styles/plan.css, src/styles/chrome.css (six answers to one contract became one; 118 colour declarations to 21), src/styles/overlay.css (section 0 deleted outright — the problem it existed for cannot recur). Override layers, each marked @override with a reason: plan's sprite ink, bevels, gilt and parchment; chrome's scrim; overlay's two-tier elevation; calc20's dark-plate status hues.
+
+data-palette moved from four layout roots to <html>, which is also what fixed the sign-in, terms and onboarding screens resolving no palette at all. The picker now appears on every layout instead of three — SettingsPanel reads ui.palette from the tracker rather than taking a prop pair that seven layouts never passed.
+
+Verified in the running app: all 39 tokens across all 10 variant/mode combinations resolve and agree with their bridged names, and classic, plan, pocket, horizon, calc20, ledger, workrecord, payguard and v2 were each opened across palettes. npm run build is green."
 
 ## Layout: global
 
@@ -891,7 +1028,7 @@ What I deliberately did not port: the pixel values and class names (W2 inset 17p
 - [x] **COMMENT — Go Through loses your place on a reload**
   - Needs: "Skipping a card, or a crash that reloads the page, throws me back to the index, and the items I skipped come back in the same order for me to skip past again to reach the one I was getting to."
   - Raised by: Raised by Sergey in chat: a reload — a bug in the app, an HMR rebuild, a stray refresh — dropped him out of a Go Through pass and back onto the board, and starting again rebuilt the pass in the same order, so getting back to the card he was on meant skipping past the same cards again.
-  - Source: src/review/ReviewProvider.tsx:76
+  - Source: src/review/ReviewProvider.tsx:80
   - Line was: `export function ReviewProvider({`
   - Component: ReviewProvider
   - Page: Review console
@@ -1001,7 +1138,7 @@ Closed on the evidence, not on my say-so: grep for "outline" or "ring" in horizo
 - [!] **COMMENT — Scroll-to-top button**
   - Needs: "on IOS I would agree that theres a shortcut to go up quickly on android there isn't I defend this choice, not sure about desktop there isn't much scrolling on desktop, but hiding for desktop why? So leave it."
   - I propose cutting it: Duplicates what the scrollbar and Home key already do.
-  - Source: src/components/ledger/TrackerLedger.tsx:163
+  - Source: src/components/ledger/TrackerLedger.tsx:169
   - Line was: `id="ledger-scroll-top"`
   - Section id: ledger-scroll-top
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -1076,7 +1213,7 @@ Closed on the evidence, not on my say-so: grep for "outline" or "ring" in horizo
 - [!] **COMMENT — Annual income chart**
   - Needs: "Do what you think is best I trust your judgement"
   - I propose cutting it: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
-  - Source: src/components/ledger/TrackerLedger.tsx:241
+  - Source: src/components/ledger/TrackerLedger.tsx:247
   - Line was: `id="ledger-year-chart"`
   - Section id: ledger-year-chart
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -1127,7 +1264,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Done, and they did not need moving: Settings has had Export JSON and Import JSON all along. The header pair were a duplicate of controls that already had a home, so they are deleted rather than relocated, along with the hidden file input and the import handler behind them. Collapse all stays, in the one header bar."
 - [!] **COMMENT — SSDI Income Tracker UNDO (4) TOP**
   - Needs: "Undo I understand top yeah nice touch"
-  - Source: src/components/ledger/TrackerLedger.tsx:111
+  - Source: src/components/ledger/TrackerLedger.tsx:117
   - Line was: `<span className="lg-header-title truncate">SSDI Income Tracker</span>`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "SSDI Income Tracker UNDO (4) TOP"
@@ -1139,7 +1276,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Closing on your "done"."
 - [!] **COMMENT — SSDI Income Tracker UNDO (4) TOP 2026 COLLAPSE A**
   - Needs: "after making those changes we need to refactor the headers into one header"
-  - Source: src/components/ledger/TrackerLedger.tsx:111
+  - Source: src/components/ledger/TrackerLedger.tsx:117
   - Line was: `<span className="lg-header-title truncate">SSDI Income Tracker</span>`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "SSDI Income Tracker UNDO (4) TOP 2026 COLLAPSE ALL IMPORT EXPORT JSON"
@@ -1149,7 +1286,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Done. One header bar: the title, the year stepper, then Collapse all, notices, Undo, Top and Settings. The second bar existed to hold Import and Export, and those are gone — see el-u6ldt3 — so there was nothing left in it to keep."
 - [!] **COMMENT — Months ≥ SGA**
   - Needs: "I like this honestly but its taking up too much space for what it is"
-  - Source: src/components/ledger/TrackerLedger.tsx:201
+  - Source: src/components/ledger/TrackerLedger.tsx:207
   - Line was: `"TWP Months Used" and "Months ≥ SGA" — which is both regimes named`
   - Component: StatTile › TrackerLedger › Root › TrackerProvider
   - Text: "MONTHS ≥ SGA 0 SGA $1,690 / month"
@@ -1159,7 +1296,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Done, and you caught more than spacing. It was two tall tiles side by side — "TWP Months Used" and "Months ≥ SGA" — which is both regimes named at once, in abbreviations, in the two largest figures on the page. This layout was supposed to have had the one-limit rule already; it had not. It is one line now, and it says whichever limit is actually yours: the trial months while they are being spent, with the nine-month meter at the weight of a rule rather than a chart; the count over your limit once they are not; and nothing at all until you have said where you stand. The chart above it had the same fault — "SGA $1,690" and "TWP $1,210" drawn as two rules — and now draws one, labelled "Your limit"."
 - [!] **COMMENT — ESTIMATED New job · add a payday**
   - Needs: "wow, bad alignment also see other comments"
-  - Source: src/components/ledger/TrackerLedger.tsx:236
+  - Source: src/components/ledger/TrackerLedger.tsx:242
   - Line was: `<div className="lg-precision lg-border-b">`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "ESTIMATED New job · add a payday"
@@ -1169,7 +1306,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Fixed, and it was the same root as your other note on this element. The precision line had four stylesheets — index.css, ledger.css, payguard.css, calc20.css — and the base one aligned its parts on the text baseline. The pips are a drawn glyph, not text, so they sat a pixel or two low against the label. One rule now, centred. See el-14oa3i9 for the rest of it."
 - [ ] **COMMENT — W-2 New job $0 Continuous**
   - Needs: "I love this very much"
-  - Source: src/components/ledger/TrackerLedger.tsx:253
+  - Source: src/components/ledger/TrackerLedger.tsx:259
   - Line was: `<div className="lg-tabbar flex items-center">`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "W-2 New job $0 Continuous"
@@ -1243,7 +1380,7 @@ In focus mode the heading beside it is already one month, so it was a second lab
   - Raised by: At a 375px viewport the Ledger layout's document is 522px wide, so every page and every modal on top of it sits partly off-screen to the right — the Settings sheet loses its left edge, headings included. Cause: .lg-header-actions in src/styles/ledger.css is flex-shrink: 0, so the row of header buttons (Collapse all, notifications, Undo, Top, Settings) refuses to shrink and sets the page width. It carries flex-wrap in the class list at src/components/ledger/TrackerLedger.tsx:129, which never gets to wrap while the container cannot narrow.
 
 Raised by: measured in the running app while verifying the settings order change. Not caused by it — nothing in that change touches this header.
-  - Source: src/styles/ledger.css:153
+  - Source: src/styles/ledger.css:127
   - Line was: `.lg-header-actions {`
   - Component: TrackerLedger
   - Origin: AI suggestion, answered by the user
@@ -1268,7 +1405,7 @@ Raised by: measured in the running app while verifying the settings order change
   - Noted: 2026-09-02 03:58
 - [!] **COMMENT — This screen**
   - Needs: "Maybe keep, I know I said remove but lets cool it on all layouts about this section"
-  - Source: src/components/ledger/TrackerLedger.tsx:111
+  - Source: src/components/ledger/TrackerLedger.tsx:117
   - Line was: `<span className="lg-header-title truncate">SSDI Income Tracker</span>`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "SSDI Income Tracker COLLAPSE ALL UNDO (0) TOP TRIAL MONTHS LEFT 9of 9 GUESSED New job · add a payday W-2 New job $0 W-2 New job $7 Continuou"
@@ -1286,7 +1423,7 @@ Raised by: measured in the running app while verifying the settings order change
   - Noted: 2026-09-02 04:32
 - [!] **COMMENT — OPEN SAFE WORK SIMULATOR**
   - Needs: "This is the worst name I mentioned my frustration before, we are not confusing our users, what does safe mean? what does that have to do with anything"
-  - Source: src/components/ledger/LedgerAnalysis.tsx:277
+  - Source: src/components/ledger/LedgerAnalysis.tsx:274
   - Line was: `{simulatorOpen ? 'Hide Safe Work Simulator' : 'Open Safe Work Simulator'}`
   - Component: LedgerAnalysis › TrackerLedger › Root › TrackerProvider
   - Text: "OPEN SAFE WORK SIMULATOR"
@@ -1311,7 +1448,7 @@ Verified in the running app — the sync row is gated to your own account, so I 
   - Raised by: Unifying the two settings screens meant picking one wording for the data buttons — they read "Export JSON" in nine layouts and "Export tracker JSON" in calc20 — and I picked the one nine layouts already show, because choosing new words is a copy decision and not part of a merge. It is still the wrong wording by this project's own rule: JSON is a word for programmers, and someone on SSDI looking to keep a copy of their earnings before wiping a phone is not looking for a JSON file. Something like "Save a copy" / "Load a saved copy" says what the buttons do. One edit in SETTINGS_ROW reaches both screens now.
 
 Raised by: unifying the settings screens.
-  - Source: src/components/settingsModel.ts:96
+  - Source: src/components/settingsModel.ts:97
   - Line was: `* read "Export JSON" in nine layouts and "Export tracker JSON" in calc20.`
   - Text: "Export JSON"
   - Origin: AI suggestion, answered by the user
@@ -1321,7 +1458,7 @@ Raised by: unifying the settings screens.
 
 - [!] **COMMENT — August countable earnings**
   - Needs: "This whole hero says three things where one would do — show the month, the limit, and the room left."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:270
+  - Source: src/components/payguard/TrackerPayGuard.tsx:285
   - Line was: `<section className="pg-status-hero" aria-labelledby="pg-current-status-title">`
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Page: Jobs
@@ -1354,7 +1491,7 @@ Raised by: unifying the settings screens.
   - Claude replied: "Moved Import/Export actions to Settings Panel and removed from header."
 - [!] **COMMENT — Annual income chart**
   - Needs: "Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:335
+  - Source: src/components/payguard/TrackerPayGuard.tsx:353
   - Line was: `id="payguard-year-chart"`
   - Section id: payguard-year-chart
   - Component: PayGuardChart › TrackerPayGuard › Root › TrackerProvider
@@ -1449,7 +1586,7 @@ Raised by: Extension of v2 el-fu3c2z and el-147x7kr to the layouts that were not
   - Claude replied: "Done — the half that was left. workrecord, calc20, horizon and pocket now name the limit that applies to you and never the other one. horizon was printing "the TWP limit" or "the SGA limit" straight into the answer line; it says "$1,690 left before your monthly limit". Its runway legend listed "At or over SGA" and "Trial work month" together — two regimes that are mutually exclusive by definition, so listing them taught a rule the app has decided never to explain. The legend is built from the fills actually on the track now, which makes that impossible rather than merely fixed. workrecord and calc20 were the same shapes twice over — the month legend, the status panel, the headline, the slab titles, the month sheet, the stream editor. All branch on phase already, so it was wording: "Your limit $1,690", "one trial work month used", "Months over your limit", "No limit yet — tell us where you stand". calc20's fork of the simulator still said "Stay below SGA" — the one you answered "Duh" to — and now leads with the answer, "Aim for 8.4 hours a week", like the shared one. Two stranded lines are gone rather than reworded: calc20's header row "TWP used up · SGA is the working limit now" and the settings note "TWP used up · SGA mode is active", both of which name both regimes to a reader who is only ever shown one, and both of which report that a resource is gone as though that were news. pocket was nearly right already; two places named trial work months regardless of phase, and both are now gated on it — including the 80-hour note in the 1099 editor, which is a trial-work rule and means nothing after those months are spent. One shared file went with them: TwpStatusPicker's three options were still "Not sure / TWP remains / TWP used up", which is the abbreviation in the one place the reader is asked about it directly. Both it and calc20's fork now say "Not sure / Trial months left / All used up". The only TWP and SGA left in the app are in the terms text, where they are the legal names of the rules and belong."
 - [!] **COMMENT — Monthly work-limit status**
   - Needs: "I have commented in other layouts, its the same comment"
-  - Source: src/components/payguard/PayGuardAnalysis.tsx:149
+  - Source: src/components/payguard/PayGuardAnalysis.tsx:153
   - Line was: `<section className="pg-card flex flex-col overflow-hidden">`
   - Section id: payguard-monthly-analysis
   - Component: PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider
@@ -1460,7 +1597,7 @@ Raised by: Extension of v2 el-fu3c2z and el-147x7kr to the layouts that were not
   - Claude replied: "Same — recorded against el-1aml79g. You are right that it is one comment and not five, and the fact that you had to leave it five times is itself the evidence."
 - [!] **COMMENT — YTD countable income**
   - Needs: "Glassy eyes, what is this, how important is it, what is necessary and what is a waste of my time."
-  - Source: src/components/payguard/PayGuardAnalysis.tsx:149
+  - Source: src/components/payguard/PayGuardAnalysis.tsx:153
   - Line was: `<section className="pg-card flex flex-col overflow-hidden">`
   - Section id: payguard-monthly-analysis
   - Component: PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider
@@ -1474,7 +1611,7 @@ Raised by: Extension of v2 el-fu3c2z and el-147x7kr to the layouts that were not
 So the answer to "what is a waste of my time" turned out to be: all three of them, and they were removed. This is the same finding as your payguard tray note, from a different screen."
 - [!] **COMMENT — These Social Security thresholds are for plannin**
   - Needs: "I dont even want to read this its so wordy"
-  - Source: src/components/payguard/PayGuardAnalysis.tsx:428
+  - Source: src/components/payguard/PayGuardAnalysis.tsx:446
   - Line was: `<div className="pg-rule-t">`
   - Section id: payguard-monthly-analysis
   - Component: PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider
@@ -1485,7 +1622,7 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - Claude replied: "Cut. Three sentences on two subjects, which is why none of them got read — and the one line that mattered was in the middle of the other two. What is left is "These figures are for planning. Check with Social Security before you act on one." The privacy sentence was a different subject and already lives in Settings with the rest of your data."
 - [!] **COMMENT — Work pay simulator**
   - Needs: "I dont understand at a glance what is the problem I clicked on simulator and this what the heck as a user"
-  - Source: src/components/SafeWorkSimulator.tsx:44
+  - Source: src/components/SafeWorkSimulator.tsx:47
   - Line was: `export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {`
   - Section id: payguard-monthly-analysis
   - Component: SafeWorkSimulator › PayGuardAnalysis › TrackerPayGuard › Root
@@ -1496,7 +1633,7 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - Claude replied: "Same panel, same fix — see el-1tqfywm. What you clicked was "Open simulator" and what you got was three restatements of "we cannot do this yet" and no way out of it. It now says the problem once, in the heading, and offers the button that solves it."
 - [!] **COMMENT — New job**
   - Needs: "already commented on a cousin theme about a high level issue"
-  - Source: src/components/payguard/PayGuardJobEditor.tsx:203
+  - Source: src/components/payguard/PayGuardJobEditor.tsx:204
   - Line was: `<div id={`pg-job-${stream.id}`} className="pg-card scroll-mt-20 overflow-hidden">`
   - Component: PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider
   - Text: "New job W-2 YTD GROSS $0 ONGOING PAUSED ENDED Since SETTINGS & DATE RANGE Every two weeks · Active all year PAY CYCLE Weekly Every two weeks"
@@ -1506,7 +1643,7 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - Claude replied: "Taken as a vote on el-1aml79g rather than answered separately — same component family, same argument. It is on the list there with the job editor named as one of the three still forked per layout."
 - [!] **COMMENT — Autofill empty months**
   - Needs: "This is a silly button in focus mode"
-  - Source: src/components/payguard/PayGuardJobEditor.tsx:435
+  - Source: src/components/payguard/PayGuardJobEditor.tsx:439
   - Line was: `<span className="hidden sm:inline">Autofill empty months</span>`
   - Component: SectionHead › PayGuardJobEditor › TrackerPayGuard › Root
   - Text: "Autofill empty months"
@@ -1515,7 +1652,7 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - Noted: 2026-09-02 04:17
 - [!] **COMMENT — This screen**
   - Needs: "more like the screenshot"
-  - Source: src/components/payguard/TrackerPayGuard.tsx:174
+  - Source: src/components/payguard/TrackerPayGuard.tsx:189
   - Line was: `<a href="#pg-main" className="pg-skip-link">Skip to main content</a>`
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Text: "Skip to main content PayGuard BENEFITS INCOME PLANNER 2026 2 NOTICES SEPTEMBER Under your limit $7 COUNTED $1,203 left FROM AN EMPLOYER $7 F"
@@ -1524,7 +1661,7 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - Noted: 2026-09-02 04:27
 - [!] **COMMENT — How many hours could I work?**
   - Needs: "more like the screenshot"
-  - Source: src/components/payguard/PayGuardAnalysis.tsx:403
+  - Source: src/components/payguard/PayGuardAnalysis.tsx:421
   - Line was: `{needsTwpConfirmation ? 'Set your limit before planning hours' : 'How many hours could I work?'}`
   - Section id: payguard-monthly-analysis
   - Component: PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider
@@ -1534,7 +1671,7 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - Noted: 2026-09-02 04:27
 - [!] **COMMENT — September**
   - Needs: "no background or line and less padding bottom"
-  - Source: src/components/payguard/PayGuardAnalysis.tsx:155
+  - Source: src/components/payguard/PayGuardAnalysis.tsx:172
   - Line was: `<header className="pg-rule-b pg-surface-quiet px-3.5 py-3 sm:px-4">`
   - Section id: payguard-monthly-analysis
   - Component: PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider
@@ -1552,6 +1689,56 @@ So the answer to "what is a waste of my time" turned out to be: all three of the
   - DOM: div#pg-analysis > div > div > section.pg-card:nth-of-type(1) > div.pg-surface > div > div:nth-of-type(1) > span.pg-text-safe:nth-of-type(2)
   - Origin: picked by the user
   - Noted: 2026-09-02 04:29
+- [!] **CUT — The polish overlay ADDS a backdrop-filter to payguard's sticky chrome**
+  - Kind: cut
+  - Raised by: src/styles/overlay.css section 5 puts `backdrop-filter: saturate(1.4) blur(10px)` on .pg-topbar, .pg-sticky-page and .pg-sticky-surface — the sticky chrome of payguard, ledger, workrecord and calc20. backdrop-filter is on the banned list at the top of CLAUDE.md, and the overlay is loaded last in src/main.tsx so it wins over anything those layouts say for themselves. The overlay's own header says it is additive polish; this is the one rule in it that the device constraint forbids.
+
+I did not change it. The classic/sidebar/workspace family and horizon are now flat and opaque (see [[task-app-bar-one-strip]]), but the pg-* family is a different theme with its own tokens and four layouts hanging off it, and its polish layer is in flight — flattening it is a decision someone should take on purpose, not a side effect of a pass on the other family.
+
+Found while flattening the base-theme app bars.
+  - Source: src/styles/overlay.css (near line 396, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:56
+- [x] **COMMENT — One palette, five variants, one setting**
+  - Kind: redesign
+  - Raised by: "Lets merge all themes into proper theme with variant options, right now its crazy I cant keep up."
+
+What was there: five variant names (paper, slate, ledger, carbon, calc20) declared across nine overlapping selector blocks in payguard.css and three more in ledger.css, each a partial patch over paper. A palette is 36 tokens and not one variant set all 36 — slate set 16, ledger 19, carbon 27, calc20 32 — so whatever a variant left out it inherited from paper silently. ledger.css declared its own values for three of the same names under --lg-*, gave 'slate' and 'ledger' one shared block so two options identical there and different everywhere else, and opted out of the app's light/dark toggle entirely. And three UiState fields (ledgerTheme, payguardTheme, workRecordTheme) held one decision, two of them indexing the same CSS, so keeping payguard and workrecord alike meant setting the same value twice.
+  - Source: src/styles/palette.css (near line 1, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:13
+  - Claude replied: "Done. src/styles/palette.css is the only file that chooses a colour now: two axes (variant = hue and paper, answering all 23 choices every time; ink = light/dark, which elevation follows rather than the variant), with carbon declaring itself dark in both modes in one line instead of in JavaScript. Generated by resolving the old cascade, so the five variants render as they did — verified token by token in the running app, all 36 tokens across all 10 variant/mode combinations, --t-* and --pg-* agreeing everywhere.
+
+src/styles/payguard.css lost 155 lines (nine palette blocks became one aliasing block, no values in it) and src/styles/ledger.css 25. Neither file's call sites moved — ~1200 of them. src/state/storage.ts has one `palette` field with a migration that prefers payguardTheme, then ledgerTheme, then workRecordTheme, because workRecordTheme mostly carries an untouched default rather than a choice; verified against a pre-merge record. Call sites: src/App.tsx, src/components/ledger/TrackerLedger.tsx, src/components/payguard/TrackerPayGuard.tsx, src/components/payguard/PayGuardShell.tsx, src/components/workrecord/TrackerWorkRecord.tsx, src/review/anchor.ts, index.html.
+
+Two things this fixed on the way: --t-topbar was color-mix(), which an old WebView drops whole, leaving payguard's and workrecord's top bar with no fill; and ledger now answers the app's dark mode, which it never did.
+
+Guard: scripts/theme-check.mjs, wired into `npm run build` before tsc. It fails on a missing choice, on anything outside palette.css setting a --t-*, and on a literal colour inside an aliasing block. Both failure modes tested by breaking them on purpose."
+- [x] **COMMENT — Palette defaults must be zero-specificity**
+  - Kind: redesign
+  - Raised by: First cut of palette.css put calc20's dark top-bar plate in the shape section and the derived default (--t-topbar: var(--t-surface)) two sections below it. Same specificity, so the later one won and calc20's bar came out white — the whole identity of that variant is a dark ink plate under a sky-blue rule. Caught in the running app, not by the check.
+  - Source: src/styles/palette.css (near line 46, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:13
+  - Claude replied: "Fixed in src/styles/palette.css: every default block is written :where([data-palette]), which is zero-specificity, so a variant's own block wins wherever it sits in the file. scripts/theme-check.mjs gained an OVERRIDABLE set naming the shape tokens and the three topbar tokens, which are the only names a variant may set outside its 23 choices — anything else has to exist on paper first, or it is a colour only one variant has and nobody can find. Verified: calc20's plate resolves to oklch(22% 0.045 258) again on both workrecord and payguard."
+- [!] **COMMENT — Status colours are identical in light and dark**
+  - Kind: redesign
+  - Raised by: Resolving the old cascade showed that --t-safe / --t-warn / --t-over / --t-twp / --t-info / --t-w2 / --t-se / --t-ring / --t-head do not change between paper/light and paper/dark — only the surfaces and inks do. So the same mid-lightness green that reads on white is being used on #111a24, and the soft-fill pairings have no dark form at all. This is the same gap the base theme had before [[task-status-ink-tier]] gave it --good-text / --warn-text / --info-text.
+
+Carried across as-is rather than fixed, because the merge was meant to be faithful. Worth measuring now that every variant's values are in one file and can be checked as a set.
+  - Source: src/styles/palette.css (near line 120, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:13
+- [!] **COMMENT — 64 color-mix() uses left, mostly now replaceable**
+  - Kind: redesign
+  - Raised by: `npm run theme:check` reports them: 35 in calc20.css, 26 in payguard.css, 3 in ledger.css. color-mix() is on the banned list at the top of CLAUDE.md because an old Android WebView drops the whole declaration, so a soft fill silently becomes transparent and a hairline border disappears.
+
+Most of payguard's are now redundant: --pg-safe-bg is color-mix(safe 10%, transparent) and the palette has a real --t-safe-soft for every variant. The ones without an equivalent are w2, se and twp, which have a base colour but no soft/text family — the same asymmetry that caused the original drift, one level down.
+
+Not fixed in this pass because the -border variants (30–32% tints) have no palette equivalent either, and mapping them to the full status colour is a visible change to four layouts that should be looked at rather than slipped in.
+  - Source: src/styles/payguard.css (near line 300, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:39
 
 ## Layout: plan
 
@@ -1721,6 +1908,89 @@ Left open. The remaining fix is probably about what the path shows — four of t
   - DOM: div > div:nth-of-type(3) > div:nth-of-type(1) > div > div:nth-of-type(1) > div > div > button:nth-of-type(3)
   - Origin: picked by the user
   - Noted: 2026-09-02 16:08
+- [x] **COMMENT — Screenshots on a note**
+  - Needs: "Attaching a screenshot to a comment was cut in the console rebuild and the reviewer asked for it back — paste, drop, and a visible button."
+  - Kind: redesign
+  - Raised by: Attaching a screenshot to a comment was cut in the console rebuild and the reviewer asked for it back — paste, drop, and a visible button.
+  - Source: src/review/ReviewProvider.tsx (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:18
+  - Claude replied: "Restored. src/review/types.ts carries shots?: string[] again; src/review/store.ts has uploadShot(); vite.review-plugin.ts serves /__review/shot and writes review/shots/. In src/review/ReviewProvider.tsx the composer holds shots, takes them by paste (textarea), by drop anywhere on the card, and by a Screenshot button beside the tags; thumbnails with a remove X sit under the box and on the opened note row. markdown.ts actionable() now counts a note carrying only a picture. Verified live: dropped a PNG, it saved to review/shots and served 200 as image/png."
+- [x] **COMMENT — Arrow keys walk the selection**
+  - Needs: "Widening and narrowing the aim was only on [ and ]; the hand reaches for the arrows on a frozen selection."
+  - Kind: redesign
+  - Raised by: Widening and narrowing the aim was only on [ and ]; the hand reaches for the arrows on a frozen selection.
+  - Source: src/review/ReviewProvider.tsx (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:18
+  - Claude replied: "Done in src/review/ReviewProvider.tsx: ArrowUp widens to the first ancestor drawing a bigger box, ArrowDown comes back down the trail, both alongside ] and [. Says so when there is nothing wider or nothing inside. The aim chip now reads "C to say · up/down to resize". Verified live: depth went 5 to 4 on ArrowUp and back."
+- [x] **COMMENT — The comment box moves**
+  - Needs: "The composer sits on top of the thing being commented on; once it is in the way the reviewer needs it moved, not closed."
+  - Kind: redesign
+  - Raised by: The composer sits on top of the thing being commented on; once it is in the way the reviewer needs it moved, not closed.
+  - Source: src/review/ReviewProvider.tsx (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:18
+  - Claude replied: "Done in src/review/ReviewProvider.tsx: the composer header is a drag handle (grab cursor, close button excluded), the card is kept whole on screen, and it stays where it is put until it closes. Verified live by dragging it clear of the sheet underneath."
+- [x] **COMMENT — D selects**
+  - Needs: "L was the select key; the reviewer asked for D."
+  - Kind: redesign
+  - Raised by: L was the select key; the reviewer asked for D.
+  - Source: src/review/ReviewProvider.tsx (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:18
+  - Claude replied: "Changed in src/review/ReviewProvider.tsx and the dock hint in src/review/ReviewDock.tsx. CLAUDE.md and README.md said L and V respectively — both now say D."
+- [x] **COMMENT — The composer opens clear of its subject**
+  - Needs: "The card opened centred at the top of the window, which put it on top of the very element being commented on — the complaint behind asking for it to be draggable."
+  - Kind: redesign
+  - Raised by: The card opened centred at the top of the window, which put it on top of the very element being commented on — the complaint behind asking for it to be draggable.
+  - Source: src/review/ReviewProvider.tsx (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:25
+  - Claude replied: "src/review/ReviewProvider.tsx: the draft carries the element box, and the card places itself once on mount into whichever band has room — below, above, then beside — falling back to the centre when none does. A drag by the reviewer wins for good after that. Verified: card bottom sat 10px above the aimed field."
+- [x] **COMMENT — One line for the address, not two**
+  - Needs: "Every row carried a wrapping two-line grey monospace anchor under it, competing with the reviewer own sentence for the eye."
+  - Kind: redesign
+  - Raised by: Every row carried a wrapping two-line grey monospace anchor under it, competing with the reviewer own sentence for the eye.
+  - Source: src/styles/review.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:25
+  - Claude replied: "src/styles/review.css + ReviewProvider.tsx: the address truncates on one line with the full path in a title attribute, and the tag chips beside it never shrink. Rows also got a focus-visible ring (they had none) and the rail got thin scrollbars in its own greys."
+- [x] **COMMENT — A note on a field is not called input**
+  - Needs: "labelFor() had no case for form controls, so notes pointing at one were filed as "input" — a title that says nothing in a list of two hundred."
+  - Kind: redesign
+  - Raised by: labelFor() had no case for form controls, so notes pointing at one were filed as "input" — a title that says nothing in a list of two hundred.
+  - Source: src/review/anchor.ts (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 22:25
+  - Claude replied: "src/review/anchor.ts: a control now takes its name from its label (innerText, so a caption and a hint do not run together), then the caption above it, then its placeholder or name. Verified: the same field went from "input" to "MILES DRIVEN 76¢ per mile"."
+- [x] **COMMENT — A single-ink palette has to force the dark class**
+  - Kind: redesign
+  - Raised by: carbon is dark in both ink modes — it declares color-scheme: dark and has no light form. But `.dark` on <html> followed UiState.theme only, so carbon with theme:'light' gave a dark page with every .dark-keyed rule switched off: plan kept its light parchment and light bevels on a black page, and pocket has about thirty such rules.
+  - Source: src/theme.ts (near line 20, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:39
+  - Claude replied: "Fixed in src/theme.ts. applyTheme now asks the stylesheet whether the palette on <html> is single-ink — it clears the .dark class and the inline color-scheme first, because both are things we set last time and would otherwise be read back as the palette's own answer — and ORs that into the dark decision. Reading it back rather than checking for the name means another single-ink palette needs no change here.
+
+index.html's pre-paint script cannot ask, because it runs before any stylesheet has parsed, so it carries a SINGLE_INK list. That is a duplicate on purpose, and scripts/theme-check.mjs fails if it stops matching the palettes that declare themselves dark — tested by breaking it."
+- [x] **COMMENT — Plan's title plates were black on black in dark mode**
+  - Kind: redesign
+  - Raised by: `.pl-plate` and the sheet header stamp their text in --parch on a --px-ink ground. --px-ink is near-black in both ink modes, but --parch is also a panel BACKGROUND and goes dark when the page does, so every title plate in the layout — "I GOT PAID", "TRIAL WORK MONTHS" — was black on black under dark ink. Present in the code before this pass; the palette merge made dark reachable enough on this layout to notice.
+  - Source: src/styles/plan.css (near line 580, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 05:39
+  - Claude replied: "Fixed in src/styles/plan.css: a --plate-fg in plan's override layer, near-white in both modes, because the plate's ground is fixed dark and its ink must be too. Used by .pl-plate and the sheet header's h2. Verified under carbon."
+
+## Layout: pocket
+
+- [x] **COMMENT — Pocket: default to net pay with inline paystub switcher**
+  - Needs: "Pocket is reverse: we ask paid then, they can say I know my paystub pay amount, if they enter that, we ask them if they want to enter paystubs from now on and we switch the logic, but the switch should live there and default to net pay."
+  - Kind: redesign
+  - Raised by: Pocket previously asked for gross pay before taxes first and hid net pay behind a fallback link. Reversed to default to net pay (Paid), added I know my paystub pay amount option, an inline prompt asking whether to enter paystubs from now on, and a persistent basis switch that lives in the logging form and defaults to net pay.
+  - Source: src/components/pocket/TrackerPocket.tsx (near line 170, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-02 23:45
+  - Claude replied: "src/components/pocket/TrackerPocket.tsx: reversed pay entry to default to net pay (Paid) with live before-tax estimate, provided I know my paystub pay amount link to reveal paystub gross entry, added inline prompt Do you want to enter paystubs from now on? with Yes, from now on / Just this time, and embedded a 44px-target segmented switch at the top of the logging card defaulting to net pay (Paid). Supported by UiState.payBasis in src/state/storage.ts and mirrored in src/components/calc20/state.tsx and src/components/PayAmount.tsx."
 
 ## Layout: responsive
 
@@ -1765,7 +2035,7 @@ So the pair now lives once, as SOURCE_CHOICE in domain/copy.ts, with the reasoni
 - [!] **MOVE — Recent activity log**
   - Needs: "What you changed is not what you owe. Useful for trusting the record — which matters — but it is a subpage, not a section on the screen where you check whether you are over."
   - Kind: move
-  - Source: src/components/TrackerV3.tsx:990
+  - Source: src/components/TrackerV3.tsx:970
   - Line was: `id="v3-recent-activity"`
   - Origin: AI suggestion, answered by the user
   - Noted: 2026-09-01 04:41
@@ -2366,7 +2636,7 @@ how income works, I am ignoring that section benefit status has no icon? focus m
   - Claude replied: "Recorded as part of the global Sheet task. A scroll jitter that only shows on short viewports wants reproducing on the device it happens on rather than a guess from me — if you can tell me the browser and rough window height, I will chase it."
 - [!] **COMMENT — Where you stand**
   - Needs: "Mute point, when TWP is exhausted I don't need any explanation or mention of it this section is reminding me about something thats no longer there redesign this or remove"
-  - Source: src/components/StatusPage.tsx:43
+  - Source: src/components/StatusPage.tsx:46
   - Line was: `{phase === 'sga' ? 'Where you are now' : 'Your trial work months'}`
   - Component: StatusPage › TrackerV2 › Root › TrackerProvider
   - Page: TWP / SGA
@@ -2413,7 +2683,7 @@ Stress Total is not like the first two sections, its confusing me but communicat
   - Claude replied: "No, it was not helpful — it described the panel's method instead of giving its answer. Replaced by the answer as the heading, with one line of consequence under it."
 - [!] **COMMENT — Stay below SGA**
   - Needs: "Duh"
-  - Source: src/components/SafeWorkSimulator.tsx:44
+  - Source: src/components/SafeWorkSimulator.tsx:47
   - Line was: `export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {`
   - Component: SafeWorkSimulator › StatusPage › TrackerV2 › Root
   - Page: TWP / SGA
@@ -2562,6 +2832,24 @@ It is two lines now and the count is computed: "{n} months this year pay you {ex
 
 The styling you actually asked about is the Sheet header, which is shared by every layout and already carries three other notes about it — el-1kxp96t, el-1vh4wms and el-c3riom, all responsiveness. Doing it here alone would make that drift worse. Left for the one Sheet pass those three are waiting on."
   - Reviewer replied: "Looks good"
+- [x] **COMMENT — One app bar, opaque, for classic / v2 / workspace**
+  - Kind: redesign
+  - Raised by: Classic, the sidebar and the workspace each wrote their own sticky top strip and each wrote it differently: bg-background/85 + backdrop-blur, /95 + blur, /98 with no blur, over border-border/70 or border-border. Three shells, four answers, one strip — and backdrop-filter is on the banned list at the top of CLAUDE.md, because an old Android WebView either ignores it (leaving the page showing through a 15%-transparent header) or honours it and pays a full-screen repaint per scroll frame.
+
+Raised by: the Improve CSS Design export in layouts/, read against the three shells it was made from.
+  - Source: src/index.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:55
+  - Claude replied: "Done. src/index.css adds `app-bar` and `app-bar-surface` — opaque background, --border-soft edge, no filter. Call sites: src/components/TrackerClassic.tsx (header), src/components/TrackerV2.tsx (header), src/components/TrackerV3.tsx (header, phone tab bar, tablet strip), src/components/PageNav.tsx (phone tab bar), src/components/Sheet.tsx (sticky head, sticky foot, and the scrim's backdrop-blur-xs). Verified in the running app at 1280px and 375px, light and dark: header computes to oklch(0.985 0.005 106) with backdrop-filter: none, sheet head to oklch(1 0 0). Also src/styles/horizon.css: .hz-top was a fourth spelling of the same strip and the only one breaking both device rules at once — color-mix() for the fill (dropped whole on an old WebView, which would have left the bar fully transparent) over a blur(10px). It is now the flat --color-background fill on a --color-border-soft edge, like the other three."
+- [x] **COMMENT — One nav row, five copies collapsed**
+  - Kind: redesign
+  - Raised by: The sidebar list, the workspace's rail, its tablet strip, its settings button and both phone tab bars were six copies of the same control with the padding, weight and active colour drifting between them — py-2.5 / py-3 / py-2, font-medium / font-semibold, text-good on one tab bar and text-accent-foreground on the other, and a pill behind the active icon on the workspace's tab bar but not the sidebar's.
+
+Raised by: the Improve CSS Design export in layouts/, whose nav is one rule.
+  - Source: src/index.css (near line ?, unverified)
+  - Origin: AI suggestion, answered by the user
+  - Noted: 2026-09-03 04:55
+  - Claude replied: "Done. src/index.css adds `nav-item`, `nav-tab` and `nav-tab-mark`. The active state keys off [aria-current='page'], which every call site already set, so the ternary that used to carry the colour is gone with the drift. nav-item carries a 2.75rem min-height — the 44px touch floor, which the tablet strip's py-2 was under. Call sites: src/components/PageNav.tsx (sidebar list, phone tab bar — which gains the active pill it did not have) and src/components/TrackerV3.tsx (desktop rail, its Settings row, tablet strip, phone tab bar, phone Settings tab). Verified in the running app."
 
 ## Layout: workrecord
 
@@ -2607,7 +2895,7 @@ Done: it already was one component, and that was the trap — it had four copies
 Not done: "don't use text to compensate for lack of self explanation, just come up with a redesign alternative". The line reads "●○○ ESTIMATED · Cafe shift · add a payday", and I think your objection is that ESTIMATED does not say estimated *what* — it is a grade floating above a number it is not visibly attached to. The fix I would propose is to stop it being a separate line at all and make it an attribute of the figure: the number itself carries the state (a dashed underline for estimated, solid for exact), and the ask becomes the number's own affordance — you press the figure to sharpen it. That deletes the label rather than rewording it. It is a real change to every layout's headline, so I have not started it. Say the word and it becomes its own task."
 - [!] **COMMENT — Confirm TWP status**
   - Needs: "Bad copy, we need content strategist mindset combined with senior product designer thinking and UX architect"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:255
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:272
   - Line was: `className="pg-btn mt-2.5"`
   - Component: TrackerWorkRecord › Root › TrackerProvider › App
   - Text: "Confirm TWP status"
@@ -2619,7 +2907,7 @@ Not done: "don't use text to compensate for lack of self explanation, just come 
   - Needs: "We are repeating ourselves multiple times this is bad design, which one is it
 
 Bad copy, we need content strategist mindset combined with senior product designer thinking and UX architect"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:293
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:304
   - Line was: `<div className="wr-phase-warning">`
   - Component: TrackerWorkRecord › Root › TrackerProvider › App
   - Text: "This tracker does not know whether TWP months remain, so it will not recommend a limit yet. Review status"
@@ -2644,7 +2932,7 @@ we should be able to hide unnecessary fields like hours and why do we need count
 For 1099 yes we need countable, not for W2
 
 But But, to high level thinking in the latest layouts like pocket etc We are doing NET + guesswork so, how can we redesign this entirely with that in mind?"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:473
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:488
   - Line was: `{open ? <div className="wr-slab-body" data-bleed={bleed || undefined}>{children}</div> : null}`
   - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
   - Text: "New job W-2 YTD GROSS $0 ONGOING PAUSED ENDED Since SETTINGS & DATE RANGE Every two weeks · Active all year PAY CYCLE Weekly Every two weeks"
@@ -2663,8 +2951,8 @@ That is a rewrite of the shared editor and it lands on four layouts, so it wants
   - Reviewer replied: "Just do it"
 - [x] **COMMENT — Add another income source**
   - Needs: "That is a long button"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:255
-  - Line was: `className="pg-btn mt-2.5"`
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:272
+  - Line was: `className="pg-btn mt-2"`
   - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
   - Text: "Add another income source"
   - DOM: main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn
@@ -2673,7 +2961,7 @@ That is a rewrite of the shared editor and it lands on four layouts, so it wants
   - Claude replied: "Done. "Add another income source" is "Add income", and it comes from the shared vocabulary in src/domain/copy.ts rather than being typed here, so the next time you want that word changed it changes once. The empty state under it went the same way: "Add a W-2 job or 1099 work to start tracking countable income against the SSA thresholds" is now "Add what pays you and we can start counting it against your limit.""
 - [x] **COMMENT — Sep**
   - Needs: "Same issue as the jobs section, we need high level thinking and I keep repeating myself for all layouts, we need more components that go across layouts but have custom preferences set only for the layout so that it can look different and have variants of the component but it should be the same thing and we should be using those global labels on the components etc"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:473
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:488
   - Line was: `{open ? <div className="wr-slab-body" data-bleed={bleed || undefined}>{children}</div> : null}`
   - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
   - Text: "COUNTABLE BY MONTH Confirm TWP status before relying on a limit SEP — Limits paused until TWP status is confirmed 2026 total $0"
@@ -2701,7 +2989,7 @@ What I have not done is the part you actually mean — "I am lost in the noise o
   - Reviewer replied: "9of 9 space missing?"
 - [!] **COMMENT — Work pay simulator**
   - Needs: "How much more redundant can we be? Holy moly, bad bad bad design"
-  - Source: src/components/SafeWorkSimulator.tsx:44
+  - Source: src/components/SafeWorkSimulator.tsx:47
   - Line was: `export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {`
   - Section id: workrecord-safe-work-simulator
   - Component: SafeWorkSimulator › WorkRecordStatus › Slab › TrackerWorkRecord
@@ -2720,7 +3008,7 @@ What I have not done is the part you actually mean — "I am lost in the noise o
   - Noted: 2026-09-02 02:55
 - [x] **COMMENT — YTD gross**
   - Needs: "all sections should have no roundedness on the page"
-  - Source: src/components/payguard/PayGuardJobEditor.tsx:206
+  - Source: src/components/payguard/PayGuardJobEditor.tsx:207
   - Line was: `<div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-2 pg-rule-b px-2.5 py-2.5 sm:px-3.5 sm:py-3"`
   - Component: PayGuardJobEditor › Slab › TrackerWorkRecord › Root
   - Text: "W-2 YTD GROSS $0"
@@ -2760,7 +3048,7 @@ What I have not done is the part you actually mean — "I am lost in the noise o
   - Claude replied: "Done in src/components/SafeWorkSimulator.tsx. Widened the recommendations grid container from sm:max-w-md to sm:max-w-xl so "Recommended" and "Also safe, closer to your limit" have ample width and the hours text does not wrap to a second line."
 - [x] **COMMENT — Jobs**
   - Needs: "lets make padding right match the trashcan icon below"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:465
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:480
   - Line was: `<div className="wr-slab-head">`
   - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
   - Text: "Jobs"
@@ -2770,7 +3058,7 @@ What I have not done is the part you actually mean — "I am lost in the noise o
   - Claude replied: "Done in src/styles/workrecord.css. Adjusted .wr-slab-head right padding from var(--wr-pad) to 0.625rem (10px on mobile, matching px-2.5) and 0.875rem (14px at sm, matching sm:px-3.5) so the collapse action aligns with the trashcan icon in the job header below."
 - [!] **COMMENT — Add**
   - Needs: "This button deserves margin on left and right"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:255
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:272
   - Line was: `className="pg-btn mt-2.5"`
   - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
   - Text: "Add"
@@ -2779,10 +3067,123 @@ What I have not done is the part you actually mean — "I am lost in the noise o
   - Noted: 2026-09-02 04:11
 - [!] **COMMENT — This screen**
   - Needs: "Do we need this?"
-  - Source: src/components/workrecord/TrackerWorkRecord.tsx:158
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:167
   - Line was: `<a href="#wr-main" className="pg-skip-link">Skip to main content</a>`
   - Component: TrackerWorkRecord › Root › TrackerProvider › App
   - Text: "Skip to main content SSDI INCOME TRACKER 2026 work record 2 NOTICES SEPTEMBER COUNTABLE $7 of $1,210 · $1,203 of room TRIAL MONTHS LEFT 9of "
   - DOM: div#root > div.pg-payguard.pg-workrecord:nth-of-type(1)
   - Origin: picked by the user
   - Noted: 2026-09-02 04:12
+- [!] **COMMENT — 2026 work record**
+  - Needs: "For mobile attached is current on left and desired on right, mostly scaling input sizes by about 30%"
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:187
+  - Line was: `SSDI income tracker`
+  - Component: TrackerWorkRecord › Root › TrackerProvider › App
+  - Text: "SSDI INCOME TRACKER 2026 work record 2021 2022 2023 2024 2025 2026 1 NOTICE"
+  - DOM: div#root > div.pg-payguard.pg-workrecord:nth-of-type(1) > header.pg-topbar > div
+  - Origin: picked by the user
+  - Noted: 2026-09-02 18:58
+- [!] **COMMENT — Tell us where you stand**
+  - Needs: "increase height by 30%"
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:275
+  - Line was: `Tell us where you stand`
+  - Component: TrackerWorkRecord › Root › TrackerProvider › App
+  - Text: "Tell us where you stand"
+  - DOM: main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1) > div:nth-of-type(1) > button.pg-btn
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:00
+- [!] **COMMENT — Since**
+  - Needs: "height of all elements should increase by 30% in mobile"
+  - Source: src/components/payguard/PayGuardJobEditor.tsx:207
+  - Line was: `<div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-2 pg-rule-b px-2.5 py-2.5 sm:px-3.5 sm:py-3"`
+  - Component: PayGuardJobEditor › Slab › TrackerWorkRecord › Root
+  - Text: "ONGOING PAUSED ENDED Since"
+  - DOM: div#pg-job-9wuhcbsxggmtkgow2q > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:04
+- [!] **COMMENT — Collapse all jobs**
+  - Needs: "make it as tall as the bar no padding around 
+in mobile"
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:222
+  - Line was: `className="pg-icon-btn pg-icon-btn-bordered"`
+  - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
+  - DOM: main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-head:nth-of-type(1) > button.pg-icon-btn.pg-icon-btn-bordered:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:04
+- [!] **COMMENT — Answer a few questions**
+  - Needs: "taller in mobile"
+  - Source: src/components/SafeWorkSimulator.tsx:120
+  - Line was: `Answer a few questions`
+  - Section id: workrecord-safe-work-simulator
+  - Component: SafeWorkSimulator › WorkRecordStatus › Slab › TrackerWorkRecord
+  - Text: "Answer a few questions"
+  - DOM: main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div:nth-of-type(2) > section > button
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:08
+- [!] **COMMENT — Review status**
+  - Needs: "taller iin mobile"
+  - Source: src/components/workrecord/WorkRecordStatus.tsx:119
+  - Line was: `Review status`
+  - Component: WorkRecordStatus › Slab › TrackerWorkRecord › Root
+  - Text: "Review status"
+  - DOM: div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div.pg-card:nth-of-type(1) > div > div:nth-of-type(1) > button.pg-btn
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:08
+- [!] **COMMENT — This month So far this year Rest of the year All**
+  - Needs: "taler in mobile
+
+Monthly history should have option of none on all layouts
+
+Default should be for all as rest of the year"
+  - Source: src/components/MonthScopePicker.tsx:21
+  - Line was: `month: 'This month',`
+  - Component: MonthScopePicker › Slab › TrackerWorkRecord › Root
+  - Text: "This month So far this year Rest of the year All year"
+  - DOM: main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-head:nth-of-type(1) > label.pg-field.pg-field-sm
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:08
+- [!] **COMMENT — Add**
+  - Needs: "taller in mobile"
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:272
+  - Line was: `className="pg-btn mt-2"`
+  - Component: Slab › TrackerWorkRecord › Root › TrackerProvider
+  - Text: "Add"
+  - DOM: main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:09
+- [!] **COMMENT — Your limit**
+  - Needs: "spasams in low scroll window"
+  - Source: src/components/Sheet.tsx:17
+  - Line was: `export function Sheet({`
+  - Component: Sheet › StatusSheet › TrackerWorkRecord › Root
+  - Text: "WHERE YOU STAND RIGHT NOW Your limit"
+  - DOM: div#root > div.pg-payguard.pg-workrecord:nth-of-type(1) > div > div > div > div:nth-of-type(2)
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:10
+- [!] **COMMENT — September countable**
+  - Needs: "we dont need this round chocolate bar header, it should just feel like its floating there in this area no shadows or rounding or outline"
+  - Source: src/components/workrecord/TrackerWorkRecord.tsx:250
+  - Line was: `<section className="wr-headline" aria-labelledby="wr-current-month">`
+  - Component: TrackerWorkRecord › Root › TrackerProvider › App
+  - Text: "SEPTEMBER COUNTABLE $0 of $1,210 · $1,210 of room TRIAL WORK MONTHS LEFT 9of 9"
+  - DOM: main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:11
+- [!] **COMMENT — 1 notice needs attention**
+  - Needs: "contrast issues"
+  - Source: src/components/NotificationsBell.tsx:20
+  - Line was: `export function NotificationsBell({`
+  - Component: NotificationsBell › TrackerWorkRecord › Root › TrackerProvider
+  - Text: "1 NOTICE"
+  - DOM: button#notifications-bell-anchor
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:11
+- [!] **COMMENT — Sep**
+  - Needs: "If calendars have fill background containers needs a similar shade fill so that it doesn’t look weird all themes"
+  - Source: src/components/workrecord/WorkRecordMonths.tsx:52
+  - Line was: `<div className="pg-month-grid">`
+  - Component: WorkRecordMonths › Slab › TrackerWorkRecord › Root
+  - Text: "SEP — AUG — JUL — JUN — MAY — APR — MAR — FEB — JAN —"
+  - DOM: main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-body:nth-of-type(2) > div.pg-card > div.pg-month-grid:nth-of-type(1)
+  - Origin: picked by the user
+  - Noted: 2026-09-02 19:15

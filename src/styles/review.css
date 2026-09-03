@@ -258,6 +258,7 @@
 
 .review-rail-count {
   border-radius: 2px;
+  white-space: nowrap;
   background: var(--review-panel-2);
   padding: 0 0.3rem;
   color: var(--review-dim);
@@ -419,7 +420,25 @@
 
 .review-dock-tool[data-on] .review-dock-key { color: rgb(255 255 255 / 0.8); }
 
-.review-rail-body { flex: 1; overflow-y: auto; }
+/* The rail is dark and narrow; a platform scrollbar in it is a bright bar
+   down the seam. Thin, in the rail's own greys, and it never takes width
+   away from the sentence. */
+.review-rail-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--review-line) transparent;
+}
+
+.review-rail-body::-webkit-scrollbar { width: 8px; }
+.review-rail-body::-webkit-scrollbar-track { background: transparent; }
+.review-rail-body::-webkit-scrollbar-thumb {
+  border: 2px solid var(--review-ink);
+  border-radius: 4px;
+  background: var(--review-line);
+}
+.review-rail-body::-webkit-scrollbar-thumb:hover { background: var(--review-faint); }
 
 .review-rail-foot {
   border-top: 1px solid var(--review-line);
@@ -492,6 +511,11 @@
 .review-row[data-unread] { border-left: 2px solid var(--review-blue); }
 .review-row[data-open] { background: var(--review-panel); }
 
+.review-row-face:focus-visible {
+  outline: 2px solid var(--review-blue);
+  outline-offset: -2px;
+}
+
 .review-row-face {
   display: flex;
   flex-direction: column;
@@ -526,16 +550,31 @@
   line-height: 1.45;
 }
 
+/* Where it lives, on one line. This used to wrap, and a two-line grey
+   monospace address under every row competed with the reviewer's own
+   sentence for the eye — the sentence is the note, the address is a
+   footnote. Cut off rather than wrapped, and the whole of it is in the
+   title attribute for anyone who needs the rest. */
 .review-row-where {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 0.4rem;
+  overflow: hidden;
   color: var(--review-faint);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 0.62rem;
 }
 
+/* The address gives way; the chips beside it never do — a tag is what the
+   note is, and it is two words long. */
+.review-row-src {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .review-row-where em {
+  flex: none;
   border-radius: 2px;
   background: var(--review-panel-2);
   padding: 0 0.25rem;
@@ -685,7 +724,21 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  /* The whole strip is the handle, so there is nothing small to hit, and the
+     hairline under it says where the chrome stops and the note begins. */
+  margin: -0.6rem -0.6rem 0;
+  border-bottom: 1px solid var(--review-line);
+  padding: 0.45rem 0.6rem;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
+
+.review-composer header:active { cursor: grabbing; }
+
+/* While a file is over the card. A hard border rather than a glow: old
+   WebViews here, and no blurred shadows. */
+.review-composer[data-dragging] { border-color: var(--review-blue); }
 
 .review-composer header strong {
   flex: 1;
@@ -704,7 +757,66 @@
 
 .review-composer header button:hover { color: var(--review-text); }
 
-.review-composer-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.review-composer-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+
+/* Thumbnails of what is attached: small enough to stay out of the way of the
+   text, big enough to tell two screenshots apart. */
+.review-composer-shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-composer-shots li { position: relative; }
+
+.review-composer-shots a { display: block; }
+.review-composer-shots a:hover img { border-color: var(--review-blue); }
+
+.review-composer-shots img {
+  display: block;
+  width: 4.5rem;
+  height: 3rem;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.review-composer-shots button {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  display: grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid var(--review-line);
+  border-radius: 9999px;
+  background: var(--review-ink);
+  color: var(--review-text);
+  cursor: pointer;
+}
+
+/* Sits with the tags because it answers the same question — what else is on
+   this note — and never grows into a menu of ways to do one thing. */
+.review-composer-attach {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  background: var(--review-panel);
+  padding: 0.15rem 0.4rem;
+  color: var(--review-dim);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-composer-attach:hover { background: var(--review-panel-2); color: var(--review-text); }
 
 .review-composer-tags button {
   border: 1px solid var(--review-line);

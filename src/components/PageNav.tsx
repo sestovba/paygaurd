@@ -20,17 +20,13 @@ function NavList({ page, onNavigate }: { page: PageId; onNavigate: (page: PageId
   return (
     <>
       {navItems.map(({ id, label, icon: Icon }) => {
-        const active = page === id;
         return (
           <button
             key={id}
             type="button"
-            aria-current={active ? 'page' : undefined}
+            aria-current={page === id ? 'page' : undefined}
             onClick={() => onNavigate(id)}
-            className={
-              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium transition-colors '
-              + (active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')
-            }
+            className="nav-item"
           >
             <Icon className="size-[18px] shrink-0" />
             {label}
@@ -91,23 +87,21 @@ export function TabBar({ page, onNavigate }: { page: PageId; onNavigate: (page: 
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-background/95 backdrop-blur pb-safe sm:hidden"
+      className="app-bar fixed inset-x-0 bottom-0 z-20 flex border-t pb-safe sm:hidden"
       aria-label="Primary"
     >
       {navItems.map(({ id, label, icon: Icon }) => {
-        const active = page === id;
         return (
           <button
             key={id}
             type="button"
-            aria-current={active ? 'page' : undefined}
+            aria-current={page === id ? 'page' : undefined}
             onClick={() => onNavigate(id)}
-            className={
-              'flex flex-1 flex-col items-center gap-1 py-2.5 text-sm font-medium transition-colors '
-              + (active ? 'text-good' : 'text-muted-foreground')
-            }
+            className="nav-tab"
           >
-            <Icon className="size-5" />
+            <span className="nav-tab-mark">
+              <Icon className="size-5" />
+            </span>
             {label}
           </button>
         );

@@ -46,8 +46,8 @@ export function HelpSpreadContent() {
             <span className="eyebrow">Average</span>
             <p className="help-copy">
               Your yearly net is divided evenly across the months the stream was
-              active. This is the default, and it is what SSA does when income
-              cannot be tied to a particular month.
+              running. This is the default, and it is what Social Security does
+              when pay cannot be tied to one month.
             </p>
             <div className="rows help-example">
               <div className="num help-note">

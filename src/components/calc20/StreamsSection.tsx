@@ -35,18 +35,24 @@ const DEFAULT_FIELDS: Record<Stream['type'], FieldId[]> = {
   ten99: ['gross', 'miles']
 };
 
-/* "W-2 · 120 hrs" and "1099 · net of expenses" — two tax-form names and one
-   accounting phrase, on the line under every job's name. */
+/* Was "W-2 · 120 hrs" and "1099 · net of expenses" — two tax-form names and
+   one accounting phrase, on the line under every job's name.
+   The type word itself is gone from here: the badge beside the name already
+   says Employer or Gig work, and having both say it left the card reading
+   "Employer / EMPLOYER · 0 HOURS". This line carries what the badge cannot —
+   the hours, and what the miles took off. */
 function subLine(stream: Stream, year: number): string {
-  if (stream.type === 'w2') return 'Employer · ' + fmtHours(streamYearHours(stream, year));
+  if (stream.type === 'w2') return fmtHours(streamYearHours(stream, year));
   const miles = streamYearMiles(stream, year);
   return miles > 0
-    ? 'Gig work · ' + fmtMiles(miles) + ' taken off'
-    : 'Gig work · after your miles come off';
+    ? fmtMiles(miles) + ' taken off'
+    : 'after your miles come off';
 }
 
+/* Was 'gross' / 'net' — the two words this product's copy rule bans by
+   name, sitting under the largest figure on each job card. */
 function totalLabel(stream: Stream): string {
-  return stream.type === 'w2' ? 'gross' : 'net';
+  return stream.type === 'w2' ? 'before taxes' : 'after your miles';
 }
 
 /**
@@ -72,10 +78,10 @@ function TypeBadge({ stream }: { stream: Stream }) {
         type="button"
         aria-haspopup="menu"
         aria-expanded={anchor.open}
-        aria-label={`Income type: ${stream.type === 'w2' ? 'W-2' : '1099'}. Change type`}
+        aria-label={`This is ${SOURCE_SHORT[stream.type].toLowerCase()}. Change it`}
         onClick={anchor.toggle}
       >
-        {stream.type === 'w2' ? 'W2' : '1099'}
+        {SOURCE_SHORT[stream.type]}
       </button>
       <AnchoredPopover
         anchor={anchor}
@@ -177,7 +183,7 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
             </button>
             <button type="button" role="menuitem" onClick={() => setView('type')}>
               <span className="menu-label">Type</span>
-              <span className="stream-menu__hint">{stream.type === 'w2' ? 'W-2' : '1099'}</span>
+              <span className="stream-menu__hint">{SOURCE_SHORT[stream.type]}</span>
               <ChevronRightIcon size={15} />
             </button>
             <button type="button" role="menuitem" onClick={() => { close(); duplicateStream(stream.id); }}>

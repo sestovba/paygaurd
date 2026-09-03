@@ -44,112 +44,137 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
   --color-warn: var(--warn);
   --color-warn-foreground: var(--warn-foreground);
   --color-warn-soft: var(--warn-soft);
+  --color-warn-text: var(--warn-text);
   --color-good: var(--good);
   --color-good-soft: var(--good-soft);
+  --color-good-text: var(--good-text);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
   --color-info-soft: var(--info-soft);
+  --color-info-text: var(--info-text);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --shadow-card: var(--shadow-card);
   --shadow-lift: var(--shadow-lift);
 }
 
+/* ------------------------------------------------------------------ */
+/* Palette bridge                                                      */
+/* ------------------------------------------------------------------ */
+/*
+ * This file used to pick its own colours: a :root block of 39 values and a
+ * .dark block of 39 more, in a green-tinted oklch family that agreed with
+ * nothing else in the app. It was the fifth palette — payguard, ledger,
+ * calc20 and plan had their own too — and the only one the light/dark
+ * toggle actually reached.
+ *
+ * It picks none now. styles/palette.css chooses; this maps those choices
+ * onto the names the base theme's ~400 Tailwind utilities already spell.
+ * The .dark block is gone with it: dark is an axis of the palette, so
+ * there is nothing left here for it to say.
+ *
+ * Two spellings worth knowing, because the words collide:
+ *   --good / --warn / --info   are this file's names for the palette's
+ *                              --t-safe / --t-warn / --t-info.
+ *   --primary                  is the call-to-action SLAB (light, dark ink).
+ *   --ring                     is the accent STROKE (mid, for lines).
+ *                              Both come from the palette; they are two
+ *                              roles, not two names for one.
+ */
 :root {
-  --radius: 1rem;
+  --radius: var(--t-radius-xl);
 
-  --background: oklch(0.985 0.005 106);
-  --foreground: oklch(0.21 0.015 150);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.965 0.008 120);
+  --background: var(--t-bg);
+  --foreground: var(--t-fg);
+  --surface: var(--t-surface);
+  --surface-2: var(--t-surface-2);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.015 150);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.015 150);
+  --card: var(--t-surface);
+  --card-foreground: var(--t-fg);
+  --popover: var(--t-surface);
+  --popover-foreground: var(--t-fg);
 
-  --primary: oklch(0.86 0.19 142);
-  --primary-foreground: oklch(0.24 0.06 140);
-  --secondary: oklch(0.955 0.009 120);
-  --secondary-foreground: oklch(0.28 0.02 150);
-  --muted: oklch(0.955 0.009 120);
-  --muted-foreground: oklch(0.52 0.015 145);
-  --accent: oklch(0.94 0.03 142);
-  --accent-foreground: oklch(0.28 0.05 142);
+  --primary: var(--t-primary);
+  --primary-foreground: var(--t-primary-fg);
+  --secondary: var(--t-surface-2);
+  --secondary-foreground: var(--t-fg);
+  --muted: var(--t-surface-2);
+  --muted-foreground: var(--t-fg-muted);
+  --accent: var(--t-accent);
+  --accent-foreground: var(--t-accent-fg);
 
-  --destructive: oklch(0.56 0.2 25);
-  --destructive-foreground: oklch(0.99 0.005 106);
+  --destructive: var(--t-over);
+  --destructive-foreground: var(--t-over-fg);
 
-  --warn: oklch(0.62 0.15 55);
-  --warn-foreground: oklch(0.4 0.09 55);
-  --warn-soft: oklch(0.965 0.04 70);
-  --good: oklch(0.52 0.13 150);
-  --good-soft: oklch(0.96 0.04 150);
-  --info: oklch(0.52 0.14 262);
-  --info-foreground: oklch(0.97 0.01 262);
-  --info-soft: oklch(0.965 0.025 262);
+  --warn: var(--t-warn);
+  --warn-soft: var(--t-warn-soft);
+  --warn-text: var(--t-warn-text);
+  /* The name that already meant ink-on-soft before the trio existed. Kept
+     so its call sites compile; there is one value, not two. */
+  --warn-foreground: var(--warn-text);
+  --good: var(--t-safe);
+  --good-soft: var(--t-safe-soft);
+  --good-text: var(--t-safe-text);
+  --info: var(--t-info);
+  --info-soft: var(--t-info-soft);
+  --info-text: var(--t-info-text);
+  --info-foreground: var(--t-info-fg);
 
-  --border: oklch(0.912 0.008 120);
-  --input: oklch(0.9 0.008 120);
-  --ring: oklch(0.78 0.16 142);
+  --border: var(--t-border);
+  --border-soft: var(--t-border-soft);
+  --border-strong: var(--t-border-strong);
+  /* An input at rest wants to read as a field, not as a hairline. */
+  --input: var(--t-border-strong);
+  --ring: var(--t-ring);
 
-  --shadow-input: 0 1px 2px oklch(0.2 0.02 150 / 0.05);
-  --shadow-card: 0 1px 2px oklch(0.2 0.02 150 / 0.05), 0 8px 24px -16px oklch(0.2 0.02 150 / 0.14);
-  --shadow-lift: 0 2px 4px oklch(0.2 0.02 150 / 0.06), 0 24px 48px -24px oklch(0.2 0.02 150 / 0.22);
-  --shadow-lime: 0 8px 24px -12px oklch(0.78 0.19 142 / 0.45);
+  --shadow-input: var(--t-shadow-sm);
+  --shadow-card: var(--t-shadow);
+  --shadow-lift: var(--t-shadow-lg);
 }
 
-.dark {
-  --background: oklch(0.16 0.012 150);
-  --foreground: oklch(0.94 0.006 106);
-  --surface: oklch(0.21 0.014 150);
-  --surface-2: oklch(0.25 0.014 150);
-
-  --card: oklch(0.21 0.014 150);
-  --card-foreground: oklch(0.94 0.006 106);
-  --popover: oklch(0.21 0.014 150);
-  --popover-foreground: oklch(0.94 0.006 106);
-
-  --primary: oklch(0.86 0.19 142);
-  --primary-foreground: oklch(0.18 0.04 140);
-  --secondary: oklch(0.28 0.014 150);
-  --secondary-foreground: oklch(0.9 0.01 106);
-  --muted: oklch(0.28 0.014 150);
-  --muted-foreground: oklch(0.66 0.014 145);
-  --accent: oklch(0.3 0.05 142);
-  --accent-foreground: oklch(0.88 0.09 142);
-
-  --destructive: oklch(0.62 0.19 25);
-  --destructive-foreground: oklch(0.97 0.006 106);
-
-  --warn: oklch(0.72 0.14 60);
-  --warn-foreground: oklch(0.86 0.1 60);
-  --warn-soft: oklch(0.3 0.05 60);
-  --good: oklch(0.68 0.13 150);
-  --good-soft: oklch(0.28 0.045 150);
-  --info: oklch(0.68 0.14 262);
-  --info-foreground: oklch(0.2 0.03 262);
-  --info-soft: oklch(0.28 0.045 262);
-
-  --border: oklch(1 0 0 / 0.1);
-  --input: oklch(1 0 0 / 0.14);
-  --ring: oklch(0.78 0.16 142);
-
-  --shadow-input: 0 1px 2px oklch(0 0 0 / 0.18);
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.2), 0 8px 24px -16px oklch(0 0 0 / 0.5);
-  --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.2), 0 18px 40px -22px oklch(0 0 0 / 0.6);
-  --shadow-lime: 0 8px 24px -10px oklch(0.86 0.19 142 / 0.35);
+/* @override base — the accent glow behind the brand mark and the primary
+ * button. Not in the palette because it is not a colour, it is a specific
+ * soft-shadow treatment this theme uses in two places, and because it is a
+ * blurred shadow: banned for anything a phone repaints on scroll, fine for
+ * two static elements. It follows the palette's accent rather than a fixed
+ * lime, so a variant still changes it. */
+:root {
+  --shadow-lime: 0 8px 24px -12px var(--t-primary);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
+  }
+
+  /* The default scrollbar is a light-mode grey whatever the theme, and it is
+   * the only chrome on the page nobody themed. Firefox/WebKit both, and both
+   * degrade to the platform default where unsupported. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border-radius: 4px;
   }
 
   html {
@@ -256,17 +281,17 @@
 
 @utility chip-good {
   background-color: var(--good-soft);
-  color: var(--good);
+  color: var(--good-text);
 }
 
 @utility chip-info {
   background-color: var(--info-soft);
-  color: var(--info);
+  color: var(--info-text);
 }
 
 @utility chip-warn {
   background-color: var(--warn-soft);
-  color: var(--warn-foreground);
+  color: var(--warn-text);
 }
 
 @utility chip-muted {
@@ -527,6 +552,106 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/*
+ * App bar — the sticky top strip and the docked bottom nav.
+ *
+ * Classic, the sidebar and the workspace each wrote their own, and each
+ * wrote it differently: bg-background/85 + backdrop-blur, /95 + blur, /98
+ * and no blur, over border-border/70 or border-border. Three shells, four
+ * answers, one strip.
+ *
+ * The answer is none of them. backdrop-filter is on the banned list at the
+ * top of CLAUDE.md — on an old Android WebView it is either ignored, which
+ * leaves the page showing straight through a 15%-transparent header, or it
+ * is honoured and costs a full-screen repaint on every scroll frame. A bar
+ * that has to stay legible over whatever scrolls under it is opaque.
+ */
+@utility app-bar {
+  background-color: var(--background);
+  border-color: var(--border-soft);
+}
+
+/* Same bar where the surrounding page is already --surface (sheets, the
+ * workspace's right-hand pane) and --background would read as a seam. */
+@utility app-bar-surface {
+  background-color: var(--surface);
+  border-color: var(--border-soft);
+}
+
+/*
+ * Primary navigation — one row, four call sites.
+ *
+ * The sidebar list, the workspace's rail, its tablet strip and both tab
+ * bars were five copies of the same button with the padding, weight and
+ * active colour drifting between them (py-2.5/py-3/py-2,
+ * font-medium/font-semibold, text-good/text-accent-foreground). The active
+ * state keys off aria-current, which every one of them already sets, so the
+ * ternary that used to carry the colour disappears with the drift.
+ *
+ * min-height is the 44px touch floor, not decoration: it is the one control
+ * on the screen a reader hits while walking.
+ */
+@utility nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--muted-foreground);
+  transition: background-color 150ms, color 150ms;
+}
+
+.nav-item:hover {
+  background-color: var(--surface-2);
+  color: var(--foreground);
+}
+
+.nav-item[aria-current='page'] {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* The same item as a phone tab: icon over label, equal share of the bar. */
+@utility nav-tab {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--muted-foreground);
+  transition: color 150ms;
+}
+
+.nav-tab[aria-current='page'] {
+  color: var(--accent-foreground);
+}
+
+/* The pill behind a tab's icon. Colour alone was carrying the active state
+ * on the sidebar layout's tab bar; the workspace already had this and it is
+ * the half of the signal that survives being colour-blind. */
+@utility nav-tab-mark {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  transition: background-color 150ms;
+}
+
+.nav-tab[aria-current='page'] .nav-tab-mark {
+  background-color: var(--accent);
 }
 
 @utility icon-btn {

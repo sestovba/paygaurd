@@ -42,7 +42,7 @@ npm run dev
 ```
 
 The in-app **review console** starts with it — dev and localhost only, never
-in a published build. Open it with ⌘R or the button bottom-right; `V` selects
+in a published build. Open it with ⌘R or the button bottom-right; `D` selects
 an element, `C` comments on it. What you write lands in `review/` as both
 JSON and a readable report, and is committed with the code.
 

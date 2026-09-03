@@ -179,7 +179,7 @@ function PaydayStep({ streamId, year, onDone }: {
             argument for asking here rather than in the job editor later. */}
         {plan ? (
           heavy.length ? (
-            <p className="flex items-start gap-2 rounded-lg bg-info-soft px-3 py-3 text-base font-semibold text-info">
+            <p className="flex items-start gap-2 rounded-lg bg-info-soft px-3 py-3 text-base font-semibold text-info-text">
               <Zap className="size-5 shrink-0" />
               <span>
                 {plan.typicalCount + 1} paychecks in{' '}

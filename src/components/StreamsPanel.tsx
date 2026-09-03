@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, ChevronDown, Pause } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
-import { copyFor, periodLabel } from '../domain/copy';
+import { copyFor, periodLabel, SOURCE_SHORT } from '../domain/copy';
 import { money } from '../domain/format';
 import { streamYearTotal } from '../domain/earnings';
 import { frequencyLabel, payPlan } from '../domain/paySchedule';
@@ -54,7 +54,7 @@ export function StreamsPanel({
                   <span className={'h-6 w-1 shrink-0 rounded-full ' + (stream.type === 'w2' ? 'bg-good' : 'bg-info')} />
                   <span className="min-w-0 flex-1 truncate text-base">{stream.name}</span>
                   <Chip tone={stream.type === 'w2' ? 'good' : 'info'}>
-                    {stream.type === 'w2' ? 'W-2' : '1099'}
+                    {SOURCE_SHORT[stream.type]}
                   </Chip>
                 </button>
               </li>
@@ -119,7 +119,7 @@ function StreamRow({ stream, year, onOpen }: { stream: Stream; year: number; onO
           <span className="truncate text-base font-medium">{stream.name}</span>
         </button>
         <span className="flex shrink-0 items-center gap-2.5">
-          <Chip tone={w2 ? 'good' : 'info'}>{w2 ? 'W-2' : '1099'}</Chip>
+          <Chip tone={w2 ? 'good' : 'info'}>{SOURCE_SHORT[w2 ? 'w2' : 'ten99']}</Chip>
           <span className="num text-base font-semibold">{money(total)}</span>
           <button
             type="button"

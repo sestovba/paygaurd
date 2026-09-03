@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Eye, EyeOff, MessageSquarePlus } from 'lucide-react';
-import type { LayoutMode } from '../state/storage';
+import type { ReviewLayoutId } from './types';
 import { useReview } from './context';
 
 /**
@@ -31,7 +31,7 @@ export function ReviewTarget({
   id: string;
   label: string;
   reason: string;
-  layout: LayoutMode;
+  layout: ReviewLayoutId;
   className?: string;
   children: ReactNode;
 }) {

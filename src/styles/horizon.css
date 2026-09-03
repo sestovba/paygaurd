@@ -24,9 +24,13 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: color-mix(in oklab, var(--color-background) 88%, transparent);
-  backdrop-filter: blur(10px);
+  /* The same flat opaque strip classic, v2 and the workspace use — see
+     `app-bar` in index.css. This was the fourth spelling of it, and the only
+     one that broke both device rules at once: color-mix() is dropped whole on
+     an old WebView, which would have left this bar fully transparent, and the
+     blur behind it costs a compositor pass on every scroll frame. */
+  border-bottom: 1px solid var(--color-border-soft);
+  background: var(--color-background);
 }
 
 .hz-top-id { flex: 1 1 auto; min-width: 0; }

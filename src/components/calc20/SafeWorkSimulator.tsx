@@ -109,7 +109,7 @@ export function SafeWorkSimulator() {
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
     return (
       <div className="simulator simulator--paused">
-        <div className="simulator__eyebrow">Safe hours</div>
+        <div className="simulator__eyebrow">Hours you can work</div>
         <div className="simulator__title">We need your limit first</div>
         <p className="help-note">
           Hours only mean something against a limit, and yours is not set yet.
@@ -121,7 +121,8 @@ export function SafeWorkSimulator() {
 
   return (
     <div className="simulator">
-      <div className="simulator__eyebrow">Safe hours</div>
+      {/* el-8lyfa5 — same rename as the shared simulator. */}
+      <div className="simulator__eyebrow">Hours you can work</div>
       {/* The heading is the answer, not the panel's job description — the
           same change the shared simulator got for "Stay below SGA — Duh".
           It also stops this layout naming a regime the reader is not in. */}
@@ -175,7 +176,7 @@ export function SafeWorkSimulator() {
           <strong>{Math.floor(safeFiveWeekHours)} hours a week</strong>
         </div>
         <div>
-          <span className="simulator__result-label">Also safe, closer to your limit</span>
+          <span className="simulator__result-label">Still under, closer to your limit</span>
           <strong>{Math.floor(safeAverageHours)} hours a week</strong>
         </div>
         <div className={fiveWeekProjection > safeTarget ? 'simulator__projection simulator__projection--over' : 'simulator__projection'}>

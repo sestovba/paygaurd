@@ -5,7 +5,7 @@ import {
   activeMonthsInYear, evenSplit, grossFor, hoursFor
 } from '../../domain/earnings';
 import {
-  longMonthName, monthIndex, monthKey, parseMonth, shortMonthName, todayMonth
+  longMonthName, monthIndex, monthKey, monthsShownLabel, parseMonth, shortMonthName, todayMonth
 } from '../../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/rules';
 import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
@@ -322,7 +322,7 @@ export function LedgerJobEditor({
                of el-kmzpns. "Ledger" is an accounting word; the year is
                already in the meta beside it. */
             label="Month by month"
-            meta={activeMonths.length + ' of 12 months'}
+            meta={monthsShownLabel(months)}
             open={ledgerOpen}
             onToggle={() => onToggleSection('ledger')}
           />

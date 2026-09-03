@@ -274,7 +274,11 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
           className="lg-btn flex items-center gap-2"
         >
           <ShieldCheck className="size-4 lg-text-safe" />
-          {simulatorOpen ? 'Hide Safe Work Simulator' : 'Open Safe Work Simulator'}
+          {/* el-8lyfa5: "what does safe mean? what does that have to do with
+              anything". Nothing — it was the tool naming itself after its own
+              maths. The tool is named by the question it answers, the way
+              PayGuard already names it. */}
+          {simulatorOpen ? 'Close' : 'How many hours could I work?'}
         </button>
       </div>
 

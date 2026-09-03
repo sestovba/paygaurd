@@ -251,12 +251,12 @@ export function ReviewDock({
           className="review-dock-tool"
           data-on={mode === 'pick' || undefined}
           aria-pressed={mode === 'pick'}
-          title="Point · l"
+          title="Point · d"
           onClick={() => onMode(mode === 'pick' ? 'off' : 'pick')}
         >
           <span className="review-dock-icon"><Crosshair className="size-[18px]" /></span>
           <span className="review-dock-name">Point</span>
-          <kbd className="review-dock-key">l</kbd>
+          <kbd className="review-dock-key">d</kbd>
         </button>
         <button
           type="button"

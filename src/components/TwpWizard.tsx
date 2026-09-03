@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
@@ -8,6 +8,7 @@ import { rulesFor } from '../domain/rules';
 import { NumericInput } from './NumericInput';
 import { Segmented } from './ui';
 import { Sheet } from './Sheet';
+import { clearQuizDraft, loadQuizDraft, saveQuizDraft } from '../state/storage';
 
 type Step = 'start' | 'worked' | 'estimate' | 'knowsTwp' | 'count' | 'conclusion';
 
@@ -52,14 +53,22 @@ export function TwpWizard({
   backLabel?: string;
 }) {
   const { setTwpAssessment, setPriorTrialMonths } = useTracker();
-  const [step, setStep] = useState<Step>('start');
-  const [history, setHistory] = useState<Step[]>([]);
-  const [startMonth, setStartMonth] = useState('');
-  const [monthlyEarnings, setMonthlyEarnings] = useState<number | undefined>(undefined);
-  const [countMode, setCountMode] = useState<'used' | 'remaining'>('used');
-  const [countValue, setCountValue] = useState<number | undefined>(undefined);
-  const [conclusion, setConclusion] = useState<Conclusion | null>(null);
-  const [pending, setPending] = useState<PendingAssessment | null>(null);
+  /* Answers are read back once, on mount. A half-finished quiz has to
+     survive a refresh or an old WebView dropping the page mid-question;
+     it is cleared the moment the answer is saved or abandoned. */
+  const [draft] = useState(() => loadQuizDraft());
+  const [step, setStep] = useState<Step>((draft?.step as Step) ?? 'start');
+  const [history, setHistory] = useState<Step[]>((draft?.history as Step[]) ?? []);
+  const [startMonth, setStartMonth] = useState(draft?.startMonth ?? '');
+  const [monthlyEarnings, setMonthlyEarnings] = useState<number | undefined>(draft?.monthlyEarnings);
+  const [countMode, setCountMode] = useState<'used' | 'remaining'>(draft?.countMode ?? 'used');
+  const [countValue, setCountValue] = useState<number | undefined>(draft?.countValue);
+  const [conclusion, setConclusion] = useState<Conclusion | null>(draft?.conclusion ?? null);
+  const [pending, setPending] = useState<PendingAssessment | null>(draft?.pending ?? null);
+
+  useEffect(() => {
+    saveQuizDraft({ step, history, startMonth, monthlyEarnings, countMode, countValue, conclusion, pending });
+  }, [step, history, startMonth, monthlyEarnings, countMode, countValue, conclusion, pending]);
 
   const monthsSince = startMonth ? monthsBetween(startMonth, todayMonth()) : 0;
 
@@ -98,6 +107,7 @@ export function TwpWizard({
       });
       if (pending.priorUsed !== null) setPriorTrialMonths(recentMonths(pending.priorUsed));
     }
+    clearQuizDraft();
     onClose();
   }
 
@@ -209,7 +219,9 @@ export function TwpWizard({
   } else if (step === 'estimate') {
     body = (
       <label className="flex flex-col gap-1.5">
-        <span className="field-label">About how much do you make in a typical month?</span>
+        {/* The step title above already asks this. Two phrasings of one
+            question, stacked, is the reader wondering whether they are two. */}
+        <span className="field-label">In a usual month</span>
         <NumericInput
           className="num field-input w-full"
           prefix="$"

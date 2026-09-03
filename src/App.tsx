@@ -9,8 +9,8 @@ import { TermsGate } from './components/TermsGate';
 import { TERMS_VERSION } from './domain/legal';
 import { canSync, saveConsentRecord } from './state/cloudSync';
 import type { Session } from './auth/session';
-import type { LedgerTheme, UiState } from './state/storage';
-import { loadUi } from './state/storage';
+import type { Palette, UiState } from './state/storage';
+import { isLegacyLayoutId, loadUi, SHELL_FOR_LEGACY } from './state/storage';
 import type { ReviewAnchor } from './review/types';
 import { lazy, Suspense } from 'react';
 
@@ -36,9 +36,7 @@ const ReviewProvider = lazy(() => import('./review/ReviewProvider')
  * gap is a frame or two, and a spinner that flashes is worse than nothing.
  */
 const LAYOUTS = {
-  classic: lazy(() => import('./components/TrackerClassic').then((m) => ({ default: m.TrackerClassic }))),
-  v2: lazy(() => import('./components/TrackerV2').then((m) => ({ default: m.TrackerV2 }))),
-  responsive: lazy(() => import('./components/TrackerV3').then((m) => ({ default: m.TrackerV3 }))),
+  overview: lazy(() => import('./components/overview/TrackerOverview').then((m) => ({ default: m.TrackerOverview }))),
   ledger: lazy(() => import('./components/ledger/TrackerLedger').then((m) => ({ default: m.TrackerLedger }))),
   payguard: lazy(() => import('./components/payguard/TrackerPayGuard').then((m) => ({ default: m.TrackerPayGuard }))),
   workrecord: lazy(() => import('./components/workrecord/TrackerWorkRecord').then((m) => ({ default: m.TrackerWorkRecord }))),
@@ -128,16 +126,23 @@ function Root({ session }: { session: Session | null }) {
  *  following one puts the app back in that state rather than dropping you on
  *  the current screen and hoping. */
 function uiPatchForAnchor(anchor: ReviewAnchor): Partial<UiState> {
-  const patch: Partial<UiState> = { layout: anchor.layout };
-  const sub = anchor.theme?.sub as LedgerTheme | undefined;
+  const patch: Partial<UiState> = isLegacyLayoutId(anchor.layout)
+    ? {}
+    : { layout: anchor.layout };
+  const sub = anchor.theme?.sub as Palette | undefined;
 
-  if (sub) {
-    if (anchor.layout === 'ledger') patch.ledgerTheme = sub;
-    if (anchor.layout === 'payguard') patch.payguardTheme = sub;
-    if (anchor.layout === 'workrecord') patch.workRecordTheme = sub;
+  /* A note taken before classic / v2 / responsive became one layout names
+     one of the three, and that is exactly which shell it was written
+     against — so it sets the shell rather than being dropped. */
+  if (isLegacyLayoutId(anchor.layout)) {
+    patch.layout = 'overview';
+    patch.overviewShell = SHELL_FOR_LEGACY[anchor.layout];
   }
-  // Ledger owns its own palette; the light/dark switch is for the others.
-  if (anchor.layout !== 'ledger' && anchor.theme?.dark !== undefined) {
+
+  // One palette field, so no per-layout branch — and no exception for
+  // ledger, which now takes the app's light/dark like everything else.
+  if (sub) patch.palette = sub;
+  if (anchor.theme?.dark !== undefined) {
     patch.theme = anchor.theme.dark ? 'dark' : 'light';
   }
   return patch;

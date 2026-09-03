@@ -4,9 +4,26 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5199,
       "autoPort": true
+    },
+    {
+      "name": "calc20-export",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--config",
+        "vite.calc20.config.ts",
+        "--port",
+        "5188",
+        "--strictPort"
+      ],
+      "port": 5188
     }
   ]
 }

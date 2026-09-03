@@ -3,8 +3,7 @@
 // heavy half is loaded lazily, and only on a dev host.
 
 import { createContext, useContext } from 'react';
-import type { LayoutMode } from '../state/storage';
-import type { ReviewNotes } from './types';
+import type { ReviewLayoutId, ReviewNotes } from './types';
 
 /** Pointing, or not. There were four — the other two were an A/B switcher
  *  that one note in 222 ever used, and a separate "audit" walk that is the
@@ -15,7 +14,7 @@ export interface SuggestedTarget {
   id: string;
   label: string;
   reason: string;
-  layout: LayoutMode;
+  layout: ReviewLayoutId;
 }
 
 export interface ReviewContextValue {

@@ -6,6 +6,7 @@ import type { ReviewNotes } from './types';
 
 const STORAGE_KEY = 'pg-review-notes-v1';
 const ENDPOINT = '/__review/notes';
+const SHOT_ENDPOINT = '/__review/shot';
 
 export function loadLocal(): ReviewNotes {
   try {
@@ -55,5 +56,28 @@ export async function pushRemote(notes: ReviewNotes): Promise<boolean> {
     return res.ok;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Send one pasted, dropped or picked image to the dev server and get back the
+ * path to record on the note. Returns null when there is no dev server behind
+ * the app — the console still works, it just cannot keep the picture.
+ */
+export async function uploadShot(id: string, file: Blob): Promise<string | null> {
+  const type = file.type || 'image/png';
+  if (!type.startsWith('image/')) return null;
+  const ext = type.split('/')[1]?.split('+')[0] ?? 'png';
+  try {
+    const res = await fetch(`${SHOT_ENDPOINT}?id=${encodeURIComponent(id)}&ext=${encodeURIComponent(ext)}`, {
+      method: 'POST',
+      headers: { 'content-type': type },
+      body: file
+    });
+    if (!res.ok) return null;
+    const body = await res.json() as { ok?: boolean; path?: string };
+    return body.ok && body.path ? body.path : null;
+  } catch {
+    return null;
   }
 }

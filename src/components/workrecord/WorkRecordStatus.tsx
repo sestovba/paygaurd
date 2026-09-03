@@ -152,7 +152,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
 
       <ReviewTarget
         id="workrecord-safe-work-simulator"
-        label="Safe-work simulator"
+        label="Hours you can work"
         reason="The multi-input planner overwhelms the core status view and belongs in an optional advanced tool."
         layout="workrecord"
       >

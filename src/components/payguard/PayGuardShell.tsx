@@ -13,19 +13,16 @@ import { useTheme } from '../../theme';
 export function PayGuardShell({ children }: { children: ReactNode }) {
   // Read straight from storage: this renders before the tracker provider,
   // so there is no context to ask.
-  const { layout, payguardTheme, workRecordTheme, theme } = loadUi();
-  useTheme(theme);
+  const { palette, theme } = loadUi();
+  useTheme(theme, palette);
 
-  // Two layouts share this skin and keep separate palettes; open on whichever
-  // one the reader is about to land in.
-  const palette = layout === 'workrecord'
-    ? workRecordTheme ?? 'calc20'
-    : payguardTheme ?? 'paper';
+  // One palette for the app, so there is nothing to choose between here —
+  // this used to pick between payguardTheme and workRecordTheme depending on
+  // which of the two layouts sharing this skin you were about to land in.
 
   return (
     <div
       className="pg-payguard flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6"
-      data-payguard-theme={palette}
     >
       {children}
     </div>

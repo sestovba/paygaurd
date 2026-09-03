@@ -1,0 +1,50 @@
+<html lang="en" style="color-scheme: light;"><head>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f9f9f7">
+    <title>PayGuard — Horizon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Inter+Tight:wght@500;600;700&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap">
+    <script>
+      (function () {
+        try {
+          var ui = JSON.parse(localStorage.getItem('pg-ui-v1') || '{}');
+          // Ledger layout owns its own palette via data-ledger-theme — the
+          // global light/dark toggle is for the other layouts only.
+          if (ui.layout === 'ledger') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = ui.ledgerTheme === 'carbon' ? 'dark' : 'light';
+            return;
+          }
+          var theme = ui.theme;
+          var dark = theme === 'dark' || ((theme === 'system' || !theme) && matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          root.classList.toggle('dark', dark);
+          root.style.colorScheme = dark ? 'dark' : 'light';
+          // Calc20's stylesheet is scoped under .pg-calc20 and themed by
+          // data-theme, so both have to be on <html> before the first paint.
+          if (ui.layout === 'calc20') {
+            root.classList.add('pg-calc20');
+            root.dataset.theme = dark ? 'dark' : 'light';
+            var g = Number((ui.calc20 || {}).glassStrength);
+            if (!Number.isFinite(g)) g = 0;
+            root.style.setProperty('--glass-strength', String(1 - Math.max(0, Math.min(100, g)) / 100));
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', dark ? '#09121f' : '#eff4f8');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    
+    
+    <link rel="stylesheet" crossorigin="" href="./assets/index-DRPKm-Rw.css">
+    <link rel="stylesheet" id="pg-polish-link" href="./polish.css">
+  </head>
+  <body>
+    <div id="root"><div class="hz" data-chrome-root="true"><header class="hz-top"><div class="hz-top-id"><h1>Horizon</h1><p>September 2026</p></div><div class="hz-top-year" role="group" aria-label="Year"><button type="button" aria-label="Previous year">‹</button><span>2026</span><button type="button" aria-label="Next year">›</button></div><button type="button" class="hz-icon-btn" aria-label="Settings"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings size-4" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg></button></header><main class="hz-main"><section class="hz-answer" data-tone="clear" aria-live="polite"><p class="hz-answer-line">$313 left before your monthly limit</p><p class="precision-line" data-level="scheduled" title="Riverside Market is missing your actual paystub amount for this month, so this total is estimated, not from a real paystub."><span class="precision-pips" aria-hidden="true"><span class="precision-pip" data-on="true"></span><span class="precision-pip" data-on="true"></span><span class="precision-pip"></span></span><span class="precision-level">Predicted</span><span class="precision-why">Riverside Market · add a paystub</span></p></section><section class="hz-runway" aria-label="The rest of 2026"><header class="hz-runway-head"><h2 class="hz-label">The rest of 2026</h2><p class="hz-runway-lede">Nothing ahead crosses a limit on what you have entered.</p></header><ol class="hz-track"><li class="hz-stop" data-fill="clear" data-now="true"><button type="button" class="hz-stop-btn" aria-label="September 2026: under the limit, current month, $313 of room left"><span class="hz-stop-month">SEP</span><span class="hz-stop-room">$313 left</span></button></li></ol><ul class="hz-key" aria-hidden="true"><li data-fill="clear">Under</li></ul></section><section class="hz-sources" aria-label="Income"><h2 class="hz-label">Your income</h2><section class="panel p-5 sm:p-6 xl:col-span-6"><h2 class="text-lg font-semibold">Income</h2><div class=""><ul class="mt-4 space-y-3"><li class="overflow-hidden rounded-lg border border-border bg-surface-2"><div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4"><button type="button" class="flex min-w-0 items-center gap-3 text-left"><span class="h-6 w-1 shrink-0 rounded-full bg-good"></span><span class="truncate text-base font-medium">Riverside Market</span></button><span class="flex shrink-0 items-center gap-2.5"><span class="chip chip-good">W-2</span><span class="num text-base font-semibold">$12,345</span><button type="button" aria-label="Expand details" class="icon-btn grid text-muted-foreground hover:bg-muted"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-5 transition-transform" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></span></div></li><li class="overflow-hidden rounded-lg border border-border bg-surface-2"><div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4"><button type="button" class="flex min-w-0 items-center gap-3 text-left"><span class="h-6 w-1 shrink-0 rounded-full bg-info"></span><span class="truncate text-base font-medium">Delivery driving</span></button><span class="flex shrink-0 items-center gap-2.5"><span class="chip chip-info">1099</span><span class="num text-base font-semibold">$2,385</span><button type="button" aria-label="Expand details" class="icon-btn grid text-muted-foreground hover:bg-muted"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-5 transition-transform" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></span></div></li></ul></div><div class="btn-row mt-4"><button type="button" title="A job that pays me" class="add-job text-good hover:bg-good-soft"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5 shrink-0" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg><span class="btn-label">A job that pays me</span></button><button type="button" title="Delivery or gig work" class="add-job text-info hover:bg-info-soft"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5 shrink-0" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg><span class="btn-label">Delivery or gig work</span></button></div></section></section></main></div></div>
+  
+
+</body></html>

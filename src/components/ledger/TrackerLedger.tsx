@@ -52,16 +52,22 @@ export function TrackerLedger() {
   const phase = benefitPhase(data, gradedMonth);
   const priorInWindow = twp.inWindow.filter((m) => data.priorTrialMonths.includes(m)).length;
 
-  // Ledger sub-themes replace the app-wide light/dark toggle. Strip .dark on
-  // mount so production (which bootstraps theme from localStorage in
-  // index.html) matches dev, where HMR often leaves html without .dark.
+  /*
+   * This used to strip `.dark` off <html> on mount, because the ledger
+   * palette replaced the app-wide light/dark toggle rather than answering
+   * it. That is gone: one palette, one light/dark switch, and both are
+   * settled in styles/palette.css. `carbon` is still dark in both modes —
+   * it says so there, in one block, instead of here in JavaScript.
+   *
+   * The theme-colour meta still needs setting, because the browser chrome
+   * cannot read a CSS variable.
+   */
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('dark');
-    root.style.colorScheme = ui.ledgerTheme === 'carbon' ? 'dark' : 'light';
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', ui.ledgerTheme === 'carbon' ? '#0a0a0c' : '#f9f9f7');
-  }, [ui.ledgerTheme]);
+    if (!meta) return;
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--t-bg').trim();
+    if (bg) meta.setAttribute('content', bg);
+  }, [ui.palette, ui.theme]);
 
   /* Import and export used to be a second header bar of their own. The
      settings sheet has offered both all along, so the buttons here were a
@@ -96,7 +102,7 @@ export function TrackerLedger() {
   }
 
   return (
-    <div className="pg-ledger min-h-dvh" data-chrome-root data-ledger-theme={ui.ledgerTheme}>
+    <div className="pg-ledger min-h-dvh" data-chrome-root>
 
       <div className="lg-app-card mx-auto flex w-full max-w-[80rem] flex-col pb-6">
       {/* Review note: "after making those changes we need to refactor the
@@ -386,13 +392,11 @@ export function TrackerLedger() {
         <SettingsPanel
           theme={ui.theme}
           onTheme={(theme) => setUi({ theme })}
-          onOpenStatus={() => { setUi({ layout: 'responsive' }); setSettingsOpen(false); }}
+          onOpenStatus={() => { setUi({ layout: 'overview' }); setSettingsOpen(false); }}
           onReset={resetAll}
           onClose={() => setSettingsOpen(false)}
           layout={ui.layout}
           onLayoutChange={(layout) => setUi({ layout })}
-          subTheme={ui.ledgerTheme}
-          onSubThemeChange={(ledgerTheme) => setUi({ ledgerTheme })}
         />
       ) : null}
     </div>

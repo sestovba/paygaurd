@@ -64,7 +64,13 @@ export interface Vocabulary {
   selfEmployed: string;
   /** The monthly amount you must not cross. Never named as a rule. */
   limit: string;
-  /** The number this app aims at, which sits under the limit. */
+  /** The number this app aims at, which sits under the limit.
+   *
+   *  As a LABEL this is "Target amount" — Sergey's wording, and it names the
+   *  figure, which "What we aim for" and the earlier "Play it safe" did not.
+   *  In a SENTENCE the same fact is still said as "the $1,000 we aim for"
+   *  (see roomToTargetLine): one meaning, two registers, which is exactly
+   *  what a tone is allowed to change. */
   target: string;
   /** Money that counts towards the limit. */
   countable: string;
@@ -154,9 +160,7 @@ export type Tone =
 /** Which layout reads in which voice. One line, so the answer to "why does
  *  this screen sound like that" is in one place rather than in the screen. */
 export const LAYOUT_TONE: Record<LayoutMode, Tone> = {
-  classic: 'plain',
-  v2: 'plain',
-  responsive: 'plain',
+  overview: 'plain',
   horizon: 'plain',
   ledger: 'compact',
   payguard: 'compact',
@@ -190,7 +194,7 @@ const PLAIN: Vocabulary = {
   w2: 'A job that pays me',
   selfEmployed: 'Work I do for myself',
   limit: 'Your limit',
-  target: 'What we aim for',
+  target: 'Target amount',
   countable: 'Counted',
   extraPayMonth: 'Months that pay you extra',
   trialMonths: 'Trial work months',

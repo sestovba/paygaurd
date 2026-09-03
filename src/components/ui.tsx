@@ -208,7 +208,7 @@ export function AddJobButton({
       type="button"
       onClick={onClick}
       title={label}
-      className={'add-job ' + (type === 'w2' ? 'text-good hover:bg-good-soft' : 'text-info hover:bg-info-soft')}
+      className={'add-job ' + (type === 'w2' ? 'text-good-text hover:bg-good-soft' : 'text-info-text hover:bg-info-soft')}
     >
       <Plus className="size-5 shrink-0" />
       <span className="btn-label">{label}</span>

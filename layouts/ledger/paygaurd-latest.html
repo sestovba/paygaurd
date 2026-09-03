@@ -1,0 +1,1005 @@
+<html lang="en"><head>
+    
+
+    
+
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayGuard — PayGuard Latest</title>
+    
+    <meta property="og:title" content="Figma Make App">
+  <style type="text/css" data-vite-dev-id="/workspaces/default/code/src/index.css">
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@300;400;500&display=swap');
+@layer properties;
+@layer theme, base, components, utilities;
+/*! tailwindcss v4.2.2 | MIT License | https://tailwindcss.com */
+@layer theme {
+  :root, :host {
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+    --color-black: #000;
+    --spacing: 0.25rem;
+    --container-xs: 20rem;
+    --container-5xl: 64rem;
+    --text-xs: 0.75rem;
+    --text-xs--line-height: calc(1 / 0.75);
+    --text-sm: 0.875rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
+    --text-xl: 1.25rem;
+    --text-xl--line-height: calc(1.75 / 1.25);
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
+    --text-3xl: 1.875rem;
+    --text-3xl--line-height: calc(2.25 / 1.875);
+    --font-weight-light: 300;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --leading-snug: 1.375;
+    --leading-relaxed: 1.625;
+    --radius-xl: 0.75rem;
+    --blur-md: 12px;
+    --default-transition-duration: 150ms;
+    --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+    --color-pg-bg: #EAE6DD;
+    --color-pg-card: #FAFAF8;
+    --color-pg-accent: #B97425;
+    --color-pg-text: #19180E;
+    --color-pg-muted: #7A736A;
+    --color-pg-border: #D8D3C8;
+    --font-display: 'Fraunces', Georgia, serif;
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  html, :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+  b, strong {
+    font-weight: bolder;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+  small {
+    font-size: 80%;
+  }
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+  sup {
+    top: -0.5em;
+  }
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  :-moz-focusring {
+    outline: auto;
+  }
+  progress {
+    vertical-align: baseline;
+  }
+  summary {
+    display: list-item;
+  }
+  ol, ul, menu {
+    list-style: none;
+  }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+  ::placeholder {
+    opacity: 1;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentcolor;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+  button, input:where([type="button"], [type="reset"], [type="submit"]), ::file-selector-button {
+    appearance: button;
+  }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+    height: auto;
+  }
+  [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+@layer utilities {
+  .pointer-events-none {
+    pointer-events: none;
+  }
+  .absolute {
+    position: absolute;
+  }
+  .fixed {
+    position: fixed;
+  }
+  .relative {
+    position: relative;
+  }
+  .sticky {
+    position: sticky;
+  }
+  .inset-0 {
+    inset: calc(var(--spacing) * 0);
+  }
+  .start {
+    inset-inline-start: var(--spacing);
+  }
+  .top-0 {
+    top: calc(var(--spacing) * 0);
+  }
+  .z-10 {
+    z-index: 10;
+  }
+  .z-20 {
+    z-index: 20;
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .mt-0\.5 {
+    margin-top: calc(var(--spacing) * 0.5);
+  }
+  .mt-1 {
+    margin-top: calc(var(--spacing) * 1);
+  }
+  .mt-2 {
+    margin-top: calc(var(--spacing) * 2);
+  }
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
+  }
+  .mr-2 {
+    margin-right: calc(var(--spacing) * 2);
+  }
+  .mb-1 {
+    margin-bottom: calc(var(--spacing) * 1);
+  }
+  .mb-1\.5 {
+    margin-bottom: calc(var(--spacing) * 1.5);
+  }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
+  }
+  .mb-3 {
+    margin-bottom: calc(var(--spacing) * 3);
+  }
+  .mb-4 {
+    margin-bottom: calc(var(--spacing) * 4);
+  }
+  .mb-5 {
+    margin-bottom: calc(var(--spacing) * 5);
+  }
+  .mb-7 {
+    margin-bottom: calc(var(--spacing) * 7);
+  }
+  .ml-0\.5 {
+    margin-left: calc(var(--spacing) * 0.5);
+  }
+  .ml-4 {
+    margin-left: calc(var(--spacing) * 4);
+  }
+  .block {
+    display: block;
+  }
+  .flex {
+    display: flex;
+  }
+  .grid {
+    display: grid;
+  }
+  .hidden {
+    display: none;
+  }
+  .inline {
+    display: inline;
+  }
+  .size-full {
+    width: 100%;
+    height: 100%;
+  }
+  .h-2 {
+    height: calc(var(--spacing) * 2);
+  }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
+  .h-7 {
+    height: calc(var(--spacing) * 7);
+  }
+  .h-8 {
+    height: calc(var(--spacing) * 8);
+  }
+  .h-\[3px\] {
+    height: 3px;
+  }
+  .h-\[18px\] {
+    height: 18px;
+  }
+  .h-\[52px\] {
+    height: 52px;
+  }
+  .h-full {
+    height: 100%;
+  }
+  .min-h-screen {
+    min-height: 100vh;
+  }
+  .w-2 {
+    width: calc(var(--spacing) * 2);
+  }
+  .w-4 {
+    width: calc(var(--spacing) * 4);
+  }
+  .w-5 {
+    width: calc(var(--spacing) * 5);
+  }
+  .w-7 {
+    width: calc(var(--spacing) * 7);
+  }
+  .w-8 {
+    width: calc(var(--spacing) * 8);
+  }
+  .w-full {
+    width: 100%;
+  }
+  .max-w-5xl {
+    max-width: var(--container-5xl);
+  }
+  .max-w-xs {
+    max-width: var(--container-xs);
+  }
+  .min-w-\[96px\] {
+    min-width: 96px;
+  }
+  .flex-1 {
+    flex: 1;
+  }
+  .shrink-0 {
+    flex-shrink: 0;
+  }
+  .transform {
+    transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+  }
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .flex-col {
+    flex-direction: column;
+  }
+  .flex-wrap {
+    flex-wrap: wrap;
+  }
+  .items-baseline {
+    align-items: baseline;
+  }
+  .items-center {
+    align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
+  }
+  .justify-between {
+    justify-content: space-between;
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .gap-0\.5 {
+    gap: calc(var(--spacing) * 0.5);
+  }
+  .gap-1 {
+    gap: calc(var(--spacing) * 1);
+  }
+  .gap-1\.5 {
+    gap: calc(var(--spacing) * 1.5);
+  }
+  .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+  .gap-3 {
+    gap: calc(var(--spacing) * 3);
+  }
+  .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+  .gap-5 {
+    gap: calc(var(--spacing) * 5);
+  }
+  .gap-\[3px\] {
+    gap: 3px;
+  }
+  .space-y-0 {
+    :where(& > :not(:last-child)) {
+      --tw-space-y-reverse: 0;
+      margin-block-start: calc(calc(var(--spacing) * 0) * var(--tw-space-y-reverse));
+      margin-block-end: calc(calc(var(--spacing) * 0) * calc(1 - var(--tw-space-y-reverse)));
+    }
+  }
+  .gap-x-4 {
+    column-gap: calc(var(--spacing) * 4);
+  }
+  .gap-x-5 {
+    column-gap: calc(var(--spacing) * 5);
+  }
+  .gap-y-2 {
+    row-gap: calc(var(--spacing) * 2);
+  }
+  .overflow-hidden {
+    overflow: hidden;
+  }
+  .rounded {
+    border-radius: 0.25rem;
+  }
+  .rounded-\[2px\] {
+    border-radius: 2px;
+  }
+  .rounded-\[3px\] {
+    border-radius: 3px;
+  }
+  .rounded-full {
+    border-radius: calc(infinity * 1px);
+  }
+  .rounded-xl {
+    border-radius: var(--radius-xl);
+  }
+  .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
+  .border-t {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 1px;
+  }
+  .border-t-2 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 2px;
+  }
+  .border-b {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 1px;
+  }
+  .border-pg-border {
+    border-color: var(--color-pg-border);
+  }
+  .border-pg-text\/15 {
+    border-color: color-mix(in srgb, #19180E 15%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-pg-text) 15%, transparent);
+    }
+  }
+  .bg-pg-bg {
+    background-color: var(--color-pg-bg);
+  }
+  .bg-pg-bg\/90 {
+    background-color: color-mix(in srgb, #EAE6DD 90%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-pg-bg) 90%, transparent);
+    }
+  }
+  .bg-pg-card {
+    background-color: var(--color-pg-card);
+  }
+  .bg-transparent {
+    background-color: transparent;
+  }
+  .p-5 {
+    padding: calc(var(--spacing) * 5);
+  }
+  .p-6 {
+    padding: calc(var(--spacing) * 6);
+  }
+  .p-8 {
+    padding: calc(var(--spacing) * 8);
+  }
+  .px-1 {
+    padding-inline: calc(var(--spacing) * 1);
+  }
+  .px-3 {
+    padding-inline: calc(var(--spacing) * 3);
+  }
+  .px-6 {
+    padding-inline: calc(var(--spacing) * 6);
+  }
+  .py-3 {
+    padding-block: calc(var(--spacing) * 3);
+  }
+  .py-4 {
+    padding-block: calc(var(--spacing) * 4);
+  }
+  .py-5 {
+    padding-block: calc(var(--spacing) * 5);
+  }
+  .py-7 {
+    padding-block: calc(var(--spacing) * 7);
+  }
+  .pt-0\.5 {
+    padding-top: calc(var(--spacing) * 0.5);
+  }
+  .pt-3\.5 {
+    padding-top: calc(var(--spacing) * 3.5);
+  }
+  .pt-4 {
+    padding-top: calc(var(--spacing) * 4);
+  }
+  .pt-5 {
+    padding-top: calc(var(--spacing) * 5);
+  }
+  .pb-1 {
+    padding-bottom: calc(var(--spacing) * 1);
+  }
+  .pb-4 {
+    padding-bottom: calc(var(--spacing) * 4);
+  }
+  .pb-16 {
+    padding-bottom: calc(var(--spacing) * 16);
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-left {
+    text-align: left;
+  }
+  .text-right {
+    text-align: right;
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  .text-2xl {
+    font-size: var(--text-2xl);
+    line-height: var(--tw-leading, var(--text-2xl--line-height));
+  }
+  .text-3xl {
+    font-size: var(--text-3xl);
+    line-height: var(--tw-leading, var(--text-3xl--line-height));
+  }
+  .text-base {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+  }
+  .text-lg {
+    font-size: var(--text-lg);
+    line-height: var(--tw-leading, var(--text-lg--line-height));
+  }
+  .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+  .text-xl {
+    font-size: var(--text-xl);
+    line-height: var(--tw-leading, var(--text-xl--line-height));
+  }
+  .text-xs {
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+  .text-\[8px\] {
+    font-size: 8px;
+  }
+  .text-\[9px\] {
+    font-size: 9px;
+  }
+  .text-\[10px\] {
+    font-size: 10px;
+  }
+  .text-\[11px\] {
+    font-size: 11px;
+  }
+  .text-\[13px\] {
+    font-size: 13px;
+  }
+  .leading-none {
+    --tw-leading: 1;
+    line-height: 1;
+  }
+  .leading-relaxed {
+    --tw-leading: var(--leading-relaxed);
+    line-height: var(--leading-relaxed);
+  }
+  .leading-snug {
+    --tw-leading: var(--leading-snug);
+    line-height: var(--leading-snug);
+  }
+  .font-light {
+    --tw-font-weight: var(--font-weight-light);
+    font-weight: var(--font-weight-light);
+  }
+  .font-medium {
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+  }
+  .font-semibold {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+  .tracking-\[0\.1em\] {
+    --tw-tracking: 0.1em;
+    letter-spacing: 0.1em;
+  }
+  .tracking-\[0\.2em\] {
+    --tw-tracking: 0.2em;
+    letter-spacing: 0.2em;
+  }
+  .tracking-\[0\.14em\] {
+    --tw-tracking: 0.14em;
+    letter-spacing: 0.14em;
+  }
+  .tracking-\[0\.16em\] {
+    --tw-tracking: 0.16em;
+    letter-spacing: 0.16em;
+  }
+  .tracking-\[0\.22em\] {
+    --tw-tracking: 0.22em;
+    letter-spacing: 0.22em;
+  }
+  .text-pg-muted {
+    color: var(--color-pg-muted);
+  }
+  .text-pg-muted\/40 {
+    color: color-mix(in srgb, #7A736A 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-pg-muted) 40%, transparent);
+    }
+  }
+  .text-pg-muted\/60 {
+    color: color-mix(in srgb, #7A736A 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-pg-muted) 60%, transparent);
+    }
+  }
+  .text-pg-text {
+    color: var(--color-pg-text);
+  }
+  .uppercase {
+    text-transform: uppercase;
+  }
+  .oldstyle-nums {
+    --tw-numeric-figure: oldstyle-nums;
+    font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+  .tabular-nums {
+    --tw-numeric-spacing: tabular-nums;
+    font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+  .opacity-60 {
+    opacity: 60%;
+  }
+  .filter {
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .backdrop-blur-md {
+    --tw-backdrop-blur: blur(var(--blur-md));
+    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  }
+  .transition-all {
+    transition-property: all;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .transition-colors {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .transition-opacity {
+    transition-property: opacity;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .duration-500 {
+    --tw-duration: 500ms;
+    transition-duration: 500ms;
+  }
+  .outline-none {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+  .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .group-hover\:border-pg-text\/30 {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        border-color: color-mix(in srgb, #19180E 30%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          border-color: color-mix(in oklab, var(--color-pg-text) 30%, transparent);
+        }
+      }
+    }
+  }
+  .group-hover\:text-pg-text {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        color: var(--color-pg-text);
+      }
+    }
+  }
+  .focus-within\:border-pg-accent {
+    &:focus-within {
+      border-color: var(--color-pg-accent);
+    }
+  }
+  .hover\:bg-black\/5 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in srgb, #000 5%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-black) 5%, transparent);
+        }
+      }
+    }
+  }
+  .hover\:bg-pg-bg\/50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in srgb, #EAE6DD 50%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-pg-bg) 50%, transparent);
+        }
+      }
+    }
+  }
+  .hover\:text-pg-text {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-pg-text);
+      }
+    }
+  }
+  .hover\:opacity-90 {
+    &:hover {
+      @media (hover: hover) {
+        opacity: 90%;
+      }
+    }
+  }
+  .lg\:grid-cols-2 {
+    @media (width >= 64rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+html, body, #root {
+  height: 100%;
+}
+body {
+  background-color: #EAE6DD;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #19180E;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+input[type='number']::-webkit-inner-spin-button, input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+@property --tw-rotate-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-z {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-space-y-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-tracking {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ordinal {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-slashed-zero {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-figure {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-spacing {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-numeric-fraction {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-drop-shadow-size {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-rotate-x: initial;
+      --tw-rotate-y: initial;
+      --tw-rotate-z: initial;
+      --tw-skew-x: initial;
+      --tw-skew-y: initial;
+      --tw-space-y-reverse: 0;
+      --tw-border-style: solid;
+      --tw-leading: initial;
+      --tw-font-weight: initial;
+      --tw-tracking: initial;
+      --tw-ordinal: initial;
+      --tw-slashed-zero: initial;
+      --tw-numeric-figure: initial;
+      --tw-numeric-spacing: initial;
+      --tw-numeric-fraction: initial;
+      --tw-blur: initial;
+      --tw-brightness: initial;
+      --tw-contrast: initial;
+      --tw-grayscale: initial;
+      --tw-hue-rotate: initial;
+      --tw-invert: initial;
+      --tw-opacity: initial;
+      --tw-saturate: initial;
+      --tw-sepia: initial;
+      --tw-drop-shadow: initial;
+      --tw-drop-shadow-color: initial;
+      --tw-drop-shadow-alpha: 100%;
+      --tw-drop-shadow-size: initial;
+      --tw-backdrop-blur: initial;
+      --tw-backdrop-brightness: initial;
+      --tw-backdrop-contrast: initial;
+      --tw-backdrop-grayscale: initial;
+      --tw-backdrop-hue-rotate: initial;
+      --tw-backdrop-invert: initial;
+      --tw-backdrop-opacity: initial;
+      --tw-backdrop-saturate: initial;
+      --tw-backdrop-sepia: initial;
+      --tw-duration: initial;
+    }
+  }
+}
+</style></head>
+  <body>
+    
+    <div id="root"><div class="min-h-screen bg-pg-bg"><header class="sticky top-0 z-20 bg-pg-bg/90 backdrop-blur-md border-b border-pg-border"><div class="max-w-5xl mx-auto px-6 h-[52px] flex items-center justify-between"><span class="text-[10px] tracking-[0.22em] uppercase font-semibold text-pg-text" style="font-family: var(--font-sans);">Payguard</span><div class="flex items-center gap-0.5"><button class="w-7 h-7 flex items-center justify-center rounded text-pg-muted hover:text-pg-text hover:bg-black/5 transition-colors text-lg">‹</button><span class="text-[13px] font-medium px-3 min-w-[96px] text-center tabular-nums">Sep 2026</span><button class="w-7 h-7 flex items-center justify-center rounded text-pg-muted hover:text-pg-text hover:bg-black/5 transition-colors text-lg">›</button></div><button class="w-8 h-8 flex items-center justify-center rounded-full text-pg-muted hover:text-pg-text hover:bg-black/5 transition-colors text-xl leading-none pb-1">···</button></div></header><main class="max-w-5xl mx-auto px-6 py-7 grid grid-cols-1 lg:grid-cols-2 gap-5 pb-16"><div class="flex flex-col gap-4"><div class="rounded-xl p-8 relative overflow-hidden" style="background-color: rgb(27, 43, 32);"><div class="absolute inset-0 pointer-events-none rounded-xl" style="background: radial-gradient(80% 60% at 10% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 70%);"></div><p class="text-[9px] tracking-[0.22em] uppercase mb-5" style="color: rgba(138, 180, 140, 0.55);">To keep September free</p><div class="mb-7 relative z-10"><h1 class="leading-none mb-3" style="font-family: var(--font-display);"><span class="block leading-none" style="font-size: clamp(4rem, 10vw, 6rem); font-weight: 300; color: rgba(255, 255, 255, 0.95); font-variant-numeric: oldstyle-nums;">54</span><span class="block" style="font-size: clamp(1.6rem, 4vw, 2.25rem); font-weight: 500; color: rgba(255, 255, 255, 0.88); margin-top: 0.15em;">more hours.</span></h1><p class="text-sm leading-relaxed max-w-xs" style="color: rgba(255, 255, 255, 0.42);">About $1,173 more counted, at $21.5/hr. Past $1,210, September uses one of your nine.</p></div><div class="relative z-10"><div class="flex items-center justify-between mb-2 text-[11px] font-mono" style="color: rgba(255, 255, 255, 0.3);"><span>$37 counted</span><span>$1,210</span></div><div class="h-[3px] rounded-full overflow-hidden" style="background-color: rgba(255, 255, 255, 0.1);"><div class="h-full rounded-full transition-all duration-500" style="width: 3.05785%; background-color: rgb(92, 168, 112);"></div></div><p class="text-[11px] font-mono mt-2" style="color: rgba(255, 255, 255, 0.28);">$1,173 of room left this month</p></div></div><div class="bg-pg-card rounded-xl p-6"><p class="text-[9px] tracking-[0.2em] uppercase text-pg-muted mb-5">Why it's not your gross pay</p><div class="space-y-0"><div class="flex items-start justify-between py-3 "><div><p class="text-sm font-medium text-pg-text">Gross pay</p><p class="text-xs text-pg-muted mt-0.5 leading-snug">Both jobs paid you</p></div><span class="text-sm font-mono tabular-nums text-pg-text ml-4 shrink-0 pt-0.5">$210</span></div><div class="flex items-start justify-between py-3 border-t border-pg-border"><div><p class="text-sm font-medium text-pg-text">Less mileage</p><p class="text-xs text-pg-muted mt-0.5 leading-snug">70 mi at $0.76 — 2026 second-half rate</p></div><span class="text-sm font-mono tabular-nums text-pg-text ml-4 shrink-0 pt-0.5">−$53</span></div><div class="flex items-start justify-between py-3 border-t border-pg-border"><div><p class="text-sm font-medium text-pg-text">Less work expenses</p><p class="text-xs text-pg-muted mt-0.5 leading-snug">Disability-related costs you entered</p></div><span class="text-sm font-mono tabular-nums text-pg-text ml-4 shrink-0 pt-0.5">−$120</span></div><div class="flex items-start justify-between pt-3.5 mt-0.5 border-t-2 border-pg-text/15"><div><p class="text-sm font-semibold text-pg-text">Counts toward $1,210</p><p class="text-xs text-pg-muted mt-0.5">The only number SSA compares</p></div><span class="text-sm font-mono font-semibold tabular-nums ml-4 shrink-0 pt-0.5" style="color: rgb(185, 116, 37);">$37</span></div></div></div><div class="bg-pg-card rounded-xl p-6"><div class="flex items-center justify-between mb-5"><p class="text-[9px] tracking-[0.2em] uppercase text-pg-muted">Trial work months</p><span class="text-[11px] font-mono text-pg-muted">8 of 9 used</span></div><div class="flex gap-[3px] mb-3"><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(196, 189, 178);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(196, 189, 178);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(185, 116, 37);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(185, 116, 37);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(185, 116, 37);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(185, 116, 37);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(185, 116, 37);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(185, 116, 37);"></div><div class="flex-1 h-[18px] rounded-[3px]" style="background-color: rgb(226, 221, 214);"></div></div><div class="flex gap-5 mb-5"><div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-[2px]" style="background-color: rgb(196, 189, 178);"></div><span class="text-[11px] text-pg-muted">Earlier years</span></div><div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-[2px]" style="background-color: rgb(185, 116, 37);"></div><span class="text-[11px] text-pg-muted">Used</span></div><div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-[2px]" style="background-color: rgb(226, 221, 214);"></div><span class="text-[11px] text-pg-muted">Available</span></div></div><div class="grid grid-cols-3 gap-3 pt-4 border-t border-pg-border"><div><p class="text-[9px] tracking-[0.14em] uppercase text-pg-muted mb-1.5">Left</p><p class="text-3xl leading-none font-light" style="font-family: var(--font-display);">1</p><p class="text-xs text-pg-muted mt-1">of nine</p></div><div><p class="text-[9px] tracking-[0.14em] uppercase text-pg-muted mb-1.5">Window</p><p class="text-sm font-medium text-pg-text">Oct 2021</p><p class="text-xs text-pg-muted mt-0.5">→ Sep 2026</p></div><div><p class="text-[9px] tracking-[0.14em] uppercase text-pg-muted mb-1.5">Next returns</p><p class="text-sm font-medium text-pg-text">Oct 2029</p><p class="text-xs text-pg-muted mt-0.5">Oldest drops out</p></div></div></div><div class="bg-pg-card rounded-xl p-6"><p class="text-[9px] tracking-[0.2em] uppercase text-pg-muted mb-4">Your 2026 limits</p><div class="grid grid-cols-2 gap-5"><div><p class="text-xs text-pg-muted mb-1">Trial work</p><p class="text-2xl font-light leading-none" style="font-family: var(--font-display);">$1,210</p><p class="text-xs text-pg-muted mt-2 leading-snug">Over this and the month counts as one of your nine.</p></div><div><p class="text-xs text-pg-muted mb-1">Substantial work</p><p class="text-2xl font-light leading-none" style="font-family: var(--font-display);">$1,690</p><p class="text-xs text-pg-muted mt-2 leading-snug">The line that matters once the nine are gone.</p></div></div></div></div><div class="flex flex-col gap-4"><div class="bg-pg-card rounded-xl overflow-hidden"><div class="px-6 pt-5 pb-4 flex items-baseline justify-between border-b border-pg-border"><div><p class="text-[9px] tracking-[0.2em] uppercase text-pg-muted">September 2026</p><p class="text-sm font-medium mt-0.5 text-pg-text">$210 gross</p></div><span class="text-xs font-mono font-medium" style="color: rgb(43, 104, 68);">$37 counted</span></div><div class="px-6 py-5 border-b border-pg-border"><div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-pg-text">Riverside Market</span><span class="text-[11px] text-pg-muted font-mono">W-2 · $21.50/hr</span></div><p class="text-[9px] tracking-[0.16em] uppercase text-pg-muted mb-2">Gross pay</p><div class="flex items-center border-b border-pg-border pb-1 focus-within:border-pg-accent transition-colors"><span class="text-pg-muted text-sm mr-2 select-none">$</span><input class="flex-1 text-right text-base font-mono font-medium bg-transparent outline-none text-pg-text" type="number" value="860"></div><p class="text-xs text-pg-muted mt-2">Counts in full: $0</p></div><div class="px-6 py-5 border-b border-pg-border"><div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-pg-text">Delivery driving</span><span class="text-[11px] text-pg-muted">Self-employed</span></div><div class="grid grid-cols-3 gap-4 mb-3"><div><p class="text-[9px] tracking-[0.14em] uppercase text-pg-muted mb-2">Gross</p><div class="flex items-center gap-1 border-b border-pg-border pb-1 focus-within:border-pg-accent transition-colors"><span class="text-pg-muted text-sm select-none">$</span><input class="flex-1 text-right text-sm font-mono bg-transparent outline-none text-pg-text" type="number" value="210"></div></div><div><p class="text-[9px] tracking-[0.14em] uppercase text-pg-muted mb-2">Miles</p><div class="flex items-center gap-1 border-b border-pg-border pb-1 focus-within:border-pg-accent transition-colors"><input class="flex-1 text-right text-sm font-mono bg-transparent outline-none text-pg-text" type="number" value="70"><span class="text-pg-muted text-xs select-none">mi</span></div></div><div><p class="text-[9px] tracking-[0.14em] uppercase text-pg-muted mb-2">Hours</p><div class="flex items-center gap-1 border-b border-pg-border pb-1 focus-within:border-pg-accent transition-colors"><input class="flex-1 text-right text-sm font-mono bg-transparent outline-none text-pg-text" type="number" value="12"><span class="text-pg-muted text-xs select-none">hrs</span></div></div></div><p class="text-xs text-pg-muted leading-relaxed">$210 less $53 mileage — counts as $157</p></div><div class="px-6 py-5 border-b border-pg-border"><p class="text-[9px] tracking-[0.16em] uppercase text-pg-muted mb-2">Work expenses this month</p><div class="flex items-center border-b border-pg-border pb-1 focus-within:border-pg-accent transition-colors"><span class="text-pg-muted text-sm mr-2 select-none">$</span><input class="flex-1 text-right text-base font-mono font-medium bg-transparent outline-none text-pg-text" type="number" value="120"></div><p class="text-xs text-pg-muted mt-2 leading-relaxed">Disability-related costs you pay to be able to work. These come off the amount SSA counts.</p></div><div class="px-6 py-4"><button class="text-sm text-pg-muted hover:text-pg-text transition-colors flex items-center gap-2 group"><span class="w-5 h-5 rounded-full border border-pg-border group-hover:border-pg-text/30 flex items-center justify-center text-xs transition-colors leading-none">+</span>Add income source</button></div></div><div class="bg-pg-card rounded-xl p-5" style="border-left: 3px solid rgb(185, 116, 37);"><div class="flex items-start justify-between gap-4"><div><p class="text-sm font-medium text-pg-text">November — 3 cheques</p><p class="text-xs text-pg-muted mt-1 leading-relaxed">Riverside pays every two weeks, so November brings 3. Projected $2,645 — over the line. Plan hours down or expect to spend a month.</p></div><span class="text-[11px] font-medium shrink-0 mt-0.5" style="color: rgb(185, 116, 37);">Will cross</span></div></div><div class="bg-pg-card rounded-xl p-6"><div class="flex items-center justify-between mb-5"><p class="text-[9px] tracking-[0.2em] uppercase text-pg-muted">2026</p><span class="text-[11px] font-mono text-pg-muted">6 months logged</span></div><div class="grid grid-cols-3 gap-x-4"><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">JAN</span><span class="text-sm font-mono tabular-nums text-pg-muted/40">—</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">FEB</span><span class="text-sm font-mono tabular-nums text-pg-muted/40">—</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">MAR</span><span class="text-sm font-mono tabular-nums font-medium" style="color: rgb(185, 116, 37);">2.2k</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">APR</span><span class="text-sm font-mono tabular-nums font-medium" style="color: rgb(185, 116, 37);">2.7k</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">MAY</span><span class="text-sm font-mono tabular-nums font-medium" style="color: rgb(43, 104, 68);">1.9k</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">JUN</span><span class="text-sm font-mono tabular-nums font-medium" style="color: rgb(185, 116, 37);">3k<sup class="text-[8px] ml-0.5 opacity-60">3</sup></span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">JUL</span><span class="text-sm font-mono tabular-nums font-medium" style="color: rgb(43, 104, 68);">1.5k</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">AUG</span><span class="text-sm font-mono tabular-nums font-medium" style="color: rgb(43, 104, 68);">2.4k</span></div><div class="py-3 flex items-end justify-between border-b border-pg-border"><span class="text-[10px] tracking-[0.1em] uppercase text-pg-text font-medium">SEP</span><span class="text-sm font-mono tabular-nums text-pg-text font-semibold">897</span></div><div class="py-3 flex items-end justify-between "><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">OCT</span><span class="text-sm font-mono tabular-nums text-pg-muted/40">—</span></div><div class="py-3 flex items-end justify-between "><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">NOV</span><span class="text-sm font-mono tabular-nums text-pg-muted/40">—<span class="text-[9px] ml-0.5" style="color: rgb(185, 116, 37); opacity: 0.7;">!</span></span></div><div class="py-3 flex items-end justify-between "><span class="text-[10px] tracking-[0.1em] uppercase text-pg-muted">DEC</span><span class="text-sm font-mono tabular-nums text-pg-muted/40">—</span></div></div><div class="flex flex-wrap gap-x-5 gap-y-2 mt-4 pt-4 border-t border-pg-border"><div class="flex items-center gap-1.5"><div class="w-4 rounded-full" style="height: 1.5px; background-color: rgb(185, 116, 37);"></div><span class="text-[11px] text-pg-muted">Uses a month</span></div><div class="flex items-center gap-1.5"><div class="w-4 rounded-full" style="height: 1.5px; background-color: rgb(43, 104, 68);"></div><span class="text-[11px] text-pg-muted">Under the limit</span></div><div class="flex items-center gap-1.5"><div class="w-4 rounded-full" style="height: 1.5px; background-color: rgb(196, 189, 178);"></div><span class="text-[11px] text-pg-muted">Nothing logged</span></div></div></div><div class="bg-pg-card rounded-xl overflow-hidden"><div class="px-6 pt-5 pb-4 border-b border-pg-border"><p class="text-[9px] tracking-[0.2em] uppercase text-pg-muted">What to do next</p></div><button class="w-full px-6 py-4 flex items-center justify-between group hover:opacity-90 transition-opacity" style="background-color: rgb(27, 43, 32);"><div class="text-left"><p class="text-sm font-medium" style="color: rgb(244, 242, 237);">Warn me before September crosses $1,210</p><p class="text-xs mt-0.5" style="color: rgba(244, 242, 237, 0.45);">We check each amount as you enter it.</p></div><span class="ml-4 text-lg shrink-0" style="color: rgba(244, 242, 237, 0.5);">→</span></button><button class="w-full px-6 py-4 flex items-center justify-between border-t border-pg-border hover:bg-pg-bg/50 transition-colors group"><div class="text-left"><p class="text-sm font-medium text-pg-text">Check this against a benefit letter</p><p class="text-xs text-pg-muted mt-0.5">Every number here is a guess until you do.</p></div><span class="text-pg-muted ml-4 text-lg shrink-0 group-hover:text-pg-text transition-colors">→</span></button></div><p class="text-xs text-pg-muted/60 leading-relaxed px-1">Figures use the 2026 limits: $1,210 for trial work, $1,690 for substantial work. Check them against a benefit letter — if your used months are a guess, everything here is a guess too.</p></div></main></div></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+  
+
+<fg-inspector-overlay-element data-html-editor-overlay="true" data-h2d-ignore="true"></fg-inspector-overlay-element></body></html>

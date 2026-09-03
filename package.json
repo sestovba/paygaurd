@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run theme:check && tsc --noEmit && vite build",
+    "build:calc20": "tsc --noEmit && vite build --config vite.calc20.config.ts",
+    "flatten": "node scripts/flatten.mjs",
     "preview": "vite preview",
     "state": "node scripts/state.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "theme:check": "node scripts/theme-check.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

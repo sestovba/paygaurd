@@ -286,7 +286,7 @@ function MonthUpClose({ month, onOpenMonth, scope, onScopeChange }: {
       ) : null}
 
       {extra ? (
-        <p className="mt-4 flex items-start gap-2 rounded-lg border border-info/30 bg-info-soft/50 p-3 text-base font-semibold text-info">
+        <p className="mt-4 flex items-start gap-2 rounded-lg border border-info/30 bg-info-soft/50 p-3 text-base font-semibold text-info-text">
           <Zap className="mt-0.5 size-5 shrink-0" />
           <span>
             {extraPaycheckLabel(extra.counts)} land in {longMonthName(month)} instead of the usual

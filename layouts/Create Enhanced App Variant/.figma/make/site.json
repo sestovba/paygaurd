@@ -1,0 +1,10 @@
+{
+  "description": "Delivers an enhanced, user-friendly platform that outperforms existing options by offering superior features and seamless user experience for all users.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -14,55 +14,47 @@ import {
   WalletCards,
   Zap
 } from 'lucide-react';
-import { BrandMark, Chip } from './ui';
+import { BrandMark, Chip } from '../ui';
 import type { LucideIcon } from 'lucide-react';
-import { useTracker } from '../state/TrackerProvider';
-import { copyFor, SOURCE_CHOICE } from '../domain/copy';
-import type { LayoutMode } from '../state/storage';
-import { useTheme } from '../theme';
-import { knownYears } from '../domain/rules';
-import { actionItems } from '../domain/notifications';
-import { formatMonth } from '../domain/months';
-import { ActionBanner } from './ActionBanner';
-import { MonthGrid } from './MonthGrid';
-import { MonthSheet } from './MonthSheet';
-import { PaycheckRadar } from './PaycheckRadar';
-import { QuickPaydaySheet } from './QuickPaydaySheet';
-import { SafetyHero } from './SafetyHero';
-import { SettingsPanel } from './SettingsPanel';
-import { ToastStack } from './ToastStack';
-import { Sheet } from './Sheet';
-import { StatusPage } from './StatusPage';
-import { StreamSheet } from './StreamSheet';
-import { StreamsPanel } from './StreamsPanel';
-import { TwpWizard } from './TwpWizard';
-import { VerifyCompleteSheet } from './VerifyCompleteSheet';
-import { YearTotal } from './YearTotal';
-import type { MonthKey, StreamType } from '../domain/types';
-import { ReviewTarget } from '../review/ReviewTarget';
+import { useTracker } from '../../state/TrackerProvider';
+import { copyFor, SOURCE_CHOICE } from '../../domain/copy';
+import { useTheme } from '../../theme';
+import { knownYears } from '../../domain/rules';
+import { actionItems } from '../../domain/notifications';
+import { formatMonth } from '../../domain/months';
+import { ActionBanner } from '../ActionBanner';
+import { MonthGrid } from '../MonthGrid';
+
+import { PaycheckRadar } from '../PaycheckRadar';
+import { SafetyHero } from '../SafetyHero';
+import { ToastStack } from '../ToastStack';
+import { Sheet } from '../Sheet';
+import { StatusPage } from '../StatusPage';
+import { StreamsPanel } from '../StreamsPanel';
+import { YearTotal } from '../YearTotal';
+import { Detail } from './detail';
+import type { DetailRequest } from './detail';
+import type { StreamType } from '../../domain/types';
+import { ReviewTarget } from '../../review/ReviewTarget';
 
 type PageId = 'overview' | 'income' | 'status';
 
+/** The six every shell offers, plus the two only a workspace has. */
 type PaneRequest =
-  | { kind: 'month'; month: MonthKey }
-  | { kind: 'stream'; streamId: string }
-  | { kind: 'payday'; streamId: string }
-  | { kind: 'quiz' }
-  | { kind: 'verify' }
-  | { kind: 'settings' }
+  | DetailRequest
   | { kind: 'notifications' }
   | { kind: 'newSource' };
 
 /**
- * The third layout is a retained workspace rather than a collection of
- * dialogs. The page is step 1, a contextual task is step 2, and a child task
+ * The same surfaces again, as a retained workspace rather than a collection
+ * of dialogs. The page is step 1, a contextual task is step 2, and a child task
  * (Month -> Source, Quick fix -> Full source, New entry -> Source) is step 3.
  * Every pane stays in normal document flow, so opening one always reflows the
  * available width instead of covering the page underneath it.
  */
-export function TrackerV3() {
-  const { data, ui, setUi, addStream, resetAll } = useTracker();
-  useTheme(ui.theme);
+export function WorkspaceShell() {
+  const { data, ui, setUi, addStream } = useTracker();
+  useTheme(ui.theme, ui.palette);
 
   /* Review note: "great location for settings, but our sidebar hides with no
      way to bring it back out — no show sidebar toggle anywhere. Only if that
@@ -184,7 +176,7 @@ export function TrackerV3() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="relative z-10 shrink-0 border-b border-border bg-background/95 backdrop-blur">
+        <header className="app-bar relative z-10 shrink-0 border-b">
           <div className="flex min-h-16 items-center gap-3 px-3 sm:px-5 lg:px-6">
             <button
               type="button"
@@ -316,11 +308,6 @@ export function TrackerV3() {
                   onReplace={(next) => replacePane(index, next)}
                   onAddSource={(type) => addAndOpen(type, index)}
                   onNavigate={navigate}
-                  onTheme={(theme) => setUi({ theme })}
-                  onReset={resetAll}
-                  layout={ui.layout}
-                  onLayoutChange={(layout) => setUi({ layout })}
-                  theme={ui.theme}
                 />
               </div>
             );
@@ -366,7 +353,7 @@ function RootPane({
       <section
         ref={activeRef}
         role="region"
-        aria-label={copyFor('responsive').income}
+        aria-label={copyFor('overview').income}
         tabIndex={activeRef ? -1 : undefined}
         className={`${rootVisibility} min-h-0 min-w-0 flex-col bg-background focus:outline-none ${hasDetail ? 'overflow-hidden' : 'overflow-y-auto'}`}
       >
@@ -458,6 +445,18 @@ function RootPane({
   );
 }
 
+/**
+ * What goes in a pane.
+ *
+ * Six of the eight are the six every shell offers, and they come from the
+ * shared renderer in ./detail.tsx. The two that do not are the two only a
+ * workspace has: an activity log you can keep open beside the page, and the
+ * picker for a source you are adding. Those stay here.
+ *
+ * The workspace's own rule about children lives in `onChild`: a detail
+ * opened from the FIRST pane pushes a second one beside it, and one opened
+ * from the second replaces it — two panes is as deep as the deck goes.
+ */
 function PaneContent({
   pane,
   index,
@@ -466,12 +465,7 @@ function PaneContent({
   onPush,
   onReplace,
   onAddSource,
-  onNavigate,
-  theme,
-  onTheme,
-  onReset,
-  layout,
-  onLayoutChange
+  onNavigate
 }: {
   pane: PaneRequest;
   index: number;
@@ -481,73 +475,7 @@ function PaneContent({
   onReplace: (pane: PaneRequest) => void;
   onAddSource: (type: StreamType) => void;
   onNavigate: (page: PageId) => void;
-  theme: 'system' | 'light' | 'dark';
-  onTheme: (theme: 'system' | 'light' | 'dark') => void;
-  onReset: () => void;
-  layout: LayoutMode;
-  onLayoutChange: (layout: LayoutMode) => void;
 }) {
-  if (pane.kind === 'stream') {
-    return <StreamSheet streamId={pane.streamId} onClose={onClose} variant="inline" backLabel={backLabel} />;
-  }
-
-  if (pane.kind === 'month') {
-    return (
-      <MonthSheet
-        month={pane.month}
-        onClose={onClose}
-        onOpenStream={(streamId) => {
-          const next: PaneRequest = { kind: 'stream', streamId };
-          if (index < 1) onPush(next);
-          else onReplace(next);
-        }}
-        variant="inline"
-        backLabel={backLabel}
-      />
-    );
-  }
-
-  if (pane.kind === 'payday') {
-    return (
-      <QuickPaydaySheet
-        streamId={pane.streamId}
-        onClose={onClose}
-        onEditFull={(streamId) => {
-          const next: PaneRequest = { kind: 'stream', streamId };
-          if (index < 1) onPush(next);
-          else onReplace(next);
-        }}
-        variant="inline"
-        backLabel={backLabel}
-        closeBeforeEdit={false}
-      />
-    );
-  }
-
-  if (pane.kind === 'quiz') {
-    return <TwpWizard onClose={onClose} variant="inline" backLabel={backLabel} />;
-  }
-
-  if (pane.kind === 'verify') {
-    return <VerifyCompleteSheet onClose={onClose} variant="inline" backLabel={backLabel} />;
-  }
-
-  if (pane.kind === 'settings') {
-    return (
-      <SettingsPanel
-        theme={theme}
-        onTheme={onTheme}
-        onOpenStatus={() => onNavigate('status')}
-        onReset={onReset}
-        onClose={onClose}
-        variant="inline"
-        backLabel={backLabel}
-        layout={layout}
-        onLayoutChange={onLayoutChange}
-      />
-    );
-  }
-
   if (pane.kind === 'notifications') {
     return (
       <ActivityPane
@@ -558,7 +486,23 @@ function PaneContent({
     );
   }
 
-  return <NewSourcePane backLabel={backLabel} onClose={onClose} onChoose={onAddSource} />;
+  if (pane.kind === 'newSource') {
+    return <NewSourcePane backLabel={backLabel} onClose={onClose} onChoose={onAddSource} />;
+  }
+
+  return (
+    <Detail
+      request={pane}
+      variant="inline"
+      backLabel={backLabel}
+      onClose={onClose}
+      onChild={(next) => (index < 1 ? onPush(next) : onReplace(next))}
+      onOpenStatus={() => onNavigate('status')}
+      /* A retained pane keeps the quick payday fix as the parent of the full
+         editor, rather than closing it on the way. */
+      closeBeforeEdit={false}
+    />
+  );
 }
 
 function DesktopSidebar({
@@ -613,35 +557,27 @@ function DesktopSidebar({
       </div>
 
       <nav className="flex flex-col gap-1 px-3" aria-label="Primary">
-        {navItems.map(({ id, label, icon: Icon }) => {
-          const active = page === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              aria-current={active ? 'page' : undefined}
-              onClick={() => onNavigate(id)}
-              className={
-                'flex items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-semibold transition-colors '
-                + (active
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground')
-              }
-            >
-              <Icon className="size-[18px] shrink-0" />
-              {label}
-            </button>
-          );
-        })}
+        {navItems.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            aria-current={page === id ? 'page' : undefined}
+            onClick={() => onNavigate(id)}
+            className="nav-item"
+          >
+            <Icon className="size-[18px] shrink-0" />
+            {label}
+          </button>
+        ))}
       </nav>
 
       <div className="mt-auto border-t border-border p-4">
         <button
           type="button"
           onClick={onSettings}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="nav-item w-full"
         >
-          <Settings className="size-[18px]" /> Settings
+          <Settings className="size-[18px] shrink-0" /> Settings
         </button>
       </div>
       </aside>
@@ -659,24 +595,18 @@ function TabletNav({
   onNavigate: (page: PageId) => void;
 }) {
   return (
-    <nav className="hidden items-center gap-1 border-t border-border/70 px-4 py-2 md:flex lg:hidden" aria-label="Primary">
-      {navItems.map(({ id, label, icon: Icon }) => {
-        const active = id === page;
-        return (
-          <button
-            key={id}
-            type="button"
-            aria-current={active ? 'page' : undefined}
-            onClick={() => onNavigate(id)}
-            className={
-              'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors '
-              + (active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')
-            }
-          >
-            <Icon className="size-4" /> {label}
-          </button>
-        );
-      })}
+    <nav className="hidden items-center gap-1 border-t border-border-soft px-4 py-2 md:flex lg:hidden" aria-label="Primary">
+      {navItems.map(({ id, label, icon: Icon }) => (
+        <button
+          key={id}
+          type="button"
+          aria-current={id === page ? 'page' : undefined}
+          onClick={() => onNavigate(id)}
+          className="nav-item"
+        >
+          <Icon className="size-[18px] shrink-0" /> {label}
+        </button>
+      ))}
     </nav>
   );
 }
@@ -696,7 +626,7 @@ function MobileNav({
 }) {
   return (
     <nav
-      className="grid shrink-0 grid-cols-4 border-t border-border bg-background/98 pb-safe md:hidden"
+      className="app-bar grid shrink-0 grid-cols-4 border-t pb-safe md:hidden"
       aria-label="Primary"
     >
       {navItems.map(({ id, label, icon: Icon }) => {
@@ -707,12 +637,9 @@ function MobileNav({
             type="button"
             aria-current={active ? 'page' : undefined}
             onClick={() => onNavigate(id)}
-            className={
-              'flex min-w-0 flex-col items-center gap-1 px-1 py-2.5 text-sm font-semibold transition-colors '
-              + (active ? 'text-accent-foreground' : 'text-muted-foreground')
-            }
+            className="nav-tab"
           >
-            <span className={`grid size-8 place-items-center rounded-xl ${active ? 'bg-accent' : ''}`}>
+            <span className="nav-tab-mark">
               <Icon className="size-[18px]" />
             </span>
             <span className="truncate">{label}</span>
@@ -723,12 +650,9 @@ function MobileNav({
         type="button"
         aria-current={settingsOpen ? 'page' : undefined}
         onClick={onSettings}
-        className={
-          'flex min-w-0 flex-col items-center gap-1 px-1 py-2.5 text-sm font-semibold transition-colors '
-          + (settingsOpen ? 'text-accent-foreground' : 'text-muted-foreground')
-        }
+        className="nav-tab"
       >
-        <span className={`grid size-8 place-items-center rounded-xl ${settingsOpen ? 'bg-accent' : ''}`}>
+        <span className="nav-tab-mark">
           <Settings className="size-[18px]" />
         </span>
         <span>Settings</span>
@@ -907,7 +831,7 @@ function SourceChoice({
       onClick={onClick}
       className="group flex min-h-36 flex-col items-start justify-between rounded-2xl border border-border bg-surface-2 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-card"
     >
-      <span className={`grid size-10 place-items-center rounded-xl ${tone === 'good' ? 'bg-good-soft text-good' : 'bg-info-soft text-info'}`}>
+      <span className={`grid size-10 place-items-center rounded-xl ${tone === 'good' ? 'bg-good-soft text-good-text' : 'bg-info-soft text-info-text'}`}>
         <Icon className="size-5" />
       </span>
       <span>

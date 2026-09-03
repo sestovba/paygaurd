@@ -55,10 +55,9 @@ export function TrackerWorkRecord() {
   const {
     data, ui, setUi, addStream, removeStream, resetAll, replaceAll, undoCount, undo
   } = useTracker();
-  useTheme(ui.theme);
+  useTheme(ui.theme, ui.palette);
 
   const { scope, setScope } = useMonthScope('many');
-  const theme = ui.workRecordTheme ?? 'calc20';
   const year = ui.year;
   const years = knownYears();
 
@@ -164,7 +163,7 @@ export function TrackerWorkRecord() {
       : 'Not set yet';
 
   return (
-    <div className="pg-payguard pg-workrecord min-h-dvh" data-chrome-root data-payguard-theme={theme}>
+    <div className="pg-payguard pg-workrecord min-h-dvh" data-chrome-root>
       <a href="#wr-main" className="pg-skip-link">Skip to main content</a>
       <input
         ref={fileInputRef}
@@ -368,16 +367,22 @@ export function TrackerWorkRecord() {
                   </button>
                 </div>
               ) : streams.length ? (
-                <button
-                  type="button"
-                  className="pg-btn w-full justify-center"
-                  onClick={() => setAddingOpen(true)}
-                >
-                  {/* Review note: "That is a long button". It is the word
-                      from the shared vocabulary now, so the next time you
-                      want it changed it changes in one file. */}
-                  <Plus className="size-3.5" /> {copyFor('workrecord').incomeAdd}
-                </button>
+                /* el-1byt1d6: "This button deserves margin on left and
+                   right". It was a 1,100px bar carrying the word "Add" —
+                   the project-wide rule is that a button takes the shape of
+                   its content, so it does, and the row gives it the air. */
+                <div className="flex justify-center px-3 py-1">
+                  <button
+                    type="button"
+                    className="pg-btn"
+                    onClick={() => setAddingOpen(true)}
+                  >
+                    {/* Review note: "That is a long button". It is the word
+                        from the shared vocabulary now, so the next time you
+                        want it changed it changes in one file. */}
+                    <Plus className="size-3.5" /> {copyFor('workrecord').incomeAdd}
+                  </button>
+                </div>
               ) : (
                 <div className="pg-card flex flex-col items-center gap-3 p-6 text-center">
                   <span className="pg-empty-title">Nothing here yet</span>
@@ -444,8 +449,6 @@ export function TrackerWorkRecord() {
           onClose={() => setSettingsOpen(false)}
           layout={ui.layout}
           onLayoutChange={(layout) => setUi({ layout })}
-          subTheme={theme}
-          onSubThemeChange={(workRecordTheme) => setUi({ workRecordTheme })}
         />
       ) : null}
     </div>

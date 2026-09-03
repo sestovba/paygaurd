@@ -88,7 +88,7 @@ export function SafetyHero({
     : 'safe';
 
   const toneClasses = {
-    safe: { value: 'text-good', badgeBg: 'bg-good-soft', badgeFg: 'text-good', bar: 'bg-good' },
+    safe: { value: 'text-good', badgeBg: 'bg-good-soft', badgeFg: 'text-good-text', bar: 'bg-good' },
     caution: { value: 'text-warn', badgeBg: 'bg-warn-soft', badgeFg: 'text-warn-foreground', bar: 'bg-warn' },
     over: { value: 'text-destructive', badgeBg: 'bg-destructive/15', badgeFg: 'text-destructive', bar: 'bg-destructive' }
   }[tone];
@@ -154,12 +154,17 @@ export function SafetyHero({
           of stranded: they are a countable resource being spent, and how many
           are left changes what this month is worth risking. That stays — with
           the name spelled out once and the abbreviation nowhere. */}
-      <div className="mt-6 border-t border-border pt-5">
+      {/* el-1vysf4s: "Why is there a divider line here". Because the card
+          was being cut into three panels by rules, on the one screen that is
+          supposed to read as a single answer. Space separates them; a line
+          says they are different things. Both rules go, not just the one
+          that was pointed at. */}
+      <div className="mt-6">
         <PrecisionLine reading={precision} onFix={onFixStream} variant="gauge" />
       </div>
 
       {phase === 'trialWork' ? (
-        <div className="mt-6 border-t border-border pt-5">
+        <div className="mt-6">
           {/* Was "Trial Work Period · 3 of 9 months used, 6 left" — a proper
                noun the reader has not been taught, then the same fact stated
                twice in two directions. */}

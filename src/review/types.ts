@@ -1,4 +1,15 @@
-import type { LayoutMode } from '../state/storage';
+import type { LayoutMode, LegacyLayoutId } from '../state/storage';
+
+/**
+ * The layout a note was taken in.
+ *
+ * Wider than LayoutMode on purpose: classic, v2 and responsive became one
+ * `overview` layout with a shell option, but 103 notes are anchored to the
+ * old names and WHICH of the three a note was written against is part of
+ * what it says. The ids stay; App.tsx translates one into a layout plus a
+ * shell when you follow a note.
+ */
+export type ReviewLayoutId = LayoutMode | LegacyLayoutId;
 
 /* One note, one shape.
  *
@@ -43,7 +54,7 @@ export interface ReviewTheme {
  *  exists so an AI pass can find the element again from the file alone. */
 export interface ReviewAnchor {
   /** Layout ("theme") the note was taken in. */
-  layout: LayoutMode;
+  layout: ReviewLayoutId;
   /** Best-effort page/tab name inside that layout. */
   page?: string;
   theme?: ReviewTheme;
@@ -102,6 +113,10 @@ export interface ReviewNote {
   /** Switched off on the page to see whether the page is better without it.
    *  Not a verdict, and it never touches the code. */
   hidden?: boolean;
+  /** Screenshots pasted, dropped or picked onto this note, as repo-relative
+   *  paths ("review/shots/…png"). The picture lives on disk; only its name
+   *  lives in the notes file. */
+  shots?: string[];
   thread?: ReviewReply[];
   /** Whose move it is. Either side writes it. */
   status: NoteState;

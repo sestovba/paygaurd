@@ -27,13 +27,13 @@ interface FieldDef { id: FieldId; label: string; placeholder: string; suffix?: s
    their benefits. Same for a bare "Miles" — personal miles do not come off. */
 const W2_FIELDS: FieldDef[] = [
   { id: 'gross', label: 'Before taxes', placeholder: 'Before taxes' },
-  { id: 'hours', label: 'Hours worked', placeholder: 'Hours', suffix: 'h' }
+  { id: 'hours', label: 'Hours worked', placeholder: 'Hours', suffix: ' hours' }
 ];
 
 const TEN99_FIELDS: FieldDef[] = [
   { id: 'gross', label: 'Paid to you', placeholder: 'Paid to you' },
-  { id: 'miles', label: 'Work miles', placeholder: 'Work miles', suffix: 'mi' },
-  { id: 'hours', label: 'Hours worked', placeholder: 'Hours', suffix: 'h' }
+  { id: 'miles', label: 'Work miles', placeholder: 'Work miles', suffix: ' miles' },
+  { id: 'hours', label: 'Hours worked', placeholder: 'Hours', suffix: ' hours' }
 ];
 
 export function fieldsFor(stream: Stream): FieldDef[] {

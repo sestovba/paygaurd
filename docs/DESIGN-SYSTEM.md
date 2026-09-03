@@ -197,7 +197,8 @@ today.
 - Its own visual system (`plan` is 16-bit and gilt; `ledger` is monospace
   columns) — argued, not decorative, and not to be "modernised".
 - Which surfaces it draws, and in what order.
-- Its sub-theme palette.
+- Its **shape** and its **density** — radii, spacing, type, how much fits on
+  a screen. This is where a layout's identity actually lives.
 
 ## 2.5 What a layout never owns
 
@@ -205,6 +206,17 @@ today.
 - Any figure or rule — those live in `src/domain/`, shared by all ten layouts.
 - Whether both limits are named. One at a time, everywhere.
 - Whether an abbreviation is acceptable "in this context". It is not.
+- **Its palette.** A layout used to own this, and five of them declared
+  their own values. There is one palette now — `src/styles/palette.css` —
+  with the variants as options on it. A layout **bridges** it onto whatever
+  token names its call sites already use, and may keep an **override layer**
+  for what is genuinely its own, marked `@override <layout> — <why>`.
+
+  The line between the two is the useful part. Plan's paper, ink and status
+  colours bridge; its sprite outline, 1999 bevels and gilt band override,
+  because those are the parts of a drawn object and no palette has an opinion
+  about them. If you cannot write the sentence after the em-dash, it is not
+  an override — it is a colour you forgot to map.
 
 ---
 

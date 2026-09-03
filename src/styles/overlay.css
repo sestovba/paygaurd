@@ -1,0 +1,501 @@
+/* ============================================================================
+   PayGuard — design polish overlay
+   Loads after the app stylesheet. Additive only: no selector here changes
+   what the app does, only how tight it reads. Grouped so single sections can
+   be lifted into the source stylesheet as they are approved.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   0 · Base scale at :root — GONE, and worth saying why
+
+   This section re-declared the whole paper palette (34 values, plus a dark
+   set) at :root, because the --pg-* scale was declared on the shell classes
+   and never at the root, so the sign-in, terms and onboarding screens —
+   which render outside any shell — resolved none of it.
+
+   It was the sixth copy of the palette in this codebase, and it disagreed
+   with the others: --pg-radius-xl here was 1rem while index.css's
+   --radius-xl was 1.25rem, and since this file loads last it silently won
+   for every .panel in the app.
+
+   Nothing needs it now. [data-palette] sits on <html>, so every screen in
+   the app — layout or not, signed in or not — is inside it, and payguard.css
+   maps --pg-* off it in one block. The problem this section existed to solve
+   cannot recur.
+   ------------------------------------------------------------------------ */
+
+/* ---------------------------------------------------------------------------
+   1 · Spacing on a 4px grid
+   The build mixed .875rem / .75rem / 1.25rem pads, which read as drift rather
+   than hierarchy. Three steps, each 8px apart, used everywhere.
+   ------------------------------------------------------------------------ */
+:root {
+  --pg-gap: 0.75rem;      /* 12 */
+  --pg-gap-lg: 1.25rem;   /* 20 */
+  --pg-pad: 1rem;         /* 16 — was 14, never lined up with anything */
+  --pg-pad-lg: 1.5rem;    /* 24 */
+}
+
+/* @override elevation — see the note below. Shadows are not palette colours;
+   they are a policy about how many planes the page has, and the answer here
+   is two. Black at an alpha, the same over every variant. */
+/* ---------------------------------------------------------------------------
+   2 · Elevation: two tiers, not four
+   .panel, .pg-card, .pg-status-hero each carried a different shadow, so cards
+   sitting side by side floated at different heights. Everything in the page
+   plane is now a hairline card; shadow is reserved for things that genuinely
+   sit above the page (sheets, popovers, sticky bars).
+   ------------------------------------------------------------------------ */
+:root {
+  --pg-shadow-sm: none;
+  --pg-shadow: none;
+  --pg-shadow-md: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --pg-shadow-lg: 0 16px 32px -12px rgb(15 23 42 / 0.18), 0 4px 10px -6px rgb(15 23 42 / 0.10);
+}
+.panel,
+.pg-card,
+.pg-status-hero {
+  box-shadow: none;
+}
+.pg-status-hero,
+.panel {
+  border-color: var(--pg-border-strong, var(--pg-border));
+}
+/* the one raised tier */
+.sheet,
+[role="dialog"],
+.pg-tooltip {
+  box-shadow: var(--pg-shadow-lg);
+}
+
+/* ---------------------------------------------------------------------------
+   3 · Measure
+   Explanatory copy ran 130–190 characters per line at desktop width. Capped at
+   a readable measure; figures, tables and inputs are untouched.
+   ------------------------------------------------------------------------ */
+.type-muted,
+.pg-tile-note,
+.pg-stat-sub,
+.pg-empty-body,
+.pg-status-phrase,
+.hz-runway-lede,
+.pk-answer-sub,
+.pl-footnote {
+  max-width: 66ch;
+}
+.pg-section-meta,
+.field-label + p,
+.pg-callout-warn p {
+  max-width: 72ch;
+}
+h1, h2, .display-figure {
+  text-wrap: pretty;
+}
+
+/* Pocket is the deliberately-minimal layout; at desktop width its single
+   column stretched the full 1280px, so the primary action became a 1200px
+   bar. Hold it to a phone-ish column and centre it. */
+/* The per-layout CSS chunks are injected lazily, i.e. AFTER this file, so
+   every .pk-* / .hz-* target here needs #root to out-specify them. */
+#root .pk-main {
+  max-width: 34rem;
+  margin-inline: auto;
+}
+#root .pk-top {
+  padding-inline: max(0.75rem, calc((100% - 34rem) / 2));
+}
+/* Horizon and Work Record were already capped but sat wide for a form app. */
+#root .hz-main { max-width: 52rem; }
+#root .hz-todo li,
+.pg-callout-warn,
+.wr-note { max-width: 72ch; }
+.lg-analysis-pad { max-width: 72ch; }
+
+/* ---------------------------------------------------------------------------
+   4 · Touch targets
+   Mobile-first, and the audit found controls at 19–36px. The component heights
+   are all token-driven, so raising the tokens on small screens and coarse
+   pointers lifts buttons, selects, inputs, tabs and segmented controls at
+   once. Desktop-with-a-mouse keeps the compact density.
+   ------------------------------------------------------------------------ */
+@media (max-width: 640px), (pointer: coarse) {
+  /* the shells re-declare these below :root, so the bump has to be scoped to
+     each of them as well */
+  :root,
+  .pg-payguard,
+  .pg-ledger,
+  .pg-workrecord,
+  .pg-calc20 {
+    --pg-h-sm: 2.25rem;   /* 36 */
+    --pg-h: 2.75rem;      /* 44 */
+    --pg-h-lg: 3rem;      /* 48 */
+    --pg-tab-h: 2.75rem;
+  }
+  /* controls sized by utility classes rather than tokens */
+  .pg-icon-btn,
+  .hz-icon-btn,
+  .notice-trigger,
+  .pg-bottom-nav-item,
+  .pg-chart-bar-trigger,
+  .lg-lock-btn,
+  .lg-chevron,
+  .lg-year-stepper > button,
+  .wr-slab-chevron {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  /* per-layout controls on their own scales */
+  .lg-btn,
+  .lg-seg,
+  .lg-field,
+  .lg-tab,
+  .lg-section-toggle,
+  .lg-name-input,
+  .hz-btn,
+  .wr-hotbar-chip,
+  .wr-slab-head-toggle {
+    min-height: 2.75rem;
+  }
+  .lg-seg-item,
+  .pg-seg-item {
+    min-height: 2.5rem;
+  }
+  /* Horizon carries its own scale (--color-*), so its controls need naming.
+     #root beats the lazily-injected TrackerHorizon chunk. */
+  #root .hz-icon-btn,
+  #root .hz-top-year button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  #root .hz-sources > button,
+  #root .hz-stop-btn {
+    min-height: 2.75rem;
+  }
+  /* icon buttons sized by a utility class */
+  button.size-6,
+  button.size-7,
+  button.size-8 {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+  /* the header is a fixed 3.5rem row — 44px controls overflow it on a 390px
+     screen, so hold header controls at 40px, still a reachable target */
+  .h-14 .pg-icon-btn,
+  .h-14 .notice-trigger,
+  .h-14 button.size-6,
+  .h-14 button.size-7,
+  .h-14 button.size-8,
+  .pg-topbar .pg-icon-btn,
+  .pg-topbar .notice-trigger,
+  .lg-header-bar .pg-icon-btn,
+  #root .hz-top .hz-icon-btn,
+  #root .hz-top .hz-top-year button {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .h-14 .notice-trigger,
+  .pg-topbar .notice-trigger {
+    width: auto;
+    min-width: 2.5rem;
+  }
+  .h-14 > *,
+  .pg-topbar > * {
+    min-width: 0;
+  }
+  .lg-ledger-input,
+  .lg-ledger-cell-field {
+    min-height: 2.5rem;
+  }
+  /* rows that act as buttons */
+  .pg-table-row > button,
+  .wr-row > button,
+  button.pg-focus-underline {
+    min-height: 2.75rem;
+  }
+  /* small buttons still need a reachable box even when the label is short */
+  .pg-btn-sm {
+    min-height: 2.25rem;
+    padding-inline: 0.75rem;
+  }
+  /* 11px labels are the floor on a phone */
+  .pg-badge,
+  .pg-tile-note,
+  .pg-stat-sub,
+  .pg-tab-amount,
+  .pg-seg-item,
+  .lg-seg-item,
+  .lg-label,
+  .lg-text-muted,
+  .wr-month-note,
+  .wr-row-note {
+    font-size: 0.75rem;
+  }
+  .pg-seg { height: var(--pg-h); }
+  /* iOS zooms any field under 16px on focus */
+  .pg-input,
+  .pg-select,
+  .pg-excel-input,
+  .field-input,
+  .lg-ledger-input,
+  .lg-name-input,
+  input[type="text"],
+  input[type="number"],
+  input[type="date"] {
+    font-size: 1rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   4b · Controls only reachable once a month has data
+   The first audit pass ran on an empty month, so dense grid controls — ledger
+   month inputs, Work Record's underline fields, Calc20's whole toolbar — were
+   never measured. These are the classes that showed up once real amounts were
+   seeded. Inputs get a min-height and let their row grow rather than being
+   forced to fit it: on a phone that trade is worth the extra few pixels.
+   ------------------------------------------------------------------------ */
+@media (max-width: 640px), (pointer: coarse) {
+  #root .lg-ledger-row input,
+  #root .lg-ledger-cell input,
+  #root input.bg-transparent,
+  #root .pg-focus-underline,
+  #root input.pg-focus-underline {
+    min-height: 2.5rem;
+  }
+  /* Ledger's month labels double as buttons */
+  #root button.lg-text-muted,
+  #root .lg-text-muted[role="button"] {
+    min-height: 2.5rem;
+    padding-block: 0.375rem;
+  }
+  /* Calc20's toolbar — its own component vocabulary */
+  #root .icon-button,
+  #root .icon-button--muted,
+  #root .avatar {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+  #root .month-square,
+  #root .month-square--pick {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+  /* utility-sized text buttons */
+  #root button.text-xs,
+  #root button.text-\[11px\] {
+    min-height: 2.5rem;
+  }
+  /* Text under 11px, enumerated from the build rather than guessed: 48 rules
+     set it, 37 of them inside .pg-calc20, whose scale runs 9–10.5px. 11px is
+     the floor on a phone; the rules only raise, never shrink. */
+  #root .c20-layout-group__title,
+  #root .lg-axis-pay,
+  #root .pg-axis-pay,
+  #root .notice-panel__count,
+  #root .pg-tab-add .pg-label,
+  #root .wr-month-note,
+  #root .text-\[0\.5625rem\],
+  #root .text-\[0\.625rem\],
+  #root .archived-chip__tag,
+  #root .archived-streams__title,
+  #root .carousel-nav__jump,
+  #root .carousel-nav__note,
+  #root .derived__label,
+  #root .entry-field__hint,
+  #root .entry-field__label,
+  #root .headline__label,
+  #root .hotbar__chip-month,
+  #root .ledger__count,
+  #root .ledger__extra-badge,
+  #root .legend__item,
+  #root .month-cell__label,
+  #root .month-cell__note,
+  #root .month-cell__read-meta,
+  #root .month-square__label,
+  #root .month-square__near,
+  #root .month-square__pay,
+  #root .notice-menu__count,
+  #root .popover-drawer__title,
+  #root .popover-surface__title,
+  #root .sheet__eyebrow,
+  #root .simulator__eyebrow,
+  #root .simulator__result-label,
+  #root .standing__label,
+  #root .stream-card__badge,
+  #root .stream-card__meta,
+  #root .stream-card__total-label,
+  #root .stream-card__type,
+  #root .toolbar__field span,
+  #root .toolbar__group-label,
+  #root .topbar__eyebrow,
+  #root .total-cell__label,
+  #root .total-cell__near,
+  #root .total-cell__pay,
+  #root .twp-meter__label,
+  #root .view-option__hint {
+    font-size: 0.6875rem;
+  }
+  /* Calc20's W-2 / 1099 chips are 20px tall and tappable */
+  #root button.stream-card__type {
+    min-height: 2.5rem;
+    padding-inline: 0.625rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  /* PayGuard's status link sits at 26px */
+  #root .pg-status-link {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  /* Horizon's stream rows: an 85px row whose button only claims 27px of it,
+     so most of what looks tappable is not */
+  #root button.text-left.items-center.min-w-0 {
+    min-height: 2.75rem;
+    align-self: stretch;
+  }
+  /* Workspace's stream tabs */
+  #root button.truncate.rounded-md {
+    min-height: 2.5rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   5 · Sticky chrome and safe areas
+   Top bars and bottom nav sat flush against the notch / home indicator, and
+   the translucent bars had no edge, so content slid under them ambiguously.
+   ------------------------------------------------------------------------ */
+.pg-topbar,
+.pg-sticky-page,
+.pg-sticky-surface {
+  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  backdrop-filter: saturate(1.4) blur(10px);
+}
+.pg-sticky-page.pg-scrolled,
+.pg-sticky-surface.pg-scrolled,
+.pg-topbar.pg-scrolled {
+  box-shadow: 0 1px 0 0 var(--pg-rule), 0 6px 16px -12px rgb(15 23 42 / 0.35);
+}
+.pg-bottom-nav {
+  padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
+}
+.pg-page-pad {
+  padding-left: max(var(--pg-pad), env(safe-area-inset-left));
+  padding-right: max(var(--pg-pad), env(safe-area-inset-right));
+}
+.sheet {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* ---------------------------------------------------------------------------
+   6 · Type detail
+   ------------------------------------------------------------------------ */
+/* every number in the app should align in a column */
+.field-input,
+.pg-tab-amount,
+.pg-status-amount,
+.pg-stat,
+.pg-tile,
+.pg-table-cell,
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+/* the caps labels were 13px at .1em — heavy for a label; 11px reads quieter
+   and leaves more room for the thing being labelled */
+.label-caps {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+}
+.pg-section-title {
+  letter-spacing: -0.005em;
+}
+/* headline figures were tracking-tight enough to touch at large sizes */
+.pg-status-amount {
+  letter-spacing: -0.04em;
+}
+
+/* ---------------------------------------------------------------------------
+   7 · The sign-in, terms and settings screens
+   These are built on .panel / .field-input / .btn-primary, which carry a
+   second token scale (--radius-*, --shadow-card) inherited from the starter.
+   Where they render inside the shell, `.pg-payguard .field-input` &co already
+   out-specify these rules and supply the app scale; the declarations below are
+   the fallback for the same components rendered outside it, and are why the
+   scale is re-declared at :root in section 0.
+   ------------------------------------------------------------------------ */
+.panel {
+  border-radius: var(--pg-radius-xl);
+}
+.field-input {
+  border-radius: var(--pg-radius-md);
+  height: 3rem;
+  border-color: var(--pg-border-strong);
+}
+.field-input:focus-visible,
+.field-input:focus {
+  outline: none;
+  border-color: var(--pg-ring);
+  box-shadow: 0 0 0 2px var(--pg-focus-ring);
+}
+.btn-primary {
+  border-radius: var(--pg-radius-md);
+  min-height: 3rem;
+  letter-spacing: 0.005em;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+.btn-primary:focus-visible,
+.pg-tab-rename:focus-visible,
+.pg-excel-input:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: 2px;
+}
+.field-label {
+  font-size: 0.9375rem;
+}
+
+/* ---------------------------------------------------------------------------
+   8 · Grid and table hygiene
+   Work Record's frozen column overflowed its cell instead of truncating, so
+   long job names pushed the grid sideways.
+   ------------------------------------------------------------------------ */
+.pg-frozen {
+  min-width: 0;
+}
+.pg-frozen > *,
+.pg-table-cell > * {
+  min-width: 0;
+}
+.pg-frozen .pg-label,
+.pg-table-cell .pg-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pg-scroll-x {
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+/* ---------------------------------------------------------------------------
+   9 · Interaction feel
+   Hover and focus were defined per component with slightly different timings.
+   ------------------------------------------------------------------------ */
+.pg-btn,
+.pg-icon-btn,
+.pg-tab,
+.pg-seg-item,
+.pg-section-head,
+.btn-primary {
+  transition-duration: 0.14s;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+/* empty states were 2.5rem of dead vertical space in a card that often sat
+   next to a full one */
+.pg-empty {
+  padding: 1.75rem 1.25rem;
+  gap: 0.375rem;
+}

@@ -1,7 +1,6 @@
 // Turns a DOM element into something an AI can find again from a text file.
 
-import type { LayoutMode } from '../state/storage';
-import type { ReviewAnchor, ReviewTheme } from './types';
+import type { ReviewAnchor, ReviewLayoutId, ReviewTheme } from './types';
 
 /** Class names that identify a section in this codebase, versus the hundreds
  *  of Tailwind utilities that identify nothing. */
@@ -88,15 +87,13 @@ function currentPage(): string | undefined {
 /** Layouts carry their own palette on the root node; the app-wide light/dark
  *  toggle sits on <html>. Both are worth restoring when returning to a note. */
 function currentTheme(): ReviewTheme | undefined {
-  const host = document.querySelector('[data-ledger-theme], [data-payguard-theme]');
-  const sub = host?.getAttribute('data-ledger-theme')
-    ?? host?.getAttribute('data-payguard-theme')
-    ?? undefined;
+  const host = document.querySelector('[data-palette]');
+  const sub = host?.getAttribute('data-palette') ?? undefined;
   const dark = document.documentElement.classList.contains('dark');
   return sub || dark ? { sub, dark } : undefined;
 }
 
-export function describeElement(el: Element, layout: LayoutMode): ReviewAnchor {
+export function describeElement(el: Element, layout: ReviewLayoutId): ReviewAnchor {
   const text = (el as HTMLElement).innerText?.replace(/\s+/g, ' ').trim();
   const hooks = usefulClasses(el).join(' ');
   return {
@@ -144,6 +141,22 @@ export function labelFor(el: Element): string {
     return above && !short.toLowerCase().includes(above.toLowerCase())
       ? `${above} · ${short}`.slice(0, 64)
       : short;
+  }
+
+  /* A field has no text of its own, so notes on one were being filed as
+     "input" — a title that says nothing in a list of two hundred. What the
+     reviewer was looking at when they pointed at it is its label, then the
+     caption above it, then whatever the empty box itself says. */
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+    // innerText rather than textContent: a label wrapping a caption and a
+    // hint has no whitespace between them in the markup, and "Miles
+    // driven76¢ per mile" is not a name.
+    const label = el.labels?.[0] as HTMLElement | undefined;
+    const named = (label?.innerText ?? label?.textContent)?.replace(/\s+/g, ' ').trim()
+      || caption(el)
+      || el.getAttribute('placeholder')?.trim()
+      || el.getAttribute('name')?.trim();
+    if (named) return named.slice(0, 48);
   }
 
   const hooks = usefulClasses(el)[0];

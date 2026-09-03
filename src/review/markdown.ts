@@ -20,7 +20,10 @@ export function locatable(note: ReviewNote): boolean {
 /** A note that asks for something. A bare selection is a thing you pointed
  *  at, not a thing you asked for, and it does not reach the report. */
 export function actionable(note: ReviewNote): boolean {
-  return Boolean(note.comment || note.tags?.length || note.hidden);
+  // A screenshot on its own counts: a picture of the thing that is wrong is
+  // an ask, and it is the one the reviewer reaches for when words were the
+  // part that was not working.
+  return Boolean(note.comment || note.tags?.length || note.hidden || note.shots?.length);
 }
 
 function line(label: string, value?: string): string {

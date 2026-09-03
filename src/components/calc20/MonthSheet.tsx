@@ -41,7 +41,7 @@ export function MonthSheet({ month, onClose }: { month: MonthKey; onClose: () =>
           <div className="sheet-hero">
             <div className="grow">
               <div className="hero-figure">{money(status.countable)}</div>
-              <div className="eyebrow">countable this month</div>
+              <div className="eyebrow">counted toward your limit</div>
             </div>
             <span
               className={

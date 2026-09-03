@@ -35,6 +35,7 @@ import { PayGuardJobEditor } from './PayGuardJobEditor';
 import { PayGuardAnalysis } from './PayGuardAnalysis';
 import { importTrackerFile } from './payguardData';
 import { useTheme } from '../../theme';
+import { useIsWide, WIDE_MIN } from '../../viewport';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
 type MobileTab = 'jobs' | 'overview' | 'analysis';
@@ -67,9 +68,8 @@ export function TrackerPayGuard() {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useTheme(ui.theme);
+  useTheme(ui.theme, ui.palette);
 
-  const currentTheme = ui.payguardTheme ?? 'paper';
   const streams = data.streams;
   const selected = streams.find((s) => s.id === selectedId) ?? streams[0] ?? null;
 
@@ -127,8 +127,23 @@ export function TrackerPayGuard() {
     });
   }
 
-  // Each mobile tab owns one section; on sm+ every section is always visible.
-  const sectionVisibility = (owner: MobileTab) => mobileTab === owner ? 'flex' : 'hidden sm:flex';
+  /* Each mobile tab owns one section; on sm+ every section is always visible.
+   *
+   * This used to switch tabs with a class — `hidden sm:flex` on the two that
+   * are not showing — which meant a phone built all three and painted one.
+   * Measured on a 390px viewport with two jobs and a year of months, that was
+   * 441 of this layout's 641 nodes mounted and hidden: the chart block (122)
+   * and the whole job editor (314), neither of which the reader can reach
+   * without pressing a tab that re-renders anyway. `display:none` is free to
+   * paint but not free to build, and the job editor re-diffs on every
+   * keystroke. So below sm the inactive sections are not rendered at all.
+   *
+   * 640 is not a guess: `.pg-bottom-nav` in payguard.css appears under
+   * `max-width: 639.98px` and nothing else, so the width at which the tabs
+   * exist is exactly the width at which this gate applies. Above it there are
+   * no tabs and every section renders, as before. */
+  const wide = useIsWide(WIDE_MIN);
+  const showSection = (owner: MobileTab) => wide || mobileTab === owner;
 
   /* Review note: "This whole hero says three things where one would do —
      show the month, the limit, and the room left."
@@ -170,7 +185,7 @@ export function TrackerPayGuard() {
       : statusTone === 'safe' ? 'var(--pg-safe)' : 'var(--pg-info)';
 
   return (
-    <div className="pg-payguard pg-page-pad min-h-dvh" data-chrome-root data-payguard-theme={currentTheme}>
+    <div className="pg-payguard pg-page-pad min-h-dvh" data-chrome-root>
       <a href="#pg-main" className="pg-skip-link">Skip to main content</a>
       <input
         ref={fileInputRef}
@@ -318,7 +333,8 @@ export function TrackerPayGuard() {
             So it does. On a wide screen it is the first thing under the
             status hero and the attention strip; the chart and the job editors
             follow it rather than gate it. */}
-        <div id="pg-analysis" className={`flex-col scroll-mt-20 ${sectionVisibility('analysis')}`}>
+        {showSection('analysis') ? (
+        <div id="pg-analysis" className="flex flex-col scroll-mt-20">
           <ReviewTarget
             id="payguard-monthly-analysis"
             label="Full monthly analysis"
@@ -328,9 +344,11 @@ export function TrackerPayGuard() {
             <PayGuardAnalysis data={data} year={year} scope={scope} />
           </ReviewTarget>
         </div>
+        ) : null}
 
         {/* ---------------- Overview: chart ---------------- */}
-        <div id="pg-overview" className={`flex-col gap-3 sm:gap-4 ${sectionVisibility('overview')}`}>
+        {showSection('overview') ? (
+        <div id="pg-overview" className="flex flex-col gap-3 sm:gap-4">
           <ReviewTarget
             id="payguard-year-chart"
             label="Annual income chart"
@@ -340,9 +358,11 @@ export function TrackerPayGuard() {
             {scope === 'month' ? null : <PayGuardChart streams={streams} year={year} limit={activeThreshold == null ? null : { kind: phase === 'trialWork' ? 'trialWork' : 'sga', amount: activeThreshold }} />}
           </ReviewTarget>
         </div>
+        ) : null}
 
         {/* ---------------- Jobs ---------------- */}
-        <div id="pg-jobs" className={`flex-col gap-3 ${sectionVisibility('jobs')}`}>
+        {showSection('jobs') ? (
+        <div id="pg-jobs" className="flex flex-col gap-3">
           <div
             className={tabsMode && streams.length > 0 ? 'pg-tabgroup' : undefined}
             data-type={tabsMode && selected ? selected.type : undefined}
@@ -456,6 +476,7 @@ export function TrackerPayGuard() {
           )}
           </div>
         </div>
+        ) : null}
 
       </main>
 
@@ -484,13 +505,11 @@ export function TrackerPayGuard() {
         <SettingsPanel
           theme={ui.theme}
           onTheme={(theme) => setUi({ theme })}
-          onOpenStatus={() => { setUi({ layout: 'responsive' }); setSettingsOpen(false); }}
+          onOpenStatus={() => { setUi({ layout: 'overview' }); setSettingsOpen(false); }}
           onReset={resetAll}
           onClose={() => setSettingsOpen(false)}
           layout={ui.layout}
           onLayoutChange={(layout) => setUi({ layout })}
-          subTheme={currentTheme}
-          onSubThemeChange={(payguardTheme) => setUi({ payguardTheme })}
         />
       ) : null}
     </div>

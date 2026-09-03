@@ -19,6 +19,9 @@ import { SheetSurface } from './SheetSurface';
 import { TermsViewSheet } from './TermsViewSheet';
 import { TwpStatusControl } from './TwpStatusControl';
 
+/** Set by the standalone Calc20 build. Off everywhere else. */
+const STANDALONE = import.meta.env.VITE_STANDALONE === '1';
+
 export function SettingsSheet({
   onClose,
   session,
@@ -105,7 +108,10 @@ function SettingsMainContent({
     ...(canSync(session?.email) ? ['sync' as const] : []),
     'terms',
     'focusMode',
-    'layout',
+    /* Not in the standalone export (vite.calc20.config.ts): that page is
+       this layout and nothing else, so a switcher there would offer eight
+       screens it has no code to draw. */
+    ...(STANDALONE ? [] : ['layout' as const]),
     'theme',
     'glass',
     'export',

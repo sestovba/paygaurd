@@ -42,20 +42,25 @@ import { activeThreshold, benefitPhase } from '../../domain/trialWork';
 import { attentionFlags } from '../../domain/attention';
 import { precisionFor } from '../../domain/precision';
 import type { MonthKey, Stream, TrackerData } from '../../domain/types';
+import type { PayBasis } from '../../state/storage';
 import { SettingsPanel } from '../SettingsPanel';
 import { ToastStack } from '../ToastStack';
 import '../../styles/pocket.css';
 
 export function TrackerPocket() {
   const { data, ui, setUi, resetAll, updateMonthEntry, pushToast } = useTracker();
-  useTheme(ui.theme);
+  useTheme(ui.theme, ui.palette);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [openMonth, setOpenMonth] = useState<MonthKey | null>(null);
   const [logging, setLogging] = useState(false);
-  const [fromBank, setFromBank] = useState(false);
-  const [net, setNet] = useState('');
-  const estimate = grossFromNet(Number(net));
+  const [basis, setBasis] = useState<PayBasis>(ui.payBasis ?? 'bank');
+  const [payValue, setPayValue] = useState('');
+  const [fromNowOn, setFromNowOn] = useState(true);
+
+  const num = Number(payValue);
+  const valid = Number.isFinite(num) && num > 0;
+  const estimate = basis === 'bank' && valid ? (grossFromNet(num) ?? 0) : 0;
 
   const now = todayMonth();
   const asOf: MonthKey = yearOf(now) === ui.year ? now : `${ui.year}-12`;
@@ -120,15 +125,43 @@ export function TrackerPocket() {
    * screenful of settings; adding this week's pay should not require it. */
   const primary = data.streams.find((s) => s.lifecycle === 'active') ?? data.streams[0];
 
-  function logPay(amount: number, basis: 'entered' | 'fromNet' = 'entered') {
+  function logPay(amount: number, entryBasis: 'entered' | 'fromNet' = 'entered', netAmount?: number) {
     if (!primary || !Number.isFinite(amount) || amount <= 0) return;
     const current = grossFor(primary, asOf);
     // The provenance rides with the figure: a month built from a guess has to
     // keep saying so, or the precision gauge reports a confidence nobody
     // earned. See MonthEntry.basis.
-    updateMonthEntry(primary.id, asOf, { gross: current + amount, basis });
+    updateMonthEntry(primary.id, asOf, {
+      gross: current + amount,
+      basis: entryBasis,
+      ...(netAmount !== undefined ? { net: (primary.months[asOf]?.net ?? 0) + netAmount } : {})
+    });
     pushToast(`${money(amount)} added to ${longMonthName(asOf)}`, true);
     setLogging(false);
+    setPayValue('');
+  }
+
+  function startLogging() {
+    setBasis(ui.payBasis ?? 'bank');
+    setPayValue('');
+    setFromNowOn(true);
+    setLogging(true);
+  }
+
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!valid) return;
+
+    if (basis === 'bank') {
+      const est = grossFromNet(num);
+      if (!est) return;
+      logPay(est, 'fromNet', num);
+    } else {
+      if (fromNowOn) {
+        setUi({ payBasis: 'paystub' });
+      }
+      logPay(num, 'entered');
+    }
   }
 
   return (
@@ -164,62 +197,58 @@ export function TrackerPocket() {
         {/* 2 — the thing you came to do. */}
         {primary ? (
           logging ? (
-            <form
-              className="pk-answer"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const field = event.currentTarget.elements.namedItem('amount') as HTMLInputElement;
-                logPay(Number(field.value));
-              }}
-            >
-              <label className="pk-edit-name" htmlFor="pk-amount">
-                How much did you get paid from {primary.name}?
-              </label>
-              {/* Where the number is, described rather than named. "Paystub"
-                  is a word plenty of people have never been taught, and the
-                  gross/net distinction is the single most common way this
-                  kind of form gets filled in wrong. */}
-              <p className="pk-edit-note">
-                Type the amount before taxes are taken out. It is on the paper
-                or email your job sends you when they pay you.
-              </p>
-              <input
-                id="pk-amount"
-                name="amount"
-                /* `decimal`, not `numeric`: it puts a full keypad with a
-                   decimal point on Android instead of digits alone. */
-                inputMode="decimal"
-                type="text"
-                autoFocus
-                placeholder="Numbers only"
-                className="pk-btn"
-                style={{ width: '100%', justifyContent: 'flex-start', marginTop: 6 }}
-              />
-              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                <button type="submit" className="pk-log" style={{ flex: '1 1 auto' }}>Save this pay</button>
-                <button type="button" className="pk-btn" onClick={() => setLogging(false)}>Cancel</button>
+            <form className="pk-answer" onSubmit={handleSubmit}>
+              {/* The switch between net pay and paystub lives right here and defaults to net pay ("Paid"). */}
+              <div className="pk-switch" role="radiogroup" aria-label="How you enter pay">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={basis === 'bank'}
+                  className="pk-switch-btn"
+                  data-active={basis === 'bank' ? '' : undefined}
+                  onClick={() => {
+                    setBasis('bank');
+                    setPayValue('');
+                    setUi({ payBasis: 'bank' });
+                  }}
+                >
+                  Paid
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={basis === 'paystub'}
+                  className="pk-switch-btn"
+                  data-active={basis === 'paystub' ? '' : undefined}
+                  onClick={() => {
+                    setBasis('paystub');
+                    setPayValue('');
+                  }}
+                >
+                  Paystub
+                </button>
               </div>
 
-              {/* The way out for someone who cannot find the before-tax
-                  number, which is a lot of people. The number they do have is
-                  in their banking app. */}
-              {fromBank ? (
-                <div className="pk-guess">
-                  <label className="pk-edit-name" htmlFor="pk-net">
-                    How much money went into your bank?
+              {basis === 'bank' ? (
+                <>
+                  <label className="pk-edit-name" htmlFor="pk-amount">
+                    How much did you get paid from {primary.name}?
                   </label>
                   <p className="pk-edit-note">
-                    This is the amount you actually received. We will work out
-                    the rest.
+                    Type what went into your bank account. We will work out what
+                    counts before taxes.
                   </p>
                   <input
-                    id="pk-net"
-                    className="pk-btn pk-edit-field"
+                    id="pk-amount"
+                    name="amount"
                     inputMode="decimal"
                     type="text"
+                    autoFocus
                     placeholder="Numbers only"
-                    value={net}
-                    onChange={(event) => setNet(event.currentTarget.value)}
+                    className="pk-btn pk-edit-field"
+                    style={{ marginTop: 6 }}
+                    value={payValue}
+                    onChange={(event) => setPayValue(event.currentTarget.value)}
                   />
                   {estimate ? (
                     <p className="pk-edit-note" data-warn>
@@ -227,28 +256,117 @@ export function TrackerPocket() {
                       guess, so we will leave extra room to be safe.
                     </p>
                   ) : null}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <button
+                      type="submit"
+                      className="pk-log"
+                      style={{ flex: '1 1 auto' }}
+                      disabled={!valid}
+                    >
+                      Save this pay
+                    </button>
+                    <button
+                      type="button"
+                      className="pk-btn"
+                      onClick={() => {
+                        setLogging(false);
+                        setPayValue('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    className="pk-log"
-                    style={{ marginTop: 10 }}
-                    disabled={!estimate}
-                    onClick={() => { if (estimate) logPay(estimate, 'fromNet'); setFromBank(false); setNet(''); }}
+                    className="pk-plain"
+                    onClick={() => {
+                      setBasis('paystub');
+                      setPayValue('');
+                    }}
                   >
-                    Use about {estimate ? money(estimate) : '—'}
+                    I know my paystub pay amount
                   </button>
-                </div>
+                </>
               ) : (
-                <button
-                  type="button"
-                  className="pk-plain"
-                  onClick={() => setFromBank(true)}
-                >
-                  I cannot find that number
-                </button>
+                <>
+                  <label className="pk-edit-name" htmlFor="pk-amount">
+                    What did your paystub say from {primary.name}?
+                  </label>
+                  <p className="pk-edit-note">
+                    Type the amount before taxes are taken out. It is on the paper
+                    or email your job sends you when they pay you.
+                  </p>
+                  <input
+                    id="pk-amount"
+                    name="amount"
+                    inputMode="decimal"
+                    type="text"
+                    autoFocus
+                    placeholder="Numbers only"
+                    className="pk-btn pk-edit-field"
+                    style={{ marginTop: 6 }}
+                    value={payValue}
+                    onChange={(event) => setPayValue(event.currentTarget.value)}
+                  />
+                  {ui.payBasis !== 'paystub' ? (
+                    <div className="pk-prompt">
+                      <p className="pk-prompt-title">Do you want to enter paystubs from now on?</p>
+                      <div className="pk-prompt-choices">
+                        <button
+                          type="button"
+                          className="pk-prompt-btn"
+                          data-selected={fromNowOn ? '' : undefined}
+                          onClick={() => setFromNowOn(true)}
+                        >
+                          Yes, from now on
+                        </button>
+                        <button
+                          type="button"
+                          className="pk-prompt-btn"
+                          data-selected={!fromNowOn ? '' : undefined}
+                          onClick={() => setFromNowOn(false)}
+                        >
+                          Just this time
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <button
+                      type="submit"
+                      className="pk-log"
+                      style={{ flex: '1 1 auto' }}
+                      disabled={!valid}
+                    >
+                      Save this pay
+                    </button>
+                    <button
+                      type="button"
+                      className="pk-btn"
+                      onClick={() => {
+                        setLogging(false);
+                        setPayValue('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className="pk-plain"
+                    onClick={() => {
+                      setBasis('bank');
+                      setPayValue('');
+                      setUi({ payBasis: 'bank' });
+                    }}
+                  >
+                    I only know what reached my bank
+                  </button>
+                </>
               )}
             </form>
           ) : (
-            <button type="button" className="pk-log" onClick={() => setLogging(true)}>
+            <button type="button" className="pk-log" onClick={startLogging}>
               I got paid
             </button>
           )
@@ -345,7 +463,7 @@ export function TrackerPocket() {
         <SettingsPanel
           theme={ui.theme}
           onTheme={(theme) => setUi({ theme })}
-          onOpenStatus={() => { setUi({ layout: 'responsive' }); setSettingsOpen(false); }}
+          onOpenStatus={() => { setUi({ layout: 'overview' }); setSettingsOpen(false); }}
           onReset={resetAll}
           onClose={() => setSettingsOpen(false)}
           layout={ui.layout}

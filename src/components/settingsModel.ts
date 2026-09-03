@@ -45,6 +45,7 @@ export type SettingsRowId =
   /* Appearance */
   | 'focusMode'
   | 'layout'
+  | 'overviewShell'
   | 'theme'
   | 'palette'
   | 'glass'
@@ -75,7 +76,7 @@ export const SETTINGS_SECTIONS: ReadonlyArray<SettingsSection> = [
   {
     id: 'appearance',
     title: 'Appearance',
-    rows: ['focusMode', 'layout', 'theme', 'palette', 'glass']
+    rows: ['focusMode', 'layout', 'overviewShell', 'theme', 'palette', 'glass']
   },
   {
     id: 'data',
@@ -119,6 +120,15 @@ export const SETTINGS_ROW: Readonly<Record<SettingsRowId, { label: string; help?
     help: 'Takes the charts and the calendars off the screen. Lists start at the month you are in.'
   },
   layout: { label: 'Layout' },
+  /* Sits directly under Layout because it is a property OF the layout above
+     it — the three things it chooses between used to be three entries in
+     that list. Only drawn while Overview is the layout; the row is skipped
+     otherwise rather than shown greyed out, because a control you cannot use
+     is a question you cannot answer. */
+  overviewShell: {
+    label: 'How Overview is laid out',
+    help: 'One long page, separate pages, or a job open beside the page you are on.'
+  },
   theme: { label: 'Theme' },
   palette: { label: 'Colour' },
   glass: {

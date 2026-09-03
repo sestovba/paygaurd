@@ -150,6 +150,26 @@ export function resolveScope(
   return chosen ?? defaultScope(focus, shape);
 }
 
+/**
+ * What the month list on screen actually covers, in words.
+ *
+ * el-16owyjf: "1 of 12 months" over a grid holding one row — the label was
+ * counting the calendar instead of the screen, so in focus mode it read as a
+ * page that had lost eleven rows. A section heading beside a month list has
+ * to answer "which period?" about the rows under it and nothing else, and
+ * that question has the same answer on every layout, so it is answered here
+ * rather than in each editor.
+ *
+ * Full month names: a unit or a period is the last word to shorten.
+ */
+export function monthsShownLabel(months: MonthKey[]): string {
+  if (months.length === 0) return 'No months';
+  if (months.length === 1) return longMonthName(months[0]);
+  if (months.length === 12) return 'All 12 months';
+  const ordered = [...months].sort();
+  return longMonthName(ordered[0]) + ' to ' + longMonthName(ordered[ordered.length - 1]);
+}
+
 export function monthOfDate(date: DateKey): MonthKey {
   return date.slice(0, 7);
 }

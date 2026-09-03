@@ -1,0 +1,10 @@
+{
+  "description": "Enhances user experience by delivering a superior, streamlined solution that outperforms existing alternatives, tailored for efficiency and ease of use.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

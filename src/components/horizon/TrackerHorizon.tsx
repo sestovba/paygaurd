@@ -63,7 +63,7 @@ import '../../styles/horizon.css';
 
 export function TrackerHorizon() {
   const { data, ui, setUi, resetAll } = useTracker();
-  useTheme(ui.theme);
+  useTheme(ui.theme, ui.palette);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [openMonth, setOpenMonth] = useState<MonthKey | null>(null);
@@ -166,7 +166,7 @@ export function TrackerHorizon() {
         <SettingsPanel
           theme={ui.theme}
           onTheme={(theme) => setUi({ theme })}
-          onOpenStatus={() => { setUi({ layout: 'responsive' }); setSettingsOpen(false); }}
+          onOpenStatus={() => { setUi({ layout: 'overview' }); setSettingsOpen(false); }}
           onReset={resetAll}
           onClose={() => setSettingsOpen(false)}
           layout={ui.layout}

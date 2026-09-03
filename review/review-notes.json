@@ -161,7 +161,7 @@
         "dark": false
       },
       "reviewId": "payguard-year-chart",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:335",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:353",
       "components": "PayGuardChart › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-income-chart",
       "hooks": "pg-card",
@@ -189,7 +189,7 @@
     "anchor": {
       "layout": "payguard",
       "page": "Jobs",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:270",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:285",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "main#pg-main > section.pg-status-hero",
       "hooks": "pg-status-hero",
@@ -199,7 +199,7 @@
     "createdAt": "2026-08-31T02:24:25.794Z",
     "updatedAt": "2026-09-01T19:32:41.521Z",
     "comment": "This whole hero says three things where one would do — show the month, the limit, and the room left.",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -301,7 +301,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:206",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:207",
       "components": "PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-job-xim6tp16ktmtg4qacf > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)",
       "hooks": "pg-rule-b pg-surface-quiet",
@@ -341,7 +341,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:350",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:370",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs",
       "hooks": "pg-tabs",
@@ -351,7 +351,7 @@
     "createdAt": "2026-09-01T01:08:48.638Z",
     "updatedAt": "2026-09-01T19:32:41.521Z",
     "verdict": "approved",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -373,7 +373,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:270",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:285",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "main#pg-main > section.pg-status-hero",
       "hooks": "pg-status-hero",
@@ -386,7 +386,7 @@
       "edge": "left",
       "at": "2026-08-31T03:04:45.811Z"
     },
-    "found": "unknown"
+    "found": "present"
   },
   "payguard-monthly-analysis": {
     "id": "payguard-monthly-analysis",
@@ -623,7 +623,7 @@
         "dark": false
       },
       "reviewId": "ledger-scroll-top",
-      "source": "src/components/ledger/TrackerLedger.tsx:163",
+      "source": "src/components/ledger/TrackerLedger.tsx:169",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div.lg-header-actions:nth-of-type(2) > div:nth-of-type(2) > div",
       "text": "TOP Scroll-to-top button",
@@ -708,7 +708,7 @@
         "at": "2026-09-01T06:32:45.871Z"
       }
     ],
-    "found": "unknown"
+    "found": "present"
   },
   "ledger-stat-ytd": {
     "id": "ledger-stat-ytd",
@@ -896,7 +896,7 @@
     "status": "done",
     "anchor": {
       "layout": "responsive",
-      "source": "src/components/TrackerV3.tsx:990",
+      "source": "src/components/TrackerV3.tsx:970",
       "sourceLine": "id=\"v3-recent-activity\""
     },
     "createdAt": "2026-09-01T04:41:28.742088Z",
@@ -1371,7 +1371,7 @@
         "dark": false
       },
       "reviewId": "ledger-year-chart",
-      "source": "src/components/ledger/TrackerLedger.tsx:241",
+      "source": "src/components/ledger/TrackerLedger.tsx:247",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(2)",
       "hooks": "lg-border-b",
@@ -1611,7 +1611,7 @@
     "createdAt": "2026-09-01T18:32:54.209Z",
     "updatedAt": "2026-09-01T19:33:29.232Z",
     "comment": "I need your critical thinking, this looks wrong, please make some changes for this to make sense with just one month",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -1745,7 +1745,7 @@
     "createdAt": "2026-09-01T18:39:13.458Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "I cant follow that title, its jargon and abbreviations.",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -1906,7 +1906,7 @@
     "createdAt": "2026-09-01T18:47:05.256Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "That makes my head hurt, we changed to one month but its only a filter applied its a yearly calendar that has other years, I am not saying its bad, it just needs a second look for some redesign of the component for it to start making sense",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -1934,7 +1934,7 @@
     "createdAt": "2026-09-01T18:48:14.340Z",
     "updatedAt": "2026-09-01T19:33:29.232Z",
     "comment": "This does absolutely nothing when in focus mode.",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -2165,7 +2165,7 @@
     "anchor": {
       "layout": "v2",
       "page": "TWP / SGA",
-      "source": "src/components/StatusPage.tsx:43",
+      "source": "src/components/StatusPage.tsx:46",
       "components": "StatusPage › TrackerV2 › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > div > main > div > section:nth-of-type(1)",
       "text": "WHERE YOU STAND Substantial Gainful Activity Trial Work is used up. SGA is the working limit now — crossing it puts benefits at risk, not ju",
@@ -2174,7 +2174,7 @@
     "createdAt": "2026-09-01T19:02:59.060Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "Mute point, when TWP is exhausted I don't need any explanation or mention of it this section is reminding me about something thats no longer there redesign this or remove",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -2200,7 +2200,7 @@
     "createdAt": "2026-09-01T19:03:41.791Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "Maybe think about the name again, how about Work pay simulator, what the hell is safe work simulator that doesnt sound right",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -2270,7 +2270,7 @@
     "anchor": {
       "layout": "v2",
       "page": "TWP / SGA",
-      "source": "src/components/SafeWorkSimulator.tsx:44",
+      "source": "src/components/SafeWorkSimulator.tsx:47",
       "components": "SafeWorkSimulator › StatusPage › TrackerV2 › Root",
       "domPath": "div#root > div:nth-of-type(1) > div > main > div > section:nth-of-type(2) > h2",
       "text": "Stay below SGA",
@@ -2332,7 +2332,7 @@
     "createdAt": "2026-09-01T19:08:45.042Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "nice a long explanation is a symptom of bad design",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -2438,7 +2438,7 @@
     "createdAt": "2026-09-01T19:26:22.207Z",
     "updatedAt": "2026-09-01T20:09:11.217Z",
     "comment": "Too wordy, this should be a shared component I saw it in other versions and its unfinished",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -2515,7 +2515,7 @@
     "createdAt": "2026-09-01T19:35:01.662Z",
     "updatedAt": "2026-09-01T20:09:11.217Z",
     "comment": "We really really need more intelligence, the user has no idea what 3 & 5 paychecks are, we must make them aware, then convince to provide a pay day, then simulate or show why its bad. I wonder if we can do that easily. how? This is a nice start but far from the solution we need ideas.",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -2567,7 +2567,7 @@
     "createdAt": "2026-09-01T19:37:35.327Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "Income sources, my mind goes blank, just call it Income",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3126,7 +3126,7 @@
     "createdAt": "2026-09-01T05:34:38.957Z",
     "updatedAt": "2026-09-01T08:03:18.800Z",
     "hidden": true,
-    "found": "unknown"
+    "found": "present"
   },
   "el-1eggpcy": {
     "id": "el-1eggpcy",
@@ -3189,7 +3189,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:255",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:272",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1) > div:nth-of-type(1) > button.pg-btn",
       "hooks": "pg-btn",
@@ -3199,7 +3199,7 @@
     "createdAt": "2026-09-01T20:39:27.643Z",
     "updatedAt": "2026-09-02T03:01:50.557Z",
     "comment": "Bad copy, we need content strategist mindset combined with senior product designer thinking and UX architect",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3220,7 +3220,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:293",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:304",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "main#wr-main > div.wr-sheet > div.wr-phase-warning:nth-of-type(3)",
       "hooks": "wr-phase-warning",
@@ -3230,7 +3230,7 @@
     "createdAt": "2026-09-01T20:39:54.293Z",
     "updatedAt": "2026-09-01T21:11:54.256Z",
     "comment": "We are repeating ourselves multiple times this is bad design, which one is it\n\nBad copy, we need content strategist mindset combined with senior product designer thinking and UX architect",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3280,7 +3280,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:473",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:488",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2)",
       "hooks": "wr-slab-body",
@@ -3316,17 +3316,17 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:255",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:272",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn",
       "hooks": "pg-btn",
       "text": "Add another income source",
-      "sourceLine": "className=\"pg-btn mt-2.5\""
+      "sourceLine": "className=\"pg-btn mt-2\""
     },
     "createdAt": "2026-09-01T20:46:17.276Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "That is a long button",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3347,7 +3347,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:473",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:488",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-body:nth-of-type(2)",
       "hooks": "wr-slab-body",
@@ -3357,7 +3357,7 @@
     "createdAt": "2026-09-01T20:48:22.000Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "Same issue as the jobs section, we need high level thinking and I keep repeating myself for all layouts, we need more components that go across layouts but have custom preferences set only for the layout so that it can look different and have variants of the component but it should be the same thing and we should be using those global labels on the components etc",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3413,7 +3413,7 @@
         "dark": false
       },
       "reviewId": "workrecord-safe-work-simulator",
-      "source": "src/components/SafeWorkSimulator.tsx:44",
+      "source": "src/components/SafeWorkSimulator.tsx:47",
       "components": "SafeWorkSimulator › WorkRecordStatus › Slab › TrackerWorkRecord",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div:nth-of-type(2) > section",
       "text": "WORK PAY SIMULATOR We need your limit first Hours only mean something against a limit, and yours is not set yet. Answer the status questions",
@@ -3422,7 +3422,7 @@
     "createdAt": "2026-09-01T20:50:28.177Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "How much more redundant can we be? Holy moly, bad bad bad design",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3444,7 +3444,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:149",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:153",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(1)",
       "hooks": "pg-card",
@@ -3476,7 +3476,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:149",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:153",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2)",
       "hooks": "pg-card",
@@ -3513,7 +3513,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:428",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:446",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2) > p.pg-rule-t.pg-surface-2",
       "hooks": "pg-rule-t pg-surface-2 pg-muted",
@@ -3523,7 +3523,7 @@
     "createdAt": "2026-09-01T20:53:37.314Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I dont even want to read this its so wordy",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3545,7 +3545,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/SafeWorkSimulator.tsx:44",
+      "source": "src/components/SafeWorkSimulator.tsx:47",
       "components": "SafeWorkSimulator › PayGuardAnalysis › TrackerPayGuard › Root",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2) > div.pg-rule-t:nth-of-type(3) > section",
       "text": "WORK PAY SIMULATOR We need your limit first Hours only mean something against a limit, and yours is not set yet. Answer the status questions",
@@ -3554,7 +3554,7 @@
     "createdAt": "2026-09-01T20:53:57.192Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I dont understand at a glance what is the problem I clicked on simulator and this what the heck as a user",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3575,7 +3575,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:203",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:204",
       "components": "PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-job-9sdmeowi1rjmtgsuchl",
       "hooks": "pg-card",
@@ -3636,7 +3636,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:111",
+      "source": "src/components/ledger/TrackerLedger.tsx:117",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1)",
       "hooks": "lg-header-bar",
@@ -3677,7 +3677,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:111",
+      "source": "src/components/ledger/TrackerLedger.tsx:117",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > header.lg-border-b",
       "hooks": "lg-border-b",
@@ -3687,7 +3687,7 @@
     "createdAt": "2026-09-01T20:56:23.225Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "after making those changes we need to refactor the headers into one header",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3708,7 +3708,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:201",
+      "source": "src/components/ledger/TrackerLedger.tsx:207",
       "components": "StatTile › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div.lg-stat-tile:nth-of-type(2)",
       "hooks": "lg-stat-tile",
@@ -3718,7 +3718,7 @@
     "createdAt": "2026-09-01T20:56:56.755Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I like this honestly but its taking up too much space for what it is",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3739,7 +3739,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:236",
+      "source": "src/components/ledger/TrackerLedger.tsx:242",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-precision.lg-border-b:nth-of-type(2)",
       "hooks": "lg-precision lg-border-b",
@@ -3749,7 +3749,7 @@
     "createdAt": "2026-09-01T20:57:24.608Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "wow, bad alignment also see other comments",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3770,7 +3770,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:253",
+      "source": "src/components/ledger/TrackerLedger.tsx:259",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-tabbar:nth-of-type(1)",
       "hooks": "lg-tabbar",
@@ -3812,7 +3812,7 @@
     "createdAt": "2026-09-01T20:59:48.743Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I understand the importance of the lock icon but is it really that important to be there always?",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3884,7 +3884,7 @@
     "createdAt": "2026-09-01T21:19:54.936Z",
     "updatedAt": "2026-09-01T22:42:43.849Z",
     "comment": "this is the most confusing feature, we ask user for input, it stays here, but we don't explain why what its for and how to use it. high level thinking needed on what is this really",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3915,7 +3915,7 @@
     "createdAt": "2026-09-01T21:20:38.518Z",
     "updatedAt": "2026-09-01T22:42:43.849Z",
     "comment": "isnt that already in this section? this is an explanation block about a few blocks before?",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -4080,7 +4080,7 @@
     "createdAt": "2026-09-01T21:34:02.329Z",
     "updatedAt": "2026-09-01T21:37:04.854Z",
     "comment": "\"Limit unknown\" is a dead end sitting at the top of the screen. It names a gap and stops. It does not say what it costs me — that every figure underneath it is an average, not mine — and \"Set up\" does not say what I would be setting up or how long it takes. This is the precision gauge again, same as the one we fixed in classic: the trade is \"answer a few questions and these numbers become yours\". Say the cost, then make the offer, and give it the dashed Estimated mark so it matches the rest of the language.",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -4455,7 +4455,7 @@
     "createdAt": "2026-09-01T22:07:47.820Z",
     "updatedAt": "2026-09-02T01:04:19.913528Z",
     "comment": "Also limits",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -5214,7 +5214,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:206",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:207",
       "components": "PayGuardJobEditor › Slab › TrackerWorkRecord › Root",
       "domPath": "div#pg-job-64y68kf0n8mtey12tw > div.pg-rule-b:nth-of-type(1)",
       "hooks": "pg-rule-b",
@@ -5336,7 +5336,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:465",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:480",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-head:nth-of-type(1)",
       "hooks": "wr-slab-head",
@@ -5524,7 +5524,7 @@
     "reason": "At a 375px viewport the Ledger layout's document is 522px wide, so every page and every modal on top of it sits partly off-screen to the right — the Settings sheet loses its left edge, headings included. Cause: .lg-header-actions in src/styles/ledger.css is flex-shrink: 0, so the row of header buttons (Collapse all, notifications, Undo, Top, Settings) refuses to shrink and sets the page width. It carries flex-wrap in the class list at src/components/ledger/TrackerLedger.tsx:129, which never gets to wrap while the container cannot narrow.\n\nRaised by: measured in the running app while verifying the settings order change. Not caused by it — nothing in that change touches this header.",
     "anchor": {
       "layout": "ledger",
-      "source": "src/styles/ledger.css:153",
+      "source": "src/styles/ledger.css:127",
       "hooks": "lg-header-actions",
       "components": "TrackerLedger",
       "sourceLine": ".lg-header-actions {"
@@ -5588,7 +5588,7 @@
     "anchor": {
       "layout": "global",
       "page": "Review console",
-      "source": "src/review/ReviewProvider.tsx:76",
+      "source": "src/review/ReviewProvider.tsx:80",
       "components": "ReviewProvider",
       "domPath": "",
       "text": "Go through N · the one-at-a-time pass",
@@ -5632,7 +5632,7 @@
     "status": "done",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/StreamsSection.tsx:798",
+      "source": "src/components/calc20/StreamsSection.tsx:804",
       "components": "AddButtons › StreamsSection › Section › TrackerApp",
       "domPath": "div:nth-of-type(1) > div > div > section:nth-of-type(1) > div:nth-of-type(2) > div.stream-footer:nth-of-type(3) > div.stream-add > div.stream-add__row",
       "hooks": "stream-add__row",
@@ -5713,7 +5713,7 @@
     "status": "done",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/StreamsSection.tsx:698",
+      "source": "src/components/calc20/StreamsSection.tsx:704",
       "components": "StreamCardFrame › StreamsSection › Section › TrackerApp",
       "domPath": "section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div.stream-grid > div.stream-card.stream-card--grid:nth-of-type(1) > div.stream-card__head:nth-of-type(1) > span.stream-card__badge.stream-card__badge--warn:nth-of-type(2) > span.stream-card__badge-text",
       "hooks": "stream-card__badge-text",
@@ -5808,7 +5808,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:255",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:272",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn",
       "hooks": "pg-btn",
@@ -5818,7 +5818,7 @@
     "createdAt": "2026-09-02T04:11:39.597Z",
     "updatedAt": "2026-09-02T04:11:39.597Z",
     "comment": "This button deserves margin on left and right",
-    "found": "present"
+    "found": "absent"
   },
   "el-gok3sr": {
     "id": "el-gok3sr",
@@ -5832,7 +5832,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:158",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:167",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-payguard.pg-workrecord:nth-of-type(1)",
       "hooks": "pg-payguard pg-workrecord",
@@ -5875,7 +5875,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:435",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:439",
       "components": "SectionHead › PayGuardJobEditor › TrackerPayGuard › Root",
       "domPath": "div#pg-job-5ccbjkfzo3pmtjhz3bn > div.pg-section-head:nth-of-type(5) > span > button.pg-btn.pg-btn-sm",
       "hooks": "pg-btn pg-btn-sm pg-btn-ghost pg-accent",
@@ -5899,7 +5899,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:174",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:189",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-payguard.pg-page-pad:nth-of-type(1)",
       "hooks": "pg-payguard pg-page-pad",
@@ -5927,7 +5927,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:403",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:421",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2) > div:nth-of-type(1)",
       "text": "How many hours could I work? Use your hourly rate to find a weekly target, including an extra-paycheck month. Close",
@@ -5954,7 +5954,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:155",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:172",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(1) > header.pg-rule-b.pg-surface-quiet",
       "hooks": "pg-rule-b pg-surface-quiet",
@@ -5964,7 +5964,7 @@
     "createdAt": "2026-09-02T04:29:02.292Z",
     "updatedAt": "2026-09-02T04:29:02.292Z",
     "comment": "no background or line and less padding bottom",
-    "found": "present"
+    "found": "absent"
   },
   "el-446101": {
     "id": "el-446101",
@@ -6003,7 +6003,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:111",
+      "source": "src/components/ledger/TrackerLedger.tsx:117",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1)",
       "hooks": "pg-ledger",
@@ -6050,7 +6050,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerAnalysis.tsx:277",
+      "source": "src/components/ledger/LedgerAnalysis.tsx:274",
       "components": "LedgerAnalysis › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-analysis:nth-of-type(5) > div.lg-analysis-pad.lg-border-t:nth-of-type(4) > button.lg-btn",
       "hooks": "lg-btn",
@@ -6060,7 +6060,7 @@
     "createdAt": "2026-09-02T04:33:06.060Z",
     "updatedAt": "2026-09-02T04:33:06.060Z",
     "comment": "This is the worst name I mentioned my frustration before, we are not confusing our users, what does safe mean? what does that have to do with anything",
-    "found": "present"
+    "found": "absent"
   },
   "task-settings-one-model": {
     "kind": "comment",
@@ -6168,7 +6168,7 @@
     "reason": "Unifying the two settings screens meant picking one wording for the data buttons — they read \"Export JSON\" in nine layouts and \"Export tracker JSON\" in calc20 — and I picked the one nine layouts already show, because choosing new words is a copy decision and not part of a merge. It is still the wrong wording by this project's own rule: JSON is a word for programmers, and someone on SSDI looking to keep a copy of their earnings before wiping a phone is not looking for a JSON file. Something like \"Save a copy\" / \"Load a saved copy\" says what the buttons do. One edit in SETTINGS_ROW reaches both screens now.\n\nRaised by: unifying the settings screens.",
     "anchor": {
       "layout": "ledger",
-      "source": "src/components/settingsModel.ts:96",
+      "source": "src/components/settingsModel.ts:97",
       "text": "Export JSON",
       "sourceLine": "* read \"Export JSON\" in nine layouts and \"Export tracker JSON\" in calc20."
     }
@@ -6355,7 +6355,7 @@
       "source": "src/domain/copy.ts (near line ?, unverified)"
     },
     "createdAt": "2026-09-02T15:44:04.330788Z",
-    "updatedAt": "2026-09-02T15:44:04.330788Z",
+    "updatedAt": "2026-09-02T22:19:17.548986Z",
     "reason": "A full content pass across every layout, asked for as \"tighten content meanings so that the person reading will not wonder, what does this text mean? give less room for error\".\n\nThe finding worth keeping is that most of what was wrong was not a bad word — it was a missing one. Four questions a label has to answer, and the failures each one prevents:\n\nWHICH NUMBER? \"Earned\", \"Amount\", \"Total\", \"Gross\" — before tax or after? These differ by hundreds of dollars against a limit measured in hundreds. Largest single class of defect, and the reason task-net-and-gross-two-doors mattered.\nWHICH PERIOD? \"Total\", \"so far\", \"YTD\" were each doing duty for this month, this year, and since-you-started. Now periodLabel().\nOF WHAT? \"$162 left\" was printed by six files and four of them never said what it was left of. \"vs SGA\"/\"vs TWP\" were columns of distances to a destination the reader has never been shown. Now roomLine/overLine.\nSO WHAT? \"Over your limit\" is a fact; \"Earning this much can stop your monthly payments\" is the fact and the stake.\n\nLanded: no abbreviation reaches any screen on any of the ten layouts (verified in the running app by sweeping rendered innerText for TWP, SGA, YTD, IRWE, Gross, Countable, hrs, /hr, /mi, h/wk, W-2, 1099 — zero hits on ledger, payguard, workrecord). Units are spelled out including in domain/format.ts and plan's own unit chips. Idioms are gone: \"on course\", \"clean slate\", \"on track\", \"Play it safe\", \"to safe\", \"closer to the line\".\n\nTwo structural fixes fell out of it rather than being copy at all:\n- payguard's chart drew both limit lines, labelled \"SGA $1,690\" and \"TWP $1,210\". The ledger's chart had been fixed for exactly this and payguard had not, so the two layouts contradicted each other. It takes a `limit` prop now, same as LedgerChart, and draws one line.\n- ledger's analysis table had twin \"vs SGA\" and \"vs TWP\" columns — half of every row about a rule that does not apply. One column, \"Against your limit\".",
     "found": "unknown",
     "thread": [
@@ -6363,6 +6363,16 @@
         "from": "claude",
         "text": "Files: src/domain/{copy,format,attention,notifications,precision,types}.ts; src/components/{PayAmount,MonthSheet,StreamSheet,MonthGrid,SafetyHero,PrecisionLine,PaycheckRadar,SafeWorkSimulator,StatusSheet,PageNav,StreamsPanel,Onboarding,TwpWizard,TwpStatusPicker,HelpSpread,TermsContent,settingsModel,SettingsPanel,TrackerV2,TrackerV3}.tsx; ledger/{LedgerAnalysis,LedgerChart,LedgerJobEditor,TrackerLedger}; payguard/{TrackerPayGuard,PayGuardAnalysis,PayGuardChart,PayGuardJobEditor,payguardData}; workrecord/{WorkRecordStatus,WorkRecordMonths,TrackerWorkRecord}; calc20/{MonthSheet,MonthGrid,SafeWorkSimulator,SettingsSheet,StatusSection,StreamsSection,StreamSettingsSheet,TotalsByMonth,TrackerCalc20,PaycheckLedger,TermsContent,TwpStatusControl,Header,state}; horizon/HorizonRunway; plan/TrackerPlan + styles/plan.css; pocket/TrackerPocket; state/TrackerProvider.tsx.",
         "at": "2026-09-02T15:44:04.330788Z"
+      },
+      {
+        "from": "claude",
+        "at": "2026-09-02T22:10:59.232238Z",
+        "text": "Verification finished — all ten layouts checked in the running app, not just typechecked.\n\nThe two I could not reach last time (calc20 and pocket, blocked by the half-landed scope refactor) are done, and calc20 was carrying residue the source scan had missed because the strings were assembled rather than literal:\n\n- \"SEPTEMBER COUNTABLE\" and \"countable this month\" — the banned word, in the largest label on the layout and on the month sheet's hero.\n- \"$378 of room\" — a distance with no destination, in the headline.\n- totalLabel() returned literally 'gross' / 'net' — the two words the copy rule bans by name — printed under the biggest figure on every job card. Now \"before taxes\" / \"after your miles\".\n- The job type badge read \"W2\" (no hyphen), which is why the earlier regex sweep missed it.\n\nSame class of miss in the shared StreamsPanel, so classic, v2 and responsive all showed a \"W-2\" / \"1099\" chip beside every job name. Both now read from SOURCE_SHORT.\n\nOne duplication I introduced and then fixed: once the badge said \"Employer\", the sub-line under it said \"Employer · 0 hours\" too, so the card read \"Employer / EMPLOYER · 0 HOURS\". The sub-line drops the type word now and carries only what the badge cannot — the hours, and what the miles took off.\n\nFinal state: zero banned words in the rendered text of classic, v2, responsive, ledger, payguard, workrecord, calc20, horizon, pocket and plan. Typecheck clean."
+      },
+      {
+        "from": "claude",
+        "at": "2026-09-02T22:19:17.548986Z",
+        "text": "Second verification pass — the sheets and panels, which the first pass never saw.\n\nWorth writing down, because it is the reason this pass existed: sweeping each layout only ever renders its default view. Every editor, sheet and settings panel is behind a click, and that is where nearly all the money-entry copy lives. Nine more defects, all in surfaces that had \"passed\":\n\n- StreamSheet said \"Active means we also expect more of it\" while the control beside it offers Current / Paused / Ended. The reader was sent to look for a button that does not exist.\n- StatusPage: \"6 left in the current 60-month window\" and \"the oldest one ages out November 2030\" — a unit of time nobody counts in, and caseworker idiom for a month no longer being held against you. Now \"6 left, across any 5 years\" and \"stops counting in\".\n- The extra-paycheck warning read \"Cafe shift: May and October have 3.\" Three of what. Now \"pay you 3 times\".\n- calc20 month cells: \"260mi\", \"36h\". Now \"260 miles\", \"36 hours\" — measured in the browser, no overflow.\n- \"That is what SSA does when income can't be tied to a month\", in three files. Now Social Security, spelled out.\n- HelpSpread: \"a lot less than what the app paid you\" — inside an app, that reads as this app paying them. Now \"the amount that landed in your account\".\n- HelpSpread mileage rates: \"Jan–Jun $0.725/mile\". Now \"January to June: $0.725 a mile\".\n- StreamSheet payday field: \"Any payday (from a paystub, preferred)\". Now \"Any one payday — from a paystub if you have one\".\n- One I caused: making the quiz step title a question left the field under it asking the same question in different words. The field is a plain label again.\n\nSurfaces now verified in the running app, not just typechecked: all ten layouts, both job editors, the month sheet with the two-mode pay control exercised end to end, Settings, the limit page and simulator, the whole trial-work quiz, and the help sheet. Typecheck clean."
       }
     ]
   },
@@ -6393,16 +6403,22 @@
     "kind": "comment",
     "origin": "suggested",
     "label": "Plan gauge: \"Play it safe\" changed to \"Aim for this\" — check me on this one",
-    "status": "open",
+    "status": "done",
     "anchor": {
       "layout": "global",
       "source": "src/components/plan/TrackerPlan.tsx (near line ?, unverified)"
     },
     "createdAt": "2026-09-02T15:44:04.330788Z",
-    "updatedAt": "2026-09-02T15:44:04.330788Z",
+    "updatedAt": "2026-09-02T22:19:17.548986Z",
     "reason": "Flagging rather than burying it, because it edits something that was approved by name.\n\ntask-plan-gauge-label landed \"PLAY IT SAFE\" above the green rule and you accepted it. The content audit changed it to \"Aim for this\", in two places (the line key and the tag on the gauge itself), for one reason: \"play it safe\" is an idiom, and the product's own copy rule says there are none — it is also the only label on that gauge that does not say what the number under it is, where \"Do not cross $1,210\" does.\n\nIf you prefer the original, it is two strings in src/components/plan/TrackerPlan.tsx and I will put it back. The idiom rule is mine to apply; the flagship's voice is yours.",
     "found": "unknown",
-    "thread": []
+    "thread": [
+      {
+        "from": "claude",
+        "at": "2026-09-02T22:19:17.548986Z",
+        "text": "Answered: \"Aim for this? Target amount\". It is TARGET AMOUNT now, in both places on the plan gauge — the line key and the tag above the safety rule.\n\nYour word is better than mine for the reason the note was filed in the first place: \"Aim for this\" removed the idiom but still did not say what the number was. \"Target amount\" names the figure, and it sits properly beside DO NOT CROSS.\n\nCarried to the vocabulary rather than left as two strings: the `target` key in src/domain/copy.ts is 'Target amount' now, so any layout that names this concept gets your word. The prose form stays as it is — SafetyHero still says \"the $1,000 we aim for\" inside a sentence — which is the one thing a tone is explicitly allowed to vary. Same fact, same number, two registers."
+      }
+    ]
   },
   "task-settingspanel-temp-verify": {
     "id": "task-settingspanel-temp-verify",
@@ -6425,16 +6441,22 @@
     "kind": "comment",
     "origin": "suggested",
     "label": "MonthScope refactor has landed the domain and not the call sites — tree is red",
-    "status": "open",
+    "status": "done",
     "anchor": {
       "layout": "global",
       "source": "src/domain/months.ts (near line ?, unverified)"
     },
     "createdAt": "2026-09-02T15:44:04.330788Z",
-    "updatedAt": "2026-09-02T15:44:04.330788Z",
+    "updatedAt": "2026-09-02T22:10:59.232238Z",
     "reason": "Recording state, not blaming it: another session is mid-refactor in this repo and the tree does not typecheck right now.\n\nsrc/domain/months.ts and src/state/storage.ts were changed at 08:40 to replace `listedMonths` and `UiState.hideFuture` with a scope system (`MonthScope`, `scopedMonths`, `resolveScope`, `MONTH_SCOPES`, `UiState.monthScope`). The domain half is in; the call sites are not. 54 typecheck errors, every one of them cascading from the two removed exports:\n\nMonthGrid, PayGuardAnalysis, LedgerAnalysis, WorkRecordMonths, TrackerWorkRecord, PayGuardJobEditor, LedgerJobEditor, calc20/{state,MonthGrid,MonthSquares,MonthHotbar,TotalsByMonth}.\n\nThe content pass in this session typechecked green immediately before that change and adds no use of either removed export — verified against the diff. Left alone deliberately: finishing someone else's migration from the outside is how two half-migrations become one broken one. Whoever owns the scope refactor should land the call sites.",
     "found": "unknown",
-    "thread": []
+    "thread": [
+      {
+        "from": "claude",
+        "at": "2026-09-02T22:10:59.232238Z",
+        "text": "Closed — the scope refactor landed its call sites and the tree typechecks clean (0 errors). Recording it because the note claimed a broken tree and that claim is no longer true; leaving it open would have the next session chasing a fault that is fixed."
+      }
+    ]
   },
   "el-1unfudl": {
     "id": "el-1unfudl",
@@ -6457,6 +6479,290 @@
     "updatedAt": "2026-09-02T16:08:10.811Z",
     "found": "unknown"
   },
+  "el-utsyus": {
+    "id": "el-utsyus",
+    "kind": "comment",
+    "origin": "user",
+    "label": "2026 work record",
+    "comment": "For mobile attached is current on left and desired on right, mostly scaling input sizes by about 30%",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:187",
+      "components": "TrackerWorkRecord › Root › TrackerProvider › App",
+      "domPath": "div#root > div.pg-payguard.pg-workrecord:nth-of-type(1) > header.pg-topbar > div",
+      "text": "SSDI INCOME TRACKER 2026 work record 2021 2022 2023 2024 2025 2026 1 NOTICE",
+      "sourceLine": "SSDI income tracker"
+    },
+    "createdAt": "2026-09-02T18:58:24.582Z",
+    "updatedAt": "2026-09-02T18:58:24.582Z",
+    "found": "present"
+  },
+  "el-1wkyukh": {
+    "id": "el-1wkyukh",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Tell us where you stand",
+    "comment": "increase height by 30%",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:275",
+      "components": "TrackerWorkRecord › Root › TrackerProvider › App",
+      "domPath": "main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1) > div:nth-of-type(1) > button.pg-btn",
+      "hooks": "pg-btn",
+      "text": "Tell us where you stand",
+      "sourceLine": "Tell us where you stand"
+    },
+    "createdAt": "2026-09-02T19:00:34.028Z",
+    "updatedAt": "2026-09-02T19:00:34.028Z",
+    "found": "present"
+  },
+  "el-1wzfn6q": {
+    "id": "el-1wzfn6q",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Since",
+    "comment": "height of all elements should increase by 30% in mobile",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:207",
+      "components": "PayGuardJobEditor › Slab › TrackerWorkRecord › Root",
+      "domPath": "div#pg-job-9wuhcbsxggmtkgow2q > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)",
+      "hooks": "pg-rule-b pg-surface-quiet",
+      "text": "ONGOING PAUSED ENDED Since",
+      "sourceLine": "<div className=\"flex flex-wrap items-center justify-between gap-x-2.5 gap-y-2 pg-rule-b px-2.5 py-2.5 sm:px-3.5 sm:py-3\">"
+    },
+    "createdAt": "2026-09-02T19:04:01.696Z",
+    "updatedAt": "2026-09-02T19:04:01.696Z",
+    "found": "present"
+  },
+  "el-pn7pyu": {
+    "id": "el-pn7pyu",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Collapse all jobs",
+    "comment": "make it as tall as the bar no padding around \nin mobile",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:222",
+      "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
+      "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-head:nth-of-type(1) > button.pg-icon-btn.pg-icon-btn-bordered:nth-of-type(2)",
+      "hooks": "pg-icon-btn pg-icon-btn-bordered",
+      "sourceLine": "className=\"pg-icon-btn pg-icon-btn-bordered\""
+    },
+    "createdAt": "2026-09-02T19:04:58.180Z",
+    "updatedAt": "2026-09-02T19:04:58.180Z",
+    "found": "unknown"
+  },
+  "el-1rrqycd": {
+    "id": "el-1rrqycd",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Answer a few questions",
+    "comment": "taller in mobile",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "reviewId": "workrecord-safe-work-simulator",
+      "source": "src/components/SafeWorkSimulator.tsx:120",
+      "components": "SafeWorkSimulator › WorkRecordStatus › Slab › TrackerWorkRecord",
+      "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div:nth-of-type(2) > section > button",
+      "text": "Answer a few questions",
+      "sourceLine": "Answer a few questions"
+    },
+    "createdAt": "2026-09-02T19:08:02.163Z",
+    "updatedAt": "2026-09-02T19:08:02.163Z",
+    "found": "present"
+  },
+  "el-1pwbj5g": {
+    "id": "el-1pwbj5g",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Review status",
+    "comment": "taller iin mobile",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/WorkRecordStatus.tsx:119",
+      "components": "WorkRecordStatus › Slab › TrackerWorkRecord › Root",
+      "domPath": "div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div.pg-card:nth-of-type(1) > div > div:nth-of-type(1) > button.pg-btn",
+      "hooks": "pg-btn",
+      "text": "Review status",
+      "sourceLine": "Review status"
+    },
+    "createdAt": "2026-09-02T19:08:23.809Z",
+    "updatedAt": "2026-09-02T19:08:23.809Z",
+    "found": "unknown"
+  },
+  "el-163xksx": {
+    "id": "el-163xksx",
+    "kind": "comment",
+    "origin": "user",
+    "label": "This month So far this year Rest of the year All",
+    "comment": "taler in mobile\n\nMonthly history should have option of none on all layouts\n\nDefault should be for all as rest of the year",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/MonthScopePicker.tsx:21",
+      "components": "MonthScopePicker › Slab › TrackerWorkRecord › Root",
+      "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-head:nth-of-type(1) > label.pg-field.pg-field-sm",
+      "hooks": "pg-field pg-field-sm",
+      "text": "This month So far this year Rest of the year All year",
+      "sourceLine": "month: 'This month',"
+    },
+    "createdAt": "2026-09-02T19:08:51.530Z",
+    "updatedAt": "2026-09-02T19:14:55.958Z",
+    "found": "present"
+  },
+  "el-1x7v1ur": {
+    "id": "el-1x7v1ur",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Add",
+    "comment": "taller in mobile",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:272",
+      "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
+      "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn",
+      "hooks": "pg-btn",
+      "text": "Add",
+      "sourceLine": "className=\"pg-btn mt-2\""
+    },
+    "createdAt": "2026-09-02T19:09:17.851Z",
+    "updatedAt": "2026-09-02T19:09:17.851Z",
+    "found": "present"
+  },
+  "el-g3v7f0": {
+    "id": "el-g3v7f0",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Your limit",
+    "comment": "spasams in low scroll window",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/Sheet.tsx:17",
+      "components": "Sheet › StatusSheet › TrackerWorkRecord › Root",
+      "domPath": "div#root > div.pg-payguard.pg-workrecord:nth-of-type(1) > div > div > div > div:nth-of-type(2)",
+      "text": "WHERE YOU STAND RIGHT NOW Your limit",
+      "sourceLine": "export function Sheet({"
+    },
+    "createdAt": "2026-09-02T19:10:20.597Z",
+    "updatedAt": "2026-09-02T19:10:20.597Z",
+    "found": "present"
+  },
+  "el-70vcxu": {
+    "id": "el-70vcxu",
+    "kind": "comment",
+    "origin": "user",
+    "label": "September countable",
+    "comment": "we dont need this round chocolate bar header, it should just feel like its floating there in this area no shadows or rounding or outline",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:250",
+      "components": "TrackerWorkRecord › Root › TrackerProvider › App",
+      "domPath": "main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1)",
+      "hooks": "wr-headline",
+      "text": "SEPTEMBER COUNTABLE $0 of $1,210 · $1,210 of room TRIAL WORK MONTHS LEFT 9of 9",
+      "sourceLine": "<section className=\"wr-headline\" aria-labelledby=\"wr-current-month\">"
+    },
+    "createdAt": "2026-09-02T19:11:23.162Z",
+    "updatedAt": "2026-09-02T19:11:23.162Z",
+    "found": "present"
+  },
+  "el-aa4auv": {
+    "id": "el-aa4auv",
+    "kind": "comment",
+    "origin": "user",
+    "label": "1 notice needs attention",
+    "comment": "contrast issues",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/NotificationsBell.tsx:20",
+      "components": "NotificationsBell › TrackerWorkRecord › Root › TrackerProvider",
+      "domPath": "button#notifications-bell-anchor",
+      "text": "1 NOTICE",
+      "sourceLine": "export function NotificationsBell({"
+    },
+    "createdAt": "2026-09-02T19:11:44.481Z",
+    "updatedAt": "2026-09-02T19:11:44.481Z",
+    "found": "present"
+  },
+  "el-1vjj21x": {
+    "id": "el-1vjj21x",
+    "kind": "comment",
+    "origin": "user",
+    "label": "Sep",
+    "comment": "If calendars have fill background containers needs a similar shade fill so that it doesn’t look weird all themes",
+    "status": "sent",
+    "anchor": {
+      "layout": "workrecord",
+      "theme": {
+        "sub": "calc20",
+        "dark": false
+      },
+      "source": "src/components/workrecord/WorkRecordMonths.tsx:52",
+      "components": "WorkRecordMonths › Slab › TrackerWorkRecord › Root",
+      "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-body:nth-of-type(2) > div.pg-card > div.pg-month-grid:nth-of-type(1)",
+      "hooks": "pg-month-grid",
+      "text": "SEP — AUG — JUL — JUN — MAY — APR — MAR — FEB — JAN —",
+      "sourceLine": "<div className=\"pg-month-grid\">"
+    },
+    "createdAt": "2026-09-02T19:15:15.247Z",
+    "updatedAt": "2026-09-02T19:15:15.247Z",
+    "found": "present"
+  },
   "task-workrecord-quiet-first-screen": {
     "id": "task-workrecord-quiet-first-screen",
     "kind": "comment",
@@ -6465,18 +6771,738 @@
     "status": "done",
     "anchor": {
       "layout": "workrecord",
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx"
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx (near line ?, unverified)"
     },
     "createdAt": "2026-09-02T19:18:55.967Z",
     "updatedAt": "2026-09-02T19:18:55.967Z",
     "reason": "The first screen split one monthly answer across a figure, an “of” line, a separate standings block, a separate precision band, and an open month history. That made the layout the noisiest alternative even though its record-book structure is sound.",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
         "text": "Done. src/components/workrecord/TrackerWorkRecord.tsx now presents one monthly status beside the amount, with the exact limit relationship directly beneath it; trial-month capacity and precision remain as supporting facts inside the same band. src/styles/workrecord.css establishes that hierarchy without color-mix or a web font, and src/state/storage.ts leaves Monthly history closed by default so the same month is not immediately repeated below the headline.",
         "at": "2026-09-02T19:18:55.967Z"
       }
+    ]
+  },
+  "task-console-shots-back": {
+    "id": "task-console-shots-back",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Screenshots on a note",
+    "reason": "Attaching a screenshot to a comment was cut in the console rebuild and the reviewer asked for it back — paste, drop, and a visible button.",
+    "comment": "Attaching a screenshot to a comment was cut in the console rebuild and the reviewer asked for it back — paste, drop, and a visible button.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Restored. src/review/types.ts carries shots?: string[] again; src/review/store.ts has uploadShot(); vite.review-plugin.ts serves /__review/shot and writes review/shots/. In src/review/ReviewProvider.tsx the composer holds shots, takes them by paste (textarea), by drop anywhere on the card, and by a Screenshot button beside the tags; thumbnails with a remove X sit under the box and on the opened note row. markdown.ts actionable() now counts a note carrying only a picture. Verified live: dropped a PNG, it saved to review/shots and served 200 as image/png.",
+        "at": "2026-09-02T22:18:53.953Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/review/ReviewProvider.tsx (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:18:53.953Z",
+    "updatedAt": "2026-09-02T22:18:53.953Z",
+    "found": "unknown"
+  },
+  "task-console-arrow-walk": {
+    "id": "task-console-arrow-walk",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Arrow keys walk the selection",
+    "reason": "Widening and narrowing the aim was only on [ and ]; the hand reaches for the arrows on a frozen selection.",
+    "comment": "Widening and narrowing the aim was only on [ and ]; the hand reaches for the arrows on a frozen selection.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done in src/review/ReviewProvider.tsx: ArrowUp widens to the first ancestor drawing a bigger box, ArrowDown comes back down the trail, both alongside ] and [. Says so when there is nothing wider or nothing inside. The aim chip now reads \"C to say · up/down to resize\". Verified live: depth went 5 to 4 on ArrowUp and back.",
+        "at": "2026-09-02T22:18:53.953Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/review/ReviewProvider.tsx (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:18:53.953Z",
+    "updatedAt": "2026-09-02T22:18:53.953Z",
+    "found": "unknown"
+  },
+  "task-console-drag-composer": {
+    "id": "task-console-drag-composer",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "The comment box moves",
+    "reason": "The composer sits on top of the thing being commented on; once it is in the way the reviewer needs it moved, not closed.",
+    "comment": "The composer sits on top of the thing being commented on; once it is in the way the reviewer needs it moved, not closed.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done in src/review/ReviewProvider.tsx: the composer header is a drag handle (grab cursor, close button excluded), the card is kept whole on screen, and it stays where it is put until it closes. Verified live by dragging it clear of the sheet underneath.",
+        "at": "2026-09-02T22:18:53.953Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/review/ReviewProvider.tsx (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:18:53.953Z",
+    "updatedAt": "2026-09-02T22:18:53.953Z",
+    "found": "unknown"
+  },
+  "task-console-select-key": {
+    "id": "task-console-select-key",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "D selects",
+    "reason": "L was the select key; the reviewer asked for D.",
+    "comment": "L was the select key; the reviewer asked for D.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Changed in src/review/ReviewProvider.tsx and the dock hint in src/review/ReviewDock.tsx. CLAUDE.md and README.md said L and V respectively — both now say D.",
+        "at": "2026-09-02T22:18:53.953Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/review/ReviewProvider.tsx (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:18:53.953Z",
+    "updatedAt": "2026-09-02T22:18:53.953Z",
+    "found": "unknown"
+  },
+  "task-console-polish-place": {
+    "id": "task-console-polish-place",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "The composer opens clear of its subject",
+    "reason": "The card opened centred at the top of the window, which put it on top of the very element being commented on — the complaint behind asking for it to be draggable.",
+    "comment": "The card opened centred at the top of the window, which put it on top of the very element being commented on — the complaint behind asking for it to be draggable.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "src/review/ReviewProvider.tsx: the draft carries the element box, and the card places itself once on mount into whichever band has room — below, above, then beside — falling back to the centre when none does. A drag by the reviewer wins for good after that. Verified: card bottom sat 10px above the aimed field.",
+        "at": "2026-09-02T22:25:27.013Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/review/ReviewProvider.tsx (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:25:27.013Z",
+    "updatedAt": "2026-09-02T22:25:27.013Z",
+    "found": "unknown"
+  },
+  "task-console-polish-rows": {
+    "id": "task-console-polish-rows",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "One line for the address, not two",
+    "reason": "Every row carried a wrapping two-line grey monospace anchor under it, competing with the reviewer own sentence for the eye.",
+    "comment": "Every row carried a wrapping two-line grey monospace anchor under it, competing with the reviewer own sentence for the eye.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "src/styles/review.css + ReviewProvider.tsx: the address truncates on one line with the full path in a title attribute, and the tag chips beside it never shrink. Rows also got a focus-visible ring (they had none) and the rail got thin scrollbars in its own greys.",
+        "at": "2026-09-02T22:25:27.013Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/styles/review.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:25:27.013Z",
+    "updatedAt": "2026-09-02T22:25:27.013Z",
+    "found": "unknown"
+  },
+  "task-console-polish-fieldnames": {
+    "id": "task-console-polish-fieldnames",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "A note on a field is not called input",
+    "reason": "labelFor() had no case for form controls, so notes pointing at one were filed as \"input\" — a title that says nothing in a list of two hundred.",
+    "comment": "labelFor() had no case for form controls, so notes pointing at one were filed as \"input\" — a title that says nothing in a list of two hundred.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "src/review/anchor.ts: a control now takes its name from its label (innerText, so a caption and a hint do not run together), then the caption above it, then its placeholder or name. Verified: the same field went from \"input\" to \"MILES DRIVEN 76¢ per mile\".",
+        "at": "2026-09-02T22:25:27.013Z"
+      }
+    ],
+    "anchor": {
+      "layout": "plan",
+      "source": "src/review/anchor.ts (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-02T22:25:27.013Z",
+    "updatedAt": "2026-09-02T22:25:27.013Z",
+    "found": "unknown"
+  },
+  "task-pocket-reverse-pay-basis": {
+    "id": "task-pocket-reverse-pay-basis",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Pocket: default to net pay with inline paystub switcher",
+    "reason": "Pocket previously asked for gross pay before taxes first and hid net pay behind a fallback link. Reversed to default to net pay (Paid), added I know my paystub pay amount option, an inline prompt asking whether to enter paystubs from now on, and a persistent basis switch that lives in the logging form and defaults to net pay.",
+    "comment": "Pocket is reverse: we ask paid then, they can say I know my paystub pay amount, if they enter that, we ask them if they want to enter paystubs from now on and we switch the logic, but the switch should live there and default to net pay.",
+    "tags": [
+      "redesign"
+    ],
+    "status": "closed",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "src/components/pocket/TrackerPocket.tsx: reversed pay entry to default to net pay (Paid) with live before-tax estimate, provided I know my paystub pay amount link to reveal paystub gross entry, added inline prompt Do you want to enter paystubs from now on? with Yes, from now on / Just this time, and embedded a 44px-target segmented switch at the top of the logging card defaulting to net pay (Paid). Supported by UiState.payBasis in src/state/storage.ts and mirrored in src/components/calc20/state.tsx and src/components/PayAmount.tsx.",
+        "at": "2026-09-02T23:45:33.679Z"
+      }
+    ],
+    "anchor": {
+      "layout": "pocket",
+      "source": "src/components/pocket/TrackerPocket.tsx (near line 170, unverified)"
+    },
+    "createdAt": "2026-09-02T23:45:33.680Z",
+    "updatedAt": "2026-09-02T23:45:33.680Z",
+    "found": "unknown"
+  },
+  "task-calc20-standalone-export": {
+    "id": "task-calc20-standalone-export",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Calc20 as a standalone HTML page",
+    "reason": "Asked for directly. Nothing in the repo produced one: layouts/calc/calc20.html is a saved snapshot of a rendered page, not something that runs, and `npm run build` emits the whole app across forty-odd files.",
+    "comment": "export calc20 as a standalone html page",
+    "tags": [
+      "architecture"
+    ],
+    "status": "done",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "`npm run build:calc20` writes one file, dist-calc20/calc20.html (483kB, 120kB gzipped), with the script, the stylesheet and every asset inlined. It opens by double-click, off a USB stick or from any static host. Files: vite.calc20.config.ts (the build, plus a singleFile() plugin that folds the chunk and the CSS into the HTML and throws if anything would ship beside it); calc20.html (the page, index.html's pre-paint block with the branching removed since this page is only ever Calc20); src/standalone/calc20.tsx (the entry — TrackerProvider + TrackerCalc20 and the four stylesheets that reach this layout, no auth, no other layouts, no review console); src/standalone/firebase-absent.ts (aliased over firebase/app|auth|firestore, so the single-file build cannot inline ~400kB of an SDK the page can never call); package.json (the script); .gitignore (dist-calc20/); .claude/launch.json (a `calc20-export` entry that serves the built file with `vite preview`, so checking the export never means starting the dev server). One shared file changed: src/components/calc20/SettingsSheet.tsx drops the layout row when VITE_STANDALONE is set — left in, it offered eight screens the page cannot draw AND rewrote the shared `layout` preference, so switching layouts in the export would have changed which layout the real app opened on next. Verified in a browser on the built file: renders, adds a job, takes $1,200 into September, totals it, survives a reload from localStorage, follows the theme switch light/dark through the pre-paint block, and holds up at 375px. No console errors. The data is the same `pg-data-v1` record the full app reads, so a browser that has used PayGuard opens this page on the months it already has. Two known gaps, each with its own note: [[task-calc20-standalone-signout]] and [[task-calc20-phone-stream-name-clipped]]. The one network reference left is the Google Fonts link, kept for parity with index.html; offline it falls back to the system stacks already in the tokens.",
+        "at": "2026-09-03T04:02:37.465Z"
+      }
+    ],
+    "anchor": {
+      "layout": "calc20",
+      "source": "vite.calc20.config.ts (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:02:37.465Z",
+    "updatedAt": "2026-09-03T04:02:37.465Z",
+    "found": "unknown"
+  },
+  "task-calc20-standalone-signout": {
+    "id": "task-calc20-standalone-signout",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Sign out in the standalone export does nothing",
+    "reason": "Found while checking the export ([[task-calc20-standalone-export]]). The account menu is also the only way into App settings, so it has to stay — but its second item is dead there.",
+    "comment": "In dist-calc20/calc20.html the avatar reads 'Not signed in' and its menu offers App settings and Sign out. There is no session and no Firebase in that build, so Sign out is a button that does nothing. Left alone rather than fixed: the same menu behaves the same way on localhost, where auth is bypassed, so this is the app's rule and not the export's. The fix is one condition — render Sign out only when there is a session — but it changes what the dev machine sees, which is a call for the owner.",
+    "tags": [
+      "bug"
+    ],
+    "status": "open",
+    "anchor": {
+      "layout": "calc20",
+      "source": "src/components/calc20/AccountMenu.tsx (near line 44, unverified)"
+    },
+    "createdAt": "2026-09-03T04:02:37.465Z",
+    "updatedAt": "2026-09-03T04:02:37.465Z",
+    "found": "unknown"
+  },
+  "task-calc20-phone-stream-name-clipped": {
+    "id": "task-calc20-phone-stream-name-clipped",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Job name hidden behind its badge at 375px",
+    "reason": "Seen while checking the export at phone width ([[task-calc20-standalone-export]]). Not caused by it — the three stylesheets the export leaves out are each scoped to their own layout class and cannot reach this card.",
+    "comment": "At 375px the stream card header shows the chevron, then a clipped 'Employe…' badge, then the money. The job's own name — the thing the card is about — is not on screen. stream-card__name and TypeBadge share .stream-card__name-row, and at that width the name loses the fight. The name should win it: badge truncates or wraps, name never does.",
+    "tags": [
+      "bug",
+      "layout"
+    ],
+    "status": "open",
+    "anchor": {
+      "layout": "calc20",
+      "source": "src/components/calc20/StreamsSection.tsx (near line 673, unverified)"
+    },
+    "createdAt": "2026-09-03T04:02:37.465Z",
+    "updatedAt": "2026-09-03T04:02:37.465Z",
+    "found": "unknown"
+  },
+  "task-app-bar-one-strip": {
+    "id": "task-app-bar-one-strip",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "One app bar, opaque, for classic / v2 / workspace",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "v2",
+      "source": "src/index.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:55:19.164523Z",
+    "updatedAt": "2026-09-03T04:56:24.008799Z",
+    "reason": "Classic, the sidebar and the workspace each wrote their own sticky top strip and each wrote it differently: bg-background/85 + backdrop-blur, /95 + blur, /98 with no blur, over border-border/70 or border-border. Three shells, four answers, one strip — and backdrop-filter is on the banned list at the top of CLAUDE.md, because an old Android WebView either ignores it (leaving the page showing through a 15%-transparent header) or honours it and pays a full-screen repaint per scroll frame.\n\nRaised by: the Improve CSS Design export in layouts/, read against the three shells it was made from.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/index.css adds `app-bar` and `app-bar-surface` — opaque background, --border-soft edge, no filter. Call sites: src/components/TrackerClassic.tsx (header), src/components/TrackerV2.tsx (header), src/components/TrackerV3.tsx (header, phone tab bar, tablet strip), src/components/PageNav.tsx (phone tab bar), src/components/Sheet.tsx (sticky head, sticky foot, and the scrim's backdrop-blur-xs). Verified in the running app at 1280px and 375px, light and dark: header computes to oklch(0.985 0.005 106) with backdrop-filter: none, sheet head to oklch(1 0 0). Also src/styles/horizon.css: .hz-top was a fourth spelling of the same strip and the only one breaking both device rules at once — color-mix() for the fill (dropped whole on an old WebView, which would have left the bar fully transparent) over a blur(10px). It is now the flat --color-background fill on a --color-border-soft edge, like the other three.",
+        "at": "2026-09-03T04:55:19.164523Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-nav-item-one-row": {
+    "id": "task-nav-item-one-row",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "One nav row, five copies collapsed",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "v2",
+      "source": "src/index.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:55:19.164523Z",
+    "updatedAt": "2026-09-03T04:55:19.164523Z",
+    "reason": "The sidebar list, the workspace's rail, its tablet strip, its settings button and both phone tab bars were six copies of the same control with the padding, weight and active colour drifting between them — py-2.5 / py-3 / py-2, font-medium / font-semibold, text-good on one tab bar and text-accent-foreground on the other, and a pill behind the active icon on the workspace's tab bar but not the sidebar's.\n\nRaised by: the Improve CSS Design export in layouts/, whose nav is one rule.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/index.css adds `nav-item`, `nav-tab` and `nav-tab-mark`. The active state keys off [aria-current='page'], which every call site already set, so the ternary that used to carry the colour is gone with the drift. nav-item carries a 2.75rem min-height — the 44px touch floor, which the tablet strip's py-2 was under. Call sites: src/components/PageNav.tsx (sidebar list, phone tab bar — which gains the active pill it did not have) and src/components/TrackerV3.tsx (desktop rail, its Settings row, tablet strip, phone tab bar, phone Settings tab). Verified in the running app.",
+        "at": "2026-09-03T04:55:19.164523Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-status-ink-tier": {
+    "id": "task-status-ink-tier",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Status colours get an ink, not just a fill",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/index.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:55:19.164523Z",
+    "updatedAt": "2026-09-03T04:55:19.164523Z",
+    "reason": "--good / --good-soft and --info / --info-soft had no ink to go on the fill, so `text-good` was doing double duty: the right colour on paper, and 4.68:1 on --good-soft — over the AA line by a hair, and under it wherever the fill is served at /40 or /60, which is how half the call sites use it. Only warn had an ink, under the name --warn-foreground, which on --info-foreground and --destructive-foreground means the opposite thing (light ink on the SOLID fill). Everyone reading this app has a disability and many are reading it on a phone in daylight.\n\nRaised by: the Improve CSS Design export in layouts/, which carries --color-good-text / --color-warn-text / --color-info-text.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/index.css adds --good-text / --warn-text / --info-text as one named contract — the ink that goes ON the matching -soft fill — in both themes, and repoints --warn-foreground at --warn-text so its eight existing call sites keep working against one value rather than two. Measured in the running app: good on good-soft 4.68 -> 7.94 (light) and 5.24 -> 8.60 (dark); info on info-soft 5.06 -> 8.45 and 4.99 -> 8.19; warn was already 8.41 and is unchanged. `chip-good` / `chip-info` / `chip-warn` now all take the ink. Call sites moved: src/components/SafetyHero.tsx (the Safe badge), src/components/TrackerV3.tsx, src/components/StreamSheet.tsx (x2), src/components/MonthGrid.tsx, src/components/Onboarding.tsx, src/components/ui.tsx.",
+        "at": "2026-09-03T04:55:19.164523Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-border-tiers-base-theme": {
+    "id": "task-border-tiers-base-theme",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Base theme gets the border tiers the pg-* palette already had",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/index.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:55:19.164523Z",
+    "updatedAt": "2026-09-03T04:55:19.164523Z",
+    "reason": "index.css had one --border. The three shells each wanted a lighter one for chrome edges and were mixing it by hand as border-border/70 and border-border/60, and nothing had an emphasis tier at all — the pg-* palette has had --pg-border-strong for a while and this one did not, so the scrollbar was the only chrome on the page nobody could theme.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/index.css adds --border-soft and --border-strong in both themes, exposed as --color-border-soft / --color-border-strong. --border-soft is what `app-bar` draws its edge with, replacing four hand-mixed alpha slices; --border-strong themes the scrollbar (scrollbar-width: thin plus the ::-webkit-scrollbar trio, added in @layer base). Verified in the running app in both themes.",
+        "at": "2026-09-03T04:55:19.164523Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-dim-tier-declined": {
+    "id": "task-dim-tier-declined",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "The reference's third ink tier, deliberately not adopted",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "small",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/index.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:55:19.164523Z",
+    "updatedAt": "2026-09-03T04:55:19.164523Z",
+    "reason": "The Improve CSS Design export carries --color-dim (#8a9e87) as a third text tier below muted, used for axis end-caps and redundant hints. It measures about 2.9:1 on its own background. I did not bring it across: this app's reader is disabled, often low-vision, and often reading a cheap phone in daylight, and a sub-3:1 text tier is a regression for them whatever it does for the mockup. Writing it down so the next pass does not read the export and adopt it as an oversight.\n\nIf a third tier is wanted, it should be a WEIGHT or a SIZE step, not a lightness step.",
+    "found": "unknown",
+    "thread": [],
+    "tags": [
+      "reword"
+    ]
+  },
+  "task-two-scales-overlay-vs-index": {
+    "id": "task-two-scales-overlay-vs-index",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "overlay.css and index.css disagree about radius",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/styles/overlay.css (near line ?, unverified)"
+    },
+    "createdAt": "2026-09-03T04:55:19.164523Z",
+    "updatedAt": "2026-09-03T04:55:19.164523Z",
+    "reason": "src/styles/overlay.css is imported last in src/main.tsx, so it wins, and it re-declares `.panel { border-radius: var(--pg-radius-xl) }` = 1rem while src/index.css sets --radius-xl: 1.25rem. Every panel on every layout is drawn at the pg-* scale, not the base one, and neither file says so. The same file also sets `.panel { box-shadow: none }` globally, which is the right answer under the device constraint but means index.css's `@utility panel { box-shadow: var(--shadow-card) }` is dead code that reads as live.\n\nOne of the two is wrong. Found while adding the app-bar and nav-item rules to index.css — I did not touch it, because picking the winner changes every layout and is a decision, not a cleanup.",
+    "found": "unknown",
+    "thread": [],
+    "tags": [
+      "remove"
+    ]
+  },
+  "task-overlay-adds-blur-to-pg-chrome": {
+    "id": "task-overlay-adds-blur-to-pg-chrome",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "The polish overlay ADDS a backdrop-filter to payguard's sticky chrome",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "small",
+    "tags": [
+      "remove"
+    ],
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/overlay.css (near line 396, unverified)"
+    },
+    "createdAt": "2026-09-03T04:56:24.008799Z",
+    "updatedAt": "2026-09-03T04:56:24.008799Z",
+    "reason": "src/styles/overlay.css section 5 puts `backdrop-filter: saturate(1.4) blur(10px)` on .pg-topbar, .pg-sticky-page and .pg-sticky-surface — the sticky chrome of payguard, ledger, workrecord and calc20. backdrop-filter is on the banned list at the top of CLAUDE.md, and the overlay is loaded last in src/main.tsx so it wins over anything those layouts say for themselves. The overlay's own header says it is additive polish; this is the one rule in it that the device constraint forbids.\n\nI did not change it. The classic/sidebar/workspace family and horizon are now flat and opaque (see [[task-app-bar-one-strip]]), but the pg-* family is a different theme with its own tokens and four layouts hanging off it, and its polish layer is in flight — flattening it is a decision someone should take on purpose, not a side effect of a pass on the other family.\n\nFound while flattening the base-theme app bars.",
+    "found": "unknown"
+  },
+  "task-one-palette-five-variants": {
+    "id": "task-one-palette-five-variants",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "One palette, five variants, one setting",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "large",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/palette.css (near line 1, unverified)"
+    },
+    "createdAt": "2026-09-03T05:13:57.267169Z",
+    "updatedAt": "2026-09-03T05:13:57.267169Z",
+    "reason": "\"Lets merge all themes into proper theme with variant options, right now its crazy I cant keep up.\"\n\nWhat was there: five variant names (paper, slate, ledger, carbon, calc20) declared across nine overlapping selector blocks in payguard.css and three more in ledger.css, each a partial patch over paper. A palette is 36 tokens and not one variant set all 36 — slate set 16, ledger 19, carbon 27, calc20 32 — so whatever a variant left out it inherited from paper silently. ledger.css declared its own values for three of the same names under --lg-*, gave 'slate' and 'ledger' one shared block so two options identical there and different everywhere else, and opted out of the app's light/dark toggle entirely. And three UiState fields (ledgerTheme, payguardTheme, workRecordTheme) held one decision, two of them indexing the same CSS, so keeping payguard and workrecord alike meant setting the same value twice.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/styles/palette.css is the only file that chooses a colour now: two axes (variant = hue and paper, answering all 23 choices every time; ink = light/dark, which elevation follows rather than the variant), with carbon declaring itself dark in both modes in one line instead of in JavaScript. Generated by resolving the old cascade, so the five variants render as they did — verified token by token in the running app, all 36 tokens across all 10 variant/mode combinations, --t-* and --pg-* agreeing everywhere.\n\nsrc/styles/payguard.css lost 155 lines (nine palette blocks became one aliasing block, no values in it) and src/styles/ledger.css 25. Neither file's call sites moved — ~1200 of them. src/state/storage.ts has one `palette` field with a migration that prefers payguardTheme, then ledgerTheme, then workRecordTheme, because workRecordTheme mostly carries an untouched default rather than a choice; verified against a pre-merge record. Call sites: src/App.tsx, src/components/ledger/TrackerLedger.tsx, src/components/payguard/TrackerPayGuard.tsx, src/components/payguard/PayGuardShell.tsx, src/components/workrecord/TrackerWorkRecord.tsx, src/review/anchor.ts, index.html.\n\nTwo things this fixed on the way: --t-topbar was color-mix(), which an old WebView drops whole, leaving payguard's and workrecord's top bar with no fill; and ledger now answers the app's dark mode, which it never did.\n\nGuard: scripts/theme-check.mjs, wired into `npm run build` before tsc. It fails on a missing choice, on anything outside palette.css setting a --t-*, and on a literal colour inside an aliasing block. Both failure modes tested by breaking them on purpose.",
+        "at": "2026-09-03T05:13:57.267169Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-palette-defaults-lost-calc20-plate": {
+    "id": "task-palette-defaults-lost-calc20-plate",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Palette defaults must be zero-specificity",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "small",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/palette.css (near line 46, unverified)"
+    },
+    "createdAt": "2026-09-03T05:13:57.267169Z",
+    "updatedAt": "2026-09-03T05:13:57.267169Z",
+    "reason": "First cut of palette.css put calc20's dark top-bar plate in the shape section and the derived default (--t-topbar: var(--t-surface)) two sections below it. Same specificity, so the later one won and calc20's bar came out white — the whole identity of that variant is a dark ink plate under a sky-blue rule. Caught in the running app, not by the check.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Fixed in src/styles/palette.css: every default block is written :where([data-palette]), which is zero-specificity, so a variant's own block wins wherever it sits in the file. scripts/theme-check.mjs gained an OVERRIDABLE set naming the shape tokens and the three topbar tokens, which are the only names a variant may set outside its 23 choices — anything else has to exist on paper first, or it is a colour only one variant has and nobody can find. Verified: calc20's plate resolves to oklch(22% 0.045 258) again on both workrecord and payguard.",
+        "at": "2026-09-03T05:13:57.267169Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-palette-base-theme": {
+    "id": "task-palette-base-theme",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "The base theme and calc20 still have their own palettes",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "large",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/index.css (near line 69, unverified)"
+    },
+    "createdAt": "2026-09-03T05:13:57.267169Z",
+    "updatedAt": "2026-09-03T05:13:57.267169Z",
+    "reason": "The merge covers the three layouts that already had variants — payguard, workrecord, ledger. src/index.css (classic, v2, workspace, horizon, plan, pocket) and src/styles/calc20.css still declare their own light/dark palettes and ignore `palette` entirely, so picking Midnight moves three layouts and not the other seven. index.css is oklch and semantically different (--background/--foreground/--muted-foreground against --t-bg/--t-fg/--t-fg-muted); calc20.css is 105 tokens plus a --glass-* system.\n\nI stopped here on purpose. Mapping index.css onto the palette changes how classic, v2 and the workspace look completely — from the lime-and-emerald oklch system to the merged hex one — and that is a decision to see before it is locked in, not a cleanup to slip into a refactor. The contract, the check and the one setting are in place, so the remaining work is per-file and each file can land on its own.",
+    "found": "unknown",
+    "thread": [],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-palette-status-colours-same-in-dark": {
+    "id": "task-palette-status-colours-same-in-dark",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Status colours are identical in light and dark",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/palette.css (near line 120, unverified)"
+    },
+    "createdAt": "2026-09-03T05:13:57.267169Z",
+    "updatedAt": "2026-09-03T05:13:57.267169Z",
+    "reason": "Resolving the old cascade showed that --t-safe / --t-warn / --t-over / --t-twp / --t-info / --t-w2 / --t-se / --t-ring / --t-head do not change between paper/light and paper/dark — only the surfaces and inks do. So the same mid-lightness green that reads on white is being used on #111a24, and the soft-fill pairings have no dark form at all. This is the same gap the base theme had before [[task-status-ink-tier]] gave it --good-text / --warn-text / --info-text.\n\nCarried across as-is rather than fixed, because the merge was meant to be faithful. Worth measuring now that every variant's values are in one file and can be checked as a set.",
+    "found": "unknown",
+    "thread": [],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "audit-dom-node-budget": {
+    "id": "audit-dom-node-budget",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "DOM node budget — measured, not guessed",
+    "status": "open",
+    "anchor": {
+      "layout": "global",
+      "source": "docs/STATE.md (no element — whole-app measurement)",
+      "components": "—"
+    },
+    "createdAt": "2026-09-03T05:28:27.284Z",
+    "updatedAt": "2026-09-03T05:36:15.516Z",
+    "reason": "Asked to plan a refactor toward \"minimum necessary divs\". Measured the live DOM at 390px on every layout before changing anything, and the premise did not hold.",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Measured on a 390px viewport, two jobs x twelve months of data, focus mode off, scope=year. Total app nodes / visible / mounted-but-display:none / divs: pocket 21/21/0/4 - horizon 83/83/0/7 - classic 161/161/0/21 - v2 167/147/20/20 - responsive 226/163/63/27 - plan 246/246/0/6 - calc20 385/372/13/140 - ledger 434/425/9/154 - workrecord 442/428/14/169 - payguard 641/200/441/260. Structural audit of payguard and workrecord: 0 flat pass-through wrappers, 0 nested single-child div chains, 0-4 empty divs. Of workrecord's 169 divs: 45 flex containers with 2+ children, 16 grid, 56 painted single-child surfaces, 23 positioned/overflow, 19 text leaves. There is no wrapper bloat to delete - every div is a flex/grid container or a painted surface. The only real excess is payguard mounting all three mobile tabs (see task-payguard-mobile-tabs-mount). Conclusion: do not run a div-reduction pass across the layouts. Node counts are all under the 800 Lighthouse warning once payguard is fixed, and the app has no tests, so a structural pass would be verified only by eye across 10 layouts x 5 palettes x 2 ink modes.",
+        "at": "2026-09-03T05:28:27.284Z"
+      },
+      {
+        "from": "claude",
+        "text": "Workstream A is done - see task-payguard-mobile-tabs-mount. PayGuard on a phone is 205 nodes where it was 641, which puts every layout in the table under 450. The recommendation stands for the rest: no div-reduction pass. The next best DOM work is the content the review queue already asks to cut (payguard-overview-stats, payguard-hero-ytd, payguard-year-chart), which removes whole subtrees and improves the screens at the same time. One thing found while verifying, worth knowing before anyone tries to check responsive behaviour here: Chrome device emulation re-lays the page out at a new width without firing matchMedia change or window resize, so any component that branches on useIsWide will hold its old answer until you reload. It is a harness artifact, not a bug - noted at the top of src/viewport.ts.",
+        "at": "2026-09-03T05:36:15.516Z"
+      }
+    ],
+    "found": "unknown"
+  },
+  "task-payguard-mobile-tabs-mount": {
+    "id": "task-payguard-mobile-tabs-mount",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "PayGuard mounts all three mobile tabs",
+    "status": "done",
+    "anchor": {
+      "layout": "payguard",
+      "page": "Overview",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:49",
+      "components": "TrackerPayGuard",
+      "sourceLine": "  const showSection = (owner: MobileTab) => wide || mobileTab === owner;"
+    },
+    "createdAt": "2026-09-03T05:28:27.284Z",
+    "updatedAt": "2026-09-03T05:36:15.516Z",
+    "reason": "DOM measurement pass (see audit-dom-node-budget). On a phone PayGuard mounts 641 nodes and hides 441 of them with display:none - 69% of the layout is the two inactive tabs.",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "sectionVisibility() switches mobile tabs with a CSS class, so the overview block (122 nodes) and the jobs block (314 nodes) stay mounted on a phone while the analysis tab is showing. display:none costs nothing to paint, but those nodes are still built on first render and re-diffed by React on every keystroke in the job editor - on a cheap Android that is the one measurable DOM cost in the app. Fix: keep the sm+ behaviour (all sections visible) and, below sm, render only the active section - a matchMedia('(min-width: 640px)') hook feeding a wide ? <Section/> : mobileTab === owner ? <Section/> : null gate at lines 321, 333 and 345. focusStream() and openAnalysis() set the tab before their requestAnimationFrame scroll, so the target exists by the time they look for it. Not started.",
+        "at": "2026-09-03T05:28:27.284Z"
+      },
+      {
+        "from": "claude",
+        "text": "Done. src/components/payguard/TrackerPayGuard.tsx - sectionVisibility() is gone; showSection() now gates the three sections at lines 336, 348 and 361 so below 640px only the active tab is rendered, and at 640px and up all three render as before. The breakpoint comes from useIsWide(WIDE_MIN) in the new src/viewport.ts, which is the generic half of calc20/useIsWide.ts moved out to the root beside theme.ts - calc20 re-exports it, so its five call sites are untouched. Measured after, 390px viewport, two jobs x twelve months: 641 nodes -> 205 on the Months tab, 398 on Jobs, 206 on Your limit; mounted-and-hidden went 441 -> 5. Visible node count is unchanged at 200, so nothing left the screen. Verified all three tabs render and switch, pg-job-<id> and pg-analysis still exist when focusStream() and openAnalysis() look for them in their rAF, no console errors, and a fresh mount at 1100px still renders all three sections with the bottom nav hidden. Typecheck passes.",
+        "at": "2026-09-03T05:36:15.516Z"
+      }
+    ],
+    "found": "present"
+  },
+  "task-all-css-one-palette": {
+    "id": "task-all-css-one-palette",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Every stylesheet on one palette, each with an override layer",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "large",
+    "anchor": {
+      "layout": "classic",
+      "source": "src/styles/palette.css (near line 1, unverified)"
+    },
+    "createdAt": "2026-09-03T05:39:17.442233Z",
+    "updatedAt": "2026-09-03T05:39:17.442233Z",
+    "reason": "\"I feel like all css should be, and all themes have their own override layer can you do that\" — extending [[task-one-palette-five-variants]] from the three layouts that already had variants to the whole app.\n\nFive stylesheets were picking their own colours: index.css (39 + 39 dark, a green oklch family nothing else shared), payguard.css, ledger.css, calc20.css and plan.css. chrome.css then answered the same 23-token contract six times over because each family spelled its colours differently. overlay.css re-declared the paper palette a sixth time at :root and, loading last, silently won — its --pg-radius-xl of 1rem beat index.css's 1.25rem for every .panel in the app.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Done. src/styles/palette.css grew from 23 choices to 39: the status families are now symmetric (safe/warn/over/info each with -soft, -text and -fg), plus accent/accent-fg and primary/primary-fg. The 8 derived roles were computed per variant rather than hand-picked — a hue-preserving tint for each -soft, then the ink darkened or lightened until it cleared 7:1 on it — and every one of the 45 resulting pairs was measured: worst 7.0:1 for ink-on-soft, worst 4.54:1 for ink-on-solid. primary/primary-fg are chosen rather than derived, because a call-to-action colour is a pick; paper keeps the base theme's existing pair.\n\nBridged: src/index.css (the .dark block is gone entirely — dark is an axis of the palette, so there was nothing left for it to say), src/styles/plan.css, src/styles/chrome.css (six answers to one contract became one; 118 colour declarations to 21), src/styles/overlay.css (section 0 deleted outright — the problem it existed for cannot recur). Override layers, each marked @override with a reason: plan's sprite ink, bevels, gilt and parchment; chrome's scrim; overlay's two-tier elevation; calc20's dark-plate status hues.\n\ndata-palette moved from four layout roots to <html>, which is also what fixed the sign-in, terms and onboarding screens resolving no palette at all. The picker now appears on every layout instead of three — SettingsPanel reads ui.palette from the tracker rather than taking a prop pair that seven layouts never passed.\n\nVerified in the running app: all 39 tokens across all 10 variant/mode combinations resolve and agree with their bridged names, and classic, plan, pocket, horizon, calc20, ledger, workrecord, payguard and v2 were each opened across palettes. npm run build is green.",
+        "at": "2026-09-03T05:39:17.442233Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-carbon-was-dark-without-dark-class": {
+    "id": "task-carbon-was-dark-without-dark-class",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "A single-ink palette has to force the dark class",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "plan",
+      "source": "src/theme.ts (near line 20, unverified)"
+    },
+    "createdAt": "2026-09-03T05:39:17.442233Z",
+    "updatedAt": "2026-09-03T05:39:17.442233Z",
+    "reason": "carbon is dark in both ink modes — it declares color-scheme: dark and has no light form. But `.dark` on <html> followed UiState.theme only, so carbon with theme:'light' gave a dark page with every .dark-keyed rule switched off: plan kept its light parchment and light bevels on a black page, and pocket has about thirty such rules.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Fixed in src/theme.ts. applyTheme now asks the stylesheet whether the palette on <html> is single-ink — it clears the .dark class and the inline color-scheme first, because both are things we set last time and would otherwise be read back as the palette's own answer — and ORs that into the dark decision. Reading it back rather than checking for the name means another single-ink palette needs no change here.\n\nindex.html's pre-paint script cannot ask, because it runs before any stylesheet has parsed, so it carries a SINGLE_INK list. That is a duplicate on purpose, and scripts/theme-check.mjs fails if it stops matching the palettes that declare themselves dark — tested by breaking it.",
+        "at": "2026-09-03T05:39:17.442233Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-plan-title-plate-black-on-black": {
+    "id": "task-plan-title-plate-black-on-black",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "Plan's title plates were black on black in dark mode",
+    "status": "done",
+    "certainty": "sure",
+    "effort": "small",
+    "anchor": {
+      "layout": "plan",
+      "source": "src/styles/plan.css (near line 580, unverified)"
+    },
+    "createdAt": "2026-09-03T05:39:17.442233Z",
+    "updatedAt": "2026-09-03T05:39:17.442233Z",
+    "reason": "`.pl-plate` and the sheet header stamp their text in --parch on a --px-ink ground. --px-ink is near-black in both ink modes, but --parch is also a panel BACKGROUND and goes dark when the page does, so every title plate in the layout — \"I GOT PAID\", \"TRIAL WORK MONTHS\" — was black on black under dark ink. Present in the code before this pass; the palette merge made dark reachable enough on this layout to notice.",
+    "found": "unknown",
+    "thread": [
+      {
+        "from": "claude",
+        "text": "Fixed in src/styles/plan.css: a --plate-fg in plan's override layer, near-white in both modes, because the plate's ground is fixed dark and its ink must be too. Used by .pl-plate and the sheet header's h2. Verified under carbon.",
+        "at": "2026-09-03T05:39:17.442233Z"
+      }
+    ],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-calc20-pocket-not-on-palette": {
+    "id": "task-calc20-pocket-not-on-palette",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "calc20 and pocket are the two files left",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "large",
+    "anchor": {
+      "layout": "calc20",
+      "source": "src/styles/calc20.css (near line 23, unverified)"
+    },
+    "createdAt": "2026-09-03T05:39:17.442233Z",
+    "updatedAt": "2026-09-03T05:39:17.442233Z",
+    "reason": "The two stylesheets still picking their own colours.\n\ncalc20.css: 101 colours across html.pg-calc20 and [data-theme='dark'], plus a --glass-* system with its own axis. It is a self-contained design system that already handles its own light/dark, so it works — it just does not follow `palette`, and picking Midnight leaves it alone.\n\npocket.css: no tokens at all. Its colours are hardcoded inside about thirty `.dark .pk-*` rules, so it follows the ink axis but not the variant. Migrating it means rewriting rules rather than a token block, which is why it is separate from the rest of this pass.\n\nBoth are listed in `npm run theme:check`'s PENDING output so the debt stays visible without blocking a build. Remove a name from that set when it migrates.",
+    "found": "unknown",
+    "thread": [],
+    "tags": [
+      "redesign"
+    ]
+  },
+  "task-color-mix-left-in-derived-layers": {
+    "id": "task-color-mix-left-in-derived-layers",
+    "kind": "comment",
+    "origin": "suggested",
+    "label": "64 color-mix() uses left, mostly now replaceable",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/payguard.css (near line 300, unverified)"
+    },
+    "createdAt": "2026-09-03T05:39:17.442233Z",
+    "updatedAt": "2026-09-03T05:39:17.442233Z",
+    "reason": "`npm run theme:check` reports them: 35 in calc20.css, 26 in payguard.css, 3 in ledger.css. color-mix() is on the banned list at the top of CLAUDE.md because an old Android WebView drops the whole declaration, so a soft fill silently becomes transparent and a hairline border disappears.\n\nMost of payguard's are now redundant: --pg-safe-bg is color-mix(safe 10%, transparent) and the palette has a real --t-safe-soft for every variant. The ones without an equivalent are w2, se and twp, which have a base colour but no soft/text family — the same asymmetry that caused the original drift, one level down.\n\nNot fixed in this pass because the -border variants (30–32% tints) have no palette equivalent either, and mapping them to the full status colour is a visible change to four layouts that should be looked at rather than slipped in.",
+    "found": "unknown",
+    "thread": [],
+    "tags": [
+      "redesign"
     ]
   }
 }

@@ -33,11 +33,14 @@ function groupPaydayRisks(risks: PaydayRisk[]): string[] {
     const monthsText = months.length > 1
       ? months.slice(0, -1).join(', ') + ' and ' + months[months.length - 1]
       : months[0];
-    const verb = months.length > 1 ? 'have' : 'has';
+    /* Was "Cafe shift: May and October have 3" — three of what. The noun
+       was left to the reader on the one line warning them about the thing
+       that catches people out. */
+    const verb = months.length > 1 ? 'pay' : 'pays';
     const checksText = streamRisks.every((r) => r.checks === streamRisks[0].checks)
       ? String(streamRisks[0].checks)
-      : streamRisks.map((r) => r.checks).join('/');
-    return `${stream}: ${monthsText} ${verb} ${checksText}`;
+      : streamRisks.map((r) => r.checks).join(' or ');
+    return `${stream}: ${monthsText} ${verb} you ${checksText} times`;
   });
 }
 
@@ -124,13 +127,16 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     <section className="panel p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 shrink-0 text-good" />
-        <p className="label-caps">Safe hours</p>
+        {/* el-8lyfa5: "safe" never says safe from what. The eyebrow says
+            which number this is; the sentence below says what it keeps you
+            under. */}
+        <p className="label-caps">Hours you can work</p>
       </div>
       <h2 className="display-figure mt-1.5">
         Aim for {Math.floor(safeFiveWeekHours)} hours a week
       </h2>
       <p className="type-muted mt-1 max-w-prose">
-        That keeps you safe even in a month that pays you an extra time.
+        That stays under your limit even in a month that pays you an extra time.
         {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already taken off.` : ''}
       </p>
 
@@ -179,7 +185,7 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
           {/* "closer to the line" is a figure of speech for a limit the
                reader has never been shown a line for. */}
-          <span className="label-caps">Also safe, closer to your limit</span>
+          <span className="label-caps">Still under, closer to your limit</span>
           <span className="display-figure">{Math.floor(safeAverageHours)} hours a week</span>
         </div>
       </div>

@@ -377,7 +377,10 @@ export function StreamSheet({
             ? 'Paused jobs stay in your records but do not count toward future month estimates.'
             : stream.lifecycle === 'completed'
               ? 'Ended jobs stop counting after the date below. Past months keep whatever was entered.'
-              : 'Money from this job counts in the months it was earned. Active means we also expect more of it in the months ahead.'}
+              /* The control's options are Current, Paused and Ended. This
+                 line said "Active", sending the reader to look for a button
+                 that is not there. */
+              : 'Money from this job counts in the months you earned it. Current means we also expect more of it in the months ahead.'}
         </InfoNote>
 
         {stream.lifecycle === 'completed' ? (
@@ -431,10 +434,10 @@ export function StreamSheet({
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-base font-semibold">
                 <Calendar className="size-5 shrink-0" />
-                Any payday (from a paystub, preferred)
+                Any one payday — from a paystub if you have one
               </span>
               {stream.anchorDate ? (
-                <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-good">
+                <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-good-text">
                   <Check className="size-4" /> Set
                 </span>
               ) : (
@@ -455,7 +458,7 @@ export function StreamSheet({
           </div>
 
           {plan && plan.heavyMonths.length ? (
-            <div className="flex items-center gap-2 rounded-lg bg-info-soft px-3 py-3 text-base font-semibold text-info">
+            <div className="flex items-center gap-2 rounded-lg bg-info-soft px-3 py-3 text-base font-semibold text-info-text">
               <Zap className="size-5" />
               {plan.typicalCount + 1} paychecks in {plan.heavyMonths.length} month{plan.heavyMonths.length === 1 ? '' : 's'} this year
             </div>

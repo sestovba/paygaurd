@@ -161,7 +161,7 @@ function hourly(n: number): string {
 
 export function TrackerPlan() {
   const { data, ui, setUi, resetAll } = useTracker();
-  useTheme(ui.theme);
+  useTheme(ui.theme, ui.palette);
 
   const [openMonth, setOpenMonth] = useState<MonthKey | null>(null);
   const [openStream, setOpenStream] = useState<string | null>(null);
@@ -359,7 +359,7 @@ function Answer({
           asks somebody to hold two regimes in their head to read one bar. */}
       <p className="pl-lines">
         <span className="pl-line-key" data-mark="safe">
-          <i aria-hidden="true" />Aim for this<b>{money(safeTarget)}</b>
+          <i aria-hidden="true" />Target amount<b>{money(safeTarget)}</b>
         </span>
         <span className="pl-line-key" data-mark="limit">
           <i aria-hidden="true" />Do not cross<b>{money(threshold)}</b>
@@ -453,10 +453,10 @@ function Gauge({ low, high, threshold, safeTarget, tryExtra, exact }: {
               label." It was a green rule with nothing on it, named only in a
               legend below that you had to match up by colour. The line says
               what it is, where it is. */}
-          {/* The tag over the safety rule. "Play it safe" is an idiom, and
-              this product's copy rule says there are none — it also never
-              said what the number under it *was*. */}
-          {i === nSafe ? <b className="pl-line-tag" aria-hidden="true">Aim for this</b> : null}
+          {/* The tag over the safety rule. "Play it safe" was an idiom and
+              never said what the number under it was; "Target amount" is
+              Sergey's wording, and it names the figure. */}
+          {i === nSafe ? <b className="pl-line-tag" aria-hidden="true">Target amount</b> : null}
         </span>
       ))}
     </div>

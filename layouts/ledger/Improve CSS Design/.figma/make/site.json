@@ -1,0 +1,10 @@
+{
+  "description": "Streamlines and enhances CSS design by consolidating multiple styles into a single, optimized, and visually appealing stylesheet for developers.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

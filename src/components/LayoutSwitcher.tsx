@@ -69,9 +69,14 @@ export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
   {
     title: 'The whole picture',
     options: [
-      { id: 'classic', label: 'Classic', description: 'The month, the year and your jobs, in one scroll.' },
-      { id: 'v2', label: 'Sidebar', description: 'Overview, income and trial-work status as separate pages.' },
-      { id: 'responsive', label: 'Workspace', description: 'Open a job beside the overview instead of on top of it.' }
+      {
+        id: 'overview',
+        label: 'Overview',
+        /* One entry, not three. Classic, Sidebar and Workspace were the same
+           surfaces in three shells; which shell is a setting now, and it sits
+           under this row in Settings. */
+        description: 'The month, the year and your jobs. Choose one scroll, separate pages, or a job open beside them.'
+      }
     ]
   }
 ];

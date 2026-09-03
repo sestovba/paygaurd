@@ -173,7 +173,7 @@ export function Sheet({
       <div
         data-sheet-head=""
         className={
-          'sticky top-0 z-10 flex shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-surface/95 backdrop-blur-md transition-[padding] duration-200 '
+          'app-bar-surface sticky top-0 z-10 flex shrink-0 items-center justify-between gap-3 border-b transition-[padding] duration-200 '
           + (scrolled ? 'px-4 py-3 sm:px-6 sm:py-3.5' : 'p-4 sm:px-6 sm:py-4')
         }
         {...(!inline && !scrolled ? swipeHandlers : undefined)}
@@ -250,7 +250,7 @@ export function Sheet({
 
       {/* Sticky Footer */}
       {footer ? (
-        <div data-sheet-foot="" className="sticky bottom-0 z-10 flex shrink-0 items-center justify-between gap-3 border-t border-border/60 bg-surface/95 backdrop-blur-md px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4">
+        <div data-sheet-foot="" className="app-bar-surface sticky bottom-0 z-10 flex shrink-0 items-center justify-between gap-3 border-t px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4">
           {footer}
         </div>
       ) : null}
@@ -262,7 +262,7 @@ export function Sheet({
   return (
     <div
       data-sheet-scrim=""
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6 bg-black/50 backdrop-blur-xs transition-opacity duration-200"
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6 bg-black/50 transition-opacity duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}

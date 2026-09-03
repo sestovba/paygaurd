@@ -12,18 +12,29 @@
       (function () {
         try {
           var ui = JSON.parse(localStorage.getItem('pg-ui-v1') || '{}');
-          // Ledger layout owns its own palette via data-ledger-theme — the
-          // global light/dark toggle is for the other layouts only.
-          if (ui.layout === 'ledger') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.style.colorScheme = ui.ledgerTheme === 'carbon' ? 'dark' : 'light';
-            return;
-          }
-          var theme = ui.theme;
-          var dark = theme === 'dark' || ((theme === 'system' || !theme) && matchMedia('(prefers-color-scheme: dark)').matches);
+          // Ledger used to bail out here and strip .dark, because its palette
+          // replaced the light/dark toggle instead of answering it. One
+          // palette now, one toggle, and `carbon` declares itself dark in
+          // styles/palette.css rather than in this script.
           var root = document.documentElement;
+          var palette = ui.palette
+            || ui.payguardTheme || ui.ledgerTheme || ui.workRecordTheme
+            || 'paper';
+          // Palettes with no light form. This runs before any stylesheet has
+          // parsed, so it cannot ask palette.css the way theme.ts does — it
+          // is a duplicate, and `npm run theme:check` fails if it stops
+          // matching the palettes that declare `color-scheme: dark`.
+          var SINGLE_INK = ['carbon'];
+          var theme = ui.theme;
+          var dark = SINGLE_INK.indexOf(palette) !== -1
+            || theme === 'dark'
+            || ((theme === 'system' || !theme) && matchMedia('(prefers-color-scheme: dark)').matches);
           root.classList.toggle('dark', dark);
           root.style.colorScheme = dark ? 'dark' : 'light';
+          // The other half of the theme. Both axes on <html>, both before
+          // the first paint, or the page arrives in the default palette and
+          // repaints into the chosen one as React mounts.
+          root.dataset.palette = palette;
           // Calc20's stylesheet is scoped under .pg-calc20 and themed by
           // data-theme, so both have to be on <html> before the first paint.
           if (ui.layout === 'calc20') {

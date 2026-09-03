@@ -30,242 +30,119 @@
  */
 
 /* ------------------------------------------------------------------ */
-/* 1. The contract, answered by the base theme                        */
+/* 1. The contract, answered once                                     */
 /* ------------------------------------------------------------------ */
 /*
- * Classic, v2, the workspace and horizon all render on index.css's tokens,
- * so the defaults are the base theme and those four need no mapping block.
+ * This section used to be six answers to the same 23 questions — one block
+ * per layout family, 118 colour declarations, because each family named its
+ * colours differently (--color-*, --pg-*, --lg-*, calc20's own, --pl-*) and
+ * chrome had to be told the spelling six times. Adding a status colour here
+ * meant editing six blocks, and .dark .pk existed because pocket's palette
+ * did not follow the app's dark toggle.
+ *
+ * Every layout resolves --t-* now, so the colour half is written once and
+ * follows the palette and the ink mode on its own. What is left per layout
+ * is SHAPE — the font, the corner, the height of the bell — and that is
+ * genuinely different: a proportional toast over a monospace ledger page is
+ * the foreign object people complain about.
  */
 :root {
+  --chrome-surface: var(--t-surface);
+  --chrome-surface-2: var(--t-surface-2);
+  --chrome-fg: var(--t-fg);
+  --chrome-muted: var(--t-fg-muted);
+  --chrome-border: var(--t-border);
+  --chrome-rule: var(--t-border-soft);
+  --chrome-hover: var(--t-accent);
+  --chrome-shadow: var(--t-shadow-lg);
+  --chrome-ring: var(--t-ring);
+
+  /* Status. --chrome-alert is the unread dot and nothing else. */
+  --chrome-safe: var(--t-safe);
+  --chrome-alert: var(--t-over);
+
+  /* Every soft state ships all three of bg / border / fg — a layout that
+     supplied a fill without the ink to go on it is how the panel first got
+     into trouble. The palette guarantees the trio for all five variants, so
+     that failure is now impossible rather than merely avoided. */
+  --chrome-warn-bg: var(--t-warn-soft);
+  --chrome-warn-border: var(--t-warn);
+  --chrome-warn-fg: var(--t-warn-text);
+
+  --chrome-info-bg: var(--t-info-soft);
+  --chrome-info-border: var(--t-info);
+  --chrome-info-fg: var(--t-info-text);
+
+  /* Shape defaults — index.css's `icon-btn` is a 2.75rem circle. */
   --chrome-font: var(--font-sans);
   --chrome-radius: 0.75rem;
   --chrome-radius-sm: 0.5rem;
-
-  /* The bell has to sit in a header next to that layout's own buttons, so
-   * it takes their height and their corner rather than a shape of its own.
-   * Base is index.css's `icon-btn`: a 2.75rem circle. */
   --chrome-trigger-h: 2.75rem;
   --chrome-trigger-radius: 999px;
+}
 
-  --chrome-surface: var(--color-popover);
-  --chrome-surface-2: var(--color-muted);
-  --chrome-fg: var(--color-popover-foreground);
-  --chrome-muted: var(--color-muted-foreground);
-  --chrome-border: var(--color-border);
-  --chrome-rule: var(--color-border);
-  --chrome-hover: var(--color-accent);
-  --chrome-shadow: var(--shadow-lift);
-  --chrome-ring: var(--color-ring);
-
-  /* The scrim behind the panel on a phone, where it is a dialog rather
-   * than a popover. */
+/* @override chrome — the scrim behind the panel on a phone, where it is a
+ * dialog rather than a popover. Not a palette colour: it is black at low
+ * alpha, which is what dimming a page means, and it reads the same over all
+ * five variants. Every palette would have to invent the same answer. */
+:root {
   --chrome-scrim: oklch(0 0 0 / 0.28);
-
-  /* Status. --chrome-alert is the unread dot and nothing else. */
-  --chrome-safe: var(--color-good);
-  --chrome-alert: var(--color-destructive);
-
-  --chrome-warn-bg: var(--color-warn-soft);
-  --chrome-warn-border: color-mix(in oklab, var(--color-warn) 38%, transparent);
-  --chrome-warn-fg: var(--color-warn-foreground);
-
-  --chrome-info-bg: var(--color-info-soft);
-  --chrome-info-border: color-mix(in oklab, var(--color-info) 34%, transparent);
-  --chrome-info-fg: var(--color-info);
 }
 
 /* ------------------------------------------------------------------ */
-/* 2. Mapping blocks — one per palette family                         */
+/* 2. Shape overrides — one per layout that has its own                */
 /* ------------------------------------------------------------------ */
+/*
+ * @override — colours are not allowed here. The bell has to sit in a header
+ * beside that layout's own buttons, so it takes their height and their
+ * corner; the toast has to look like it belongs to the page under it, so it
+ * takes its font. Nothing below picks a colour, and theme:check enforces it.
+ */
 
 /* PayGuard, and Work Record with it: workrecord always renders inside
- * .pg-payguard and borrows the whole token set, so one block covers both
- * and every payguard sub-theme, because these all resolve at use. */
+ * .pg-payguard and borrows the whole token set, so one block covers both. */
 .pg-payguard {
   --chrome-font: 'DM Sans', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
   --chrome-radius: var(--pg-radius);
   --chrome-radius-sm: var(--pg-radius-md);
   --chrome-trigger-h: var(--pg-h);
   --chrome-trigger-radius: var(--pg-radius-md);
-
-  --chrome-surface: var(--pg-surface);
-  --chrome-surface-2: var(--pg-surface-2);
-  --chrome-fg: var(--pg-fg);
-  --chrome-muted: var(--pg-fg-muted);
-  --chrome-border: var(--pg-border);
-  --chrome-rule: var(--pg-rule);
-  --chrome-hover: var(--pg-hover);
-  --chrome-shadow: var(--pg-shadow-lg);
-  --chrome-ring: var(--pg-ring);
-  --chrome-scrim: rgb(15 23 42 / 0.32);
-
-  --chrome-safe: var(--pg-safe);
-  --chrome-alert: var(--pg-over);
-
-  --chrome-warn-bg: var(--pg-warn-bg);
-  --chrome-warn-border: var(--pg-warn-border);
-  --chrome-warn-fg: var(--pg-warn-text);
-
-  --chrome-info-bg: var(--pg-info-bg);
-  --chrome-info-border: var(--pg-info-border);
-  --chrome-info-fg: var(--pg-info-text);
 }
 
-/* Ledger — monospace paper. The font is the whole identity of this layout,
- * so the chrome takes it too; a proportional toast over a ledger page is
- * exactly the foreign object being complained about. */
+/* Ledger — monospace paper. The font is the whole identity of this layout. */
 .pg-ledger {
   --chrome-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   --chrome-radius: var(--lg-radius);
   --chrome-radius-sm: var(--lg-radius);
   --chrome-trigger-h: 2.25rem;
   --chrome-trigger-radius: var(--lg-radius);
-
-  --chrome-surface: var(--lg-surface);
-  --chrome-surface-2: var(--lg-surface-2);
-  --chrome-fg: var(--lg-fg);
-  --chrome-muted: var(--lg-muted);
-  --chrome-border: var(--lg-border);
-  --chrome-rule: var(--lg-border-soft);
-  --chrome-hover: var(--lg-surface-2);
-  --chrome-shadow: var(--lg-shadow);
-  --chrome-ring: var(--lg-ring);
-  --chrome-scrim: rgb(20 20 30 / 0.3);
-
-  --chrome-safe: var(--lg-safe);
-  --chrome-alert: var(--lg-over);
-
-  --chrome-warn-bg: color-mix(in oklab, var(--lg-warn) 12%, var(--lg-surface));
-  --chrome-warn-border: color-mix(in oklab, var(--lg-warn) 36%, transparent);
-  --chrome-warn-fg: color-mix(in oklab, var(--lg-warn) 62%, var(--lg-fg));
-
-  --chrome-info-bg: color-mix(in oklab, var(--lg-w2) 10%, var(--lg-surface));
-  --chrome-info-border: color-mix(in oklab, var(--lg-w2) 32%, transparent);
-  --chrome-info-fg: color-mix(in oklab, var(--lg-w2) 66%, var(--lg-fg));
 }
 
-/* calc20 puts its tokens on <html> so portaled menus inherit them; the
- * mapping goes to the same place for the same reason. */
 html.pg-calc20 {
   --chrome-font: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
   --chrome-radius: 0.5rem;
   --chrome-radius-sm: 0.375rem;
   --chrome-trigger-h: 2.25rem;
   --chrome-trigger-radius: 0.375rem;
-
-  --chrome-surface: var(--card);
-  --chrome-surface-2: var(--paper-3);
-  --chrome-fg: var(--ink);
-  --chrome-muted: var(--ink-3);
-  --chrome-border: var(--line);
-  --chrome-rule: var(--line-3);
-  --chrome-hover: var(--paper-2);
-  --chrome-shadow: 0 6px 18px -10px rgb(0 0 0 / 0.35);
-  --chrome-ring: var(--ring);
-  --chrome-scrim: rgb(10 14 24 / 0.3);
-
-  --chrome-safe: var(--keep-label);
-  --chrome-alert: var(--over-label);
-
-  --chrome-warn-bg: var(--spent-bg);
-  --chrome-warn-border: var(--spent-line);
-  --chrome-warn-fg: var(--spent-label);
-
-  --chrome-info-bg: var(--badge-w2-bg);
-  --chrome-info-border: var(--line-strong);
-  --chrome-info-fg: var(--badge-w2-ink);
 }
 
-/* Plan — paper, hard rules, no soft anything. */
+/* Plan and Pocket size their chrome in px, not rem: both are built for a
+   cheap phone where the root font is 18px, and a bell that grew with it
+   would not fit the header it sits in. */
 .pl {
   --chrome-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --chrome-radius: 6px;
   --chrome-radius-sm: 4px;
   --chrome-trigger-h: 40px;
   --chrome-trigger-radius: 6px;
-
-  --chrome-surface: var(--paper-2);
-  --chrome-surface-2: var(--paper);
-  --chrome-fg: var(--ink);
-  --chrome-muted: var(--ink-soft);
-  --chrome-border: var(--rule-strong);
-  --chrome-rule: var(--rule);
-  --chrome-hover: var(--paper);
-  --chrome-shadow: 0 3px 0 var(--rule-strong);
-  --chrome-ring: var(--clear);
-  --chrome-scrim: rgb(22 25 31 / 0.34);
-
-  --chrome-safe: var(--clear);
-  --chrome-alert: var(--over);
-
-  --chrome-warn-bg: var(--near-bg);
-  --chrome-warn-border: var(--near);
-  --chrome-warn-fg: var(--near);
-
-  --chrome-info-bg: var(--unknown-bg);
-  --chrome-info-border: var(--rule-strong);
-  --chrome-info-fg: var(--ink);
 }
 
-/*
- * Pocket — the cheap-Android layout. Literal values only: pocket.css bans
- * color-mix() because an old WebView drops the whole declaration, and bans
- * blurred shadows because they cost a compositor pass per frame on a weak
- * GPU. A border does the same job here.
- */
 .pk {
-  /* Same system stack as the rest of pocket: no webfont, no download, no
-   * FOIT on a metered connection. */
   --chrome-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --chrome-radius: 8px;
   --chrome-radius-sm: 6px;
-  /* 44px, because this is the phone layout and that is the touch target. */
   --chrome-trigger-h: 44px;
   --chrome-trigger-radius: 8px;
-
-  --chrome-surface: #ffffff;
-  --chrome-surface-2: #f3f5f8;
-  --chrome-fg: #16191f;
-  --chrome-muted: #5c6572;
-  --chrome-border: #c9cfd8;
-  --chrome-rule: #dfe3e9;
-  --chrome-hover: #f3f5f8;
-  --chrome-shadow: none;
-  --chrome-ring: #1f6f43;
-  --chrome-scrim: rgba(10, 12, 16, 0.42);
-
-  --chrome-safe: #1f6f43;
-  --chrome-alert: #b3261e;
-
-  --chrome-warn-bg: #fdf3e0;
-  --chrome-warn-border: #d9a441;
-  --chrome-warn-fg: #7a4b06;
-
-  --chrome-info-bg: #eaf1fb;
-  --chrome-info-border: #9dbbe4;
-  --chrome-info-fg: #1d4b8f;
-}
-
-.dark .pk {
-  --chrome-surface: #1a1f27;
-  --chrome-surface-2: #232936;
-  --chrome-fg: #eef1f5;
-  --chrome-muted: #a3adbb;
-  --chrome-border: #3a4250;
-  --chrome-rule: #2a2f39;
-  --chrome-hover: #232936;
-  --chrome-ring: #6fd39b;
-
-  --chrome-safe: #6fd39b;
-  --chrome-alert: #f2837c;
-
-  --chrome-warn-bg: #3a2f16;
-  --chrome-warn-border: #8a6a24;
-  --chrome-warn-fg: #f3d08a;
-
-  --chrome-info-bg: #1c2b42;
-  --chrome-info-border: #3f5b85;
-  --chrome-info-fg: #a8c7f0;
 }
 
 /* ------------------------------------------------------------------ */

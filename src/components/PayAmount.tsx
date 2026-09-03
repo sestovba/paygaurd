@@ -1,10 +1,14 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
+import { useTracker } from '../state/TrackerProvider';
+import type { PayBasis } from '../state/storage';
 import { grossFromNet } from '../domain/earnings';
 import { money } from '../domain/format';
 import { NumericInput } from './NumericInput';
 import { Segmented } from './ui';
 import type { MonthEntry } from '../domain/types';
+
+export type { PayBasis };
 
 /*
  * One door for the same fact.
@@ -42,8 +46,6 @@ import type { MonthEntry } from '../domain/types';
  * cost the reader a wrong answer for it.
  */
 
-export type PayBasis = 'bank' | 'paystub';
-
 const PayBasisContext = createContext<{
   basis: PayBasis;
   setBasis: (next: PayBasis) => void;
@@ -52,7 +54,9 @@ const PayBasisContext = createContext<{
 /** Wraps an editor so its money fields and its switch agree without every
  *  call site threading the state through. */
 export function PayBasisProvider({ children }: { children: ReactNode }) {
-  const [basis, setBasis] = useState<PayBasis>('bank');
+  const { ui, setUi } = useTracker();
+  const basis = ui.payBasis ?? 'bank';
+  const setBasis = (next: PayBasis) => setUi({ payBasis: next });
   return (
     <PayBasisContext.Provider value={{ basis, setBasis }}>
       {children}

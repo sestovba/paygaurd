@@ -107,7 +107,7 @@ things you discover and set aside.** A session ends whenever it ends, and
 the next one may be a different model with none of this conversation. The
 notes file is the only thing both of you can read.
 
-- **Front end:** use the console itself. `L` selects, `C` comments, and the
+- **Front end:** use the console itself. `D` selects, `C` comments, and the
   note it writes carries the element, its DOM path and the source file and
   line off the React fiber — an anchor no one can type by hand as well.
   Comment on the thing you are about to change, then answer your own note
@@ -192,13 +192,57 @@ layouts at once, so a change there is worth more than a change in one screen.
 `calc20/` keeps its own `UiState` shim in `calc20/state.tsx`. A new shared
 preference must be added in four places there or it silently never arrives.
 
+## One palette, and every theme's override layer
+
+**`src/styles/palette.css` is the only file that chooses a colour.** 39
+choices, five variants, two axes:
+
+- **variant** — `paper` · `slate` · `ledger` · `carbon` · `calc20`. The hue
+  and the paper. Answers all 39 choices, every time; a variant never inherits
+  one. `UiState.palette` picks it, `data-palette` on `<html>` carries it.
+- **ink** — light / dark, from `UiState.theme`. Elevation follows ink, not
+  variant. A variant with no light form says so with `color-scheme: dark` in
+  its own block (`carbon`), and `applyTheme` reads that back off the
+  stylesheet and forces `.dark`, so every `.dark`-keyed rule in the app is
+  correct for it without naming it.
+
+Every other stylesheet is two things and says which:
+
+| | |
+|---|---|
+| **bridge** | `--pg-x: var(--t-x)` — maps the palette onto whatever names that file's call sites already spell. No values. |
+| **override** | the argued exceptions, each marked `@override <layout> — <why>` in the comment above the block. |
+
+An override needs a sentence, and that sentence is the point: an exception
+someone had to justify is an exception someone can find. Plan's sprite ink,
+gilt and bevels are overrides; its paper and status colours are not.
+
+`npm run theme:check` (run first by `npm run build`) fails on: a variant
+missing a choice or listing one out of order; a `--t-*` set outside
+palette.css; a colour *chosen* in an unmarked block; a variant with no dark
+form that has not declared itself single-ink; and `index.html`'s `SINGLE_INK`
+list drifting from what palette.css says. It also reports, without failing,
+the `color-mix()` uses left over and the files not yet migrated.
+
+**Not yet on it:** `calc20.css` (101 colours, its own glass system) and
+`pocket.css` (colours hardcoded in rules rather than tokens, so it follows
+light/dark but not the variant). Both are listed in `theme:check`'s output
+and in the review notes.
+
 ## Commands
 
 ```bash
-npm run dev        # the app, and the review console with it
-npm run typecheck  # tsc --noEmit
-npm run build      # typecheck + vite build
+npm run dev           # the app, and the review console with it
+npm run typecheck     # tsc --noEmit
+npm run build         # typecheck + vite build
+npm run build:calc20  # Calc20 alone, as one file: dist-calc20/calc20.html
 ```
 
+The last one is a handover format, not a second deploy: one self-contained
+HTML page carrying the Calc20 layout on the same `pg-data-v1` record, with no
+sign-in, no Firebase, no other layouts and no review console. It opens by
+double-click. `vite.calc20.config.ts` is the whole of it, and its header says
+what is left out and why.
+
 The review console is dev/localhost only and is never in a published build.
-Open it with ⌘R or the button bottom-right. `L` selects, `C` comments.
+Open it with ⌘R or the button bottom-right. `D` selects, `C` comments.

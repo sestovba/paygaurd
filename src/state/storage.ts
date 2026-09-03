@@ -8,8 +8,55 @@ const DATA_KEY = 'pg-data-v1';
 const UI_KEY = 'pg-ui-v1';
 
 export type ThemePref = 'system' | 'light' | 'dark';
-export type LayoutMode = 'classic' | 'v2' | 'responsive' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket' | 'plan';
-export type LedgerTheme = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
+export type LayoutMode = 'overview' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket' | 'plan';
+
+/**
+ * How the Overview layout is navigated.
+ *
+ * There used to be three layouts here — classic, v2 and responsive — and
+ * they were one layout drawn three ways. Every content surface they render
+ * (ActionBanner, SafetyHero, PaycheckRadar, MonthGrid, StreamsPanel,
+ * YearTotal, and all six detail views) is used by those three and by nothing
+ * else in the app; what differed was the chrome around them and where a
+ * detail opens. That is an option, not a layout.
+ *
+ *   scroll     One page, everything down it. Details open as sheets over it.
+ *   pages      Overview / Income / Your limit as separate pages, with a
+ *              sidebar on a desktop and tabs on a phone. A detail replaces
+ *              the page and offers a way back.
+ *   workspace  The same pages, but a detail opens BESIDE what you were
+ *              looking at and both stay on screen.
+ */
+export type OverviewShell = 'scroll' | 'pages' | 'workspace';
+
+/** What the three used to be called. Review notes are anchored to these —
+ *  103 of them — and a note records which shell it was written against, so
+ *  the ids are translated on the way in rather than rewritten in the file. */
+export type LegacyLayoutId = 'classic' | 'v2' | 'responsive';
+
+export const SHELL_FOR_LEGACY: Record<LegacyLayoutId, OverviewShell> = {
+  classic: 'scroll',
+  v2: 'pages',
+  responsive: 'workspace'
+};
+
+export function isLegacyLayoutId(value: unknown): value is LegacyLayoutId {
+  return value === 'classic' || value === 'v2' || value === 'responsive';
+}
+/**
+ * The palette, for the whole app.
+ *
+ * The name is historical — it was `LedgerTheme` when only the Ledger layout
+ * had one. Three fields then grew off it (`ledgerTheme`, `payguardTheme`,
+ * `workRecordTheme`) for what is one decision, and two of the three indexed
+ * the *same* CSS, so keeping payguard and workrecord looking alike meant
+ * setting the same value twice. They are one field now: `palette`.
+ */
+export type Palette = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
+
+/** @deprecated The old name. Kept so imports elsewhere keep compiling. */
+export type LedgerTheme = Palette;
+export type PayBasis = 'bank' | 'paystub';
 
 /**
  * Presentation state belonging to the Calc20 layout alone.
@@ -96,13 +143,15 @@ export interface UiState {
   /** Layout selection is kept beside the other device-local preferences so
    *  comparing modes does not reset on every refresh. */
   layout: LayoutMode;
-  /** Sub-theme for the Ledger layout only — independent of light/dark. */
-  ledgerTheme: LedgerTheme;
-  /** Sub-theme for the PayGuard card layout. */
-  payguardTheme?: LedgerTheme;
-  /** Sub-theme for the Work Record layout. Defaults to the calc20 palette
-   *  it was ported alongside, rather than to PayGuard's own. */
-  workRecordTheme?: LedgerTheme;
+  /** Which shell the Overview layout wears. See `OverviewShell`. */
+  overviewShell: OverviewShell;
+  /**
+   * Which palette the app wears. One field for every layout that has one —
+   * see `Palette` above for why there used to be three. Independent of
+   * `theme`: that is the light/dark axis, this is the hue, and
+   * styles/palette.css crosses them.
+   */
+  palette: Palette;
   /** Work Record's three slabs remember whether they were left open. Stored
    *  flat rather than as a nested object because loadUi merges one level. */
   wrStreamsOpen: boolean;
@@ -134,22 +183,29 @@ export interface UiState {
   /** Matches domain/legal.ts's TERMS_VERSION once accepted; unset re-gates. */
   termsAcceptedVersion?: string;
   termsAcceptedAt?: string;
+  /**
+   * How the user prefers to enter pay across the app.
+   * 'bank' = Net pay (what actually reached the bank account).
+   * 'paystub' = Gross pay before taxes (from the paystub).
+   * Defaults to 'bank' (net pay).
+   */
+  payBasis: PayBasis;
 }
 
 export const DEFAULT_UI: UiState = {
   year: new Date().getFullYear(),
   theme: 'system',
   layout: 'plan',
-  ledgerTheme: 'paper',
-  payguardTheme: 'paper',
-  workRecordTheme: 'calc20',
+  overviewShell: 'pages',
+  palette: 'paper',
   wrStreamsOpen: true,
   wrMonthsOpen: false,
   wrStatusOpen: false,
   calc20: DEFAULT_CALC20_UI,
   onboarded: false,
   focusMode: true,
-  cloudSyncEnabled: false
+  cloudSyncEnabled: false,
+  payBasis: 'bank'
 };
 
 export function loadData(): TrackerData {
@@ -170,17 +226,51 @@ export function loadUi(): UiState {
   try {
     const raw = localStorage.getItem(UI_KEY);
     if (!raw) return { ...DEFAULT_UI };
-    const saved = JSON.parse(raw) as Partial<UiState> & { hideFuture?: boolean };
+    const saved = JSON.parse(raw) as Partial<UiState> & {
+      hideFuture?: boolean;
+      layout?: LayoutMode | LegacyLayoutId;
+      ledgerTheme?: Palette;
+      payguardTheme?: Palette;
+      workRecordTheme?: Palette;
+    };
     // `hideFuture: false` was the old way of saying "show me the whole year",
     // and it is one of the four positions monthScope now has. Carry it over
     // once; anything saved after this reads monthScope and ignores it.
     const carried = saved.monthScope ?? (saved.hideFuture === false ? 'year' : undefined);
+    /*
+     * Three palette fields became one. A record saved before that has up to
+     * three answers and no way to know which was set last, so the tie is
+     * broken by which one the person is most likely to have chosen on
+     * purpose: payguardTheme and ledgerTheme were offered in Settings on the
+     * layouts people use, while workRecordTheme defaulted to 'calc20' and
+     * most records carry that untouched default rather than a choice.
+     */
+    /*
+     * classic / v2 / responsive became one layout with a shell option. A
+     * record saved before that names one of the three, and which one is the
+     * whole of what it was saying — so it picks the shell rather than being
+     * discarded.
+     */
+    const legacy = isLegacyLayoutId(saved.layout) ? saved.layout : null;
+    const layout: LayoutMode = legacy ? 'overview' : (saved.layout ?? DEFAULT_UI.layout);
+    const overviewShell: OverviewShell = saved.overviewShell
+      ?? (legacy ? SHELL_FOR_LEGACY[legacy] : DEFAULT_UI.overviewShell);
+
+    const palette: Palette = saved.palette
+      ?? saved.payguardTheme
+      ?? saved.ledgerTheme
+      ?? saved.workRecordTheme
+      ?? DEFAULT_UI.palette;
     // The top-level spread is one level deep, so a nested slice saved before
     // a switch existed would arrive missing that switch. Merge it by hand.
     return {
       ...DEFAULT_UI,
       ...saved,
       monthScope: carried,
+      layout,
+      overviewShell,
+      palette,
+      payBasis: saved.payBasis === 'paystub' ? 'paystub' : 'bank',
       calc20: { ...DEFAULT_CALC20_UI, ...(saved.calc20 ?? {}) }
     };
   } catch {
@@ -203,4 +293,45 @@ export function saveUiPatch(patch: Partial<UiState>): UiState {
   const next = { ...loadUi(), ...patch };
   saveUi(next);
   return next;
+}
+
+/**
+ * The TWP quiz's own answers, kept only while the quiz is unfinished.
+ *
+ * It is a separate key from the UI record because it is not a preference:
+ * it is a half-finished conversation that must survive a refresh, a
+ * backgrounded tab or an old WebView killing the page mid-question, and
+ * then go away. `finish` writes the real assessment into TrackerData and
+ * clears this; nothing else reads it.
+ */
+const QUIZ_KEY = 'pg-quiz-draft-v1';
+
+export interface QuizDraft {
+  step: string;
+  history: string[];
+  startMonth: string;
+  monthlyEarnings?: number;
+  countMode: 'used' | 'remaining';
+  countValue?: number;
+  conclusion: { headline: string; detail: string; showCountEscape?: boolean } | null;
+  pending: { state: 'remaining' | 'complete' | 'unknown'; basis: 'personal-records' | 'unconfirmed'; priorUsed: number | null } | null;
+}
+
+export function loadQuizDraft(): Partial<QuizDraft> | null {
+  try {
+    const raw = localStorage.getItem(QUIZ_KEY);
+    return raw ? (JSON.parse(raw) as Partial<QuizDraft>) : null;
+  } catch { return null; }
+}
+
+export function saveQuizDraft(draft: QuizDraft): void {
+  try {
+    localStorage.setItem(QUIZ_KEY, JSON.stringify(draft));
+  } catch { /* quota or private mode; the quiz continues in memory */ }
+}
+
+export function clearQuizDraft(): void {
+  try {
+    localStorage.removeItem(QUIZ_KEY);
+  } catch { /* ignore */ }
 }

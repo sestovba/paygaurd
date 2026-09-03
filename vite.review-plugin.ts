@@ -158,6 +158,11 @@ function withResolvedSources(root: string, notes: ReviewNotes): ReviewNotes {
 }
 
 const JSON_PATH = 'review/review-notes.json';
+/* Screenshots go to disk as real files, never into review-notes.json. That
+ * file is read whole by every AI pass; a handful of base64 PNGs would bury
+ * fifty notes under a megabyte of pixels nobody can grep. The note keeps the
+ * filename, the file keeps the image. */
+const SHOTS_DIR = 'review/shots';
 const MD_PATH = 'review/REVIEW-NOTES.md';
 const BACKUP_PATH = 'review/review-notes.backup.json';
 
@@ -197,6 +202,53 @@ export function reviewNotes(): Plugin {
     configureServer(server) {
       const jsonFile = resolve(server.config.root, JSON_PATH);
       const mdFile = resolve(server.config.root, MD_PATH);
+
+      /* Paste, drop or pick an image on a note and it lands here: the body is
+       * the raw image, the note id and extension ride in the query string,
+       * and what comes back is the path to write onto the note. */
+      server.middlewares.use('/__review/shot', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end();
+          return;
+        }
+        const url = new URL(req.url ?? '/', 'http://localhost');
+        // The id reaches the filesystem, so it is reduced to characters that
+        // cannot climb out of the directory it is meant to land in.
+        const id = (url.searchParams.get('id') ?? 'shot').replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 60);
+        const ext = (url.searchParams.get('ext') ?? 'png').replace(/[^a-z0-9]/gi, '').slice(0, 5) || 'png';
+
+        const chunks: Buffer[] = [];
+        let size = 0;
+        let aborted = false;
+        req.on('data', (chunk: Buffer) => {
+          size += chunk.length;
+          // A screenshot that will not fit in ten megabytes is not a
+          // screenshot; refusing early keeps a runaway paste out of memory.
+          if (size > 10_000_000) {
+            aborted = true;
+            res.statusCode = 413;
+            res.end(JSON.stringify({ ok: false, error: 'Image over 10MB' }));
+            req.destroy();
+            return;
+          }
+          chunks.push(chunk);
+        });
+        req.on('end', () => {
+          if (aborted) return;
+          try {
+            const dir = resolve(server.config.root, SHOTS_DIR);
+            mkdirSync(dir, { recursive: true });
+            const name = `${id}-${Date.now().toString(36)}.${ext}`;
+            writeFileSync(resolve(dir, name), Buffer.concat(chunks));
+            res.setHeader('content-type', 'application/json');
+            res.end(JSON.stringify({ ok: true, path: `${SHOTS_DIR}/${name}` }));
+          } catch (error) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ ok: false, error: String(error) }));
+          }
+        });
+      });
 
       server.middlewares.use('/__review/notes', (req, res) => {
         if (req.method === 'GET') {

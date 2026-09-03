@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayGuard — Regal Academic Ledger (Classroom)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --radius: 0.375rem;
+      --background: #f6f4ea;
+      --foreground: #153826;
+      --card: #fcfbf7;
+      --primary: #153826;
+      --primary-fg: #f6f4ea;
+      --muted: #e8e5d8;
+      --muted-foreground: #5a7566;
+      --gold: #b38b32;
+      --gold-soft: rgba(179, 139, 50, 0.15);
+      --border: #dfdbca;
+      --good: #1b633b;
+      --good-soft: #e2f0e7;
+      --warn: #a36110;
+      --warn-soft: #fcf1de;
+      --font-display: 'JetBrains Mono', monospace;
+      --font-sans: 'Work Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+      padding: 0 0 60px;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+    .figure {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+    .field-line {
+      border-bottom: 1px solid var(--gold);
+      transition: border-color 150ms ease;
+    }
+    .field-line:focus-within {
+      border-bottom-color: var(--primary);
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(246, 244, 234, 0.92);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .shield-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(21, 56, 38, 0.04);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+    .big-num {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--foreground);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: var(--good-soft);
+      color: var(--good);
+    }
+    .gold-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: var(--gold-soft);
+      color: #7d5b12;
+    }
+    .pips {
+      display: flex;
+      gap: 4px;
+      margin: 10px 0;
+    }
+    .pip {
+      flex: 1;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--muted);
+    }
+    .pip.used { background: var(--gold); }
+    .pip.prior { background: var(--muted-foreground); opacity: 0.4; }
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 600px) {
+      .month-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .month-cell {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--background);
+    }
+    .month-cell.current {
+      border-color: var(--gold);
+      background: var(--card);
+    }
+    .table-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-row">
+        <div class="brand">
+          <div class="shield-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem; letter-spacing: -0.01em;">PayGuard</div>
+            <div class="eyebrow" style="font-size: 0.55rem;">Regal Academic Ledger</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); padding: 4px 10px; border-radius: var(--radius); background: var(--card);">
+            2026
+          </div>
+          <span class="chip">Active Period</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="margin-top: 24px;">
+    <div class="hero-grid">
+      <div class="card">
+        <p class="eyebrow">September 2026 Countable</p>
+        <div style="display: flex; align-items: baseline; gap: 12px; margin: 12px 0 8px;">
+          <span class="big-num figure">97</span>
+          <span class="chip">Safe</span>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--muted-foreground); margin-bottom: 16px;">
+          <strong>03 headroom</strong> before the ,000 aim. Statutory SGA limit is ,210.
+        </p>
+        <div style="border-top: 1px solid var(--border); padding-top: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-family: var(--font-mono); color: var(--muted-foreground); margin-bottom: 6px;">
+            <span>/bin/sh</span>
+            <span>97 Counted</span>
+            <span>,210 Limit</span>
+          </div>
+          <div style="height: 8px; background: var(--muted); border-radius: 4px; overflow: hidden; position: relative;">
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 74%; background: var(--primary); border-radius: 4px;"></div>
+            <div style="position: absolute; left: 82.6%; top: 0; bottom: 0; width: 2px; background: var(--gold);"></div>
+          </div>
+        </div>
+        <p class="eyebrow" style="margin-top: 16px; color: var(--gold);">Estimated Capacity</p>
+        <p style="font-size: 0.85rem; margin-top: 4px;">
+          Approx. <strong>4 more hours</strong> of work at 1.50/hr at Riverside Market.
+        </p>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Trial Work Period (TWP)</p>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin: 10px 0 6px;">
+          <span style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 500;">8 of 9 used</span>
+          <span class="gold-pill">1 month remains</span>
+        </div>
+        <div class="pips">
+          <div class="pip prior" title="Prior year"></div>
+          <div class="pip prior" title="Prior year"></div>
+          <div class="pip used" title="Used in 2026"></div>
+          <div class="pip used" title="Used in 2026"></div>
+          <div class="pip used" title="Used in 2026"></div>
+          <div class="pip used" title="Used in 2026"></div>
+          <div class="pip used" title="Used in 2026"></div>
+          <div class="pip used" title="Used in 2026"></div>
+          <div class="pip" title="Available"></div>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.5; margin-top: 8px;">
+          Earn any amount in trial work months without losing benefits. Rolling 60-month evaluation window applies.
+        </p>
+
+        <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 14px;">
+          <p class="eyebrow">Audit Confidence</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+            <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;">67% Confirmed</span>
+            <span class="eyebrow" style="color: var(--gold);">Riverside · Paystub needed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026 Runway -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <p class="eyebrow">2026 Year Runway</p>
+        <span class="figure" style="font-size: 0.85rem; color: var(--muted-foreground);">Total Countable YTD: <strong>4,610</strong></span>
+      </div>
+      <div class="month-grid">
+        <div class="month-cell"><div class="eyebrow">Jan</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">20</div></div>
+        <div class="month-cell"><div class="eyebrow">Feb</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">80</div></div>
+        <div class="month-cell"><div class="eyebrow">Mar</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">,170</div></div>
+        <div class="month-cell"><div class="eyebrow">Apr</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">45</div></div>
+        <div class="month-cell"><div class="eyebrow">May</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">,075</div></div>
+        <div class="month-cell"><div class="eyebrow">Jun</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">20</div></div>
+        <div class="month-cell"><div class="eyebrow">Jul</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">,025</div></div>
+        <div class="month-cell"><div class="eyebrow">Aug</div><div class="figure" style="font-weight:600; font-size:0.9rem; margin-top:4px;">,043</div></div>
+        <div class="month-cell current"><div class="eyebrow" style="color:var(--gold);">Sep (Now)</div><div class="figure" style="font-weight:700; font-size:0.95rem; margin-top:4px; color:var(--primary);">97</div></div>
+        <div class="month-cell" style="opacity:0.5;"><div class="eyebrow">Oct</div><div class="figure" style="font-size:0.9rem; margin-top:4px;">—</div></div>
+        <div class="month-cell" style="opacity:0.5;"><div class="eyebrow">Nov</div><div class="figure" style="font-size:0.9rem; margin-top:4px;">—</div></div>
+        <div class="month-cell" style="opacity:0.5;"><div class="eyebrow">Dec</div><div class="figure" style="font-size:0.9rem; margin-top:4px;">—</div></div>
+      </div>
+    </div>
+
+    <!-- Income Sources -->
+    <div class="card">
+      <p class="eyebrow" style="margin-bottom: 14px;">Income Sources & Allowances</p>
+      <div class="table-row">
+        <div>
+          <div style="font-weight: 600; font-size: 0.95rem;">Riverside Market</div>
+          <div class="eyebrow" style="margin-top: 2px;">W-2 Employment · 1.50/hr · Bi-weekly</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="figure" style="font-weight: 700; font-size: 1rem;">2,345</div>
+          <div class="eyebrow">2026 YTD</div>
+        </div>
+      </div>
+      <div class="table-row">
+        <div>
+          <div style="font-weight: 600; font-size: 0.95rem;">Delivery Driving</div>
+          <div class="eyebrow" style="margin-top: 2px;">1099 Self-Employed · 1,053 mi deducted (/bin/sh.76/mi)</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="figure" style="font-weight: 700; font-size: 1rem;">,385</div>
+          <div class="eyebrow">2026 YTD Net</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

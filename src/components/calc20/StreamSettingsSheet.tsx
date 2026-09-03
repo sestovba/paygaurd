@@ -264,8 +264,8 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
                 <span className="eyebrow">How this income spreads</span>
                 <p className="help-note">
                   The annual total on the card divides evenly across the months
-                  this stream was active — what SSA does when income cannot be
-                  tied to a month. Enter a month directly for an exact figure.
+                  this job was running — what Social Security does when pay cannot
+                  be tied to one month. Enter a month directly for an exact figure.
                 </p>
               </div>
 

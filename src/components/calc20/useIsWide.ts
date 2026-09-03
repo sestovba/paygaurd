@@ -1,29 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useIsWide } from '../../viewport';
 import type { ViewportBand } from './state';
 
 export type { ViewportBand };
+/* The hook itself is no layout's property — it moved to src/viewport.ts when
+   PayGuard needed it too. Re-exported here so this layout's own call sites
+   keep reading from the file that also owns its band helpers. */
+export { useIsWide };
 
 /** Typical iPhone CSS width (iPhone 14/15). */
 export const IPHONE_WIDTH = 390;
 /** Wider than a phone. Below the desktop cutoff this is still the compact layout. */
 export const TABLET_LAYOUT_MIN = Math.round(IPHONE_WIDTH * 1.25);
-
-/** A small matchMedia hook used anywhere behavior, not just CSS, changes. */
-export function useIsWide(minWidth = 780): boolean {
-  const [wide, setWide] = useState(() =>
-    typeof window === 'undefined' ? false : window.matchMedia(`(min-width: ${minWidth}px)`).matches
-  );
-
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${minWidth}px)`);
-    const sync = () => setWide(mq.matches);
-    sync();
-    mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
-  }, [minWidth]);
-
-  return wide;
-}
 
 /**
  * iPhone (including landscape) vs iPad-sized vs a wide window.

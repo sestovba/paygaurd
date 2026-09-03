@@ -32,18 +32,60 @@
  * whose eyes are not twenty.
  */
 
+/* ------------------------------------------------------------------ */
+/* Palette bridge, and this layout's override layer                    */
+/* ------------------------------------------------------------------ */
+/*
+ * Plan used to declare a whole palette twice — .pl and .dark .pl, 49 values
+ * in a warm-paper family of its own. About half of it was just this file's
+ * spelling for things every layout has: --ink is foreground, --paper is
+ * background, --clear/--near/--over are the status three. Those bridge.
+ *
+ * The other half does not, and that is the point of the split. §2.4 of
+ * docs/DESIGN-SYSTEM.md says this layout owns its own visual system and
+ * that it is argued rather than decorative: the sprite outline, the 1999
+ * bevel pair, the gilt band on a treasure frame and the parchment behind it
+ * are what make a block read as an OBJECT rather than a coloured area, which
+ * is what survives a cheap panel in daylight. None of that is a palette
+ * choice and none of it belongs in palette.css.
+ */
 .pl {
-  --ink: #16191f;
-  --ink-soft: #5b6470;
-  --paper: #faf9f7;
-  --paper-2: #ffffff;
-  --rule: #e2e0da;
-  --rule-strong: #c9c6be;
+  --ink: var(--t-fg);
+  --ink-soft: var(--t-fg-muted);
+  --paper: var(--t-bg);
+  --paper-2: var(--t-surface);
+  --rule: var(--t-border);
+  --rule-strong: var(--t-border-strong);
 
-  --clear: #146c43;
-  --near: #8a5a00;
-  --over: #b3261e;
-  --unknown: #6b7280;
+  --clear: var(--t-safe);
+  --near: var(--t-warn);
+  --over: var(--t-over);
+  --clear-bg: var(--t-safe-soft);
+  --near-bg: var(--t-warn-soft);
+  --over-bg: var(--t-over-soft);
+
+  /* Every figure on the screen. A readout face, not a headline face. */
+  --figures: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+  min-height: 100%;
+  padding-bottom: 48px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+/*
+ * @override plan — the 16-bit surface treatment.
+ *
+ * Not colours in the palette sense: these are the parts of a drawn object.
+ * "unknown" is here rather than in the palette because it is the absence of
+ * a status, not a fifth one — a tile nobody has answered for yet — and every
+ * palette would have to invent a meaning for it.
+ */
+.pl {
   /* Sprite ink. Every drawn thing gets the same hard outline, the way a
      2D tile does — it is what makes a block read as an object rather than a
      coloured area, and it survives a cheap panel in daylight far better than
@@ -58,39 +100,24 @@
   --gilt: #c9a227;
   --gilt-hi: #f0d271;
   --parch: #fdfaf1;
-  /* Every figure on the screen. A readout face, not a headline face. */
-  --figures: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
   /* 1999 bevels: a light edge up-left, a dark edge down-right. */
   --bev-hi: #ffffff;
   --bev-lo: #a9a49a;
-
-  --clear-bg: #eef6f1;
-  --near-bg: #fbf4e6;
-  --over-bg: #fbeeed;
+  --unknown: #6b7280;
   --unknown-bg: #f1f2f4;
-
-  min-height: 100%;
-  padding-bottom: 48px;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
+  /* Ink stamped INTO the title plate. The plate's ground is --px-ink, which
+     is near-black in both ink modes, so its text is near-white in both — it
+     is not a paper colour and must not follow one. It used to borrow --parch,
+     which is also a panel background, and --parch goes dark when the page
+     does: every title plate in this layout was black-on-black in dark mode
+     before the palette merge made dark reachable enough to notice. */
+  --plate-fg: #fdfaf1;
 }
 
+/* @override plan — the same treatment under dark ink. The bridge above needs
+ * no dark twin, because dark is an axis of the palette; only the drawn-object
+ * values below have to be restated. */
 .dark .pl {
-  --ink: #eef1f5;
-  --ink-soft: #98a2b1;
-  --paper: #101319;
-  --paper-2: #171b22;
-  --rule: #262b34;
-  --rule-strong: #39404d;
-
-  --clear: #4ec07f;
-  --near: #e8b45c;
-  --over: #ff8a80;
-  --unknown: #98a2b1;
   --px-ink: #05070a;
   --px-hi: rgba(255, 255, 255, 0.26);
   --px-lo: rgba(0, 0, 0, 0.4);
@@ -101,10 +128,7 @@
   --parch: #1a1f28;
   --bev-hi: #333b48;
   --bev-lo: #05070a;
-
-  --clear-bg: #12211a;
-  --near-bg: #221c0f;
-  --over-bg: #241618;
+  --unknown: #98a2b1;
   --unknown-bg: #1a1e25;
 }
 
@@ -562,7 +586,7 @@
   margin: 0 0 12px;
   padding: 6px 10px;
   background: var(--px-ink);
-  color: var(--parch);
+  color: var(--plate-fg);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -1304,7 +1328,8 @@
   -webkit-backdrop-filter: none;
 }
 .pl [data-sheet] [data-sheet-head] h2 {
-  color: var(--parch);
+  /* Same plate, same reason as .pl-plate: the ground is --px-ink. */
+  color: var(--plate-fg);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.06em;

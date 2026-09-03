@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Check, Crosshair, Eye, EyeOff, MessageSquarePlus, X } from 'lucide-react';
-import type { LayoutMode } from '../state/storage';
+import { Check, Crosshair, Eye, EyeOff, ImagePlus, MessageSquarePlus, X } from 'lucide-react';
 import { anchorId, describeElement, elementPath, insideOf, labelFor, widerThan } from './anchor';
 import { actionable, notesToMarkdown } from './markdown';
-import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal } from './store';
-import type { NoteState, ReviewAnchor, ReviewNote, ReviewNotes } from './types';
+import { fetchRemote, loadLocal, mergeNotes, pushRemote, saveLocal, uploadShot } from './store';
+import type { NoteState, ReviewAnchor, ReviewLayoutId, ReviewNote, ReviewNotes } from './types';
 import {
   DECISIONS, STATE_BLURB, STATE_NAME, TAGS, TAG_NAME,
   canMove, closedByClaude, hasAsk, progressOf, stateOf, tagsOf
@@ -36,6 +35,11 @@ interface Composer {
   anchor: ReviewAnchor;
   text: string;
   tags: Tag[];
+  /** Repo-relative paths of the screenshots hung on this draft. */
+  shots: string[];
+  /** Where the thing being talked about was on screen when the composer
+   *  opened, so the card can get out of its way. */
+  over?: { top: number; left: number; width: number; height: number };
   /** True when this element already had a note — the composer is editing it
    *  rather than starting one. */
   existing: boolean;
@@ -78,7 +82,7 @@ export function ReviewProvider({
   onNavigate,
   children
 }: {
-  layout: LayoutMode;
+  layout: ReviewLayoutId;
   onNavigate?: (anchor: ReviewAnchor) => void;
   children: ReactNode;
 }) {
@@ -106,7 +110,7 @@ function ReviewConsole({
   onNavigate,
   children
 }: {
-  layout: LayoutMode;
+  layout: ReviewLayoutId;
   onNavigate?: (anchor: ReviewAnchor) => void;
   children: ReactNode;
 }) {
@@ -135,10 +139,14 @@ function ReviewConsole({
   const [undoDepth, setUndoDepth] = useState(0);
   const suggested = useRef<Record<string, { label: string; reason: string }>>({});
   const composerRef = useRef<HTMLTextAreaElement>(null);
+  /** The draft as it stands, so the uploader can read its id without being
+   *  rebuilt on every character typed into the box. */
+  const composerRef2 = useRef<Composer | null>(null);
   const loaded = useRef(false);
 
   notesRef.current = notes;
   pickedRef.current = picked;
+  composerRef2.current = composer;
 
   const say = useCallback((text: string, tone: 'good' | 'warn' | 'info' = 'good') => {
     setToast({ text, tone });
@@ -259,6 +267,11 @@ function ReviewConsole({
       anchor: existing?.anchor ?? anchor,
       text: existing?.comment ?? '',
       tags: existing ? tagsOf(existing) : [],
+      shots: existing?.shots ?? [],
+      over: (() => {
+        const box = el.getBoundingClientRect();
+        return { top: box.top, left: box.left, width: box.width, height: box.height };
+      })(),
       existing: Boolean(existing)
     });
     if (opts?.reason && !existing) {
@@ -266,6 +279,23 @@ function ReviewConsole({
     }
     window.setTimeout(() => composerRef.current?.focus(), 30);
   }, [layout]);
+
+  /** Send images to the dev server and hang the paths on the draft. Anything
+   *  that fails to upload is reported rather than silently dropped: a
+   *  screenshot you think you attached and did not is worse than none. */
+  const attachShots = useCallback(async (files: File[]) => {
+    const images = files.filter((file) => file.type.startsWith('image/'));
+    if (!images.length) return;
+    const id = composerRef2.current?.id ?? `shot-${Date.now().toString(36)}`;
+    const saved: string[] = [];
+    for (const file of images) {
+      const path = await uploadShot(id, file);
+      if (path) saved.push(path);
+    }
+    if (!saved.length) { say('Could not save that image — is the dev server running?', 'warn'); return; }
+    setComposer((current) => (current ? { ...current, shots: [...current.shots, ...saved] } : current));
+    say(saved.length === 1 ? 'Screenshot attached' : `${saved.length} screenshots attached`, 'good');
+  }, [say]);
 
   const commentOn = useCallback((
     label: string,
@@ -337,6 +367,7 @@ function ReviewConsole({
           reason: existing?.reason ?? proposal?.reason,
           comment: draft.text.trim() || undefined,
           tags: draft.tags.length ? draft.tags : undefined,
+          shots: draft.shots.length ? draft.shots : undefined,
           hidden: existing?.hidden,
           thread: existing?.thread,
           status: to,
@@ -458,7 +489,7 @@ function ReviewConsole({
         return;
       }
 
-      if (event.key === 'l') { event.preventDefault(); setMode((m) => (m === 'pick' ? 'off' : 'pick')); return; }
+      if (event.key === 'd') { event.preventDefault(); setMode((m) => (m === 'pick' ? 'off' : 'pick')); return; }
       if (event.key === 'u') { event.preventDefault(); undo(); return; }
 
       if (event.key === 'c') {
@@ -473,19 +504,27 @@ function ReviewConsole({
       // that draws a bigger box, `[` comes back down the way it came — a card
       // here is four nested elements drawing the same rectangle, so stepping
       // one DOM node at a time changes nothing you can see.
-      if (event.key === ']' && pickedRef.current) {
+      // `]` and `↑` both go out, `[` and `↓` both come back in. The arrows
+      // are what a hand reaches for on a selection, and the brackets are what
+      // the chip has always said, so both are bound to the same pair rather
+      // than one replacing the other.
+      const out = event.key === ']' || event.key === 'ArrowUp';
+      const back = event.key === '[' || event.key === 'ArrowDown';
+      if (out && pickedRef.current) {
         event.preventDefault();
         const wider = widerThan(pickedRef.current);
         if (wider) { setTrail((t) => [...t, pickedRef.current!]); setPicked(wider); }
+        else say('Nothing wider to hold', 'info');
         return;
       }
-      if (event.key === '[' && pickedRef.current) {
+      if (back && pickedRef.current) {
         event.preventDefault();
         setTrail((t) => {
-          const back = t[t.length - 1];
-          if (back) { setPicked(back); return t.slice(0, -1); }
+          const previous = t[t.length - 1];
+          if (previous) { setPicked(previous); return t.slice(0, -1); }
           const inside = insideOf(pickedRef.current!);
           if (inside) setPicked(inside);
+          else say('Nothing inside this', 'info');
           return t;
         });
       }
@@ -564,6 +603,7 @@ function ReviewConsole({
           draft={composer}
           textRef={composerRef}
           onChange={setComposer}
+          onAttach={attachShots}
           onFile={fileNote}
           onClose={() => { setComposer(null); setPicked(null); }}
         />
@@ -628,7 +668,7 @@ function AimOverlay({ el, frozen }: { el: Element; frozen: boolean }) {
         style={{ top: Math.max(4, box.top - 26), left: Math.max(4, box.left) }}
       >
         {name}
-        {frozen ? <kbd>C to say · [ ] to resize</kbd> : <kbd>click to hold</kbd>}
+        {frozen ? <kbd>C to say · ↑↓ to resize</kbd> : <kbd>click to hold</kbd>}
         <span className="review-aim-depth">{depth}</span>
       </span>
     </div>
@@ -650,36 +690,133 @@ function ComposerCard({
   draft,
   textRef,
   onChange,
+  onAttach,
   onFile,
   onClose
 }: {
   draft: Composer;
   textRef: React.Ref<HTMLTextAreaElement>;
   onChange: (next: Composer) => void;
+  onAttach: (files: File[]) => void;
   onFile: (draft: Composer, to: NoteState) => void;
   onClose: () => void;
 }) {
-  const ready = Boolean(draft.text.trim() || draft.tags.length);
+  // A comment about a thing sits on top of the thing. Once it is in the way,
+  // the reviewer needs it moved, not closed — so the header is a handle and
+  // the card stays where it is put for the rest of the session.
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  const card = useRef<HTMLFormElement>(null);
+  /** Set the moment the reviewer moves the card themselves: after that it is
+   *  their placement, and a new note is not a reason to take it back. */
+  const dragged = useRef(false);
+  const placedFor = useRef<string | null>(null);
+  const shotInput = useRef<HTMLInputElement>(null);
+  const [over, setOver] = useState(false);
+
+  /* Opening on top of the thing you are talking about is the whole reason
+     this card had to become draggable. So it places itself once, in whichever
+     band — under the element or over it — has room for it, and only falls
+     back to the middle when neither does. After that the reviewer's own drag
+     wins and nothing moves it again. */
+  useLayoutEffect(() => {
+    if (dragged.current || placedFor.current === draft.id) return;
+    placedFor.current = draft.id;
+    const over = draft.over;
+    const box = card.current?.getBoundingClientRect();
+    if (!over || !box) return;
+    const gap = 10;
+    const below = window.innerHeight - (over.top + over.height);
+    const above = over.top;
+    const left = Math.min(Math.max(gap, over.left), window.innerWidth - box.width - gap);
+    if (below >= box.height + gap * 2) { setAt({ x: left, y: over.top + over.height + gap }); return; }
+    if (above >= box.height + gap * 2) { setAt({ x: left, y: over.top - box.height - gap }); return; }
+    // Nothing above or below: go beside it, on the roomier side.
+    const room = over.left > window.innerWidth - (over.left + over.width);
+    const x = room ? over.left - box.width - gap : over.left + over.width + gap;
+    if (x > gap && x + box.width < window.innerWidth - gap) {
+      setAt({ x, y: Math.min(Math.max(gap, over.top), window.innerHeight - box.height - gap) });
+    }
+  }, [draft.id, draft.over]);
+
+  const startDrag = (event: React.PointerEvent) => {
+    if (event.button !== 0) return;
+    const box = card.current?.getBoundingClientRect();
+    if (!box) return;
+    const dx = event.clientX - box.left;
+    const dy = event.clientY - box.top;
+    event.preventDefault();
+    dragged.current = true;
+    const move = (e: PointerEvent) => {
+      // Kept whole on screen: a card dragged off the edge is a card you have
+      // to reopen to get back.
+      const x = Math.min(Math.max(4, e.clientX - dx), window.innerWidth - box.width - 4);
+      const y = Math.min(Math.max(4, e.clientY - dy), window.innerHeight - 40);
+      setAt({ x, y });
+    };
+    const stop = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+  };
+
+  const takeFiles = (list: FileList | null) => {
+    const files = [...(list ?? [])].filter((file) => file.type.startsWith('image/'));
+    if (files.length) onAttach(files);
+    return files.length > 0;
+  };
+
+  const ready = Boolean(draft.text.trim() || draft.tags.length || draft.shots.length);
   return (
     <form
+      ref={card}
       className="review-composer"
       data-review-ui
       data-review-composer
+      data-dragging={over || undefined}
+      style={at ? { left: at.x, top: at.y, transform: 'none' } : undefined}
       onSubmit={(event) => { event.preventDefault(); if (ready) onFile(draft, 'sent'); }}
+      // Drop anywhere on the card, not only in the text box: by the time the
+      // file is over the window the reviewer is aiming at the note, not at a
+      // particular field of it.
+      onDragOver={(event) => {
+        if (!event.dataTransfer.types.includes('Files')) return;
+        event.preventDefault();
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(event) => {
+        if (!event.dataTransfer.types.includes('Files')) return;
+        event.preventDefault();
+        setOver(false);
+        takeFiles(event.dataTransfer.files);
+      }}
     >
-      <header>
+      <header onPointerDown={startDrag} title="Drag to move">
         <Crosshair className="size-3.5" />
         <strong>{draft.label}</strong>
-        <button type="button" onClick={onClose} aria-label="Close without saving">
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={onClose}
+          aria-label="Close without saving"
+        >
           <X className="size-4" />
         </button>
       </header>
 
+      {/* Paste a picture straight into the box you are already typing in: a
+          screenshot is on the clipboard the instant you take one, and the
+          whole reason for attaching it is that words were not working. */}
       <textarea
         ref={textRef}
         value={draft.text}
-        placeholder="What should change about this?"
+        placeholder="What should change about this? Paste or drop a screenshot too."
         onChange={(event) => onChange({ ...draft, text: event.target.value })}
+        onPaste={(event) => {
+          if (takeFiles(event.clipboardData.files)) event.preventDefault();
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && (event.metaKey || event.ctrlKey) && ready) {
             event.preventDefault();
@@ -688,6 +825,24 @@ function ComposerCard({
           if (event.key === 'Escape') { event.preventDefault(); onClose(); }
         }}
       />
+
+      {draft.shots.length ? (
+        <ul className="review-composer-shots" aria-label="Screenshots on this note">
+          {draft.shots.map((path) => (
+            <li key={path}>
+              <img src={`/${path}`} alt="" />
+              <button
+                type="button"
+                aria-label={`Remove ${path.split('/').pop()}`}
+                title="Remove"
+                onClick={() => onChange({ ...draft, shots: draft.shots.filter((p) => p !== path) })}
+              >
+                <X className="size-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <div className="review-composer-tags" role="group" aria-label="What kind of change">
         {TAGS.map((tag) => (
@@ -706,6 +861,28 @@ function ComposerCard({
             {TAG_NAME[tag]}
           </button>
         ))}
+        {/* Paste and drop both work and neither announces itself, so there is
+            one visible control to say the ability exists. */}
+        <button
+          type="button"
+          className="review-composer-attach"
+          title="Attach a screenshot"
+          onClick={() => shotInput.current?.click()}
+        >
+          <ImagePlus className="size-3.5" /> Screenshot
+        </button>
+        <input
+          ref={shotInput}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={(event) => {
+            const list = event.currentTarget.files;
+            takeFiles(list);
+            event.currentTarget.value = '';
+          }}
+        />
       </div>
 
       <footer>
@@ -758,7 +935,7 @@ function NoteList({
   if (!total) {
     return (
       <p className="review-empty">
-        Nothing yet. Press <kbd>L</kbd> to point at something, then <kbd>C</kbd> to say what is wrong with it.
+        Nothing yet. Press <kbd>D</kbd> to point at something, then <kbd>C</kbd> to say what is wrong with it.
       </p>
     );
   }
@@ -854,7 +1031,9 @@ function NoteRow({
         </span>
         {note.comment ? <span className="review-row-said">{note.comment}</span> : null}
         <span className="review-row-where">
-          {note.anchor.source ?? note.anchor.layout}
+          <span className="review-row-src" title={note.anchor.source ?? note.anchor.layout}>
+            {note.anchor.source ?? note.anchor.layout}
+          </span>
           {tags.length ? <em>{tags.map((t) => TAG_NAME[t]).join(' · ')}</em> : null}
           {byClaude ? <em className="review-row-claude">closed by Claude</em> : null}
         </span>
@@ -887,6 +1066,15 @@ function NoteRow({
               {entry.text}
             </p>
           ))}
+          {note.shots?.length ? (
+            <ul className="review-composer-shots" aria-label="Screenshots on this note">
+              {note.shots.map((path) => (
+                <li key={path}>
+                  <a href={`/${path}`} target="_blank" rel="noreferrer"><img src={`/${path}`} alt="" /></a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           {note.anchor.sourceLine ? (
             <p className="review-row-line"><code>{note.anchor.sourceLine.slice(0, 140)}</code></p>
           ) : null}

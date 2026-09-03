@@ -12,6 +12,7 @@ import {
   longMonthName,
   monthIndex,
   monthKey,
+  monthsShownLabel,
   parseMonth,
   shortMonthName,
   todayMonth
@@ -421,10 +422,13 @@ export function PayGuardJobEditor({
               {/* ---------------- Monthly ledger ---------------- */}
               <SectionHead
                 label={`${year} monthly ledger`}
-                meta={`${activeMonths.length} of 12 active`}
+                meta={monthsShownLabel(months)}
                 open={ledgerOpen}
                 onToggle={() => setLedgerOpen((v) => !v)}
-                action={ledgerOpen && !stream.locked ? (
+                /* el-gwvwyx: "a silly button in focus mode" — it fills the
+                   empty months on screen, and in focus mode there is one. A
+                   bulk action needs something to be bulk about. */
+                action={ledgerOpen && !stream.locked && months.length > 1 ? (
                   <button
                     type="button"
                     onClick={autofillRemainingMonths}

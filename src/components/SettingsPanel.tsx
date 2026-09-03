@@ -73,7 +73,7 @@ function GuardPanel({ tone = 'plain', title, children }: {
 
 export function SettingsPanel({
   theme, onTheme, onOpenStatus, onReset, onClose, variant = 'sheet', backLabel,
-  layout, onLayoutChange, subTheme, onSubThemeChange
+  layout, onLayoutChange
 }: {
   theme: 'system' | 'light' | 'dark';
   onTheme: (theme: 'system' | 'light' | 'dark') => void;
@@ -84,10 +84,13 @@ export function SettingsPanel({
   backLabel?: string;
   layout: LayoutMode;
   onLayoutChange: (layout: LayoutMode) => void;
-  /** Layouts with their own palette (PayGuard, Ledger) pass it here so the
-   *  picker is reachable on mobile, where the header has no room for it. */
-  subTheme?: LedgerTheme;
-  onSubThemeChange?: (theme: LedgerTheme) => void;
+  /*
+   * The palette used to arrive as a prop pair, passed only by the three
+   * layouts that had one — so seven layouts offered no way to change the
+   * colour of an app that has five. There is one `ui.palette` now and every
+   * layout answers it, so this reads it from the tracker like every other
+   * preference on this screen and the row is always drawn.
+   */
 }) {
   const {
     data, ui, setUi, replaceAll,
@@ -155,8 +158,9 @@ export function SettingsPanel({
     ...(session ? ['terms' as const] : []),
     'focusMode',
     'layout',
+    ...(ui.layout === 'overview' ? ['overviewShell' as const] : []),
     'theme',
-    ...(subTheme && onSubThemeChange ? ['palette' as const] : []),
+    'palette',
     'export',
     'import',
     'clearAll',
@@ -332,16 +336,39 @@ export function SettingsPanel({
           />
         );
 
+      case 'overviewShell':
+        /* Labelled, unlike Theme above it, because "One page / Separate
+           pages / Side by side" says nothing on its own sitting under a
+           heading called Appearance. */
+        return (
+          <div key={id} className="flex flex-col gap-2">
+            <div>
+              <span className="block text-base font-semibold">{SETTINGS_ROW.overviewShell.label}</span>
+              <span className="type-muted mt-0.5 block">{SETTINGS_ROW.overviewShell.help}</span>
+            </div>
+            <Segmented
+              value={ui.overviewShell}
+              onChange={(overviewShell) => setUi({ overviewShell })}
+              columns={3}
+              options={[
+                { id: 'scroll' as const, label: 'One page' },
+                { id: 'pages' as const, label: 'Separate pages' },
+                { id: 'workspace' as const, label: 'Side by side' }
+              ]}
+            />
+          </div>
+        );
+
       case 'palette':
-        return subTheme && onSubThemeChange ? (
+        return (
           <SwatchPicker
             key={id}
             label={SETTINGS_ROW.palette.label}
-            value={subTheme}
-            onChange={onSubThemeChange}
+            value={ui.palette}
+            onChange={(palette) => setUi({ palette })}
             options={SUB_THEMES}
           />
-        ) : null;
+        );
 
       /* Export and import are one row of two buttons, so the pair is drawn
          on 'export' and 'import' draws nothing. */

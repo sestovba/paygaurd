@@ -90,7 +90,7 @@ export function Header({
 
       <div className="headline">
         <div className="headline__main">
-          <div className="headline__label">{longMonthName(focusMonth)} countable</div>
+          <div className="headline__label">Counted so far in {longMonthName(focusMonth)}</div>
           <div className={'headline__value' + (over ? ' headline__value--over' : '')}>
             {money(status.countable)}
           </div>
@@ -105,7 +105,7 @@ export function Header({
               <div className="headline__room">
                 {over
                   ? (threshold.kind === 'trialWork' ? 'one trial work month used' : 'over your limit')
-                  : money(room) + ' of room'}
+                  : money(room) + ' left before your limit'}
               </div>
             </>
           ) : (

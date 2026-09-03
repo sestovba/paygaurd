@@ -142,6 +142,10 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
      one-row table — the test is the number of months on screen, not which
      setting produced it. */
   const focused = cards.length === 1 ? cards[0] : undefined;
+  /* Whether the focused month has anything in it at all. The room figure and
+     the body block are the same fact told twice when it does not: the body
+     already says "No income added for September". */
+  const focusedFilled = Boolean(focused && (focused.status.countable > 0 || focused.status.isServiceMonth));
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
@@ -152,8 +156,22 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
           in its own padded, ruled row, which read as a separate section rather
           than as a key for the panel it belongs to.
         */}
-        <header className="pg-rule-b pg-surface-quiet px-3.5 py-3 sm:px-4">
-          <div className="grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        {/*
+          el-1lie5wt: "no background or line and less padding bottom". One
+          month is not a table, so it does not get a table's title bar — the
+          band and the rule under it are what made a single month read as a
+          header over an empty grid. Several months still get both, because
+          there the header is a key for the rows beneath it.
+
+          el-446101: the room left goes to the top right of this header, on
+          the "Under your limit" line — hence items-end on the focused month
+          and items-center where the right cell is the view switch.
+        */}
+        <header className={focused
+          ? 'px-3.5 pt-3 pb-1.5 sm:px-4'
+          : 'pg-rule-b pg-surface-quiet px-3.5 py-3 sm:px-4'}>
+          <div className={'grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] '
+            + (focused ? 'sm:items-end' : 'sm:items-center')}>
             <div className="flex min-w-0 flex-col gap-1.5">
               <h2 className="pg-section-title pg-fg sm:text-[0.8125rem]">
                 {focused ? longMonthName(focused.month) : 'Month by month'}
@@ -190,7 +208,11 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
               )}
             </div>
 
-            {focused ? null : (
+            {focused ? (focusedFilled ? (
+              <span className={`justify-self-start text-xs font-bold sm:justify-self-end ${KIND_TEXT_CLASS[focused.kind]}`}>
+                {focused.label}
+              </span>
+            ) : null) : (
               <div
                 className="pg-seg w-fit justify-self-start sm:justify-self-end"
                 role="group"
@@ -215,17 +237,13 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
 
         {focused ? (
           <div className="pg-surface p-3.5 sm:p-5">
-            {focused.status.countable > 0 || focused.status.isServiceMonth ? (
+            {focusedFilled ? (
               <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap items-end justify-between gap-2">
-                  <span className="flex items-baseline gap-2">
-                    <span className="pg-figure">{money(focused.status.countable)}</span>
-                    <span className="pg-label">Counted</span>
-                  </span>
-                  <span className={`text-xs font-bold ${KIND_TEXT_CLASS[focused.kind]}`}>
-                    {focused.label}
-                  </span>
-                </div>
+                {/* The room left moved up to the header — el-446101. */}
+                <span className="flex items-baseline gap-2">
+                  <span className="pg-figure">{money(focused.status.countable)}</span>
+                  <span className="pg-label">Counted</span>
+                </span>
 
                 <div className="pg-meter" aria-label={`${Math.round(focused.pct)} percent of your monthly limit`}>
                   <span

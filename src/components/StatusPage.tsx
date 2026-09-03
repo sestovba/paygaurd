@@ -22,8 +22,11 @@ export function StatusPage() {
             {twp.used} of {TRIAL_MONTH_LIMIT} trial work months used
           </h2>
           <p className="type-muted mt-2">
-            {twp.remaining} left in the current 60-month window
-            {twp.nextExpiry ? `. The oldest one ages out ${formatMonth(twp.nextExpiry)}.` : '.'}
+            {/* Was "left in the current 60-month window" and "ages out" —
+                a unit of time nobody counts in, and a piece of caseworker
+                idiom for a month no longer being held against you. */}
+            {twp.remaining} left, across any 5 years
+            {twp.nextExpiry ? `. Your oldest one stops counting in ${formatMonth(twp.nextExpiry)}.` : '.'}
           </p>
           <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
         </section>

@@ -7,7 +7,7 @@
 // times and is the only one of them that answers a question you cannot answer
 // by staring at the screen. So that is all that is left here.
 
-import type { LayoutMode } from '../state/storage';
+import type { ReviewLayoutId } from './types';
 import type { ReviewNote, ReviewNotes } from './types';
 
 /** Switched off on the page. Never a verdict, and it never touches the code:
@@ -31,7 +31,7 @@ export function safeQuery(selector?: string): HTMLElement | null {
  *  tree — pulling it out would leave React updating a node that is gone. */
 export function applyHiddenAttributes(
   notes: ReviewNotes,
-  layout: LayoutMode,
+  layout: ReviewLayoutId,
   reveal: boolean,
   /** One note to reveal whatever the mode — the element Locate is pointing
    *  at. Pointing at something and leaving it invisible is the failure this

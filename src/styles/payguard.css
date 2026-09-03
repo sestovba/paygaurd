@@ -21,13 +21,56 @@
 /* ------------------------------------------------------------------ */
 
 .pg-payguard {
-  color-scheme: light;
-  /* Radii */
-  --pg-radius-xl: 1rem;
-  --pg-radius: 0.75rem;
-  --pg-radius-md: 0.5rem;
-  --pg-radius-sm: 0.375rem;
-  --pg-radius-xs: 0.25rem;
+  /*
+   * The palette. Chosen in styles/palette.css and mapped here — one line
+   * per token, no values. That file owns which colours exist and what each
+   * variant answers; this block owns nothing but the spelling, so the ~945
+   * --pg-* call sites below did not have to move when the five variants
+   * were merged into one place.
+   *
+   * Adding a colour means adding it there and aliasing it here. Adding a
+   * VARIANT means adding it there only.
+   */
+  --pg-bg: var(--t-bg);
+  --pg-border: var(--t-border);
+  --pg-border-soft: var(--t-border-soft);
+  --pg-border-strong: var(--t-border-strong);
+  --pg-fg: var(--t-fg);
+  --pg-fg-dim: var(--t-fg-dim);
+  --pg-fg-muted: var(--t-fg-muted);
+  --pg-head: var(--t-head);
+  --pg-head-fg: var(--t-head-fg);
+  --pg-info: var(--t-info);
+  --pg-invert: var(--t-invert);
+  --pg-invert-border: var(--t-invert-border);
+  --pg-invert-fg: var(--t-invert-fg);
+  --pg-over: var(--t-over);
+  --pg-radius: var(--t-radius);
+  --pg-radius-md: var(--t-radius-md);
+  --pg-radius-sm: var(--t-radius-sm);
+  --pg-radius-xl: var(--t-radius-xl);
+  --pg-radius-xs: var(--t-radius-xs);
+  --pg-ring: var(--t-ring);
+  --pg-safe: var(--t-safe);
+  --pg-se: var(--t-se);
+  --pg-shadow: var(--t-shadow);
+  --pg-shadow-lg: var(--t-shadow-lg);
+  --pg-shadow-md: var(--t-shadow-md);
+  --pg-shadow-sm: var(--t-shadow-sm);
+  --pg-surface: var(--t-surface);
+  --pg-surface-2: var(--t-surface-2);
+  --pg-surface-3: var(--t-surface-3);
+  --pg-topbar: var(--t-topbar);
+  --pg-topbar-accent: var(--t-topbar-accent);
+  --pg-topbar-accent-w: var(--t-topbar-accent-w);
+  --pg-topbar-fg: var(--t-topbar-fg);
+  --pg-twp: var(--t-twp);
+  --pg-w2: var(--t-w2);
+  --pg-warn: var(--t-warn);
+
+  /* color-scheme is set by the palette, not here: `carbon` is dark in both
+     ink modes, and a `color-scheme: light` on this block would out-order it
+     at equal specificity. */
 
   /* Sticky chrome. The header is --pg-header-h tall plus its 1px bottom
    * border, and the tab strip parks directly beneath it. */
@@ -81,26 +124,6 @@
   --pg-pad-lg: 1.25rem;
 
   /* "Paper" — high-contrast warm white with emerald and slate accents */
-  --pg-bg: #f8fafc;
-  --pg-surface: #ffffff;
-  --pg-surface-2: #f1f5f9;
-  --pg-surface-3: #e2e8f0;
-  --pg-head: #064e3b;
-  --pg-head-fg: #ffffff;
-  --pg-fg: #0f172a;
-  --pg-fg-muted: #526071;
-  --pg-fg-dim: #64748b;
-  --pg-border: #e2e8f0;
-  --pg-border-soft: #f1f5f9;
-  --pg-border-strong: #cbd5e1;
-  --pg-ring: #059669;
-  --pg-w2: #059669;
-  --pg-se: #ea580c;
-  --pg-safe: #059669;
-  --pg-warn: #d97706;
-  --pg-twp: #7c3aed;
-  --pg-over: #dc2626;
-  --pg-info: #0284c7;
 
   /*
    * Topbar. Broken out as its own tokens because a sub-theme may want the
@@ -108,20 +131,8 @@
    * see the calc20 theme, whose whole identity is a dark ink bar under a
    * sky rule. Defaults reproduce the plain translucent-surface header.
    */
-  --pg-topbar: color-mix(in oklab, var(--pg-surface) 90%, transparent);
-  --pg-topbar-fg: var(--pg-fg);
-  --pg-topbar-accent: var(--pg-border);
-  --pg-topbar-accent-w: 1px;
 
   /* Tooltips and other inverted surfaces */
-  --pg-invert: #0f172a;
-  --pg-invert-fg: #f8fafc;
-  --pg-invert-border: #334155;
-
-  --pg-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --pg-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --pg-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-  --pg-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
 
   --shadow-input: none;
 
@@ -131,131 +142,9 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* "Slate" — cool steel with a blue accent */
-.pg-payguard[data-payguard-theme='slate'] {
-  --pg-bg: #f1f5f9;
-  --pg-surface: #ffffff;
-  --pg-surface-2: #e8eef5;
-  --pg-surface-3: #cbd5e1;
-  --pg-head: #0f172a;
-  --pg-head-fg: #ffffff;
-  --pg-fg: #0f172a;
-  --pg-fg-muted: #475569;
-  --pg-fg-dim: #64748b;
-  --pg-border: #d5dee8;
-  --pg-border-soft: #e6ecf3;
-  --pg-border-strong: #94a3b8;
-  --pg-ring: #2563eb;
-  --pg-w2: #0284c7;
-  --pg-se: #ea580c;
-  --pg-info: #2563eb;
-}
 
-/* "Ledger" — accounting cream and parchment with dark forest green */
-.pg-payguard[data-payguard-theme='ledger'] {
-  --pg-bg: #faf7ed;
-  --pg-surface: #ffffff;
-  --pg-surface-2: #f6f1e5;
-  --pg-surface-3: #e8e0cc;
-  --pg-head: #14532d;
-  --pg-head-fg: #ffffff;
-  --pg-fg: #1c1917;
-  --pg-fg-muted: #57534e;
-  --pg-fg-dim: #6f675c;
-  --pg-border: #e6ddc8;
-  --pg-border-soft: #f0e9d9;
-  --pg-border-strong: #c8bd9e;
-  --pg-ring: #15803d;
-  --pg-w2: #15803d;
-  --pg-se: #c2410c;
-  --pg-safe: #15803d;
-  --pg-warn: #b45309;
-  --pg-over: #b91c1c;
-  --pg-info: #0369a1;
-}
 
-/* "Carbon" — obsidian dark with vivid status colours */
-.pg-payguard[data-payguard-theme='carbon'] {
-  color-scheme: dark;
-  --pg-bg: #090d16;
-  --pg-surface: #111827;
-  --pg-surface-2: #182031;
-  --pg-surface-3: #26334a;
-  --pg-head: #059669;
-  --pg-head-fg: #04150f;
-  --pg-fg: #f8fafc;
-  --pg-fg-muted: #cbd5e1;
-  --pg-fg-dim: #94a3b8;
-  --pg-border: #22304a;
-  --pg-border-soft: #18233a;
-  --pg-border-strong: #3a4a68;
-  --pg-ring: #10b981;
-  --pg-w2: #10b981;
-  --pg-se: #f97316;
-  --pg-safe: #10b981;
-  --pg-warn: #fbbf24;
-  --pg-twp: #a855f7;
-  --pg-over: #f43f5e;
-  --pg-info: #38bdf8;
 
-  --pg-invert: #f8fafc;
-  --pg-invert-fg: #0f172a;
-  --pg-invert-border: #cbd5e1;
-
-  --pg-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --pg-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-  --pg-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
-  --pg-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
-}
-
-/*
- * "calc20" — ported from the sibling sga_calc20 project's "2026 Work Record"
- * design, expressed entirely in this layout's token contract.
- *
- * Its identity: a cool blue-grey desk, white cards, a dark ink topbar under a
- * sky-blue rule, blue as the primary and a rounder radius scale. Status
- * colours keep that project's semantics — green kept, amber trial month spent,
- * red over SGA — and 1099 work stays purple, as it is there.
- */
-.pg-payguard[data-payguard-theme='calc20'] {
-  --pg-radius-xl: 1.5rem;
-  --pg-radius: 0.75rem;
-  --pg-radius-md: 0.625rem;
-  --pg-radius-sm: 0.5rem;
-  --pg-radius-xs: 0.375rem;
-
-  --pg-bg: oklch(96.5% 0.008 240);
-  --pg-surface: oklch(100% 0 0);
-  --pg-surface-2: oklch(94.5% 0.015 240);
-  --pg-surface-3: oklch(90% 0.016 242);
-  --pg-head: oklch(55% 0.17 255);
-  --pg-head-fg: oklch(98.5% 0.005 250);
-  --pg-fg: oklch(22% 0.045 258);
-  --pg-fg-muted: oklch(52% 0.035 252);
-  --pg-fg-dim: oklch(52% 0.035 250);
-  --pg-border: oklch(91.5% 0.012 245);
-  --pg-border-soft: oklch(94.5% 0.012 245);
-  --pg-border-strong: oklch(78% 0.022 248);
-  --pg-ring: oklch(55% 0.17 255);
-
-  --pg-w2: oklch(55% 0.17 255);
-  --pg-se: oklch(45% 0.15 310);
-  --pg-safe: oklch(45% 0.11 148);
-  --pg-warn: oklch(58% 0.13 78);
-  --pg-twp: oklch(45% 0.11 62);
-  --pg-over: oklch(45% 0.16 26);
-  --pg-info: oklch(52% 0.13 232);
-
-  /* The dark plate and its sky rule — the most recognisable thing about it */
-  --pg-topbar: oklch(22% 0.045 258);
-  --pg-topbar-fg: oklch(98.5% 0.005 250);
-  --pg-topbar-accent: oklch(78% 0.12 230);
-  --pg-topbar-accent-w: 2px;
-
-  --pg-invert: oklch(22% 0.045 258);
-  --pg-invert-fg: oklch(98.5% 0.005 250);
-  --pg-invert-border: oklch(42% 0.05 255);
-}
 
 /*
  * Controls sitting ON an inverted topbar. Rather than restyling each button,
@@ -265,7 +154,14 @@
  *
  * Add any future dark-topbar theme to this selector list.
  */
-.pg-payguard[data-payguard-theme='calc20'] .pg-topbar {
+/* @override calc20 — the status hues, lifted for the dark plate.
+ *
+ * These are the only colours in the app chosen against something other than
+ * the page: this bar is a dark slab inside an otherwise light layout, so the
+ * mid-lightness safe/warn/over/twp that read on a white card disappear on it
+ * and have to come up several steps. A palette cannot answer this, because
+ * the answer depends on what the token is sitting ON, not on the variant. */
+[data-palette='calc20'] .pg-topbar {
   --pg-fg: var(--pg-topbar-fg);
   --pg-fg-muted: color-mix(in oklab, var(--pg-topbar-fg) 74%, transparent);
   --pg-fg-dim: color-mix(in oklab, var(--pg-topbar-fg) 55%, transparent);
@@ -286,49 +182,6 @@
   --pg-info: var(--pg-topbar-accent);
 }
 
-/* Appearance mode now applies to every light palette. Accent and status hues
- * stay palette-specific while shared surfaces move onto a readable dark desk. */
-.dark .pg-payguard:not([data-payguard-theme='carbon']) {
-  color-scheme: dark;
-  --pg-bg: #0b1117;
-  --pg-surface: #111a24;
-  --pg-surface-2: #172330;
-  --pg-surface-3: #263748;
-  --pg-fg: #f8fafc;
-  --pg-fg-muted: #cbd5e1;
-  --pg-fg-dim: #94a3b8;
-  --pg-border: #2a3a4b;
-  --pg-border-soft: #1b2a38;
-  --pg-border-strong: #496075;
-  --pg-invert: #f8fafc;
-  --pg-invert-fg: #0f172a;
-  --pg-invert-border: #cbd5e1;
-  --pg-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --pg-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.42), 0 1px 2px -1px rgb(0 0 0 / 0.38);
-  --pg-shadow-md: 0 8px 24px -12px rgb(0 0 0 / 0.72);
-  --pg-shadow-lg: 0 18px 40px -18px rgb(0 0 0 / 0.82);
-}
-
-.dark .pg-payguard[data-payguard-theme='ledger'] {
-  --pg-bg: #13110d;
-  --pg-surface: #1c1914;
-  --pg-surface-2: #272219;
-  --pg-surface-3: #3b3325;
-  --pg-border: #403727;
-  --pg-border-soft: #2b251b;
-  --pg-border-strong: #6e5f43;
-}
-
-.dark .pg-payguard[data-payguard-theme='slate'],
-.dark .pg-payguard[data-payguard-theme='calc20'] {
-  --pg-bg: #0d121c;
-  --pg-surface: #141c29;
-  --pg-surface-2: #1b2737;
-  --pg-surface-3: #2a3b50;
-  --pg-border: #2c3d52;
-  --pg-border-soft: #1c2a3b;
-  --pg-border-strong: #4d657f;
-}
 
 /*
  * Derived tokens. These are declared once and resolve against whichever

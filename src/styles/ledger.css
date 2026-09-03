@@ -3,31 +3,43 @@
  * under .pg-ledger so it never touches the Classic/New/Responsive layouts,
  * which share the ordinary Tailwind tokens in index.css.
  *
- * Four sub-themes (Paper/Slate/Ledger/Carbon) switch via
- * [data-ledger-theme] on the root — independent of the app's own light/dark
- * toggle, since this layout owns its own look end to end.
+ * The palette is not one of them. It comes from styles/palette.css like
+ * every other layout's — [data-palette] on the root — and this file maps the
+ * five --t-* choices onto the --lg-* names its ~278 call sites already use.
+ *
+ * It used to declare its own. Three blocks, values that agreed with nothing
+ * else in the app, only three of the five variants present, and 'slate' and
+ * 'ledger' sharing one block so two options that look different everywhere
+ * else were identical here. It also opted out of the app's light/dark
+ * toggle entirely — "this layout owns its own look end to end" — which
+ * meant turning the app dark left exactly one layout light.
  */
 
 .pg-ledger {
-  /* Ledger sub-themes own light/dark — ignore the app-wide .dark toggle. */
-  color-scheme: light;
-  --lg-radius: 0.375rem;
-  --lg-bg: oklch(0.985 0.004 106);
-  --lg-surface: oklch(1 0 0);
-  --lg-surface-2: oklch(0.965 0.005 240);
-  --lg-head: oklch(0.95 0.006 240);
-  --lg-fg: oklch(0.24 0.015 250);
-  --lg-muted: oklch(0.53 0.015 250);
-  --lg-border: oklch(0.9 0.006 250);
-  --lg-border-soft: oklch(0.9 0.006 250 / 45%);
-  --lg-ring: oklch(0.6 0.09 158);
-  --lg-w2: oklch(0.48 0.11 158);
-  --lg-se: oklch(0.55 0.13 40);
-  --lg-safe: oklch(0.55 0.13 158);
-  --lg-warn: oklch(0.68 0.15 70);
-  --lg-twp: oklch(0.55 0.18 295);
-  --lg-over: oklch(0.56 0.19 22);
-  --lg-shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 10px 24px -16px rgba(20, 20, 30, 0.16);
+  /*
+   * The palette, mapped. palette.css owns the values; this owns the
+   * spelling. One judgement call: --lg-head is this layout's table-head
+   * fill, a light grey, while --t-head is the app's brand plate, a dark
+   * green — same word, different job — so it takes --t-surface-3, the
+   * deepest well, which is what a table head actually is.
+   */
+  --lg-bg: var(--t-bg);
+  --lg-surface: var(--t-surface);
+  --lg-surface-2: var(--t-surface-2);
+  --lg-head: var(--t-surface-3);
+  --lg-fg: var(--t-fg);
+  --lg-muted: var(--t-fg-muted);
+  --lg-border: var(--t-border);
+  --lg-border-soft: var(--t-border-soft);
+  --lg-ring: var(--t-ring);
+  --lg-w2: var(--t-w2);
+  --lg-se: var(--t-se);
+  --lg-safe: var(--t-safe);
+  --lg-warn: var(--t-warn);
+  --lg-twp: var(--t-twp);
+  --lg-over: var(--t-over);
+  --lg-shadow: var(--t-shadow);
+  --lg-radius: var(--t-radius-sm);
 
   background: var(--lg-bg);
   color: var(--lg-fg);
@@ -37,44 +49,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.pg-ledger[data-ledger-theme='slate'],
-.pg-ledger[data-ledger-theme='ledger'] {
-  --lg-bg: oklch(0.975 0.006 250);
-  --lg-surface: #ffffff;
-  --lg-surface-2: oklch(0.955 0.008 250);
-  --lg-head: oklch(0.94 0.01 250);
-  --lg-fg: oklch(0.26 0.03 260);
-  --lg-muted: oklch(0.5 0.02 260);
-  --lg-border: oklch(0.87 0.012 250);
-  --lg-border-soft: oklch(0.87 0.012 250 / 55%);
-  --lg-ring: oklch(0.55 0.16 255);
-  --lg-w2: oklch(0.5 0.16 255);
-  --lg-se: oklch(0.58 0.14 30);
-  --lg-safe: oklch(0.5 0.13 165);
-  --lg-warn: oklch(0.65 0.14 65);
-  --lg-twp: oklch(0.52 0.17 295);
-  --lg-over: oklch(0.55 0.19 20);
-}
-
-.pg-ledger[data-ledger-theme='carbon'] {
-  color-scheme: dark;
-  --lg-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 28px -16px rgba(0, 0, 0, 0.7);
-  --lg-bg: #0a0a0c;
-  --lg-surface: #16161a;
-  --lg-surface-2: #1e1e24;
-  --lg-head: #26262e;
-  --lg-fg: #f3f3f0;
-  --lg-muted: #a7a7a1;
-  --lg-border: #3a3a42;
-  --lg-border-soft: rgba(255, 255, 255, 0.14);
-  --lg-ring: oklch(0.78 0.19 250);
-  --lg-w2: oklch(0.75 0.17 250);
-  --lg-se: oklch(0.78 0.18 330);
-  --lg-safe: oklch(0.82 0.19 150);
-  --lg-warn: oklch(0.85 0.18 80);
-  --lg-twp: oklch(0.8 0.2 300);
-  --lg-over: oklch(0.74 0.22 25);
-}
 
 .pg-ledger * {
   box-sizing: border-box;

@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: #0c0c0f;
+  --color-surface: #151518;
+  --color-surface-2: #1d1d22;
+  --color-surface-3: #252529;
+  --color-border: rgba(255,255,255,0.065);
+  --color-border-strong: rgba(255,255,255,0.12);
+  --color-text: #e4e4e8;
+  --color-text-muted: #68687a;
+  --color-text-dim: #3a3a45;
+  --color-safe: #34d399;
+  --color-safe-bg: rgba(52,211,153,0.1);
+  --color-warn: #fbbf24;
+  --color-warn-bg: rgba(251,191,36,0.1);
+  --color-danger: #f87171;
+  --color-danger-bg: rgba(248,113,113,0.1);
+  --color-twp: #a78bfa;
+  --color-twp-bg: rgba(167,139,250,0.1);
+  --color-brand: #818cf8;
+  --font-ui: 'Outfit', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #0c0c0f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  color: #e4e4e8;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 0; height: 0; }
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="month"] {
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+}
+
+input:focus { outline: none; }

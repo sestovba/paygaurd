@@ -31,7 +31,7 @@ import { hasMeaningfulData } from '../../domain/earnings';
 import { resolveScope, scopedMonths } from '../../domain/months';
 import type { MonthScope, MonthShape } from '../../domain/months';
 import { useTracker as usePayGuard } from '../../state/TrackerProvider';
-import type { Calc20Ui, LayoutMode, ThemePref, UiState as PgUiState } from '../../state/storage';
+import type { Calc20Ui, LayoutMode, PayBasis, ThemePref, UiState as PgUiState } from '../../state/storage';
 import { DEFAULT_CALC20_UI } from '../../state/storage';
 import type { Session } from '../../auth/session';
 
@@ -87,6 +87,7 @@ export interface UiState extends Calc20Ui {
   cloudSyncConsentedAt?: string;
   termsAcceptedVersion?: string;
   termsAcceptedAt?: string;
+  payBasis: PayBasis;
 }
 
 export const DEFAULT_UI: UiState = {
@@ -94,13 +95,14 @@ export const DEFAULT_UI: UiState = {
   year: new Date().getFullYear(),
   focusMode: true,
   theme: 'system',
-  cloudSyncEnabled: false
+  cloudSyncEnabled: false,
+  payBasis: 'bank'
 };
 
 /** Keys that belong to the shared record rather than to `ui.calc20`. */
 const SHARED_KEYS = [
   'year', 'monthScope', 'focusMode', 'theme', 'cloudSyncEnabled', 'cloudSyncConsentedAt',
-  'termsAcceptedVersion', 'termsAcceptedAt'
+  'termsAcceptedVersion', 'termsAcceptedAt', 'payBasis'
 ] as const;
 
 const SHARED_KEY_SET = new Set<string>(SHARED_KEYS);
@@ -224,7 +226,8 @@ export function Calc20Store({ children }: { children: ReactNode }) {
     cloudSyncEnabled: pgUi.cloudSyncEnabled,
     cloudSyncConsentedAt: pgUi.cloudSyncConsentedAt,
     termsAcceptedVersion: pgUi.termsAcceptedVersion,
-    termsAcceptedAt: pgUi.termsAcceptedAt
+    termsAcceptedAt: pgUi.termsAcceptedAt,
+    payBasis: pgUi.payBasis ?? 'bank'
   }), [pgUi]);
 
   /** Only the keys `ui.calc20` owns. Written as an updater so two preference

@@ -1,0 +1,522 @@
+/*
+ * The palette. Every colour this app can be, chosen in one place.
+ * ===================================================================
+ *
+ * WHAT WAS HERE BEFORE
+ *
+ * Five variants — paper, slate, ledger, carbon, calc20 — declared across
+ * nine overlapping selector blocks in payguard.css and three more in
+ * ledger.css, each one a partial patch over `paper`. A palette is 36 tokens
+ * and not one variant set all 36: slate set 16, ledger 19, carbon 27,
+ * calc20 32. Whatever a variant left out it inherited from paper, silently,
+ * so slate wore paper's status colours and nobody could say what a variant
+ * actually defined without resolving the cascade by hand. ledger.css then
+ * declared its own values for three of the same five names under --lg-*,
+ * and gave 'slate' and 'ledger' the same block, so two options that look
+ * different in one layout were identical in another.
+ *
+ * THE MODEL
+ *
+ * Two axes, and they were tangled together. They are separate here:
+ *
+ *   VARIANT   paper · slate · ledger · carbon · calc20
+ *             The hue and the paper. Sets the 23 CHOICES below — all of
+ *             them, every time. A variant never inherits a colour.
+ *
+ *   INK       light · dark
+ *             Driven by the app's own light/dark setting. Elevation follows
+ *             ink, not variant, because a shadow is about how dark the room
+ *             is. `carbon` is the exception and says so: it is a dark theme
+ *             in both modes, so it has one block and no light form.
+ *
+ * Everything else is DERIVED from a choice or is SHAPE, and both are
+ * written once at the top rather than repeated per variant.
+ *
+ * THE RULE THAT KEEPS IT THIS WAY
+ *
+ * A variant block lists all 23 choices in the order below. `npm run
+ * theme:check` fails if one is missing, misspelt or out of order — that is
+ * the whole reason the check exists, because the old files drifted exactly
+ * by leaving things out.
+ *
+ * Layouts do not read --t-* directly. payguard.css and ledger.css each map
+ * their own long-standing names onto it in one aliasing block, so the ~1200
+ * call sites across those two stylesheets did not have to move.
+ */
+
+/*
+ * Every DEFAULT below is written `:where([data-palette])`, which has zero
+ * specificity. A variant's own `[data-palette='x']` block therefore wins
+ * whether it appears above or below — which matters, because it did not.
+ * calc20's dark top-bar plate sat in section 1 and the derived default sat
+ * in section 3, same specificity, and the later one silently took it: the
+ * whole identity of that variant is a dark ink bar, and it came out white.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1 · Shape — follows the variant                                     */
+/* ------------------------------------------------------------------ */
+:where([data-palette]) {
+  --t-radius-xl: 1rem;
+  --t-radius: 0.75rem;
+  --t-radius-md: 0.5rem;
+  --t-radius-sm: 0.375rem;
+  --t-radius-xs: 0.25rem;
+  --t-topbar-accent-w: 1px;
+}
+
+/* calc20 is a softer shape language: one step rounder throughout, and a
+   heavier accent stroke under a top bar that is a plate in its own right
+   rather than more page — see the .pg-topbar block in payguard.css, which
+   re-points the control tokens inside it so buttons and fields come out
+   light-on-dark automatically. */
+[data-palette='calc20'] {
+  --t-radius-xl: 1.5rem;
+  --t-radius-md: 0.625rem;
+  --t-radius-sm: 0.5rem;
+  --t-radius-xs: 0.375rem;
+  --t-topbar-accent-w: 2px;
+  --t-topbar: oklch(22% 0.045 258);
+  --t-topbar-fg: oklch(98.5% 0.005 250);
+  --t-topbar-accent: oklch(78% 0.12 230);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2 · Elevation — follows the ink, not the variant                    */
+/* ------------------------------------------------------------------ */
+/*
+ * There used to be three sets for two ink modes: a light one, a dark one,
+ * and carbon's own — the light geometry at heavier alpha, differing from
+ * the dark set by 0.02 on --t-shadow-sm. Two sets now; carbon takes dark.
+ */
+:where([data-palette]) {
+  --t-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --t-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --t-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --t-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+}
+
+.dark[data-palette],
+[data-palette='carbon'] {
+  --t-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --t-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.42), 0 1px 2px -1px rgb(0 0 0 / 0.38);
+  --t-shadow-md: 0 8px 24px -12px rgb(0 0 0 / 0.72);
+  --t-shadow-lg: 0 18px 40px -18px rgb(0 0 0 / 0.82);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3 · Derived — computed from the choices, never set by a variant     */
+/* ------------------------------------------------------------------ */
+/*
+ * --t-topbar was `color-mix(in oklab, var(--t-surface) 90%, transparent)`.
+ * color-mix() is on the banned list at the top of CLAUDE.md: an old Android
+ * WebView drops the whole declaration, which left the top bar of payguard
+ * and workrecord with no fill at all. It is the surface, flat — the same
+ * answer `app-bar` gives on the base theme.
+ *
+ * These three are the one place a variant is allowed to speak outside its
+ * choices, because for calc20 the top bar is not derived from the page —
+ * a dark ink plate under a sky-blue rule IS that variant's identity. A
+ * variant that overrides one of them says so in its own block below, and
+ * theme:check permits exactly these three names and the shape tokens.
+ */
+:where([data-palette]) {
+  --t-topbar: var(--t-surface);
+  --t-topbar-fg: var(--t-fg);
+  --t-topbar-accent: var(--t-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* 4 · The variants                                                    */
+/* ------------------------------------------------------------------ */
+
+/* Paper — the default. Slate-grey paper, emerald accent. */
+[data-palette='paper'] {
+  color-scheme: light;
+  --t-bg: #f8fafc;
+  --t-surface: #ffffff;
+  --t-surface-2: #f1f5f9;
+  --t-surface-3: #e2e8f0;
+  --t-fg: #0f172a;
+  --t-fg-muted: #526071;
+  --t-fg-dim: #64748b;
+  --t-border: #e2e8f0;
+  --t-border-soft: #f1f5f9;
+  --t-border-strong: #cbd5e1;
+  --t-head: #064e3b;
+  --t-head-fg: #ffffff;
+  --t-ring: #059669;
+  --t-accent: #d6f5e5;
+  --t-accent-fg: #005b3e;
+  --t-primary: #81ef76;
+  --t-primary-fg: #0e2608;
+  --t-w2: #059669;
+  --t-se: #ea580c;
+  --t-safe: #059669;
+  --t-safe-soft: #d6f5e5;
+  --t-safe-text: #005b3e;
+  --t-safe-fg: #051b11;
+  --t-warn: #d97706;
+  --t-warn-soft: #ffebdd;
+  --t-warn-text: #7a4000;
+  --t-warn-fg: #221205;
+  --t-over: #dc2626;
+  --t-over-soft: #ffe4e1;
+  --t-over-text: #9d000c;
+  --t-over-fg: #fff6f5;
+  --t-twp: #7c3aed;
+  --t-info: #0284c7;
+  --t-info-soft: #dbefff;
+  --t-info-text: #00517d;
+  --t-info-fg: #000000;
+  --t-invert: #0f172a;
+  --t-invert-fg: #f8fafc;
+  --t-invert-border: #334155;
+}
+.dark[data-palette='paper'] {
+  color-scheme: dark;
+  --t-bg: #0b1117;
+  --t-surface: #111a24;
+  --t-surface-2: #172330;
+  --t-surface-3: #263748;
+  --t-fg: #f8fafc;
+  --t-fg-muted: #cbd5e1;
+  --t-fg-dim: #94a3b8;
+  --t-border: #2a3a4b;
+  --t-border-soft: #1b2a38;
+  --t-border-strong: #496075;
+  --t-head: #064e3b;
+  --t-head-fg: #ffffff;
+  --t-ring: #059669;
+  --t-accent: #223b2f;
+  --t-accent-fg: #6addab;
+  --t-primary: #81ef76;
+  --t-primary-fg: #0e2608;
+  --t-w2: #059669;
+  --t-se: #ea580c;
+  --t-safe: #059669;
+  --t-safe-soft: #223b2f;
+  --t-safe-text: #6addab;
+  --t-safe-fg: #051b11;
+  --t-warn: #d97706;
+  --t-warn-soft: #4d3421;
+  --t-warn-text: #ffbc89;
+  --t-warn-fg: #221205;
+  --t-over: #dc2626;
+  --t-over-soft: #502521;
+  --t-over-text: #ffa99f;
+  --t-over-fg: #fff6f5;
+  --t-twp: #7c3aed;
+  --t-info: #0284c7;
+  --t-info-soft: #203748;
+  --t-info-text: #87ccff;
+  --t-info-fg: #000000;
+  --t-invert: #f8fafc;
+  --t-invert-fg: #0f172a;
+  --t-invert-border: #cbd5e1;
+}
+
+/* Slate — cool steel, blue accent. */
+[data-palette='slate'] {
+  color-scheme: light;
+  --t-bg: #f1f5f9;
+  --t-surface: #ffffff;
+  --t-surface-2: #e8eef5;
+  --t-surface-3: #cbd5e1;
+  --t-fg: #0f172a;
+  --t-fg-muted: #475569;
+  --t-fg-dim: #64748b;
+  --t-border: #d5dee8;
+  --t-border-soft: #e6ecf3;
+  --t-border-strong: #94a3b8;
+  --t-head: #0f172a;
+  --t-head-fg: #ffffff;
+  --t-ring: #2563eb;
+  --t-accent: #dfebff;
+  --t-accent-fg: #003bc0;
+  --t-primary: #b9d2ff;
+  --t-primary-fg: #051a4c;
+  --t-w2: #0284c7;
+  --t-se: #ea580c;
+  --t-safe: #059669;
+  --t-safe-soft: #d6f5e5;
+  --t-safe-text: #005b3e;
+  --t-safe-fg: #051b11;
+  --t-warn: #d97706;
+  --t-warn-soft: #ffebdd;
+  --t-warn-text: #7a4000;
+  --t-warn-fg: #221205;
+  --t-over: #dc2626;
+  --t-over-soft: #ffe4e1;
+  --t-over-text: #9d000c;
+  --t-over-fg: #fff6f5;
+  --t-twp: #7c3aed;
+  --t-info: #2563eb;
+  --t-info-soft: #dfebff;
+  --t-info-text: #003bc0;
+  --t-info-fg: #f5f9ff;
+  --t-invert: #0f172a;
+  --t-invert-fg: #f8fafc;
+  --t-invert-border: #334155;
+}
+
+.dark[data-palette='slate'] {
+  color-scheme: dark;
+  --t-bg: #0d121c;
+  --t-surface: #141c29;
+  --t-surface-2: #1b2737;
+  --t-surface-3: #2a3b50;
+  --t-fg: #f8fafc;
+  --t-fg-muted: #cbd5e1;
+  --t-fg-dim: #94a3b8;
+  --t-border: #2c3d52;
+  --t-border-soft: #1c2a3b;
+  --t-border-strong: #4d657f;
+  --t-head: #0f172a;
+  --t-head-fg: #ffffff;
+  --t-ring: #2563eb;
+  --t-accent: #213254;
+  --t-accent-fg: #a4c3ff;
+  --t-primary: #b9d2ff;
+  --t-primary-fg: #051a4c;
+  --t-w2: #0284c7;
+  --t-se: #ea580c;
+  --t-safe: #059669;
+  --t-safe-soft: #243d31;
+  --t-safe-text: #6addab;
+  --t-safe-fg: #051b11;
+  --t-warn: #d97706;
+  --t-warn-soft: #4f3623;
+  --t-warn-text: #ffc191;
+  --t-warn-fg: #221205;
+  --t-over: #dc2626;
+  --t-over-soft: #522723;
+  --t-over-text: #ffaea4;
+  --t-over-fg: #fff6f5;
+  --t-twp: #7c3aed;
+  --t-info: #2563eb;
+  --t-info-soft: #213254;
+  --t-info-text: #a4c3ff;
+  --t-info-fg: #f5f9ff;
+  --t-invert: #f8fafc;
+  --t-invert-fg: #0f172a;
+  --t-invert-border: #cbd5e1;
+}
+
+/* Ledger — accounting cream and parchment, dark forest green. */
+[data-palette='ledger'] {
+  color-scheme: light;
+  --t-bg: #faf7ed;
+  --t-surface: #ffffff;
+  --t-surface-2: #f6f1e5;
+  --t-surface-3: #e8e0cc;
+  --t-fg: #1c1917;
+  --t-fg-muted: #57534e;
+  --t-fg-dim: #6f675c;
+  --t-border: #e6ddc8;
+  --t-border-soft: #f0e9d9;
+  --t-border-strong: #c8bd9e;
+  --t-head: #14532d;
+  --t-head-fg: #ffffff;
+  --t-ring: #15803d;
+  --t-accent: #d7f1db;
+  --t-accent-fg: #005a26;
+  --t-primary: #7eed9a;
+  --t-primary-fg: #03270e;
+  --t-w2: #15803d;
+  --t-se: #c2410c;
+  --t-safe: #15803d;
+  --t-safe-soft: #d7f1db;
+  --t-safe-text: #005a26;
+  --t-safe-fg: #f3fbf4;
+  --t-warn: #b45309;
+  --t-warn-soft: #ffe4d6;
+  --t-warn-text: #7e3700;
+  --t-warn-fg: #fff6f2;
+  --t-over: #b91c1c;
+  --t-over-soft: #ffe0db;
+  --t-over-text: #9c000a;
+  --t-over-fg: #fff6f5;
+  --t-twp: #7c3aed;
+  --t-info: #0369a1;
+  --t-info-soft: #d4ebfe;
+  --t-info-text: #004f7b;
+  --t-info-fg: #f3f9ff;
+  --t-invert: #0f172a;
+  --t-invert-fg: #f8fafc;
+  --t-invert-border: #334155;
+}
+.dark[data-palette='ledger'] {
+  color-scheme: dark;
+  --t-bg: #13110d;
+  --t-surface: #1c1914;
+  --t-surface-2: #272219;
+  --t-surface-3: #3b3325;
+  --t-fg: #f8fafc;
+  --t-fg-muted: #cbd5e1;
+  --t-fg-dim: #94a3b8;
+  --t-border: #403727;
+  --t-border-soft: #2b251b;
+  --t-border-strong: #6e5f43;
+  --t-head: #14532d;
+  --t-head-fg: #ffffff;
+  --t-ring: #15803d;
+  --t-accent: #203625;
+  --t-accent-fg: #73d28a;
+  --t-primary: #7eed9a;
+  --t-primary-fg: #03270e;
+  --t-w2: #15803d;
+  --t-se: #c2410c;
+  --t-safe: #15803d;
+  --t-safe-soft: #203625;
+  --t-safe-text: #73d28a;
+  --t-safe-fg: #f3fbf4;
+  --t-warn: #b45309;
+  --t-warn-soft: #442b1e;
+  --t-warn-text: #ffac7f;
+  --t-warn-fg: #fff6f2;
+  --t-over: #b91c1c;
+  --t-over-soft: #47221e;
+  --t-over-text: #ffa398;
+  --t-over-fg: #fff6f5;
+  --t-twp: #7c3aed;
+  --t-info: #0369a1;
+  --t-info-soft: #1e303f;
+  --t-info-text: #74c3ff;
+  --t-info-fg: #f3f9ff;
+  --t-invert: #f8fafc;
+  --t-invert-fg: #0f172a;
+  --t-invert-border: #cbd5e1;
+}
+
+/* Carbon — dark in both ink modes. It has no light form, which is
+   why there is one block here and not two. */
+[data-palette='carbon'] {
+  color-scheme: dark;
+  --t-bg: #090d16;
+  --t-surface: #111827;
+  --t-surface-2: #182031;
+  --t-surface-3: #26334a;
+  --t-fg: #f8fafc;
+  --t-fg-muted: #cbd5e1;
+  --t-fg-dim: #94a3b8;
+  --t-border: #22304a;
+  --t-border-soft: #18233a;
+  --t-border-strong: #3a4a68;
+  --t-head: #059669;
+  --t-head-fg: #04150f;
+  --t-ring: #10b981;
+  --t-accent: #254335;
+  --t-accent-fg: #5deaaf;
+  --t-primary: #5bf0b2;
+  --t-primary-fg: #002718;
+  --t-w2: #10b981;
+  --t-se: #f97316;
+  --t-safe: #10b981;
+  --t-safe-soft: #254335;
+  --t-safe-text: #5deaaf;
+  --t-safe-fg: #051b11;
+  --t-warn: #fbbf24;
+  --t-warn-soft: #544527;
+  --t-warn-text: #ffdb93;
+  --t-warn-fg: #1d1503;
+  --t-over: #f43f5e;
+  --t-over-soft: #55292c;
+  --t-over-text: #ffb1b4;
+  --t-over-fg: #240f10;
+  --t-twp: #a855f7;
+  --t-info: #38bdf8;
+  --t-info-soft: #294553;
+  --t-info-text: #a4dfff;
+  --t-info-fg: #041923;
+  --t-invert: #f8fafc;
+  --t-invert-fg: #0f172a;
+  --t-invert-border: #cbd5e1;
+}
+
+/* Calc20 — the calculator plate: cool blue-grey, rounder shapes,
+   and a dark ink top bar (see .pg-topbar in payguard.css). */
+[data-palette='calc20'] {
+  color-scheme: light;
+  --t-bg: oklch(96.5% 0.008 240);
+  --t-surface: oklch(100% 0 0);
+  --t-surface-2: oklch(94.5% 0.015 240);
+  --t-surface-3: oklch(90% 0.016 242);
+  --t-fg: oklch(22% 0.045 258);
+  --t-fg-muted: oklch(52% 0.035 252);
+  --t-fg-dim: oklch(52% 0.035 250);
+  --t-border: oklch(91.5% 0.012 245);
+  --t-border-soft: oklch(94.5% 0.012 245);
+  --t-border-strong: oklch(78% 0.022 248);
+  --t-head: oklch(55% 0.17 255);
+  --t-head-fg: oklch(98.5% 0.005 250);
+  --t-ring: oklch(55% 0.17 255);
+  --t-accent: #ddecff;
+  --t-accent-fg: #004b96;
+  --t-primary: #b2d4ff;
+  --t-primary-fg: #011f42;
+  --t-w2: oklch(55% 0.17 255);
+  --t-se: oklch(45% 0.15 310);
+  --t-safe: oklch(45% 0.11 148);
+  --t-safe-soft: #d8ecd9;
+  --t-safe-text: #0b5721;
+  --t-safe-fg: #f3fbf4;
+  --t-warn: oklch(58% 0.13 78);
+  --t-warn-soft: #fbe9d1;
+  --t-warn-text: #694500;
+  --t-warn-fg: #000000;
+  --t-over: oklch(45% 0.16 26);
+  --t-over-soft: #ffdcd8;
+  --t-over-text: #911017;
+  --t-over-fg: #fff6f5;
+  --t-twp: oklch(45% 0.11 62);
+  --t-info: oklch(52% 0.13 232);
+  --t-info-soft: #d4edfe;
+  --t-info-text: #005075;
+  --t-info-fg: #f2faff;
+  --t-invert: oklch(22% 0.045 258);
+  --t-invert-fg: oklch(98.5% 0.005 250);
+  --t-invert-border: oklch(42% 0.05 255);
+}
+.dark[data-palette='calc20'] {
+  color-scheme: dark;
+  --t-bg: #0d121c;
+  --t-surface: #141c29;
+  --t-surface-2: #1b2737;
+  --t-surface-3: #2a3b50;
+  --t-fg: #f8fafc;
+  --t-fg-muted: #cbd5e1;
+  --t-fg-dim: #94a3b8;
+  --t-border: #2c3d52;
+  --t-border-soft: #1c2a3b;
+  --t-border-strong: #4d657f;
+  --t-head: oklch(55% 0.17 255);
+  --t-head-fg: oklch(98.5% 0.005 250);
+  --t-ring: oklch(55% 0.17 255);
+  --t-accent: #21344d;
+  --t-accent-fg: #9cc7ff;
+  --t-primary: #b2d4ff;
+  --t-primary-fg: #011f42;
+  --t-w2: oklch(55% 0.17 255);
+  --t-se: oklch(45% 0.15 310);
+  --t-safe: oklch(45% 0.11 148);
+  --t-safe-soft: #213123;
+  --t-safe-text: #85cb8f;
+  --t-safe-fg: #f3fbf4;
+  --t-warn: oklch(58% 0.13 78);
+  --t-warn-soft: #413320;
+  --t-warn-text: #f6bc67;
+  --t-warn-fg: #000000;
+  --t-over: oklch(45% 0.16 26);
+  --t-over-soft: #41221f;
+  --t-over-text: #ff9b92;
+  --t-over-fg: #fff6f5;
+  --t-twp: oklch(45% 0.11 62);
+  --t-info: oklch(52% 0.13 232);
+  --t-info-soft: #203542;
+  --t-info-text: #78cbff;
+  --t-info-fg: #f2faff;
+  --t-invert: #f8fafc;
+  --t-invert-fg: #0f172a;
+  --t-invert-border: #cbd5e1;
+}

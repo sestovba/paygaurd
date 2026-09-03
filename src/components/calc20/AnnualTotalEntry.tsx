@@ -41,8 +41,8 @@ export function AnnualTotalEntry({ stream }: { stream: Stream }) {
       <p className="help-note">
         One figure for the whole year, spread evenly across the {active.length}
         {' '}active month{active.length === 1 ? '' : 's'} — instead of entering
-        the same average twelve times. That is what SSA does when income
-        can't be tied to a month. Edit any month below for an exact figure.
+        the same average twelve times. That is what Social Security does when
+        pay cannot be tied to one month. Edit any month below for an exact figure.
       </p>
     </div>
   );
