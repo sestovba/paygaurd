@@ -243,7 +243,7 @@ export function TrackerLedger() {
             {/* Tabs are the entry model — the Scrolling/Tabs switch was a
                 second way to browse the same jobs. One way now. */}
             <div className="lg-tabbar flex items-center">
-              <div className="lg-tabbar-scroller">
+              <div className="lg-tabbar-scroller" role="group" aria-label="Jobs">
                 {ongoing.map((s) => (
                   <div
                     key={s.id}
@@ -251,7 +251,24 @@ export function TrackerLedger() {
                     data-type={s.type}
                     className="lg-tab"
                     title="Double-click to rename"
+                    role={editingTabId === s.id ? undefined : 'button'}
+                    tabIndex={editingTabId === s.id ? -1 : 0}
+                    aria-pressed={editingTabId === s.id ? undefined : selected?.id === s.id}
                     onClick={() => setSelectedId(s.id)}
+                    onKeyDown={(event) => {
+                      if (editingTabId === s.id) return;
+
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setSelectedId(s.id);
+                      }
+
+                      if (event.key === 'F2') {
+                        event.preventDefault();
+                        setSelectedId(s.id);
+                        setEditingTabId(s.id);
+                      }
+                    }}
                   >
                     <span className="lg-type-badge" data-type={s.type}>
                       {SOURCE_SHORT[s.type]}

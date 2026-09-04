@@ -43,6 +43,7 @@ export function TwpStatusForm() {
           </p>
           <div className="flex gap-2">
             <input
+              aria-label="Add prior trial work month"
               className="field-input w-24"
               type="text"
               inputMode="numeric"

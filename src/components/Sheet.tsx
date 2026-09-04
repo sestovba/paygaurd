@@ -147,6 +147,9 @@ export function Sheet({
     <div
       ref={cardRef}
       tabIndex={inline ? undefined : -1}
+      role={inline ? undefined : 'dialog'}
+      aria-modal={inline ? undefined : true}
+      aria-labelledby={inline ? undefined : titleId}
       /* A stable hook so a layout can restyle its own popups. Purely an
          attribute — it changes nothing for layouts that do not use it. */
       data-sheet=""
@@ -271,9 +274,6 @@ export function Sheet({
     <div
       data-sheet-scrim=""
       className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6 bg-black/50 transition-opacity duration-200"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
       onClick={onClose}
     >
       <div className="flex w-full justify-center">

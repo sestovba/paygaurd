@@ -93,12 +93,15 @@ function ManageSourcesModal({
   return (
     <div
       className="pk-modal-scrim"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
       onClick={onDone}
     >
-      <div className="pk-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="pk-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="pk-modal-accent" aria-hidden="true" />
         <div className="pk-modal-head">
           <h2 id={titleId} className="pk-modal-title">Manage sources</h2>
@@ -196,12 +199,16 @@ function AddIncomeSourceModal({
   return (
     <div
       className="pk-modal-scrim"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
       onClick={onCancel}
     >
-      <form className="pk-modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
+      <form
+        className="pk-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={submit}
+      >
         <div className="pk-modal-accent" aria-hidden="true" />
         <div className="pk-modal-head">
           <h2 id={titleId} className="pk-modal-title">Add income source</h2>

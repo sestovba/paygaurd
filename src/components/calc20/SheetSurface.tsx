@@ -46,14 +46,14 @@ export function SheetSurface({
   return (
     <div
       className={'sheet-backdrop' + (closing ? ' sheet-backdrop--closing' : '')}
-      role="dialog"
-      aria-modal="true"
-      aria-label={label}
       onClick={requestClose}
     >
       <div
         ref={sheetRef}
         className={'sheet' + (condensed ? ' sheet--condensed' : '') + (closing ? ' sheet--closing' : '')}
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
         onClick={(event) => event.stopPropagation()}
       >
         <div
