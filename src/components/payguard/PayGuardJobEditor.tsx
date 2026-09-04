@@ -1,5 +1,5 @@
 import { ButtonBase } from '../../design-system';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ChevronDown, Lock, LockOpen, Sparkles, Trash2, Zap } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import {
@@ -51,12 +51,18 @@ function CellInput({
   prefix?: string;
 }) {
   const [draft, setDraft] = useState(value == null || value === 0 ? '' : String(value));
+const skipCommitRef = useRef(false);
 
   useEffect(() => {
     setDraft(value == null || value === 0 ? '' : String(value));
   }, [value]);
 
   function commit() {
+    if (skipCommitRef.current) {
+      skipCommitRef.current = false;
+      return;
+    }
+
     const trimmed = draft.trim();
     const next = trimmed ? Number(trimmed) : undefined;
     if (trimmed && (!Number.isFinite(next) || Number(next) < 0)) {
@@ -85,7 +91,17 @@ function CellInput({
         onChange={(event) => setDraft(event.target.value)}
         onBlur={commit}
         onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === 'Escape') event.currentTarget.blur();
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            skipCommitRef.current = true;
+            setDraft(value == null || value === 0 ? '' : String(value));
+            event.currentTarget.blur();
+            return;
+          }
+
+          if (event.key === 'Enter') {
+            event.currentTarget.blur();
+          }
         }}
         className={`pg-excel-input ${prefix ? 'pl-5' : ''}`}
       />
