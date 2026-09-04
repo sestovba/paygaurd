@@ -278,7 +278,7 @@
   border: 1px solid var(--pg-border);
   background: var(--pg-surface);
   color: var(--pg-fg);
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -518,7 +518,7 @@
   border: 1px solid var(--pg-border);
   background: var(--pg-surface);
   color: var(--pg-fg);
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   white-space: nowrap;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -567,7 +567,7 @@
   background: var(--pg-surface);
   color: var(--pg-fg);
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -864,7 +864,7 @@
   background: transparent;
   padding: 0.15rem 0;
   color: var(--pg-info-text);
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   cursor: pointer;
 }
@@ -951,7 +951,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  min-height: 2.75rem;
+  min-height: var(--t-touch-target);
   padding: 0 0.875rem;
   border-bottom: 1px solid var(--pg-rule);
   background: color-mix(in oklab, var(--pg-surface-2) 45%, var(--pg-surface));
@@ -993,7 +993,7 @@
 }
 
 .pg-section-title {
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1001,7 +1001,7 @@
 }
 
 .pg-section-meta {
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   color: var(--pg-fg-muted);
   min-width: 0;
@@ -1229,7 +1229,7 @@
   flex-shrink: 0;
   scroll-snap-align: start;
   position: relative;
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   white-space: nowrap;
   user-select: none;
   cursor: pointer;
@@ -1862,7 +1862,7 @@
 }
 
 .pg-empty-title {
-  font-size: 0.875rem;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   color: var(--pg-fg);
 }
@@ -2289,7 +2289,7 @@
 .pg-payguard .display-figure {
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 1.375rem;
+  font-size: var(--t-text-xl);
   letter-spacing: -0.015em;
   line-height: 1.15;
 }
@@ -2658,7 +2658,7 @@
 }
 
 .pg-signin-label {
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   color: var(--pg-fg-muted);
 }
@@ -2674,7 +2674,7 @@
   background: var(--pg-surface);
   color: var(--pg-fg);
   font-family: inherit;
-  font-size: 1rem; /* 16px — anything smaller and iOS zooms the page on focus */
+  font-size: var(--t-text-base); /* 16px — anything smaller and iOS zooms the page on focus */
   font-weight: 600;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -2687,7 +2687,7 @@
 
 .pg-signin-hint {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   line-height: 1.4;
   color: var(--pg-fg-dim);
 }
@@ -2699,7 +2699,7 @@
   padding: 0;
   color: var(--pg-fg-muted);
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;

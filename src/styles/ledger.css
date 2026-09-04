@@ -305,7 +305,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  min-height: 2.25rem;
+  min-height: var(--t-touch-small);
   padding: 0.5rem 0.8rem; /* control chrome — not a layout step */
   border: 1px solid var(--lg-border);
   background: var(--lg-surface);
@@ -329,7 +329,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-scope {
   display: inline-flex;
   align-items: center;
-  min-height: 2.25rem;
+  min-height: var(--t-touch-small);
   padding: 0 var(--lg-pad-cell);
   border: 1px solid var(--lg-border);
   background: var(--lg-surface);
@@ -381,7 +381,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.25rem;
+  min-height: var(--t-touch-small);
   padding: 0 0.75rem; /* control chrome */
   font: 500 var(--lg-fs-caption)/1 var(--lg-font-mono);
   letter-spacing: 0.06em;
@@ -481,7 +481,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  min-height: 2.25rem;
+  min-height: var(--t-touch-small);
   padding: 0 0.15rem; /* hit-area nudge */
   font: 500 var(--lg-fs-caption)/1 var(--lg-font-mono);
   letter-spacing: 0.06em;
@@ -533,7 +533,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   border-radius: var(--lg-radius);
   padding: var(--lg-pad-cell);
   font: 500 var(--lg-fs-body)/1.2 var(--lg-font-mono);
-  min-height: 2.5rem;
+  min-height: var(--t-touch-compact);
 }
 
 /* Affixed $ / unit fields: the shell IS the input. Prefix and suffix sit in

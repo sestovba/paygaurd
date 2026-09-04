@@ -159,7 +159,7 @@
   justify-content: center;
   gap: 6px;
   min-width: 44px;
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   padding: 0 14px;
   border: 1px solid var(--pk-edge);
   border-radius: 10px;
@@ -219,7 +219,7 @@
 /* The second and later sub-lines are supporting detail behind the first. */
 .pk-hero-sub ~ .pk-hero-sub {
   margin-top: 7px;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   color: var(--pk-ink-3);
 }
 
@@ -316,7 +316,7 @@
 
 .pk-month-name {
   flex: 0 0 40px;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -327,7 +327,7 @@
 
 .pk-month-amount {
   display: block;
-  font-size: 18px;
+  font-size: var(--t-text-lg);
   font-weight: 700;
   letter-spacing: -0.015em;
   font-variant-numeric: tabular-nums;
@@ -348,7 +348,7 @@
   padding: 3px 9px;
   border: 1px solid;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -454,7 +454,7 @@
 .pk-edit-name:first-child { margin-top: 0; }
 .pk-edit-name span {
   margin-left: 6px;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   color: var(--pk-ink-3);
 }
@@ -494,7 +494,7 @@
 .pk-plain {
   display: block;
   width: 100%;
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   margin-top: 8px;
   padding: 10px;
   border: 0;
@@ -557,7 +557,7 @@
 
 .pk-prompt-title {
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   line-height: 1.35;
   color: inherit;
@@ -574,7 +574,7 @@
   background: var(--pk-surface);
   color: var(--pk-ink-2);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -631,7 +631,7 @@
 
 .pk-modal-title {
   margin: 0;
-  font-size: 22px;
+  font-size: var(--t-text-xl);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -639,7 +639,7 @@
 
 .pk-modal-sub {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   line-height: 1.45;
   color: var(--pk-ink-2);
 }
@@ -653,7 +653,7 @@
   padding: 14px;
   border: 1px dashed var(--pk-edge);
   border-radius: 12px;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   line-height: 1.45;
   color: var(--pk-ink-2);
 }

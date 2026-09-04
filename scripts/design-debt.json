@@ -87,9 +87,9 @@
     "literal-text": 150
   },
   "src/styles/charm.css": {
-    "literal-size": 7,
+    "literal-size": 4,
     "literal-radius": 16,
-    "literal-text": 37
+    "literal-text": 19
   },
   "src/styles/chrome.css": {
     "literal-size": 3,
@@ -102,16 +102,16 @@
     "literal-text": 11
   },
   "src/styles/ledger.css": {
-    "literal-size": 18,
+    "literal-size": 13,
     "literal-radius": 8
   },
   "src/styles/overview.css": {
     "literal-text": 4
   },
   "src/styles/payguard.css": {
-    "literal-size": 12,
+    "literal-size": 11,
     "literal-radius": 12,
-    "literal-text": 59
+    "literal-text": 46
   },
   "src/styles/plan.css": {
     "literal-size": 20,
@@ -119,9 +119,9 @@
     "literal-text": 30
   },
   "src/styles/pocket.css": {
-    "literal-size": 12,
+    "literal-size": 10,
     "literal-radius": 18,
-    "literal-text": 33
+    "literal-text": 23
   },
   "src/styles/review.css": {
     "literal-size": 6,
@@ -130,6 +130,6 @@
   },
   "src/styles/workrecord.css": {
     "literal-size": 2,
-    "literal-text": 15
+    "literal-text": 13
   }
 }
