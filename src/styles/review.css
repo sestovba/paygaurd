@@ -254,7 +254,7 @@
 }
 
 .review-rail-tab:hover { background: var(--review-panel); }
-.review-rail-tab kbd { color: var(--review-faint); font-size: 0.65rem; }
+.review-rail-tab kbd { color: var(--review-faint); font-size: var(--t-text-xs); }
 
 .review-rail-count {
   border-radius: 2px;
@@ -302,7 +302,7 @@
   padding: 0.5rem 0.6rem;
 }
 
-.review-rail-head strong { flex: 1; font-size: 0.8rem; }
+.review-rail-head strong { flex: 1; font-size: var(--t-text-sm); }
 
 .review-rail-undo,
 .review-rail-close {
@@ -634,7 +634,7 @@
 }
 
 .review-row-reply[data-from='claude'] { border-left-color: var(--review-blue); }
-.review-row-reply strong { display: block; color: var(--review-faint); font-size: 0.62rem; text-transform: uppercase; }
+.review-row-reply strong { display: block; color: var(--review-faint); font-size: var(--t-text-xs); text-transform: uppercase; }
 
 .review-row-line {
   margin: 0;
@@ -695,7 +695,7 @@
 .review-ghost:hover { background: var(--review-line); }
 .review-primary:disabled,
 .review-ghost:disabled { opacity: 0.45; cursor: default; }
-.review-primary kbd { color: rgb(255 255 255 / 0.75); font-size: 0.62rem; }
+.review-primary kbd { color: rgb(255 255 255 / 0.75); font-size: var(--t-text-xs); }
 
 /* ================================================================== */
 /* The composer                                                       */

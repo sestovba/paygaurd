@@ -34,8 +34,8 @@
 }
 
 .hz-top-id { flex: 1 1 auto; min-width: 0; }
-.hz-top-id h1 { font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; }
-.hz-top-id p { font-size: 0.75rem; color: var(--color-muted-foreground); }
+.hz-top-id h1 { font-size: var(--t-text-base); font-weight: 800; letter-spacing: -0.01em; }
+.hz-top-id p { font-size: var(--t-text-sm); color: var(--color-muted-foreground); }
 
 .hz-top-year {
   display: flex;
@@ -297,7 +297,7 @@
 
 @media (max-width: 40rem) {
   .hz-main { padding: 0.75rem; gap: 0.75rem; }
-  .hz-answer-line { font-size: 1.125rem; }
+  .hz-answer-line { font-size: var(--t-text-lg); }
   .hz-stop { flex: 0 0 4.75rem; }
 
   /* Side by side, the level sits vertically centred against four lines of

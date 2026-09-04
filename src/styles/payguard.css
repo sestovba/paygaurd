@@ -614,13 +614,13 @@
   color: var(--pg-fg);
 }
 
-.pg-figure-lg { font-size: 1.375rem; }
-.pg-figure-md { font-size: 1.125rem; }
-.pg-figure-sm { font-size: 1rem; }
+.pg-figure-lg { font-size: var(--t-text-xl); }
+.pg-figure-md { font-size: var(--t-text-lg); }
+.pg-figure-sm { font-size: var(--t-text-base); }
 
 @media (min-width: 640px) {
-  .pg-figure-lg { font-size: 1.5rem; }
-  .pg-figure-md { font-size: 1.1875rem; }
+  .pg-figure-lg { font-size: var(--t-text-xl); }
+  .pg-figure-md { font-size: var(--t-text-lg); }
 }
 
 /* Badges */
@@ -830,7 +830,7 @@
 .pg-status-amount {
   min-width: 0;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-  font-size: clamp(1.8rem, 4vw, 2.45rem);
+  font-size: var(--t-text-fluid-compact);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.055em;
@@ -2528,7 +2528,7 @@
  */
 /* Structure and colour come from styles/chrome.css, which this layout
    answers with --pg-*. Only the register is payguard's. */
-.pg-payguard .precision-line { margin-top: 0.5rem; font-size: 0.6875rem; line-height: 1.4; }
+.pg-payguard .precision-line { margin-top: 0.5rem; font-size: var(--t-text-xs); line-height: 1.4; }
 .pg-payguard .precision-level { text-transform: uppercase; }
 .pg-payguard .precision-line[data-fix]:hover .precision-why { text-decoration: underline; }
 

@@ -427,7 +427,7 @@
    so nothing clips on a 320px screen. */
 @media (max-width: 22.5em) {
   .pk-main { padding: 12px 10px 24px; }
-  .pk-hero-line { font-size: 26px; }
+  .pk-hero-line { font-size: var(--t-text-2xl); }
   .pk-month-name { flex-basis: 34px; }
   .pk-month { padding: 12px 10px; }
 }

@@ -80,7 +80,7 @@
   font-weight: 750;
   letter-spacing: -0.04em;
   line-height: 0.92;
-  font-size: clamp(2.25rem, 10vw, 3.5rem);
+  font-size: var(--t-text-fluid-display);
   color: var(--pg-fg);
 }
 

@@ -95,6 +95,11 @@
   --t-text-2xl: 1.75rem;   /* 28px — a figure worth reading first          */
   --t-text-3xl: 2.25rem;   /* 36px — the one number on the screen          */
   --t-text-4xl: 3.5rem;    /* 56px — that number when it IS the screen     */
+  --t-text-display: 3rem; /* 48px display figure */
+  --t-text-fluid-compact: clamp(1.8rem, 4vw, 2.45rem); /* compact responsive display */
+  --t-text-fluid-container: clamp(1.9rem, 9cqw, 2.6rem); /* container-responsive display */
+  --t-text-fluid-display: clamp(2.25rem, 10vw, 3.5rem); /* large responsive display */
+  --t-text-relative-half: 0.5em; /* relative nested text */
   --t-text-hero-fluid: clamp(2.25rem, 1.6rem + 2vw, 3rem); /* responsive hero/display */
 
   --t-weight-normal: 400;

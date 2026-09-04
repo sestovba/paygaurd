@@ -700,14 +700,14 @@ html.pg-calc20 {
 
 .precision-gauge-pct {
   color: var(--chrome-fg);
-  font-size: clamp(1.9rem, 9cqw, 2.6rem);
+  font-size: var(--t-text-fluid-container);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 .precision-gauge-pct small {
-  font-size: 0.5em;
+  font-size: var(--t-text-relative-half);
   font-weight: 700;
 }
 

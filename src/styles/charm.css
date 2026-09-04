@@ -544,8 +544,8 @@
 
 @media (max-width: 22.5em) {
   .ch-main { padding: 14px 10px 32px; }
-  .ch-counts { font-size: 46px; }
-  .ch-headline { font-size: 24px; }
+  .ch-counts { font-size: var(--t-text-display); }
+  .ch-headline { font-size: var(--t-text-xl); }
 }
 
 @media (prefers-reduced-motion: reduce) {

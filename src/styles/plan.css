@@ -236,7 +236,7 @@
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
-@media (max-width: 22.5em) { .pl-answer-big { font-size: 48px; } }
+@media (max-width: 22.5em) { .pl-answer-big { font-size: var(--t-text-display); } }
 .pl-answer[data-tone='over'] .pl-answer-big { color: var(--over); }
 
 .pl-answer-lead {
@@ -987,7 +987,7 @@
   margin: 10px 0 0;
   font-size: var(--t-text-ui);
 }
-.pl-tokens-line b { font-size: 19px; }
+.pl-tokens-line b { font-size: var(--t-text-lg); }
 .pl-tokens-line b span { font-family: var(--figures); }
 .pl-tokens-line span { color: var(--ink-soft); }
 
@@ -1120,7 +1120,7 @@
 }
 
 .pl-source-body { min-width: 0; flex: 1 1 auto; }
-.pl-source-name { display: block; font-size: 16px; font-weight: 700; }
+.pl-source-name { display: block; font-size: var(--t-text-base); font-weight: 700; }
 .pl-source-note {
   display: block;
   margin-top: 1px;
