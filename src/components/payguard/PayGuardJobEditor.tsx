@@ -26,6 +26,7 @@ import { money } from '../../domain/format';
 import { copyFor, periodLabel } from '../../domain/copy';
 import type { MonthEntry, MonthKey, PayFrequency, Stream, TrackerData } from '../../domain/types';
 import { HelpSpread } from '../HelpSpread';
+import { NumericInput } from '../NumericInput';
 import {
   PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, payPatchFor, payValueFor, usePayBasis
 } from '../PayAmount';
