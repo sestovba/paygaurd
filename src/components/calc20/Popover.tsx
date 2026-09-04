@@ -18,6 +18,7 @@ import { useMountTransition } from './useMountTransition';
 import { useSwipeToDismiss } from './useSwipeToDismiss';
 
 import { ButtonBase } from '../../design-system';
+import { useDialogFocus } from '../ui/useDialogFocus';
 const EXIT_MS = 180;
 
 const GAP = 4;
@@ -136,6 +137,10 @@ export function AnchoredPopover({
   const { mounted, closing } = useMountTransition(open, EXIT_MS);
   // The body still needs its own vertical drag for scrolling long menus, so
   // this only ever attaches to the grip/title bar, not the whole drawer.
+  useDialogFocus(surfaceRef, close, {
+    enabled: mounted && !wide && role === 'dialog'
+  });
+
   const swipe = useSwipeToDismiss(surfaceRef, close);
 
   if (!mounted) return null;
@@ -146,6 +151,7 @@ export function AnchoredPopover({
       <div className={'popover-scrim' + (closing ? ' popover-scrim--closing' : '')} onClick={close}>
         <div
           ref={surfaceRef}
+          tabIndex={role === 'dialog' ? -1 : undefined}
           className={('popover-drawer ' + (closing ? 'popover-drawer--closing ' : '') + className).trim()}
           role={role}
           aria-label={label}

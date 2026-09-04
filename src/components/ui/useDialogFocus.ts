@@ -6,14 +6,20 @@ const FOCUSABLE =
 export function useDialogFocus<T extends HTMLElement>(
   containerRef: RefObject<T | null>,
   onClose: () => void,
-  options: { focusContainer?: boolean } = {}
+  options: {
+    focusContainer?: boolean;
+    enabled?: boolean;
+  } = {}
 ) {
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
   const focusContainer = options.focusContainer ?? false;
+  const enabled = options.enabled ?? true;
 
   useEffect(() => {
+    if (!enabled) return;
+
     const previouslyFocused =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
@@ -81,5 +87,5 @@ export function useDialogFocus<T extends HTMLElement>(
         previouslyFocused.focus();
       }
     };
-  }, [containerRef, focusContainer]);
+  }, [containerRef, enabled, focusContainer]);
 }

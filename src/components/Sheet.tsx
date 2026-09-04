@@ -1,9 +1,10 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { ChevronLeft, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { IconButton } from './ui';
 
 import { ButtonBase } from '../design-system';
+import { useDialogFocus } from './ui/useDialogFocus';
 const DISMISS_PX = 80;
 const DISMISS_VELOCITY = 0.45;
 
@@ -49,57 +50,15 @@ export function Sheet({
 }) {
   const [scrolled, setScrolled] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef(onClose);
-  closeRef.current = onClose;
   const titleId = useId();
   const startY = useRef(0);
   const startTime = useRef(0);
   const dragging = useRef(false);
   const inline = variant === 'inline';
 
-  useEffect(() => {
-    if (inline) return;
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    const frame = requestAnimationFrame(() => {
-      const first = cardRef.current?.querySelector<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])'
-      );
-      (first ?? cardRef.current)?.focus();
-    });
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeRef.current();
-        return;
-      }
-      if (event.key !== 'Tab' || !cardRef.current) return;
-      const focusable = Array.from(cardRef.current.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])'
-      ));
-      if (!focusable.length) {
-        event.preventDefault();
-        cardRef.current.focus();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      cancelAnimationFrame(frame);
-      document.removeEventListener('keydown', onKeyDown);
-      previouslyFocused?.focus();
-    };
-  }, [inline]);
+  useDialogFocus(cardRef, onClose, {
+    enabled: !inline
+  });
 
   const onTouchStart = (event: React.TouchEvent) => {
     if (inline) return;
