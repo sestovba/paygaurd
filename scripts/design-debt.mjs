@@ -78,6 +78,47 @@ const TEXT = /font-size\s*:\s*([^;}]+)/g;
 const isTokened = (v) => /var\(\s*--/.test(v);
 const isTrivial = (v) => /^\s*(0|auto|100%|inherit|unset|initial|1px|none)\s*$/.test(v);
 
+/*
+ * literal-size is CONTROL debt, not arbitrary geometry debt.
+ *
+ * A previous broad pass charged viewport shells, chart caps, pips, meter
+ * rails, sheet grips and swatches simply because they had a `height`.
+ * That encouraged meaningless tokens and contradicted this script's own
+ * definition of the category.
+ *
+ * Radius and type remain intentionally global; size is selector-aware.
+ */
+const CONTROL_SELECTOR =
+  /(?:\b(?:button|input|select|textarea)\b|(?:^|[.#\s>+~:[,_-])(?:btn|button|control|field|input|select|tab|toggle|switch|action|step|seg|chip|filter|close|cta|lock|scope|trigger|picker|prompt|quest|toolbar|hotbar|year-select|signin|modal-btn|source-trash|add-job|add-button|log|do)(?:$|[.#\s>+~:[,_-]))/i;
+
+function selectorAt(css, index) {
+  const open = css.lastIndexOf('{', index);
+  if (open < 0) return '';
+
+  const previousClose = css.lastIndexOf('}', open);
+  const previousOpen = css.lastIndexOf('{', open - 1);
+  const boundary = Math.max(previousClose, previousOpen);
+
+  return css.slice(boundary + 1, open).trim();
+}
+
+function countControlSizes(css) {
+  let n = 0;
+
+  for (const m of css.matchAll(SIZE)) {
+    const value = m[1].trim();
+
+    if (isTokened(value) || isTrivial(value)) continue;
+
+    const selector = selectorAt(css, m.index ?? 0);
+    if (!CONTROL_SELECTOR.test(selector)) continue;
+
+    n++;
+  }
+
+  return n;
+}
+
 function measure(file) {
   const raw = readFileSync(file, 'utf8');
   const debt = {};
@@ -95,7 +136,7 @@ function measure(file) {
       }
       return n;
     };
-    const size = count(SIZE);
+    const size = countControlSizes(css);
     const radius = count(RADIUS);
     const text = count(TEXT);
     if (size) debt['literal-size'] = size;
