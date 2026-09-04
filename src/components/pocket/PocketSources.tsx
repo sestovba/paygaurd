@@ -11,6 +11,7 @@ import { money } from '../../domain/format';
 import { streamYearTotal } from '../../domain/earnings';
 import type { Stream } from '../../domain/types';
 
+import { ButtonBase } from '../../design-system';
 type AddReturn = 'manage' | 'logging' | 'home';
 
 export type SourcesView =
@@ -124,7 +125,7 @@ function ManageSourcesModal({
                       </span>
                     </span>
                     {stream.locked ? null : (
-                      <button
+                      <ButtonBase
                         type="button"
                         className="pk-source-trash"
                         aria-label={`Remove ${stream.name}`}
@@ -134,7 +135,7 @@ function ManageSourcesModal({
                         }}
                       >
                         <TrashIcon />
-                      </button>
+                      </ButtonBase>
                     )}
                   </li>
                 );
@@ -144,12 +145,12 @@ function ManageSourcesModal({
         </div>
 
         <div className="pk-modal-foot">
-          <button type="button" className="pk-modal-btn pk-modal-btn-outline" onClick={onAdd}>
+          <ButtonBase type="button" className="pk-modal-btn pk-modal-btn-outline" onClick={onAdd}>
             + Add source
-          </button>
-          <button type="button" className="pk-modal-btn pk-modal-btn-primary" onClick={onDone}>
+          </ButtonBase>
+          <ButtonBase type="button" className="pk-modal-btn pk-modal-btn-primary" onClick={onDone}>
             Done
-          </button>
+          </ButtonBase>
         </div>
       </div>
     </div>
@@ -223,16 +224,16 @@ function AddIncomeSourceModal({
         </div>
 
         <div className="pk-modal-foot">
-          <button type="button" className="pk-modal-btn pk-modal-btn-outline" onClick={onCancel}>
+          <ButtonBase type="button" className="pk-modal-btn pk-modal-btn-outline" onClick={onCancel}>
             Cancel
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="submit"
             className="pk-modal-btn pk-modal-btn-primary"
             disabled={!canAdd}
           >
             Add source
-          </button>
+          </ButtonBase>
         </div>
       </form>
     </div>

@@ -52,6 +52,7 @@ import { ToastStack } from '../ToastStack';
 import { PocketSourcesModals, type SourcesView } from './PocketSources';
 import '../../styles/pocket.css';
 
+import { ButtonBase } from '../../design-system';
 export function TrackerPocket() {
   const {
     data, ui, setUi, resetAll, updateMonthEntry, pushToast,
@@ -343,17 +344,17 @@ export function TrackerPocket() {
       <header className="pk-top">
         <div className="pk-top-when">
           <b>{longMonthName(asOf)} {ui.year}</b>
-          <button
+          <ButtonBase
             type="button"
             className="pk-top-sources"
             onClick={openManageSources}
           >
             {data.streams.length === 1 ? primary?.name : `${data.streams.length} sources`}
-          </button>
+          </ButtonBase>
         </div>
-        <button type="button" className="pk-btn" onClick={() => setSettingsOpen(true)}>
+        <ButtonBase type="button" className="pk-btn" onClick={() => setSettingsOpen(true)}>
           Settings
-        </button>
+        </ButtonBase>
       </header>
 
       <main className="pk-main">
@@ -389,7 +390,7 @@ export function TrackerPocket() {
               <p className="pk-edit-name">Which job paid you?</p>
               <div className="pk-months">
                 {candidates.map((st) => (
-                  <button
+                  <ButtonBase
                     key={st.id}
                     type="button"
                     className="pk-month"
@@ -404,22 +405,22 @@ export function TrackerPocket() {
                           : ' · nothing logged this month'}
                       </span>
                     </span>
-                  </button>
+                  </ButtonBase>
                 ))}
               </div>
-              <button
+              <ButtonBase
                 type="button"
                 className="pk-plain"
                 onClick={() => openAddSource('logging')}
               >
                 Add a job
-              </button>
+              </ButtonBase>
             </section>
           ) : logging && target ? (
             <form className="pk-answer" onSubmit={handleSubmit}>
               {/* The switch between net pay and paystub lives right here and defaults to net pay ("Paid"). */}
               <div className="pk-switch" role="radiogroup" aria-label="How you enter pay">
-                <button
+                <ButtonBase
                   type="button"
                   role="radio"
                   aria-checked={basis === 'bank'}
@@ -432,8 +433,8 @@ export function TrackerPocket() {
                   }}
                 >
                   Paid
-                </button>
-                <button
+                </ButtonBase>
+                <ButtonBase
                   type="button"
                   role="radio"
                   aria-checked={basis === 'paystub'}
@@ -445,7 +446,7 @@ export function TrackerPocket() {
                   }}
                 >
                   Paystub
-                </button>
+                </ButtonBase>
               </div>
 
               {basis === 'bank' ? (
@@ -484,15 +485,15 @@ export function TrackerPocket() {
                       own .pk-plain exists for exactly that ("a plain text
                       button, not a second big green one — there is one primary
                       action") and was going unused three lines below. */}
-                  <button
+                  <ButtonBase
                     type="submit"
                     className="pk-log"
                     style={{ marginTop: 10 }}
                     disabled={!valid}
                   >
                     Add pay
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="pk-plain"
                     onClick={() => {
@@ -502,8 +503,8 @@ export function TrackerPocket() {
                     }}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="pk-plain"
                     onClick={() => {
@@ -512,7 +513,7 @@ export function TrackerPocket() {
                     }}
                   >
                     Enter my paystub amount instead
-                  </button>
+                  </ButtonBase>
                 </>
               ) : (
                 <>
@@ -539,22 +540,22 @@ export function TrackerPocket() {
                     <div className="pk-prompt">
                       <p className="pk-prompt-title">Do you want to enter paystubs from now on?</p>
                       <div className="pk-prompt-choices">
-                        <button
+                        <ButtonBase
                           type="button"
                           className="pk-prompt-btn"
                           data-selected={fromNowOn ? '' : undefined}
                           onClick={() => setFromNowOn(true)}
                         >
                           Yes, from now on
-                        </button>
-                        <button
+                        </ButtonBase>
+                        <ButtonBase
                           type="button"
                           className="pk-prompt-btn"
                           data-selected={!fromNowOn ? '' : undefined}
                           onClick={() => setFromNowOn(false)}
                         >
                           Just this time
-                        </button>
+                        </ButtonBase>
                       </div>
                     </div>
                   ) : null}
@@ -567,15 +568,15 @@ export function TrackerPocket() {
                       own .pk-plain exists for exactly that ("a plain text
                       button, not a second big green one — there is one primary
                       action") and was going unused three lines below. */}
-                  <button
+                  <ButtonBase
                     type="submit"
                     className="pk-log"
                     style={{ marginTop: 10 }}
                     disabled={!valid}
                   >
                     Add pay
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="pk-plain"
                     onClick={() => {
@@ -585,8 +586,8 @@ export function TrackerPocket() {
                     }}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="pk-plain"
                     onClick={() => {
@@ -596,26 +597,26 @@ export function TrackerPocket() {
                     }}
                   >
                     Enter Direct deposit instead
-                  </button>
+                  </ButtonBase>
                 </>
               )}
             </form>
           ) : (
-            <button type="button" className="pk-log" onClick={startLogging}>
+            <ButtonBase type="button" className="pk-log" onClick={startLogging}>
               Log Pay
-            </button>
+            </ButtonBase>
           )
         ) : (
           <div className="pk-empty">
             <p>First, tell us about your job.</p>
-            <button
+            <ButtonBase
               type="button"
               className="pk-log"
               style={{ marginTop: 12 }}
               onClick={() => openAddSource('home')}
             >
               Add income source
-            </button>
+            </ButtonBase>
           </div>
         )}
 
@@ -637,7 +638,7 @@ export function TrackerPocket() {
 
               return (
                 <div key={month}>
-                  <button
+                  <ButtonBase
                     type="button"
                     className="pk-month"
                     aria-expanded={isOpen}
@@ -671,7 +672,7 @@ export function TrackerPocket() {
                     {heavy.has(month)
                       ? <span className="pk-tag" data-kind="pay">{flag?.kind === 'pay' ? flag.text : '3 paydays'}</span>
                       : null}
-                  </button>
+                  </ButtonBase>
 
                   {isOpen ? (
                     <div className="pk-detail">

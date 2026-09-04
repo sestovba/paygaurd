@@ -155,12 +155,6 @@
   "src/components/plan/TrackerPlan.tsx": {
     "raw-button": 15
   },
-  "src/components/pocket/PocketSources.tsx": {
-    "raw-button": 5
-  },
-  "src/components/pocket/TrackerPocket.tsx": {
-    "raw-button": 17
-  },
   "src/components/ui/legacy.tsx": {
     "raw-button": 6
   },
