@@ -1,5 +1,5 @@
 import { ButtonBase } from '../../design-system';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, Plus, Settings, Undo2, X
 } from 'lucide-react';
@@ -38,6 +38,30 @@ export function TrackerLedger() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(data.streams[0]?.id ?? null);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
+
+  const renameStartRef = useRef<{ id: string; name: string } | null>(null);
+
+  function beginRename(id: string, name: string) {
+    renameStartRef.current = { id, name };
+    setEditingTabId(id);
+  }
+
+  function finishRename() {
+    renameStartRef.current = null;
+    setEditingTabId(null);
+  }
+
+  function cancelRename(id: string) {
+    const start = renameStartRef.current;
+
+    if (start?.id === id) {
+      updateStream(id, { name: start.name });
+    }
+
+    renameStartRef.current = null;
+    setEditingTabId(null);
+  }
+
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const [addingType, setAddingType] = useState(false);
 
@@ -266,7 +290,7 @@ export function TrackerLedger() {
                       if (event.key === 'F2') {
                         event.preventDefault();
                         setSelectedId(s.id);
-                        setEditingTabId(s.id);
+                        beginRename(s.id, s.name);
                       }
                     }}
                   >
@@ -280,14 +304,24 @@ export function TrackerLedger() {
                         value={s.name}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => updateStream(s.id, { name: e.target.value })}
-                        onBlur={() => setEditingTabId(null)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') setEditingTabId(null); }}
+                        onBlur={finishRename}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            finishRename();
+                            return;
+                          }
+
+                          if (e.key === 'Escape') {
+                            e.preventDefault();
+                            cancelRename(s.id);
+                          }
+                        }}
                         className="lg-name-input"
                         style={{ width: Math.max(4, s.name.length) + 'ch' }}
                       />
                     ) : (
                       <span
-                        onDoubleClick={(e) => { e.stopPropagation(); if (!s.locked) setEditingTabId(s.id); }}
+                        onDoubleClick={(e) => { e.stopPropagation(); if (!s.locked) beginRename(s.id, s.name); }}
                       >
                         {s.name}
                       </span>
