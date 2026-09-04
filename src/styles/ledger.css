@@ -2158,3 +2158,12 @@ body:has([data-palette='carbon'] .pg-ledger) {
     font-size: var(--t-text-xs);
   }
 }
+
+
+/* Current-month scan rail
+ * Current date is navigation, not status. Keep it neutral and narrow so
+ * warning/limit colours retain their meaning.
+ */
+.pg-ledger [data-current-month] {
+  box-shadow: inset 3px 0 0 var(--lg-fg);
+}

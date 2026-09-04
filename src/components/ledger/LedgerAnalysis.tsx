@@ -219,7 +219,9 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
       ) : view === 'cards' ? (
         <div className="lg-analysis-grid">
           {visible.map((c) => (
-            <div key={c.month} className="lg-status-card" data-status={c.kind}>
+            <div key={c.month} className="lg-status-card" data-status={c.kind}
+  aria-current={c.month === todayMonth() ? 'date' : undefined}
+  data-current-month={c.month === todayMonth() || undefined}>
               <div className="lg-status-card-head">
                 <span className="lg-label">{longMonthName(c.month)}</span>
                 <span className="ml-auto lg-status-dot" />
@@ -285,7 +287,9 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
             </thead>
             <tbody>
               {visible.map((c) => (
-                <tr key={c.month} className="lg-border-b-soft">
+                <tr key={c.month} className="lg-border-b-soft"
+  aria-current={c.month === todayMonth() ? 'date' : undefined}
+  data-current-month={c.month === todayMonth() || undefined}>
                   <td className="lg-type-body">{longMonthName(c.month)}</td>
                   <td className={`text-right lg-type-body font-semibold${c.kind === 'none' ? ' lg-text-muted' : ''}`}>
                     {c.kind === 'none' ? '–' : money2(c.status.countable)}

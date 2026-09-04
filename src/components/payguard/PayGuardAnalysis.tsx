@@ -353,7 +353,9 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                 </thead>
                 <tbody>
                   {visible.map((c, idx) => (
-                    <tr key={c.month} className="pg-table-row" data-stripe={idx % 2 === 1}>
+                    <tr key={c.month} className="pg-table-row" data-stripe={idx % 2 === 1}
+  aria-current={c.month === todayMonth() ? 'date' : undefined}
+  data-current-month={c.month === todayMonth() || undefined}>
                       <th
                         scope="row"
                         className="pg-frozen pg-rule-r px-3.5 py-2 text-left font-semibold pg-fg sm:px-4"
@@ -405,6 +407,8 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                 key={c.month}
                 className="pg-month-cell"
                 data-filled={c.status.countable > 0 || c.status.isServiceMonth}
+                aria-current={c.month === todayMonth() ? 'date' : undefined}
+                data-current-month={c.month === todayMonth() || undefined}
               >
                 <div className="flex items-center justify-between gap-1">
                   <span className="pg-label pg-fg">{shortMonthName(c.month)}</span>

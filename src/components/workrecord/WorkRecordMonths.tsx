@@ -88,6 +88,8 @@ export function WorkRecordMonths({
                 onMouseLeave={() => onHover(null)}
                 onFocus={() => onHover(month)}
                 onBlur={() => onHover(null)}
+                aria-current={month === todayMonth() ? 'date' : undefined}
+                data-current-month={month === todayMonth() || undefined}
                 onClick={() => onOpenMonth(month)}
               >
                 <span className="wr-month-label">{shortMonthName(month)}</span>

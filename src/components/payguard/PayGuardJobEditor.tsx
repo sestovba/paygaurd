@@ -167,7 +167,9 @@ function W2PayGuardLedger({
                 data-stripe={idx % 2 === 1}
                 data-over={isOver}
                 role="row"
-              >
+
+                aria-current={m === todayMonth() ? 'date' : undefined}
+                data-current-month={m === todayMonth() || undefined}>
                 <div
                   className="pg-frozen flex flex-col justify-center gap-0.5 pg-rule-r px-2.5 py-1.5"
                   data-stripe={idx % 2 === 1}

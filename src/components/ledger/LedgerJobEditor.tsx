@@ -173,7 +173,12 @@ function W2MonthLedger({
               const converted = basis === 'bank' && amount ? payPatchFor('bank', amount).gross : undefined;
 
               return (
-                <tr key={m} className="lg-ledger-row">
+                <tr
+                  key={m}
+                  className="lg-ledger-row"
+                  aria-current={m === todayMonth() ? 'date' : undefined}
+                  data-current-month={m === todayMonth() || undefined}
+                >
                   <td className="lg-ledger-cell lg-ledger-cell--month">
                     <span>{shortMonthName(m)}</span>
                     {context.length ? (
