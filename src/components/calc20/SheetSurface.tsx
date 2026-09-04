@@ -4,6 +4,7 @@ import { ChevronLeftIcon, CloseIcon } from './Icons';
 import { useSwipeToDismiss } from './useSwipeToDismiss';
 
 import { ButtonBase } from '../../design-system';
+import { useDialogFocus } from '../ui/useDialogFocus';
 const EXIT_MS = 200;
 
 export function SheetSurface({
@@ -37,6 +38,8 @@ export function SheetSurface({
 
   // The body still needs its own vertical drag for scrolling long content,
   // so this only ever attaches to the head/grip, not the whole sheet.
+  useDialogFocus(sheetRef, requestClose);
+
   const swipe = useSwipeToDismiss(sheetRef, requestClose);
 
   const onScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -50,6 +53,7 @@ export function SheetSurface({
     >
       <div
         ref={sheetRef}
+        tabIndex={-1}
         className={'sheet' + (condensed ? ' sheet--condensed' : '') + (closing ? ' sheet--closing' : '')}
         role="dialog"
         aria-modal="true"

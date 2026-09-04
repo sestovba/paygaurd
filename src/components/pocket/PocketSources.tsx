@@ -12,6 +12,7 @@ import { streamYearTotal } from '../../domain/earnings';
 import type { Stream } from '../../domain/types';
 
 import { ButtonBase } from '../../design-system';
+import { useDialogFocus } from '../ui/useDialogFocus';
 type AddReturn = 'manage' | 'logging' | 'home';
 
 export type SourcesView =
@@ -76,6 +77,11 @@ function ManageSourcesModal({
   onRemove: (id: string) => void;
 }) {
   const titleId = useId();
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // This is a management surface, not a form: announce the dialog first
+  // instead of dropping keyboard focus onto a destructive trash action.
+  useDialogFocus(modalRef, onDone, { focusContainer: true });
   const count = streams.length;
   const subtitle = count === 1 ? '1 income source' : `${count} income sources`;
 
@@ -96,6 +102,8 @@ function ManageSourcesModal({
       onClick={onDone}
     >
       <div
+        ref={modalRef}
+        tabIndex={-1}
         className="pk-modal"
         role="dialog"
         aria-modal="true"
@@ -170,6 +178,10 @@ function AddIncomeSourceModal({
   const titleId = useId();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLFormElement>(null);
+
+  // First focusable control is the source-name input.
+  useDialogFocus(modalRef, onCancel);
   const [name, setName] = useState('');
   const trimmed = name.trim();
   const canAdd = trimmed.length > 0;
@@ -202,6 +214,8 @@ function AddIncomeSourceModal({
       onClick={onCancel}
     >
       <form
+        ref={modalRef}
+        tabIndex={-1}
         className="pk-modal"
         role="dialog"
         aria-modal="true"
