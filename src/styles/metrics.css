@@ -128,6 +128,15 @@
   --t-touch-target: 2.75rem;
   --t-touch-compact: 2.5rem;
   --t-touch-small: 2.25rem;
+  /* Fixed interaction geometry — independent of palette personality. */
+  --t-size-control-dense: 2rem;                 /* 32px */
+  --t-size-control-small: var(--t-touch-small); /* 36px */
+  --t-size-control-compact: var(--t-touch-compact); /* 40px */
+  --t-size-control-target: var(--t-touch-target);   /* 44px */
+  --t-size-control-comfortable: 3rem;           /* 48px */
+  --t-size-control-large: 3.25rem;              /* 52px */
+  --t-size-control-xl: 3.5rem;                  /* 56px */
+  --t-size-control-textarea: 4.5rem;            /* 72px */
 }
 
 /* Reduced motion is a system setting, not a preference we get to weigh. */

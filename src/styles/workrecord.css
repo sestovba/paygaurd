@@ -268,7 +268,7 @@
   gap: 0.5rem;
   flex: 1 1 0%;
   min-width: 0;
-  min-height: 3.25rem;
+  min-height: var(--t-size-control-large);
   padding: 0 0.5rem 0 var(--wr-pad);
   margin: 0;
   border: 0;

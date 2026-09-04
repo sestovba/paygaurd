@@ -197,7 +197,7 @@ html.pg-calc20 {
 
 .toast__action {
   flex: 0 0 auto;
-  min-height: 2rem;
+  min-height: var(--t-size-control-dense);
   padding: 0 0.7rem;
   border: 1px solid var(--chrome-border);
   border-radius: var(--chrome-radius-sm);

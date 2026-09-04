@@ -429,7 +429,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .year-select {
-  height: 34px;
+  height: var(--t-size-control-small);
   padding: 0 8px;
   border: 1px solid var(--line-ink);
   border-radius: 5px;
@@ -445,7 +445,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .icon-button {
   width: 34px;
-  height: 34px;
+  height: var(--t-size-control-small);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -716,7 +716,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .col-select {
-  min-height: 30px;
+  min-height: var(--t-size-control-dense);
   padding: 0 8px;
   border: 1px solid var(--line-strong);
   border-radius: 5px;
@@ -844,7 +844,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .seg {
   display: inline-flex;
   align-items: stretch;
-  height: 32px;
+  height: var(--t-size-control-dense);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: var(--card);
@@ -876,7 +876,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   justify-content: center;
   gap: 3px;
-  min-height: 32px;
+  min-height: var(--t-size-control-dense);
   padding: 0 9px;
   border: 0;
   border-right: 1px solid var(--line-2);
@@ -907,7 +907,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-width: 0;
   width: max-content;
   max-width: 220px;
-  height: 32px;
+  height: var(--t-size-control-dense);
   padding: 0 22px 0 10px;
   border: 0;
   border-right: 1px solid var(--line-2);
@@ -932,7 +932,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  min-height: 56px;
+  min-height: var(--t-size-control-xl);
 }
 
 .pg-calc20 .view-option svg { flex: 0 0 auto; color: var(--ink-3); }
@@ -1133,7 +1133,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-width: 0;
   max-width: calc(100% - 72px);
   width: max-content;
-  height: 32px;
+  height: var(--t-size-control-dense);
   padding: 0 22px 0 10px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
@@ -1429,7 +1429,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 38px;
+  min-height: var(--t-size-control-compact);
   padding: 0 26px;
   border: 0;
   background: transparent;
@@ -1532,7 +1532,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .ledger__date-input, .pg-calc20 .ledger__num-input {
   flex: 1 1 96px;
   min-width: 0;
-  min-height: 38px;
+  min-height: var(--t-size-control-compact);
   padding: 0 9px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -1550,7 +1550,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   justify-content: center;
   gap: 5px;
   flex: 0 0 auto;
-  min-height: 38px;
+  min-height: var(--t-size-control-compact);
   padding: 0 12px;
   border: 0;
   border-radius: var(--radius);
@@ -1564,7 +1564,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 /* A narrow-screen 2+2 wrap leaves Add cramped in the corner — give it the
  * full row instead, a clearer tap target than half a wrapped row. */
 @media (max-width: 480px) {
-  .pg-calc20 .ledger__add-button { flex: 1 1 100%; min-height: 42px; }
+  .pg-calc20 .ledger__add-button { flex: 1 1 100%; min-height: var(--t-size-control-target); }
 }
 
 .pg-calc20 .ledger__add-button:disabled { opacity: .4; cursor: not-allowed; }
@@ -1637,13 +1637,13 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .stream-panel-end .seg {
-  height: 28px;
+  height: var(--t-size-control-dense);
   flex: 0 0 auto;
 }
 
 .pg-calc20 .stream-panel-end .seg__btn {
   gap: 5px;
-  min-height: 28px;
+  min-height: var(--t-size-control-dense);
   padding: 0 8px;
   font-size: var(--t-text-xs);
 }
@@ -1679,7 +1679,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 28px;
+  min-height: var(--t-size-control-dense);
   padding: 0 4px 0 9px;
   cursor: pointer;
 }
@@ -1736,7 +1736,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .col-auto__drop input[type='range'] {
   width: 112px;
-  height: 32px;
+  height: var(--t-size-control-dense);
   margin: 0;
   accent-color: var(--accent-ink);
   cursor: pointer;
@@ -1799,7 +1799,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 6px;
   width: fit-content;
-  min-height: 32px;
+  min-height: var(--t-size-control-dense);
   padding: 0 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
@@ -1819,7 +1819,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 .pg-calc20 .stream-future-toggle {
   align-self: center;
-  min-height: 32px;
+  min-height: var(--t-size-control-dense);
   padding: 0 4px;
   font-size: var(--t-text-xs);
 }
@@ -2018,7 +2018,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .pg-calc20 .chip {
-  min-height: 30px;
+  min-height: var(--t-size-control-dense);
   display: inline-flex;
   align-items: center;
   padding: 0 10px;
@@ -2166,7 +2166,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .entry-field input {
   width: 100%;
   min-width: 0;
-  min-height: 46px;
+  min-height: var(--t-size-control-comfortable);
   padding: 0 11px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -2272,7 +2272,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .cell-input {
   width: 100%;
   min-width: 0;
-  height: 28px;
+  height: var(--t-size-control-dense);
   padding: 0 7px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -2286,13 +2286,13 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   transition: border-color 120ms linear, box-shadow 120ms linear;
 }
 
-.pg-calc20 .cell-input--comfortable { height: 46px; font-size: var(--t-text-base); padding: 0 10px; }
+.pg-calc20 .cell-input--comfortable { height: var(--t-size-control-comfortable); font-size: var(--t-text-base); padding: 0 10px; }
 
 /* Compact density packs more months per row on wide screens, but on a
  * phone there is only ever one column — the space it buys back is not
  * worth a font small enough to zoom the page on focus. */
 @media (max-width: 779px) {
-  .pg-calc20 .cell-input { height: 36px; font-size: var(--t-text-base); padding: 0 9px; }
+  .pg-calc20 .cell-input { height: var(--t-size-control-small); font-size: var(--t-text-base); padding: 0 9px; }
 }
 
 .pg-calc20 .cell-input::placeholder { font-family: var(--sans); color: var(--muted); }
@@ -2502,7 +2502,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 /* ------------------------------------------------------------- buttons */
 
 .pg-calc20 .filled-button, .pg-calc20 .tonal-button, .pg-calc20 .text-button, .pg-calc20 .danger-button {
-  min-height: 46px;
+  min-height: var(--t-size-control-comfortable);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2522,7 +2522,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .tonal-button { background: var(--paper-3); color: var(--ink); }
 .pg-calc20 .tonal-button:hover { background: var(--line); }
 
-.pg-calc20 .text-button { min-height: 44px; background: transparent; color: var(--muted); font-size: var(--t-text-sm); }
+.pg-calc20 .text-button { min-height: var(--t-size-control-target); background: transparent; color: var(--muted); font-size: var(--t-text-sm); }
 .pg-calc20 .text-button:hover { background: var(--paper-3); color: var(--ink-3); }
 
 .pg-calc20 .danger-button { background: var(--card); border: 1px solid var(--line-strong); color: var(--over-label); }
@@ -2565,7 +2565,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   max-width: 340px;
 }
 
-.pg-calc20 .app-empty__actions .filled-button, .pg-calc20 .app-empty__actions .tonal-button { min-height: 48px; width: 100%; }
+.pg-calc20 .app-empty__actions .filled-button, .pg-calc20 .app-empty__actions .tonal-button { min-height: var(--t-size-control-comfortable); width: 100%; }
 .pg-calc20 .app-empty__actions .text-button { align-self: center; margin-top: 2px; }
 
 /* ------------------------------------------------------------- hotbar */
@@ -2600,7 +2600,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   display: flex;
   align-items: center;
   gap: 6px;
-  min-height: 30px;
+  min-height: var(--t-size-control-dense);
   padding: 0 10px;
   border: 1px solid var(--line-strong);
   border-radius: var(--t-radius-full);
@@ -2754,7 +2754,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 42px;
+  min-height: var(--t-size-control-target);
   padding: 0 10px;
   border: 0;
   border-radius: 12px;
@@ -2848,7 +2848,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .popover-surface__close {
   flex: 0 0 auto;
   width: 30px;
-  height: 30px;
+  height: var(--t-size-control-dense);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3002,7 +3002,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 52px;
+  min-height: var(--t-size-control-large);
   padding: 0 14px;
   border: 0;
   border-radius: 10px;
@@ -3243,7 +3243,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .sheet__back, .pg-calc20 .sheet__close {
   flex: 0 0 auto;
   width: 38px;
-  height: 38px;
+  height: var(--t-size-control-compact);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3470,7 +3470,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .field input, .pg-calc20 .field select {
   width: 100%;
-  min-height: 46px;
+  min-height: var(--t-size-control-comfortable);
   padding: 0 13px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -3491,7 +3491,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
  * unstyled, small-text native input. */
 .pg-calc20 .num-input {
   box-sizing: border-box;
-  min-height: 46px;
+  min-height: var(--t-size-control-comfortable);
   padding: 0 13px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -3522,7 +3522,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .segmented button {
   flex: 1 1 0;
-  min-height: 42px;
+  min-height: var(--t-size-control-target);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3640,7 +3640,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
  * hit once, one-handed, before anything is loaded — see the same note in
  * payguard.css, which draws the same gate in the other skin. */
 .pg-calc20 .signin-provider {
-  min-height: 48px;
+  min-height: var(--t-size-control-comfortable);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3682,7 +3682,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .signin-or::before,
-.pg-calc20 .signin-or::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--line); }
+.pg-calc20 .signin-or::after { content: ''; flex: 1 1 auto; height: var(--t-size-control-dense); background: var(--line); }
 
 .pg-calc20 .signin-form { display: flex; flex-direction: column; gap: 14px; }
 .pg-calc20 .signin-row { display: flex; flex-direction: column; gap: 6px; }
@@ -3693,7 +3693,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
  * wants to check what they typed. 16px keeps iOS from zooming on focus. */
 .pg-calc20 .signin-input {
   width: 100%;
-  min-height: 48px;
+  min-height: var(--t-size-control-comfortable);
   padding: 0 16px;
   border: 1px solid var(--line-strong);
   border-radius: 14px;
@@ -3724,7 +3724,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .signin-reveal:hover { color: var(--ink); }
 
 .pg-calc20 .signin-submit {
-  min-height: 48px;
+  min-height: var(--t-size-control-comfortable);
   margin-top: 2px;
   border: 1px solid var(--ink);
   border-radius: var(--t-radius-full);
@@ -3877,7 +3877,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .toast__action {
   flex: 0 0 auto;
-  min-height: 34px;
+  min-height: var(--t-size-control-small);
   padding: 0 12px;
   border: 0;
   border-radius: 5px;
@@ -4056,7 +4056,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 6px;
   max-width: 100%;
-  min-height: 28px;
+  min-height: var(--t-size-control-dense);
   padding: 1px 9px;
   border: 1px solid var(--line-2);
   border-radius: var(--t-radius-full);
@@ -4257,7 +4257,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .standing-divider { background: rgba(255, 255, 255, .16); }
 
 .pg-calc20 .year-select {
-  height: 34px;
+  height: var(--t-size-control-small);
   border: 1px solid rgba(255, 255, 255, .18);
   border-radius: 10px;
   background: rgba(255, 255, 255, .09);
@@ -5204,7 +5204,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .year-select {
-  height: 34px;
+  height: var(--t-size-control-small);
   min-height: 0;
   padding: 0 8px;
   border: 1px solid color-mix(in oklab, var(--on-ink) 18%, transparent);
@@ -5219,7 +5219,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .topbar .icon-button, .pg-calc20 .topbar .avatar {
   width: 34px;
-  height: 34px;
+  height: var(--t-size-control-small);
   color: color-mix(in oklab, var(--on-ink) 70%, transparent);
 }
 
@@ -5913,7 +5913,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .stream-card .icon-button--muted {
   flex: 0 0 34px;
   width: 34px;
-  height: 34px;
+  height: var(--t-size-control-small);
   margin-top: 0;
 }
 
@@ -6061,7 +6061,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
   /* A <select> zooms the page on focus below 16px exactly like a text
    * input does — the year picker was still at its compact desktop size. */
-  .pg-calc20 .year-select { min-height: 40px; font-size: var(--t-text-base); }
+  .pg-calc20 .year-select { min-height: var(--t-size-control-compact); font-size: var(--t-text-base); }
 }
 
 .pg-calc20 .ledger__date-input, .pg-calc20 .ledger__field, .pg-calc20 .ledger__num-input {
@@ -6099,7 +6099,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .ledger__field .ledger__num-input {
   flex: 1 1 auto;
   min-height: 0;
-  height: 42px;
+  height: var(--t-size-control-target);
   padding: 0;
   border: 0;
   border-radius: var(--t-radius-none);
@@ -6207,7 +6207,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .stream-card__foot .stream-panel-edit, .pg-calc20 .stream-card__foot .lock-toggle {
-  min-height: 32px;
+  min-height: var(--t-size-control-dense);
   gap: 8px;
   padding: 0 14px;
   border: 1px solid var(--border);

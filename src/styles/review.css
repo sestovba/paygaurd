@@ -100,7 +100,7 @@
   display: grid;
   place-items: center;
   width: 1.5rem;
-  height: 1.5rem;
+  height: var(--t-size-control-dense);
   border: 1px solid var(--review-line);
   border-radius: 3px;
   background: var(--review-panel);
@@ -596,7 +596,7 @@
   display: grid;
   place-items: center;
   width: 1.35rem;
-  height: 1.35rem;
+  height: var(--t-size-control-dense);
   border: 1px solid transparent;
   border-radius: 3px;
   background: none;
@@ -650,7 +650,7 @@
 
 .review-row-body textarea,
 .review-composer textarea {
-  min-height: 4.5rem;
+  min-height: var(--t-size-control-textarea);
   border: 1px solid var(--review-line);
   border-radius: 3px;
   background: var(--review-ink);
@@ -791,7 +791,7 @@
   display: grid;
   place-items: center;
   width: 1.05rem;
-  height: 1.05rem;
+  height: var(--t-size-control-dense);
   border: 1px solid var(--review-line);
   border-radius: var(--t-radius-full);
   background: var(--review-ink);

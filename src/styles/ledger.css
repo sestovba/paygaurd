@@ -247,7 +247,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-year-stepper button {
   display: grid;
   width: 2rem;
-  height: 2rem;
+  height: var(--t-size-control-dense);
   place-items: center;
 }
 
@@ -736,7 +736,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   margin-left: auto;
   display: grid;
   width: 2rem;
-  height: 2rem;
+  height: var(--t-size-control-dense);
   place-items: center;
   flex-shrink: 0;
 }
@@ -1461,7 +1461,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 1.875rem;
+  min-height: var(--t-size-control-dense);
   padding: var(--lg-pad-micro) var(--lg-pad-cell);
   border: 1px solid var(--lg-border);
   border-radius: var(--lg-radius);
