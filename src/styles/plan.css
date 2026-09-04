@@ -211,7 +211,7 @@
   position: relative;
   padding: 18px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--paper-2);
   box-shadow:
     inset 6px 0 0 var(--unknown),
@@ -367,7 +367,7 @@
   min-width: 0;
   height: 32px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   box-shadow: inset 0 0 0 2px var(--rule-strong);
 }
@@ -561,7 +561,7 @@
   position: relative;
   padding: 16px 18px 14px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--paper-2);
   box-shadow: inset 0 0 0 2px var(--px-ink), 3px 3px 0 0 var(--bev-lo);
 }
@@ -898,7 +898,7 @@
   margin-top: 8px;
   padding: 0 12px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--paper);
   color: var(--ink);
   font-family: var(--figures);
@@ -967,7 +967,7 @@
   aspect-ratio: 1;
   height: auto;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   box-shadow: inset 0 0 0 2px var(--px-ink), inset 0 0 0 4px var(--parch);
 }
@@ -1310,7 +1310,7 @@
 /* The card: parchment, square, triple-framed. */
 .pl [data-sheet]:not([data-sheet-inline]) {
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   margin: 7px;
   background: var(--parch);
   box-shadow:
@@ -1371,7 +1371,7 @@
 .pl [data-sheet] input[type='number'],
 .pl [data-sheet] select {
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--paper);
   font-family: var(--figures);
   font-weight: 700;
@@ -1427,7 +1427,7 @@
 /* Panels inside a popup are slabs, not cards. */
 .pl [data-sheet] .panel {
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--paper-2);
   box-shadow: inset 0 0 0 2px var(--px-ink);
 }
@@ -1507,7 +1507,7 @@
   padding-bottom: 2px;
 }
 .pl [data-sheet] [data-sheet-grab] > div {
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   height: 4px;
   width: 44px;
   background: var(--gilt);
@@ -1536,7 +1536,7 @@
  * layout is made of.
  */
 .pl [data-note] {
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--parch);
   color: var(--ink);
   box-shadow: inset 0 0 0 2px var(--px-ink), inset 5px 0 0 var(--gilt);
@@ -1581,7 +1581,7 @@
   height: 0.7em;
   margin-right: 0.4em;
   border: 2px dashed var(--unknown);
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   vertical-align: baseline;
 }
 

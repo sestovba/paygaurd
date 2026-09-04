@@ -385,7 +385,7 @@
   padding-block: var(--t-space-4);
   padding-inline-start: var(--bb-gutter);
   padding-inline-end: var(--t-space-2);
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   text-align: left;
   font-weight: var(--t-weight-normal);
 }
@@ -514,7 +514,7 @@
 
 .bb-more.ui-btn {
   inline-size: 100%;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   border-top: 1px solid var(--t-border-soft);
   font-size: var(--t-text-sm);
 }

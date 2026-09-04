@@ -494,7 +494,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-width: 14px;
   height: 14px;
   padding: 0 3px;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--accent);
   color: var(--ink);
   font-family: var(--mono);
@@ -584,7 +584,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .twp-dot {
   flex: 1 1 0;
   height: 10px;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: color-mix(in oklab, var(--accent) 16%, transparent);
   border: 2px solid var(--accent);
   transition: background 180ms var(--motion), border-color 180ms var(--motion);
@@ -1181,7 +1181,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   height: 8px;
   padding: 0;
   border: 0;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--line-strong);
   cursor: pointer;
   transition: width 160ms var(--motion), background 160ms var(--motion);
@@ -1415,7 +1415,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
    * rounded box sitting in the panel gap. */
   margin: 0 -14px 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   border-top: 1px solid var(--line-2);
   background: var(--card);
 }
@@ -1449,7 +1449,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-width: 17px;
   height: 17px;
   padding: 0 5px;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--paper-3);
   color: var(--ink-3);
   font-size: 10.5px;
@@ -1914,7 +1914,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   flex: 0 0 auto;
   padding: 1px 7px;
   border: 1px solid var(--line-strong);
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--paper-2);
   color: var(--ink-2);
   font-family: var(--mono);
@@ -1944,7 +1944,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   justify-self: start;
   margin-top: 0;
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   font-size: 10.5px;
   font-weight: 600;
   line-height: 1.4;
@@ -2194,7 +2194,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   height: 26px;
   padding: 0 11px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   font-size: 11px;
   font-weight: 600;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
@@ -2386,7 +2386,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   align-self: flex-start;
   padding: 2px 6px;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 700;
@@ -2603,7 +2603,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: 30px;
   padding: 0 10px;
   border: 1px solid var(--line-strong);
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--card);
   cursor: pointer;
 }
@@ -2787,7 +2787,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   margin-bottom: 2px;
   border: 0;
   border-bottom: 1px solid var(--line-3);
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   color: var(--muted);
   font-size: 13px;
@@ -2961,7 +2961,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   width: 36px;
   height: 4px;
   margin: 0;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--line-strong);
   transform: translateX(-50%);
 }
@@ -3200,7 +3200,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   width: 36px;
   height: 4px;
   margin: 0;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--line-strong);
   transform: translateX(-50%);
 }
@@ -3287,14 +3287,14 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .sheet__body::-webkit-scrollbar-track {
   background: rgba(86, 123, 153, .12);
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   margin: 8px 2px 18px;
 }
 
 .pg-calc20 .sheet__body::-webkit-scrollbar-thumb {
   background: rgba(70, 108, 140, .7);
   border: 2px solid transparent;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background-clip: content-box;
   min-height: var(--t-touch-small);
 }
@@ -3647,7 +3647,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   gap: 11px;
   padding: 0 18px;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
@@ -3727,7 +3727,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: 48px;
   margin-top: 2px;
   border: 1px solid var(--ink);
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--ink);
   color: var(--card);
   font-family: inherit;
@@ -4059,7 +4059,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: 28px;
   padding: 1px 9px;
   border: 1px solid var(--line-2);
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--paper-2);
   color: inherit;
   font: inherit;
@@ -4084,7 +4084,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .archived-chip__tag {
   flex: 0 0 auto;
   padding: 1px 6px;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--card);
   color: var(--muted);
   font-size: 10px;
@@ -4189,7 +4189,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   filter: none;
   transform: none;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -4222,7 +4222,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: 0;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -4375,7 +4375,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   margin: 0;
   padding: 28px 16px 24px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -4396,7 +4396,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .app-empty__actions {
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -4440,7 +4440,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .ledger {
   margin: 0 -14px 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   border-top: 1px solid rgba(164, 185, 201, .34);
   background: transparent;
   -webkit-backdrop-filter: none;
@@ -4908,13 +4908,13 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .sheet__body::-webkit-scrollbar { width: 12px; }
 .pg-calc20 .sheet__body::-webkit-scrollbar-track {
   background: rgba(86, 123, 153, .12);
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   margin: 8px 2px 18px;
 }
 .pg-calc20 .sheet__body::-webkit-scrollbar-thumb {
   background: rgba(70, 108, 140, .7);
   border: 2px solid transparent;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background-clip: content-box;
   min-height: var(--t-touch-small);
 }
@@ -5007,7 +5007,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   margin-top: 4px;
   padding: 10px 0 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   box-shadow: none;
   -webkit-backdrop-filter: none;
@@ -5018,7 +5018,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: var(--t-touch-target);
   margin-bottom: 4px;
   border-bottom: 1px solid var(--line-3);
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   color: var(--muted);
 }
 
@@ -5464,7 +5464,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .topbar .twp-dot {
   height: 6px;
   box-sizing: border-box;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   border: 1px dashed color-mix(in srgb, var(--sky) 50%, transparent);
   background: color-mix(in srgb, var(--primary) 30%, transparent);
   opacity: 1;
@@ -5668,7 +5668,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .stream-card__foot .chip {
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   padding: 6px 12px;
   font-size: 11px;
 }
@@ -5966,7 +5966,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: 0;
   padding: 16px 24px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: var(--card);
   color: var(--ink);
   font-family: var(--sans);
@@ -6014,7 +6014,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   height: 20px;
   padding: 0 7px;
-  border-radius: 99px;
+  border-radius: var(--t-radius-full);
   background: var(--spent-bg);
   color: var(--spent-label);
   font-family: var(--mono);
@@ -6102,7 +6102,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   height: 42px;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
   box-shadow: none;
 }
@@ -6171,7 +6171,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   gap: 8px;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
 }
 
@@ -6179,7 +6179,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-height: 0;
   padding: 6px 12px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: color-mix(in oklab, var(--primary) 10%, transparent);
   color: var(--primary);
   font-family: var(--mono);
@@ -6211,7 +6211,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   gap: 8px;
   padding: 0 14px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--card);
   color: var(--ink);
   font-family: var(--mono);

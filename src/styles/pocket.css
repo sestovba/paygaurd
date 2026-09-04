@@ -347,7 +347,7 @@
   flex: 0 0 auto;
   padding: 3px 9px;
   border: 1px solid;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   font-size: var(--t-text-xs);
   font-weight: 700;
   white-space: nowrap;
@@ -370,7 +370,7 @@
 .pk-answer > .pk-months {
   margin: 12px -16px 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   background: transparent;
 }
 .pk-answer > .pk-months .pk-month { padding-left: 16px; padding-right: 16px; }
@@ -751,7 +751,7 @@
   height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: #ede9fe;
   color: #5b21b6;
   font-size: 15px;

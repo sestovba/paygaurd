@@ -96,7 +96,7 @@
 .ch-btn {
   appearance: none;
   border: 1px solid var(--ch-edge);
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--ch-surface);
   color: inherit;
   font: inherit;
@@ -236,7 +236,7 @@
   box-sizing: border-box;
   min-height: 52px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--ch-green);
   color: #fff;
   font: inherit;
@@ -308,14 +308,14 @@
   gap: 6px;
   margin-bottom: 14px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--ch-sunken);
 }
 
 .ch-switch-btn {
   min-height: var(--t-touch-compact);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: transparent;
   color: var(--ch-ink-2);
   font: inherit;
@@ -439,7 +439,7 @@
 .ch-trial-pip {
   flex: 1 1 0;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--ch-sunken);
 }
 
@@ -515,7 +515,7 @@
 .ch-tag {
   flex: 0 0 auto;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--ch-sunken);
   color: var(--ch-ink-2);
   font-size: var(--t-text-xs);

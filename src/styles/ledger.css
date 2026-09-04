@@ -570,7 +570,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-swatch {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   flex: 0 0 auto;
 }
 
@@ -937,7 +937,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-axis-pay {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--lg-warn-soft);
   padding: 0 0.3rem; /* pill chrome */
   color: var(--lg-warn);
@@ -1094,7 +1094,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 }
 .pg-ledger .lg-analysis-band--panel > .panel {
   border: none;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   box-shadow: none;
   background: transparent;
   padding-left: 0;
@@ -1191,7 +1191,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-status-dot {
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--lg-border);
   flex: 0 0 auto;
 }
@@ -1841,7 +1841,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 
 .lg-standing-meter > span {
   flex: 1;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
 }
 
 /* Pay basis (Direct deposit / Gross pay) — edge to edge, full-width seg.
@@ -1862,11 +1862,11 @@ body:has([data-palette='carbon'] .pg-ledger) {
   grid-template-columns: 1fr 1fr;
   width: 100%;
   border: none;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   overflow: hidden;
 }
 .lg-pay-basis .seg-item {
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   min-height: var(--lg-row-h);
   justify-content: center;
 }
@@ -2068,7 +2068,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 
 .lg-btn-bleed {
   width: 100%;
-  border-radius: 0;
+  border-radius: var(--t-radius-none);
   /* Parent band owns the hairline — no second top/bottom from .lg-btn. */
   border: none;
   background: transparent;

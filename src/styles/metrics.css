@@ -160,6 +160,7 @@
   --t-control-gap: 0.5rem;
 
   /* Shape — M3's shape scale. `full` is the pill. */
+  --t-radius-none: 0;
   --t-radius-xs: 0.25rem;
   --t-radius-sm: 0.375rem;
   --t-radius-md: 0.5rem;

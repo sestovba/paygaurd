@@ -1033,7 +1033,7 @@
   cursor: ew-resize;
   align-self: center;
   height: 64px;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   margin: 0 6px;
   background: var(--review-line);
   opacity: 0.55;

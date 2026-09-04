@@ -280,7 +280,7 @@ html.pg-calc20 {
   right: 0.3rem;
   width: 0.5rem;
   height: 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   background: var(--chrome-alert);
 }
 
@@ -593,7 +593,7 @@ html.pg-calc20 {
   width: 0.4rem;
   height: 0.4rem;
   border: 1px solid var(--precision-mark);
-  border-radius: 999px;
+  border-radius: var(--t-radius-full);
   opacity: 0.35;
 }
 
