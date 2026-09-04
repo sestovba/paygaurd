@@ -132,15 +132,26 @@ try {
 const errors = [];
 const KINDS = ['raw-button', 'literal-size', 'literal-radius', 'literal-text'];
 const ADVICE = {
-  'raw-button': 'use <Button> / <IconButton> from components/ui',
+  'raw-button': 'use <Button> / <IconButton>, or <ButtonBase> for a layout-owned skin',
   'literal-size': 'use var(--t-control-h) — see styles/metrics.css',
   'literal-radius': 'use var(--t-radius*) — see styles/metrics.css',
   'literal-text': 'use var(--t-text-*) — see styles/metrics.css'
 };
 
 let banked = 0;
-for (const [file, debt] of Object.entries(current)) {
+
+/* Compare the union of baseline + current files. A file disappears from
+ * `current` when its final debt item reaches zero, and that payoff still
+ * needs to be counted and banked. */
+const measuredFiles = new Set([
+  ...Object.keys(baseline),
+  ...Object.keys(current)
+]);
+
+for (const file of [...measuredFiles].sort()) {
+  const debt = current[file] ?? {};
   const was = baseline[file];
+
   if (!was) {
     for (const kind of KINDS) {
       if (debt[kind]) {
@@ -149,9 +160,11 @@ for (const [file, debt] of Object.entries(current)) {
     }
     continue;
   }
+
   for (const kind of KINDS) {
     const now = debt[kind] ?? 0;
     const before = was[kind] ?? 0;
+
     if (now > before) {
       errors.push(`${file}: ${kind} went ${before} → ${now}. The ratchet only turns one way — ${ADVICE[kind]}.`);
     } else if (now < before) {

@@ -23,6 +23,22 @@ import { cn } from './cn';
  * a button inside the app's sheets that submits a form reloads the page and
  * loses what was typed. That has been a real bug in three layouts.
  */
+export type ButtonBaseProps = ButtonHTMLAttributes<HTMLButtonElement>;
+
+/**
+ * Behavior-only button primitive for layout-owned skins.
+ *
+ * Use this when a layout deliberately owns every visual property itself.
+ * It adds no classes; its value is the safe HTML default, ref forwarding,
+ * and one shared semantic primitive instead of hand-written <button>s.
+ */
+export const ButtonBase = forwardRef<HTMLButtonElement, ButtonBaseProps>(function ButtonBase(
+  { type = 'button', ...rest },
+  ref
+) {
+  return <button ref={ref} type={type} {...rest} />;
+});
+
 export type ButtonVariant = 'filled' | 'tonal' | 'outlined' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 

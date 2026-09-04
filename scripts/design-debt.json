@@ -134,9 +134,6 @@
   "src/components/ledger/LedgerAnalysis.tsx": {
     "raw-button": 5
   },
-  "src/components/ledger/LedgerChart.tsx": {
-    "raw-button": 1
-  },
   "src/components/ledger/LedgerJobEditor.tsx": {
     "raw-button": 9
   },

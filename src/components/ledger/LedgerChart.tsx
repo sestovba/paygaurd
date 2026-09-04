@@ -6,6 +6,7 @@ import { monthsOfYear, shortMonthName } from '../../domain/months';
 import { rulesFor } from '../../domain/rules';
 import { extraPaycheckMonths } from '../../domain/paySchedule';
 import type { Stream } from '../../domain/types';
+import { ButtonBase } from '../../design-system';
 import { money0, money2 } from './ledgerFormat';
 
 /**
@@ -75,8 +76,7 @@ export function LedgerChart({
 
   return (
     <div className="lg-chart-accordion" data-open={open || undefined}>
-      <button
-        type="button"
+      <ButtonBase
         className="lg-band-head"
         data-open={open}
         aria-expanded={open}
@@ -107,7 +107,7 @@ export function LedgerChart({
             </span>
           </span>
         ) : null}
-      </button>
+      </ButtonBase>
 
       {open ? (
       <div className="lg-chart-full">
