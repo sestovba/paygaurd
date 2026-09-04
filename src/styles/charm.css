@@ -7,6 +7,7 @@
  * No ring gauge. Boxes only for things you act on.
  */
 
+/* @override charm — the neutral/green/blue palette is the defining Charm visual identity */
 .ch {
   --ch-ground: #f4f6f8;
   --ch-surface: #ffffff;
@@ -23,7 +24,9 @@
   --ch-warn: #8a5200;
   --ch-over: #9b2c2c;
   --ch-near: #8a5200;
+}
 
+.ch {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -33,6 +36,7 @@
   -webkit-text-size-adjust: 100%;
 }
 
+/* @override charm — dark Charm uses a deliberately tuned companion palette */
 .dark .ch {
   --ch-ground: #0c0f13;
   --ch-surface: #161a20;

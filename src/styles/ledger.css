@@ -22,6 +22,12 @@ body:has(.pg-ledger) {
  * meant turning the app dark left exactly one layout light.
  */
 
+/* @override ledger — pure white is an intentional light-mode paper surface for maximum ledger contrast */
+.pg-ledger {
+  --lg-bg: #ffffff;
+  --lg-surface: #ffffff;
+}
+
 .pg-ledger {
   /*
    * The palette, mapped. palette.css owns the values; this owns the
@@ -30,9 +36,6 @@ body:has(.pg-ledger) {
    * green — same word, different job — so it takes --t-surface-3, the
    * deepest well, which is what a table head actually is.
    */
-  /* Lightest end = pure white — more contrast against rails / ink / accents. */
-  --lg-bg: #ffffff;
-  --lg-surface: #ffffff;
   --lg-surface-2: color-mix(in oklch, var(--lg-ring) 6%, var(--lg-surface));
   --lg-head: var(--lg-row-rail);
   --lg-fg: var(--t-fg);
