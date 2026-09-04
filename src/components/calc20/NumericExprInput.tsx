@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useRef } from 'react';
 import type { InputHTMLAttributes } from 'react';
 import { evalAmount } from '../../domain/expr';
 
@@ -12,6 +12,8 @@ export const NumericExprInput = forwardRef<HTMLInputElement, Props>(function Num
   ref
 ) {
   const [draft, setDraft] = useState<string | null>(null);
+  const editStartRef = useRef(value);
+  const skipBlurCommitRef = useRef(false);
   const shown = draft ?? (value == null ? '' : String(value));
 
   return (
@@ -22,6 +24,8 @@ export const NumericExprInput = forwardRef<HTMLInputElement, Props>(function Num
       inputMode="decimal"
       value={shown}
       onFocus={(event) => {
+        editStartRef.current = value;
+        skipBlurCommitRef.current = false;
         setDraft(value == null ? '' : String(value));
         // Select-all on focus so typing a new figure replaces the old one
         // instead of appending to it — the common case beats editing in place.
@@ -39,6 +43,12 @@ export const NumericExprInput = forwardRef<HTMLInputElement, Props>(function Num
         if (next !== undefined) onCommit(next);
       }}
       onBlur={(event) => {
+        if (skipBlurCommitRef.current) {
+          skipBlurCommitRef.current = false;
+          setDraft(null);
+          onBlur?.(event);
+          return;
+        }
         if (draft !== null) {
           if (!draft.trim()) onCommit(undefined);
           else {
@@ -50,7 +60,25 @@ export const NumericExprInput = forwardRef<HTMLInputElement, Props>(function Num
         onBlur?.(event);
       }}
       onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === 'Escape') event.currentTarget.blur();
+        if (event.key === 'Escape') {
+          event.preventDefault();
+
+          const original = editStartRef.current;
+
+          skipBlurCommitRef.current = true;
+          setDraft(original == null ? '' : String(original));
+
+          onCommit(original == null ? undefined : original);
+          event.currentTarget.blur();
+
+          onKeyDown?.(event);
+          return;
+        }
+
+        if (event.key === 'Enter') {
+          event.currentTarget.blur();
+        }
+
         onKeyDown?.(event);
       }}
     />
