@@ -265,8 +265,13 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto"
+          role="region"
+          aria-label="Monthly income analysis"
+          tabIndex={0}
+        >
           <table className="w-full lg-analysis-table" data-worked={showWorked || undefined}>
+            <caption className="sr-only">Monthly income analysis</caption>
             <thead>
               <tr>
                 {/* Four abbreviations and a preposition became two columns.
@@ -276,13 +281,13 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
                     One column now, against the limit in force.
                     Worked (hours) only appears when at least one visible
                     row has hours — otherwise it is a column of dashes. */}
-                <th className="lg-label border-b text-left lg-label-border">Month</th>
-                <th className="lg-label border-b text-right lg-label-border">Counted</th>
+                <th scope="col" className="lg-label border-b text-left lg-label-border">Month</th>
+                <th scope="col" className="lg-label border-b text-right lg-label-border">Counted</th>
                 {showWorked ? (
-                  <th className="lg-label border-b text-right lg-label-border">Hours</th>
+                  <th scope="col" className="lg-label border-b text-right lg-label-border">Hours</th>
                 ) : null}
-                <th className="lg-label border-b text-right lg-label-border">Status</th>
-                <th className="lg-label border-b text-right lg-label-border">Vs limit</th>
+                <th scope="col" className="lg-label border-b text-right lg-label-border">Status</th>
+                <th scope="col" className="lg-label border-b text-right lg-label-border">Vs limit</th>
               </tr>
             </thead>
             <tbody>

@@ -145,7 +145,11 @@ function W2MonthLedger({
   const showHours = offerHours || anyHours;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto"
+      role="region"
+      aria-label="Monthly pay entries"
+      tabIndex={0}
+    >
       <div className="lg-pay-basis">
         <PayBasisSwitch />
         {!showHours ? (
@@ -161,6 +165,7 @@ function W2MonthLedger({
       </div>
       <div className="lg-ledger-scroll" data-hours={showHours || undefined}>
         <table className="lg-ledger-table">
+          <caption className="sr-only">Monthly pay entries</caption>
           <colgroup>
             <col className="lg-col-month" />
             <col className="lg-col-amount" />

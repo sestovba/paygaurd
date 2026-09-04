@@ -545,27 +545,31 @@ export function PayGuardJobEditor({
                       <div className="grid grid-cols-2 gap-2">
                         <span className="pg-field">
                           <span className="pg-mono pg-dim">$</span>
-                          <input
-                            type="text"
-                            inputMode="decimal"
+                          <NumericInput
                             placeholder="0.00"
                             aria-label="Hourly rate"
-                            value={stream.hourlyRate ?? ''}
+                            value={stream.hourlyRate}
                             disabled={stream.locked}
-                            onChange={(e) => updateStream(stream.id, { hourlyRate: e.target.value ? Number(e.target.value) : undefined })}
+                            onCommit={(next) => {
+                              if (next == null || next >= 0) {
+                                updateStream(stream.id, { hourlyRate: next });
+                              }
+                            }}
                             className="pg-mono w-full text-right"
                           />
                           <span className="pg-mono text-[0.625rem] pg-dim">an hour</span>
                         </span>
                         <span className="pg-field">
-                          <input
-                            type="text"
-                            inputMode="decimal"
+                          <NumericInput
                             placeholder="0"
                             aria-label="Planned hours per week"
-                            value={stream.plannedHoursPerWeek ?? ''}
+                            value={stream.plannedHoursPerWeek}
                             disabled={stream.locked}
-                            onChange={(e) => updateStream(stream.id, { plannedHoursPerWeek: e.target.value ? Number(e.target.value) : undefined })}
+                            onCommit={(next) => {
+                              if (next == null || next >= 0) {
+                                updateStream(stream.id, { plannedHoursPerWeek: next });
+                              }
+                            }}
                             className="pg-mono w-full text-right"
                           />
                           <span className="pg-mono text-[0.625rem] pg-dim">hours a week</span>

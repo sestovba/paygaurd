@@ -764,6 +764,7 @@ function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
         inputMode="decimal"
         type="text"
         value={amountDraft ?? String(gross)}
+        onFocus={(event) => event.currentTarget.select()}
         onChange={(event) => setAmountDraft(event.currentTarget.value)}
         onBlur={saveAmount}
         onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }}
@@ -779,6 +780,7 @@ function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
             inputMode="numeric"
             type="text"
             value={hoursDraft ?? String(hours)}
+            onFocus={(event) => event.currentTarget.select()}
             onChange={(event) => setHoursDraft(event.currentTarget.value)}
             onBlur={saveHours}
             onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }}
