@@ -311,7 +311,7 @@ export function TrackerLedger() {
 
                 {addingType ? (
                   <div className="lg-tab lg-tab-static lg-tab-add">
-                    <div className="lg-add-split" role="group" aria-label="Add a job">
+                    <div className="lg-add-split" role="group" aria-label="Add an income source">
                       <ButtonBase
                         type="button"
                         className="lg-add-split__job"
@@ -332,7 +332,7 @@ export function TrackerLedger() {
                     </ButtonBase>
                   </div>
                 ) : (
-                  <ButtonBase type="button" className="lg-tab lg-tab-add-trigger min-w-[3.25rem] justify-center" aria-label="Add a job" onClick={() => setAddingType(true)}>
+                  <ButtonBase type="button" className="lg-tab lg-tab-add-trigger min-w-[3.25rem] justify-center" aria-label="Add an income source" onClick={() => setAddingType(true)}>
                     <Plus className="size-5" strokeWidth={2.5} />
                   </ButtonBase>
                 )}

@@ -491,7 +491,7 @@ export function TrackerPocket() {
                     style={{ marginTop: 10 }}
                     disabled={!valid}
                   >
-                    Add pay
+                    Log pay
                   </ButtonBase>
                   <ButtonBase
                     type="button"
@@ -574,7 +574,7 @@ export function TrackerPocket() {
                     style={{ marginTop: 10 }}
                     disabled={!valid}
                   >
-                    Add pay
+                    Log pay
                   </ButtonBase>
                   <ButtonBase
                     type="button"
@@ -603,7 +603,7 @@ export function TrackerPocket() {
             </form>
           ) : (
             <ButtonBase type="button" className="pk-log" onClick={startLogging}>
-              Log Pay
+              Log pay
             </ButtonBase>
           )
         ) : (

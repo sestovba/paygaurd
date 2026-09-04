@@ -685,7 +685,7 @@ function LogPay({ month, onOpenStream, onSaved }: {
      lives in already marks it as the place you put something in. */
   return (
     <section className="pl-log">
-      <Plate>Log Pay</Plate>
+      <Plate>Log pay</Plate>
 
       {active.length > 1 ? (
         <label className="pl-field">

@@ -418,10 +418,10 @@ export function TrackerPayGuard() {
                 <span className="pg-tab-add">
                   <span className="pg-label">Add</span>
                   <ButtonBase type="button" onClick={() => addAndSelect('w2')} className="pg-btn pg-btn-sm pg-text-w2">
-                    W-2 Job
+                    Employer job
                   </ButtonBase>
                   <ButtonBase type="button" onClick={() => addAndSelect('ten99')} className="pg-btn pg-btn-sm pg-text-se">
-                    1099 Work
+                    Gig or self-employment
                   </ButtonBase>
                   <ButtonBase
                     type="button"
@@ -440,7 +440,7 @@ export function TrackerPayGuard() {
                   title="Add a job or self-employment source"
                 >
                   <Plus className="size-4" />
-                  <span>Add Job</span>
+                  <span>Add income source</span>
                 </ButtonBase>
               )}
             </div>
@@ -466,17 +466,16 @@ export function TrackerPayGuard() {
             </div>
           ) : (
             <div className="pg-card flex flex-col items-center gap-3 p-6 text-center sm:p-12">
-              <span className="text-base font-bold pg-fg sm:text-lg">No income sources added yet</span>
+              <span className="text-base font-bold pg-fg sm:text-lg">No income sources yet</span>
               <p className="max-w-md text-xs pg-muted sm:text-sm">
-                Add your W-2 job paychecks or 1099 self-employment earnings to track countable income
-                against SSA thresholds.
+                Add where your money comes from, and Payguard will keep track of what counts toward your monthly limit.
               </p>
               <div className="mt-1 flex flex-wrap justify-center gap-2">
                 <ButtonBase type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndSelect('w2')}>
-                  <Plus className="size-3.5" /> Add W-2 Job
+                  <Plus className="size-3.5" /> Employer job
                 </ButtonBase>
                 <ButtonBase type="button" className="pg-btn pg-btn-lg" onClick={() => addAndSelect('ten99')}>
-                  <Plus className="size-3.5" /> Add 1099 Work
+                  <Plus className="size-3.5" /> Gig or self-employment
                 </ButtonBase>
               </div>
             </div>

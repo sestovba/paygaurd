@@ -418,7 +418,7 @@ export function TrackerCharm() {
                   ) : null}
                   {milesField}
                   <ButtonBase type="submit" className="ch-log" style={{ marginTop: 10 }} disabled={!valid}>
-                    Add pay
+                    Log pay
                   </ButtonBase>
                   <ButtonBase
                     type="button"
@@ -481,7 +481,7 @@ export function TrackerCharm() {
                   ) : null}
                   {milesField}
                   <ButtonBase type="submit" className="ch-log" style={{ marginTop: 10 }} disabled={!valid}>
-                    Add pay
+                    Log pay
                   </ButtonBase>
                   <ButtonBase
                     type="button"
@@ -506,7 +506,7 @@ export function TrackerCharm() {
             </form>
           ) : (
             <ButtonBase type="button" className="ch-log" onClick={startLogging}>
-              Add pay
+              Log pay
             </ButtonBase>
           )
         ) : (
