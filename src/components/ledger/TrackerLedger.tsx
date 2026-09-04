@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 import { useEffect, useState } from 'react';
 import {
   ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, Plus, Settings, Undo2, X
@@ -130,31 +131,31 @@ export function TrackerLedger() {
             <span className="lg-header-title truncate">SSDI Tracker</span>
             <MonthScopePicker scope={scope} onChange={setScope} className="lg-scope lg-scope-inline" />
             <div className="lg-year-stepper">
-              <button
+              <ButtonBase
                 type="button"
                 disabled={years.indexOf(year) <= 0}
                 onClick={() => setUi({ year: years[years.indexOf(year) - 1] })}
                 aria-label="Previous year"
               >
                 <ChevronLeft className="size-4" />
-              </button>
+              </ButtonBase>
               <span className="min-w-10 lg-pad-micro-x text-center lg-type-body font-bold">{year}</span>
-              <button
+              <ButtonBase
                 type="button"
                 disabled={years.indexOf(year) >= years.length - 1}
                 onClick={() => setUi({ year: years[years.indexOf(year) + 1] })}
                 aria-label="Next year"
               >
                 <ChevronRight className="size-4" />
-              </button>
+              </ButtonBase>
             </div>
           </div>
 
           <div className="lg-header-actions">
-            <button type="button" className="lg-btn" onClick={toggleCollapseAll} aria-label={allCollapsed ? 'Expand all' : 'Collapse all'} title={allCollapsed ? 'Expand all' : 'Collapse all'}>
+            <ButtonBase type="button" className="lg-btn" onClick={toggleCollapseAll} aria-label={allCollapsed ? 'Expand all' : 'Collapse all'} title={allCollapsed ? 'Expand all' : 'Collapse all'}>
               {allCollapsed ? <ChevronsDown className="size-4" /> : <ChevronsUp className="size-4" />}
               <span className="lg-btn-label">{allCollapsed ? 'Expand all' : 'Collapse all'}</span>
-            </button>
+            </ButtonBase>
             <NotificationsBell
               open={notificationsOpen}
               onOpenChange={setNotificationsOpen}
@@ -164,7 +165,7 @@ export function TrackerLedger() {
                 document.querySelector('.lg-analysis')?.scrollIntoView({ behavior: 'smooth' });
               }}
             />
-            <button
+            <ButtonBase
               type="button"
               className="lg-btn disabled:opacity-40 disabled:pointer-events-none"
               disabled={!canUndo}
@@ -174,8 +175,8 @@ export function TrackerLedger() {
             >
               <Undo2 className="size-4" />
               <span className="lg-btn-label">{canUndo ? `Undo (${undoCount})` : 'Undo'}</span>
-            </button>
-            <button
+            </ButtonBase>
+            <ButtonBase
               type="button"
               className="lg-btn lg-btn-icon"
               onClick={() => setSettingsOpen(true)}
@@ -183,7 +184,7 @@ export function TrackerLedger() {
               title="Settings"
             >
               <Settings className="size-4" />
-            </button>
+            </ButtonBase>
           </div>
         </div>
       </header>
@@ -275,7 +276,7 @@ export function TrackerLedger() {
                       </span>
                     )}
                     {!s.locked ? (
-                      <button
+                      <ButtonBase
                         type="button"
                         aria-label={`Remove ${s.name}`}
                         className="lg-tab-close lg-text-muted"
@@ -286,7 +287,7 @@ export function TrackerLedger() {
                         }}
                       >
                         <X className="size-5" />
-                      </button>
+                      </ButtonBase>
                     ) : null}
                   </div>
                 ))}
@@ -294,29 +295,29 @@ export function TrackerLedger() {
                 {addingType ? (
                   <div className="lg-tab lg-tab-static lg-tab-add">
                     <div className="lg-add-split" role="group" aria-label="Add a job">
-                      <button
+                      <ButtonBase
                         type="button"
                         className="lg-add-split__job"
                         onClick={() => { addAndSelect('w2'); setAddingType(false); }}
                       >
                         {SOURCE_SHORT.w2}
-                      </button>
-                      <button
+                      </ButtonBase>
+                      <ButtonBase
                         type="button"
                         className="lg-add-split__gig"
                         onClick={() => { addAndSelect('ten99'); setAddingType(false); }}
                       >
                         {SOURCE_SHORT.ten99}
-                      </button>
+                      </ButtonBase>
                     </div>
-                    <button type="button" aria-label="Cancel" onClick={() => setAddingType(false)} className="lg-tab-close lg-text-muted" style={{ opacity: 1 }}>
+                    <ButtonBase type="button" aria-label="Cancel" onClick={() => setAddingType(false)} className="lg-tab-close lg-text-muted" style={{ opacity: 1 }}>
                       <X className="size-5" strokeWidth={2.25} />
-                    </button>
+                    </ButtonBase>
                   </div>
                 ) : (
-                  <button type="button" className="lg-tab lg-tab-add-trigger min-w-[3.25rem] justify-center" aria-label="Add a job" onClick={() => setAddingType(true)}>
+                  <ButtonBase type="button" className="lg-tab lg-tab-add-trigger min-w-[3.25rem] justify-center" aria-label="Add a job" onClick={() => setAddingType(true)}>
                     <Plus className="size-5" strokeWidth={2.5} />
-                  </button>
+                  </ButtonBase>
                 )}
               </div>
             </div>
@@ -387,8 +388,8 @@ export function TrackerLedger() {
             <p className="lg-type-ui">Nothing here yet</p>
             <p className="max-w-sm lg-type-body lg-text-muted">Add where your money comes from, and we will keep track of what counts toward your monthly limit.</p>
             <div className="flex gap-2">
-              <button type="button" className="lg-btn lg-btn-solid" onClick={() => addAndSelect('w2')}>{SOURCE_CHOICE.w2.label}</button>
-              <button type="button" className="lg-btn" onClick={() => addAndSelect('ten99')}>{SOURCE_CHOICE.ten99.label}</button>
+              <ButtonBase type="button" className="lg-btn lg-btn-solid" onClick={() => addAndSelect('w2')}>{SOURCE_CHOICE.w2.label}</ButtonBase>
+              <ButtonBase type="button" className="lg-btn" onClick={() => addAndSelect('ten99')}>{SOURCE_CHOICE.ten99.label}</ButtonBase>
             </div>
           </div>
         )}
@@ -444,7 +445,7 @@ function LedgerArchivedChip({
   const paused = stream.lifecycle === 'inactive';
   return (
     <div className="lg-archived-wrap">
-      <button
+      <ButtonBase
         type="button"
         className="lg-archived-chip"
         data-open={open || undefined}
@@ -458,17 +459,17 @@ function LedgerArchivedChip({
           {paused ? 'Paused' : 'Ended'}
         </span>
         <span className="lg-archived-total">{money0(streamYearGross(stream, year))}</span>
-      </button>
+      </ButtonBase>
       {open ? (
         <div className="lg-archived-menu" role="menu">
-          <button
+          <ButtonBase
             type="button"
             role="menuitem"
             onClick={() => { setOpen(false); onReturn(); }}
           >
             Return to ongoing
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="button"
             role="menuitem"
             className="lg-archived-menu-danger"
@@ -477,7 +478,7 @@ function LedgerArchivedChip({
             onClick={() => { setOpen(false); onRemove(); }}
           >
             Remove
-          </button>
+          </ButtonBase>
         </div>
       ) : null}
     </div>
@@ -500,7 +501,7 @@ function MonthAttention() {
       <span className="lg-label lg-attention-title">Watch</span>
       <div className="lg-attention-rail">
         {flags.map((flag) => (
-          <button
+          <ButtonBase
             key={flag.month + flag.kind + flag.text}
             type="button"
             className="lg-attention-chip"
@@ -510,7 +511,7 @@ function MonthAttention() {
           >
             <span className="lg-attention-month">{shortMonthName(flag.month).toUpperCase()}</span>
             <span>{flag.text}</span>
-          </button>
+          </ButtonBase>
         ))}
       </div>
     </section>

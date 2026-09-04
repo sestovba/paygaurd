@@ -15,6 +15,7 @@ import {
   PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, payPatchFor, payValueFor, usePayBasis
 } from '../PayAmount';
 import { miles0, money2 } from './ledgerFormat';
+import { ButtonBase } from '../../design-system';
 import { periodLabel } from '../../domain/copy';
 
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
@@ -75,7 +76,7 @@ function SectionToggle({ label, meta, open, onToggle }: {
   label: string; meta?: string; open: boolean; onToggle: () => void;
 }) {
   return (
-    <button
+    <ButtonBase
       type="button"
       onClick={onToggle}
       aria-expanded={open}
@@ -87,7 +88,7 @@ function SectionToggle({ label, meta, open, onToggle }: {
       </span>
       <span>{label}</span>
       {meta ? <span className="lg-section-toggle-meta">{meta}</span> : null}
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -132,14 +133,14 @@ function W2MonthLedger({
       <div className="lg-pay-basis">
         <PayBasisSwitch />
         {!showHours ? (
-          <button
+          <ButtonBase
             type="button"
             className="lg-add-hours"
             disabled={locked}
             onClick={() => setOfferHours(true)}
           >
             Add hours
-          </button>
+          </ButtonBase>
         ) : null}
       </div>
       <div className="lg-ledger-scroll" data-hours={showHours || undefined}>
@@ -215,14 +216,14 @@ function W2MonthLedger({
                     </td>
                   ) : null}
                   <td className="lg-ledger-cell lg-ledger-cell--clear">
-                    <button
+                    <ButtonBase
                       type="button"
                       disabled={disabled}
                       onClick={() => onClear(m)}
                       className="lg-quiet-action"
                     >
                       Clear
-                    </button>
+                    </ButtonBase>
                   </td>
                 </tr>
               );
@@ -284,14 +285,14 @@ export function LedgerJobEditor({
     <div className="lg-job-card" data-type={stream.type}>
       {/* header */}
       <div className="lg-job-card-header" data-open={cardOpen}>
-        <button
+        <ButtonBase
           type="button"
           onClick={onToggleOpen}
           aria-label={cardOpen ? 'Collapse' : 'Expand'}
           className="lg-toggle-lead lg-text-muted"
         >
           <ChevronDown className="lg-chevron" data-collapsed={!cardOpen} />
-        </button>
+        </ButtonBase>
         {/* Type lives on the tab; repeating the badge here was chrome. */}
         <input
           aria-label="Job name"
@@ -312,7 +313,7 @@ export function LedgerJobEditor({
         {/* Same three states as calc20 settings. Tabs only show Ongoing;
             Paused / Ended land under Not ongoing with Return to ongoing. */}
         <div className="lg-seg" role="group" aria-label="Job status">
-          <button
+          <ButtonBase
             type="button"
             disabled={stream.locked}
             data-on={stream.lifecycle === 'active'}
@@ -320,8 +321,8 @@ export function LedgerJobEditor({
             onClick={() => updateStream(stream.id, { lifecycle: 'active', activeTo: null })}
           >
             Ongoing
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="button"
             disabled={stream.locked}
             data-on={stream.lifecycle === 'inactive'}
@@ -329,8 +330,8 @@ export function LedgerJobEditor({
             onClick={() => updateStream(stream.id, { lifecycle: 'inactive' })}
           >
             Paused
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="button"
             disabled={stream.locked}
             data-on={stream.lifecycle === 'completed'}
@@ -341,7 +342,7 @@ export function LedgerJobEditor({
             })}
           >
             Ended
-          </button>
+          </ButtonBase>
         </div>
         <label className="flex items-center gap-1.5 lg-type-body lg-text-muted">
           Since
@@ -386,7 +387,7 @@ export function LedgerJobEditor({
             <TriangleAlert className="size-4" /> History stays — Return to ongoing under Not ongoing
           </span>
         ) : null}
-        <button
+        <ButtonBase
           type="button"
           onClick={() => updateStream(stream.id, { locked: !stream.locked })}
           aria-label={stream.locked ? 'Unlock' : 'Lock'}
@@ -395,7 +396,7 @@ export function LedgerJobEditor({
           title={stream.locked ? 'Unlock this job' : 'Lock this job'}
         >
           {stream.locked ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
-        </button>
+        </ButtonBase>
       </div>
 
       {stream.type === 'w2' ? (
@@ -541,13 +542,13 @@ export function LedgerJobEditor({
                 </span>
               </label>
               <div className="flex w-full items-center justify-between lg-pad-micro-t">
-                <button
+                <ButtonBase
                   type="button"
                   onClick={() => setHelpOpen(true)}
                   className="lg-type-caption font-semibold hover:underline lg-text-w2"
                 >
                   How your miles change what counts →
-                </button>
+                </ButtonBase>
               </div>
               <p className="w-full lg-type-body leading-relaxed lg-text-muted">
                 {eligibleMonths.length

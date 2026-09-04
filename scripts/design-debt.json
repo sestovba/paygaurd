@@ -131,12 +131,6 @@
   "src/components/horizon/TrackerHorizon.tsx": {
     "raw-button": 3
   },
-  "src/components/ledger/LedgerJobEditor.tsx": {
-    "raw-button": 9
-  },
-  "src/components/ledger/TrackerLedger.tsx": {
-    "raw-button": 16
-  },
   "src/components/overview/PagesShell.tsx": {
     "raw-button": 6
   },
