@@ -196,6 +196,7 @@ Nothing here needs a reply from you.
 Filed as a finished cut, but the element is still in the source. One of
 the two is wrong — check before trusting either.
 
+- **Income-source count** — `src/components/ledger/TrackerLedger.tsx:28`
 - **Three-step tutorial** — `src/components/TrackerV3.tsx (near line 876, unverified)`
 
 ## History
@@ -334,7 +335,7 @@ something. Kept here so they are not lost.
 - right tray · 2 items — "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
 
 313 note(s) · 32 owed to Claude · 11 in Claude's backlog · 246 settled · 19 cut(s)
-Updated 2026-09-04 18:00
+Updated 2026-09-04 18:42
 
 ## The whole product
 
