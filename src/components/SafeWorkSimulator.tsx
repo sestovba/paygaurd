@@ -9,6 +9,7 @@ import { activeThreshold, benefitPhase } from '../domain/trialWork';
 import { payPlan } from '../domain/paySchedule';
 import { NumericInput } from './NumericInput';
 
+import { ButtonBase } from '../design-system';
 function clamp(value: number | undefined, max?: number): number {
   const n = Math.max(0, value ?? 0);
   return max !== undefined ? Math.min(max, n) : n;
@@ -125,9 +126,9 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     return (
       <section className="panel p-4 sm:p-5">
         <h2 className="display-figure">{words.hoursAsk}</h2>
-        <button type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
+        <ButtonBase type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
           Answer a few questions
-        </button>
+        </ButtonBase>
       </section>
     );
   }

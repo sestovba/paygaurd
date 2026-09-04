@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Briefcase, LayoutGrid, ShieldCheck, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+import { ButtonBase } from '../design-system';
 export type PageId = 'overview' | 'income' | 'status';
 
 export function useNavItems(): { id: PageId; label: string; icon: LucideIcon }[] {
@@ -22,7 +23,7 @@ function NavList({ page, onNavigate }: { page: PageId; onNavigate: (page: PageId
     <>
       {navItems.map(({ id, label, icon: Icon }) => {
         return (
-          <button
+          <ButtonBase
             key={id}
             type="button"
             aria-current={page === id ? 'page' : undefined}
@@ -31,7 +32,7 @@ function NavList({ page, onNavigate }: { page: PageId; onNavigate: (page: PageId
           >
             <Icon className="size-[18px] shrink-0" />
             {label}
-          </button>
+          </ButtonBase>
         );
       })}
     </>
@@ -80,7 +81,7 @@ export function Sidebar({
     </div>
   );
 
-  /* flex-col, not a plain block, and that is not cosmetic. A <button> is
+  /* flex-col, not a plain block, and that is not cosmetic. A <ButtonBase> is
      shrink-to-fit even when it is `display: flex`, so the Settings row in a
      block wrapper came out 118px wide against the 199px nav items above it —
      a footer that looked like a stray chip rather than the last item in the
@@ -116,14 +117,14 @@ export function Sidebar({
                 scrim, on Escape, and on picking a page. */}
             {brandRow}
             <div className="flex items-center justify-end px-3 pt-3">
-              <button
+              <ButtonBase
                 type="button"
                 aria-label="Close menu"
                 onClick={onClose}
                 className="icon-btn grid text-muted-foreground hover:bg-muted"
               >
                 <X className="size-5" />
-              </button>
+              </ButtonBase>
             </div>
             <div className="flex flex-col gap-1 p-3 pt-1">
               {action ? <div className="pb-2">{action}</div> : null}
@@ -149,7 +150,7 @@ export function TabBar({ page, onNavigate }: { page: PageId; onNavigate: (page: 
     >
       {navItems.map(({ id, label, icon: Icon }) => {
         return (
-          <button
+          <ButtonBase
             key={id}
             type="button"
             aria-current={page === id ? 'page' : undefined}
@@ -160,7 +161,7 @@ export function TabBar({ page, onNavigate }: { page: PageId; onNavigate: (page: 
               <Icon className="size-5" />
             </span>
             {label}
-          </button>
+          </ButtonBase>
         );
       })}
     </nav>

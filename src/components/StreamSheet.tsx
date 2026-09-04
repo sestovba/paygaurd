@@ -17,6 +17,7 @@ import { Button, IconButton, Segmented } from './ui';
 import { HelpSpread } from './HelpSpread';
 import type { PayFrequency, Stream } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
 
 function round2(n: number): number {
@@ -27,7 +28,7 @@ function CollapsibleSection({ label, children }: { label: string; children: Reac
   const [open, setOpen] = useState(true);
   return (
     <div className="flex flex-col gap-4">
-      <button
+      <ButtonBase
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
@@ -36,7 +37,7 @@ function CollapsibleSection({ label, children }: { label: string; children: Reac
         <span className="label-caps shrink-0 text-accent-foreground">{label}</span>
         <div className="rule-line flex-1" />
         <ChevronDown className={'size-5 shrink-0 text-muted-foreground transition-transform ' + (open ? '' : '-rotate-90')} />
-      </button>
+      </ButtonBase>
       {open ? <div className="flex flex-col gap-4">{children}</div> : null}
     </div>
   );
@@ -69,13 +70,13 @@ function TenNinetyNineIncomeSection({ stream, year, onYearChange }: {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="field-label">{periodLabel(year, isYearToDate)}</span>
         <div className="flex items-center gap-2">
-          <button
+          <ButtonBase
             type="button"
             onClick={() => setHelpOpen(true)}
             className="text-xs font-semibold text-accent-foreground hover:underline"
           >
             How Social Security counts this
-          </button>
+          </ButtonBase>
           <select
             className="field-input w-28"
             value={year}

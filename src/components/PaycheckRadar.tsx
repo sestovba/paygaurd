@@ -11,6 +11,7 @@ import { activeThreshold } from '../domain/trialWork';
 import { actionItems } from '../domain/notifications';
 import type { MonthKey, Stream } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 /** What one more paycheck from this job would add to a month, when we know
  *  enough about the job to say. Null is an honest answer here: a number made
  *  up to fill the slot is worse than no number in a panel whose entire job is
@@ -98,13 +99,13 @@ export function PaycheckRadar({
                   </p>
                 </div>
               </div>
-              <button
+              <ButtonBase
                 type="button"
                 onClick={() => onOpenMonth(flag.month)}
                 className="btn-primary shrink-0 px-3 py-2 text-sm"
               >
                 Open
-              </button>
+              </ButtonBase>
             </div>
           ))}
         </div>
@@ -121,7 +122,7 @@ export function PaycheckRadar({
       )}
 
       {items.length ? (
-        <button
+        <ButtonBase
           type="button"
           onClick={onCheckNotifications}
           className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-base hover:underline"
@@ -134,7 +135,7 @@ export function PaycheckRadar({
           {urgentCount && importantCount ? <span className="text-muted-foreground">,</span> : null}
           {importantCount ? <span className="font-semibold text-info">{importantCount} worth a look</span> : null}
           <span className="text-muted-foreground">— see what they are</span>
-        </button>
+        </ButtonBase>
       ) : null}
     </section>
   );
@@ -174,9 +175,9 @@ function UnscheduledExplainer({ streams, limit, onSetPayday }: {
       </div>
 
       {onSetPayday ? (
-        <button type="button" onClick={() => onSetPayday(job.id)} className="btn-primary self-start">
+        <ButtonBase type="button" onClick={() => onSetPayday(job.id)} className="btn-primary self-start">
           Add any payday from your paystub
-        </button>
+        </ButtonBase>
       ) : null}
     </div>
   );

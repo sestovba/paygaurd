@@ -12,6 +12,7 @@ import { PrecisionLine } from './PrecisionLine';
 import { precisionFor } from '../domain/precision';
 import type { PrecisionGap } from '../domain/precision';
 
+import { ButtonBase } from '../design-system';
 /** The one thing this app exists to answer: are you safe right now. */
 export function SafetyHero({
   onTakeQuiz, onReviewStatus, onFixStream
@@ -65,13 +66,13 @@ export function SafetyHero({
                 ? 'A few questions set your real monthly limit.'
                 : 'Match them to your records. Then the limit here is yours.'}
             </p>
-            <button
+            <ButtonBase
               type="button"
               onClick={phase === 'unknown' ? onTakeQuiz : onReviewStatus}
               className="btn-primary mt-4"
             >
               {phase === 'unknown' ? 'Answer a few questions' : 'Check months'}
-            </button>
+            </ButtonBase>
           </div>
         </div>
       </section>

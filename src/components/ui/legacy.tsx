@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import { Check, DollarSign, Plus } from 'lucide-react';
 import { SOURCE_CHOICE } from '../../domain/copy';
 
+import { ButtonBase } from './Button';
 export function BrandMark({
   onClick, subtitle
 }: {
@@ -34,14 +35,14 @@ export function BrandMark({
   }
 
   return (
-    <button
+    <ButtonBase
       type="button"
       onClick={onClick}
       aria-label="Go to overview"
       className="flex min-w-0 items-center gap-2.5 rounded-lg text-left transition-opacity hover:opacity-80"
     >
       {inner}
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -53,7 +54,7 @@ export function Switch({
   label: string;
 }) {
   return (
-    <button
+    <ButtonBase
       type="button"
       role="switch"
       aria-checked={checked}
@@ -66,7 +67,7 @@ export function Switch({
         data-state={checked ? 'checked' : 'unchecked'}
         className="switch-thumb"
       />
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -95,14 +96,14 @@ export function Segmented<T extends string>({
       style={{ '--seg-cols': columns ?? 2 } as React.CSSProperties}
     >
       {options.map((option) => (
-        <button
+        <ButtonBase
           key={option.id}
           type="button"
           onClick={() => onChange(option.id)}
           className={'seg-item ' + (value === option.id ? 'seg-item-on' : '')}
         >
           {option.label}
-        </button>
+        </ButtonBase>
       ))}
     </div>
   );
@@ -128,7 +129,7 @@ export function OptionList<T extends string>({
       {options.map((option) => {
         const selected = value === option.id;
         return (
-          <button
+          <ButtonBase
             key={option.id}
             type="button"
             role="radio"
@@ -146,7 +147,7 @@ export function OptionList<T extends string>({
                 <span className="type-muted mt-0.5 block text-sm leading-snug">{option.description}</span>
               ) : null}
             </span>
-          </button>
+          </ButtonBase>
         );
       })}
     </div>
@@ -167,7 +168,7 @@ export function SwatchPicker<T extends string>({
       {options.map((option) => {
         const selected = value === option.id;
         return (
-          <button
+          <ButtonBase
             key={option.id}
             type="button"
             role="radio"
@@ -182,7 +183,7 @@ export function SwatchPicker<T extends string>({
               ))}
             </span>
             <span className="text-sm font-semibold">{option.label}</span>
-          </button>
+          </ButtonBase>
         );
       })}
     </div>
@@ -200,7 +201,7 @@ export function AddJobButton({
      same decision. One door, one set of words. */
   const label = SOURCE_CHOICE[type].label;
   return (
-    <button
+    <ButtonBase
       type="button"
       onClick={onClick}
       title={label}
@@ -208,6 +209,6 @@ export function AddJobButton({
     >
       <Plus className="size-5 shrink-0" />
       <span className="btn-label">{label}</span>
-    </button>
+    </ButtonBase>
   );
 }

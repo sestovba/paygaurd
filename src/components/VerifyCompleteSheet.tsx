@@ -4,6 +4,7 @@ import { trialWorkStatus } from '../domain/trialWork';
 import { InfoNote } from './InfoNote';
 import { Sheet } from './Sheet';
 
+import { ButtonBase } from '../design-system';
 export function VerifyCompleteSheet({
   onClose, variant = 'sheet', backLabel
 }: {
@@ -33,16 +34,16 @@ export function VerifyCompleteSheet({
       backLabel={variant === 'inline' ? backLabel : undefined}
       footer={
         <>
-          <button
+          <ButtonBase
             type="button"
             onClick={onClose}
             className="text-base font-medium text-muted-foreground hover:text-foreground"
           >
             Not yet
-          </button>
-          <button type="button" onClick={confirmComplete} className="btn-primary">
+          </ButtonBase>
+          <ButtonBase type="button" onClick={confirmComplete} className="btn-primary">
             Verify
-          </button>
+          </ButtonBase>
         </>
       }
     >

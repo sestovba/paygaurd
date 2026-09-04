@@ -9,6 +9,7 @@ import { todayMonth, yearOf } from '../domain/months';
 import { AddJobButton, ButtonRow, Chip } from './ui';
 import type { Stream } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 export function StreamsPanel({
   onOpenStream, selectedId, compact, fill = false
 }: {
@@ -41,7 +42,7 @@ export function StreamsPanel({
           <ul className="flex flex-col gap-1.5">
             {streams.map((stream) => (
               <li key={stream.id}>
-                <button
+                <ButtonBase
                   type="button"
                   onClick={() => onOpenStream(stream.id)}
                   className={
@@ -64,7 +65,7 @@ export function StreamsPanel({
                   <span className="num shrink-0 text-sm font-semibold text-foreground">
                     {money(streamYearTotal(stream, ui.year))}
                   </span>
-                </button>
+                </ButtonBase>
               </li>
             ))}
           </ul>
@@ -89,7 +90,7 @@ export function StreamsPanel({
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             {archived.map((stream) => (
-              <button
+              <ButtonBase
                 key={stream.id}
                 type="button"
                 onClick={() => onOpenStream(stream.id)}
@@ -97,7 +98,7 @@ export function StreamsPanel({
               >
                 {stream.name}
                 <Chip tone="muted">{stream.lifecycle === 'inactive' ? 'Paused' : 'Ended'}</Chip>
-              </button>
+              </ButtonBase>
             ))}
           </div>
           <p className="type-muted mt-2 text-[0.9375rem]">
@@ -118,38 +119,38 @@ function StreamRow({ stream, year, onOpen }: { stream: Stream; year: number; onO
   return (
     <li className="overflow-hidden rounded-lg border border-border bg-surface-2">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4">
-        <button
+        <ButtonBase
           type="button"
           onClick={() => setExpanded((v) => !v)}
           className="flex min-w-0 items-center gap-3 text-left"
         >
           <span className={'h-6 w-1 shrink-0 rounded-full ' + (w2 ? 'bg-good' : 'bg-info')} />
           <span className="truncate text-base font-medium">{stream.name}</span>
-        </button>
+        </ButtonBase>
         <span className="flex shrink-0 items-center gap-2.5">
           <Chip tone={w2 ? 'good' : 'info'}>{SOURCE_SHORT[w2 ? 'w2' : 'ten99']}</Chip>
           <span className="num text-base font-semibold">{money(total)}</span>
-          <button
+          <ButtonBase
             type="button"
             aria-label={expanded ? 'Collapse details' : 'Expand details'}
             onClick={() => setExpanded((v) => !v)}
             className="icon-btn grid text-muted-foreground hover:bg-muted"
           >
             <ChevronDown className={'size-5 transition-transform ' + (expanded ? 'rotate-180' : '')} />
-          </button>
+          </ButtonBase>
         </span>
       </div>
 
       {expanded ? (
         <div className="border-t border-border p-4">
           <StreamStats stream={stream} year={year} isCurrentYear={isCurrentYear} total={total} />
-          <button
+          <ButtonBase
             type="button"
             onClick={onOpen}
             className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-3 text-base font-medium transition-colors hover:bg-muted"
           >
             Edit details <ArrowRight className="size-4" />
-          </button>
+          </ButtonBase>
         </div>
       ) : null}
     </li>

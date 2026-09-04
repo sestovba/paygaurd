@@ -4,6 +4,7 @@ import { copyFor } from '../domain/copy';
 import { useTracker } from '../state/TrackerProvider';
 import type { Vocabulary } from '../domain/copy';
 
+import { ButtonBase } from '../design-system';
 /** The scale, in order. Three states is a scale, and a scale can be drawn. */
 const LEVELS: Precision[] = ['estimated', 'scheduled', 'exact'];
 
@@ -81,7 +82,7 @@ export function PrecisionLine({
   }
 
   return (
-    <button
+    <ButtonBase
       type="button"
       className="precision-line"
       data-level={reading.level}
@@ -90,7 +91,7 @@ export function PrecisionLine({
       title={precisionSentence(reading)}
     >
       {body}
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -183,9 +184,9 @@ function PrecisionGauge({ reading, onFix }: {
             {gap ? <span>{gap.streamName} · {askFor(gap, words)}</span> : null}
           </p>
           {gap && onFix ? (
-            <button type="button" className="precision-gauge-go" onClick={() => onFix(gap)}>
+            <ButtonBase type="button" className="precision-gauge-go" onClick={() => onFix(gap)}>
               Improve accuracy <span aria-hidden="true">→</span>
-            </button>
+            </ButtonBase>
           ) : null}
         </>
       ) : reading.streams ? (

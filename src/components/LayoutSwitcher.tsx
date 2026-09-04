@@ -2,6 +2,7 @@ import type { LayoutMode } from '../state/storage';
 import { Check } from 'lucide-react';
 import { LAYOUTS as REGISTRY } from 'virtual:pg-layouts';
 
+import { ButtonBase } from '../design-system';
 export interface LayoutOption {
   id: LayoutMode;
   label: string;
@@ -107,7 +108,7 @@ export function LayoutSwitcher({
             {group.options.map((option) => {
               const selected = value === option.id;
               return (
-                <button
+                <ButtonBase
                   key={option.id}
                   type="button"
                   role="radio"
@@ -125,7 +126,7 @@ export function LayoutSwitcher({
                       <span className="type-muted mt-0.5 block text-sm leading-snug">{option.description}</span>
                     ) : null}
                   </span>
-                </button>
+                </ButtonBase>
               );
             })}
           </div>

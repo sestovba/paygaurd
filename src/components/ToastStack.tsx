@@ -7,6 +7,7 @@
 
 import { useTracker } from '../state/TrackerProvider';
 
+import { ButtonBase } from '../design-system';
 export function ToastStack() {
   const { toasts, dismissToast, undo, undoCount } = useTracker();
   if (!toasts.length) return null;
@@ -20,21 +21,21 @@ export function ToastStack() {
               back — a button that says Undo and does nothing is worse than
               no button, because it is the one you reach for in a hurry. */}
           {toast.undo && undoCount > 0 ? (
-            <button
+            <ButtonBase
               className="toast__action"
               type="button"
               onClick={() => { undo(); dismissToast(toast.id); }}
             >
               Undo
-            </button>
+            </ButtonBase>
           ) : (
-            <button
+            <ButtonBase
               className="toast__action"
               type="button"
               onClick={() => dismissToast(toast.id)}
             >
               Dismiss
-            </button>
+            </ButtonBase>
           )}
         </div>
       ))}

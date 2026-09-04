@@ -8,6 +8,7 @@ import { LayoutSwitcher } from './LayoutSwitcher';
 import { AppleMark, GoogleMark } from './signin/marks';
 import { providerOrder, SIGN_IN_COPY as T, useSignInForm } from './signin/form';
 
+import { ButtonBase } from '../design-system';
 /**
  * The gate, in PayGuard's skin. Calc20 draws the same screen in its own —
  * everything that is not markup is shared, in signin/form.ts.
@@ -57,7 +58,7 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
 
         <div className="pg-signin-providers">
           {order.map((provider, index) => (
-            <button
+            <ButtonBase
               key={provider}
               type="button"
               className="pg-signin-provider"
@@ -67,7 +68,7 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
             >
               {provider === 'apple' ? <AppleMark /> : <GoogleMark />}
               <span>{provider === 'apple' ? T.apple : T.google}</span>
-            </button>
+            </ButtonBase>
           ))}
         </div>
 
@@ -93,9 +94,9 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
           <div className="pg-signin-row">
             <div className="pg-signin-label-row">
               <label className="pg-signin-label" htmlFor="pg-signin-password">{T.passwordLabel}</label>
-              <button type="button" className="pg-signin-reveal" onClick={form.togglePassword}>
+              <ButtonBase type="button" className="pg-signin-reveal" onClick={form.togglePassword}>
                 {form.passwordVisible ? T.hide : T.show}
-              </button>
+              </ButtonBase>
             </div>
             <input
               id="pg-signin-password"
@@ -112,14 +113,14 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
             <p className="pg-signin-hint" id="pg-signin-password-hint">{T.passwordHint}</p>
           </div>
 
-          <button type="submit" className="pg-signin-submit" disabled={auth.pending !== null}>
+          <ButtonBase type="submit" className="pg-signin-submit" disabled={auth.pending !== null}>
             {form.submitLabel}
-          </button>
+          </ButtonBase>
           <p className="pg-signin-hint">{T.submitNote}</p>
 
-          <button type="button" className="pg-signin-link" onClick={form.forgot} disabled={form.resetting}>
+          <ButtonBase type="button" className="pg-signin-link" onClick={form.forgot} disabled={form.resetting}>
             {form.resetting ? T.forgotBusy : T.forgot}
-          </button>
+          </ButtonBase>
         </form>
 
         {form.message ? (
@@ -133,9 +134,9 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
         ) : null}
 
         <div className="pg-signin-local">
-          <button type="button" className="pg-signin-local-btn" onClick={auth.continueWithoutAccount}>
+          <ButtonBase type="button" className="pg-signin-local-btn" onClick={auth.continueWithoutAccount}>
             {T.localTitle}
-          </button>
+          </ButtonBase>
           <p className="pg-signin-note">{T.localNote}</p>
         </div>
 

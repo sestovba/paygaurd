@@ -5,6 +5,7 @@ import { actionItems } from '../domain/notifications';
 import type { ActionItem } from '../domain/notifications';
 import type { MonthKey } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 /**
  * Unlike the dashboard cards this replaced, a banner can stack one per
  * urgent item — dismissing is the safety valve that keeps that from being
@@ -72,14 +73,14 @@ function Banner({
       <div className="flex items-center justify-between gap-3 sm:contents">
         <Icon className="size-4 shrink-0 text-[var(--pg-warn-text)] sm:order-1" />
         <div className="flex shrink-0 items-center gap-2 sm:order-3">
-          <button
+          <ButtonBase
             type="button"
             onClick={onResolve}
             className="pg-btn pg-btn-sm border-[var(--pg-warn-border)] bg-[var(--pg-surface)] text-[var(--pg-warn-text)] font-bold uppercase tracking-wider hover:bg-[var(--pg-surface-2)]"
           >
             {actionLabel}
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="button"
             aria-label="Dismiss"
             onClick={(e) => onDismiss(e.currentTarget.closest('[data-banner-row]') as HTMLElement)}
@@ -87,7 +88,7 @@ function Banner({
             className="pg-icon-btn size-7 text-[var(--pg-warn-text)] hover:bg-[var(--pg-warn-border)]/30"
           >
             <X className="size-4" />
-          </button>
+          </ButtonBase>
         </div>
       </div>
       <p className="min-w-0 flex-1 text-xs font-semibold leading-relaxed sm:order-2">{item.message}</p>

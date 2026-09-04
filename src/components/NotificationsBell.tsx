@@ -17,6 +17,7 @@ import { useTracker } from '../state/TrackerProvider';
 import { actionItems } from '../domain/notifications';
 import type { MonthKey } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 export function NotificationsBell({
   open, onOpenChange, onSetPayday, onReviewStream, onOpenMonth, variant = 'icon'
 }: {
@@ -117,7 +118,7 @@ export function NotificationsBell({
 
   return (
     <div className="notice">
-      <button
+      <ButtonBase
         ref={triggerRef}
         type="button"
         id="notifications-bell-anchor"
@@ -148,7 +149,7 @@ export function NotificationsBell({
         {/* The summary trigger already says the count in words, so the dot
             there would be a second copy of the same fact. */}
         {showDot && variant !== 'summary' ? <span className="notice-trigger__dot" /> : null}
-      </button>
+      </ButtonBase>
 
       {open && host ? createPortal(
         <div className="notice-popover">
@@ -179,7 +180,7 @@ export function NotificationsBell({
                 <ul className="notice-list">
                   {items.map((item) => (
                     <li key={item.id}>
-                      <button
+                      <ButtonBase
                         type="button"
                         onClick={() => {
                           onOpenChange(false);
@@ -194,7 +195,7 @@ export function NotificationsBell({
                           : item.action.kind === 'reviewStream' ? <TrendingUp className="notice-item__icon size-4" />
                           : <Zap className="notice-item__icon size-4" />}
                         <span className="notice-item__text">{item.message}</span>
-                      </button>
+                      </ButtonBase>
                     </li>
                   ))}
                 </ul>
@@ -207,7 +208,7 @@ export function NotificationsBell({
             </div>
 
             <div className="notice-activity">
-              <button
+              <ButtonBase
                 type="button"
                 onClick={() => setShowActivity((v) => !v)}
                 className="notice-activity__toggle"
@@ -215,7 +216,7 @@ export function NotificationsBell({
               >
                 <span>Recent activity</span>
                 <ChevronDown className="notice-activity__chevron size-3.5" />
-              </button>
+              </ButtonBase>
               {showActivity ? (
                 activity.length ? (
                   <ul className="notice-activity__list">

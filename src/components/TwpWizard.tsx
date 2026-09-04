@@ -10,6 +10,7 @@ import { Segmented } from './ui';
 import { Sheet } from './Sheet';
 import { clearQuizDraft, loadQuizDraft, saveQuizDraft } from '../state/storage';
 
+import { ButtonBase } from '../design-system';
 type Step = 'start' | 'worked' | 'estimate' | 'knowsTwp' | 'count' | 'conclusion';
 
 interface Conclusion {
@@ -198,21 +199,21 @@ export function TwpWizard({
       </>
     );
     primary = (
-      <button type="button" disabled={!startMonth} onClick={submitStart} className="btn-primary ml-auto">
+      <ButtonBase type="button" disabled={!startMonth} onClick={submitStart} className="btn-primary ml-auto">
         Continue
-      </button>
+      </ButtonBase>
     );
   } else if (step === 'worked') {
     body = (
       <>
         <p className="type-muted">Any paid hours count — even a short gig.</p>
         <div className="grid grid-cols-2 gap-3">
-          <button type="button" onClick={hasWorked} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
+          <ButtonBase type="button" onClick={hasWorked} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
             Yes
-          </button>
-          <button type="button" onClick={notWorkedYet} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
+          </ButtonBase>
+          <ButtonBase type="button" onClick={notWorkedYet} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
             Not yet
-          </button>
+          </ButtonBase>
         </div>
       </>
     );
@@ -234,9 +235,9 @@ export function TwpWizard({
       </label>
     );
     primary = (
-      <button type="button" onClick={submitEstimate} className="btn-primary ml-auto">
+      <ButtonBase type="button" onClick={submitEstimate} className="btn-primary ml-auto">
         See my estimate
-      </button>
+      </ButtonBase>
     );
   } else if (step === 'knowsTwp') {
     body = (
@@ -248,12 +249,12 @@ export function TwpWizard({
           Do you know how many you have used?
         </p>
         <div className="grid grid-cols-2 gap-3">
-          <button type="button" onClick={() => goTo('count')} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
+          <ButtonBase type="button" onClick={() => goTo('count')} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
             Yes, I know
-          </button>
-          <button type="button" onClick={dontKnowStatus} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
+          </ButtonBase>
+          <ButtonBase type="button" onClick={dontKnowStatus} className="seg-item rounded-lg border border-border bg-surface-2 py-3.5 text-base font-semibold">
             Not sure
-          </button>
+          </ButtonBase>
         </div>
       </>
     );
@@ -276,15 +277,15 @@ export function TwpWizard({
           autoFocus
           onCommit={setCountValue}
         />
-        <button type="button" onClick={dontKnowStatus} className="text-left text-base font-medium text-muted-foreground hover:text-foreground">
+        <ButtonBase type="button" onClick={dontKnowStatus} className="text-left text-base font-medium text-muted-foreground hover:text-foreground">
           Actually, I do not know
-        </button>
+        </ButtonBase>
       </>
     );
     primary = (
-      <button type="button" disabled={countValue === undefined} onClick={submitCount} className="btn-primary">
+      <ButtonBase type="button" disabled={countValue === undefined} onClick={submitCount} className="btn-primary">
         Continue
-      </button>
+      </ButtonBase>
     );
   } else if (conclusion) {
     body = (
@@ -294,20 +295,20 @@ export function TwpWizard({
           <p className="type-muted mt-2">{conclusion.detail}</p>
         </div>
         {conclusion.showCountEscape ? (
-          <button
+          <ButtonBase
             type="button"
             onClick={() => goTo('count')}
             className="text-left text-base font-medium text-muted-foreground hover:text-foreground"
           >
             I know how many months I have left
-          </button>
+          </ButtonBase>
         ) : null}
       </>
     );
     primary = (
-      <button type="button" onClick={finish} className="btn-primary ml-auto">
+      <ButtonBase type="button" onClick={finish} className="btn-primary ml-auto">
         Save and continue
-      </button>
+      </ButtonBase>
     );
   }
 
@@ -319,9 +320,9 @@ export function TwpWizard({
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           {history.length ? (
-            <button type="button" onClick={goBack} className="text-base font-medium text-muted-foreground hover:text-foreground">
+            <ButtonBase type="button" onClick={goBack} className="text-base font-medium text-muted-foreground hover:text-foreground">
               Back
-            </button>
+            </ButtonBase>
           ) : <span />}
           {primary}
         </div>

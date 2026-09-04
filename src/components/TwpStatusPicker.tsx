@@ -1,5 +1,6 @@
 import { Check, X } from 'lucide-react';
 
+import { ButtonBase } from '../design-system';
 export type TwpState = 'unknown' | 'remaining' | 'complete';
 
 /* Not "TWP remains" / "TWP used up". The abbreviation is the thing the app
@@ -26,7 +27,7 @@ export function TwpStatusPicker({
       {OPTIONS.map(({ state: optionState, label }) => {
         const on = state === optionState;
         return (
-          <button
+          <ButtonBase
             key={optionState}
             type="button"
             aria-pressed={on}
@@ -44,7 +45,7 @@ export function TwpStatusPicker({
               <X className="size-4 text-destructive" />
             ) : null}
             {label}
-          </button>
+          </ButtonBase>
         );
       })}
     </div>

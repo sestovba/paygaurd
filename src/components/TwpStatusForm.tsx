@@ -6,6 +6,7 @@ import { InfoNote } from './InfoNote';
 import { TwpStatusPicker } from './TwpStatusPicker';
 import type { TwpState } from './TwpStatusPicker';
 
+import { ButtonBase } from '../design-system';
 /** The TWP self-assessment — shared by the Settings sheet's Status modal
  *  and the standalone Status page, so the two never drift apart. This is
  *  the quiet, revisit-anytime version; first-time setup uses TwpWizard. */
@@ -49,7 +50,7 @@ export function TwpStatusForm() {
               value={priorText}
               onChange={(e) => setPriorText(e.target.value.replace(/[^0-9]/g, ''))}
             />
-            <button
+            <ButtonBase
               type="button"
               className="btn-primary shrink-0"
               onClick={() => {
@@ -60,7 +61,7 @@ export function TwpStatusForm() {
               }}
             >
               Fill in
-            </button>
+            </ButtonBase>
           </div>
           <InfoNote>
             Fills the most recent months before now. You can change any of them

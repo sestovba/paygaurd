@@ -11,6 +11,7 @@ import { benefitPhase } from '../domain/trialWork';
 import type { BenefitPhase } from '../domain/trialWork';
 import type { MonthKey, MonthStatus } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 /**
  * Which of the three states a month is in, in words.
  *
@@ -141,7 +142,7 @@ export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => v
           ) + (isNow ? ' ring-1 ring-primary/15' : '');
 
           return (
-            <button
+            <ButtonBase
               key={month}
               type="button"
               onClick={() => onOpenMonth(month)}
@@ -184,7 +185,7 @@ export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => v
                   </Chip>
                 </p>
               ) : null}
-            </button>
+            </ButtonBase>
           );
         })}
       </div>
@@ -308,13 +309,13 @@ function MonthUpClose({ month, onOpenMonth, scope, onScopeChange }: {
         </p>
       ) : null}
 
-      <button
+      <ButtonBase
         type="button"
         onClick={() => onOpenMonth(month)}
         className="btn-primary mt-5"
       >
         Open {longMonthName(month)}
-      </button>
+      </ButtonBase>
     </section>
   );
 }

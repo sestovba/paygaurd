@@ -16,6 +16,7 @@ import { Sheet } from './Sheet';
 import { AddJobButton, ButtonRow, Chip, IconButton, Switch } from './ui';
 import type { MonthKey, Stream } from '../domain/types';
 
+import { ButtonBase } from '../design-system';
 /**
  * Self-employment, editable for the month you are looking at.
  *
@@ -51,13 +52,13 @@ function SelfEmployedMonth({ stream, month, onOpenStream }: {
           <p className="num text-base font-semibold">{money(countableFor(stream, month))}</p>
           <p className="type-muted text-sm">Counts toward your limit, after your miles come off</p>
         </div>
-        <button
+        <ButtonBase
           type="button"
           onClick={() => onOpenStream(stream.id)}
           className="shrink-0 text-sm font-medium text-primary hover:underline"
         >
           See every month
-        </button>
+        </ButtonBase>
       </div>
 
       {/* Three labels one word long — Earned, Miles, Hours — where each word

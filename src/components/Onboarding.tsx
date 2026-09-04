@@ -10,6 +10,7 @@ import { StreamSheet } from './StreamSheet';
 import { TwpWizard } from './TwpWizard';
 import { AddJobButton, BrandMark, ButtonRow, Segmented } from './ui';
 
+import { ButtonBase } from '../design-system';
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
 
 export function Onboarding() {
@@ -79,13 +80,13 @@ export function Onboarding() {
                 ? rulesFor(year).trialWork
                 : rulesFor(year).sga)} a month.`}
             </p>
-            <button
+            <ButtonBase
               type="button"
               onClick={() => setQuizOpen(true)}
               className="shrink-0 text-base font-medium text-primary hover:underline"
             >
               Retake
-            </button>
+            </ButtonBase>
           </div>
         ) : (
           <div className="flex w-full flex-col gap-3">
@@ -96,13 +97,13 @@ export function Onboarding() {
             <p className="type-muted">
               Your answers set which monthly limit applies.
             </p>
-            <button
+            <ButtonBase
               type="button"
               onClick={() => setQuizOpen(true)}
               className="btn-primary flex w-full items-center justify-center"
             >
               Answer a few questions
-            </button>
+            </ButtonBase>
           </div>
         )}
 
@@ -111,13 +112,13 @@ export function Onboarding() {
             <AddJobButton type="w2" onClick={() => startJob('w2')} />
             <AddJobButton type="ten99" onClick={() => startJob('ten99')} />
           </ButtonRow>
-          <button
+          <ButtonBase
             type="button"
             onClick={() => setUi({ onboarded: true })}
             className="flex items-center justify-center gap-1.5 pt-1 text-base font-medium text-muted-foreground hover:text-foreground"
           >
             Skip for now <ArrowRight className="size-4" />
-          </button>
+          </ButtonBase>
         </div>
       </main>
 
@@ -214,16 +215,16 @@ function PaydayStep({ streamId, year, onDone }: {
         ) : null}
 
         <div className="flex items-center justify-between gap-3">
-          <button
+          <ButtonBase
             type="button"
             onClick={onDone}
             className="text-base font-medium text-muted-foreground hover:text-foreground"
           >
             I don't know yet
-          </button>
-          <button type="button" onClick={onDone} className="btn-primary">
+          </ButtonBase>
+          <ButtonBase type="button" onClick={onDone} className="btn-primary">
             Continue
-          </button>
+          </ButtonBase>
         </div>
       </div>
     </div>

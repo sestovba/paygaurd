@@ -15,6 +15,7 @@ import { HelpSpreadBody } from './HelpSpread';
 import { LAYOUTS, LayoutSwitcher } from './LayoutSwitcher';
 import { SETTINGS_ROW, sectionsFor, type SettingsRowId } from './settingsModel';
 
+import { ButtonBase } from '../design-system';
 /** Three representative colours per sub-theme: surface, accent, secondary. */
 const SUB_THEMES: { id: LedgerTheme; label: string; colors: [string, string, string] }[] = [
   { id: 'paper', label: 'Evergreen', colors: ['#ffffff', '#059669', '#ea580c'] },
@@ -29,7 +30,7 @@ const SUB_THEMES: { id: LedgerTheme; label: string; colors: [string, string, str
 /** A settings row that opens something else. */
 function LinkRow({ icon, label, onClick }: { icon?: React.ReactNode; label: string; onClick: () => void }) {
   return (
-    <button
+    <ButtonBase
       type="button"
       onClick={onClick}
       className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2 px-4 py-3.5 text-left text-base font-semibold hover:bg-muted"
@@ -39,7 +40,7 @@ function LinkRow({ icon, label, onClick }: { icon?: React.ReactNode; label: stri
         <span className="truncate">{label}</span>
       </span>
       <ArrowRight className="size-5 shrink-0 text-muted-foreground" />
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -385,13 +386,13 @@ export function SettingsPanel({
       case 'clearAll':
         return (
           <div key={id} className="flex flex-col">
-            <button
+            <ButtonBase
               type="button"
               onClick={onReset}
               className="mt-1 flex items-center justify-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3.5 text-base font-semibold text-destructive hover:bg-destructive/15"
             >
               <Trash2 className="size-5" /> {SETTINGS_ROW.clearAll.label}
-            </button>
+            </ButtonBase>
             <p className="type-muted mt-1 px-1 text-sm">
               Earnings stay on this device unless you turn on sync.
             </p>

@@ -7,6 +7,7 @@ import { TermsContent } from './TermsContent';
 import { BrandMark } from './ui';
 import { PayGuardShell } from './payguard/PayGuardShell';
 
+import { ButtonBase } from '../design-system';
 export function TermsGate({ onAgree }: { onAgree: () => void }) {
   const [checked, setChecked] = useState(false);
 
@@ -41,14 +42,14 @@ export function TermsGate({ onAgree }: { onAgree: () => void }) {
             />
             <span>I've read and agree to these terms.</span>
           </label>
-          <button
+          <ButtonBase
             type="button"
             disabled={!checked}
             onClick={onAgree}
             className="btn-primary disabled:opacity-40"
           >
             Agree &amp; continue
-          </button>
+          </ButtonBase>
         </div>
       </div>
     </PayGuardShell>

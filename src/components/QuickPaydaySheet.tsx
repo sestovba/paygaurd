@@ -3,6 +3,7 @@ import { useTracker } from '../state/TrackerProvider';
 import { InfoNote } from './InfoNote';
 import { Sheet } from './Sheet';
 
+import { ButtonBase } from '../design-system';
 /**
  * The one field a "Set a payday" notification is actually about — not the
  * full job editor. Resolving a specific, narrow problem should open a
@@ -36,7 +37,7 @@ export function QuickPaydaySheet({
       backLabel={variant === 'inline' ? backLabel : undefined}
       footer={
         <>
-          <button
+          <ButtonBase
             type="button"
             onClick={() => {
               if (closeBeforeEdit) onClose();
@@ -45,15 +46,15 @@ export function QuickPaydaySheet({
             className="text-base font-medium text-muted-foreground hover:text-foreground"
           >
             Edit full job details
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="button"
             disabled={!date}
             onClick={() => { updateStream(stream.id, { anchorDate: date }); onClose(); }}
             className="btn-primary disabled:opacity-40"
           >
             Save
-          </button>
+          </ButtonBase>
         </>
       }
     >

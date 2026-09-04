@@ -3,6 +3,7 @@ import { ChevronLeft, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { IconButton } from './ui';
 
+import { ButtonBase } from '../design-system';
 const DISMISS_PX = 80;
 const DISMISS_VELOCITY = 0.45;
 
@@ -172,13 +173,13 @@ export function Sheet({
       )}
 
       {(onBack || (inline && backLabel)) ? (
-        <button
+        <ButtonBase
           type="button"
           onClick={onBack ?? onClose}
           className="flex shrink-0 items-center gap-1 px-4 pt-4 text-sm sm:text-base font-semibold text-muted-foreground transition-colors hover:text-foreground sm:px-6 sm:pt-6"
         >
           <ChevronLeft className="size-5" /> {backLabel ?? 'Back'}
-        </button>
+        </ButtonBase>
       ) : null}
 
       {/* Header with swipe-to-dismiss support on mobile */}
