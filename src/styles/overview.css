@@ -161,7 +161,7 @@
 
 .pg-overview .ov-lede {
   max-width: 60ch;
-  font-size: 0.875rem;
+  font-size: var(--t-text-sm);
   line-height: 1.625;
   color: var(--pg-fg-muted);
 }

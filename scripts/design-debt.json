@@ -79,12 +79,12 @@
   "src/styles/beautiful.css": {
     "literal-size": 1,
     "literal-radius": 1,
-    "literal-text": 4
+    "literal-text": 1
   },
   "src/styles/calc20.css": {
-    "literal-size": 119,
+    "literal-size": 99,
     "literal-radius": 93,
-    "literal-text": 203
+    "literal-text": 150
   },
   "src/styles/charm.css": {
     "literal-size": 7,
@@ -98,15 +98,15 @@
   },
   "src/styles/horizon.css": {
     "literal-size": 3,
-    "literal-radius": 7,
-    "literal-text": 14
+    "literal-radius": 1,
+    "literal-text": 11
   },
   "src/styles/ledger.css": {
     "literal-size": 18,
     "literal-radius": 8
   },
   "src/styles/overview.css": {
-    "literal-text": 5
+    "literal-text": 4
   },
   "src/styles/payguard.css": {
     "literal-size": 12,
@@ -114,9 +114,9 @@
     "literal-text": 59
   },
   "src/styles/plan.css": {
-    "literal-size": 21,
+    "literal-size": 20,
     "literal-radius": 16,
-    "literal-text": 45
+    "literal-text": 30
   },
   "src/styles/pocket.css": {
     "literal-size": 12,

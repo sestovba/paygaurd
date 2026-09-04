@@ -314,7 +314,7 @@
   gap: 0.5rem; /* 8px — badge beside SEP */
 }
 .bb-mn {
-  font-size: 0.75rem; /* 12px */
+  font-size: var(--t-text-xs); /* 12px */
   font-weight: var(--t-weight-bold);
   letter-spacing: 0.075em; /* ~1.2px at 12px */
   text-transform: uppercase;
@@ -325,7 +325,7 @@
   margin: 0.5rem 0 0; /* 8px */
   font-family: var(--t-font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 1.125rem; /* 18px */
+  font-size: var(--t-text-lg); /* 18px */
   font-weight: var(--t-weight-bold);
   line-height: 1.55; /* ~28px */
   color: var(--t-fg);
@@ -333,7 +333,7 @@
 .bb-mcard[data-over='true'] .bb-mv { color: var(--t-over-text); }
 .bb-mu {
   margin: 0;
-  font-size: 0.75rem; /* 12px */
+  font-size: var(--t-text-xs); /* 12px */
   font-weight: var(--t-weight-medium);
   line-height: 1.35;
   color: var(--t-fg-dim);

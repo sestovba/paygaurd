@@ -272,7 +272,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--desk);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 16px;
+  font-size: var(--t-text-base);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -324,7 +324,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .eyebrow, .pg-calc20 .mono-track {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -436,7 +436,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--ink-2);
   color: var(--on-ink);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   cursor: pointer;
 }
 
@@ -520,7 +520,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--ink-2);
   color: var(--accent);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: .04em;
   cursor: pointer;
@@ -723,7 +723,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--paper);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   cursor: pointer;
 }
 
@@ -757,7 +757,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   /* Buttons shrink-wrap their label in a flex row unless the basis is 0. */
   flex: 1 1 0%;
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   width: auto;
   margin: 0;
   padding: 24px var(--section-pad);
@@ -859,7 +859,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
   color: var(--ink-3);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -882,7 +882,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-right: 1px solid var(--line-2);
   background: transparent;
   color: var(--ink-3);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: -.01em;
   white-space: nowrap;
@@ -1038,7 +1038,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .view-customize__note {
   margin: 0;
   padding: 0 10px 8px;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   line-height: 1.45;
   color: var(--muted);
   font-weight: 500;
@@ -1151,7 +1151,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .carousel-nav__arrow {
   flex: 0 0 auto;
   width: 40px;
-  height: 40px;
+  height: var(--t-touch-compact);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1541,7 +1541,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   color: var(--ink);
   font-family: var(--mono);
   /* 16px so iOS does not zoom the page on focus. */
-  font-size: 16px;
+  font-size: var(--t-text-base);
 }
 
 .pg-calc20 .ledger__add-button {
@@ -1631,7 +1631,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   color: var(--muted);
 }
@@ -1645,7 +1645,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   gap: 5px;
   min-height: 28px;
   padding: 0 8px;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
 }
 
 .pg-calc20 .stream-panel-end .seg__btn--icon {
@@ -1665,7 +1665,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 8px;
   background: var(--card);
   color: var(--ink-3);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
 }
 
@@ -1758,7 +1758,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 8px;
   background: var(--card);
   color: var(--ink-3);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -1776,7 +1776,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 0;
   color: inherit;
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 600;
   cursor: pointer;
 }
@@ -1821,7 +1821,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-self: center;
   min-height: 32px;
   padding: 0 4px;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
 }
 
 
@@ -1871,7 +1871,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .stream-card__name {
   min-width: 0;
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 700;
   letter-spacing: -.018em;
   color: var(--ink);
@@ -2175,7 +2175,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   color: var(--ink);
   font-family: var(--mono);
   /* 16px so iOS does not zoom on focus */
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -2279,7 +2279,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
@@ -2314,7 +2314,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .totals-card__title {
   flex: 1 1 auto;
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 700;
   letter-spacing: -.018em;
   color: var(--ink);
@@ -2510,7 +2510,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 0 16px;
   border: 0;
   border-radius: var(--radius);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   cursor: pointer;
   transition: background 140ms var(--motion), border-color 140ms var(--motion), color 140ms var(--motion);
@@ -2760,7 +2760,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 12px;
   background: transparent;
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   text-align: left;
   cursor: pointer;
 }
@@ -2782,7 +2782,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 36px;
+  min-height: var(--t-touch-small);
   padding: 0 10px;
   margin-bottom: 2px;
   border: 0;
@@ -2946,7 +2946,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .popover-drawer__top {
   position: relative;
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -2982,7 +2982,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .popover-drawer__close {
   width: 36px;
-  height: 36px;
+  height: var(--t-touch-small);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3229,7 +3229,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .sheet__title {
   max-width: 100%;
-  font-size: 28px;
+  font-size: var(--t-text-2xl);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -.035em;
@@ -3296,7 +3296,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border: 2px solid transparent;
   border-radius: 99px;
   background-clip: content-box;
-  min-height: 36px;
+  min-height: var(--t-touch-small);
 }
 
 .pg-calc20 .sheet__body::-webkit-scrollbar-thumb:hover {
@@ -3322,14 +3322,14 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .settings-tabs__btn {
-  min-height: 40px;
+  min-height: var(--t-touch-compact);
   padding: 0 4px;
   margin-bottom: -1px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -3460,7 +3460,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .hero-figure__of {
   margin-left: 6px;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   letter-spacing: 0;
   color: var(--muted);
@@ -3478,7 +3478,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   color: var(--ink);
   font-family: var(--sans);
   /* 16px so iOS does not zoom on focus */
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 500;
 }
 
@@ -3499,7 +3499,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   color: var(--ink);
   font-family: var(--mono);
   /* 16px so iOS does not zoom on focus */
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -3609,7 +3609,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .rows__value {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -3700,7 +3700,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 600;
   outline: none;
   transition: border-color 150ms var(--motion);
@@ -3715,7 +3715,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 0;
   color: var(--muted);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
@@ -3883,7 +3883,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 5px;
   background: var(--ink-2);
   color: var(--accent);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   cursor: pointer;
 }
@@ -4077,7 +4077,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
 }
 
@@ -4247,7 +4247,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .headline__value {
-  font-size: 36px;
+  font-size: var(--t-text-3xl);
   font-weight: 650;
   color: var(--accent);
 }
@@ -4334,18 +4334,18 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .section__bar {
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   padding: 0;
 }
 
 .pg-calc20 .section__head {
   flex: 1 1 0%;
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   padding: 24px var(--section-pad);
 }
 
 .pg-calc20 .section__title {
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 650;
 }
 
@@ -4390,7 +4390,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .app-empty__note {
   max-width: 46ch;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
 }
 
 .pg-calc20 .app-empty__actions {
@@ -4916,7 +4916,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border: 2px solid transparent;
   border-radius: 99px;
   background-clip: content-box;
-  min-height: 36px;
+  min-height: var(--t-touch-small);
 }
 .pg-calc20 .sheet__body::-webkit-scrollbar-thumb:hover {
   background: rgba(70, 108, 140, .9);
@@ -5015,7 +5015,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .popover-drawer__items > .stream-menu__back {
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   margin-bottom: 4px;
   border-bottom: 1px solid var(--line-3);
   border-radius: 0;
@@ -5212,7 +5212,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: color-mix(in oklab, var(--on-ink) 9%, transparent);
   color: var(--header-ink);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   box-shadow: none;
 }
@@ -5258,7 +5258,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .headline__value {
   font-family: var(--sans);
-  font-size: 36px;
+  font-size: var(--t-text-3xl);
   font-weight: 650;
   letter-spacing: -.03em;
   line-height: 1;
@@ -5277,14 +5277,14 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .headline__of {
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   letter-spacing: .02em;
   color: color-mix(in oklab, var(--header-ink) 60%, transparent);
 }
 
 .pg-calc20 .headline__room {
   margin-top: 4px;
-  font-size: 18px;
+  font-size: var(--t-text-lg);
   font-weight: 600;
   letter-spacing: 0;
   color: var(--header-ink);
@@ -5389,25 +5389,25 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   }
 
   .pg-calc20 .topbar__eyebrow {
-    font-size: 12px;
+    font-size: var(--t-text-xs);
     letter-spacing: .14em;
   }
 
   .pg-calc20 .topbar h1 {
-    font-size: 36px;
+    font-size: var(--t-text-3xl);
     line-height: 1.1;
   }
 
   .pg-calc20 .year-select {
-    height: 40px;
+    height: var(--t-touch-compact);
     padding: 0 12px;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: var(--t-text-sm);
   }
 
   .pg-calc20 .topbar .icon-button, .pg-calc20 .topbar .avatar {
     width: 40px;
-    height: 40px;
+    height: var(--t-touch-compact);
   }
 
   .pg-calc20 .topbar .icon-button svg, .pg-calc20 .topbar .avatar svg {
@@ -5423,7 +5423,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   }
 
   .pg-calc20 .topbar .twp-meter__label {
-    font-size: 12px;
+    font-size: var(--t-text-xs);
     letter-spacing: .1em;
   }
 
@@ -5533,7 +5533,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .section__aside {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -5564,7 +5564,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .stream-card__name {
-  font-size: 1rem;
+  font-size: var(--t-text-base);
   font-weight: 600;
 }
 
@@ -5597,7 +5597,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .stream-card__total {
   font-family: var(--sans);
-  font-size: 1rem;
+  font-size: var(--t-text-base);
   font-weight: 600;
 }
 
@@ -5656,7 +5656,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .stream-card .month-cell__read-value {
   font-family: var(--sans);
-  font-size: 1.125rem;
+  font-size: var(--t-text-lg);
   font-weight: 600;
 }
 
@@ -5676,7 +5676,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .stream-card__foot .stream-panel-edit, .pg-calc20 .stream-card__foot .lock-toggle {
   border-radius: var(--radius);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -5713,7 +5713,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .archived-chip {
   gap: 10px;
-  min-height: 36px;
+  min-height: var(--t-touch-small);
   padding: 8px 16px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -5723,7 +5723,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .archived-chip__name {
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   color: var(--ink);
 }
@@ -5871,7 +5871,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .popover-drawer__items > button {
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   gap: 12px;
   padding: 0 12px;
   border-radius: 12px;
@@ -5892,7 +5892,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .popover-surface > button {
-  min-height: 40px;
+  min-height: var(--t-touch-compact);
   gap: 10px;
 }
 
@@ -5925,7 +5925,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .stream-section-actions .icon-button {
   width: 36px;
-  height: 36px;
+  height: var(--t-touch-small);
 }
 
 .pg-calc20 .stream-section-actions .icon-button:hover:not(:disabled) {
@@ -5940,7 +5940,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .section__aside {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -5970,7 +5970,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -5985,7 +5985,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-width: 0;
   margin: 0;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   letter-spacing: 0;
   color: var(--ink);
@@ -6065,7 +6065,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .ledger__date-input, .pg-calc20 .ledger__field, .pg-calc20 .ledger__num-input {
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--card);
@@ -6073,7 +6073,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   color: var(--ink);
   font-family: var(--mono);
   /* 16px so iOS does not zoom on focus */
-  font-size: 16px;
+  font-size: var(--t-text-base);
 }
 
 .pg-calc20 .ledger__date-input {
@@ -6108,13 +6108,13 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .ledger__add-button {
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   padding: 0 14px;
   border-radius: 10px;
   background: var(--secondary);
   color: var(--muted);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   box-shadow: none;
 }
@@ -6133,7 +6133,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .ledger__add-button:not(:disabled):hover { filter: brightness(1.05); }
 
 .pg-calc20 .ledger__row {
-  min-height: 36px;
+  min-height: var(--t-touch-small);
   padding: 0 6px;
   border-radius: 8px;
 }

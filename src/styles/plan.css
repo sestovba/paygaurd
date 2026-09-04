@@ -72,7 +72,7 @@
   background: var(--paper);
   color: var(--ink);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 16px;
+  font-size: var(--t-text-base);
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
 }
@@ -257,7 +257,7 @@
 
 .pl-answer-meter-note {
   margin: 8px 0 0;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
@@ -327,7 +327,7 @@
   background: var(--paper-2);
   color: var(--ink);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
@@ -491,7 +491,7 @@
   align-items: center;
   gap: 6px;
   margin: 12px 0 0;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   color: var(--clear);
 }
@@ -536,7 +536,7 @@
   padding: 3px 8px 3px 5px;
   background: var(--paper);
   box-shadow: inset 0 0 0 2px var(--px-ink);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -550,7 +550,7 @@
 
 .pl-line-key b {
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -642,7 +642,7 @@
 }
 .pl-stepper-value span {
   display: block;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   color: var(--ink-soft);
 }
 
@@ -709,7 +709,7 @@
   min-height: 56px;
   background: #146c43;
   color: #ffffff;
-  font-size: 18px;
+  font-size: var(--t-text-lg);
   letter-spacing: 0.01em;
   margin-bottom: 5px;
   box-shadow:
@@ -746,7 +746,7 @@
 .pl-plain {
   display: block;
   width: 100%;
-  min-height: 44px;
+  min-height: var(--t-touch-target);
   padding: 8px 0;
   border: 0;
   background: none;
@@ -826,7 +826,7 @@
 
 .pl-label {
   display: block;
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -842,7 +842,7 @@
   background: var(--unknown-bg);
   box-shadow: inset 0 0 0 2px var(--px-ink);
   font-family: var(--figures);
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   color: var(--ink-soft);
 }
@@ -884,7 +884,7 @@
   left: auto;
   right: 2px;
   width: 70px;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
 }
 
 /* A sunken field: light edge down-right, dark edge up-left — the exact
@@ -1053,7 +1053,7 @@
   background: var(--px-ink);
   color: var(--gilt-hi);
   font-family: var(--figures);
-  font-size: 12px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -1158,7 +1158,7 @@
   background: var(--px-ink);
   color: var(--gilt-hi);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1198,7 +1198,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 16px;
+  font-size: var(--t-text-base);
   font-weight: 700;
 }
 .pl-choice > svg { flex: 0 0 auto; }
@@ -1541,7 +1541,7 @@
   color: var(--ink);
   box-shadow: inset 0 0 0 2px var(--px-ink), inset 5px 0 0 var(--gilt);
   padding-left: 16px;
-  font-size: 14px;
+  font-size: var(--t-text-sm);
   line-height: 1.5;
 }
 .pl [data-note] svg { color: var(--gilt); }
