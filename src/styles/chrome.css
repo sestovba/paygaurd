@@ -188,7 +188,7 @@ html.pg-calc20 {
   background: var(--chrome-surface);
   color: var(--chrome-fg);
   font-family: var(--chrome-font);
-  font-size: 0.875rem;
+  font-size: var(--t-text-sm);
   line-height: 1.45;
   box-shadow: var(--chrome-shadow);
 }
@@ -409,7 +409,7 @@ html.pg-calc20 {
   background: var(--chrome-info-bg);
   color: var(--chrome-info-fg);
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   line-height: 1.4;
   text-align: left;
@@ -440,7 +440,7 @@ html.pg-calc20 {
   border-radius: var(--chrome-radius-sm);
   background: var(--chrome-surface-2);
   color: var(--chrome-muted);
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
 }
 
 .notice-clear__icon { flex: 0 0 auto; color: var(--chrome-safe); }
@@ -575,7 +575,7 @@ html.pg-calc20 {
   padding: 0.25rem 0;
   color: var(--precision-ink);
   font-family: var(--chrome-font);
-  font-size: 0.75rem;
+  font-size: var(--t-text-xs);
   line-height: 1.45;
   text-align: left;
 }
