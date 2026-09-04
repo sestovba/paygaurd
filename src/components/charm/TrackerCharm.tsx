@@ -511,7 +511,7 @@ export function TrackerCharm() {
           )
         ) : (
           <div className="ch-empty">
-            <p>First, tell us about your job.</p>
+            <p>First, tell us where this pay came from.</p>
             <ButtonBase
               type="button"
               className="ch-log"
@@ -626,12 +626,12 @@ export function TrackerCharm() {
             className="ch-sheet-card"
             role="dialog"
             aria-modal="true"
-            aria-label={addingJob ? 'Add a job' : 'Income sources'}
+            aria-label={addingJob ? 'Add income source' : 'Income sources'}
           >
             {addingJob ? (
               <>
                 <div className="ch-sheet-head">
-                  <h2>Add a job</h2>
+                  <h2>Add income source</h2>
                   <ButtonBase
                     type="button"
                     className="ch-plain"

@@ -608,7 +608,7 @@ export function TrackerPocket() {
           )
         ) : (
           <div className="pk-empty">
-            <p>First, tell us about your job.</p>
+            <p>First, tell us where this pay came from.</p>
             <ButtonBase
               type="button"
               className="pk-log"

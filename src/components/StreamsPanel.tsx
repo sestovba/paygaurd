@@ -36,7 +36,7 @@ export function StreamsPanel({
       <div className={compact ? (fill ? 'min-h-0 flex-1 overflow-y-auto p-4' : 'p-4') : ''}>
         {streams.length === 0 ? (
           <p className={compact ? 'p-1 type-muted' : 'mt-4 type-muted'}>
-            No jobs yet. Add a W-2 job or 1099 work below.
+            No income sources yet. Add where your money comes from below.
           </p>
         ) : compact ? (
           <ul className="flex flex-col gap-1.5">

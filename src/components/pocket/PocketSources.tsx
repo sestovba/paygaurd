@@ -119,7 +119,7 @@ function ManageSourcesModal({
         <div className="pk-modal-body">
           {streams.length === 0 ? (
             <p className="pk-modal-empty">
-              No jobs yet. Add one so you can log pay.
+              No income sources yet. Add one so you can log pay.
             </p>
           ) : (
             <ul className="pk-source-list">
@@ -157,7 +157,7 @@ function ManageSourcesModal({
 
         <div className="pk-modal-foot">
           <ButtonBase type="button" className="pk-modal-btn pk-modal-btn-outline" onClick={onAdd}>
-            + Add source
+            + Add income source
           </ButtonBase>
           <ButtonBase type="button" className="pk-modal-btn pk-modal-btn-primary" onClick={onDone}>
             Done
