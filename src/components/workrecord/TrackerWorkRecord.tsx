@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 import { useEffect, useRef, useState } from 'react';
 import {
   ChevronDown,
@@ -219,7 +220,7 @@ export function TrackerWorkRecord() {
               variant="summary"
             />
 
-            <button
+            <ButtonBase
               type="button"
               className="pg-icon-btn pg-icon-btn-bordered"
               disabled={undoCount === 0}
@@ -228,9 +229,9 @@ export function TrackerWorkRecord() {
               title={undoCount ? `Undo last change (${undoCount})` : 'Nothing to undo'}
             >
               <Undo2 className="size-3.5" />
-            </button>
+            </ButtonBase>
 
-            <button
+            <ButtonBase
               type="button"
               className="pg-icon-btn pg-icon-btn-bordered group"
               onClick={() => setSettingsOpen(true)}
@@ -238,7 +239,7 @@ export function TrackerWorkRecord() {
               title="Settings"
             >
               <Settings className="size-4 transition-transform duration-300 group-hover:rotate-45" />
-            </button>
+            </ButtonBase>
           </div>
         </div>
       </header>
@@ -269,13 +270,13 @@ export function TrackerWorkRecord() {
                           : `${money(room)} left before your ${money(threshold.amount)} monthly limit`}
                     </p>
                   ) : (
-                    <button
+                    <ButtonBase
                       type="button"
                       className="pg-btn mt-2"
                       onClick={() => setStatusOpen(true)}
                     >
                       Tell us where you stand
-                    </button>
+                    </ButtonBase>
                   )}
                   {cap && cap.hours !== null ? (
                     <p className="wr-headline-of">{hoursLine(cap.hours)}</p>
@@ -311,9 +312,9 @@ export function TrackerWorkRecord() {
                 Nine trial work months are on record. Check them against your own
                 paperwork — after that your limit changes.
               </span>
-              <button type="button" className="pg-btn pg-btn-sm" onClick={() => setStatusOpen(true)}>
+              <ButtonBase type="button" className="pg-btn pg-btn-sm" onClick={() => setStatusOpen(true)}>
                 Review status
-              </button>
+              </ButtonBase>
             </div>
           ) : null}
 
@@ -327,7 +328,7 @@ export function TrackerWorkRecord() {
             onToggle={() => setUi({ wrStreamsOpen: !ui.wrStreamsOpen })}
             aside={streamsAside}
             action={ui.wrStreamsOpen && streams.length ? (
-              <button
+              <ButtonBase
                 type="button"
                 className="pg-icon-btn pg-icon-btn-bordered"
                 onClick={toggleCollapseAll}
@@ -335,7 +336,7 @@ export function TrackerWorkRecord() {
                 title={allCollapsed ? 'Expand all' : 'Collapse all'}
               >
                 {allCollapsed ? <ChevronsDown className="size-3.5" /> : <ChevronsUp className="size-3.5" />}
-              </button>
+              </ButtonBase>
             ) : null}
           >
             <div className="flex flex-col gap-3">
@@ -356,20 +357,20 @@ export function TrackerWorkRecord() {
               {addingOpen ? (
                 <div className="pg-card flex flex-wrap items-center gap-2 p-3">
                   <span className="pg-label">Add</span>
-                  <button type="button" className="pg-btn pg-text-w2" onClick={() => addAndOpen('w2')}>
+                  <ButtonBase type="button" className="pg-btn pg-text-w2" onClick={() => addAndOpen('w2')}>
                     <Plus className="size-3.5" /> W-2 job
-                  </button>
-                  <button type="button" className="pg-btn pg-text-se" onClick={() => addAndOpen('ten99')}>
+                  </ButtonBase>
+                  <ButtonBase type="button" className="pg-btn pg-text-se" onClick={() => addAndOpen('ten99')}>
                     <Plus className="size-3.5" /> 1099 work
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="pg-icon-btn"
                     onClick={() => setAddingOpen(false)}
                     aria-label="Cancel"
                   >
                     <X className="size-3.5" />
-                  </button>
+                  </ButtonBase>
                 </div>
               ) : streams.length ? (
                 /* el-1byt1d6: "This button deserves margin on left and
@@ -377,7 +378,7 @@ export function TrackerWorkRecord() {
                    the project-wide rule is that a button takes the shape of
                    its content, so it does, and the row gives it the air. */
                 <div className="flex justify-center px-3 py-1">
-                  <button
+                  <ButtonBase
                     type="button"
                     className="pg-btn"
                     onClick={() => setAddingOpen(true)}
@@ -386,7 +387,7 @@ export function TrackerWorkRecord() {
                         from the shared vocabulary now, so the next time you
                         want it changed it changes in one file. */}
                     <Plus className="size-3.5" /> {copyFor('workrecord').incomeAdd}
-                  </button>
+                  </ButtonBase>
                 </div>
               ) : (
                 <div className="pg-card flex flex-col items-center gap-3 p-6 text-center">
@@ -395,12 +396,12 @@ export function TrackerWorkRecord() {
                     Add what pays you and we can start counting it against your limit.
                   </span>
                   <div className="mt-1 flex flex-wrap justify-center gap-2">
-                    <button type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndOpen('w2')}>
+                    <ButtonBase type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndOpen('w2')}>
                       <Plus className="size-3.5" /> Add W-2 job
-                    </button>
-                    <button type="button" className="pg-btn pg-btn-lg" onClick={() => addAndOpen('ten99')}>
+                    </ButtonBase>
+                    <ButtonBase type="button" className="pg-btn pg-btn-lg" onClick={() => addAndOpen('ten99')}>
                       <Plus className="size-3.5" /> Add 1099 work
-                    </button>
+                    </ButtonBase>
                   </div>
                 </div>
               )}
@@ -483,11 +484,11 @@ function Slab({
   return (
     <section className="wr-slab">
       <div className="wr-slab-head">
-        <button type="button" className="wr-slab-head-toggle" aria-expanded={open} onClick={onToggle}>
+        <ButtonBase type="button" className="wr-slab-head-toggle" aria-expanded={open} onClick={onToggle}>
           <ChevronDown className="wr-slab-chevron size-4" data-open={open} aria-hidden="true" />
           <span className="wr-slab-title">{title}</span>
           {!open ? <span className="wr-slab-aside">{aside}</span> : null}
-        </button>
+        </ButtonBase>
         {action}
       </div>
       {open ? <div className="wr-slab-body" data-bleed={bleed || undefined}>{children}</div> : null}
@@ -517,7 +518,7 @@ function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }
       <TriangleAlert className="size-4 shrink-0 pg-muted" aria-hidden="true" />
       <div className="wr-hotbar-rail">
         {flags.map((flag) => (
-          <button
+          <ButtonBase
             key={flag.month + flag.kind + flag.text}
             type="button"
             className="wr-hotbar-chip"
@@ -527,7 +528,7 @@ function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }
           >
             <span className="wr-hotbar-chip-month">{shortMonthName(flag.month).toUpperCase()}</span>
             <span>{flag.text}</span>
-          </button>
+          </ButtonBase>
         ))}
       </div>
     </div>

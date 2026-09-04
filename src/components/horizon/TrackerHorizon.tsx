@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 /*
  * Horizon — an eighth layout, assembled from what the review found.
  *
@@ -113,22 +114,22 @@ export function TrackerHorizon() {
           <p>{longMonthName(asOf)} {ui.year}</p>
         </div>
         <div className="hz-top-year" role="group" aria-label="Year">
-          <button type="button" onClick={() => setUi({ year: ui.year - 1 })} aria-label="Previous year">‹</button>
+          <ButtonBase type="button" onClick={() => setUi({ year: ui.year - 1 })} aria-label="Previous year">‹</ButtonBase>
           <span>{ui.year}</span>
-          <button type="button" onClick={() => setUi({ year: ui.year + 1 })} aria-label="Next year">›</button>
+          <ButtonBase type="button" onClick={() => setUi({ year: ui.year + 1 })} aria-label="Next year">›</ButtonBase>
         </div>
         {/* Beside the year because it answers the same question one size
             down: which months am I looking at. The runway already obeys
             useMonthScope; this is the control it was missing. */}
         <MonthScopePicker scope={scope} onChange={setScope} className="hz-scope" />
-        <button
+        <ButtonBase
           type="button"
           className="hz-icon-btn"
           onClick={() => setSettingsOpen(true)}
           aria-label="Settings"
         >
           <Settings className="size-4" />
-        </button>
+        </ButtonBase>
       </header>
 
       <main className="hz-main">

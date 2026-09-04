@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 // Counted each month, across every stream — the Months slab's whole content.
 //
 // Ported from sga_calc20's TotalsByMonth. The rule it exists to enforce is
@@ -73,7 +74,7 @@ export function WorkRecordMonths({
                 : null;
 
             return (
-              <button
+              <ButtonBase
                 key={month}
                 type="button"
                 className="wr-month-cell"
@@ -92,7 +93,7 @@ export function WorkRecordMonths({
                 <span className="wr-month-label">{shortMonthName(month)}</span>
                 <span className="wr-month-value">{empty ? '—' : money(status.countable)}</span>
                 {note ? <span className="wr-month-note" data-kind={note.kind}>{note.text}</span> : null}
-              </button>
+              </ButtonBase>
             );
           })}
         </div>

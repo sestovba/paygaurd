@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 import { useMemo, useState } from 'react';
 import { countableFor } from '../../domain/earnings';
 import { money } from '../../domain/format';
@@ -114,14 +115,14 @@ export function PayGuardChart({ streams, year, limit }: {
           <div className="flex items-center gap-2 text-[0.6875rem]">
             {activeMonthData.w2 > 0 ? <span className="pg-text-w2 font-semibold">W2: {money(activeMonthData.w2)}</span> : null}
             {activeMonthData.se > 0 ? <span className="pg-text-se font-semibold">1099: {money(activeMonthData.se)}</span> : null}
-            <button
+            <ButtonBase
               type="button"
               onClick={() => setSelectedMonth(null)}
               aria-label="Clear selected month"
               className="pg-icon-btn pg-touch-target ml-1"
             >
               <span aria-hidden="true">✕</span>
-            </button>
+            </ButtonBase>
           </div>
         </div>
       ) : null}
@@ -214,7 +215,7 @@ export function PayGuardChart({ streams, year, limit }: {
                   : 'left-1/2 -translate-x-1/2';
 
               return (
-                <button
+                <ButtonBase
                   type="button"
                   key={item.month}
                   onClick={() => setSelectedMonth((cur) => cur === item.month ? null : item.month)}
@@ -313,7 +314,7 @@ export function PayGuardChart({ streams, year, limit }: {
                       <span className="pg-chart-cap" data-breach={usesTrialMonth ? 'twp' : 'over'} aria-hidden="true" />
                     ) : null}
                   </div>
-                </button>
+                </ButtonBase>
               );
             })}
           </div>

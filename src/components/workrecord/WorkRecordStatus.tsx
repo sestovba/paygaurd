@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 // The Status slab: what phase you are in, which months are spent, and the
 // planner. Ported from sga_calc20's StatusSection — same progression (trial
 // work → after it → unconfirmed), rebuilt on the PayGuard tokens so it retheme
@@ -116,9 +117,9 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
                   ? 'We have nine trial work months on record. Check them against your own paperwork. After that, your limit changes.'
                   : 'We cannot warn you about a limit until you tell us where you stand. The hours planner stays off until then, too.'}
               </p>
-              <button type="button" className="pg-btn" onClick={onReviewStatus}>
+              <ButtonBase type="button" className="pg-btn" onClick={onReviewStatus}>
                 Review status
-              </button>
+              </ButtonBase>
             </div>
           )}
 

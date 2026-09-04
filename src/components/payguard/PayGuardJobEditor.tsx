@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 import { useEffect, useState } from 'react';
 import { ChevronDown, Lock, LockOpen, Sparkles, Trash2, Zap } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
@@ -235,7 +236,7 @@ function W2PayGuardLedger({
                 </div>
 
                 <div className="flex items-center justify-center p-1" role="cell">
-                  <button
+                  <ButtonBase
                     type="button"
                     disabled={disabled || (!amount && !hrs && !entry?.gross)}
                     onClick={() => onClear(m)}
@@ -244,7 +245,7 @@ function W2PayGuardLedger({
                     className="pg-icon-btn pg-btn-danger pg-touch-target size-7 text-[0.625rem] font-bold uppercase tracking-wider"
                   >
                     ✕
-                  </button>
+                  </ButtonBase>
                 </div>
               </div>
             );
@@ -360,7 +361,7 @@ export function PayGuardJobEditor({
       {/* ---------------- Job header ---------------- */}
       <div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-2 pg-rule-b px-2.5 py-2.5 sm:px-3.5 sm:py-3">
         <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
-          <button
+          <ButtonBase
             type="button"
             onClick={onToggleOpen}
             aria-expanded={cardOpen}
@@ -368,8 +369,8 @@ export function PayGuardJobEditor({
             className="pg-icon-btn"
           >
             <ChevronDown className={`size-4 transition-transform duration-150 ${cardOpen ? '' : '-rotate-90'}`} />
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             type="button"
             onClick={() => updateStream(stream.id, { locked: !stream.locked })}
             aria-pressed={stream.locked}
@@ -380,7 +381,7 @@ export function PayGuardJobEditor({
             {stream.locked
               ? <Lock className="size-3.5 pg-text-warn" />
               : <LockOpen className="size-3.5" />}
-          </button>
+          </ButtonBase>
           <span className={`pg-badge ${stream.type === 'w2' ? 'pg-badge-w2' : 'pg-badge-se'}`}>
             {stream.type === 'w2' ? 'W-2' : '1099'}
           </span>
@@ -404,7 +405,7 @@ export function PayGuardJobEditor({
             <span className="pg-figure pg-figure-md">{money(ytdGross)}</span>
           </span>
           {onRemove ? (
-            <button
+            <ButtonBase
               type="button"
               onClick={onRemove}
               aria-label={`Remove ${stream.name}`}
@@ -412,7 +413,7 @@ export function PayGuardJobEditor({
               className="pg-icon-btn pg-icon-btn-bordered pg-btn-danger pg-touch-target"
             >
               <Trash2 className="size-3.5" />
-            </button>
+            </ButtonBase>
           ) : null}
         </div>
       </div>
@@ -423,7 +424,7 @@ export function PayGuardJobEditor({
           <div className="flex flex-wrap items-center gap-2 pg-rule-b pg-surface-quiet px-2.5 py-2.5 sm:px-3.5">
             <div className="pg-seg" role="group" aria-label="Employment status">
               {LIFECYCLES.map(({ id, label }) => (
-                <button
+                <ButtonBase
                   key={id}
                   type="button"
                   disabled={stream.locked}
@@ -438,7 +439,7 @@ export function PayGuardJobEditor({
                   className="pg-seg-item"
                 >
                   {label}
-                </button>
+                </ButtonBase>
               ))}
             </div>
 
@@ -589,7 +590,7 @@ export function PayGuardJobEditor({
                    empty months on screen, and in focus mode there is one. A
                    bulk action needs something to be bulk about. */
                 action={ledgerOpen && !stream.locked && months.length > 1 ? (
-                  <button
+                  <ButtonBase
                     type="button"
                     onClick={autofillRemainingMonths}
                     className="pg-btn pg-btn-sm pg-btn-ghost pg-accent"
@@ -598,7 +599,7 @@ export function PayGuardJobEditor({
                     <Sparkles className="size-3.5" />
                     <span className="hidden sm:inline">Autofill empty months</span>
                     <span className="sm:hidden">Autofill</span>
-                  </button>
+                  </ButtonBase>
                 ) : undefined}
               />
 
@@ -660,13 +661,13 @@ export function PayGuardJobEditor({
                           : `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Work miles take money off what counts before it meets your monthly limit.`)
                         : `No elapsed active months in ${year} yet to split this across.`}
                     </p>
-                    <button
+                    <ButtonBase
                       type="button"
                       onClick={() => setHelpOpen(true)}
                       className="text-xs font-semibold pg-accent hover:underline"
                     >
                       How your miles change what counts →
-                    </button>
+                    </ButtonBase>
                   </div>
                 </>
               ) : null}

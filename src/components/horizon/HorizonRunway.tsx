@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 // The runway: the months you have left, and what is waiting in them.
 //
 // This is the one surface in the layout that does not exist anywhere else.
@@ -129,7 +130,7 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
       <ol className="hz-track">
         {stops.map(({ month, fill, extra, room }) => (
           <li key={month} className="hz-stop" data-fill={fill} data-now={month === now || undefined}>
-            <button
+            <ButtonBase
               type="button"
               className="hz-stop-btn"
               onClick={onOpenMonth ? () => onOpenMonth(month) : undefined}
@@ -158,7 +159,7 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
                   : room > 0 ? `${money(room)} left`
                     : `${money(Math.abs(room))} over`}
               </span>
-            </button>
+            </ButtonBase>
           </li>
         ))}
       </ol>

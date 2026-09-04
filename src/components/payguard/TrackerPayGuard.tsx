@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -219,7 +220,7 @@ export function TrackerPayGuard() {
 
           {/* Year — compact filter stepper */}
           <div className="pg-field ml-1 gap-0.5 rounded-full px-1 py-0.5 sm:ml-2">
-            <button
+            <ButtonBase
               type="button"
               disabled={years.indexOf(year) <= 0}
               onClick={() => setUi({ year: years[years.indexOf(year) - 1] })}
@@ -227,9 +228,9 @@ export function TrackerPayGuard() {
               aria-label="Previous year"
             >
               <ChevronLeft className="size-3.5" />
-            </button>
+            </ButtonBase>
             <span className="pg-mono min-w-8 text-center text-xs font-bold pg-fg sm:min-w-10">{year}</span>
-            <button
+            <ButtonBase
               type="button"
               disabled={years.indexOf(year) >= years.length - 1}
               onClick={() => setUi({ year: years[years.indexOf(year) + 1] })}
@@ -237,7 +238,7 @@ export function TrackerPayGuard() {
               aria-label="Next year"
             >
               <ChevronRight className="size-3.5" />
-            </button>
+            </ButtonBase>
           </div>
 
           {/* How much of the year the month lists below show. Beside the
@@ -258,7 +259,7 @@ export function TrackerPayGuard() {
               variant="summary"
             />
 
-            <button
+            <ButtonBase
               type="button"
               className="pg-icon-btn pg-icon-btn-bordered"
               disabled={!canUndo}
@@ -267,9 +268,9 @@ export function TrackerPayGuard() {
               title={canUndo ? `Undo last change (${undoCount})` : 'Nothing to undo'}
             >
               <Undo2 className="size-3.5" />
-            </button>
+            </ButtonBase>
 
-            <button
+            <ButtonBase
               type="button"
               className="pg-icon-btn pg-icon-btn-bordered group relative"
               onClick={() => setSettingsOpen(true)}
@@ -277,7 +278,7 @@ export function TrackerPayGuard() {
               title="Settings"
             >
               <Settings className="size-4 transition-transform duration-300 group-hover:rotate-45" />
-            </button>
+            </ButtonBase>
           </div>
         </div>
       </header>
@@ -316,9 +317,9 @@ export function TrackerPayGuard() {
               onFix={(gap) => focusStream(gap.streamId)}
             />
 
-            <button type="button" className="pg-status-link mt-3" onClick={openAnalysis}>
+            <ButtonBase type="button" className="pg-status-link mt-3" onClick={openAnalysis}>
               {phaseNeedsReview ? 'Confirm your status' : 'See every month'} <ArrowRight className="size-3.5" />
-            </button>
+            </ButtonBase>
           </div>
         </section>
 
@@ -385,7 +386,7 @@ export function TrackerPayGuard() {
               {tabsMode ? streams.map((s) => {
                 const isSelected = selected?.id === s.id;
                 return (
-                  <button
+                  <ButtonBase
                     key={s.id}
                     type="button"
                     onClick={() => setSelectedId(s.id)}
@@ -409,30 +410,30 @@ export function TrackerPayGuard() {
                     )}
                     <span className="max-w-[8.5rem] truncate font-semibold" title={s.name}>{s.name}</span>
                     <span className="pg-tab-amount">{money(streamYearGross(s, year))}</span>
-                  </button>
+                  </ButtonBase>
                 );
               }) : null}
 
               {addingMenuOpen ? (
                 <span className="pg-tab-add">
                   <span className="pg-label">Add</span>
-                  <button type="button" onClick={() => addAndSelect('w2')} className="pg-btn pg-btn-sm pg-text-w2">
+                  <ButtonBase type="button" onClick={() => addAndSelect('w2')} className="pg-btn pg-btn-sm pg-text-w2">
                     W-2 Job
-                  </button>
-                  <button type="button" onClick={() => addAndSelect('ten99')} className="pg-btn pg-btn-sm pg-text-se">
+                  </ButtonBase>
+                  <ButtonBase type="button" onClick={() => addAndSelect('ten99')} className="pg-btn pg-btn-sm pg-text-se">
                     1099 Work
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     onClick={() => setAddingMenuOpen(false)}
                     aria-label="Cancel"
                     className="pg-icon-btn pg-touch-target size-6"
                   >
                     <X className="size-3.5" />
-                  </button>
+                  </ButtonBase>
                 </span>
               ) : (
-                <button
+                <ButtonBase
                   type="button"
                   onClick={() => setAddingMenuOpen(true)}
                   className="pg-tab pg-tab-action shrink-0"
@@ -440,7 +441,7 @@ export function TrackerPayGuard() {
                 >
                   <Plus className="size-4" />
                   <span>Add Job</span>
-                </button>
+                </ButtonBase>
               )}
             </div>
           </div>
@@ -471,12 +472,12 @@ export function TrackerPayGuard() {
                 against SSA thresholds.
               </p>
               <div className="mt-1 flex flex-wrap justify-center gap-2">
-                <button type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndSelect('w2')}>
+                <ButtonBase type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndSelect('w2')}>
                   <Plus className="size-3.5" /> Add W-2 Job
-                </button>
-                <button type="button" className="pg-btn pg-btn-lg" onClick={() => addAndSelect('ten99')}>
+                </ButtonBase>
+                <ButtonBase type="button" className="pg-btn pg-btn-lg" onClick={() => addAndSelect('ten99')}>
                   <Plus className="size-3.5" /> Add 1099 Work
-                </button>
+                </ButtonBase>
               </div>
             </div>
           )}
@@ -489,7 +490,7 @@ export function TrackerPayGuard() {
       {/* ---------------- Mobile navigation ---------------- */}
       <nav className="pg-bottom-nav" aria-label="Sections">
         {MOBILE_TABS.map(({ id, label, Icon }) => (
-          <button
+          <ButtonBase
             key={id}
             type="button"
             data-active={mobileTab === id}
@@ -501,7 +502,7 @@ export function TrackerPayGuard() {
               <Icon className="size-5" />
             </span>
             <span>{label}</span>
-          </button>
+          </ButtonBase>
         ))}
       </nav>
 
@@ -543,7 +544,7 @@ function MonthAttention({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => voi
       <TriangleAlert className="size-4 shrink-0" aria-hidden="true" />
       <div className="pg-attention-rail">
         {flags.map((flag) => (
-          <button
+          <ButtonBase
             key={flag.month + flag.kind + flag.text}
             type="button"
             className="pg-attention-chip"
@@ -553,7 +554,7 @@ function MonthAttention({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => voi
           >
             <span className="pg-attention-month">{shortMonthName(flag.month).toUpperCase()}</span>
             <span>{flag.text}</span>
-          </button>
+          </ButtonBase>
         ))}
       </div>
     </section>

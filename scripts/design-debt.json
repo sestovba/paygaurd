@@ -122,12 +122,6 @@
   "src/components/calc20/TwpStatusControl.tsx": {
     "raw-button": 1
   },
-  "src/components/horizon/HorizonRunway.tsx": {
-    "raw-button": 1
-  },
-  "src/components/horizon/TrackerHorizon.tsx": {
-    "raw-button": 3
-  },
   "src/components/overview/PagesShell.tsx": {
     "raw-button": 6
   },
@@ -137,35 +131,11 @@
   "src/components/overview/WorkspaceShell.tsx": {
     "raw-button": 15
   },
-  "src/components/payguard/PayGuardAnalysis.tsx": {
-    "raw-button": 4
-  },
-  "src/components/payguard/PayGuardChart.tsx": {
-    "raw-button": 2
-  },
-  "src/components/payguard/PayGuardJobEditor.tsx": {
-    "raw-button": 7
-  },
-  "src/components/payguard/PayGuardPrimitives.tsx": {
-    "raw-button": 1
-  },
-  "src/components/payguard/TrackerPayGuard.tsx": {
-    "raw-button": 14
-  },
   "src/components/plan/TrackerPlan.tsx": {
     "raw-button": 15
   },
   "src/components/ui/legacy.tsx": {
     "raw-button": 6
-  },
-  "src/components/workrecord/TrackerWorkRecord.tsx": {
-    "raw-button": 13
-  },
-  "src/components/workrecord/WorkRecordMonths.tsx": {
-    "raw-button": 1
-  },
-  "src/components/workrecord/WorkRecordStatus.tsx": {
-    "raw-button": 1
   },
   "src/index.css": {
     "literal-size": 10,

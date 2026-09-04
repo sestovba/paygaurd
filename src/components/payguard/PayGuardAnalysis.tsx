@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 import { useMemo, useState } from 'react';
 import { CalendarOff, ShieldCheck } from 'lucide-react';
 import { countableFor, monthStatus, nearLimit } from '../../domain/earnings';
@@ -219,7 +220,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
               <div className="pg-view-tools justify-self-start sm:justify-self-end" role="toolbar" aria-label="By month view">
                 <div className="pg-seg w-fit" role="group" aria-label="Layout">
                   {MODES.map((m) => (
-                    <button
+                    <ButtonBase
                       key={m.id}
                       type="button"
                       data-on={mode === m.id}
@@ -228,10 +229,10 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                       className="pg-seg-item"
                     >
                       {m.label}
-                    </button>
+                    </ButtonBase>
                   ))}
                 </div>
-                <button
+                <ButtonBase
                   type="button"
                   className="pg-filter-chip"
                   data-on={activeOnly || undefined}
@@ -240,7 +241,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                 >
                   <span className="pg-filter-chip-mark" aria-hidden="true" />
                   Active only
-                </button>
+                </ButtonBase>
               </div>
             )}
           </div>
@@ -302,9 +303,9 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
               This shows months with earnings or a trial work month. Add earnings above, or
               turn off Active only to see every month on this list.
             </span>
-            <button type="button" className="pg-btn mt-1" onClick={() => setActiveOnly(false)}>
+            <ButtonBase type="button" className="pg-btn mt-1" onClick={() => setActiveOnly(false)}>
               Show every month
-            </button>
+            </ButtonBase>
           </div>
         ) : mode === 'table' ? (
           /* Full bleed: the card's own border is the table's border. */
@@ -445,7 +446,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                 : 'Use your hourly rate to find a weekly target, including an extra-paycheck month.'}
             </p>
           </div>
-          <button
+          <ButtonBase
             type="button"
             onClick={() => {
               if (needsTwpConfirmation && onOpenStatus) onOpenStatus();
@@ -458,7 +459,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
             {needsTwpConfirmation && onOpenStatus
               ? 'Set my limit'
               : simulatorOpen ? 'Close' : 'Plan my hours'}
-          </button>
+          </ButtonBase>
         </div>
 
         {simulatorOpen ? (

@@ -1,3 +1,4 @@
+import { ButtonBase } from '../../design-system';
 // Small presentational pieces shared by the PayGuard screens. They exist so
 // the same readout doesn't get re-typed with slightly different font sizes and
 // paddings in three files — the sizes live in payguard.css, not here.
@@ -67,7 +68,7 @@ export function SectionHead({
 }) {
   return (
     <div className="pg-section-head">
-      <button
+      <ButtonBase
         type="button"
         onClick={onToggle}
         aria-expanded={open}
@@ -78,7 +79,7 @@ export function SectionHead({
         />
         <span className="pg-section-title">{label}</span>
         {meta ? <span className="pg-section-meta hidden xs:block">{meta}</span> : null}
-      </button>
+      </ButtonBase>
       {action ? <span className="flex shrink-0 items-center">{action}</span> : null}
     </div>
   );
