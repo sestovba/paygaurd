@@ -21,6 +21,7 @@ import { Detail } from './detail';
 import type { DetailRequest } from './detail';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
+import { ButtonBase } from '../../design-system';
 function pageLabel(page: PageId): string {
   return page === 'overview' ? 'Overview' : page === 'income' ? 'Income' : 'Your limit';
 }
@@ -111,7 +112,7 @@ export function PagesShell() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         brand={(
-          <button
+          <ButtonBase
             type="button"
             onClick={() => navigate('overview')}
             className="-mx-1 flex w-full items-center gap-3 rounded-xl px-1 py-1.5 text-left hover:bg-surface-2"
@@ -128,10 +129,10 @@ export function PagesShell() {
                   opens it once a month can re-read it without asking. */}
               <span className="ov-eyebrow block leading-tight">Stay under the limit</span>
             </span>
-          </button>
+          </ButtonBase>
         )}
         action={(
-          <button
+          <ButtonBase
             type="button"
             onClick={() => setDetail({ kind: 'stream', streamId: addStream('w2') })}
             className="btn-primary flex w-full items-center justify-center gap-2"
@@ -141,10 +142,10 @@ export function PagesShell() {
                 action read as a third nav item that happened to be green. */}
             <Plus className="size-[18px] shrink-0" />
             Add income
-          </button>
+          </ButtonBase>
         )}
         footer={(
-          <button
+          <ButtonBase
             type="button"
             onClick={() => setDetail({ kind: 'settings' })}
             className="nav-item"
@@ -159,21 +160,21 @@ export function PagesShell() {
                 what the reference does not use. */}
             <Settings className="size-[18px] shrink-0" />
             Settings
-          </button>
+          </ButtonBase>
         )}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="app-bar sticky top-0 z-10 border-b">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-10">
-            <button
+            <ButtonBase
               type="button"
               aria-label="Open menu"
               onClick={() => setSidebarOpen(true)}
               className="icon-btn grid border border-border bg-surface text-muted-foreground hover:bg-muted lg:hidden"
             >
               <Menu className="size-5" />
-            </button>
+            </ButtonBase>
             {/* The brand appears here ONLY where the sidebar does not.
                 Above lg both were on screen at once, six inches apart, naming
                 the same product twice — so it went. But removing it outright
@@ -198,7 +199,7 @@ export function PagesShell() {
             <p className="hidden min-w-0 flex-1 truncate text-base font-semibold lg:block">{pageLabel(page)}</p>
             <div className="flex shrink-0 items-center gap-2">
               <div className="flex items-center gap-1 rounded-full border border-border bg-surface px-1 py-1">
-                <button
+                <ButtonBase
                   type="button"
                   aria-label="Previous year"
                   disabled={yearIndex <= 0}
@@ -206,9 +207,9 @@ export function PagesShell() {
                   className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
                 >
                   <ChevronLeft className="size-4" />
-                </button>
+                </ButtonBase>
                 <span className="num px-1 text-sm font-semibold">{ui.year}</span>
-                <button
+                <ButtonBase
                   type="button"
                   aria-label="Next year"
                   disabled={yearIndex >= years.length - 1}
@@ -216,7 +217,7 @@ export function PagesShell() {
                   className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
                 >
                   <ChevronRight className="size-4" />
-                </button>
+                </ButtonBase>
               </div>
               <NotificationsBell
                 open={notificationsOpen}

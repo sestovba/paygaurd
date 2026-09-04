@@ -5,6 +5,7 @@
 
 import { CheckIcon, CloseIcon } from './Icons';
 
+import { ButtonBase } from '../../design-system';
 export type TwpState = 'unknown' | 'remaining' | 'complete';
 
 /* Not "TWP remains" / "TWP used up". The abbreviation is the thing the app
@@ -37,7 +38,7 @@ export function TwpStatusControl({
       {OPTIONS.map(({ state: optionState, label }) => {
         const on = state === optionState;
         return (
-          <button
+          <ButtonBase
             className={variant === 'seg' ? 'seg__btn' + (on ? ' seg__btn--on' : '') : undefined}
             key={optionState}
             type="button"
@@ -50,7 +51,7 @@ export function TwpStatusControl({
               <CloseIcon className="twp-status-icon twp-status-icon--bad" size={14} />
             ) : null}
             {label}
-          </button>
+          </ButtonBase>
         );
       })}
     </div>

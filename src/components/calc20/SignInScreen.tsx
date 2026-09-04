@@ -5,6 +5,7 @@ import { useAppearance } from './appearance';
 import { AppleMark, GoogleMark } from '../signin/marks';
 import { providerOrder, SIGN_IN_COPY as T, useSignInForm } from '../signin/form';
 
+import { ButtonBase } from '../../design-system';
 /**
  * The same gate as components/SignInScreen.tsx, in Calc20's skin.
  *
@@ -29,7 +30,7 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
 
         <div className="signin-actions">
           {order.map((provider, index) => (
-            <button
+            <ButtonBase
               key={provider}
               type="button"
               className="signin-provider"
@@ -39,7 +40,7 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
             >
               {provider === 'apple' ? <AppleMark /> : <GoogleMark />}
               <span>{provider === 'apple' ? T.apple : T.google}</span>
-            </button>
+            </ButtonBase>
           ))}
         </div>
 
@@ -65,9 +66,9 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
           <div className="signin-row">
             <div className="signin-label-row">
               <label className="signin-label" htmlFor="c20-signin-password">{T.passwordLabel}</label>
-              <button type="button" className="signin-reveal" onClick={form.togglePassword}>
+              <ButtonBase type="button" className="signin-reveal" onClick={form.togglePassword}>
                 {form.passwordVisible ? T.hide : T.show}
-              </button>
+              </ButtonBase>
             </div>
             <input
               id="c20-signin-password"
@@ -84,14 +85,14 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
             <p className="signin-hint" id="c20-signin-password-hint">{T.passwordHint}</p>
           </div>
 
-          <button type="submit" className="signin-submit" disabled={auth.pending !== null}>
+          <ButtonBase type="submit" className="signin-submit" disabled={auth.pending !== null}>
             {form.submitLabel}
-          </button>
+          </ButtonBase>
           <p className="signin-hint">{T.submitNote}</p>
 
-          <button type="button" className="signin-link" onClick={form.forgot} disabled={form.resetting}>
+          <ButtonBase type="button" className="signin-link" onClick={form.forgot} disabled={form.resetting}>
             {form.resetting ? T.forgotBusy : T.forgot}
-          </button>
+          </ButtonBase>
         </form>
 
         {form.message ? (
@@ -105,9 +106,9 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
         ) : null}
 
         <div className="signin-local">
-          <button type="button" className="signin-local-btn" onClick={auth.continueWithoutAccount}>
+          <ButtonBase type="button" className="signin-local-btn" onClick={auth.continueWithoutAccount}>
             {T.localTitle}
-          </button>
+          </ButtonBase>
           <p className="signin-note">{T.localNote}</p>
         </div>
       </div>

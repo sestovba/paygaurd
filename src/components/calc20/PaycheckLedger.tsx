@@ -13,6 +13,7 @@ import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedul
 import { ChevronRightIcon, PlusIcon, TrashIcon } from './Icons';
 import { NumericExprInput } from './NumericExprInput';
 
+import { ButtonBase } from '../../design-system';
 function formatDate(key: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(key);
   if (!m) return key;
@@ -53,7 +54,7 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
 
   return (
     <div className={'ledger' + (open ? ' ledger--open' : '')}>
-      <button
+      <ButtonBase
         className="ledger__toggle"
         type="button"
         aria-expanded={open}
@@ -70,7 +71,7 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
           className={'ledger__chevron' + (open ? ' ledger__chevron--open' : '')}
           size={16}
         />
-      </button>
+      </ButtonBase>
 
       {open ? (
       <div className="ledger__body">
@@ -81,14 +82,14 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
                 <span className="ledger__date">{formatDate(check.date)}</span>
                 <span className="ledger__gross">{money(check.gross)}</span>
                 <span className="ledger__hours">{check.hours ? check.hours + ' h' : ''}</span>
-                <button
+                <ButtonBase
                   className="ledger__remove"
                   type="button"
                   aria-label={`Remove paycheck from ${formatDate(check.date)}`}
                   onClick={() => removePaycheck(stream.id, check.id)}
                 >
                   <TrashIcon size={15} />
-                </button>
+                </ButtonBase>
               </div>
             ))}
           </div>
@@ -132,14 +133,14 @@ export function PaycheckLedger({ stream }: { stream: Stream }) {
               }
             }}
           />
-          <button
+          <ButtonBase
             className="ledger__add-button"
             type="button"
             disabled={!canAdd}
             onClick={submit}
           >
             <PlusIcon size={14} /> Add
-          </button>
+          </ButtonBase>
         </div>
         {stream.hourlyRate ? (
           <p className="help-note">

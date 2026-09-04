@@ -35,6 +35,7 @@ import { TwpWizard } from '../TwpWizard';
 import { PrecisionLine } from '../PrecisionLine';
 import '../../styles/plan.css';
 
+import { ButtonBase } from '../../design-system';
 /** One tap of the hours stepper — about half a shift. */
 const HOUR_STEP = 4;
 
@@ -192,14 +193,14 @@ export function TrackerPlan() {
     <div className="pl" data-chrome-root data-tone={tone}>
       <header className="pl-top">
         <b className="pl-top-month">{longMonthName(asOf)}</b>
-        <button
+        <ButtonBase
           type="button"
           className="pl-icon"
           aria-label="Settings"
           onClick={() => setSettingsOpen(true)}
         >
           <Joystick size={22} />
-        </button>
+        </ButtonBase>
       </header>
 
       <main className="pl-frame">
@@ -300,7 +301,7 @@ function Answer({
         <p className="pl-answer-sub">
           Not yours — we do not know your limit yet. A few questions and these become your own.
         </p>
-        <button type="button" className="pl-do" onClick={onAnswerStatus}>Answer a few questions</button>
+        <ButtonBase type="button" className="pl-do" onClick={onAnswerStatus}>Answer a few questions</ButtonBase>
       </section>
     );
   }
@@ -387,7 +388,7 @@ function Answer({
       {gaps.length ? (
         <div className="pl-chips">
           {gaps.slice(0, 2).map((gap) => (
-            <button
+            <ButtonBase
               key={gap.label}
               type="button"
               className="pl-quest"
@@ -395,7 +396,7 @@ function Answer({
             >
               <span className="pl-quest-plus" aria-hidden="true">+</span>
               <span className="pl-quest-label">{gap.label}</span>
-            </button>
+            </ButtonBase>
           ))}
         </div>
       ) : null}
@@ -525,7 +526,7 @@ function TryIt({ capacity, hours: extra, onHours: setExtra }: {
   return (
     <section className="pl-try" data-tone={extra > 0 ? outcome.tone : 'idle'}>
       <div className="pl-stepper">
-        <button
+        <ButtonBase
           type="button"
           className="pl-step"
           aria-label={`${HOUR_STEP} fewer hours`}
@@ -533,12 +534,12 @@ function TryIt({ capacity, hours: extra, onHours: setExtra }: {
           onClick={() => setExtra((n) => Math.max(0, n - HOUR_STEP))}
         >
           <Minus className="size-5" aria-hidden="true" />
-        </button>
+        </ButtonBase>
         <span className="pl-stepper-value" aria-live="polite">
           <b>{extra}</b>
           <span>more hours</span>
         </span>
-        <button
+        <ButtonBase
           type="button"
           className="pl-step"
           aria-label={`${HOUR_STEP} more hours`}
@@ -546,7 +547,7 @@ function TryIt({ capacity, hours: extra, onHours: setExtra }: {
           onClick={() => setExtra((n) => Math.min(ceiling, n + HOUR_STEP))}
         >
           <Plus className="size-5" aria-hidden="true" />
-        </button>
+        </ButtonBase>
       </div>
 
       {extra > 0 ? (
@@ -701,7 +702,7 @@ function LogPay({ month, onOpenStream, onSaved }: {
 
       <div className="pl-seg" role="radiogroup" aria-label="Where the number came from">
         {(['net', 'hours', 'gross'] as Route[]).map((r) => (
-          <button
+          <ButtonBase
             key={r}
             type="button"
             role="radio"
@@ -711,7 +712,7 @@ function LogPay({ month, onOpenStream, onSaved }: {
             onClick={() => { setRoute(r); setValue(''); }}
           >
             {ROUTE_LABEL[r]}
-          </button>
+          </ButtonBase>
         ))}
       </div>
 
@@ -803,9 +804,9 @@ function LogPay({ month, onOpenStream, onSaved }: {
           so the lever visibly does something and the number on the button is
           the number the decision is made on. */}
       <div className="pl-row">
-        <button type="button" className="pl-do pl-do-primary" disabled={!estimate} onClick={save}>
+        <ButtonBase type="button" className="pl-do pl-do-primary" disabled={!estimate} onClick={save}>
           {counted != null ? `Add ${money(counted)}` : 'Add'}
-        </button>
+        </ButtonBase>
       </div>
     </section>
   );
@@ -920,7 +921,7 @@ function EntryLog({ month, onOpenMonth }: {
           a sentence, which is the one thing this list is scanned for. */}
       <div className="pl-log-list">
         {shown.map((row) => (
-          <button
+          <ButtonBase
             type="button"
             key={row.key}
             className="pl-log-row"
@@ -943,13 +944,13 @@ function EntryLog({ month, onOpenMonth }: {
                 {row.miles > 0 ? ` · ${row.miles} work miles` : ''}
               </span>
             </span>
-          </button>
+          </ButtonBase>
         ))}
       </div>
       {rows.length > shown.length || all ? (
-        <button type="button" className="pl-plain" onClick={() => setAll(!all)}>
+        <ButtonBase type="button" className="pl-plain" onClick={() => setAll(!all)}>
           {all ? 'Fewer' : `All ${rows.length}`}
-        </button>
+        </ButtonBase>
       ) : null}
     </section>
   );
@@ -970,7 +971,7 @@ function Sources({ month, onOpenStream }: {
       <Plate>Work</Plate>
       <div className="pl-sources">
         {active.map((s) => (
-          <button
+          <ButtonBase
             type="button"
             key={s.id}
             className="pl-source"
@@ -984,7 +985,7 @@ function Sources({ month, onOpenStream }: {
               <span className="pl-source-note">{describe(s, month)}</span>
             </span>
             <span className="pl-source-take">{money(grossFor(s, month))}</span>
-          </button>
+          </ButtonBase>
         ))}
       </div>
       <AddWork onAdded={onOpenStream} />
@@ -1010,13 +1011,13 @@ function AddWork({ onAdded }: { onAdded: (id: string) => void }) {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
-      <button type="button" className="pl-add" onClick={() => setOpen(true)}>
+      <ButtonBase type="button" className="pl-add" onClick={() => setOpen(true)}>
         <svg width="14" height="14" viewBox="0 0 14 14" shapeRendering="crispEdges" aria-hidden="true">
           <rect x="5" y="0" width="4" height="14" fill="currentColor" />
           <rect x="0" y="5" width="14" height="4" fill="currentColor" />
         </svg>
         Add work
-      </button>
+      </ButtonBase>
     );
   }
   return <WorkChoices onAdded={onAdded} onCancel={() => setOpen(false)} />;
@@ -1040,11 +1041,11 @@ function WorkChoices({ onAdded, onCancel }: {
 
   return (
     <div className="pl-choices">
-      <button type="button" className="pl-choice" onClick={() => add('w2', 'My job')}>
+      <ButtonBase type="button" className="pl-choice" onClick={() => add('w2', 'My job')}>
         <Chest size={26} />
         <span>A job that pays me</span>
-      </button>
-      <button
+      </ButtonBase>
+      <ButtonBase
         type="button"
         className="pl-choice"
         onClick={() => add('ten99', 'Delivery driving')}
@@ -1054,13 +1055,13 @@ function WorkChoices({ onAdded, onCancel }: {
           Driving or delivery
           <i>Uber Eats, DoorDash, Amazon Flex, Instacart, Lyft</i>
         </span>
-      </button>
-      <button type="button" className="pl-choice" onClick={() => add('ten99', 'My own work')}>
+      </ButtonBase>
+      <ButtonBase type="button" className="pl-choice" onClick={() => add('ten99', 'My own work')}>
         <Chest size={26} />
         <span>Work I do for myself</span>
-      </button>
+      </ButtonBase>
       {onCancel ? (
-        <button type="button" className="pl-plain" onClick={onCancel}>Cancel</button>
+        <ButtonBase type="button" className="pl-plain" onClick={onCancel}>Cancel</ButtonBase>
       ) : null}
     </div>
   );

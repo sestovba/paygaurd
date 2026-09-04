@@ -32,6 +32,7 @@ import { canSync, saveConsentRecord } from '../../state/cloudSync';
 import { useSlabBounce } from './useSlabBounce';
 import { useAppearance } from './appearance';
 
+import { ButtonBase } from '../../design-system';
 /**
  * Calc20 — the sga_calc20 layout, running on PayGuard's data.
  *
@@ -144,7 +145,7 @@ function TrackerApp({
               aside={!ui.streamsOpen ? activeAside : undefined}
               action={ui.streamsOpen ? (
                 <div className="stream-section-actions">
-                  <button
+                  <ButtonBase
                     className="icon-button icon-button--muted"
                     type="button"
                     aria-label={allCollapsed ? 'Expand all' : 'Collapse all'}
@@ -160,7 +161,7 @@ function TrackerApp({
                     }}
                   >
                     {allCollapsed ? <ExpandAllIcon size={17} /> : <CollapseAllIcon size={17} />}
-                  </button>
+                  </ButtonBase>
                   {/* layout changer — hidden; restore by removing `false &&` */}
                   {false && (
                   <StreamViewMenu
@@ -272,13 +273,13 @@ function TrackerApp({
               ) : null}
             </div>
             <div className="app-empty__actions">
-              <button className="filled-button" type="button" onClick={() => setStreamSettingsId(addStream('w2'))}>
+              <ButtonBase className="filled-button" type="button" onClick={() => setStreamSettingsId(addStream('w2'))}>
                 <PlusIcon size={16} /> W-2 job
-              </button>
-              <button className="tonal-button" type="button" onClick={() => setStreamSettingsId(addStream('ten99'))}>
+              </ButtonBase>
+              <ButtonBase className="tonal-button" type="button" onClick={() => setStreamSettingsId(addStream('ten99'))}>
                 <PlusIcon size={16} /> 1099 work
-              </button>
-              <button
+              </ButtonBase>
+              <ButtonBase
                 className="text-button"
                 type="button"
                 onClick={() => {
@@ -287,7 +288,7 @@ function TrackerApp({
                 }}
               >
                 Import tracker JSON
-              </button>
+              </ButtonBase>
             </div>
           </div>
         )}
@@ -336,7 +337,7 @@ function StreamViewMenu({
 
   return (
     <>
-      <button
+      <ButtonBase
         ref={anchor.triggerRef}
         className="icon-button icon-button--muted"
         type="button"
@@ -346,7 +347,7 @@ function StreamViewMenu({
         onClick={anchor.toggle}
       >
         {currentOption?.icon}
-      </button>
+      </ButtonBase>
       <AnchoredPopover
         anchor={anchor}
         width={240}
@@ -365,7 +366,7 @@ function StreamViewMenu({
           Customize layout
         </label>
         {options.map((option) => (
-          <button
+          <ButtonBase
             className={
               'view-option'
               + (option.id === current ? ' view-option--on' : '')
@@ -387,7 +388,7 @@ function StreamViewMenu({
             {option.id === current ? (
               <CheckIcon className="view-option__check" size={16} />
             ) : null}
-          </button>
+          </ButtonBase>
         ))}
       </AnchoredPopover>
     </>
@@ -425,7 +426,7 @@ function Section({
       onAnimationEnd={onAnimationEnd}
     >
       <div className="section__bar">
-        <button className="section__head" type="button" aria-expanded={open} onClick={onToggle}>
+        <ButtonBase className="section__head" type="button" aria-expanded={open} onClick={onToggle}>
           <span className="disclosure" aria-hidden="true">
             <ChevronDownIcon
               className={'section__chevron' + (open ? '' : ' section__chevron--closed')}
@@ -434,7 +435,7 @@ function Section({
           </span>
           <span className="section__title">{title}</span>
           {aside ? <span className="section__aside">{aside}</span> : null}
-        </button>
+        </ButtonBase>
         {action ? <div className="section__actions">{action}</div> : null}
       </div>
       {open ? children : null}

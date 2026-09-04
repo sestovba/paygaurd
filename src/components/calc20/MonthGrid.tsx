@@ -16,6 +16,7 @@ import { NumericExprInput } from './NumericExprInput';
 import { useViewportBand } from './useIsWide';
 import { LockIcon } from './Icons';
 
+import { ButtonBase } from '../../design-system';
 type FieldId = 'gross' | 'hours' | 'miles';
 
 interface FieldDef { id: FieldId; label: string; placeholder: string; suffix?: string }
@@ -139,7 +140,7 @@ export function MonthGrid({
             .join(' · ');
 
           return (
-            <button
+            <ButtonBase
               className={cls}
               key={month}
               type="button"
@@ -160,7 +161,7 @@ export function MonthGrid({
                 {amount ? money(amount) : <span className="month-cell__blank">—</span>}
               </div>
               {secondary ? <div className="month-cell__read-meta">{secondary}</div> : null}
-            </button>
+            </ButtonBase>
           );
         }
 
@@ -204,9 +205,9 @@ export function MonthGrid({
               <div className="month-cell__note">Set by the paycheck ledger</div>
             ) : null}
             {!editing ? (
-              <button className="month-cell__done" type="button" onClick={() => onEditMonth(null)}>
+              <ButtonBase className="month-cell__done" type="button" onClick={() => onEditMonth(null)}>
                 Done
-              </button>
+              </ButtonBase>
             ) : null}
           </div>
         );

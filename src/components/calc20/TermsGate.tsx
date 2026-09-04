@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { TermsContent } from './TermsContent';
 
+import { ButtonBase } from '../../design-system';
 export function TermsGate({ onAgree }: { onAgree: () => void }) {
   const [checked, setChecked] = useState(false);
 
@@ -33,14 +34,14 @@ export function TermsGate({ onAgree }: { onAgree: () => void }) {
             />
             <span>I've read and agree to these terms.</span>
           </label>
-          <button
+          <ButtonBase
             className="signin-submit"
             type="button"
             disabled={!checked}
             onClick={onAgree}
           >
             Agree & continue
-          </button>
+          </ButtonBase>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { formatMonth, shortMonthName } from '../../domain/months';
 import { attentionFlags } from '../../domain/attention';
 import { WarningIcon } from './Icons';
 
+import { ButtonBase } from '../../design-system';
 export function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data } = useTracker();
   const { months } = useMonthScope('many');
@@ -26,7 +27,7 @@ export function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =>
       <WarningIcon className="hotbar__icon" size={15} />
       <div className="hotbar__rail">
         {flags.map((flag) => (
-          <button
+          <ButtonBase
             className={'hotbar__chip hotbar__chip--' + flag.kind}
             key={flag.month + flag.kind + flag.text}
             type="button"
@@ -35,7 +36,7 @@ export function MonthHotbar({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =>
           >
             <span className="hotbar__chip-month">{shortMonthName(flag.month).toUpperCase()}</span>
             <span className="hotbar__chip-text">{flag.text}</span>
-          </button>
+          </ButtonBase>
         ))}
       </div>
     </div>

@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { ButtonBase } from '../../design-system';
 export function EditableName({
   value,
   onCommit,
@@ -54,13 +55,13 @@ export function EditableName({
   }
 
   return (
-    <button
+    <ButtonBase
       className={'name-button ' + (className ?? '')}
       type="button"
       title="Click to rename"
       onClick={() => setEditing(true)}
     >
       {value}
-    </button>
+    </ButtonBase>
   );
 }

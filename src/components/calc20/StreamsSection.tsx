@@ -29,6 +29,7 @@ import { useIsHandset, useViewportBand } from './useIsWide';
 import { layoutFor, useMonthScope } from './state';
 import { useSlabBounce } from './useSlabBounce';
 
+import { ButtonBase } from '../../design-system';
 type FieldId = 'gross' | 'hours' | 'miles';
 
 const DEFAULT_FIELDS: Record<Stream['type'], FieldId[]> = {
@@ -73,7 +74,7 @@ function TypeBadge({ stream }: { stream: Stream }) {
 
   return (
     <>
-      <button
+      <ButtonBase
         ref={anchor.triggerRef}
         className={'stream-card__type' + (stream.type === 'w2' ? ' stream-card__type--w2' : '')}
         type="button"
@@ -83,7 +84,7 @@ function TypeBadge({ stream }: { stream: Stream }) {
         onClick={anchor.toggle}
       >
         {SOURCE_SHORT[stream.type]}
-      </button>
+      </ButtonBase>
       <AnchoredPopover
         anchor={anchor}
         width={160}
@@ -92,22 +93,22 @@ function TypeBadge({ stream }: { stream: Stream }) {
         title="What kind of work"
         role="menu"
       >
-        <button
+        <ButtonBase
           type="button"
           role="menuitem"
           onClick={() => { anchor.close(); updateStream(stream.id, { type: 'w2' }); }}
         >
           <span className="menu-label">{SOURCE_SHORT.w2}</span>
           {stream.type === 'w2' ? <CheckIcon size={15} /> : null}
-        </button>
-        <button
+        </ButtonBase>
+        <ButtonBase
           type="button"
           role="menuitem"
           onClick={() => { anchor.close(); updateStream(stream.id, { type: 'ten99' }); }}
         >
           <span className="menu-label">{SOURCE_SHORT.ten99}</span>
           {stream.type === 'ten99' ? <CheckIcon size={15} /> : null}
-        </button>
+        </ButtonBase>
       </AnchoredPopover>
     </>
   );
@@ -123,7 +124,7 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
   return (
     <>
       {asChip ? (
-        <button
+        <ButtonBase
           ref={anchor.triggerRef}
           className={'archived-chip' + (anchor.open ? ' archived-chip--open' : '')}
           type="button"
@@ -140,9 +141,9 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
             {stream.lifecycle === 'inactive' ? 'Paused' : 'Ended'}
           </span>
           <span className="archived-chip__total">{money(streamYearTotal(stream, ui.year))}</span>
-        </button>
+        </ButtonBase>
       ) : (
-        <button
+        <ButtonBase
           ref={anchor.triggerRef}
           className="icon-button icon-button--muted"
           type="button"
@@ -152,7 +153,7 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
           onClick={anchor.toggle}
         >
           <MoreIcon size={17} />
-        </button>
+        </ButtonBase>
       )}
 
       <AnchoredPopover
@@ -165,55 +166,55 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
       >
         {view === 'type' ? (
           <>
-            <button type="button" className="stream-menu__back" onClick={() => setView('main')}>
+            <ButtonBase type="button" className="stream-menu__back" onClick={() => setView('main')}>
               <ChevronLeftIcon size={16} /><span>Back</span>
-            </button>
-            <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { type: 'w2' }); }}>
+            </ButtonBase>
+            <ButtonBase type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { type: 'w2' }); }}>
               <span className="menu-label">{SOURCE_SHORT.w2}</span>
               {stream.type === 'w2' ? <CheckIcon size={15} /> : null}
-            </button>
-            <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { type: 'ten99' }); }}>
+            </ButtonBase>
+            <ButtonBase type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { type: 'ten99' }); }}>
               <span className="menu-label">{SOURCE_SHORT.ten99}</span>
               {stream.type === 'ten99' ? <CheckIcon size={15} /> : null}
-            </button>
+            </ButtonBase>
           </>
         ) : (
           <>
-            <button type="button" role="menuitem" onClick={() => { close(); onSettings(); }}>
+            <ButtonBase type="button" role="menuitem" onClick={() => { close(); onSettings(); }}>
               <SlidersIcon size={17} /><span>Settings</span>
-            </button>
-            <button type="button" role="menuitem" onClick={() => setView('type')}>
+            </ButtonBase>
+            <ButtonBase type="button" role="menuitem" onClick={() => setView('type')}>
               <span className="menu-label">Type</span>
               <span className="stream-menu__hint">{SOURCE_SHORT[stream.type]}</span>
               <ChevronRightIcon size={15} />
-            </button>
-            <button type="button" role="menuitem" onClick={() => { close(); duplicateStream(stream.id); }}>
+            </ButtonBase>
+            <ButtonBase type="button" role="menuitem" onClick={() => { close(); duplicateStream(stream.id); }}>
               <CopyIcon size={17} /><span>Duplicate</span>
-            </button>
-            <button
+            </ButtonBase>
+            <ButtonBase
               type="button"
               role="menuitem"
               onClick={() => { close(); updateStream(stream.id, { locked: !stream.locked }); }}
             >
               {stream.locked ? <UnlockIcon size={17} /> : <LockIcon size={17} />}
               <span>{stream.locked ? 'Unlock' : 'Lock'}</span>
-            </button>
+            </ButtonBase>
             {stream.lifecycle !== 'inactive' ? (
-              <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { lifecycle: 'inactive' }); }}>
+              <ButtonBase type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { lifecycle: 'inactive' }); }}>
                 <PauseIcon size={17} /><span>Mark paused</span>
-              </button>
+              </ButtonBase>
             ) : null}
             {stream.lifecycle !== 'completed' ? (
-              <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { lifecycle: 'completed' }); }}>
+              <ButtonBase type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { lifecycle: 'completed' }); }}>
                 <ArchiveIcon size={17} /><span>Mark ended</span>
-              </button>
+              </ButtonBase>
             ) : null}
             {stream.lifecycle !== 'active' ? (
-              <button type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { lifecycle: 'active' }); }}>
+              <ButtonBase type="button" role="menuitem" onClick={() => { close(); updateStream(stream.id, { lifecycle: 'active' }); }}>
                 <ArchiveRestoreIcon size={17} /><span>Return to ongoing</span>
-              </button>
+              </ButtonBase>
             ) : null}
-            <button
+            <ButtonBase
               className="menu-danger"
               type="button"
               role="menuitem"
@@ -222,7 +223,7 @@ function StreamMenu({ stream, asChip, onSettings }: { stream: Stream; asChip?: b
               onClick={() => { close(); removeStream(stream.id); }}
             >
               <TrashIcon size={17} /><span>Remove</span>
-            </button>
+            </ButtonBase>
           </>
         )}
       </AnchoredPopover>
@@ -268,7 +269,7 @@ function MonthColAuto() {
         />
         <span className="col-auto__name">Auto</span>
       </label>
-      <button
+      <ButtonBase
         className="col-auto__menu"
         type="button"
         aria-expanded={dropOpen}
@@ -282,7 +283,7 @@ function MonthColAuto() {
           className={'col-auto__chevron' + (dropOpen ? ' col-auto__chevron--open' : '')}
           size={12}
         />
-      </button>
+      </ButtonBase>
       {dropOpen ? (
         <div className="col-auto__drop" onClick={(event) => event.stopPropagation()}>
           <input
@@ -471,7 +472,7 @@ export function StreamsSection({
         onClick={(e) => e.stopPropagation()}
       >
         {fieldsFor(stream).map((f) => (
-          <button
+          <ButtonBase
             className={'ledger-seg__btn' + (active.includes(f.id) ? ' ledger-seg__btn--on' : '')}
             key={f.id}
             type="button"
@@ -480,7 +481,7 @@ export function StreamsSection({
             onClick={() => toggleField(stream, f.id)}
           >
             {f.label}
-          </button>
+          </ButtonBase>
         ))}
       </div>
     );
@@ -498,7 +499,7 @@ export function StreamsSection({
           {layoutLocked ? null : (
             <>
               <div className="seg" role="group" aria-label="Month layout">
-                <button
+                <ButtonBase
                   className={'seg__btn seg__btn--icon' + (pivot ? ' seg__btn--on' : '')}
                   type="button"
                   aria-pressed={pivot}
@@ -506,8 +507,8 @@ export function StreamsSection({
                   onClick={() => setUi({ pivot: true })}
                 >
                   <ListIcon size={15} />
-                </button>
-                <button
+                </ButtonBase>
+                <ButtonBase
                   className={'seg__btn seg__btn--icon' + (!pivot ? ' seg__btn--on' : '')}
                   type="button"
                   aria-pressed={!pivot}
@@ -518,7 +519,7 @@ export function StreamsSection({
                   })}
                 >
                   <MonthColumnsIcon size={15} />
-                </button>
+                </ButtonBase>
               </div>
               {pivot ? null : <MonthColAuto />}
             </>
@@ -536,7 +537,7 @@ export function StreamsSection({
       <div className="stream-card__foot">
         {chips(stream)}
         <div className="stream-card__foot-end">
-          <button
+          <ButtonBase
             className={'stream-panel-edit' + (density === 'compact' ? ' stream-panel-edit--on' : '')}
             type="button"
             aria-pressed={density === 'compact'}
@@ -547,7 +548,7 @@ export function StreamsSection({
           >
             {density === 'compact' ? <CompactIcon size={14} /> : <RoomyIcon size={14} />}
             {density === 'compact' ? 'Compact' : 'Cozy'}
-          </button>
+          </ButtonBase>
           {/* "Hiding future" used to sit here, on the foot of every stream
               card — one app-wide preference drawn once per job. It is one
               control in the header now, and it says all four things it can
@@ -593,11 +594,11 @@ export function StreamsSection({
     <div className="streams-section">
       {showMissingBanner ? (
         <div className="missing-month">
-          <button className="missing-month__go" type="button" onClick={() => onOpenMonth(previousMonth)}>
+          <ButtonBase className="missing-month__go" type="button" onClick={() => onOpenMonth(previousMonth)}>
             <strong>Update {formatMonth(previousMonth)}</strong>
             <span>No entry yet for {missingPrevious.map((stream) => stream.name).join(', ')}.</span>
-          </button>
-          <button
+          </ButtonBase>
+          <ButtonBase
             className="missing-month__dismiss"
             type="button"
             aria-label={'Dismiss update for ' + formatMonth(previousMonth)}
@@ -608,14 +609,14 @@ export function StreamsSection({
             })}
           >
             <CloseIcon size={16} />
-          </button>
+          </ButtonBase>
         </div>
       ) : null}
 
       <div className={cardArrange === 'carousel' ? 'carousel-stage' : undefined}>
         {cardArrange === 'carousel' && ongoing.length > 1 ? (
           <>
-            <button
+            <ButtonBase
               className="carousel-stage__arrow carousel-stage__arrow--prev"
               type="button"
               aria-label="Previous income stream"
@@ -623,7 +624,7 @@ export function StreamsSection({
               onClick={() => moveCarousel(-1)}
             >
               <ChevronLeftIcon size={26} />
-            </button>
+            </ButtonBase>
             {/* Job jump dropdown — parked while arrows sit on the card.
             <select
               className="carousel-jump__select"
@@ -636,7 +637,7 @@ export function StreamsSection({
               ))}
             </select>
             */}
-            <button
+            <ButtonBase
               className="carousel-stage__arrow carousel-stage__arrow--next"
               type="button"
               aria-label="Next income stream"
@@ -644,7 +645,7 @@ export function StreamsSection({
               onClick={() => moveCarousel(1)}
             >
               <ChevronRightIcon size={26} />
-            </button>
+            </ButtonBase>
           </>
         ) : null}
         <div
@@ -750,7 +751,7 @@ export function StreamsSection({
         <nav className="carousel-nav carousel-nav--below" aria-label="Income stream carousel">
           <div className="carousel-nav__dots" aria-label="Choose income stream">
             {ongoing.map((stream, index) => (
-              <button
+              <ButtonBase
                 className={'carousel-nav__dot' + (index === selectedIndex ? ' carousel-nav__dot--active' : '')}
                 key={stream.id}
                 type="button"
@@ -820,12 +821,12 @@ function StreamCardFrame({
 function AddButtons({ onAdd }: { onAdd: (type: Stream['type']) => void }) {
   return (
     <div className="stream-add__row">
-      <button className="filled-button" type="button" onClick={() => onAdd('w2')}>
+      <ButtonBase className="filled-button" type="button" onClick={() => onAdd('w2')}>
         <PlusIcon size={20} /> W-2
-      </button>
-      <button className="tonal-button" type="button" onClick={() => onAdd('ten99')}>
+      </ButtonBase>
+      <ButtonBase className="tonal-button" type="button" onClick={() => onAdd('ten99')}>
         <PlusIcon size={20} /> 1099
-      </button>
+      </ButtonBase>
     </div>
   );
 }

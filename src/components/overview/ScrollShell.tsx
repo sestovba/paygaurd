@@ -17,6 +17,7 @@ import { Detail } from './detail';
 import type { DetailRequest } from './detail';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
+import { ButtonBase } from '../../design-system';
 /**
  * Overview, as one scroll.
  *
@@ -45,23 +46,23 @@ export function ScrollShell() {
           <BrandMark onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 rounded-full border border-border bg-surface px-1 py-1">
-              <button
+              <ButtonBase
                 type="button"
                 disabled={yearIndex <= 0}
                 onClick={() => setUi({ year: years[yearIndex - 1] })}
                 className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
               >
                 <ChevronLeft className="size-4" />
-              </button>
+              </ButtonBase>
               <span className="num px-1 text-sm font-semibold">{ui.year}</span>
-              <button
+              <ButtonBase
                 type="button"
                 disabled={yearIndex >= years.length - 1}
                 onClick={() => setUi({ year: years[yearIndex + 1] })}
                 className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
               >
                 <ChevronRight className="size-4" />
-              </button>
+              </ButtonBase>
             </div>
             <NotificationsBell
               open={notificationsOpen}
@@ -70,14 +71,14 @@ export function ScrollShell() {
               onReviewStream={(streamId) => setDetail({ kind: 'stream', streamId })}
               onOpenMonth={(month) => setDetail({ kind: 'month', month })}
             />
-            <button
+            <ButtonBase
               type="button"
               aria-label="Settings"
               onClick={() => setDetail({ kind: 'settings' })}
               className="icon-btn grid border border-border bg-surface text-muted-foreground hover:bg-muted"
             >
               <Settings className="size-5" />
-            </button>
+            </ButtonBase>
           </div>
         </div>
       </header>

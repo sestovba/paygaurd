@@ -12,6 +12,7 @@ import { SheetSurface } from './SheetSurface';
 import { NumericExprInput } from './NumericExprInput';
 import { LockIcon, UnlockIcon } from './Icons';
 
+import { ButtonBase } from '../../design-system';
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
 
 export function StreamSettingsSheet({
@@ -58,20 +59,20 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
           <div className="field">
             <span className="eyebrow">Type</span>
             <div className="segmented">
-              <button
+              <ButtonBase
                 type="button"
                 aria-pressed={stream.type === 'w2'}
                 onClick={() => updateStream(stream.id, { type: 'w2' })}
               >
                 W-2
-              </button>
-              <button
+              </ButtonBase>
+              <ButtonBase
                 type="button"
                 aria-pressed={stream.type === 'ten99'}
                 onClick={() => updateStream(stream.id, { type: 'ten99' })}
               >
                 1099
-              </button>
+              </ButtonBase>
             </div>
             <p className="help-note">
               Switches which fields apply below — pay schedule and hourly
@@ -83,27 +84,27 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
           <div className="field">
             <span className="eyebrow">Source status</span>
             <div className="segmented">
-              <button
+              <ButtonBase
                 type="button"
                 aria-pressed={stream.lifecycle === 'active'}
                 onClick={() => updateStream(stream.id, { lifecycle: 'active' })}
               >
                 Ongoing
-              </button>
-              <button
+              </ButtonBase>
+              <ButtonBase
                 type="button"
                 aria-pressed={stream.lifecycle === 'inactive'}
                 onClick={() => updateStream(stream.id, { lifecycle: 'inactive' })}
               >
                 Paused
-              </button>
-              <button
+              </ButtonBase>
+              <ButtonBase
                 type="button"
                 aria-pressed={stream.lifecycle === 'completed'}
                 onClick={() => updateStream(stream.id, { lifecycle: 'completed' })}
               >
                 Ended
-              </button>
+              </ButtonBase>
             </div>
             <p className="help-note">
               {stream.lifecycle === 'inactive'
@@ -112,7 +113,7 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
                   ? 'Ended is for work you have left for good. History stays either way — this only moves it out of ongoing.'
                   : 'Move a stream to Paused or Ended without deleting its history.'}
             </p>
-            <button
+            <ButtonBase
               className="lock-toggle"
               type="button"
               aria-pressed={stream.locked}
@@ -120,7 +121,7 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
             >
               {stream.locked ? <UnlockIcon size={15} /> : <LockIcon size={15} />}
               {stream.locked ? 'Locked — unlock to edit' : 'Lock to prevent accidental edits'}
-            </button>
+            </ButtonBase>
           </div>
 
           <fieldset className="settings-fieldset">
@@ -139,14 +140,14 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
                 <span className="eyebrow">How often are you paid</span>
                 <div className="segmented">
                   {FREQUENCIES.map((f) => (
-                    <button
+                    <ButtonBase
                       key={f}
                       type="button"
                       aria-pressed={stream.payFrequency === f}
                       onClick={() => updateStream(stream.id, { payFrequency: f })}
                     >
                       {f === 'semimonthly' ? 'Twice a month' : f.charAt(0).toUpperCase() + f.slice(1)}
-                    </button>
+                    </ButtonBase>
                   ))}
                 </div>
               </div>

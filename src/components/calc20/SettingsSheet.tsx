@@ -19,6 +19,7 @@ import { SheetSurface } from './SheetSurface';
 import { TermsViewSheet } from './TermsViewSheet';
 import { TwpStatusControl } from './TwpStatusControl';
 
+import { ButtonBase } from '../../design-system';
 /** Set by the standalone Calc20 build. Off everywhere else. */
 const STANDALONE = import.meta.env.VITE_STANDALONE === '1';
 
@@ -131,12 +132,12 @@ function SettingsMainContent({
 
       case 'terms':
         return (
-          <button className="rows rows--nav" key={id} type="button" onClick={onTerms}>
+          <ButtonBase className="rows rows--nav" key={id} type="button" onClick={onTerms}>
             <div className="rows__row">
               <span className="rows__label rows__label--strong">{SETTINGS_ROW.terms.label}</span>
               <ChevronRightIcon size={16} />
             </div>
-          </button>
+          </ButtonBase>
         );
 
       /* Focus mode reached every layout except this one. It was wired all
@@ -147,7 +148,7 @@ function SettingsMainContent({
         return (
           <div className="field" key={id}>
             <span className="eyebrow">{SETTINGS_ROW.focusMode.label}</span>
-            <button
+            <ButtonBase
               className="lock-toggle"
               type="button"
               aria-pressed={ui.focusMode}
@@ -155,7 +156,7 @@ function SettingsMainContent({
             >
               <CheckIcon size={15} />
               {ui.focusMode ? 'Fewer things on screen' : 'Show everything'}
-            </button>
+            </ButtonBase>
             <p className="help-note">{SETTINGS_ROW.focusMode.help}</p>
           </div>
         );
@@ -170,14 +171,14 @@ function SettingsMainContent({
                 ['light', 'Light'],
                 ['dark', 'Dark']
               ] as const).map(([value, label]) => (
-                <button
+                <ButtonBase
                   key={value}
                   type="button"
                   aria-pressed={ui.theme === value}
                   onClick={() => setUi({ theme: value })}
                 >
                   {label}
-                </button>
+                </ButtonBase>
               ))}
             </div>
             <p className="help-note">System follows the device.</p>
@@ -218,7 +219,7 @@ function SettingsMainContent({
                 {group.options.map((option) => {
                   const current = appLayout === option.id;
                   return (
-                    <button
+                    <ButtonBase
                       className="rows rows--nav"
                       key={option.id}
                       type="button"
@@ -232,7 +233,7 @@ function SettingsMainContent({
                         </div>
                         {current ? <CheckIcon size={16} /> : <ChevronRightIcon size={16} />}
                       </div>
-                    </button>
+                    </ButtonBase>
                   );
                 })}
               </div>
@@ -252,22 +253,22 @@ function SettingsMainContent({
           <div className="field" key={id}>
             <span className="eyebrow">Your data</span>
             <div className="stack-col">
-              <button className="tonal-button button--start" type="button" onClick={downloadJson}>
+              <ButtonBase className="tonal-button button--start" type="button" onClick={downloadJson}>
                 <DownloadIcon size={17} /> {SETTINGS_ROW.export.label}
-              </button>
-              <button className="tonal-button button--start" type="button" onClick={() => fileRef.current?.click()}>
+              </ButtonBase>
+              <ButtonBase className="tonal-button button--start" type="button" onClick={() => fileRef.current?.click()}>
                 <UploadIcon size={17} /> {SETTINGS_ROW.import.label}
-              </button>
-              <button className="danger-button button--start" type="button" onClick={() => clearYear(ui.year)}>
+              </ButtonBase>
+              <ButtonBase className="danger-button button--start" type="button" onClick={() => clearYear(ui.year)}>
                 <TrashIcon size={17} /> Clear {ui.year} data
-              </button>
+              </ButtonBase>
               <p className="help-note">
                 Removes the income, hours, and paychecks you entered for {ui.year},
                 from every job. Your settings stay as they are.
               </p>
-              <button className="danger-button button--start" type="button" onClick={resetAll}>
+              <ButtonBase className="danger-button button--start" type="button" onClick={resetAll}>
                 <TrashIcon size={17} /> {SETTINGS_ROW.clearAll.label}
-              </button>
+              </ButtonBase>
               <p className="help-note">
                 Every year, every job, and your trial work record. This one
                 cannot be undone, so save a copy first.
@@ -337,7 +338,7 @@ function SettingsMainContent({
               <div className="field">
                 <span className="eyebrow">How do you know?</span>
                 <div className="segmented">
-                  <button
+                  <ButtonBase
                     type="button"
                     aria-pressed={data.twpAssessment.basis === 'personal-records'}
                     onClick={() => setTwpAssessment({
@@ -347,8 +348,8 @@ function SettingsMainContent({
                     })}
                   >
                     My records
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     aria-pressed={data.twpAssessment.basis === 'ssa-record'}
                     onClick={() => setTwpAssessment({
@@ -358,7 +359,7 @@ function SettingsMainContent({
                     })}
                   >
                     SSA record
-                  </button>
+                  </ButtonBase>
                 </div>
               </div>
             ) : null}
@@ -405,7 +406,7 @@ function SettingsMainContent({
             {phase === 'remaining' ? (
               <div className="field">
                 <span className="eyebrow">Trial work months already used</span>
-                <button className="rows rows--nav" type="button" onClick={onPickPrior}>
+                <ButtonBase className="rows rows--nav" type="button" onClick={onPickPrior}>
                   <div className="rows__row">
                     <div className="grow">
                       <div className="rows__label">Before this tracker</div>
@@ -418,7 +419,7 @@ function SettingsMainContent({
                     <span className="rows__value">{data.priorTrialMonths.length}</span>
                     <ChevronRightIcon size={16} />
                   </div>
-                </button>
+                </ButtonBase>
                 <p className="help-note">
                   You have {TRIAL_MONTH_LIMIT} trial work months, and they only count
                   {' '}while they fall inside the same rolling {ROLLING_WINDOW} months. An old
@@ -435,12 +436,12 @@ function SettingsMainContent({
 
       case 'howIncomeWorks':
         return (
-          <button className="rows rows--nav" key={id} type="button" onClick={onHelp}>
+          <ButtonBase className="rows rows--nav" key={id} type="button" onClick={onHelp}>
             <div className="rows__row">
               <span className="rows__label rows__label--strong">{SETTINGS_ROW.howIncomeWorks.label}</span>
               <ChevronRightIcon size={16} />
             </div>
-          </button>
+          </ButtonBase>
         );
 
       default:
@@ -456,7 +457,7 @@ function SettingsMainContent({
         * group, so the two kinds of control read as different things). */}
       <div className="settings-tabs" role="tablist" aria-label="Settings section">
         {sections.map((section) => (
-          <button
+          <ButtonBase
             className="settings-tabs__btn"
             key={section.id}
             type="button"
@@ -465,7 +466,7 @@ function SettingsMainContent({
             onClick={() => setTab(section.id)}
           >
             {section.title}
-          </button>
+          </ButtonBase>
         ))}
       </div>
 
@@ -510,7 +511,7 @@ function CloudSyncField({ session }: { session?: Session | null }) {
     <div className="field">
       <span className="eyebrow">{SETTINGS_ROW.sync.label}</span>
 
-      <button
+      <ButtonBase
         className="lock-toggle"
         type="button"
         aria-pressed={enabled}
@@ -518,7 +519,7 @@ function CloudSyncField({ session }: { session?: Session | null }) {
       >
         <CloudIcon size={15} />
         {enabled ? 'Cloud sync is on' : 'Cloud sync is off'}
-      </button>
+      </ButtonBase>
 
       {enabled && guard.step === 'idle' ? (
         <p className="help-note">
@@ -543,12 +544,12 @@ function CloudSyncField({ session }: { session?: Session | null }) {
               again deletes the Firebase copy; it does not pause it.
             </div>
             <div className="button-row">
-              <button className="filled-button" type="button" onClick={guard.turnOn}>
+              <ButtonBase className="filled-button" type="button" onClick={guard.turnOn}>
                 I agree — turn on
-              </button>
-              <button className="text-button" type="button" onClick={guard.cancel}>
+              </ButtonBase>
+              <ButtonBase className="text-button" type="button" onClick={guard.cancel}>
                 Cancel
-              </button>
+              </ButtonBase>
             </div>
           </div>
         </div>
@@ -573,17 +574,17 @@ function CloudSyncField({ session }: { session?: Session | null }) {
               aria-label={`Type ${SYNC_OFF_CONFIRM_WORD} to confirm`}
             />
             <div className="button-row">
-              <button
+              <ButtonBase
                 className="danger-button"
                 type="button"
                 disabled={!guard.canConfirmOff}
                 onClick={guard.turnOffWithBackup}
               >
                 Download backup &amp; delete
-              </button>
-              <button className="text-button" type="button" onClick={guard.cancel}>
+              </ButtonBase>
+              <ButtonBase className="text-button" type="button" onClick={guard.cancel}>
                 Cancel
-              </button>
+              </ButtonBase>
             </div>
           </div>
         </div>
@@ -653,9 +654,9 @@ function PriorMonthsContent({
                 value={quickCount}
                 onChange={(e) => setQuickCount(e.target.value.replace(/[^0-9]/g, ''))}
               />
-              <button className="tonal-button" type="button" onClick={quickFill}>
+              <ButtonBase className="tonal-button" type="button" onClick={quickFill}>
                 Fill in that many months
-              </button>
+              </ButtonBase>
             </div>
             <p className="help-note">
               Fills the most recent months before now, up to {TRIAL_MONTH_LIMIT}. These
@@ -678,7 +679,7 @@ function PriorMonthsContent({
                 {monthsOfYear(year).map((month) => {
                   const on = picked.includes(month);
                   return (
-                    <button
+                    <ButtonBase
                       className={'month-square month-square--pick' + (on ? ' month-square--spent' : ' month-square--empty')}
                       key={month}
                       type="button"
@@ -688,16 +689,16 @@ function PriorMonthsContent({
                       <span className="month-square__label">
                         {formatMonth(month).slice(0, 3).toUpperCase()}
                       </span>
-                    </button>
+                    </ButtonBase>
                   );
                 })}
               </div>
             </div>
           ))}
 
-          <button className="filled-button" type="button" onClick={() => onSave(picked)}>
+          <ButtonBase className="filled-button" type="button" onClick={() => onSave(picked)}>
             Save {picked.length} month{picked.length === 1 ? '' : 's'}
-          </button>
+          </ButtonBase>
     </>
   );
 }

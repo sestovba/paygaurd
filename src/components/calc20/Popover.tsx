@@ -17,6 +17,7 @@ import { useIsWide } from './useIsWide';
 import { useMountTransition } from './useMountTransition';
 import { useSwipeToDismiss } from './useSwipeToDismiss';
 
+import { ButtonBase } from '../../design-system';
 const EXIT_MS = 180;
 
 const GAP = 4;
@@ -160,9 +161,9 @@ export function AnchoredPopover({
             >
               <span className="popover-drawer__grip" aria-hidden="true" />
               {title ? <div className="popover-drawer__title">{title}</div> : <span />}
-              <button className="popover-drawer__close" type="button" aria-label="Close" onClick={close}>
+              <ButtonBase className="popover-drawer__close" type="button" aria-label="Close" onClick={close}>
                 <CloseIcon size={18} />
-              </button>
+              </ButtonBase>
             </div>
           ) : null}
           <div className="popover-drawer__items">{children}</div>
@@ -216,9 +217,9 @@ export function AnchoredPopover({
       {title ? (
         <div className="popover-surface__head">
           <span className="popover-surface__title">{title}</span>
-          <button className="popover-surface__close" type="button" aria-label="Close" onClick={close}>
+          <ButtonBase className="popover-surface__close" type="button" aria-label="Close" onClick={close}>
             <CloseIcon size={16} />
-          </button>
+          </ButtonBase>
         </div>
       ) : null}
       {children}

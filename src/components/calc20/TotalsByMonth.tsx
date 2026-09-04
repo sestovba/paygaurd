@@ -19,6 +19,7 @@ import { benefitPhase } from '../../domain/trialWork';
 import { gridColumns } from './gridColumns';
 import { useViewportBand } from './useIsWide';
 
+import { ButtonBase } from '../../design-system';
 export function TotalsByMonth({
   hovered,
   onHover,
@@ -82,7 +83,7 @@ export function TotalsByMonth({
           const extraText = extra ? extraPaycheckLabel(extra.counts) : null;
 
           return (
-            <button
+            <ButtonBase
               className={cls}
               key={month}
               type="button"
@@ -101,7 +102,7 @@ export function TotalsByMonth({
               {near ? (
                 <span className={'total-cell__near near--' + near.kind}>{near.text}</span>
               ) : null}
-            </button>
+            </ButtonBase>
           );
         })}
       </div>

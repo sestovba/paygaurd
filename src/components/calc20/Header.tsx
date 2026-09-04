@@ -22,6 +22,7 @@ import { precisionFor } from '../../domain/precision';
 import type { MonthKey } from '../../domain/types';
 import type { Session } from '../../auth/session';
 
+import { ButtonBase } from '../../design-system';
 export function Header({
   session,
   onSignOut,
@@ -69,7 +70,7 @@ export function Header({
             {knownYears().map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
 
-          <button
+          <ButtonBase
             className="icon-button"
             type="button"
             aria-label="Undo last change"
@@ -78,7 +79,7 @@ export function Header({
             onClick={undo}
           >
             <UndoIcon />
-          </button>
+          </ButtonBase>
 
           <NoticeMenu onOpenMonth={onOpenMonth} />
 
@@ -109,9 +110,9 @@ export function Header({
               </div>
             </>
           ) : (
-            <button className="tonal-button" type="button" onClick={onOpenSettings}>
+            <ButtonBase className="tonal-button" type="button" onClick={onOpenSettings}>
               Tell us where you stand
-            </button>
+            </ButtonBase>
           )}
         </div>
 
@@ -156,7 +157,7 @@ export function Header({
             Nine trial work months are on record. Check them against your own
             paperwork — after that your limit changes.
           </span>
-          <button className="text-button" type="button" onClick={onOpenSettings}>Review status</button>
+          <ButtonBase className="text-button" type="button" onClick={onOpenSettings}>Review status</ButtonBase>
         </div>
       ) : null}
 
@@ -185,7 +186,7 @@ function NoticeMenu({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void })
 
   return (
     <div className="notice-menu">
-      <button
+      <ButtonBase
         ref={anchor.triggerRef}
         className="icon-button"
         type="button"
@@ -196,7 +197,7 @@ function NoticeMenu({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void })
       >
         <BellIcon />
         <span className="notice-menu__count">{notices.length}</span>
-      </button>
+      </ButtonBase>
       <AnchoredPopover
         anchor={anchor}
         width={280}
@@ -207,7 +208,7 @@ function NoticeMenu({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void })
       >
         {notices.map((notice) => (
           <div className="notice-row" key={notice.month}>
-            <button
+            <ButtonBase
               className="notice-row__main"
               type="button"
               role="menuitem"
@@ -220,8 +221,8 @@ function NoticeMenu({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void })
                 <span className="view-option__label">Update {formatMonth(notice.month)}</span>
                 <span className="view-option__hint">{notice.names.join(', ')}</span>
               </span>
-            </button>
-            <button
+            </ButtonBase>
+            <ButtonBase
               className="notice-row__dismiss"
               type="button"
               aria-label={`Dismiss reminder for ${formatMonth(notice.month)}`}
@@ -230,7 +231,7 @@ function NoticeMenu({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void })
               })}
             >
               <CloseIcon size={14} />
-            </button>
+            </ButtonBase>
           </div>
         ))}
       </AnchoredPopover>

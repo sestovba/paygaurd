@@ -2,6 +2,7 @@ import { SignOutIcon, SlidersIcon } from './Icons';
 import { AnchoredPopover, useAnchoredPopover } from './Popover';
 import { displayNameFor, initialsFor, type Session } from '../../auth/session';
 
+import { ButtonBase } from '../../design-system';
 export function AccountMenu({
   session,
   onSignOut,
@@ -16,7 +17,7 @@ export function AccountMenu({
 
   return (
     <div className="account-menu">
-      <button
+      <ButtonBase
         ref={anchor.triggerRef}
         className="avatar"
         type="button"
@@ -29,7 +30,7 @@ export function AccountMenu({
         {session?.photoURL
           ? <img src={session.photoURL} alt="" />
           : initialsFor(session)}
-      </button>
+      </ButtonBase>
 
       <AnchoredPopover
         anchor={anchor}
@@ -39,14 +40,14 @@ export function AccountMenu({
         title={name}
         role="menu"
       >
-        <button type="button" role="menuitem" onClick={() => { anchor.close(); onOpenSettings(); }}>
+        <ButtonBase type="button" role="menuitem" onClick={() => { anchor.close(); onOpenSettings(); }}>
           <SlidersIcon size={18} />
           <span>App settings</span>
-        </button>
-        <button type="button" role="menuitem" onClick={() => { anchor.close(); onSignOut(); }}>
+        </ButtonBase>
+        <ButtonBase type="button" role="menuitem" onClick={() => { anchor.close(); onSignOut(); }}>
           <SignOutIcon size={18} />
           <span>Sign out</span>
-        </button>
+        </ButtonBase>
       </AnchoredPopover>
     </div>
   );

@@ -37,6 +37,7 @@ import type { DetailRequest } from './detail';
 import type { StreamType } from '../../domain/types';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
+import { ButtonBase } from '../../design-system';
 type PageId = 'overview' | 'income' | 'status';
 
 /** The six every shell offers, plus the two only a workspace has. */
@@ -178,7 +179,7 @@ export function WorkspaceShell() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="app-bar relative z-10 shrink-0 border-b">
           <div className="flex min-h-16 items-center gap-3 px-3 sm:px-5 lg:px-6">
-            <button
+            <ButtonBase
               type="button"
               aria-label={sidebarOpen ? 'Hide the sidebar' : 'Show the sidebar'}
               aria-expanded={sidebarOpen}
@@ -186,7 +187,7 @@ export function WorkspaceShell() {
               className="icon-btn grid shrink-0 border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <PanelLeft className="size-5" />
-            </button>
+            </ButtonBase>
 
             <div className="flex min-w-0 flex-1 items-center gap-2.5 lg:hidden">
               <BrandMark onClick={() => navigate('overview')} />
@@ -216,7 +217,7 @@ export function WorkspaceShell() {
               onYear={(year) => setUi({ year })}
             />
 
-            <button
+            <ButtonBase
               type="button"
               aria-label="Notifications and activity"
               onClick={() => {
@@ -227,7 +228,7 @@ export function WorkspaceShell() {
             >
               <Bell className="size-5" />
               <NotificationDot />
-            </button>
+            </ButtonBase>
 
             {/* Review note: "the theme switcher should be removed but the gear
                 icon should stay", and the gear "is there at a wider view but
@@ -241,14 +242,14 @@ export function WorkspaceShell() {
                 all. It starts at `md` now, which closes that band without
                 putting a second Settings button next to the one in the bottom
                 bar on a phone. */}
-            <button
+            <ButtonBase
               type="button"
               aria-label="Settings"
               onClick={() => openPane({ kind: 'settings' })}
               className="icon-btn hidden border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground md:grid"
             >
               <Settings className="size-5" />
-            </button>
+            </ButtonBase>
           </div>
 
           <div className="border-t border-border/70 px-3 py-2.5 sm:px-5 lg:hidden">
@@ -527,7 +528,7 @@ function DesktopSidebar({
   return (
     <>
       {open ? (
-        <button
+        <ButtonBase
           type="button"
           aria-label="Close the sidebar"
           onClick={onClose}
@@ -547,18 +548,18 @@ function DesktopSidebar({
       </div>
 
       <div className="p-4">
-        <button
+        <ButtonBase
           type="button"
           onClick={onNewEntry}
           className="btn-primary flex w-full items-center justify-center gap-2 shadow-[var(--shadow-lime)]"
         >
           <Plus className="size-5" /> Add income
-        </button>
+        </ButtonBase>
       </div>
 
       <nav className="flex flex-col gap-1 px-3" aria-label="Primary">
         {navItems.map(({ id, label, icon: Icon }) => (
-          <button
+          <ButtonBase
             key={id}
             type="button"
             aria-current={page === id ? 'page' : undefined}
@@ -567,18 +568,18 @@ function DesktopSidebar({
           >
             <Icon className="size-[18px] shrink-0" />
             {label}
-          </button>
+          </ButtonBase>
         ))}
       </nav>
 
       <div className="mt-auto border-t border-border p-4">
-        <button
+        <ButtonBase
           type="button"
           onClick={onSettings}
           className="nav-item w-full"
         >
           <Settings className="size-[18px] shrink-0" /> Settings
-        </button>
+        </ButtonBase>
       </div>
       </aside>
     </>
@@ -597,7 +598,7 @@ function TabletNav({
   return (
     <nav className="hidden items-center gap-1 border-t border-border-soft px-4 py-2 md:flex lg:hidden" aria-label="Primary">
       {navItems.map(({ id, label, icon: Icon }) => (
-        <button
+        <ButtonBase
           key={id}
           type="button"
           aria-current={id === page ? 'page' : undefined}
@@ -605,7 +606,7 @@ function TabletNav({
           className="nav-item"
         >
           <Icon className="size-[18px] shrink-0" /> {label}
-        </button>
+        </ButtonBase>
       ))}
     </nav>
   );
@@ -632,7 +633,7 @@ function MobileNav({
       {navItems.map(({ id, label, icon: Icon }) => {
         const active = id === page && !settingsOpen;
         return (
-          <button
+          <ButtonBase
             key={id}
             type="button"
             aria-current={active ? 'page' : undefined}
@@ -643,10 +644,10 @@ function MobileNav({
               <Icon className="size-[18px]" />
             </span>
             <span className="truncate">{label}</span>
-          </button>
+          </ButtonBase>
         );
       })}
-      <button
+      <ButtonBase
         type="button"
         aria-current={settingsOpen ? 'page' : undefined}
         onClick={onSettings}
@@ -656,7 +657,7 @@ function MobileNav({
           <Settings className="size-[18px]" />
         </span>
         <span>Settings</span>
-      </button>
+      </ButtonBase>
     </nav>
   );
 }
@@ -687,7 +688,7 @@ function JourneyTrail({
             {index > 0 ? (
               <ChevronRight className="size-4 shrink-0 text-muted-foreground/50" aria-hidden="true" />
             ) : null}
-            <button
+            <ButtonBase
               type="button"
               aria-current={isCurrent ? 'page' : undefined}
               onClick={() => onStep(index)}
@@ -700,7 +701,7 @@ function JourneyTrail({
               }
             >
               {label}
-            </button>
+            </ButtonBase>
           </div>
         );
       })}
@@ -721,7 +722,7 @@ function YearPicker({
 }) {
   return (
     <div className="flex shrink-0 items-center rounded-xl border border-border bg-surface p-1">
-      <button
+      <ButtonBase
         type="button"
         aria-label="Previous year"
         disabled={yearIndex <= 0}
@@ -729,9 +730,9 @@ function YearPicker({
         className="grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
       >
         <ChevronLeft className="size-3.5" />
-      </button>
+      </ButtonBase>
       <span className="num min-w-11 px-1 text-center text-xs font-bold">{year}</span>
-      <button
+      <ButtonBase
         type="button"
         aria-label="Next year"
         disabled={yearIndex >= years.length - 1}
@@ -739,7 +740,7 @@ function YearPicker({
         className="grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
       >
         <ChevronRight className="size-3.5" />
-      </button>
+      </ButtonBase>
     </div>
   );
 }
@@ -826,7 +827,7 @@ function SourceChoice({
   onClick: () => void;
 }) {
   return (
-    <button
+    <ButtonBase
       type="button"
       onClick={onClick}
       className="group flex min-h-36 flex-col items-start justify-between rounded-2xl border border-border bg-surface-2 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-card"
@@ -840,7 +841,7 @@ function SourceChoice({
         </span>
         <span className="mt-1 block text-sm text-muted-foreground">{description}</span>
       </span>
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -883,7 +884,7 @@ function ActivityPane({
                 : item.action.kind === 'reviewStream' ? TrendingUp : Zap;
               return (
                 <li key={item.id}>
-                  <button
+                  <ButtonBase
                     type="button"
                     onClick={() => resolve(item)}
                     className="flex w-full items-start gap-3 rounded-xl border border-border bg-surface-2 p-3 text-left transition-colors hover:border-primary hover:bg-muted"
@@ -891,7 +892,7 @@ function ActivityPane({
                     <Icon className={'mt-0.5 size-4 shrink-0 ' + (item.severity === 'warn' ? 'text-warn-foreground' : 'text-info')} />
                     <span className="min-w-0 flex-1 text-base leading-relaxed">{item.message}</span>
                     <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  </button>
+                  </ButtonBase>
                 </li>
               );
             })}

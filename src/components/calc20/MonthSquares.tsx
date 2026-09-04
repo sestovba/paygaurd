@@ -8,6 +8,7 @@ import { monthStatus, nearLimit } from '../../domain/earnings';
 import { extraPaycheckLabel, extraPaycheckMonths } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
 
+import { ButtonBase } from '../../design-system';
 export function MonthSquares({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
   const { months } = useMonthScope('many');
@@ -37,7 +38,7 @@ export function MonthSquares({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =
         if (month === now) cls += ' month-square--now';
 
         return (
-          <button
+          <ButtonBase
             className={cls}
             key={month}
             type="button"
@@ -59,7 +60,7 @@ export function MonthSquares({ onOpenMonth }: { onOpenMonth: (month: MonthKey) =
             ) : extraText ? (
               <span className="month-square__pay">{extraText}</span>
             ) : null}
-          </button>
+          </ButtonBase>
         );
       })}
     </div>

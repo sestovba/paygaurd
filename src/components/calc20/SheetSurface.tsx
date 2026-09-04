@@ -3,6 +3,7 @@ import type { ReactNode, UIEvent } from 'react';
 import { ChevronLeftIcon, CloseIcon } from './Icons';
 import { useSwipeToDismiss } from './useSwipeToDismiss';
 
+import { ButtonBase } from '../../design-system';
 const EXIT_MS = 200;
 
 export function SheetSurface({
@@ -64,9 +65,9 @@ export function SheetSurface({
           <span className="sheet__grip" aria-hidden="true" />
 
           {onBack ? (
-            <button className="sheet__back" type="button" aria-label="Back" onClick={onBack}>
+            <ButtonBase className="sheet__back" type="button" aria-label="Back" onClick={onBack}>
               <ChevronLeftIcon size={19} />
-            </button>
+            </ButtonBase>
           ) : null}
 
           <div className="sheet__heading">
@@ -74,9 +75,9 @@ export function SheetSurface({
             <div className="sheet__title">{title}</div>
           </div>
 
-          <button className="sheet__close" type="button" aria-label="Close" onClick={requestClose}>
+          <ButtonBase className="sheet__close" type="button" aria-label="Close" onClick={requestClose}>
             <CloseIcon size={18} />
-          </button>
+          </ButtonBase>
         </div>
 
         <div className="sheet__body" onScroll={onScroll}>
