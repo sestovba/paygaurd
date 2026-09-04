@@ -26,6 +26,7 @@ import type { PayBasis } from '../../state/storage';
 import { SettingsPanel } from '../SettingsPanel';
 import { ToastStack } from '../ToastStack';
 import '../../styles/charm.css';
+import { ButtonBase } from '../../design-system';
 
 export function TrackerCharm() {
   const {
@@ -238,13 +239,13 @@ export function TrackerCharm() {
       <header className="ch-top">
         <div className="ch-top-when">
           <b>{monthUpper} {ui.year}</b>
-          <button type="button" className="ch-top-sources" onClick={openManageSources}>
+          <ButtonBase type="button" className="ch-top-sources" onClick={openManageSources}>
             {data.streams.length === 1 ? primary?.name : `${data.streams.length} sources`}
-          </button>
+          </ButtonBase>
         </div>
-        <button type="button" className="ch-btn" onClick={() => setSettingsOpen(true)}>
+        <ButtonBase type="button" className="ch-btn" onClick={() => setSettingsOpen(true)}>
           Settings
-        </button>
+        </ButtonBase>
       </header>
 
       <main className="ch-main">
@@ -267,14 +268,14 @@ export function TrackerCharm() {
           <p className="ch-counts-label">Counts this month</p>
           <p className="ch-counts">{money(counted)}</p>
 
-          <button
+          <ButtonBase
             type="button"
             className="ch-why"
             aria-expanded={whyOpen}
             onClick={() => setWhyOpen((v) => !v)}
           >
             Not your gross pay?
-          </button>
+          </ButtonBase>
           {whyOpen ? (
             <div className="ch-why-body">
               <p>
@@ -309,7 +310,7 @@ export function TrackerCharm() {
               <p className="ch-edit-name">Which job paid you?</p>
               <div className="ch-months">
                 {candidates.map((st) => (
-                  <button
+                  <ButtonBase
                     key={st.id}
                     type="button"
                     className="ch-month"
@@ -324,17 +325,17 @@ export function TrackerCharm() {
                           : ' · nothing logged this month'}
                       </span>
                     </span>
-                  </button>
+                  </ButtonBase>
                 ))}
               </div>
-              <button type="button" className="ch-plain" onClick={() => openAddSource('logging')}>
+              <ButtonBase type="button" className="ch-plain" onClick={() => openAddSource('logging')}>
                 Add a job
-              </button>
+              </ButtonBase>
             </section>
           ) : logging && target ? (
             <form className="ch-answer" onSubmit={handleSubmit}>
               <div className="ch-switch" role="radiogroup" aria-label="How you enter pay">
-                <button
+                <ButtonBase
                   type="button"
                   role="radio"
                   aria-checked={basis === 'bank'}
@@ -347,8 +348,8 @@ export function TrackerCharm() {
                   }}
                 >
                   Paid
-                </button>
-                <button
+                </ButtonBase>
+                <ButtonBase
                   type="button"
                   role="radio"
                   aria-checked={basis === 'paystub'}
@@ -360,7 +361,7 @@ export function TrackerCharm() {
                   }}
                 >
                   Paystub
-                </button>
+                </ButtonBase>
               </div>
 
               {basis === 'bank' ? (
@@ -391,23 +392,23 @@ export function TrackerCharm() {
                     </p>
                   ) : null}
                   {milesField}
-                  <button type="submit" className="ch-log" style={{ marginTop: 10 }} disabled={!valid}>
+                  <ButtonBase type="submit" className="ch-log" style={{ marginTop: 10 }} disabled={!valid}>
                     Add pay
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="ch-plain"
                     onClick={() => { setLogging(false); setPayValue(''); setMilesValue(''); }}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="ch-plain"
                     onClick={() => { setBasis('paystub'); setPayValue(''); }}
                   >
                     Enter my paystub amount instead
-                  </button>
+                  </ButtonBase>
                 </>
               ) : (
                 <>
@@ -434,37 +435,37 @@ export function TrackerCharm() {
                     <div className="ch-prompt">
                       <p className="ch-prompt-title">Do you want to enter paystubs from now on?</p>
                       <div className="ch-prompt-choices">
-                        <button
+                        <ButtonBase
                           type="button"
                           className="ch-prompt-btn"
                           data-selected={fromNowOn ? '' : undefined}
                           onClick={() => setFromNowOn(true)}
                         >
                           Yes, from now on
-                        </button>
-                        <button
+                        </ButtonBase>
+                        <ButtonBase
                           type="button"
                           className="ch-prompt-btn"
                           data-selected={!fromNowOn ? '' : undefined}
                           onClick={() => setFromNowOn(false)}
                         >
                           Just this time
-                        </button>
+                        </ButtonBase>
                       </div>
                     </div>
                   ) : null}
                   {milesField}
-                  <button type="submit" className="ch-log" style={{ marginTop: 10 }} disabled={!valid}>
+                  <ButtonBase type="submit" className="ch-log" style={{ marginTop: 10 }} disabled={!valid}>
                     Add pay
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="ch-plain"
                     onClick={() => { setLogging(false); setPayValue(''); setMilesValue(''); }}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ButtonBase>
+                  <ButtonBase
                     type="button"
                     className="ch-plain"
                     onClick={() => {
@@ -474,26 +475,26 @@ export function TrackerCharm() {
                     }}
                   >
                     Enter Direct deposit instead
-                  </button>
+                  </ButtonBase>
                 </>
               )}
             </form>
           ) : (
-            <button type="button" className="ch-log" onClick={startLogging}>
+            <ButtonBase type="button" className="ch-log" onClick={startLogging}>
               Add pay
-            </button>
+            </ButtonBase>
           )
         ) : (
           <div className="ch-empty">
             <p>First, tell us about your job.</p>
-            <button
+            <ButtonBase
               type="button"
               className="ch-log"
               style={{ marginTop: 12 }}
               onClick={() => openAddSource('home')}
             >
               Add income source
-            </button>
+            </ButtonBase>
           </div>
         )}
 
@@ -528,7 +529,7 @@ export function TrackerCharm() {
               const monthTrial = benefitPhase(data, month) === 'trialWork';
               return (
                 <div key={month}>
-                  <button
+                  <ButtonBase
                     type="button"
                     className="ch-month"
                     aria-expanded={isOpen}
@@ -551,7 +552,7 @@ export function TrackerCharm() {
                     {heavy.has(month) ? (
                       <span className="ch-tag">{flag?.kind === 'pay' ? flag.text : 'Extra pay'}</span>
                     ) : null}
-                  </button>
+                  </ButtonBase>
 
                   {isOpen ? (
                     <div className="ch-detail">
@@ -599,7 +600,7 @@ export function TrackerCharm() {
               <>
                 <div className="ch-sheet-head">
                   <h2>Add a job</h2>
-                  <button
+                  <ButtonBase
                     type="button"
                     className="ch-plain"
                     style={{ marginTop: 0, width: 'auto' }}
@@ -609,7 +610,7 @@ export function TrackerCharm() {
                     }}
                   >
                     Close
-                  </button>
+                  </ButtonBase>
                 </div>
                 <label className="ch-edit-name" htmlFor="ch-new-job">What should we call it?</label>
                 <input
@@ -621,17 +622,17 @@ export function TrackerCharm() {
                   onChange={(e) => setNewJobName(e.currentTarget.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSource(); } }}
                 />
-                <button type="button" className="ch-log" style={{ marginTop: 12 }} disabled={!newJobName.trim()} onClick={handleAddSource}>
+                <ButtonBase type="button" className="ch-log" style={{ marginTop: 12 }} disabled={!newJobName.trim()} onClick={handleAddSource}>
                   Save job
-                </button>
+                </ButtonBase>
               </>
             ) : (
               <>
                 <div className="ch-sheet-head">
                   <h2>Your jobs</h2>
-                  <button type="button" className="ch-plain" style={{ marginTop: 0, width: 'auto' }} onClick={() => setSourcesOpen(false)}>
+                  <ButtonBase type="button" className="ch-plain" style={{ marginTop: 0, width: 'auto' }} onClick={() => setSourcesOpen(false)}>
                     Close
-                  </button>
+                  </ButtonBase>
                 </div>
                 <ul className="ch-job-list">
                   {data.streams.map((st) => (
@@ -641,7 +642,7 @@ export function TrackerCharm() {
                         <small>{SOURCE_SHORT[st.type]}</small>
                       </span>
                       {st.locked ? null : (
-                        <button
+                        <ButtonBase
                           type="button"
                           className="ch-plain"
                           style={{ marginTop: 0, width: 'auto' }}
@@ -651,14 +652,14 @@ export function TrackerCharm() {
                           }}
                         >
                           Remove
-                        </button>
+                        </ButtonBase>
                       )}
                     </li>
                   ))}
                 </ul>
-                <button type="button" className="ch-log" style={{ marginTop: 12 }} onClick={() => openAddSource('manage')}>
+                <ButtonBase type="button" className="ch-log" style={{ marginTop: 12 }} onClick={() => openAddSource('manage')}>
                   Add a job
-                </button>
+                </ButtonBase>
               </>
             )}
           </div>
