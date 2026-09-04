@@ -74,7 +74,7 @@
   background: var(--review-blue);
   padding: 0.1rem 0.4rem;
   color: #fff;
-  font-size: 0.62rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -205,7 +205,7 @@
   background: var(--review-ink);
   padding: 0.2rem 0.45rem;
   color: var(--review-text);
-  font-size: 0.7rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   white-space: nowrap;
   box-shadow: var(--review-lift);
@@ -218,7 +218,7 @@
   border-radius: 2px;
   padding: 0 0.25rem;
   color: var(--review-dim);
-  font-size: 0.62rem;
+  font-size: var(--t-text-xs);
   font-weight: 500;
 }
 
@@ -227,7 +227,7 @@
   background: var(--review-panel-2);
   padding: 0 0.25rem;
   color: var(--review-faint);
-  font-size: 0.62rem;
+  font-size: var(--t-text-xs);
 }
 
 /* ================================================================== */
@@ -262,7 +262,7 @@
   background: var(--review-panel-2);
   padding: 0 0.3rem;
   color: var(--review-dim);
-  font-size: 0.65rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
 }
 
@@ -280,7 +280,7 @@
   background: var(--review-ink);
   color: var(--review-text);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
+  font-size: var(--t-text-sm);
 }
 
 .review-rail-grip {
@@ -314,7 +314,7 @@
   background: none;
   padding: 0.2rem;
   color: var(--review-dim);
-  font-size: 0.65rem;
+  font-size: var(--t-text-xs);
   cursor: pointer;
 }
 
@@ -359,7 +359,7 @@
 .review-rail-menu-label {
   padding: 0.35rem 0.4rem 0.15rem;
   color: var(--review-faint);
-  font-size: 0.6rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -415,7 +415,7 @@
   border-radius: 2px;
   padding: 0 0.25rem;
   color: var(--review-faint);
-  font-size: 0.62rem;
+  font-size: var(--t-text-xs);
 }
 
 .review-dock-tool[data-on] .review-dock-key { color: rgb(255 255 255 / 0.8); }
@@ -444,7 +444,7 @@
   border-top: 1px solid var(--review-line);
   padding: 0.35rem 0.6rem;
   color: var(--review-faint);
-  font-size: 0.65rem;
+  font-size: var(--t-text-xs);
 }
 
 /* ================================================================== */
@@ -454,7 +454,7 @@
 .review-empty {
   padding: 1.5rem 1rem;
   color: var(--review-dim);
-  font-size: 0.78rem;
+  font-size: var(--t-text-sm);
   line-height: 1.6;
 }
 
@@ -479,7 +479,7 @@
   border-bottom: 1px solid var(--review-line);
   background: var(--review-panel);
   padding: 0.35rem 0.6rem;
-  font-size: 0.68rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -488,7 +488,7 @@
 .review-group > h3 em {
   flex: 1;
   color: var(--review-faint);
-  font-size: 0.65rem;
+  font-size: var(--t-text-xs);
   font-style: normal;
   font-weight: 400;
   letter-spacing: 0;
@@ -534,7 +534,7 @@
   align-items: center;
   gap: 0.3rem;
   color: var(--review-text);
-  font-size: 0.76rem;
+  font-size: var(--t-text-sm);
   font-weight: 600;
 }
 
@@ -546,7 +546,7 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
   color: var(--review-dim);
-  font-size: 0.72rem;
+  font-size: var(--t-text-xs);
   line-height: 1.45;
 }
 
@@ -562,7 +562,7 @@
   overflow: hidden;
   color: var(--review-faint);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.62rem;
+  font-size: var(--t-text-xs);
 }
 
 /* The address gives way; the chips beside it never do — a tag is what the
@@ -620,7 +620,7 @@
 .review-row-reason {
   margin: 0;
   color: var(--review-dim);
-  font-size: 0.72rem;
+  font-size: var(--t-text-xs);
   line-height: 1.5;
 }
 
@@ -629,7 +629,7 @@
   border-left: 2px solid var(--review-line);
   padding-left: 0.5rem;
   color: var(--review-text);
-  font-size: 0.72rem;
+  font-size: var(--t-text-xs);
   line-height: 1.5;
 }
 
@@ -644,7 +644,7 @@
 .review-row-line code {
   color: var(--review-green);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.65rem;
+  font-size: var(--t-text-xs);
   white-space: pre;
 }
 
@@ -684,7 +684,7 @@
   border: 1px solid var(--review-line);
   border-radius: 3px;
   padding: 0.25rem 0.55rem;
-  font-size: 0.72rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -743,7 +743,7 @@
 .review-composer header strong {
   flex: 1;
   overflow: hidden;
-  font-size: 0.78rem;
+  font-size: var(--t-text-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -811,7 +811,7 @@
   background: var(--review-panel);
   padding: 0.15rem 0.4rem;
   color: var(--review-dim);
-  font-size: 0.68rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -824,7 +824,7 @@
   background: var(--review-panel);
   padding: 0.15rem 0.45rem;
   color: var(--review-dim);
-  font-size: 0.68rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -843,7 +843,7 @@
   overflow: hidden;
   color: var(--review-faint);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.62rem;
+  font-size: var(--t-text-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -912,7 +912,7 @@
   background: var(--review-panel);
   padding: 0.28rem 0.4rem;
   color: var(--review-faint);
-  font-size: 0.7rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -941,7 +941,7 @@
   gap: 0.4rem;
   padding: 0 0.6rem;
   color: var(--review-faint);
-  font-size: 0.7rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
 }
 
@@ -1063,7 +1063,7 @@
   padding: 0.25rem 0.3rem;
   color: var(--review-text);
   font: inherit;
-  font-size: 0.7rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
 }
 
@@ -1073,7 +1073,7 @@
 .review-frame-size {
   flex: none;
   color: var(--review-faint);
-  font-size: 0.68rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -1092,7 +1092,7 @@
   background: var(--review-panel);
   padding: 0.25rem 0.36rem;
   color: var(--review-faint);
-  font-size: 0.68rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }

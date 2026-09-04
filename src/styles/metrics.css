@@ -89,11 +89,13 @@
   --t-text-xs: 0.75rem;    /* 12px — numerals and chips only, never prose */
   --t-text-sm: 0.875rem;   /* 14px — the floor for anything a user reads   */
   --t-text-base: 1rem;     /* 16px — body                                  */
+  --t-text-ui: 0.9375rem;   /* 15px — compact primary UI labels */
   --t-text-lg: 1.125rem;   /* 18px — a control's own label                 */
   --t-text-xl: 1.375rem;   /* 22px — section titles                        */
   --t-text-2xl: 1.75rem;   /* 28px — a figure worth reading first          */
   --t-text-3xl: 2.25rem;   /* 36px — the one number on the screen          */
   --t-text-4xl: 3.5rem;    /* 56px — that number when it IS the screen     */
+  --t-text-hero-fluid: clamp(2.25rem, 1.6rem + 2vw, 3rem); /* responsive hero/display */
 
   --t-weight-normal: 400;
   --t-weight-medium: 500;

@@ -150,7 +150,7 @@
 
 /* The month is the subject of the whole screen, so it is sized like one. */
 .pl-top-month {
-  font-size: 27px;
+  font-size: var(--t-text-2xl);
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -230,7 +230,7 @@
 .pl-answer-big {
   margin: 0;
   font-family: var(--figures);
-  font-size: 58px;
+  font-size: var(--t-text-4xl);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -241,7 +241,7 @@
 
 .pl-answer-lead {
   margin: 4px 0 0;
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   font-weight: 600;
   line-height: 1.35;
 }
@@ -250,7 +250,7 @@
    before the offer to close it. */
 .pl-answer-sub {
   margin: 6px 0 10px;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   line-height: 1.4;
   color: var(--ink-soft);
 }
@@ -282,7 +282,7 @@
   background: var(--parch);
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   cursor: pointer;
   box-shadow:
@@ -310,7 +310,7 @@
   margin-left: 4px;
   background: var(--gilt);
   color: var(--px-ink);
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   font-weight: 700;
   line-height: 1;
   box-shadow: inset 0 2px 0 var(--gilt-hi);
@@ -462,7 +462,7 @@
   bottom: calc(100% + 6px);
   left: -7px;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -509,7 +509,7 @@
   flex-wrap: wrap;
   gap: 6px 16px;
   margin: 8px 0 0;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   color: var(--ink-soft);
 }
 .pl-key-item { display: inline-flex; align-items: center; gap: 6px; }
@@ -568,7 +568,7 @@
 
 .pl-heading {
   margin: 0 0 10px;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -587,7 +587,7 @@
   padding: 6px 10px;
   background: var(--px-ink);
   color: var(--plate-fg);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -636,7 +636,7 @@
 }
 .pl-stepper-value b {
   display: block;
-  font-size: 30px;
+  font-size: var(--t-text-2xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -648,7 +648,7 @@
 
 .pl-try-verdict {
   margin: 12px 0 0;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   line-height: 1.45;
   font-weight: 600;
 }
@@ -687,7 +687,7 @@
   background: var(--paper-2);
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 0 0 2px var(--px-ink), 0 4px 0 0 var(--key-edge);
@@ -752,7 +752,7 @@
   background: none;
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   text-align: left;
   text-decoration: underline;
@@ -784,7 +784,7 @@
   background: var(--paper-2);
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   cursor: pointer;
   box-shadow: inset 0 2px 0 var(--px-hi), 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
@@ -875,7 +875,7 @@
   background: var(--px-ink);
   color: var(--gilt-hi);
   font-family: var(--figures);
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   font-weight: 700;
   pointer-events: none;
 }
@@ -902,7 +902,7 @@
   background: var(--paper);
   color: var(--ink);
   font-family: var(--figures);
-  font-size: 20px;
+  font-size: var(--t-text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   box-shadow:
@@ -940,7 +940,7 @@
 
 .pl-vault-why {
   margin: 0 0 14px;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   line-height: 1.45;
   font-weight: 600;
 }
@@ -985,7 +985,7 @@
   align-items: baseline;
   gap: 10px;
   margin: 10px 0 0;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
 }
 .pl-tokens-line b { font-size: 19px; }
 .pl-tokens-line b span { font-family: var(--figures); }
@@ -1039,7 +1039,7 @@
 
 .pl-log-amount {
   font-family: var(--figures);
-  font-size: 21px;
+  font-size: var(--t-text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -1062,7 +1062,7 @@
 .pl-log-when {
   display: block;
   margin-top: 2px;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.35;
   color: var(--ink-soft);
 }
@@ -1124,7 +1124,7 @@
 .pl-source-note {
   display: block;
   margin-top: 1px;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.35;
   color: var(--ink-soft);
 }
@@ -1137,7 +1137,7 @@
   background: var(--px-ink);
   color: var(--gilt-hi);
   font-family: var(--figures);
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -1206,7 +1206,7 @@
 .pl-choice i {
   display: block;
   margin-top: 2px;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-style: normal;
   font-weight: 400;
   line-height: 1.4;
@@ -1230,7 +1230,7 @@
   background: var(--parch);
   box-shadow: inset 0 0 0 2px var(--px-ink), inset 0 0 0 4px var(--gilt);
   font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-style: italic;
   line-height: 1.5;
   letter-spacing: 0.01em;
@@ -1330,14 +1330,14 @@
 .pl [data-sheet] [data-sheet-head] h2 {
   /* Same plate, same reason as .pl-plate: the ground is --px-ink. */
   color: var(--plate-fg);
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .pl [data-sheet] [data-sheet-head] p {
   color: var(--gilt-hi);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }

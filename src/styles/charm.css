@@ -67,7 +67,7 @@
 
 .ch-top-when b {
   display: block;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   letter-spacing: 0.12em;
   line-height: 1.3;
@@ -100,7 +100,7 @@
   background: var(--ch-surface);
   color: inherit;
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   min-height: var(--t-touch-target);
   padding: 0 16px;
@@ -131,7 +131,7 @@
 
 .ch-limit {
   margin: 0 0 18px;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -140,7 +140,7 @@
 .ch-limit-sep { color: var(--ch-ink-3); }
 .ch-limit-label {
   color: var(--ch-ink-3);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -148,7 +148,7 @@
 
 .ch-counts-label {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -172,7 +172,7 @@
   background: none;
   color: var(--ch-link);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -217,7 +217,7 @@
 
 .ch-sub {
   margin: 8px 0 0;
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   line-height: 1.35;
   color: var(--ch-ink-2);
 }
@@ -240,7 +240,7 @@
   background: var(--ch-green);
   color: #fff;
   font: inherit;
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   font-weight: 700;
   cursor: pointer;
 }
@@ -269,7 +269,7 @@
   background: none;
   color: var(--ch-link);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   text-align: center;
   cursor: pointer;
@@ -319,7 +319,7 @@
   background: transparent;
   color: var(--ch-ink-2);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 650;
   cursor: pointer;
 }
@@ -341,7 +341,7 @@
 .ch-edit-name span {
   color: var(--ch-ink-3);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
 }
 
 .ch-edit-note {
@@ -361,7 +361,7 @@
   margin-top: 8px;
   border-radius: 12px;
   text-align: left;
-  font-size: 20px;
+  font-size: var(--t-text-xl);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
@@ -417,7 +417,7 @@
 }
 
 .ch-trial-label {
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -425,7 +425,7 @@
 }
 
 .ch-trial-count {
-  font-size: 17px;
+  font-size: var(--t-text-lg);
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
@@ -456,7 +456,7 @@
 /* —— Months —— */
 .ch-section-title {
   margin: 0 0 10px;
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -508,7 +508,7 @@
 .ch-month-note {
   display: block;
   margin-top: 2px;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   color: var(--ch-ink-3);
 }
 
@@ -612,7 +612,7 @@
 
 .ch-job-row b {
   display: block;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
 }
 
 .ch-job-row small {

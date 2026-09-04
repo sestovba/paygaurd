@@ -406,7 +406,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .topbar__eyebrow {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .13em;
   text-transform: uppercase;
@@ -415,7 +415,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .topbar h1 {
   margin: 3px 0 0;
-  font-size: 20px;
+  font-size: var(--t-text-xl);
   font-weight: 700;
   letter-spacing: -.025em;
   color: var(--on-ink);
@@ -498,7 +498,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--accent);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   line-height: 14px;
   text-align: center;
@@ -542,7 +542,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .headline__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -551,7 +551,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .headline__value {
   font-family: var(--mono);
-  font-size: 34px;
+  font-size: var(--t-text-3xl);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -.03em;
@@ -602,7 +602,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .twp-meter__label {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -626,7 +626,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
   .pg-calc20 .standing__label {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: var(--t-text-xs);
     font-weight: 500;
     letter-spacing: .11em;
     text-transform: uppercase;
@@ -636,7 +636,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
   .pg-calc20 .standing__value {
     font-family: var(--mono);
-    font-size: 21px;
+    font-size: var(--t-text-xl);
     font-weight: 600;
     letter-spacing: -.02em;
     font-variant-numeric: tabular-nums;
@@ -682,7 +682,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .toolbar__group-label {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -709,7 +709,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .toolbar__field span {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   letter-spacing: .09em;
   text-transform: uppercase;
   color: var(--muted);
@@ -797,7 +797,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .section__title {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   letter-spacing: -.015em;
   line-height: 28px;
@@ -807,7 +807,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .section__aside {
   flex: 0 0 auto;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   color: var(--muted);
   white-space: nowrap;
 }
@@ -914,7 +914,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: transparent;
   color: var(--ink-3);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   field-sizing: content;
   cursor: pointer;
@@ -990,7 +990,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: transparent;
   color: var(--ink);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -1023,7 +1023,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 8px 10px;
   border-radius: 8px;
   background: var(--paper-2);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 700;
   cursor: pointer;
 }
@@ -1048,7 +1048,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .view-option__hint {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -1140,7 +1140,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   color: var(--ink-3);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   field-sizing: content;
   cursor: pointer;
@@ -1193,7 +1193,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   flex: 1 1 auto;
   min-width: 0;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -1210,7 +1210,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--paper);
   color: var(--ink-3);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   cursor: pointer;
 }
 
@@ -1404,7 +1404,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .glass-slider__value {
   flex: 0 0 auto;
   min-width: 34px;
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   color: var(--ink-3);
   text-align: right;
@@ -1434,7 +1434,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border: 0;
   background: transparent;
   color: var(--ink-3);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   text-align: left;
   cursor: pointer;
@@ -1452,7 +1452,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: var(--t-radius-full);
   background: var(--paper-3);
   color: var(--ink-3);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-family: var(--mono);
 }
 
@@ -1483,14 +1483,14 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .ledger__date {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   color: var(--ink);
 }
 
 .pg-calc20 .ledger__gross {
   flex: 0 0 auto;
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -1500,7 +1500,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   flex: 0 0 auto;
   width: 32px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   color: var(--muted);
   text-align: right;
 }
@@ -1556,7 +1556,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: var(--radius);
   background: var(--ink);
   color: #fff;
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -1805,7 +1805,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: var(--radius-md);
   background: var(--card);
   color: var(--ink-3);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -1918,7 +1918,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--paper-2);
   color: var(--ink-2);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: .04em;
   cursor: pointer;
@@ -1945,7 +1945,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   margin-top: 0;
   padding: 2px 7px;
   border-radius: var(--t-radius-full);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   line-height: 1.4;
   overflow: hidden;
@@ -1981,7 +1981,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -1994,7 +1994,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .stream-card__total {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   letter-spacing: -.018em;
   font-variant-numeric: tabular-nums;
@@ -2007,7 +2007,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -2027,7 +2027,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--paper);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -2074,7 +2074,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .month-cell__read-value {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   letter-spacing: -.02em;
   font-variant-numeric: tabular-nums;
@@ -2085,7 +2085,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .month-cell__read-meta {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   letter-spacing: .04em;
   color: var(--muted);
 }
@@ -2093,7 +2093,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .month-cell--pivot.month-cell--read .month-cell__read-value { flex: 1 1 auto; }
 
 .pg-calc20 .month-cell__note {
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   line-height: 1.3;
   color: var(--muted);
 }
@@ -2106,7 +2106,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 4px;
   background: var(--paper-3);
   color: var(--ink-3);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -2156,7 +2156,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .entry-field__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -2183,7 +2183,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .entry-field input:focus { outline: none; border-color: var(--accent-ink); box-shadow: 0 0 0 2px var(--accent); }
 
 .pg-calc20 .entry-field__hint {
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   line-height: 1.4;
   color: var(--muted);
 }
@@ -2195,7 +2195,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   height: 26px;
   padding: 0 11px;
   border-radius: var(--t-radius-full);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
 }
@@ -2243,7 +2243,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .month-cell__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -2361,7 +2361,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .total-cell__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -2370,7 +2370,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .total-cell__value {
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   letter-spacing: -.02em;
   font-variant-numeric: tabular-nums;
@@ -2388,7 +2388,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 2px 6px;
   border-radius: var(--t-radius-full);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: .03em;
   white-space: nowrap;
@@ -2397,7 +2397,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 /* Extra-paycheck months: name them here, not as a cell fill. */
 .pg-calc20 .total-cell__pay, .pg-calc20 .month-square__pay {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: .03em;
   white-space: nowrap;
@@ -2421,7 +2421,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 7px;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   letter-spacing: .04em;
   color: var(--ink-3);
 }
@@ -2478,7 +2478,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .month-square__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .09em;
   color: var(--muted);
@@ -2486,7 +2486,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .month-square__value {
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -2552,7 +2552,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   margin: 6px auto 0;
   max-width: 44ch;
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.5;
 }
 
@@ -2610,7 +2610,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .hotbar__chip-month {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: .05em;
   color: var(--muted);
@@ -2618,7 +2618,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .hotbar__chip-text {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -2652,7 +2652,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .warning__body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 7px; }
 
 .pg-calc20 .warning__title {
-  font-size: 14.5px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   letter-spacing: -.015em;
   color: var(--spent-value);
@@ -2772,7 +2772,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .stream-menu__hint {
   flex: 0 0 auto;
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
 }
 
 /* The back row atop a drilled-down view. Muted so it doesn't compete with
@@ -2790,7 +2790,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: var(--t-radius-none);
   background: transparent;
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   text-align: left;
   cursor: pointer;
 }
@@ -2835,7 +2835,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   flex: 1 1 auto;
   min-width: 0;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .11em;
   text-transform: uppercase;
@@ -2970,7 +2970,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   min-width: 0;
   padding: 7px 0 0;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .11em;
   text-transform: uppercase;
@@ -3009,7 +3009,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: transparent;
   color: var(--ink);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -3219,7 +3219,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .sheet__eyebrow {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .11em;
   text-transform: uppercase;
@@ -3354,7 +3354,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .help-copy {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--t-text-sm);
   line-height: 1.6;
   color: var(--ink-2);
 }
@@ -3367,7 +3367,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .help-example__total {
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   color: var(--ink);
 }
@@ -3442,7 +3442,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .sheet-hero__aside {
   flex: 0 0 auto;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   color: var(--ink);
 }
@@ -3450,7 +3450,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .hero-figure {
   margin-top: 4px;
   font-family: var(--mono);
-  font-size: 32px;
+  font-size: var(--t-text-3xl);
   font-weight: 650;
   line-height: 1;
   letter-spacing: -.03em;
@@ -3531,7 +3531,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 5px;
   background: transparent;
   color: var(--ink-3);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   cursor: pointer;
   transition: background 140ms var(--motion), color 140ms var(--motion);
@@ -3578,7 +3578,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .derived__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -3587,7 +3587,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .derived__main {
   font-family: var(--mono);
-  font-size: 14.5px;
+  font-size: var(--t-text-ui);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--on-ink);
@@ -3595,7 +3595,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .derived__accent {
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
@@ -3627,7 +3627,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .signin-title {
   margin: 4px 0 0;
-  font-size: 26px;
+  font-size: var(--t-text-2xl);
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -.028em;
@@ -3651,7 +3651,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   cursor: pointer;
   transition: background 150ms var(--motion), border-color 150ms var(--motion), opacity 150ms var(--motion);
@@ -3675,7 +3675,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   align-items: center;
   gap: 12px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -3731,7 +3731,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--ink);
   color: var(--card);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   cursor: pointer;
   transition: opacity 150ms var(--motion);
@@ -3747,7 +3747,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 4px 0;
   color: var(--muted);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
@@ -3760,7 +3760,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   margin: 0;
   padding: 6px 0 6px 12px;
   border-left: 2px solid currentColor;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.5;
 }
 
@@ -3785,7 +3785,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 4px 0;
   color: var(--ink);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--t-text-ui);
   font-weight: 700;
   cursor: pointer;
 }
@@ -3812,7 +3812,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   color: var(--muted);
   cursor: pointer;
 }
@@ -3854,7 +3854,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   -webkit-backdrop-filter: saturate(calc(100% + 30% * var(--glass-strength)));
   backdrop-filter: saturate(calc(100% + 30% * var(--glass-strength)));
   color: var(--on-ink);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.45;
   box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
   /* The shared rule draws a hairline in --chrome-border, which is this
@@ -3924,7 +3924,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--spent-bg);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
   color: var(--spent-label);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.5;
   text-align: left;
 }
@@ -3946,7 +3946,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .twp-quiet {
   font-family: var(--mono);
   color: var(--on-ink-muted);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   letter-spacing: .02em;
 }
 
@@ -4036,7 +4036,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .archived-streams__title {
   flex: 0 0 auto;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -4087,7 +4087,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: var(--t-radius-full);
   background: var(--card);
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -4096,7 +4096,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .archived-chip__total {
   flex: 0 0 auto;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   color: var(--ink);
 }
 
@@ -4148,7 +4148,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-left: 3px solid var(--spent-line);
   background: var(--spent-bg);
   color: var(--spent-label);
-  font-size: 11.5px;
+  font-size: var(--t-text-xs);
 }
 
 @media (min-width: 780px) {
@@ -4242,7 +4242,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .topbar h1 {
   margin-top: 3px;
-  font-size: 20px;
+  font-size: var(--t-text-xl);
   font-weight: 650;
 }
 
@@ -4383,7 +4383,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .app-empty__title {
-  font-size: 24px;
+  font-size: var(--t-text-xl);
   font-weight: 650;
   letter-spacing: -.03em;
 }
@@ -5176,7 +5176,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   grid-row: 2;
   margin-top: 3px;
   font-family: var(--sans);
-  font-size: 20px;
+  font-size: var(--t-text-xl);
   font-weight: 650;
   letter-spacing: -.025em;
   line-height: 1.2;
@@ -5192,7 +5192,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .topbar__eyebrow, .pg-calc20 .headline__label, .pg-calc20 .topbar .twp-meter__label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -5237,7 +5237,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 0 4px;
   background: var(--sky);
   color: var(--navy-deep);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   line-height: 18px;
 }
@@ -5338,7 +5338,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
   .pg-calc20 .headline__label {
     font-family: var(--mono);
-    font-size: 15px;
+    font-size: var(--t-text-ui);
     font-weight: 400;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -5347,7 +5347,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
   .pg-calc20 .standing__label, .pg-calc20 .headline__of {
     font-family: var(--mono);
-    font-size: 15px;
+    font-size: var(--t-text-ui);
     font-weight: 400;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -5366,7 +5366,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
   .pg-calc20 .headline__room, .pg-calc20 .standing__value {
     font-family: var(--mono);
-    font-size: 20px;
+    font-size: var(--t-text-xl);
     font-weight: 600;
     letter-spacing: -.02em;
     color: var(--header-ink);
@@ -5418,7 +5418,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   .pg-calc20 .notice-menu__count {
     min-width: 20px;
     height: 20px;
-    font-size: 11px;
+    font-size: var(--t-text-xs);
     line-height: 20px;
   }
 
@@ -5521,14 +5521,14 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .section__title {
-  font-size: 1.5rem;
+  font-size: var(--t-text-xl);
   font-weight: 600;
   letter-spacing: -.02em;
   line-height: 1.3;
 }
 
 .pg-calc20 .stack > .section:not(.section--open) .section__title {
-  font-size: 1.25rem;
+  font-size: var(--t-text-xl);
 }
 
 .pg-calc20 .section__aside {
@@ -5579,7 +5579,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--badge-1099-bg);
   color: var(--badge-1099-ink);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: .08em;
 }
@@ -5606,7 +5606,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .stream-card__total-label {
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   letter-spacing: .08em;
 }
 
@@ -5670,7 +5670,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .stream-card__foot .chip {
   border-radius: var(--t-radius-full);
   padding: 6px 12px;
-  font-size: 11px;
+  font-size: var(--t-text-xs);
 }
 
 .pg-calc20 .stream-card__foot .stream-panel-edit, .pg-calc20 .stream-card__foot .lock-toggle {
@@ -5702,7 +5702,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .archived-streams__title {
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -5732,7 +5732,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 2px 8px;
   border-radius: 6px;
   font-family: var(--sans);
-  font-size: 10px;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -5811,7 +5811,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 .pg-calc20 .app-empty__title {
-  font-size: 1.5rem;
+  font-size: var(--t-text-xl);
   font-weight: 700;
   letter-spacing: -.03em;
 }
@@ -6018,7 +6018,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--spent-bg);
   color: var(--spent-label);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: .02em;
   white-space: nowrap;
@@ -6033,7 +6033,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 
 .pg-calc20 .ledger__empty {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   line-height: 1.45;
   color: var(--muted);
 }
@@ -6092,7 +6092,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .ledger__prefix {
   flex: 0 0 auto;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   color: var(--muted);
 }
 
@@ -6183,7 +6183,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: color-mix(in oklab, var(--primary) 10%, transparent);
   color: var(--primary);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--t-text-xs);
   font-weight: 500;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -6215,7 +6215,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   background: var(--card);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--t-text-sm);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -6314,7 +6314,7 @@ html.pg-calc20, .pg-calc20 body, .pg-calc20 .app-shell {
 
 .c20-layout-group__title {
   padding: 0 0.15rem 0.1rem;
-  font-size: 0.625rem;
+  font-size: var(--t-text-xs);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;

@@ -108,7 +108,7 @@
 .pg-overview .ov-title {
   font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
   font-weight: 400;
-  font-size: clamp(2.25rem, 1.6rem + 2vw, 3rem);
+  font-size: var(--t-text-hero-fluid);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--pg-fg);
@@ -118,7 +118,7 @@
 .pg-overview .ov-section {
   font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
   font-weight: 400;
-  font-size: 1.875rem;
+  font-size: var(--t-text-2xl);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--pg-fg);
@@ -152,7 +152,7 @@
 .pg-overview .label-caps,
 .pg-overview .ov-eyebrow {
   font-family: inherit;
-  font-size: 0.6875rem;
+  font-size: var(--t-text-xs);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -199,7 +199,7 @@
   border: 1px solid var(--pg-border);
   border-radius: var(--pg-radius-sm);
   background: var(--pg-surface-2);
-  font-size: 0.8125rem;
+  font-size: var(--t-text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--pg-fg-dim);
