@@ -411,13 +411,13 @@ export function useTracker(): TrackerContextValue {
  * a page that failed to load. Once the reader picks from the dropdown their
  * choice is what is in force, on every layout, until they change it.
  */
-export function useMonthScope(shape: MonthShape): {
+export function useMonthScope(shape: MonthShape, fallback?: MonthScope): {
   scope: MonthScope;
   months: MonthKey[];
   setScope: (scope: MonthScope) => void;
 } {
   const { ui, setUi } = useTracker();
-  const scope = resolveScope(ui.monthScope, ui.focusMode, shape);
+  const scope = resolveScope(ui.monthScope, ui.focusMode, shape, fallback);
   const months = useMemo(() => scopedMonths(ui.year, scope), [ui.year, scope]);
   const setScope = useCallback((next: MonthScope) => setUi({ monthScope: next }), [setUi]);
   return { scope, months, setScope };

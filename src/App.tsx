@@ -20,6 +20,13 @@ import { lazy, Suspense } from 'react';
 const REVIEW_HOST = import.meta.env.DEV
   || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
 
+/* The console renders the app inside a narrow frame when a phone width is
+ * chosen, so the app's own media queries resolve against a real viewport
+ * rather than a narrow box in a wide one. That frame loads this same page,
+ * which must therefore come up as the app alone — otherwise every frame
+ * carries another console, each with its own frame. */
+const FRAMED = new URLSearchParams(window.location.search).get('frame') === '1';
+
 const ReviewProvider = lazy(() => import('./review/ReviewProvider')
   .then((module) => ({ default: module.ReviewProvider })));
 
@@ -42,9 +49,30 @@ const LAYOUTS = {
   workrecord: lazy(() => import('./components/workrecord/TrackerWorkRecord').then((m) => ({ default: m.TrackerWorkRecord }))),
   horizon: lazy(() => import('./components/horizon/TrackerHorizon').then((m) => ({ default: m.TrackerHorizon }))),
   pocket: lazy(() => import('./components/pocket/TrackerPocket').then((m) => ({ default: m.TrackerPocket }))),
+  charm: lazy(() => import('./components/charm/TrackerCharm').then((m) => ({ default: m.TrackerCharm }))),
   plan: lazy(() => import('./components/plan/TrackerPlan').then((m) => ({ default: m.TrackerPlan }))),
-  calc20: lazy(() => import('./components/calc20/TrackerCalc20').then((m) => ({ default: m.TrackerCalc20 })))
+  calc20: lazy(() => import('./components/calc20/TrackerCalc20').then((m) => ({ default: m.TrackerCalc20 }))),
+  beautiful: lazy(() => import('./components/beautiful/TrackerBeautiful').then((m) => ({ default: m.TrackerBeautiful })))
 } as const;
+
+/**
+ * The class each layout draws its own root <div> with — `.pl` for plan, `.hz`
+ * for horizon, and so on. Screens that render BEFORE a layout mounts (the
+ * introduction, and the sign-in and terms gates above it) have no such div of
+ * their own, so this is how they borrow one. See the note in Root below.
+ *
+ * payguard and workrecord are absent on purpose: they share a real shell
+ * component, PayGuardShell, which does more than set a class.
+ */
+const ROOT_CLASS: Partial<Record<UiState['layout'], string>> = {
+  overview: 'pg-overview',
+  ledger: 'pg-ledger',
+  horizon: 'hz',
+  pocket: 'pk',
+  charm: 'ch',
+  plan: 'pl',
+  beautiful: 'bb'
+};
 
 export default function App() {
   const auth = useAuth();
@@ -94,11 +122,29 @@ function Root({ session }: { session: Session | null }) {
   }
 
   if (!calc20 && !ui.onboarded && !hasMeaningfulData(data)) {
-    // Both PayGuard-skinned layouts open onto the same palette they will
-    // land in, rather than index.css's default.
+    /*
+     * The introduction wears the layout it is about to open into.
+     *
+     * "Why does that introduction look the same for plan, and not styled like
+     * plan?" — because it was not inside plan, or inside anything. Only the
+     * two PayGuard-skinned layouts wrapped it; every other layout got a bare
+     * <Onboarding /> with no root class on it at all. A layout's stylesheet
+     * is scoped to that class, so outside it the screen resolved none of the
+     * --pg-* scale and fell back to whatever index.css happened to say. Which
+     * is also why its buttons had square corners: `.btn-primary` asks for
+     * var(--pg-radius-md), and an unresolved var() drops the declaration
+     * rather than falling back. One shared screen, eight layouts, and it
+     * belonged to none of them.
+     *
+     * ROOT_CLASS is the same class each TrackerX renders on its own outermost
+     * div. Nothing is duplicated: adding a layout means adding its id here
+     * beside the import above, and if it is missed the screen is exactly as
+     * unstyled as it was before — never worse.
+     */
+    const shell = <Onboarding />;
     return ui.layout === 'payguard' || ui.layout === 'workrecord'
-      ? <PayGuardShell><Onboarding /></PayGuardShell>
-      : <Onboarding />;
+      ? <PayGuardShell>{shell}</PayGuardShell>
+      : <div className={ROOT_CLASS[ui.layout] ?? ''} data-chrome-root>{shell}</div>;
   }
 
   const Layout = LAYOUTS[ui.layout] ?? LAYOUTS.plan;
@@ -108,12 +154,13 @@ function Root({ session }: { session: Session | null }) {
     </Suspense>
   );
 
-  if (!REVIEW_HOST) return tracker;
+  if (!REVIEW_HOST || FRAMED) return tracker;
 
   return (
     <Suspense fallback={tracker}>
       <ReviewProvider
         layout={ui.layout}
+        shell={ui.overviewShell}
         onNavigate={(anchor: ReviewAnchor) => setUi(uiPatchForAnchor(anchor))}
       >
         {tracker}

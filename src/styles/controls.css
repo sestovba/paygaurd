@@ -1,0 +1,283 @@
+/*
+ * The controls. One button, one field, one row — drawn once.
+ * =========================================================
+ *
+ * WHAT THIS REPLACES
+ *
+ * Nothing in this codebase was a shared control. `src/components/ui.tsx` had
+ * Switch, Chip and Segmented and no Button at all, so every layout invented
+ * one. The count on 2026-09-04, before this file existed:
+ *
+ *     .btn-primary  .btn-label  .btn-row  .btn-truncate  .button--start
+ *     .button-row  .danger-button  .filled-button  .hz-btn  .hz-icon-btn
+ *     .hz-stop-btn  .icon-btn  .icon-button  .icon-button--muted
+ *     .icon-button--on  .ledger-seg__btn  .ledger-seg__btn--on
+ *     .ledger__add-button  .lg-btn  .lg-btn-se  .lg-btn-solid  .lg-btn-w2
+ *     .lg-lock-btn  .name-button  .pg-btn  .pg-btn-danger  .pg-btn-ghost
+ *     .pg-btn-lg  .pg-btn-sm  .pg-btn-solid  .pg-icon-btn
+ *     .pg-icon-btn-bordered  .pg-signin-local-btn  .pk-btn  .pk-prompt-btn
+ *     .pk-switch-btn  .pl-seg-btn  .seg__btn  .seg__btn--icon
+ *     .seg__btn--menu  .seg__btn--on  .settings-tabs__btn  .signin-local-btn
+ *     .text-button  .tonal-button  .review-target-btn  .review-row-buttons
+ *
+ * Forty-eight names for about five ideas.
+ *
+ * WHY CSS CLASSES AND NOT TAILWIND UTILITIES IN THE COMPONENT
+ *
+ * shadcn/ui's own convention is to spell the utilities inside the .tsx. That
+ * is the right default when a project owns one theme. This project ships five
+ * and the standing instruction is that a theme is an OVERRIDE, not a rewrite —
+ * so the variable part has to be reachable from CSS. With the utilities in the
+ * component, re-shaping a button for `ledger` means editing React and
+ * branching on the palette; with a class, it is one rule in one stylesheet and
+ * the component never learns that themes exist.
+ *
+ * It also costs nothing at runtime, which matters more here than usual: the
+ * floor device is a 1–2GB Android on an un-updated WebView.
+ *
+ * Utilities still win where they should. These live in `@layer components`,
+ * Tailwind's utilities layer sits above it, so `className="w-full"` on a
+ * Button overrides without !important and without an escape hatch.
+ *
+ * EVERY VALUE HERE COMES FROM A TOKEN
+ *
+ * Not one literal size, colour or radius below. Heights, paddings and radii
+ * resolve through metrics.css; colours through palette.css. That is what makes
+ * a new theme cheap: answer the 14 shape choices and the 39 colour choices and
+ * every control in the app is already correct.
+ */
+
+@layer components {
+  /* ---------------------------------------------------------------- */
+  /* Button                                                            */
+  /* ---------------------------------------------------------------- */
+  /*
+   * One base, five variants, three sizes. The variants are M3's button types
+   * under this product's names: filled = M3 filled, tonal = M3 filled tonal,
+   * outlined = M3 outlined, ghost = M3 text. `danger` is not an M3 type and
+   * is here because destructive actions in this app delete a user's income
+   * record, and an outlined button is not enough warning for that.
+   */
+  .ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--t-control-gap);
+    flex-shrink: 0;
+
+    block-size: var(--t-control-h);
+    padding-inline: var(--t-control-px);
+    border-radius: var(--t-radius);
+    border: 1px solid transparent;
+
+    font-family: var(--t-font-sans);
+    font-size: var(--t-text-base);
+    font-weight: var(--t-weight-semibold);
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--t-motion-short) var(--t-ease),
+      border-color var(--t-motion-short) var(--t-ease),
+      color var(--t-motion-short) var(--t-ease);
+  }
+
+  /* Keyboard focus, once, for every control in this file. It was spelled six
+     different ways across the eight stylesheets and omitted entirely in
+     three, which is the accessibility failure this audience feels first. */
+  .ui-btn:focus-visible,
+  .ui-field-input:focus-visible,
+  .ui-btn-icon:focus-visible {
+    outline: var(--t-focus-w) solid var(--t-ring);
+    outline-offset: var(--t-focus-offset);
+  }
+
+  .ui-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  /* Sizes. A size only ever moves height and horizontal padding — never the
+     font size, which belongs to the type ramp and not to the control. */
+  .ui-btn-sm {
+    block-size: var(--t-control-h-sm);
+    padding-inline: var(--t-control-px-sm);
+    font-size: var(--t-text-sm);
+  }
+
+  .ui-btn-lg {
+    block-size: var(--t-control-h-lg);
+    padding-inline: var(--t-control-px-lg);
+    font-size: var(--t-text-lg);
+  }
+
+  /* Variants. */
+  .ui-btn-filled {
+    background: var(--t-primary);
+    color: var(--t-primary-fg);
+  }
+  .ui-btn-filled:hover:not(:disabled) { background: var(--t-ring); color: var(--t-head-fg); }
+
+  .ui-btn-tonal {
+    background: var(--t-accent);
+    color: var(--t-accent-fg);
+  }
+  .ui-btn-tonal:hover:not(:disabled) { background: var(--t-surface-3); }
+
+  .ui-btn-outlined {
+    background: var(--t-surface);
+    color: var(--t-fg);
+    border-color: var(--t-border-strong);
+  }
+  .ui-btn-outlined:hover:not(:disabled) { background: var(--t-surface-2); }
+
+  .ui-btn-ghost {
+    background: transparent;
+    color: var(--t-fg-muted);
+  }
+  .ui-btn-ghost:hover:not(:disabled) { background: var(--t-surface-2); color: var(--t-fg); }
+
+  .ui-btn-danger {
+    background: var(--t-over);
+    color: var(--t-over-fg);
+  }
+  .ui-btn-danger:hover:not(:disabled) { background: var(--t-over-text); }
+
+  /* Full width. A modifier rather than a size, because "the one action on
+     this phone screen" is a layout fact and not a different button. */
+  .ui-btn-block {
+    inline-size: 100%;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Icon button                                                       */
+  /* ---------------------------------------------------------------- */
+  /*
+   * Square, and never smaller than the touch target even when the icon is
+   * small. Six of the old icon-button classes were 28–34px, which is under
+   * both Android's 48dp guidance and WCAG 2.5.8, on an app used one-handed
+   * by people with motor impairments.
+   */
+  .ui-btn-icon {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    block-size: var(--t-control-h);
+    inline-size: var(--t-control-h);
+    padding: 0;
+    border-radius: var(--t-radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--t-fg-muted);
+
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--t-motion-short) var(--t-ease),
+      color var(--t-motion-short) var(--t-ease);
+  }
+  .ui-btn-icon:hover:not(:disabled) { background: var(--t-surface-2); color: var(--t-fg); }
+  .ui-btn-icon:disabled { cursor: not-allowed; opacity: 0.35; }
+
+  .ui-btn-icon-sm { block-size: var(--t-control-h-sm); inline-size: var(--t-control-h-sm); }
+
+  .ui-btn-icon-danger:hover:not(:disabled) { background: var(--t-over-soft); color: var(--t-over-text); }
+
+  /* ---------------------------------------------------------------- */
+  /* Field                                                             */
+  /* ---------------------------------------------------------------- */
+  /*
+   * A label and its input, stacked. The label is not optional and there is no
+   * placeholder-only variant: a placeholder disappears the moment someone
+   * types, which for a form about money is where mistakes come from.
+   */
+  .ui-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--t-space-1);
+    min-inline-size: 0;
+  }
+
+  .ui-field-label {
+    font-family: var(--t-font-sans);
+    font-size: var(--t-text-sm);
+    font-weight: var(--t-weight-medium);
+    color: var(--t-fg-muted);
+  }
+
+  .ui-field-input {
+    block-size: var(--t-control-h);
+    inline-size: 100%;
+    min-inline-size: 0;
+    padding-inline: var(--t-control-px);
+    border-radius: var(--t-radius-md);
+    border: 1px solid var(--t-border-strong);
+    background: var(--t-surface);
+    color: var(--t-fg);
+
+    font-family: var(--t-font-sans);
+    font-size: var(--t-text-base);
+    transition: border-color var(--t-motion-short) var(--t-ease);
+  }
+  .ui-field-input::placeholder { color: var(--t-fg-dim); }
+  .ui-field-input:disabled { cursor: not-allowed; opacity: 0.5; }
+
+  /* The hint sits under the input and is the only place a rule gets
+     explained. It is --t-text-sm, not smaller: see metrics.css. */
+  .ui-field-hint {
+    font-size: var(--t-text-sm);
+    color: var(--t-fg-dim);
+  }
+
+  .ui-field-error {
+    font-size: var(--t-text-sm);
+    color: var(--t-over-text);
+  }
+  .ui-field-input[aria-invalid='true'] { border-color: var(--t-over); }
+
+  /* ---------------------------------------------------------------- */
+  /* Button row                                                        */
+  /* ---------------------------------------------------------------- */
+  /*
+   * The footer of every sheet in the app. It existed as `.btn-row`,
+   * `.button-row` and `.review-row-buttons`, plus an inline flex in four
+   * more places, each with its own gap.
+   */
+  .ui-btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--t-space-3);
+  }
+
+  /* Wrapping is decided by how long the labels are, not by a breakpoint —
+     the one genuinely good idea in the `.btn-row` this replaces, and worth
+     carrying forward. A row of two short buttons stays a row at any width; a
+     row whose labels cannot both make 11rem stacks, on a phone and on a
+     desktop alike, because the reason is the text and not the screen. */
+  .ui-btn-row > * {
+    flex: 1 1 auto;
+    min-inline-size: min(11rem, 100%);
+    max-inline-size: 100%;
+  }
+
+  /* A single long label truncates rather than reflowing one button to three
+     lines. Call sites pass the full text as the element's accessible name. */
+  .ui-btn-row .ui-btn {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* An icon button in a row is square and does not grow — it has no label to
+     stack from, so letting it flex just makes a 200px-wide icon. */
+  .ui-btn-row > .ui-btn-icon {
+    flex: 0 0 auto;
+    min-inline-size: var(--t-control-h);
+  }
+}

@@ -24,6 +24,53 @@ but expensive to get wrong, §4–6 are reference.
 | **"align"** | Rendered pixels from the viewport edge, not equal padding. → §4 |
 | Praise — *"very reassuring"*, *"good placement"* | **Do not touch this.** Say it's untouched and move on. |
 
+## A reference is a specification too
+
+Everything under *A screenshot is a specification* applies when he points at a
+**live page**, and one thing more: **measure it, do not guess.** Twice in the
+layout-nine session a value was invented that one DOM read would have given —
+month cards at 12px where the reference used 26px, and an editing state drawn
+as an unfolding panel when the real one turns the row itself into the field.
+Both were obvious to him on sight.
+
+And the expensive one: **a rule from our own design system is not a licence to
+deviate from a reference he has pointed at.** Their progress bar got replaced
+with `plan`'s twelve chunks on the grounds that a continuous bar asks the
+reader to estimate a proportion. The reasoning is sound; applying it there was
+still a redesign when he had asked for a match. *"Lets get the parity right
+first then we can diverge."*
+
+## A screenshot is a specification
+
+When he sends a screenshot, **that is the thing he wants** — not a starting
+point, not a mood board, not an invitation to reinterpret. His words for it:
+
+> *"When I provide a screenshot that is what I want the way it is, only if you
+> can make it better more appealing will I accept that but my expectation is
+> something very similar not worse but hopefully better."*
+
+And, on how often this goes wrong:
+
+> *"I have seen worse often."*
+
+So the bar is explicit and it is one-directional:
+
+| Result | Verdict |
+|---|---|
+| Very close to the screenshot | **Correct.** This is the target. |
+| Genuinely better and more appealing | **Accepted**, and welcome. |
+| Different-but-interesting | **Failure.** He asked for the thing he showed you. |
+| Simplified because it was faster | **Failure**, and the common one. |
+
+Two things follow:
+
+- **Match it before improving it.** Get the layout, spacing, weight and
+  hierarchy right first. An improvement is a change to something that already
+  matches; a shortcut wearing the word "improvement" is not.
+- **If you deviate, say so and say why**, in a line, at the time. A deviation
+  he can see and reject is fine. A deviation presented as the requested work
+  is what "I have seen worse often" is describing.
+
 ## Answer shape
 
 Action first, one line of reasoning, depth only when asked.
@@ -95,7 +142,7 @@ all three.
 
 ## Fix it where it lives
 
-`src/domain/` is the source of truth for all ten layouts. Fix a rule there and
+`src/domain/` is the source of truth for all eight layouts. Fix a rule there and
 every screen gets it; fix it in a layout and you've made the ninth copy.
 
 When you build a shared primitive, **rewrite the existing callers onto it in
@@ -119,6 +166,22 @@ anything claiming to be aligned need eyes on the running app.
 
 **Do not ask him to go and look** — he asked you to build it so he wouldn't
 have to. Open the app, measure, screenshot, say what you saw.
+
+**Use the review console's own tools to do it.** They exist, they are the
+tools he reviews with, and checking by hand what they answer directly is how
+a session ends up reporting something the console would have contradicted:
+
+- **Check it at a phone width, in the frame.** The device control renders the
+  app in a real viewport of that size, so the media queries are the ones that
+  ship. Resizing the window by eye, or reading a stylesheet and reasoning
+  about it, is not the same check — most of this product's readers are on a
+  phone, so "verified" without a phone width is half a verification.
+- **Point at it in the frame and file the note there.** A note taken through
+  the console carries the source file, the line, the DOM path and the width
+  it was seen at. A note typed into the JSON by hand carries whichever of
+  those you remembered.
+- **Two widths, not one**, when a change touches layout at all: the frame's
+  phone preset and full width. The bugs live at the breakpoint.
 
 ---
 
@@ -256,6 +319,20 @@ decorative — do not "modernise" it.
 - **Treasure island.** Each job is a chest, shut until it has paid into this
   month. Saved payments send coins **upward** — falling coins read as loss.
 
+## Settled in the layout-nine work, 2026-09-04
+
+- **Tile three of the four-tile grid is "Months over limit".** He chose it over
+  my Hours tile, and his grid is better: the bottom row is then the year and
+  the top row is this month.
+- **The 80-hour rule is an edge case and gets drawn like one.** *"Hours you
+  worked is an edgecase"* — no tile, no card, one line inside the edit row past
+  about 60 hours. A tile reading "34 of 80" every month is a number people
+  learn to stop seeing.
+- **The limit field stays.** *"We even want these."* I had argued we should
+  derive it rather than ask; having both costs nothing, and the derived figure
+  is what fills the field.
+- **The month strip may abbreviate.** See `DESIGN-SYSTEM.md § 1.3`.
+
 ## Rejected — do not re-propose
 
 - **A coin currency.** A counter was built and removed: *"let's not give them
@@ -274,6 +351,13 @@ decorative — do not "modernise" it.
 - From earlier builds: a dark-glass header redesign; direction-sensitive
   hide/reveal chrome on scroll; replacing the information architecture during
   a polish pass.
+- **A mode switch on the hours card.** A segmented *"I know my pay / I know my
+  hours"* was proposed and refused: *"We dont need a tab… not in this green
+  section."* The card asks one question and answers it; a mode switch makes the
+  reader choose before anything has been asked of them, which is the kind of
+  upfront choice this audience should never face. `hours → rate` is still real
+  and still missing — it is a Phase 1 question and belongs on the front door,
+  not inside a block about the month you are in.
 
 ---
 

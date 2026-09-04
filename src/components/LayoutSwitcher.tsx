@@ -1,5 +1,6 @@
 import type { LayoutMode } from '../state/storage';
 import { Check } from 'lucide-react';
+import { LAYOUTS as REGISTRY } from 'virtual:pg-layouts';
 
 export interface LayoutOption {
   id: LayoutMode;
@@ -14,72 +15,53 @@ export interface LayoutGroup {
 
 /**
  * Grouped by what you want out of the screen, which is the only thing a
- * person choosing between ten of them can act on.
+ * person choosing between nine of them can act on.
  *
- * They were grouped by where they came from — two groups both titled
- * "Variants", then "Calc20 (derivative)" and "Calc20 (as built)", with a
- * sibling repository named in a description. That is the project's own
- * history, and it is a heading only the person who wrote it can read.
+ * This list used to be written here by hand. It went wrong in two ways worth
+ * recording, because both will happen again as layouts are added.
  *
- * The second failure was subtler and worth naming, because it will happen
- * again as layouts are added: three new ones arrived and each took a heading
- * of its own, so the list grew six groups for ten options and half of them
- * held one item. A group of one is not a group — it is a heading with an
+ * It drifted. The review console's copy of the menu listed six of the ten
+ * layouts — Plan among the missing — and nothing about reading either file
+ * said so. A list kept in a file the thing itself does not live in is a list
+ * that gets forgotten on the pass that matters.
+ *
+ * And it grew a heading per layout. Three new layouts arrived and each took
+ * a group of its own, so ten options sat under six headings, half of them
+ * holding one item. A group of one is not a group; it is a heading with an
  * option under it, and the reader still has to read every line.
  *
- * So: four headings, none of them fewer than two, and every one of them a
- * sentence about what you are trying to do rather than about how the screen
- * is built. A new layout joins the group whose job it does.
+ * So the list is derived. Each layout's README declares where it sits:
+ *
+ *     <!-- registry: order="3" group="The least on screen" -->
+ *
+ * and vite.layouts-plugin.ts reads the folder, the title and the lead
+ * sentence out of the same file. Adding a layout is adding its folder and
+ * its README — no central list to keep, here or in the console. Group order
+ * is its lowest member's order, so the headings need no list either.
  */
-export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = [
-  {
-    title: 'Deciding what to do next',
-    options: [
-      {
-        id: 'plan',
-        label: 'Plan',
-        description: 'How many more hours you can work, what a shift would cost you, and which months pay you extra.'
-      },
-      {
-        id: 'horizon',
-        label: 'Horizon',
-        description: 'The months you have left, what lands in them, and what to do about it.'
-      }
-    ]
-  },
-  {
-    title: 'The least on screen',
-    options: [
-      {
-        id: 'pocket',
-        label: 'Pocket',
-        description: 'Big text, one action, no chart. Built for a cheap phone on slow data.'
-      },
-      { id: 'workrecord', label: 'Work Record', description: 'The year as a grid, with the months that need you on top.' },
-      { id: 'calc20', label: 'Calc20', description: 'Twelve squares and a running total.' }
-    ]
-  },
-  {
-    title: 'Typing income in',
-    options: [
-      { id: 'ledger', label: 'Ledger', description: 'Every month as a row. Fastest for entering amounts.' },
-      { id: 'payguard', label: 'PayGuard', description: 'Cards you edit in place, with a bar to switch sections.' }
-    ]
-  },
-  {
-    title: 'The whole picture',
-    options: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        /* One entry, not three. Classic, Sidebar and Workspace were the same
-           surfaces in three shells; which shell is a setting now, and it sits
-           under this row in Settings. */
-        description: 'The month, the year and your jobs. Choose one scroll, separate pages, or a job open beside them.'
-      }
-    ]
+const KNOWN_IDS = new Set<string>([
+  'overview', 'ledger', 'payguard', 'workrecord', 'calc20', 'horizon', 'pocket', 'charm', 'plan', 'beautiful'
+]);
+
+function isLayoutMode(id: string): id is LayoutMode {
+  return KNOWN_IDS.has(id);
+}
+
+export const LAYOUT_GROUPS: ReadonlyArray<LayoutGroup> = (() => {
+  const groups: LayoutGroup[] = [];
+  const byTitle = new Map<string, LayoutOption[]>();
+  for (const entry of REGISTRY) {
+    if (!isLayoutMode(entry.id)) continue;
+    let options = byTitle.get(entry.group);
+    if (!options) {
+      options = [];
+      byTitle.set(entry.group, options);
+      groups.push({ title: entry.group, options });
+    }
+    options.push({ id: entry.id, label: entry.label, description: entry.description });
   }
-];
+  return groups;
+})();
 
 export const LAYOUTS: ReadonlyArray<LayoutOption> = LAYOUT_GROUPS.flatMap((g) => g.options);
 

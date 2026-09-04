@@ -1,3 +1,10 @@
+/* When ledger is the layout, html/body share its well so overscroll
+   * and letterbox edges do not flash a different page colour. */
+html:has(.pg-ledger),
+body:has(.pg-ledger) {
+  background: #ffffff;
+}
+
 /*
  * Ledger layout — a monospace "paper ledger" design system, entirely scoped
  * under .pg-ledger so it never touches the Classic/New/Responsive layouts,
@@ -23,14 +30,18 @@
    * green — same word, different job — so it takes --t-surface-3, the
    * deepest well, which is what a table head actually is.
    */
-  --lg-bg: var(--t-bg);
-  --lg-surface: var(--t-surface);
-  --lg-surface-2: var(--t-surface-2);
-  --lg-head: var(--t-surface-3);
+  /* Lightest end = pure white — more contrast against rails / ink / accents. */
+  --lg-bg: #ffffff;
+  --lg-surface: #ffffff;
+  --lg-surface-2: color-mix(in oklch, var(--lg-ring) 6%, var(--lg-surface));
+  --lg-head: var(--lg-row-rail);
   --lg-fg: var(--t-fg);
   --lg-muted: var(--t-fg-muted);
-  --lg-border: var(--t-border);
-  --lg-border-soft: var(--t-border-soft);
+  /* Chrome hairlines stay near-neutral on white. A heavier green mix read as a
+   * pale stripe under the header and along the job tab bar; rails/fills still
+   * carry the green family via --lg-row-* and accents. */
+  --lg-border: color-mix(in oklch, var(--lg-ring) 6%, color-mix(in oklch, var(--lg-fg) 11%, var(--lg-surface)));
+  --lg-border-soft: color-mix(in oklch, var(--lg-ring) 3%, color-mix(in oklch, var(--lg-fg) 5%, var(--lg-surface)));
   --lg-ring: var(--t-ring);
   --lg-w2: var(--t-w2);
   --lg-se: var(--t-se);
@@ -38,16 +49,93 @@
   --lg-warn: var(--t-warn);
   --lg-twp: var(--t-twp);
   --lg-over: var(--t-over);
-  --lg-shadow: var(--t-shadow);
-  --lg-radius: var(--t-radius-sm);
+  /* Soft plates: enough chroma to read as accent, not gray mush. */
+  --lg-w2-soft: color-mix(in oklch, var(--lg-w2) 16%, var(--lg-surface));
+  --lg-se-soft: color-mix(in oklch, var(--lg-se) 16%, var(--lg-surface));
+  --lg-safe-soft: color-mix(in oklch, var(--lg-safe) 16%, var(--lg-surface));
+  --lg-warn-soft: color-mix(in oklch, var(--lg-warn) 16%, var(--lg-surface));
+  --lg-over-soft: color-mix(in oklch, var(--lg-over) 14%, var(--lg-surface));
+  --lg-twp-soft: color-mix(in oklch, var(--lg-twp) 16%, var(--lg-surface));
+  /*
+   * Harmonic measure — φ = 1.618 (Leonardo / Vitruvian).
+   * Outer frame : inner panel ≈ φ. Pad steps climb by ≈φ.
+   * Type climbs by √φ ≈ 1.272 so six roles stay readable.
+   * Columns favor Fibonacci widths (3 / 5 / 8 / 13).
+   */
+  --lg-phi: 1.618;
+  --lg-radius: 0.25rem; /* paper corner, not soft-UI blob */
+  --lg-shadow: none;
+
+  /* Row : tab ≈ 5 : 6 — tab a hair taller so it seats the card. */
+  --lg-row-h: 2.5rem;
+  --lg-tab-h: 3rem;
+
+  /*
+   * Type hierarchy (loud → quiet). Pick a ROLE class in TSX, not a raw size.
+   *   figure  — φ rem — big countable money (analysis cards)
+   *   title   — √φ × ui — page / job name, mid money
+   *   ui      — 1rem — tabs, section toggles, empty-state heading (sans)
+   *   body    — table cells, help, year (mono — default ledger voice)
+   *   label   — .lg-label — uppercase field / column headers
+   * Placement (label left vs above vs column): see LABEL-LAYOUT.md
+   *   caption — legends, secondary meta (not shouting)
+   *   micro   — units, badges, axis pills, quiet actions
+   * Sans = names & chrome. Mono = numbers & dense UI. Don't mix for the same job.
+   */
+  --lg-font-sans: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --lg-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --lg-fs-micro: 0.625rem;
+  --lg-fs-caption: 0.75rem;
+  --lg-fs-body: 0.875rem;          /* caption × √φ */
+  --lg-fs-ui: 1rem;
+  --lg-fs-title: 1.272rem;         /* ui × √φ */
+  --lg-fs-figure: 1.618rem;        /* φ */
+
+  /* One green family: head > rail/surface-2 > zebra(hover). No ash gray wells. */
+  --lg-row-head: color-mix(in oklch, var(--lg-ring) 11%, var(--lg-surface));
+  --lg-row-rail: color-mix(in oklch, var(--lg-ring) 5%, var(--lg-surface));
+  --lg-row-zebra: color-mix(in oklch, var(--lg-ring) 2%, var(--lg-surface));
+  --lg-accent-line: color-mix(in oklch, var(--lg-ring) 55%, var(--lg-border));
+  /*
+   * Padding hierarchy (outer → dense). Same ROLE → same token — do not
+   * invent a new rem for a job these already cover.
+   * Climb ≈ φ: micro → cell → section → card; page = card × φ.
+   *   page    — --lg-page-gutter — outer shell / page chrome L/R
+   *   section — --lg-pad-section — toolbar / band block pad
+   *   card    — --lg-card-gutter — inside a job card / panel
+   *   cell    — --lg-pad-cell    — dense row / table cell / field inset
+   *   micro   — --lg-pad-micro   — badge, chip, quiet control inset
+   */
+  --lg-pad-micro: 0.25rem;
+  --lg-pad-cell: 0.4rem;           /* micro × φ */
+  --lg-pad-section: 0.65rem;       /* cell × φ */
+  --lg-card-gutter: 0.75rem;       /* between section and page */
+  --lg-page-gutter: 1.214rem;      /* card × φ — outer frame breathes more */
 
   background: var(--lg-bg);
   color: var(--lg-fg);
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--lg-font-mono);
   font-variant-numeric: tabular-nums;
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Dark / carbon: keep palette surfaces (pure #fff is a light-mode contrast trick). */
+.dark .pg-ledger,
+[data-palette='carbon'] .pg-ledger {
+  --lg-bg: var(--t-surface);
+  --lg-surface: var(--t-surface);
+  background: var(--t-surface);
+}
+.dark html:has(.pg-ledger),
+.dark body:has(.pg-ledger),
+html:has([data-palette='carbon'] .pg-ledger),
+body:has([data-palette='carbon'] .pg-ledger) {
+  background: var(--t-surface);
+}
+
 
 
 .pg-ledger * {
@@ -83,19 +171,19 @@
 .pg-ledger input:focus-visible,
 .pg-ledger select:focus-visible {
   outline: 2px solid var(--lg-ring);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .lg-mono {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--lg-font-mono);
 }
 
 .lg-sans {
-  font-family: 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--lg-font-sans);
 }
 
 .lg-label {
-  font: 500 0.75rem/1.2 'JetBrains Mono', monospace;
+  font: 500 var(--lg-fs-caption)/1.2 var(--lg-font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--lg-muted);
@@ -103,50 +191,45 @@
 
 .lg-header-bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem 0.75rem;
   width: 100%;
-  padding: 0.75rem 0.85rem;
-  background: var(--lg-surface);
+  min-height: var(--lg-row-h);
+  padding: var(--lg-pad-section) var(--lg-page-gutter);
+  background: var(--lg-bg);
+  /* One hairline only — do not also put lg-border-b on the wrapping <header>.
+   * Soft on white so it does not read as a green stripe under the title bar. */
+  border-bottom: 1px solid var(--lg-border-soft);
+}
+
+.lg-header-identity {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  flex-wrap: nowrap;
+}
+
+/* Scope beside the title — quieter than a tool button in the action pile. */
+.lg-scope-inline {
+  flex-shrink: 0;
 }
 
 .lg-header-title {
-  font: 700 1.25rem/1.2 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font: 700 var(--lg-fs-title)/1.2 var(--lg-font-sans);
   letter-spacing: -0.02em;
   color: var(--lg-fg);
 }
 
-.lg-header-sub {
-  font: 500 0.75rem/1.3 'JetBrains Mono', monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--lg-muted);
-}
-
 .lg-header-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   margin-left: auto;
-}
-
-.lg-header-tools {
-  overflow-x: auto;
-  border-top: 1px solid var(--lg-border-soft);
-  background: var(--lg-surface);
-}
-
-.lg-header-tools-inner {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 0.55rem 0.85rem;
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .lg-year-stepper {
@@ -155,6 +238,7 @@
   gap: 0.15rem;
   border: 1px solid var(--lg-border);
   border-radius: var(--lg-radius);
+  background: none;
 }
 
 .lg-year-stepper button {
@@ -172,33 +256,37 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  padding: 0.2rem 0.45rem;
-  font: 700 0.75rem/1 'JetBrains Mono', monospace;
-  letter-spacing: 0.08em;
+  padding: 0.1rem 0.3rem; /* control chrome — not a layout step */
+  font: 700 var(--lg-fs-micro)/1 var(--lg-font-mono);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .lg-type-badge[data-type='w2'] {
   color: var(--lg-w2);
-  border: 1px solid var(--lg-w2);
-  background: color-mix(in oklch, var(--lg-w2) 12%, var(--lg-surface));
+  border: 1px solid color-mix(in oklch, var(--lg-w2) 32%, var(--lg-border));
+  background: var(--lg-w2-soft);
 }
 
 .lg-type-badge[data-type='ten99'] {
   color: var(--lg-se);
-  border: 1px solid var(--lg-se);
-  background: color-mix(in oklch, var(--lg-se) 12%, var(--lg-surface));
+  border: 1px solid color-mix(in oklch, var(--lg-se) 32%, var(--lg-border));
+  background: var(--lg-se-soft);
 }
 
 @media (min-width: 640px) {
-  .lg-header-bar,
-  .lg-header-tools-inner {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+  .pg-ledger {
+    --lg-page-gutter: 1.618rem; /* φ */
+    --lg-card-gutter: 1rem;     /* page / φ */
+    /* section / cell / micro stay — density does not grow with page width */
+  }
+
+  .lg-header-bar {
+    flex-wrap: nowrap;
   }
 
   .lg-header-title {
-    font-size: 1.375rem;
+    font-size: var(--lg-fs-title);
   }
 }
 
@@ -215,16 +303,16 @@
   align-items: center;
   gap: 0.45rem;
   min-height: 2.25rem;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.8rem; /* control chrome — not a layout step */
   border: 1px solid var(--lg-border);
   background: var(--lg-surface);
   border-radius: var(--lg-radius);
-  font: 500 0.75rem/1 'JetBrains Mono', monospace;
+  font: 500 var(--lg-fs-caption)/1 var(--lg-font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--lg-fg);
   cursor: pointer;
-  transition: background-color 0.12s, border-color 0.12s;
+  transition: var(--lg-ease);
   white-space: nowrap;
 }
 
@@ -239,7 +327,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 2.25rem;
-  padding: 0 0.5rem;
+  padding: 0 var(--lg-pad-cell);
   border: 1px solid var(--lg-border);
   background: var(--lg-surface);
   border-radius: var(--lg-radius);
@@ -254,7 +342,7 @@
   border: 0;
   background: none;
   padding: 0;
-  font: 500 0.75rem/1 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font: 500 var(--lg-fs-caption)/1 var(--lg-font-mono);
   letter-spacing: 0.04em;
   color: var(--lg-fg);
   cursor: pointer;
@@ -271,6 +359,14 @@
   background: var(--lg-fg);
 }
 
+/* Icon-only tool — same outer box as .lg-btn, square padding. */
+.lg-btn-icon {
+  justify-content: center;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  padding-inline: 0;
+}
+
 .lg-seg {
   display: inline-flex;
   border: 1px solid var(--lg-border);
@@ -279,8 +375,12 @@
 }
 
 .lg-seg-item {
-  padding: 0.55rem 0.75rem;
-  font: 500 0.75rem/1 'JetBrains Mono', monospace;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0 0.75rem; /* control chrome */
+  font: 500 var(--lg-fs-caption)/1 var(--lg-font-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--lg-muted);
@@ -288,7 +388,7 @@
   cursor: pointer;
   border: none;
   border-right: 1px solid var(--lg-border);
-  transition: background-color 0.12s, color 0.12s;
+  transition: var(--lg-ease);
 }
 
 .lg-seg-item:last-child {
@@ -298,6 +398,108 @@
 .lg-seg-item[data-on='true'] {
   background: var(--lg-fg);
   color: var(--lg-bg);
+}
+
+/* ---- By month instrument cluster ------------------------------------
+ * Cards | Table is the only view control (plain .lg-seg — same shell as
+ * Ongoing/Paused/Ended). Active is a checkbox filter beside it — same row,
+ * different job, so it cannot read as a third mode. Legend lives under the
+ * title in the same toolbar, not a second chrome band.
+ * -------------------------------------------------------------------- */
+.lg-analysis-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: var(--lg-pad-cell) calc(var(--lg-card-gutter) + 1px);
+  border-bottom: 1px solid var(--lg-border-soft);
+}
+
+.lg-analysis-titleblock {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.4rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  /* Align legend with band-head title (after chevron lead). */
+  padding-left: calc(2rem + 0.5rem);
+}
+
+.lg-analysis-tools-wrap {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Same open/close hairline behavior as Year shape. */
+.lg-analysis > .lg-band-head {
+  /* Reset UA button chrome without wiping the tabbar hairline. */
+  border: 0;
+  border-bottom: 1px solid var(--lg-border);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+.lg-analysis > .lg-band-head:hover,
+.lg-chart-band .lg-band-head:hover {
+  background: var(--lg-row-head);
+}
+.lg-analysis > .lg-band-head[data-open='true'],
+.lg-chart-band .lg-band-head[data-open='true'] {
+  border-bottom: 1px solid var(--lg-border);
+}
+.lg-analysis > .lg-band-head[data-open='true'] + * {
+  border-top: none;
+}
+
+.lg-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+}
+
+
+.lg-analysis-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lg-analysis-controls .lg-seg-item {
+  padding-inline: 0.9rem; /* control chrome */
+}
+
+.lg-active-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0 0.15rem; /* hit-area nudge */
+  font: 500 var(--lg-fs-caption)/1 var(--lg-font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.lg-active-filter:hover { color: var(--lg-fg); }
+
+.lg-active-filter input {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0;
+  accent-color: var(--lg-fg);
+  cursor: pointer;
+}
+
+.lg-active-filter:has(input:checked) {
+  color: var(--lg-fg);
 }
 
 /* An editable name that reads as plain text until touched — no border at
@@ -326,9 +528,40 @@
   border: 1px solid var(--lg-border);
   background: var(--lg-surface);
   border-radius: var(--lg-radius);
-  padding: 0.6rem 0.6rem;
-  font: 500 0.8125rem/1.2 'JetBrains Mono', monospace;
+  padding: var(--lg-pad-cell);
+  font: 500 var(--lg-fs-body)/1.2 var(--lg-font-mono);
   min-height: 2.5rem;
+}
+
+/* Affixed $ / unit fields: the shell IS the input. Prefix and suffix sit in
+ * padding; the real <input> stays bare. Global input:focus-visible would
+ * otherwise draw a second green box around just the number. */
+.pg-ledger .lg-field input,
+.pg-ledger .lg-field input:focus-visible {
+  border: none;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+  min-width: 0;
+  flex: 1 1 auto;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+}
+/* Nested number fields only — bare .lg-field on date/select keeps its own ring. */
+.pg-ledger .lg-field:has(input):focus-within {
+  border-color: var(--lg-ring);
+  outline: 2px solid color-mix(in oklch, var(--lg-ring) 45%, transparent);
+  outline-offset: 0;
+}
+.lg-field-prefix,
+.lg-field-suffix {
+  flex-shrink: 0;
+  color: var(--lg-muted);
+  user-select: none;
+}
+.pg-ledger .lg-field:has(input) {
+  cursor: text;
 }
 
 .lg-swatch {
@@ -341,6 +574,37 @@
 /* ---- semantic utilities ---- */
 
 .lg-text-muted { color: var(--lg-muted); }
+
+/* Role classes — prefer these. Size-only .lg-fs-* is an escape hatch. */
+.lg-type-figure {
+  font: 600 var(--lg-fs-figure)/1.15 var(--lg-font-sans);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.lg-type-title {
+  font: 700 var(--lg-fs-title)/1.2 var(--lg-font-sans);
+  letter-spacing: -0.02em;
+}
+.lg-type-ui {
+  font: 600 var(--lg-fs-ui)/1.25 var(--lg-font-sans);
+}
+.lg-type-body {
+  font: 500 var(--lg-fs-body)/1.35 var(--lg-font-mono);
+}
+.lg-type-caption {
+  font: 500 var(--lg-fs-caption)/1.35 var(--lg-font-mono);
+}
+.lg-type-micro {
+  font: 500 var(--lg-fs-micro)/1.2 var(--lg-font-mono);
+  letter-spacing: 0.04em;
+}
+.lg-fs-micro { font-size: var(--lg-fs-micro); }
+.lg-fs-caption { font-size: var(--lg-fs-caption); }
+.lg-fs-body { font-size: var(--lg-fs-body); }
+.lg-fs-ui { font-size: var(--lg-fs-ui); }
+.lg-fs-title { font-size: var(--lg-fs-title); }
+.lg-fs-figure { font-size: var(--lg-fs-figure); }
+
 .lg-text-w2 { color: var(--lg-w2); }
 .lg-text-se { color: var(--lg-se); }
 .lg-text-fg { color: var(--lg-fg); }
@@ -349,13 +613,13 @@
 .lg-text-twp { color: var(--lg-twp); }
 .lg-text-over { color: var(--lg-over); }
 
-.lg-fill-w2 { background: var(--lg-w2); }
-.lg-fill-se { background: var(--lg-se); }
-.lg-fill-muted { background: var(--lg-muted); }
-.lg-fill-safe { background: var(--lg-safe); }
-.lg-fill-warn { background: var(--lg-warn); }
-.lg-fill-twp { background: var(--lg-twp); }
-.lg-fill-over { background: var(--lg-over); }
+.lg-fill-w2 { background: var(--lg-w2-soft); }
+.lg-fill-se { background: var(--lg-se-soft); }
+.lg-fill-muted { background: var(--lg-border-soft); }
+.lg-fill-safe { background: var(--lg-safe-soft); }
+.lg-fill-warn { background: var(--lg-warn-soft); }
+.lg-fill-twp { background: var(--lg-twp-soft); }
+.lg-fill-over { background: var(--lg-over-soft); }
 
 .lg-border-b { border-bottom: 1px solid var(--lg-border); }
 .lg-border-b-soft { border-bottom: 1px solid var(--lg-border-soft); }
@@ -366,76 +630,185 @@
 .lg-bg-surface-2 { background: var(--lg-surface-2); }
 .lg-bg-border-soft { background: var(--lg-border-soft); }
 
-.lg-stat-tile {
-  min-width: 9.5rem;
-  border-color: var(--lg-border);
+.lg-summary-tile {
+  min-width: 13rem;
+  padding: var(--lg-pad-section) var(--lg-card-gutter);
 }
-
-.lg-summary-tile { min-width: 13rem; }
 
 .lg-field-compact {
   min-height: auto;
-  padding: 0.25rem 0.4rem;
+  padding: var(--lg-pad-micro) var(--lg-pad-cell);
 }
 
 .lg-chevron {
+  /* One size for every section / card toggle — don't restyle per call site. */
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
   color: var(--lg-muted);
+  transition: transform 0.15s ease;
 }
 
 .lg-chevron[data-collapsed='true'] {
   transform: rotate(-90deg);
 }
 
-.lg-job-card {
-  border: 1px solid var(--lg-border);
-  border-left-width: 3px;
+/* Shared lead column — job header, Year shape, By month all start here. */
+.lg-toggle-lead {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  place-items: center;
 }
 
-.lg-job-card[data-type='w2'] { border-left-color: var(--lg-w2); }
-.lg-job-card[data-type='ten99'] { border-left-color: var(--lg-se); }
+/* One header row for job card / Year shape / By month — columns don't wrap apart. */
+.lg-band-head,
+.lg-job-card-header {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--lg-tab-h);
+  height: var(--lg-tab-h);
+  padding: 0 var(--lg-card-gutter);
+  background: var(--lg-surface);
+  border-bottom: 1px solid var(--lg-border);
+  overflow: hidden;
+}
+.lg-band-head__title {
+  min-width: 0;
+  font: 700 var(--lg-fs-ui)/1.2 var(--lg-font-sans);
+  color: var(--lg-fg);
+}
+.lg-band-head__meta {
+  min-width: 0;
+  justify-self: end;
+}
+.lg-band-head__body {
+  grid-column: 3 / -1;
+  min-width: 0;
+}
 
-.lg-job-card-header[data-open='false'] { border-bottom: none; }
-.lg-job-card-header[data-open='true'] { border-bottom: 1px solid var(--lg-border-soft); }
-
-.lg-settings-grid {
-  background: var(--lg-border);
-  gap: 1px;
-  border-top: 1px solid var(--lg-border);
+.lg-job-card {
+  border: 1px solid var(--lg-border);
+  border-top: none; /* tabbar hairline is the top edge; active tab seals it */
+  border-bottom: none; /* header owns the hairline */
+  background: var(--lg-surface);
+  position: relative;
+  z-index: 1;
+}
+/* Collapsed: flush with Year shape / By month — no side rails. */
+.lg-job-card:has(.lg-job-card-header[data-open='false']) {
+  border-left: none;
+  border-right: none;
+}
+/* Open: restore frame + bottom edge before Year shape. */
+.lg-job-card:has(.lg-job-card-header[data-open='true']) {
+  border-left-width: 1px;
+  border-right: 1px solid var(--lg-border);
   border-bottom: 1px solid var(--lg-border);
 }
 
-.lg-notice-badge {
-  background: var(--lg-warn);
-  color: var(--lg-bg);
+.lg-job-card[data-type='w2'] { border-left-color: color-mix(in oklch, var(--lg-w2) 70%, var(--lg-border)); }
+.lg-job-card[data-type='ten99'] { border-left-color: color-mix(in oklch, var(--lg-se) 70%, var(--lg-border)); }
+
+.lg-job-card-header[data-open='true'] + * {
+  border-top: none;
+  margin-top: 0;
 }
 
-.lg-analysis-summary {
-  background: var(--lg-surface);
-  border-top: 1px solid var(--lg-border);
+/* Lifecycle + date range — one compact instrument row under the title. */
+.lg-job-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  padding: var(--lg-pad-cell) var(--lg-card-gutter);
+  border-bottom: 1px solid var(--lg-border-soft);
+}
+.lg-job-status-lock {
+  margin-left: auto;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+/* Quiet cell action (Clear) — same register as .lg-label, not a second button. */
+/* One quiet text control — Clear in a cell, and the pay-basis "add hours"
+   rail. Size/padding differ; voice does not. */
+.lg-quiet-action,
+.lg-add-hours {
+  border: 0;
+  background: transparent;
+  font: 500 var(--lg-fs-micro)/1 var(--lg-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+  cursor: pointer;
+}
+.lg-quiet-action { width: 100%; }
+.lg-quiet-action:hover,
+.lg-add-hours:hover { color: var(--lg-fg); }
+.lg-quiet-action:disabled,
+.lg-add-hours:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.lg-add-hours {
+  flex: 0 0 auto;
+  align-self: stretch;
+  padding: 0 var(--lg-card-gutter);
+  border-left: 1px solid var(--lg-border-soft);
+  font-size: var(--lg-fs-caption);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.lg-settings-grid {
+  /* Soft hairlines between tiles — full --lg-border read as a dark grid. */
+  background: var(--lg-border-soft);
+  gap: 1px;
+  /* No border-top: .lg-job-card-header[data-open='true'] + * already draws it. */
+  border-bottom: 1px solid var(--lg-border-soft);
 }
 
 .lg-analysis-table {
-  min-width: 42rem;
+  min-width: 34rem;
   border-collapse: collapse;
 }
 
-.lg-ledger-scroll { min-width: 30rem; }
+.lg-analysis-table thead th {
+  background: var(--lg-row-head);
+  border-bottom: 1px solid var(--lg-border);
+}
+
+.lg-analysis-table tbody tr {
+  transition: var(--lg-ease);
+}
+@media (hover: hover) {
+  .lg-analysis-table tbody tr:hover {
+    background: var(--lg-row-rail);
+  }
+}
+
+.lg-analysis-table[data-worked] {
+  min-width: 55rem;
+}
+
+.lg-ledger-scroll { min-width: 21rem; }
+.lg-ledger-scroll[data-hours] { min-width: 34rem; }
 
 .lg-tooltip-panel {
   background: var(--lg-surface);
   border: 1px solid var(--lg-border);
   box-shadow: var(--lg-shadow);
   min-width: 8rem;
-}
-
-.lg-btn-w2 {
-  color: var(--lg-w2);
-  border-color: var(--lg-w2);
-}
-
-.lg-btn-se {
-  color: var(--lg-se);
-  border-color: var(--lg-se);
+  padding: var(--lg-pad-micro);
 }
 
 .lg-tab-static {
@@ -444,15 +817,15 @@
 }
 
 .lg-chart-bar-w2 { background: var(--lg-w2); }
-.lg-chart-bar-se { background: var(--lg-se); opacity: 0.85; }
+.lg-chart-bar-se { background: color-mix(in oklch, var(--lg-se) 88%, var(--lg-surface)); }
 
-.lg-swatch-w2 { background: var(--lg-w2); }
-.lg-swatch-se { background: var(--lg-se); }
-.lg-swatch-muted { background: var(--lg-muted); }
-.lg-swatch-safe { background: var(--lg-safe); }
-.lg-swatch-warn { background: var(--lg-warn); }
-.lg-swatch-twp { background: var(--lg-twp); }
-.lg-swatch-over { background: var(--lg-over); }
+.lg-swatch-w2 { background: var(--lg-w2-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-w2) 45%, transparent); }
+.lg-swatch-se { background: var(--lg-se-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-se) 45%, transparent); }
+.lg-swatch-muted { background: var(--lg-border-soft); box-shadow: inset 0 0 0 1px var(--lg-border); }
+.lg-swatch-safe { background: var(--lg-safe-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-safe) 45%, transparent); }
+.lg-swatch-warn { background: var(--lg-warn-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-warn) 45%, transparent); }
+.lg-swatch-twp { background: var(--lg-twp-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-twp) 45%, transparent); }
+.lg-swatch-over { background: var(--lg-over-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-over) 45%, transparent); }
 
 .lg-label-border { border-color: var(--lg-border); }
 
@@ -468,7 +841,7 @@
   background: transparent;
   color: var(--lg-muted);
   opacity: 0.55;
-  transition: opacity 140ms, background-color 140ms;
+  transition: var(--lg-ease);
 }
 
 .lg-lock-btn:hover,
@@ -483,17 +856,6 @@
 
 .lg-disclaimer {
   color: var(--lg-muted);
-  border-top: 1px solid var(--lg-border);
-}
-
-/* A grouped card — rounded, softly shadowed, with an internal grid of
- * hairline dividers (via the background-color-as-gap trick) rather than the
- * flush, sharp-cornered accounting-ledger look. This is the "base" style
- * from the theme CSS, applied to every major panel. */
-.lg-card {
-  border-radius: var(--lg-radius);
-  box-shadow: var(--lg-shadow);
-  overflow: hidden;
 }
 
 /* ---- chart ---- */
@@ -501,7 +863,6 @@
 .lg-chart-rail {
   position: relative;
   border-bottom: 1px solid var(--lg-border);
-  border-left: 1px solid var(--lg-border-soft);
 }
 
 .lg-chart-threshold {
@@ -510,7 +871,7 @@
   right: 0;
   z-index: 1;
   height: 0;
-  border-top: 2px solid currentColor;
+  border-top: 1px solid currentColor;
 }
 
 .lg-chart-bars {
@@ -521,8 +882,15 @@
   gap: 3px;
 }
 
+.lg-chart-axis {
+  gap: 3px;
+}
+
 @media (min-width: 640px) {
   .lg-chart-bars {
+    gap: 7px;
+  }
+  .lg-chart-axis {
     gap: 7px;
   }
 }
@@ -545,7 +913,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 1px;
   background: var(--lg-warn);
 }
 
@@ -558,7 +926,7 @@
   top: 0;
   left: 0;
   right: 0;
-  background: color-mix(in oklab, var(--lg-over) 8%, transparent);
+  background: color-mix(in oklab, var(--lg-over) 4%, transparent);
   pointer-events: none;
 }
 
@@ -567,10 +935,10 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--lg-warn) 16%, transparent);
-  padding: 0 0.3rem;
+  background: var(--lg-warn-soft);
+  padding: 0 0.3rem; /* pill chrome */
   color: var(--lg-warn);
-  font-size: 0.5625rem;
+  font-size: var(--lg-fs-micro);
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.5;
@@ -578,36 +946,64 @@
 
 /* ---- monthly ledger table (per-job editor) ---- */
 
+/* Flat rows. Zebra + the tinted jobs/analysis wells stacked into a busy
+ * checkerboard — every other month a plate, every band a different ground.
+ * Structure is the hairline only; fill is reserved for hover and focus. */
+.lg-ledger-table {
+  width: 100%;
+  min-width: 21rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.lg-ledger-scroll[data-hours] .lg-ledger-table {
+  min-width: 34rem;
+}
+/* Fixed cols ≈ Fib 5 : 8 : 3 — amount (auto) takes the golden remainder. */
+.lg-ledger-table col.lg-col-month { width: 5.25rem; }
+.lg-ledger-table col.lg-col-amount { width: auto; }
+.lg-ledger-table col.lg-col-hours { width: 8rem; }
+.lg-ledger-table col.lg-col-clear { width: 3.25rem; }
+
 .lg-ledger-row {
-  display: flex;
   border-bottom: 1px solid var(--lg-border-soft);
+  background: transparent;
+  transition: var(--lg-ease);
 }
-
-.lg-ledger-row:nth-child(even) {
-  background: var(--lg-surface-2);
-}
-
 @media (hover: hover) {
-  .lg-ledger-row:hover,
-  .lg-ledger-row:nth-child(even):hover {
-    background: color-mix(in oklch, var(--lg-ring) 12%, var(--lg-surface));
+  .lg-ledger-row:hover {
+    background: var(--lg-row-rail);
   }
 }
 
 .lg-ledger-cell {
-  padding: 0.6rem 0.55rem;
+  padding: var(--lg-pad-cell);
   border-right: 1px solid var(--lg-border-soft);
-  font: 500 0.8125rem/1.2 'JetBrains Mono', monospace;
-  display: flex;
-  align-items: center;
+  font: 500 var(--lg-fs-body)/1.2 var(--lg-font-mono);
+  vertical-align: middle;
+}
+.lg-ledger-cell:last-child {
+  border-right: none;
+}
+.lg-ledger-cell--month {
+  width: 5.25rem;
+  text-align: left;
+}
+.lg-ledger-cell--month .lg-type-micro {
+  display: block;
+  margin-top: 0.15rem;
+}
+.lg-ledger-cell--num {
+  text-align: right;
+}
+.lg-ledger-cell--clear {
+  width: 3.25rem;
+  text-align: center;
+  padding: 0;
 }
 
-/* A cell whose entire body is the input, Excel-style — no cell padding of
- * its own, so the input's padding is the only inset and its hit/focus area
- * spans the full cell edge to edge. */
+/* Excel-style field cell — input owns the inset. */
 .lg-ledger-cell-field {
   padding: 0;
-  align-items: stretch;
 }
 
 .lg-ledger-input {
@@ -615,10 +1011,10 @@
   height: 100%;
   border: none;
   background: transparent;
-  font: 500 0.8125rem/1 'JetBrains Mono', monospace;
+  font: 500 var(--lg-fs-body)/1 var(--lg-font-mono);
   text-align: right;
   outline: none;
-  padding: 0.6rem 0.55rem;
+  padding: var(--lg-pad-cell);
 }
 
 /* index.css defines a global input:focus-visible ring (0,1,1 specificity)
@@ -631,7 +1027,8 @@
 }
 
 .lg-ledger-cell:has(.lg-ledger-input:focus-visible) {
-  background: color-mix(in oklch, var(--lg-ring) 12%, var(--lg-surface));
+  background: color-mix(in oklch, var(--lg-ring) 10%, var(--lg-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-ring) 45%, transparent);
 }
 
 /* ---- monthly analysis cards ---- */
@@ -642,57 +1039,91 @@
  * itself stays edge to edge — only its inner rows carry the gutter, so the
  * summary row and table can bleed to the full width. */
 .lg-analysis {
-  background: var(--lg-head);
+  /* Flat with the page — hairline only, no recessed tray. */
+  background: transparent;
   border-top: 1px solid var(--lg-border);
+  margin-top: -1px;
+  flex: 1 1 auto;
 }
 
 .lg-analysis-pad {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: var(--lg-card-gutter);
+  padding-right: var(--lg-card-gutter);
+}
+
+/* Footer bands under By month — full bleed, no side inset. */
+.lg-analysis-pad--bleed {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* One rule for every By month footer band (hours ask, simulator, disclaimer). */
+.lg-analysis-band {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--lg-pad-section) 0;
+  border-top: 1px solid var(--lg-border);
+  margin: 0;
+}
+/* Cards already have their own bottom edge — keep a little air so that edge
+   and this band rule do not sit flush and read as one fat double line. */
+.lg-analysis-grid + .lg-analysis-band,
+.lg-analysis .overflow-x-auto + .lg-analysis-band,
+.lg-empty-months + .lg-analysis-band {
+  margin-top: var(--lg-pad-micro);
+}
+/* Consecutive footer bands share one hairline instead of stacking. */
+.lg-analysis-band + .lg-analysis-band {
+  margin-top: -1px;
+}
+.lg-analysis-band--copy {
+  padding-left: var(--lg-card-gutter);
+  padding-right: var(--lg-card-gutter);
+}
+/* Simulator open: same full-width hairline; flatten nested .panel chrome. */
+.lg-analysis-band--panel {
+  padding-left: var(--lg-card-gutter);
+  padding-right: var(--lg-card-gutter);
+  padding-bottom: var(--lg-pad-section);
+}
+.pg-ledger .lg-analysis-band--panel > .panel {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .lg-legend-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font: 500 0.875rem/1.4 'JetBrains Mono', monospace;
-  color: var(--lg-fg);
+  gap: 0.4rem;
+  font: 500 var(--lg-fs-caption)/1.35 var(--lg-font-mono);
+  letter-spacing: 0.02em;
+  color: var(--lg-muted);
 }
 
 .lg-analysis-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.65rem;
-  padding: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); /* Fib 13 */
+  gap: var(--lg-pad-section);
+  padding: var(--lg-pad-section) var(--lg-page-gutter);
 }
 
-@media (min-width: 640px) {
-  .lg-analysis-pad {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .lg-analysis-grid {
-    padding: 1rem;
-  }
-}
-
-@media (min-width: 480px) {
-  .lg-analysis-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 720px) {
-  .lg-analysis-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1100px) {
-  .lg-analysis-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
+.lg-empty-months {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: calc(var(--lg-pad-section) * 4) var(--lg-page-gutter);
+  text-align: center;
+  font: 500 var(--lg-fs-body)/1.45 var(--lg-font-mono);
+  color: var(--lg-muted);
 }
 
 .lg-status-card {
@@ -702,6 +1133,55 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: var(--lg-ease);
+}
+@media (hover: hover) {
+  .lg-status-card:hover {
+    border-color: var(--lg-accent-line);
+  }
+}
+
+
+.lg-status-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--lg-pad-section) var(--lg-card-gutter) var(--lg-pad-micro);
+}
+
+.lg-status-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--lg-pad-micro) var(--lg-card-gutter) var(--lg-pad-section);
+}
+
+.lg-status-card-body-filled {
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .lg-status-card-head,
+  .lg-status-card-body {
+    /* --lg-card-gutter already steps up at 640px */
+    padding-left: var(--lg-card-gutter);
+    padding-right: var(--lg-card-gutter);
+  }
+}
+
+/* Thin bottom progress — the card's edge, not a mid-body bar. */
+.lg-card-meter {
+  display: flex;
+  height: 2px;
+  width: 100%;
+  margin-top: auto;
+  background: var(--lg-border-soft);
+  flex-shrink: 0;
+}
+.lg-card-meter > span {
+  display: block;
+  height: 100%;
 }
 
 /* The one rounded thing on an otherwise square-cornered card. */
@@ -713,18 +1193,57 @@
   flex: 0 0 auto;
 }
 
+
+/* Status cards: soft fill + chroma ring. Inline styles used to dump full
+ * --lg-safe/warn/twp/over onto every dot and meter; data-status owns it now. */
+.lg-status-card[data-status='safe'] .lg-status-dot {
+  background: var(--lg-safe-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-safe) 55%, transparent);
+}
+.lg-status-card[data-status='warn'] .lg-status-dot {
+  background: var(--lg-warn-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-warn) 55%, transparent);
+}
+.lg-status-card[data-status='twp'] .lg-status-dot {
+  background: var(--lg-twp-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-twp) 55%, transparent);
+}
+.lg-status-card[data-status='over'] .lg-status-dot {
+  background: var(--lg-over-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-over) 55%, transparent);
+}
+.lg-status-card[data-status='review'] .lg-status-dot {
+  background: var(--lg-border-soft);
+  box-shadow: inset 0 0 0 1px var(--lg-border);
+}
+.lg-status-card[data-status='none'] .lg-status-dot {
+  background: var(--lg-border-soft);
+}
+
+.lg-status-card[data-status='safe'] .lg-card-meter > span { background: color-mix(in oklch, var(--lg-safe) 70%, var(--lg-surface)); }
+.lg-status-card[data-status='warn'] .lg-card-meter > span { background: color-mix(in oklch, var(--lg-warn) 70%, var(--lg-surface)); }
+.lg-status-card[data-status='twp'] .lg-card-meter > span { background: color-mix(in oklch, var(--lg-twp) 70%, var(--lg-surface)); }
+.lg-status-card[data-status='over'] .lg-card-meter > span { background: color-mix(in oklch, var(--lg-over) 70%, var(--lg-surface)); }
+.lg-status-card[data-status='review'] .lg-card-meter > span { background: var(--lg-muted); }
+
 .lg-status-badge {
-  font: 500 0.6875rem/1.3 'JetBrains Mono', monospace;
+  font: 500 var(--lg-fs-caption)/1.3 var(--lg-font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.2rem 0.45rem;
+  padding: 0.2rem 0.45rem; /* badge chrome */
   border: 1px solid currentColor;
   border-radius: 2px;
 }
 
-/* Edge to edge at every width — no floating card, no page-margin backdrop. */
+/* Edge to edge at every width — no floating card, no page-margin backdrop.
+   Fills the viewport under the chrome so the page doesn't stop short. */
 .lg-app-card {
-  background: var(--lg-surface);
+  background: var(--lg-bg);
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
 }
 
 /* ---- job tabs ---- */
@@ -732,65 +1251,351 @@
 /* The strip sits on the tinted ground so the selected tab — the only white
  * one — reads as raised and connected to the card below it, instead of
  * dissolving into the white chart panel above. */
-.lg-tabbar {
-  background: var(--lg-head);
+.lg-jobs {
+  background: transparent;
+  /* Card (or empty shell) owns the bottom edge — a second rule here stacked fat. */
+  border-bottom: none;
+}
+.lg-jobs:not(:has(.lg-job-card)):not(:has(.lg-border)) {
+  /* Tabs / Not ongoing only — still need a floor before chart. */
   border-bottom: 1px solid var(--lg-border);
 }
 
+.lg-tabbar {
+  background: transparent;
+  border-bottom: 1px solid var(--lg-border-soft);
+  margin-top: -1px;
+  /* Keep the hairline; the scroller below lets the active tab overlap it.
+   * Soft on white — same quiet edge as the header, not a green tab rule. */
+}
+
+/* overflow-x clips margin-bottom on tabs — pad 1px then pull back so the
+   active tab can seal the hairline without a gap under it. */
+.lg-tabbar-scroller {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  overflow-x: auto;
+  margin-bottom: -1px;
+  padding-bottom: 1px;
+}
+
 .lg-ledger-head {
-  background: var(--lg-head);
+  /* Column labels stay the one quiet tinted rail in the table. */
+  background: var(--lg-row-head);
   border-bottom: 1px solid var(--lg-border);
+}
+
+/* Head padding matches .lg-ledger-input so labels share an edge with figures. */
+.lg-ledger-table thead th.lg-ledger-hcell {
+  padding: var(--lg-pad-cell);
+  box-sizing: border-box;
+  border-right: 1px solid var(--lg-border-soft);
+  border-bottom: 1px solid var(--lg-border);
+  background: var(--lg-row-head);
+  font: 500 var(--lg-fs-caption)/1.2 var(--lg-font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+  vertical-align: middle;
+}
+.lg-ledger-table thead th.lg-ledger-hcell:last-child {
+  border-right: none;
+}
+.lg-ledger-hcell--month { text-align: left; }
+.lg-ledger-hcell--num { text-align: right; }
+.lg-ledger-hcell--clear { text-align: center; letter-spacing: 0.1em; }
+.lg-ledger-cell--clear {
+  border-right: none;
+  text-align: center;
+  padding: 0;
+  width: 3.25rem;
+}
+
+/* Sub-line under a money input — same horizontal inset as .lg-ledger-input. */
+.lg-ledger-hint {
+  padding: 0 var(--lg-pad-cell) var(--lg-pad-cell);
+  font: 500 var(--lg-fs-micro)/1.3 var(--lg-font-mono);
+  color: var(--lg-muted);
+}
+
+/* Clear column: head + body share one fixed width on the same axis. */
+.lg-ledger-hcell--clear,
+.lg-ledger-cell--clear {
+  width: 3.25rem;
+  flex: 0 0 3.25rem;
+  box-sizing: border-box;
+}
+.lg-ledger-cell--clear {
+  padding: 0;
+  border-right: none;
+  justify-content: center;
+}
+
+/* Page chrome horizontal inset (chart legend, footnotes). */
+.lg-page-inset {
+  padding-left: var(--lg-page-gutter);
+  padding-right: var(--lg-page-gutter);
+}
+
+/* Vertical steps from the padding hierarchy (prefer over Tailwind py-*). */
+.lg-pad-section-y { padding-top: var(--lg-pad-section); padding-bottom: var(--lg-pad-section); }
+.lg-pad-cell-y { padding-top: var(--lg-pad-cell); padding-bottom: var(--lg-pad-cell); }
+.lg-pad-micro-y { padding-top: var(--lg-pad-micro); padding-bottom: var(--lg-pad-micro); }
+.lg-pad-section-b { padding-bottom: var(--lg-pad-section); }
+.lg-pad-cell { padding: var(--lg-pad-cell); }
+.lg-pad-micro { padding: var(--lg-pad-micro); }
+.lg-pad-micro-x { padding-left: var(--lg-pad-micro); padding-right: var(--lg-pad-micro); }
+.lg-pad-micro-t { padding-top: var(--lg-pad-micro); }
+.lg-empty-shell {
+  padding: calc(var(--lg-pad-section) * 4) var(--lg-page-gutter);
+}
+
+/* Analysis table: Month column shares the toolbar's left edge; numbers stay
+   right-aligned on a shared right gutter. */
+.lg-analysis-table th,
+.lg-analysis-table td {
+  padding: var(--lg-pad-section) var(--lg-pad-cell);
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+.lg-analysis-table th:first-child,
+.lg-analysis-table td:first-child {
+  padding-left: var(--lg-card-gutter);
+}
+.lg-analysis-table th:last-child,
+.lg-analysis-table td:last-child {
+  padding-right: var(--lg-card-gutter);
+}
+
+/* Card-level horizontal pad (1099 form, warn banner). */
+.lg-card-inset {
+  padding-left: var(--lg-card-gutter);
+  padding-right: var(--lg-card-gutter);
+}
+
+/* 1099 year-total form — same left edge as Income section toggle. */
+.lg-se-form {
+  padding: var(--lg-pad-section) var(--lg-card-gutter);
 }
 
 .lg-tab {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0 1rem;
-  min-height: 3.25rem;
-  height: 3.25rem;
-  border-right: 1px solid var(--lg-border);
+  padding: 0 var(--lg-card-gutter);
+  min-height: var(--lg-tab-h);
+  height: var(--lg-tab-h);
+  border-right: 1px solid var(--lg-border-soft);
   background: transparent;
   cursor: pointer;
   white-space: nowrap;
-  font: 600 1rem/1.2 'Inter Tight', sans-serif;
+  font: 600 var(--lg-fs-ui)/1.2 var(--lg-font-sans);
   color: var(--lg-muted);
-  transition: background-color 0.12s;
+  transition: var(--lg-ease);
 }
 
 .lg-tab[data-active='true'] {
   color: var(--lg-fg);
+  font-weight: 600;
   background: var(--lg-surface);
-  box-shadow: inset 0 -2px 0 var(--lg-w2);
+  /* Overlap the tabbar hairline so the card below reads continuous. */
+  margin-bottom: -1px;
+  border-bottom: 1px solid var(--lg-surface);
+  /* One hairline seal — 2px read as a fat bar under a new job. */
+  box-shadow: inset 0 -1px 0 var(--lg-w2);
+  position: relative;
+  z-index: 2;
 }
 
 .lg-tab[data-active='true'][data-type='ten99'] {
-  box-shadow: inset 0 -2px 0 var(--lg-se);
+  box-shadow: inset 0 -1px 0 var(--lg-se);
 }
 
 .lg-tab:hover {
-  background: var(--lg-surface-2);
+  background: var(--lg-row-rail);
+  color: var(--lg-fg);
 }
 
 .lg-tab[data-active='true']:hover {
   background: var(--lg-surface);
+  color: var(--lg-fg);
+}
+
+/* calc20 archive pattern: Not ongoing · chip (name · tag · total) · menu */
+.lg-archived {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* Inside the job card after Income — card gutters, not page gutters. */
+  padding: var(--lg-pad-section) var(--lg-card-gutter);
+  background: transparent;
+  border-top: 1px solid var(--lg-border);
+}
+/* Fallback under tabs when no ongoing job is open — still use page gutters. */
+.lg-jobs > .lg-archived {
+  padding-left: var(--lg-page-gutter);
+  padding-right: var(--lg-page-gutter);
+}
+.lg-archived-title {
+  font: 500 var(--lg-fs-micro)/1.2 var(--lg-font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+}
+.lg-archived-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.lg-archived-wrap {
+  position: relative;
+}
+.lg-archived-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.875rem;
+  padding: var(--lg-pad-micro) var(--lg-pad-cell);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+  background: transparent;
+  color: var(--lg-fg);
+  cursor: pointer;
+  max-width: 100%;
+}
+.lg-archived-chip:hover,
+.lg-archived-chip[data-open] {
+  background: var(--lg-row-rail);
+  border-color: var(--lg-border);
+}
+.lg-archived-name {
+  font: 400 var(--lg-fs-body)/1.25 var(--lg-font-sans);
+  color: var(--lg-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 14rem;
+}
+.lg-archived-tag {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.35rem; /* tag chrome */
+  border: 1px solid var(--lg-border);
+  border-radius: 0.2rem;
+  background: transparent;
+  font: 500 var(--lg-fs-micro)/1 var(--lg-font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+}
+.lg-archived-tag[data-kind='paused'] {
+  border-color: color-mix(in oklch, var(--lg-warn) 45%, var(--lg-border));
+  color: var(--lg-warn);
+}
+.lg-archived-tag[data-kind='ended'] {
+  border-color: var(--lg-border);
+  color: var(--lg-muted);
+}
+.lg-archived-total {
+  font: 400 var(--lg-fs-caption)/1 var(--lg-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--lg-muted);
+}
+.lg-archived-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  min-width: 11rem;
+  padding: var(--lg-pad-micro);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+  background: var(--lg-surface);
+  box-shadow: var(--lg-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.lg-archived-menu button {
+  display: block;
+  width: 100%;
+  padding: var(--lg-pad-cell) var(--lg-pad-section);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: 400 var(--lg-fs-body)/1.25 var(--lg-font-sans);
+  color: var(--lg-fg);
+  cursor: pointer;
+  border-radius: calc(var(--lg-radius) - 1px);
+}
+.lg-archived-menu button:hover {
+  background: var(--lg-row-rail);
+}
+.lg-archived-menu-danger {
+  color: var(--lg-over) !important;
+}
+.lg-archived-menu-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.lg-tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.15rem;
+  padding: 0.15rem; /* icon hit */
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0;
+  transition: var(--lg-ease);
+}
+.lg-tab:hover .lg-tab-close,
+.lg-tab[data-active='true'] .lg-tab-close,
+.lg-tab-close:focus-visible {
+  opacity: 1;
 }
 
 .lg-section-toggle {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.85rem 0.85rem;
+  gap: 0.5rem;
+  min-height: var(--lg-tab-h);
+  height: var(--lg-tab-h);
+  padding: 0 var(--lg-card-gutter);
   text-align: left;
-  font: 600 1rem/1.25 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font: 700 var(--lg-fs-ui)/1.2 var(--lg-font-sans);
   color: var(--lg-fg);
   background: var(--lg-surface);
-  border-bottom: 1px solid var(--lg-border-soft);
+  border-bottom: 1px solid var(--lg-border);
+  cursor: pointer;
+  transition: var(--lg-ease);
+}
+.lg-section-toggle:hover {
+  background: var(--lg-row-head);
+}
+.lg-section-toggle:focus-visible {
+  outline: 2px solid var(--lg-ring);
+  outline-offset: -2px;
 }
 
+
 .lg-section-toggle[data-open='false'] {
-  border-bottom: none;
+  border-bottom: 1px solid var(--lg-border);
+}
+
+/* Keep the tabbar-weight hairline when open — content does not steal it. */
+.lg-section-toggle[data-open='true'] + * {
+  border-top: none;
+}
+.lg-section-toggle[data-open='true'] {
+  border-bottom: 1px solid var(--lg-border);
 }
 
 .lg-section-toggle-meta {
@@ -798,16 +1603,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 500 0.8125rem/1.3 'JetBrains Mono', monospace;
+  font: 500 var(--lg-fs-body)/1.3 var(--lg-font-mono);
   color: var(--lg-muted);
 }
 
-@media (min-width: 640px) {
-  .lg-section-toggle {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
+/* Card gutters come from --lg-card-gutter (set with --lg-page-gutter at 640px). */
 
 /* ---- popups ---- */
 
@@ -860,8 +1660,8 @@
   --shadow-lift: var(--lg-shadow);
 
   /* Serif display figures are the one thing the ledger never uses. */
-  --font-display: 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Inter Tight', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--lg-font-sans);
+  --font-sans: var(--lg-font-sans);
 
   --radius-sm: 2px;
   --radius-md: var(--lg-radius);
@@ -888,11 +1688,11 @@
 .pg-ledger [role='dialog'] .display-figure {
   font-weight: 700;
   letter-spacing: -0.01em;
-  font-size: 1.375rem;
+  font-size: var(--lg-fs-title);
 }
 
 .pg-ledger [role='dialog'] .label-caps {
-  font: 500 0.6875rem/1.3 'JetBrains Mono', monospace;
+  font: 500 var(--lg-fs-caption)/1.3 var(--lg-font-mono);
   letter-spacing: 0.12em;
   color: var(--lg-muted);
 }
@@ -903,15 +1703,50 @@
 /* Leads the page, above the stat strip: the hazard the product exists to
    catch was a cell in a table you had to scroll to. Renders nothing when
    there is nothing to say. */
+
+/* ---- Section language: hairlines, not fills ------------------------------
+ * Page plane = --lg-bg everywhere (header, jobs, analysis, archived).
+ * Bands share one ground; a single outer edge separates them. Soft chroma
+ * is for meaning (status / W2 / SE), not for carving recessed trays.
+ * -------------------------------------------------------------------- */
+.lg-status-band,
+.lg-status-band.review-target {
+  background: none;
+  /* Header already draws the top edge — a second border-top stacked into a fat rule. */
+  border-top: none;
+  /* Soft: this is the line above the job tabs on white. */
+  border-bottom: 1px solid var(--lg-border-soft);
+}
+
+.lg-status-band .lg-standing,
+.lg-status-band .lg-precision,
+.lg-status-band .lg-attention {
+  border-bottom: none;
+}
+
+.lg-status-band .lg-standing + .lg-precision,
+.lg-status-band .lg-attention + .lg-standing,
+.lg-status-band .lg-attention + .lg-precision {
+  /* soft internal rhythm without a rule */
+  padding-top: var(--lg-pad-micro); /* soft stack rhythm */
+}
+
+.lg-chart-band {
+  background: none;
+  /* Toggle / chart-full own the hairlines — an outer border-bottom doubled them. */
+  border-bottom: none;
+  margin-top: -1px;
+}
+
 .lg-attention {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: var(--lg-surface-2);
+  padding: var(--lg-pad-cell) var(--lg-page-gutter);
+  background: transparent;
 }
 
-.lg-attention-title { flex: 0 0 auto; color: var(--lg-warn); }
+.lg-attention-title { flex: 0 0 auto; color: var(--lg-muted); }
 
 .lg-attention-rail {
   display: flex;
@@ -927,22 +1762,23 @@
   align-items: center;
   gap: 0.375rem;
   flex: 0 0 auto;
-  padding: 0.2rem 0.5rem;
-  border: 1px solid;
+  padding: var(--lg-pad-micro) var(--lg-pad-cell);
+  border: 1px solid var(--lg-border);
   border-radius: var(--lg-radius);
-  font-size: 0.6875rem;
+  font-size: var(--lg-fs-caption);
   font-weight: 700;
   line-height: 1.35;
   cursor: pointer;
-  background: transparent;
+  background: var(--lg-surface);
+  color: var(--lg-fg);
 }
 
-.lg-attention-chip[data-kind='over'] { color: var(--lg-over); border-color: var(--lg-over); }
-.lg-attention-chip[data-kind='near'] { color: var(--lg-warn); border-color: var(--lg-warn); }
-.lg-attention-chip[data-kind='pay'] { color: var(--lg-twp); border-color: var(--lg-twp); }
+.lg-attention-chip[data-kind='over'] { border-color: var(--lg-fg); }
+.lg-attention-chip[data-kind='near'] { color: var(--lg-muted); }
+.lg-attention-chip[data-kind='pay'] { color: var(--lg-muted); }
 
 .lg-attention-month {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--lg-font-mono);
   letter-spacing: 0.04em;
   opacity: 0.7;
 }
@@ -950,12 +1786,12 @@
 .lg-attention-chip:focus-visible { outline: 2px solid var(--lg-ring); outline-offset: -2px; }
 
 /* Precision — how far the figures above can be trusted. */
-.lg-precision { padding: 0.5rem 1rem; }
+.lg-precision { padding: var(--lg-pad-cell) var(--lg-page-gutter); }
 
 /* Structure and colour come from styles/chrome.css, which this layout
    answers with --lg-*. All that is left here is the register: this is a
    monospace ledger, so the grade is set in small caps. */
-.pg-ledger .precision-line { font-size: 0.6875rem; line-height: 1.4; }
+.pg-ledger .precision-line { font-size: var(--lg-fs-caption); line-height: 1.4; }
 .pg-ledger .precision-level { letter-spacing: 0.04em; text-transform: uppercase; }
 
 /*
@@ -971,25 +1807,22 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  padding: 0.5rem 1rem;
+  padding: var(--lg-pad-cell) var(--lg-page-gutter);
 }
 
 .lg-standing-figure {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
+  font: 700 var(--lg-fs-ui)/1 var(--lg-font-sans);
   letter-spacing: -0.01em;
 }
 
 .lg-standing-of {
   margin-left: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 400;
+  font: 400 var(--lg-fs-caption)/1 var(--lg-font-mono);
   color: var(--lg-muted);
 }
 
 .lg-standing-sub {
-  font-size: 0.6875rem;
+  font: 500 var(--lg-fs-caption)/1.35 var(--lg-font-mono);
   color: var(--lg-muted);
 }
 
@@ -997,8 +1830,8 @@
 .lg-standing-meter {
   display: flex;
   flex: 1 1 6rem;
-  gap: 2px;
-  height: 4px;
+  gap: 1px;
+  height: 2px;
   min-width: 6rem;
   max-width: 14rem;
 }
@@ -1006,4 +1839,239 @@
 .lg-standing-meter > span {
   flex: 1;
   border-radius: 999px;
+}
+
+/* Pay basis (Direct deposit / Gross pay) — edge to edge, full-width seg.
+ * Add hours sits beside the switch when the Worked column is hidden. */
+.lg-pay-basis {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--lg-border);
+  background: var(--lg-surface);
+}
+.lg-pay-basis > .lg-pay-basis-switch {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0;
+}
+.lg-pay-basis .seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+}
+.lg-pay-basis .seg-item {
+  border-radius: 0;
+  min-height: var(--lg-row-h);
+  justify-content: center;
+}
+/* Under-copy: full width, paycycle rail — segment is the label (pattern 9). */
+.lg-pay-basis-note {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--lg-pad-cell) var(--lg-card-gutter);
+  background: var(--lg-row-rail);
+  border-top: 1px solid var(--lg-border-soft);
+}
+/* --band kept as an alias; Year shape uses plain .lg-section-toggle now. */
+.lg-section-toggle--band { }
+
+/* Outside the job card: +1px matches the card's left border so chevrons line up. */
+.lg-chart-band .lg-band-head {
+  border: 0;
+  border-bottom: 1px solid var(--lg-border);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.lg-chart-band .lg-band-head[data-open='true'] {
+  border-bottom: 1px solid var(--lg-border);
+}
+.lg-chart-band .lg-band-head[data-open='true'] + * {
+  border-top: none;
+}
+.lg-chart-mini {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 1.25rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 16rem;
+}
+.lg-chart-mini-bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  background: var(--lg-muted);
+  opacity: 0.45;
+  border-radius: 1px 1px 0 0;
+}
+.lg-chart-mini-bar[data-over] {
+  background: var(--lg-fg);
+  opacity: 0.85;
+}
+.lg-chart-full {
+  padding: var(--lg-pad-micro) 0 var(--lg-pad-section);
+  background: var(--lg-surface);
+  /* Open-band sibling rule already supplies border-top; keep a bottom edge only. */
+  border-top: none;
+  border-bottom: 1px solid var(--lg-border);
+}
+/* Chart / By month share --lg-card-gutter with Income / Pay cycle. */
+
+/* No trailing dead pad under analysis — edge flush to page bottom. */
+.lg-app-card {
+  padding-bottom: 0;
+}
+
+/* Status band: one calm row on desktop — standing · hours · precision. */
+.lg-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1.25rem;
+  padding: var(--lg-pad-section) var(--lg-page-gutter);
+}
+.lg-status-row .lg-standing,
+.lg-status-row .lg-precision {
+  padding: 0;
+  flex: 0 1 auto;
+}
+.lg-status-row .lg-standing {
+  gap: 0.5rem;
+}
+.lg-status-row .lg-precision {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 1rem;
+  min-width: 0;
+  margin-left: auto;
+}
+.lg-status-row .lg-standing-sub,
+.lg-status-row .precision-line {
+  margin: 0;
+  padding: 0;
+}
+/* Estimate + hours share the right edge (flex-end). Override chrome's
+   width:100% so the line shrink-wraps instead of stretching full row. */
+.lg-status-row .precision-line {
+  width: auto;
+  max-width: 100%;
+  flex: 0 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+.lg-status-row .lg-hours {
+  flex: 0 0 auto;
+  text-align: right;
+}
+.lg-standing-figure {
+  font-variant-numeric: tabular-nums;
+}
+.lg-standing-of {
+  margin-left: 0.35rem;
+}
+.pg-ledger .precision-level::after {
+  content: '\00a0';
+}
+.pg-ledger .precision-why {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (min-width: 720px) {
+  .lg-status-row {
+    flex-wrap: nowrap;
+  }
+}
+
+
+/* Toolbar text labels drop on narrow / touch — icons stay. */
+@media (max-width: 640px), (pointer: coarse) {
+  .lg-btn-label {
+    display: none;
+  }
+  .lg-header-actions .lg-btn:not(.lg-btn-icon) {
+    padding-inline: var(--lg-pad-cell);
+  }
+}
+
+
+/* Adjacent bands each paint a 1px edge — pull the lower one up so they share
+   a single hairline instead of stacking into a double border.
+   DOM order: status → jobs → chart → analysis. */
+.lg-status-band + .lg-jobs,
+.lg-jobs + .lg-chart-band,
+.lg-chart-band + .lg-analysis,
+.lg-jobs + .lg-analysis {
+  margin-top: -1px;
+}
+
+
+/* Add control: one pill, Job | Gig halves, cancel beside. */
+.lg-tab-add {
+  gap: 0.55rem;
+}
+.lg-add-split {
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: var(--lg-radius);
+  border: 1px solid var(--lg-border);
+  min-height: 2.5rem; /* matches --lg-row-h */
+}
+.lg-add-split__job,
+.lg-add-split__gig {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem; /* Fib 3+ */
+  padding: 0.4rem 0.65rem; /* cell / section */
+  border: 0;
+  cursor: pointer;
+  font: 700 var(--lg-fs-caption)/1 var(--lg-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lg-add-split__job {
+  color: var(--lg-w2);
+  background: var(--lg-w2-soft);
+  border-right: 1px solid color-mix(in oklch, var(--lg-w2) 28%, var(--lg-border));
+}
+.lg-add-split__gig {
+  color: var(--lg-se);
+  background: var(--lg-se-soft);
+}
+.lg-add-split__job:hover {
+  background: color-mix(in oklch, var(--lg-w2) 18%, var(--lg-surface));
+}
+.lg-add-split__gig:hover {
+  background: color-mix(in oklch, var(--lg-se) 18%, var(--lg-surface));
+}
+.lg-tab-add-trigger svg {
+  /* crisp plus — even stroke, no soft icon weight */
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+
+.lg-btn-bleed {
+  width: 100%;
+  border-radius: 0;
+  /* Parent band owns the hairline — no second top/bottom from .lg-btn. */
+  border: none;
+  background: transparent;
+  min-height: var(--lg-row-h);
+  justify-content: center;
+}
+.lg-btn-bleed:hover {
+  background: var(--lg-surface-2);
 }

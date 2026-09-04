@@ -13,7 +13,7 @@ import { InfoNote } from './InfoNote';
 import { NumericInput } from './NumericInput';
 import { PayAmountField, PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, usePayBasis } from './PayAmount';
 import { Sheet } from './Sheet';
-import { Segmented } from './ui';
+import { Button, IconButton, Segmented } from './ui';
 import { HelpSpread } from './HelpSpread';
 import type { PayFrequency, Stream } from '../domain/types';
 
@@ -184,7 +184,7 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
           value={mode}
           onChange={setMode}
           options={[
-            { id: 'monthly', label: 'Month by month' },
+            { id: 'monthly', label: 'By month' },
             { id: 'yearly', label: 'Yearly total' }
           ]}
         />
@@ -260,7 +260,7 @@ function IncomeEntrySection({ stream, year, onYearChange }: {
         {mode === 'monthly'
           ? 'Real paychecks you enter later replace whatever you put here.'
           : eligibleMonths.length
-            ? `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Switch to Month by month to change one of them.`
+            ? `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Switch to By month to change one of them.`
             : `No active months in ${year} yet to split this across.`}
       </InfoNote>
     </CollapsibleSection>
@@ -299,31 +299,26 @@ export function StreamSheet({
       onClose={onClose}
       headerActions={
         <>
-          <button
-            type="button"
+          <IconButton
+            label={stream.locked ? 'Unlock' : 'Lock'}
             onClick={() => updateStream(stream.id, { locked: !stream.locked })}
-            aria-label={stream.locked ? 'Unlock' : 'Lock'}
-            title={stream.locked ? 'Unlock' : 'Lock'}
-            className="icon-btn grid text-muted-foreground hover:bg-muted"
           >
             {stream.locked ? <LockOpen className="size-5" /> : <Lock className="size-5" />}
-          </button>
-          <button
-            type="button"
+          </IconButton>
+          <IconButton
+            label={stream.locked ? 'Unlock this job to remove it' : 'Remove'}
+            tone="danger"
             disabled={stream.locked}
             onClick={() => { removeStream(stream.id); onClose(); }}
-            aria-label="Remove"
-            title={stream.locked ? 'Unlock this job to remove it' : 'Remove'}
-            className="icon-btn grid text-destructive hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-30"
           >
             <Trash2 className="size-5" />
-          </button>
+          </IconButton>
         </>
       }
       footer={
-        <button type="button" onClick={onClose} className="btn-primary ml-auto">
+        <Button variant="filled" onClick={onClose} className="ml-auto">
           Done
-        </button>
+        </Button>
       }
     >
       <CollapsibleSection label="About this job">

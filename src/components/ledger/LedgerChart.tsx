@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import { countableFor } from '../../domain/earnings';
 import { monthsOfYear, shortMonthName } from '../../domain/months';
@@ -51,6 +52,14 @@ export function LedgerChart({
 
   const railRef = useRef<HTMLDivElement>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  /* Collapsed by default — mini year shape in the header; full chart on open.
+     Avoids an always-on white slab and a stack of hairlines. */
+  const [open, setOpen] = useState(false);
+
+  const overCount = limit
+    ? rows.filter((r) => r.total > limit.amount).length
+    : 0;
+  const peak = Math.max(1, ...(limit ? [limit.amount] : []), ...rows.map((r) => r.total));
 
   function onMove(e: MouseEvent<HTMLDivElement>) {
     const rect = railRef.current?.getBoundingClientRect();
@@ -65,23 +74,58 @@ export function LedgerChart({
   const tooltipRight = hoverIndex !== null && hoverIndex >= rows.length - 3;
 
   return (
-    <div className="border-t px-3 pt-4 pb-2 sm:px-5 lg-label-border">
-      <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="lg-label">What counted toward your limit, month by month</span>
-        <span className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] lg-text-muted">
+    <div className="lg-chart-accordion" data-open={open || undefined}>
+      <button
+        type="button"
+        className="lg-band-head"
+        data-open={open}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="lg-toggle-lead" aria-hidden="true">
+          <ChevronDown className="lg-chevron" data-collapsed={!open} />
+        </span>
+        <span className="lg-band-head__title">Year shape</span>
+        {!open ? (
+          <span className="lg-band-head__meta flex min-w-0 items-center gap-2">
+            <span className="lg-chart-mini" aria-hidden="true">
+              {rows.map((row) => {
+                const h = Math.max(2, Math.round((row.total / peak) * 100));
+                const over = limit && row.total > limit.amount;
+                return (
+                  <span
+                    key={row.month}
+                    className="lg-chart-mini-bar"
+                    data-over={over || undefined}
+                    style={{ height: h + '%' }}
+                  />
+                );
+              })}
+            </span>
+            <span className="lg-section-toggle-meta" style={{ marginLeft: 0 }}>
+              {overCount ? `${overCount} over` : (limit ? 'Under limit' : 'No limit yet')}
+            </span>
+          </span>
+        ) : null}
+      </button>
+
+      {open ? (
+      <div className="lg-chart-full">
+      <div className="lg-card-inset mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 lg-type-caption lg-text-muted">
           <span className="inline-flex items-center gap-1.5">
-            <span className="lg-swatch lg-swatch-w2" /> W2
+            <span className="lg-swatch lg-swatch-w2" /> Job
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="lg-swatch lg-swatch-se" /> Self-Emp
+            <span className="lg-swatch lg-swatch-se" /> Gig
           </span>
-          <span>ceiling {money0(ceiling)}</span>
         </span>
       </div>
 
+      <div className="lg-chart-plot lg-card-inset">
       <div
         ref={railRef}
-        className="lg-chart-rail h-40 sm:h-52 lg-label-border"
+        className="lg-chart-rail h-40 sm:h-52"
         onMouseMove={onMove}
         onMouseLeave={() => setHoverIndex(null)}
       >
@@ -92,20 +136,20 @@ export function LedgerChart({
               style={{ left: hoverLeftPct + '%', width: '1px', background: 'var(--lg-border)' }}
             />
             <div
-              className="pointer-events-none absolute top-1 z-10 flex flex-col gap-0.5 p-2 lg-tooltip-panel"
+              className="pointer-events-none absolute top-1 z-10 flex flex-col gap-0.5 lg-tooltip-panel"
               style={{
                 left: hoverLeftPct + '%',
                 transform: tooltipRight ? 'translateX(calc(-100% - 8px))' : 'translateX(8px)',
               }}
             >
-              <span className="text-[0.625rem] font-semibold uppercase tracking-wider lg-text-muted">
+              <span className="lg-type-micro font-semibold uppercase tracking-wider lg-text-muted">
                 {shortMonthName(hovered.month)} {year}
               </span>
-              <span className="text-base font-semibold">{money2(hovered.total)}</span>
-              <span className="text-[0.625rem] lg-text-muted">
+              <span className="lg-type-title">{money2(hovered.total)}</span>
+              <span className="lg-type-micro lg-text-muted">
                 {/* "W2 $900 · SE $300" — two abbreviations, one of which
                     ("SE") appears nowhere else in the product. */}
-                {hovered.total > 0 ? `Employer ${money0(hovered.w2)} · Gig work ${money0(hovered.se)}` : 'No income'}
+                {hovered.total > 0 ? `Job ${money0(hovered.w2)} · Gig ${money0(hovered.se)}` : 'No income'}
               </span>
             </div>
           </>
@@ -119,7 +163,7 @@ export function LedgerChart({
             <div className="lg-chart-over-band" style={{ bottom: limitPct + '%' }} aria-hidden="true" />
             <div className="lg-chart-threshold" style={{ bottom: limitPct + '%', color: 'var(--lg-over)' }} />
             <span
-              className="absolute right-0.5 px-1 text-[0.5625rem] font-medium uppercase leading-tight tracking-wider lg-text-over lg-bg-surface"
+              className="absolute right-0.5 lg-pad-micro-x lg-type-micro font-medium uppercase leading-tight tracking-wider lg-text-over lg-bg-surface"
               style={{ bottom: limitPct + '%' }}
             >
               Your limit {money0(limit!.amount)}
@@ -155,7 +199,7 @@ export function LedgerChart({
                 {breach ? (
                   <span
                     className="lg-chart-cap"
-                    style={{ bottom: `calc(${Math.min(100, w2Pct + sePct)}% - 3px)` }}
+                    style={{ bottom: `calc(${Math.min(100, w2Pct + sePct)}% - 1px)` }}
                     aria-hidden="true"
                   />
                 ) : null}
@@ -165,11 +209,11 @@ export function LedgerChart({
         </div>
       </div>
 
-      <div className="mt-2 flex gap-[3px] sm:gap-[7px]">
+      <div className="lg-chart-axis mt-2 flex">
         {months.map((month) => {
           const extra = extraPay.get(month);
           return (
-            <div key={month} className="flex flex-1 flex-col items-center text-[0.8125rem] font-semibold uppercase tracking-wide lg-text-muted">
+            <div key={month} className="flex flex-1 flex-col items-center lg-type-micro tracking-wide lg-text-muted">
               <span className={extra ? 'lg-text-warn' : undefined}>{shortMonthName(month)}</span>
               {extra ? (
                 <span className="lg-axis-pay" title={`${extra.counts.join(' or ')} paychecks`}>
@@ -180,11 +224,14 @@ export function LedgerChart({
           );
         })}
       </div>
+      </div>
       {extraPay.size > 0 ? (
-        <p className="mt-1.5 text-[0.6875rem] lg-text-muted">
+        <p className="lg-card-inset mt-1.5 lg-type-caption lg-text-muted">
           <span className="lg-axis-pay align-middle">3&times;</span>
-          <span className="ml-1.5 align-middle">months your pay schedule lands an extra paycheck in.</span>
+          <span className="ml-1.5 align-middle">extra paycheck months</span>
         </p>
+      ) : null}
+      </div>
       ) : null}
     </div>
   );

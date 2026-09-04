@@ -1,0 +1,3598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayGuard — SSDI Income Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500;600&family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   PAYGUARD — LIGHT THEME
+   Design based on "If these two had a baby" crossbreed spec.
+   Typography: DM Sans (UI) + DM Mono (numbers) + Roboto Slab (headings)
+   ================================================================ */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f2f3f5;
+  --surface-3: #e9ebef;
+  --border: #e3e6ea;
+  --border-strong: #c8cccf;
+
+  --text: #1a1c20;
+  --text-2: #464b54;
+  --muted: #7a828c;
+  --dim: #a3a9b0;
+
+  --safe: #0d9488;
+  --safe-soft: #ccfbf1;
+  --safe-text: #115e59;
+  --careful: #d97706;
+  --careful-soft: #fef3c7;
+  --careful-text: #92400e;
+  --over: #dc2626;
+  --over-soft: #fee2e2;
+  --over-text: #991b1b;
+
+  --brand: #7c3aed;
+  --brand-soft: #ede9fe;
+  --brand-hover: #6d28d9;
+  --brand-text: #ffffff;
+
+  --w2: #2563eb;
+  --w2-soft: #dbeafe;
+  --1099: #7c3aed;
+  --1099-soft: #ede9fe;
+  --gig: #b45309;
+  --gig-soft: #fef3c7;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.mono {
+  font-family: 'DM Mono', 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3 {
+  font-family: 'Roboto Slab', 'DM Sans', serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── App shell ── */
+#root {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px 100px;
+}
+
+/* ── Sticky header ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(246, 247, 249, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.brand-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--brand), #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.brand-year {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 2px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  margin-left: 2px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.icon-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+/* ── Sections ── */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 18px 20px;
+  margin-bottom: 12px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.section-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: inline-block;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: var(--brand-text);
+  border-color: var(--brand);
+}
+.btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border-color: var(--border);
+}
+.btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.btn-danger {
+  background: var(--over);
+  color: white;
+  border-color: var(--over);
+}
+.btn-danger:hover { background: #b91c1c; border-color: #b91c1c; }
+
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; border-radius: 5px; }
+
+/* ── Hinge modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 28, 32, 0.45);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  backdrop-filter: blur(2px);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  transform: translateY(8px);
+  transition: transform 0.2s;
+  overflow: hidden;
+}
+
+.modal-overlay.open .modal-box { transform: translateY(0); }
+
+.modal-header {
+  padding: 20px 20px 0;
+  text-align: center;
+}
+
+.modal-question {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.modal-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.modal-body {
+  padding: 8px 20px 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Hinge buttons */
+.hinge-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hinge-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.hinge-btn-working {
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+}
+.hinge-btn-working:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+.hinge-btn-looking {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.hinge-btn-looking:hover {
+  background: var(--surface-2);
+  border-color: var(--text-2);
+}
+
+.hinge-btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hinge-btn-working .hinge-btn-icon {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+.hinge-btn-looking .hinge-btn-icon {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+/* ── This Month hero ── */
+.hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 20px 18px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand), #a78bfa, var(--safe));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.hero-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.hero-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.hero-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: inline-block;
+}
+
+.hero-amount {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+}
+
+.hero-amount.over { color: var(--over); }
+.hero-amount.careful { color: var(--careful); }
+.hero-amount.safe { color: var(--safe); }
+
+.hero-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.hero-sub strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.hero-job-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  margin-bottom: 12px;
+}
+
+.hero-job-pill .job-name-short {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hero-job-pill .count-badge {
+  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.hero-orb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  border: 1px solid var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+/* ── Orange banner ── */
+.orange-banner {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: #9a3412;
+  line-height: 1.5;
+}
+
+.orange-banner svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #ea580c;
+}
+
+.orange-banner strong {
+  font-weight: 600;
+}
+
+/* ── Job cards (Your Income) ── */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.job-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 0;
+  margin-bottom: 0;
+  transition: border-color 0.15s;
+}
+
+.job-card:hover { border-color: var(--border-strong); }
+
+.job-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  cursor: pointer;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.job-card-header:hover { background: var(--surface-2); }
+
+.job-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.job-badge.w2 {
+  background: var(--w2-soft);
+  color: var(--w2);
+}
+
+.job-badge.1099,
+.job-badge.gig {
+  background: var(--1099-soft);
+  color: var(--1099);
+}
+
+.job-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-name-input {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--brand);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: inherit;
+  outline: none;
+  min-width: 60px;
+}
+
+.job-status-pills {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.status-pill {
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  text-transform: capitalize;
+  line-height: 1.4;
+}
+
+.status-pill:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.status-pill.active-ongoing {
+  background: var(--safe-soft);
+  color: var(--safe-text);
+  border-color: var(--safe);
+}
+
+.status-pill.active-paused {
+  background: var(--careful-soft);
+  color: var(--careful-text);
+  border-color: var(--careful);
+}
+
+.status-pill.active-ended {
+  background: var(--over-soft);
+  color: var(--over-text);
+  border-color: var(--over);
+}
+
+.job-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.job-counted {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.job-counted-amount {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.01em;
+}
+
+.job-counted-amount.zero { color: var(--dim); }
+
+.job-counted-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.job-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0 14px 11px;
+}
+
+.job-meta-row span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.job-meta-row .label {
+  color: var(--dim);
+}
+
+.job-meta-row .value {
+  color: var(--text-2);
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+
+.job-actions {
+  display: flex;
+  gap: 2px;
+  padding: 0 14px 11px;
+}
+
+.job-action-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.job-action-btn:hover { color: var(--text); background: var(--surface-2); }
+.job-action-btn.delete:hover { color: var(--over); background: var(--over-soft); }
+
+.add-job-card {
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.add-job-card:hover {
+  background: var(--surface-3);
+  border-color: var(--brand);
+  color: var(--text);
+}
+
+.add-job-card .plus-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Ledger (bank-statement style) ── */
+.ledger-section {
+  padding: 0;
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ledger-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ledger-head .section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ledger-head .section-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--careful);
+}
+
+.ledger-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ledger-scroll {
+  overflow-x: auto;
+  padding: 0 2px 2px;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 660px;
+}
+
+.ledger-table thead th {
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--border);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.ledger-table thead th.right,
+.ledger-table tbody td.right {
+  text-align: right;
+}
+
+.ledger-table thead th.center,
+.ledger-table tbody td.center {
+  text-align: center;
+}
+
+.ledger-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+
+.ledger-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ledger-table tbody tr:hover td {
+  background: var(--surface-2);
+}
+
+.ledger-group-header td {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13px;
+  border-bottom: 2px solid var(--border);
+  padding: 9px 10px;
+}
+
+.ledger-group-header .job-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ledger-group-header .ytd-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.ledger-entry-date {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.ledger-entry-amount {
+  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ledger-entry-amount.zero {
+  color: var(--dim);
+  font-weight: 400;
+}
+
+.ledger-entry-amount.over {
+  color: var(--over);
+}
+
+.ledger-month-total td {
+  font-weight: 700;
+  color: var(--text);
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+  padding-top: 9px;
+  background: var(--surface-2);
+}
+
+.ledger-month-total .month-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.ledger-grand-total td {
+  background: var(--surface-3);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+  padding: 10px;
+}
+
+.ledger-grand-total .amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+}
+
+.ledger-grand-total.over .amount { color: var(--over); }
+.ledger-grand-total.careful .amount { color: var(--careful); }
+
+/* Month columns in ledger */
+.month-col {
+  text-align: center;
+  min-width: 50px;
+  width: 50px;
+}
+
+.month-col .month-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.month-col .month-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+.month-col .month-value.zero {
+  color: var(--dim);
+}
+
+.month-col.current .month-name {
+  color: var(--brand);
+}
+
+.month-col.current .month-value {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ── Entry action buttons in ledger ── */
+.entry-actions {
+  display: flex;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
+.entry-action-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.entry-action-btn:hover { background: var(--surface-3); color: var(--text); }
+.entry-action-btn.delete:hover { background: var(--over-soft); color: var(--over); }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--muted);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 10px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dim);
+}
+
+.empty-state-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 3px;
+}
+
+.empty-state-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── Job edit panel (inline expand) ── */
+.job-edit-panel {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+  background: var(--surface-2);
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.edit-row:last-child { margin-bottom: 0; }
+
+.edit-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-width: 65px;
+}
+
+.edit-input {
+  flex: 1;
+  min-width: 70px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.edit-input:focus { border-color: var(--brand); }
+.edit-input.mono { font-family: 'DM Mono', monospace; }
+
+.edit-select {
+  flex: 1;
+  min-width: 70px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237a828c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 26px;
+}
+
+.edit-select:focus { border-color: var(--brand); }
+
+.panel-hint {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+  text-align: right;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.panel-hint:hover { color: var(--text-2); }
+
+/* ── Modal form elements ── */
+.modal-form .form-row {
+  margin-bottom: 12px;
+}
+
+.modal-form .form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--brand);
+}
+
+.form-input.mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237a828c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 26px;
+}
+
+.form-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 0 0;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── TWP Tracker ── */
+.twp-dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.twp-dot {
+  flex: 1;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.twp-dot.used {
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: 0 0 5px rgba(124, 58, 237, 0.25);
+}
+
+.twp-dot.current {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0); }
+}
+
+.twp-dot.future {
+  background: var(--surface-3);
+  border-color: var(--border);
+}
+
+.twp-info {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.twp-info strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.twp-info .twp-count {
+  font-family: 'DM Mono', monospace;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+/* ── Month-by-month grid ── */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.month-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.month-box.current {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.month-box.over {
+  border-color: var(--over);
+  background: var(--over-soft);
+}
+
+.month-box-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.month-box.current .month-box-name {
+  color: var(--brand);
+}
+
+.month-box-amount {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  line-height: 1.2;
+}
+
+.month-box-amount.over { color: var(--over); }
+.month-box-amount.safe { color: var(--safe); }
+
+.month-box-limit {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── Your Limit section ── */
+.limit-section {
+  margin-bottom: 12px;
+}
+
+.limit-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.limit-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.limit-amount-big {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+
+.limit-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.limit-stat {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 8px;
+  text-align: center;
+}
+
+.limit-stat-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  line-height: 1.2;
+}
+
+.limit-stat-value.safe { color: var(--safe); }
+.limit-stat-value.careful { color: var(--careful); }
+.limit-stat-value.over { color: var(--over); }
+.limit-stat-value.brand { color: var(--brand); }
+.limit-stat-value.muted { color: var(--muted); }
+
+.limit-stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 3px;
+}
+
+.limit-notice {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.limit-notice strong {
+  color: var(--text-2);
+}
+
+/* ── Bank reconciliation ── */
+.bank-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 18px 20px;
+  margin-bottom: 12px;
+}
+
+.bank-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bank-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.bank-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--careful);
+}
+
+.bank-summary {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.bank-stat {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.bank-stat strong {
+  color: var(--text);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+.bank-stat.missed strong { color: var(--careful); }
+.bank-stat.matched strong { color: var(--safe); }
+
+.bank-import {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.bank-import-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.bank-import-input:focus { border-color: var(--brand); }
+
+.bank-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  line-height: 1.5;
+  width: 100%;
+}
+
+.bank-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.bank-table thead th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--border);
+  background: var(--surface-2);
+}
+
+.bank-table thead th.right,
+.bank-table tbody td.right {
+  text-align: right;
+}
+
+.bank-table thead th.center,
+.bank-table tbody td.center {
+  text-align: center;
+}
+
+.bank-table tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+
+.bank-table tbody tr:hover td {
+  background: var(--surface-2);
+}
+
+.bank-deposit {
+  color: var(--safe);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+.bank-unknown {
+  color: var(--muted);
+}
+
+.bank-matched {
+  background: var(--safe-soft);
+}
+
+.bank-unmatched {
+  background: var(--careful-soft);
+}
+
+.bank-viewed {
+  opacity: 0.65;
+}
+
+.bank-action-cell {
+  display: flex;
+  gap: 3px;
+  justify-content: flex-end;
+}
+
+.bank-action-btn {
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+
+.bank-action-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.bank-action-btn.confirmed {
+  background: var(--safe);
+  color: white;
+  border-color: var(--safe);
+}
+
+.bank-empty {
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bank-empty-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 10px;
+  color: var(--dim);
+  opacity: 0.6;
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(246, 247, 249, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  z-index: 40;
+  padding: 4px 8px env(safe-area-inset-bottom, 4px);
+}
+
+.bottom-nav-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.15s;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav-item.active {
+  color: var(--brand);
+}
+
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s;
+  z-index: 200;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.success { background: var(--safe); color: white; }
+.toast.error { background: var(--over); color: white; }
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  #root {
+    padding: 0 10px 90px;
+  }
+
+  .topbar-inner {
+    padding: 10px 12px;
+  }
+
+  .brand-year {
+    display: none;
+  }
+
+  .section {
+    padding: 14px 12px 16px;
+    margin-bottom: 10px;
+  }
+
+  .hero {
+    padding: 16px 14px;
+  }
+
+  .hero-amount {
+    font-size: 26px;
+  }
+
+  .hero-sub {
+    font-size: 12px;
+  }
+
+  .month-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .limit-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .job-card-header {
+    flex-wrap: wrap;
+  }
+
+  .job-status-pills {
+    order: 3;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .job-card-footer {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .job-actions {
+    order: 3;
+    width: 100%;
+    margin-top: 2px;
+    justify-content: flex-end;
+  }
+
+  .job-meta-row {
+    order: 2;
+    width: 100%;
+    margin-top: 2px;
+    flex-wrap: wrap;
+  }
+
+  .bottom-nav-inner {
+    gap: 2px;
+  }
+
+  .nav-item {
+    padding: 4px 4px;
+    font-size: 8px;
+  }
+
+  .nav-item svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ── Scrollbar ── */
+.ledger-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.ledger-scroll::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+
+.ledger-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toast" class="toast"></div>
+<div id="modal-root"></div>
+<script>
+// ── Constants ──
+const SGA_TRIAL = 1210;
+const SGA_SUBSTANTIAL = 1690;
+const TWP_TOTAL = 9;
+const STORAGE_KEY = 'payguard_v3_state';
+const BANK_KEY = 'payguard_v3_bank';
+
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const STATUS_TEXT = { ongoing: 'Working', paused: 'Paused', ended: 'Ended' };
+const TYPE_LABELS = { W2: 'W-2', '1099': '1099', gig: 'Gig' };
+const CYCLE_LABELS = { weekly: 'Weekly', biweekly: 'Bi-weekly', semimonthly: 'Semi-monthly', monthly: 'Monthly' };
+// ── State ──
+let state = { mode: null, jobs: [], entries: [], bankLines: [] };
+let expandedJobId = null;
+let flashingJobId = null;
+
+// ── Helpers ──
+function $(s, r) { return (r || document).querySelector(s); }
+
+function el(tag, attrs, children) {
+  const e = document.createElement(tag);
+  if (attrs) {
+    for (const k in attrs) {
+      if (k === 'className') e.className = attrs[k];
+      else if (k === 'text') e.textContent = attrs[k];
+      else if (k === 'html') e.innerHTML = attrs[k];
+      else if (k === 'style') Object.assign(e.style, attrs[k]);
+      else if (k === 'onClick') e.addEventListener('click', attrs[k]);
+      else if (k === 'onChange') e.addEventListener('change', attrs[k]);
+      else if (k === 'onInput') e.addEventListener('input', attrs[k]);
+      else if (k === 'onKeyDown') e.addEventListener('keydown', attrs[k]);
+      else if (k === 'onBlur') e.addEventListener('blur', attrs[k]);
+      else if (attrs[k] !== undefined && attrs[k] !== null && typeof attrs[k] !== 'function') {
+        if (k === 'src' || k === 'href' || k === 'value' || k === 'type' || k === 'placeholder' ||
+            k === 'min' || k === 'max' || k === 'step' || k === 'rows' || k === 'cols' ||
+            k === 'autofocus' || k === 'disabled' || k === 'readonly' || k === 'required' ||
+            k === 'checked' || k === 'multiple' || k === 'selected') {
+          e.setAttribute(k, attrs[k]);
+        } else {
+          e.setAttribute(k, attrs[k]);
+        }
+      }
+    }
+  }
+  if (children) {
+    if (typeof children === 'string') e.textContent = children;
+    else if (Array.isArray(children)) children.forEach(c => c && e.appendChild(c));
+    else if (children) e.appendChild(children);
+  }
+  return e;
+}
+
+function fmt(n) { const v = Number(n) || 0; return v.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function fmt2(n) { const v = Number(n) || 0; return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function money(n) { return '$' + fmt2(n); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+function today() { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; }
+function isCurrentYearMonth(y, m) { const t = today(); return y === t.year && m === t.month; }
+function dateKey(y, m) { return y + '-' + String(m + 1).padStart(2, '0'); }
+function parseDateKey(s) { if (!s) return null; const [y, m] = s.split('-').map(Number); return { year: y, month: m - 1 }; }
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ── Storage ──
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && typeof s === 'object') return s;
+    }
+  } catch (e) { /* ignore */ }
+  return { mode: null, jobs: [], entries: [], bankLines: [] };
+}
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+function loadBank() {
+  try {
+    const raw = localStorage.getItem(BANK_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch (e) { /* ignore */ }
+  return [];
+}
+
+// ── Toast ──
+const toastEl = $('#toast');
+let toastTimer = null;
+function toast(msg, type) {
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 2200);
+}
+
+// ── Computed: SGA counted for a job+entry ──
+function countedAmount(job, entry) {
+  const gross = Number(entry.amount) || 0;
+  if (job.type === 'W2') return gross;
+  const ded = Number(entry.deductions) || 0;
+  return Math.max(0, gross - ded);
+}
+
+// ── Computed: job YTD (current year, all months up to now) ──
+function jobYTD(job) {
+  const t = today();
+  return state.entries
+    .filter(e => e.jobId === job.id && e.year === t.year && e.month <= t.month)
+    .reduce((s, e) => s + countedAmount(job, e), 0);
+}
+
+// ── Computed: job total for a given year+month ──
+function jobMonthTotal(job, year, month) {
+  return state.entries
+    .filter(e => e.jobId === job.id && e.year === year && e.month === month)
+    .reduce((s, e) => s + countedAmount(job, e), 0);
+}
+
+// ── Computed: job gross for a given year+month ──
+function jobMonthGross(job, year, month) {
+  return state.entries
+    .filter(e => e.jobId === job.id && e.year === year && e.month === month)
+    .reduce((s, e) => s + (Number(e.amount) || 0), 0);
+}
+
+// ── Computed: all entries for a job, sorted ──
+function jobEntries(job) {
+  return state.entries
+    .filter(e => e.jobId === job.id)
+    .sort((a, b) => (a.year * 100 + a.month) - (b.year * 100 + b.month) || (a.payDate || '').localeCompare(b.payDate || ''));
+}
+
+// ── Computed: this month's SGA remaining ──
+function thisMonthRemaining(job) {
+  const t = today();
+  const totalThisMonth = state.entries
+    .filter(e => e.year === t.year && e.month === t.month)
+    .reduce((s, e) => s + countedAmount(job, e), 0);
+  return Math.max(0, SGA_TRIAL - totalThisMonth);
+}
+
+// ── Computed: hours remaining at rate ──
+function hoursRemaining(job, remaining) {
+  if (!job || !job.rate || job.rate <= 0) return null;
+  return Math.floor(remaining / job.rate);
+}
+
+// ── CRUD: Jobs ──
+function addJob(data) {
+  const job = {
+    id: data.id || uid(),
+    name: data.name || 'New Income Source',
+    type: data.type || 'W2',
+    rate: data.rate || 0,
+    status: data.status || 'ongoing',
+    createdAt: Date.now()
+  };
+  state.jobs.unshift(job);
+  saveState();
+  render();
+  toast('"' + job.name + '" added', 'success');
+}
+
+function editJob(id, data) {
+  const job = state.jobs.find(j => j.id === id);
+  if (!job) return;
+  if (data.name !== undefined) job.name = data.name || job.name;
+  if (data.type !== undefined) job.type = data.type;
+  if (data.rate !== undefined) job.rate = Number(data.rate) || 0;
+  if (data.status !== undefined) job.status = data.status;
+  saveState();
+  render();
+  toast('Updated', 'success');
+}
+
+function deleteJob(id) {
+  const job = state.jobs.find(j => j.id === id);
+  if (!job) return;
+  // Remove all entries for this job too
+  state.entries = state.entries.filter(e => e.jobId !== id);
+  state.jobs = state.jobs.filter(j => j.id !== id);
+  if (expandedJobId === id) expandedJobId = null;
+  saveState();
+  render();
+  toast('"' + job.name + '" removed', 'success');
+}
+
+function setJobStatus(id, status) {
+  const job = state.jobs.find(j => j.id === id);
+  if (!job) return;
+  job.status = status;
+  saveState();
+  render();
+}
+
+// ── CRUD: Entries ──
+function addEntry(jobId, data) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  const entry = {
+    id: uid(),
+    jobId: jobId,
+    amount: Number(data.amount) || 0,
+    hours: Number(data.hours) || 0,
+    deductions: Number(data.deductions) || 0,
+    notes: data.notes || '',
+    payDate: data.payDate || null,
+    year: data.year !== undefined ? data.year : today().year,
+    month: data.month !== undefined ? data.month : today().month,
+    createdAt: Date.now()
+  };
+  if (data.payDate) {
+    const d = parseDateKey(data.payDate);
+    if (d) { entry.year = d.year; entry.month = d.month; }
+  }
+  state.entries.push(entry);
+  saveState();
+  render();
+  toast('Entry added to "' + job.name + '"', 'success');
+}
+
+function editEntry(id, data) {
+  const entry = state.entries.find(e => e.id === id);
+  if (!entry) return;
+  if (data.amount !== undefined) entry.amount = Number(data.amount) || 0;
+  if (data.hours !== undefined) entry.hours = Number(data.hours) || 0;
+  if (data.deductions !== undefined) entry.deductions = Number(data.deductions) || 0;
+  if (data.notes !== undefined) entry.notes = data.notes || '';
+  if (data.payDate !== undefined) {
+    const d = parseDateKey(data.payDate);
+    if (d) { entry.year = d.year; entry.month = d.month; entry.payDate = data.payDate; }
+  }
+  if (data.year !== undefined) entry.year = data.year;
+  if (data.month !== undefined) entry.month = data.month;
+  saveState();
+  render();
+  toast('Entry updated', 'success');
+}
+
+function deleteEntry(id) {
+  const entry = state.entries.find(e => e.id === id);
+  if (!entry) return;
+  const job = state.jobs.find(j => j.id === entry.jobId);
+  state.entries = state.entries.filter(e => e.id !== id);
+  saveState();
+  render();
+  toast('Entry deleted', 'success');
+}
+
+// ── Bank Lines ──
+function addBankLine(data) {
+  const line = {
+    id: uid(),
+    date: data.date,
+    desc: data.desc,
+    amount: Number(data.amount) || 0,
+    matched: data.matched || null,
+    checked: false
+  };
+  state.bankLines.unshift(line);
+  saveState();
+  render();
+  toast('Bank line added', 'success');
+}
+
+function deleteBankLine(id) {
+  state.bankLines = state.bankLines.filter(l => l.id !== id);
+  saveState();
+  render();
+  toast('Bank line removed', 'success');
+}
+
+function matchBankLine(id, entryId) {
+  const line = state.bankLines.find(l => l.id === id);
+  if (!line) return;
+  line.matched = entryId;
+  line.checked = true;
+  saveState();
+  render();
+  toast('Matched to entry', 'success');
+}
+
+function unmatchBankLine(id) {
+  const line = state.bankLines.find(l => l.id === id);
+  if (!line) return;
+  line.matched = null;
+  saveState();
+  render();
+  toast('Unmatched', 'success');
+}
+
+// ── Import bank lines from pasted text ──
+function importBankLines(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  let count = 0;
+  for (const line of lines) {
+    // Support: 2026-01-15  Employer Direct Deposit  2800.00
+    // And: 01/15/2026  Employer Direct Deposit  2800.00
+    // And: 2026-01-15,Employer Direct Deposit,2800.00
+    const m = line.match(/^(\d{4}-\d{2}-\d{2})\s+(.+?)\s+\$?(-?[\d,]+\.?\d*)\s*$/i) ||
+              line.match(/^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+\$?(-?[\d,]+\.?\d*)\s*$/i) ||
+              line.match(/^(\d{4}-\d{2}-\d{2}),(.+?),(\$?-?[\d,]+\.?\d*)\s*$/i);
+    if (!m) continue;
+    let d, desc, amt;
+    if (m[1].includes('-')) {
+      d = m[1];
+    } else {
+      // mm/dd/yyyy -> yyyy-mm-dd
+      const [mm, dd, yy] = m[1].split('/');
+      d = yy + '-' + mm + '-' + dd;
+    }
+    desc = m[2].trim();
+    amt = parseFloat(m[3].replace(/,/g, ''));
+    if (isNaN(amt) || amt === 0) continue;
+    // Avoid exact duplicates
+    const dup = state.bankLines.some(l => l.date === d && Math.abs(l.amount - amt) < 0.01 && l.desc === desc);
+    if (!dup) {
+      state.bankLines.unshift({ id: uid(), date: d, desc, amount: amt, matched: null, checked: false });
+      count++;
+    }
+  }
+  if (count > 0) {
+    saveState();
+    render();
+    toast('Imported ' + count + ' line' + (count !== 1 ? 's' : ''), 'success');
+  } else {
+    toast('No lines parsed — check format', 'error');
+  }
+}
+// ── RENDER: This Month hero ──
+function renderHero() {
+  if (state.jobs.length === 0) return null;
+
+  const t = today();
+  // Find primary job (first ongoing, or first job)
+  const primary = state.jobs.find(j => j.status === 'ongoing') || state.jobs[0];
+  if (!primary) return null;
+
+  // Compute this month's counted amount across ALL jobs
+  const allCountedThisMonth = state.entries
+    .filter(e => e.year === t.year && e.month === t.month)
+    .reduce((s, e) => {
+      const job = state.jobs.find(j => j.id === e.jobId);
+      return s + (job ? countedAmount(job, e) : 0);
+    }, 0);
+
+  const remaining = Math.max(0, SGA_TRIAL - allCountedThisMonth);
+  const over = allCountedThisMonth > SGA_TRIAL;
+  const careful = allCountedThisMonth > SGA_TRIAL * 0.85;
+
+  let cls = 'hero-amount';
+  if (over) cls += ' over';
+  else if (careful) cls += ' careful';
+  else cls += ' safe';
+
+  const hoursLeft = hoursRemaining(primary, remaining);
+
+  // Check for extra-paycheck month (month where this job has 2+ entries, or paychecks > 1)
+  const entriesThisMonth = state.entries.filter(e => e.year === t.year && e.month === t.month && e.jobId === primary.id);
+  const hasExtraPaycheck = primary.paychecks > 1 || entriesThisMonth.length > 1;
+
+  const hero = el('div', { className: 'hero' });
+
+  // Header row
+  const head = el('div', { className: 'hero-head' });
+  head.appendChild(el('span', { className: 'hero-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'This Month' })
+  ]));
+  head.appendChild(el('span', { className: 'hero-amount ' + (over ? 'over' : careful ? 'careful' : 'safe'), text: money(allCountedThisMonth) }));
+  hero.appendChild(head);
+
+  // Subtext
+  const subParts = [];
+  subParts.push('of your ' + money(SGA_TRIAL) + ' limit');
+  if (hoursLeft !== null && hoursLeft > 0) {
+    subParts.push('· about ' + hoursLeft + ' more hours at ' + money(primary.rate) + '/hr');
+  } else if (hoursLeft !== null && hoursLeft <= 0) {
+    subParts.push('· no hours left at ' + money(primary.rate) + '/hr');
+  }
+  hero.appendChild(el('div', { className: 'hero-sub', html: subParts.join(' ') }));
+
+  // Primary job pill
+  if (primary) {
+    const pill = el('div', { className: 'hero-job-pill' });
+    pill.appendChild(el('span', { className: 'hero-orb' }, [
+      el('svg', { viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M20 7h-4V5h4V3H7v2H3v2h17V7zM3 17h18v-2H3v2zM12 12v4M10 14h4' })
+      ])
+    ]));
+    pill.appendChild(el('span', { className: 'job-name-short', text: primary.name }));
+    const countedThisMonth = state.entries
+      .filter(e => e.jobId === primary.id && e.year === t.year && e.month === t.month)
+      .reduce((s, e) => s + countedAmount(primary, e), 0);
+    pill.appendChild(el('span', { className: 'count-badge', text: money(countedThisMonth) + ' COUNTED' }));
+    hero.appendChild(pill);
+  }
+
+  // Orange banner for extra paycheck month
+  if (hasExtraPaycheck) {
+    hero.appendChild(el('div', { className: 'orange-banner' }, [
+      el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z' }),
+        el('line', { x1: 12, y1: 9, x2: 12, y2: 13 }),
+        el('line', { x1: 12, y1: 17, x2: 12.01, y2: 17 })
+      ]),
+      el('span', { html: '<strong>' + MONTHS_FULL[t.month] + ' pays you an extra time.</strong> That month can go over without you working any differently.' })
+    ]));
+  }
+
+  return hero;
+}
+
+// ── RENDER: Your Income (job cards) ──
+function renderJobsSection() {
+  const section = el('div', { className: 'section' });
+  const head = el('div', { className: 'section-head' });
+  head.appendChild(el('span', { className: 'section-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'Your Income' })
+  ]));
+  head.appendChild(el('span', { className: 'section-title', text: state.jobs.length + ' job' + (state.jobs.length !== 1 ? 's' : '') }));
+  head.appendChild(el('button', { className: 'btn btn-primary btn-sm', text: '+ Add a job', onClick: openAddJobModal }));
+  section.appendChild(head);
+
+  if (state.jobs.length === 0) {
+    section.appendChild(el('div', { className: 'empty-state' }, [
+      el('div', { className: 'empty-state-icon' }, [
+        el('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          el('path', { d: 'M20 7h-4V5h4V3H7v2H3v2h17V7zM3 17h18v-2H3v2zM12 12v4M10 14h4' })
+        ])
+      ]),
+      el('div', { className: 'empty-state-title', text: 'No income sources yet' }),
+      el('div', { className: 'empty-state-desc', text: 'Add a job to start tracking your earnings.' })
+    ]));
+    return section;
+  }
+
+  const list = el('div', { className: 'job-list' });
+  state.jobs.forEach(job => list.appendChild(renderJobCard(job)));
+  list.appendChild(el('div', { className: 'add-job-card', onClick: openAddJobModal }, [
+    el('span', { className: 'plus-icon' }, [
+      el('svg', { viewBox: '0 0 24 24', width: 12, height: 12, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M12 5v14M5 12h14' })
+      ])
+    ]),
+    el('span', { text: 'Add another income source' })
+  ]));
+  section.appendChild(list);
+  return section;
+}
+
+function renderJobCard(job) {
+  const t = today();
+  const card = el('div', { className: 'job-card' });
+  const isExpanded = expandedJobId === job.id;
+
+  // Header
+  const header = el('div', { className: 'job-card-header', onClick: () => {
+    expandedJobId = expandedJobId === job.id ? null : job.id;
+    render();
+  }});
+
+  // Badge
+  const badgeCls = job.type === 'W2' ? 'w2' : (job.type === '1099' ? '1099' : 'gig');
+  header.appendChild(el('span', { className: 'job-badge ' + badgeCls, text: TYPE_LABELS[job.type] || job.type }));
+
+  // Name (or inline edit)
+  if (flashingJobId === job.id && isExpanded) {
+    const inp = el('input', {
+      className: 'job-name-input',
+      type: 'text',
+      value: job.name,
+      autoFocus: true,
+      onClick: e => e.stopPropagation(),
+      onKeyDown: e => {
+        if (e.key === 'Enter') {
+          const v = e.target.value.trim();
+          if (v) editJob(job.id, { name: v });
+          flashingJobId = null;
+          render();
+        } else if (e.key === 'Escape') {
+          flashingJobId = null;
+          render();
+        }
+      },
+      onBlur: e => {
+        const v = e.target.value.trim();
+        if (v && v !== job.name) editJob(job.id, { name: v });
+        flashingJobId = null;
+        render();
+      }
+    });
+    header.appendChild(inp);
+  } else {
+    header.appendChild(el('span', { className: 'job-name', text: job.name }));
+  }
+
+  // Status pills
+  const pills = el('div', { className: 'job-status-pills' });
+  ['ongoing', 'paused', 'ended'].forEach(s => {
+    pills.appendChild(el('button', {
+      className: 'status-pill' + (job.status === s ? ' active-' + s : ''),
+      onClick: e => { e.stopPropagation(); setJobStatus(job.id, s); },
+      text: STATUS_TEXT[s]
+    }));
+  });
+  header.appendChild(pills);
+  card.appendChild(header);
+
+  // Footer: counted amount
+  const footer = el('div', { className: 'job-card-footer' });
+  const counted = jobYTD(job);
+  footer.appendChild(el('div', { className: 'job-counted' }, [
+    el('span', { className: 'job-counted-amount' + (counted === 0 ? ' zero' : ''), text: money(counted) }),
+    el('span', { className: 'job-counted-label', text: 'COUNTED' })
+  ]));
+  footer.appendChild(el('div', { className: 'job-counted' }, [
+    el('span', { className: 'job-counted-amount', text: money(job.rate) + '/hr' }),
+    el('span', { className: 'job-counted-label', text: 'RATE' })
+  ]));
+  card.appendChild(footer);
+
+  // Meta row
+  const meta = el('div', { className: 'job-meta-row' });
+  const entriesThisMonth = state.entries.filter(e => e.jobId === job.id && e.year === t.year && e.month === t.month);
+  const countedThisMonth = entriesThisMonth.reduce((s, e) => s + countedAmount(job, e), 0);
+  meta.appendChild(el('span', { className: 'label', text: 'This month: ' }));
+  meta.appendChild(el('span', { className: 'value', text: money(countedThisMonth) }));
+  const totalEntries = state.entries.filter(e => e.jobId === job.id).length;
+  meta.appendChild(el('span', { className: 'label', text: '· ' + totalEntries + ' entr' + (totalEntries !== 1 ? 'ies' : 'y') }));
+  card.appendChild(meta);
+
+  // Actions
+  const actions = el('div', { className: 'job-actions' });
+  actions.appendChild(el('button', {
+    className: 'btn btn-primary btn-xs',
+    text: '+ Add Entry',
+    onClick: e => { e.stopPropagation(); openAddEntryModal(job.id); }
+  }));
+  actions.appendChild(el('button', {
+    className: 'job-action-btn',
+    title: 'Edit job',
+    onClick: e => { e.stopPropagation(); openEditJobModal(job.id); }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', width: 13, height: 13, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
+      el('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
+    ])
+  ]));
+  actions.appendChild(el('button', {
+    className: 'job-action-btn delete',
+    title: 'Delete job',
+    onClick: e => { e.stopPropagation(); deleteJob(job.id); }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', width: 13, height: 13, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('polyline', { points: '3 6 5 6 21 6' }),
+      el('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })
+    ])
+  ]));
+  card.appendChild(actions);
+
+  // Inline edit panel
+  if (isExpanded) {
+    const panel = el('div', { className: 'job-edit-panel' });
+    panel.appendChild(el('div', { className: 'edit-row' }, [
+      el('label', { className: 'edit-label', text: 'Name' }),
+      el('input', {
+        className: 'edit-input',
+        type: 'text',
+        value: job.name,
+        onKeyDown: e => {
+          if (e.key === 'Enter') {
+            const v = e.target.value.trim();
+            if (v) editJob(job.id, { name: v });
+            expandedJobId = null;
+            render();
+          }
+        }
+      })
+    ]));
+    panel.appendChild(el('div', { className: 'edit-row' }, [
+      el('label', { className: 'edit-label', text: 'Type' }),
+      el('select', {
+        className: 'edit-select',
+        value: job.type,
+        onChange: e => editJob(job.id, { type: e.target.value })
+      }, [
+        el('option', { value: 'W2' }, 'W-2 — counts in full'),
+        el('option', { value: '1099' }, '1099 — deduct expenses'),
+        el('option', { value: 'gig' }, 'Gig — deduct expenses')
+      ])
+    ]));
+    panel.appendChild(el('div', { className: 'edit-row' }, [
+      el('label', { className: 'edit-label', text: 'Rate' }),
+      el('input', {
+        className: 'edit-input mono',
+        type: 'number',
+        value: job.rate || '',
+        min: 0,
+        step: 0.01,
+        placeholder: '$0.00/hr',
+        onKeyDown: e => {
+          if (e.key === 'Enter') {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) editJob(job.id, { rate: v });
+            expandedJobId = null;
+            render();
+          }
+        }
+      })
+    ]));
+    panel.appendChild(el('div', { className: 'edit-row' }, [
+      el('span', { className: 'panel-hint', text: 'Enter to save · Esc to cancel', onClick: () => { expandedJobId = null; render(); } })
+    ]));
+    card.appendChild(panel);
+  }
+
+  return card;
+}
+
+// ── RENDER: What You Were Paid (ledger) ──
+function renderLedgerSection() {
+  const section = el('div', { className: 'ledger-section' });
+
+  // Header
+  const head = el('div', { className: 'ledger-head' });
+  head.appendChild(el('span', { className: 'section-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'What You Were Paid' })
+  ]));
+  head.appendChild(el('span', { className: 'ledger-hint', text: 'Click any entry to edit · grouped by job' }));
+  section.appendChild(head);
+
+  const scroll = el('div', { className: 'ledger-scroll' });
+
+  if (state.jobs.length === 0 || state.entries.length === 0) {
+    scroll.appendChild(el('div', { className: 'empty-state' }, [
+      el('div', { className: 'empty-state-icon' }, [
+        el('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          el('rect', { x: 3, y: 3, width: 18, height: 18, rx: 2 }),
+          el('line', { x1: 3, y1: 9, x2: 21, y2: 9 }),
+          el('line', { x1: 9, y1: 21, x2: 9, y2: 9 })
+        ])
+      ]),
+      el('div', { className: 'empty-state-title', text: 'No entries yet' }),
+      el('div', { className: 'empty-state-desc', text: 'Click + Add Entry on any job to log your pay.' })
+    ]));
+    section.appendChild(scroll);
+    return section;
+  }
+
+  const table = el('table', { className: 'ledger-table' });
+  const t = today();
+  const currentYear = t.year;
+
+  // THEAD
+  const thead = el('thead');
+  const hrow = el('tr');
+  hrow.appendChild(el('th', { text: '' }));
+  hrow.appendChild(el('th', { text: 'Pay Date' }));
+  hrow.appendChild(el('th', { text: 'Source' }));
+  hrow.appendChild(el('th', { className: 'center', text: 'Hrs' }));
+  hrow.appendChild(el('th', { className: 'right', text: 'Gross' }));
+  hrow.appendChild(el('th', { className: 'right', text: 'Deductions' }));
+  hrow.appendChild(el('th', { className: 'right', text: 'SGA Counted' }));
+
+  // 12 month columns
+  MONTHS_SHORT.forEach((name, mi) => {
+    const isCurrent = isCurrentYearMonth(currentYear, mi);
+    hrow.appendChild(el('th', {
+      className: 'month-col' + (isCurrent ? ' current' : ''),
+      style: { minWidth: 52, width: 52, textAlign: 'center', padding: '7px 2px' }
+    }, [
+      el('div', { className: 'month-name', text: name }),
+      el('div', { style: { fontSize: '9px', color: 'var(--muted)', marginTop: 1, fontFamily: "'DM Mono', monospace" }, text: money(SGA_TRIAL) })
+    ]));
+  });
+
+  hrow.appendChild(el('th', { className: 'right', text: 'Notes' }));
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  // TBODY
+  const tbody = el('tbody');
+  let grandTotal = 0;
+  const monthlyGrandTotals = new Array(12).fill(0);
+  const monthlyGrossTotals = new Array(12).fill(0);
+
+  state.jobs.forEach(job => {
+    const entries = jobEntries(job);
+    if (entries.length === 0) return;
+
+    // Group header
+    const ghead = el('tr', { className: 'ledger-group-header' });
+    ghead.appendChild(el('td', { colSpan: 7 + 12 + 1, style: { padding: '9px 10px' } }, [
+      el('span', { className: 'job-name', text: job.name }),
+      el('span', { className: 'ytd-label', text: money(jobYTD(job)) + ' YTD' })
+    ]));
+    tbody.appendChild(ghead);
+
+    // Entry rows
+    entries.forEach(entry => {
+      const counted = countedAmount(job, entry);
+      const row = el('tr', { className: 'ledger-row-entry' });
+
+      // Edit button cell
+      row.appendChild(el('td', { style: { width: 28, textAlign: 'center', padding: '8px 2px' } }, [
+        el('div', { className: 'entry-actions' }, [
+          el('button', {
+            className: 'entry-action-btn',
+            onClick: () => openEditEntryModal(entry.id),
+            title: 'Edit'
+          }, [
+            el('svg', { viewBox: '0 0 24 24', width: 11, height: 11, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+              el('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
+              el('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
+            ])
+          ]),
+          el('button', {
+            className: 'entry-action-btn delete',
+            onClick: () => deleteEntry(entry.id),
+            title: 'Delete'
+          }, [
+            el('svg', { viewBox: '0 0 24 24', width: 11, height: 11, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+              el('polyline', { points: '3 6 5 6 21 6' }),
+              el('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })
+            ])
+          ])
+        ])
+      ]));
+
+      // Date
+      row.appendChild(el('td', { className: 'ledger-entry-date', text: entry.payDate || (MONTHS_SHORT[entry.month] + ' ' + entry.year) }));
+
+      // Source
+      row.appendChild(el('td', { text: job.name, style: { fontSize: '12px', color: 'var(--text-2)' } }));
+
+      // Hours
+      row.appendChild(el('td', { className: 'center mono', text: entry.hours || '—', style: { color: 'var(--muted)' } }));
+
+      // Gross
+      row.appendChild(el('td', { className: 'right ledger-entry-amount', text: money(entry.amount) }));
+
+      // Deductions
+      row.appendChild(el('td', { className: 'right ledger-entry-amount zero', text: entry.deductions ? money(entry.deductions) : '—' }));
+
+      // SGA Counted
+      row.appendChild(el('td', {
+        className: 'right ledger-entry-amount' + (counted > SGA_TRIAL ? ' over' : ''),
+        text: money(counted)
+      }));
+
+      // 12 month columns
+      for (let mi = 0; mi < 12; mi++) {
+        const isThis = entry.year === currentYear && entry.month === mi;
+        const mCls = 'month-col' + (isThis ? ' current' : '');
+        const valCls = 'month-value' + (isThis ? '' : ' zero');
+        row.appendChild(el('td', {
+          className: mCls,
+          style: { padding: '8px 2px', textAlign: 'center', verticalAlign: 'middle' }
+        }, [
+          isThis ? el('span', { className: valCls, style: { fontWeight: 600 }, text: money(entry.amount) }) :
+                  el('span', { className: valCls, text: '' })
+        ]));
+      }
+
+      // Notes
+      row.appendChild(el('td', {
+        className: 'right',
+        text: entry.notes || '',
+        style: { fontSize: '11px', color: 'var(--muted)', maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+      }));
+
+      tbody.appendChild(row);
+    });
+
+    // Job total row
+    const jobTotal = jobYearTotal(job, currentYear);
+    const jobGrossTotal = jobEntries(job).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+    const jobDedTotal = jobEntries(job).reduce((s, e) => s + (Number(e.deductions) || 0), 0);
+    grandTotal += jobTotal;
+
+    const jtotal = el('tr', { className: 'ledger-month-total' });
+    jtotal.appendChild(el('td', { colSpan: 2 }));
+    jtotal.appendChild(el('td', { style: { fontWeight: 600, color: 'var(--text)' } }, [
+      el('span', { text: 'Total — ' + job.name })
+    ]));
+    jtotal.appendChild(el('td', { className: 'center', text: '' }));
+    jtotal.appendChild(el('td', { className: 'right ledger-entry-amount', style: { fontWeight: 600 }, text: money(jobGrossTotal) }));
+    jtotal.appendChild(el('td', { className: 'right ledger-entry-amount zero', style: { fontWeight: 600 }, text: jobDedTotal ? money(jobDedTotal) : '—' }));
+    jtotal.appendChild(el('td', {
+      className: 'right ledger-entry-amount' + (jobTotal > SGA_TRIAL ? ' over' : ''),
+      style: { fontWeight: 700, fontFamily: "'DM Mono', monospace" },
+      text: money(jobTotal)
+    }));
+
+    for (let mi = 0; mi < 12; mi++) {
+      const mv = jobMonthTotal(job, currentYear, mi);
+      monthlyGrandTotals[mi] += mv;
+      monthlyGrossTotals[mi] += jobMonthGross(job, currentYear, mi);
+      const over = mv > SGA_TRIAL;
+      jtotal.appendChild(el('td', {
+        className: 'month-col' + (mi === t.month ? ' current' : ''),
+        style: { padding: '9px 2px', textAlign: 'center', fontSize: '12px' }
+      }, [
+        el('span', {
+          className: 'month-value' + (mv === 0 ? ' zero' : '') + (over ? ' over' : ''),
+          style: { fontWeight: 600 },
+          text: mv ? money(mv) : '—'
+        })
+      ]));
+    }
+
+    jtotal.appendChild(el('td', { text: '' }));
+    tbody.appendChild(jtotal);
+  });
+
+  // Grand total row
+  const gtotal = el('tr', {
+    className: 'ledger-grand-total' + (grandTotal > SGA_TRIAL ? ' over' : (grandTotal > SGA_TRIAL * 0.85 ? ' careful' : ''))
+  });
+
+  // Simplified grand total — just show total counted
+  gtotal.appendChild(el('td', { text: '' }));
+  gtotal.appendChild(el('td', { text: '' }));
+  gtotal.appendChild(el('td', { style: { fontWeight: 700, fontSize: '14px' } }, [
+    el('span', { text: 'Total — All Jobs (' + currentYear + ')' })
+  ]));
+  gtotal.appendChild(el('td', { text: '' }));
+  const allGross = state.entries.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const allDed = state.entries.reduce((s, e) => s + (Number(e.deductions) || 0), 0);
+  gtotal.appendChild(el('td', {
+    className: 'right amount',
+    style: { fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700 }
+  }, [money(allGross)]));
+  gtotal.appendChild(el('td', {
+    className: 'right amount',
+    style: { fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700 }
+  }, [money(allDed)]));
+  gtotal.appendChild(el('td', {
+    className: 'right amount',
+    style: { fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700 },
+    text: money(grandTotal)
+  }));
+
+  for (let mi = 0; mi < 12; mi++) {
+    const mt = monthlyGrandTotals[mi];
+    const over = mt > SGA_TRIAL;
+    gtotal.appendChild(el('td', {
+      className: 'month-col' + (mi === t.month ? ' current' : ''),
+      style: { padding: '10px 2px', textAlign: 'center', fontWeight: 700, fontSize: '13px' }
+    }, [
+      el('span', {
+        className: 'month-value' + (mt === 0 ? ' zero' : '') + (over ? ' over' : ''),
+        style: { fontSize: '13px' },
+        text: mt ? money(mt) : '—'
+      })
+    ]));
+  }
+
+  gtotal.appendChild(el('td', { text: '' }));
+  tbody.appendChild(gtotal);
+
+  table.appendChild(tbody);
+  scroll.appendChild(table);
+  section.appendChild(scroll);
+
+  // Summary line
+  const summary = el('div', { style: { padding: '8px 14px', fontSize: '12px', color: 'var(--text-2)', borderTop: '1px solid var(--border)', background: 'var(--surface-2)' } });
+  const countedThisYear = state.entries
+    .filter(e => e.year === currentYear)
+    .reduce((s, e) => {
+      const job = state.jobs.find(j => j.id === e.jobId);
+      return s + (job ? countedAmount(job, e) : 0);
+    }, 0);
+  summary.innerHTML = '<strong>Counted in ' + currentYear + '</strong> ' + money(countedThisYear);
+  section.appendChild(summary);
+
+  return section;
+}
+
+function jobYearTotal(job, year) {
+  return state.entries
+    .filter(e => e.jobId === job.id && e.year === year)
+    .reduce((s, e) => s + countedAmount(job, e), 0);
+}
+// ── MODAL SYSTEM ──
+const modalRoot = $('#modal-root');
+let activeModalClose = null;
+
+function openModal(title, bodyEl, footerEl, onClose) {
+  modalRoot.innerHTML = '';
+  const overlay = el('div', { className: 'modal-overlay', style: { display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0, background: 'rgba(26,28,32,0.45)', zIndex: 100, padding: 20 } });
+  overlay.addEventListener('click', e => { if (e.target === overlay && onClose) onClose(); });
+  const box = el('div', { className: 'modal-box' });
+  if (title) box.appendChild(el('div', { className: 'modal-header' }, [
+    el('div', { className: 'modal-question', text: title })
+  ]));
+  if (bodyEl) box.appendChild(el('div', { className: 'modal-body' }, [bodyEl]));
+  if (footerEl) box.appendChild(el('div', { className: 'modal-footer' }, [footerEl]));
+  overlay.appendChild(box);
+  modalRoot.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+  activeModalClose = onClose || null;
+  setTimeout(() => {
+    const firstInput = box.querySelector('input, select, button');
+    if (firstInput) firstInput.focus();
+  }, 50);
+}
+
+function closeModal() {
+  modalRoot.innerHTML = '';
+  activeModalClose = null;
+}
+
+// ── CONFIRM DIALOG ──
+function confirmDialog(question, onConfirm) {
+  const body = el('div', { className: 'modal-body' }, [
+    el('p', { style: { color: 'var(--text-2)', marginBottom: 4, lineHeight: 1.5 }, text: question })
+  ]);
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-danger', text: 'Delete', onClick: () => { closeModal(); onConfirm(); } })
+  ]);
+  openModal('Confirm', body, footer);
+}
+
+// ── HINGE MODAL (on first visit or when mode is null) ──
+function openHingeModal() {
+  const body = el('div', { className: 'modal-body' }, [
+    el('div', { className: 'modal-question', text: 'Are you working right now, or looking for work?' }),
+    el('div', { className: 'modal-sub', text: 'You can change this whenever it changes. Nothing you have written down is lost either way.' }),
+    el('div', { className: 'hinge-options' }, [
+      el('button', {
+        className: 'hinge-btn hinge-btn-working',
+        onClick: () => {
+          state.mode = 'working';
+          saveState();
+          closeModal();
+          render();
+        }
+      }, [
+        el('span', { className: 'hinge-btn-icon' }, [
+          el('svg', { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('rect', { x: 3, y: 3, width: 18, height: 18, rx: 2 }),
+            el('line', { x1: 9, y1: 3, x2: 9, y2: 21 }),
+            el('line', { x1: 15, y1: 3, x2: 15, y2: 21 }),
+            el('path', { d: 'M9 12h6' })
+          ])
+        ]),
+        el('span', { text: "I'm working" })
+      ]),
+      el('button', {
+        className: 'hinge-btn hinge-btn-looking',
+        onClick: () => {
+          state.mode = 'looking';
+          saveState();
+          closeModal();
+          render();
+        }
+      }, [
+        el('span', { className: 'hinge-btn-icon' }, [
+          el('svg', { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('circle', { cx: 11, cy: 11, r: 6 }),
+            el('circle', { cx: 18, cy: 11, r: 1.5, fill: 'currentColor' })
+          ])
+        ]),
+        el('span', { text: "I'm looking" })
+      ])
+    ])
+  ]);
+  openModal('Welcome', body, null);
+}
+
+// ── ADD JOB MODAL ──
+function openAddJobModal() {
+  const body = el('div', { className: 'modal-body modal-form' }, [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Job name' }),
+      el('input', {
+        className: 'form-input',
+        type: 'text',
+        placeholder: 'e.g. Riverside Market',
+        id: 'aj-name',
+        required: true
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Type' }),
+      el('select', {
+        className: 'form-select',
+        id: 'aj-type',
+        onChange: () => {}
+      }, [
+        el('option', { value: 'W2' }, 'W-2 — Counts in full'),
+        el('option', { value: '1099' }, '1099 — Deduct expenses'),
+        el('option', { value: 'gig' }, 'Gig — Deduct expenses')
+      ])
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Hourly rate ($/hr)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        placeholder: 'Optional, e.g. 21.50',
+        id: 'aj-rate',
+        min: 0,
+        step: 0.01
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Start date' }),
+      el('input', {
+        className: 'form-input',
+        type: 'month',
+        id: 'aj-start',
+        value: dateKey(today().year, today().month)
+      })
+    ])
+  ]);
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-primary', text: 'Add Job', onClick: () => {
+      const name = $('#aj-name').value.trim();
+      const type = $('#aj-type').value;
+      const rate = parseFloat($('#aj-rate').value) || 0;
+      const start = $('#aj-start').value;
+      if (!name) { toast('Enter a job name', 'error'); return; }
+      addJob({ name, type, rate, status: 'ongoing', startDate: start });
+      closeModal();
+    }})
+  ]);
+
+  openModal('Add Income Source', body, footer, () => {
+    setTimeout(() => { const i = $('#aj-name'); if (i) i.focus(); }, 50);
+  });
+}
+
+// ── EDIT JOB MODAL ──
+function openEditJobModal(id) {
+  const job = state.jobs.find(j => j.id === id);
+  if (!job) return;
+
+  const body = el('div', { className: 'modal-body modal-form' }, [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Job name' }),
+      el('input', {
+        className: 'form-input',
+        type: 'text',
+        value: job.name,
+        id: 'ej-name'
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Type' }),
+      el('select', {
+        className: 'form-select',
+        value: job.type,
+        id: 'ej-type'
+      }, [
+        el('option', { value: 'W2' }, 'W-2 — Counts in full'),
+        el('option', { value: '1099' }, '1099 — Deduct expenses'),
+        el('option', { value: 'gig' }, 'Gig — Deduct expenses')
+      ])
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Hourly rate ($/hr)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        value: job.rate || '',
+        id: 'ej-rate',
+        min: 0,
+        step: 0.01,
+        placeholder: 'Optional'
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Status' }),
+      el('select', {
+        className: 'form-select',
+        value: job.status,
+        id: 'ej-status'
+      }, [
+        el('option', { value: 'ongoing' }, 'Working'),
+        el('option', { value: 'paused' }, 'Paused'),
+        el('option', { value: 'ended' }, 'Ended')
+      ])
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Start date' }),
+      el('input', {
+        className: 'form-input',
+        type: 'month',
+        value: job.startDate || '',
+        id: 'ej-start'
+      })
+    ])
+  ]);
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-danger', text: 'Delete', onClick: () => {
+      closeModal();
+      deleteJob(job.id);
+    }}),
+    el('button', { className: 'btn btn-primary', text: 'Save', onClick: () => {
+      const name = $('#ej-name').value.trim() || job.name;
+      const type = $('#ej-type').value;
+      const rate = parseFloat($('#ej-rate').value) || 0;
+      const status = $('#ej-status').value;
+      const start = $('#ej-start').value;
+      editJob(job.id, { name, type, rate, status, startDate: start });
+      closeModal();
+    }})
+  ]);
+
+  openModal('Edit — ' + job.name, body, footer, () => {
+    setTimeout(() => { const i = $('#ej-name'); if (i) i.focus(); }, 50);
+  });
+}
+
+// ── ADD ENTRY MODAL ──
+function openAddEntryModal(jobId) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (!job) return;
+
+  const payDateStr = dateKey(today().year, today().month);
+
+  const body = el('div', { className: 'modal-body modal-form' }, [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Pay date' }),
+      el('input', {
+        className: 'form-input',
+        type: 'month',
+        value: payDateStr,
+        id: 'ae-date'
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Gross amount ($)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        placeholder: '0.00',
+        id: 'ae-amount',
+        min: 0,
+        step: 0.01
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Hours worked' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        placeholder: 'Optional',
+        id: 'ae-hours',
+        min: 0,
+        step: 0.5
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Deductions ($)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        placeholder: 'Mileage, work expenses...',
+        id: 'ae-ded',
+        min: 0,
+        step: 0.01
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Notes' }),
+      el('input', {
+        className: 'form-input',
+        type: 'text',
+        placeholder: 'Optional note...',
+        id: 'ae-notes'
+      })
+    ])
+  ]);
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-primary', text: 'Add Entry', onClick: () => {
+      const dateVal = $('#ae-date').value;
+      const amount = parseFloat($('#ae-amount').value) || 0;
+      const hours = parseFloat($('#ae-hours').value) || 0;
+      const ded = parseFloat($('#ae-ded').value) || 0;
+      const notes = $('#ae-notes').value.trim();
+      if (!amount && !hours && !ded && !notes) { toast('Enter at least an amount or hours', 'error'); return; }
+      addEntry(jobId, { amount, hours, deductions: ded, notes, payDate: dateVal });
+      closeModal();
+    }})
+  ]);
+
+  openModal('Log Pay — ' + job.name, body, footer, () => {
+    setTimeout(() => { const i = $('#ae-amount'); if (i) i.focus(); }, 50);
+  });
+}
+
+// ── EDIT ENTRY MODAL ──
+function openEditEntryModal(id) {
+  const entry = state.entries.find(e => e.id === id);
+  if (!entry) return;
+  const job = state.jobs.find(j => j.id === entry.jobId);
+  if (!job) return;
+
+  const payDateStr = entry.payDate || dateKey(entry.year, entry.month);
+
+  const body = el('div', { className: 'modal-body modal-form' }, [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Pay date' }),
+      el('input', {
+        className: 'form-input',
+        type: 'month',
+        value: payDateStr,
+        id: 'ee-date'
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Gross amount ($)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        value: entry.amount || '',
+        id: 'ee-amount',
+        min: 0,
+        step: 0.01
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Hours worked' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        value: entry.hours || '',
+        id: 'ee-hours',
+        min: 0,
+        step: 0.5
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Deductions ($)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        value: entry.deductions || '',
+        id: 'ee-ded',
+        min: 0,
+        step: 0.01
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Notes' }),
+      el('input', {
+        className: 'form-input',
+        type: 'text',
+        value: entry.notes || '',
+        id: 'ee-notes'
+      })
+    ])
+  ]);
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-danger', text: 'Delete', onClick: () => {
+      closeModal();
+      deleteEntry(entry.id);
+    }}),
+    el('button', { className: 'btn btn-primary', text: 'Save', onClick: () => {
+      const dateVal = $('#ee-date').value;
+      const amount = parseFloat($('#ee-amount').value) || 0;
+      const hours = parseFloat($('#ee-hours').value) || 0;
+      const ded = parseFloat($('#ee-ded').value) || 0;
+      const notes = $('#ee-notes').value.trim();
+      editEntry(entry.id, { amount, hours, deductions: ded, notes, payDate: dateVal });
+      closeModal();
+    }})
+  ]);
+
+  openModal('Edit Entry — ' + job.name, body, footer, () => {
+    setTimeout(() => { const i = $('#ee-amount'); if (i) i.focus(); }, 50);
+  });
+}
+
+// ── BANK LINE MODAL ──
+function openAddBankLineModal() {
+  const body = el('div', { className: 'modal-body modal-form' }, [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Date' }),
+      el('input', {
+        className: 'form-input',
+        type: 'date',
+        id: 'bl-date',
+        value: dateKey(today().year, today().month)
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Description' }),
+      el('input', {
+        className: 'form-input',
+        type: 'text',
+        placeholder: 'e.g. Employer Direct Deposit',
+        id: 'bl-desc'
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'form-label', text: 'Amount ($)' }),
+      el('input', {
+        className: 'form-input mono',
+        type: 'number',
+        placeholder: '0.00',
+        id: 'bl-amount',
+        min: 0,
+        step: 0.01
+      })
+    ])
+  ]);
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-primary', text: 'Add Line', onClick: () => {
+      const dateVal = $('#bl-date').value;
+      const desc = $('#bl-desc').value.trim();
+      const amount = parseFloat($('#bl-amount').value) || 0;
+      if (!dateVal || !desc) { toast('Fill in date and description', 'error'); return; }
+      const d = dateVal.split('-');
+      const dateStr = d[0] + '-' + String(d[1]).padStart(2, '0') + '-' + String(d[2]).padStart(2, '0');
+      addBankLine({ date: dateStr, desc, amount });
+      closeModal();
+    }})
+  ]);
+
+  openModal('Add Bank Line', body, footer, () => {
+    setTimeout(() => { const i = $('#bl-date'); if (i) i.focus(); }, 50);
+  });
+}
+
+// ── BANK MATCH MODAL ──
+function openBankMatchModal(lineId) {
+  const line = state.bankLines.find(l => l.id === lineId);
+  if (!line) return;
+
+  // Find candidate entries — same amount, within 1 month
+  const lineDate = parseDateKey(line.date);
+  let match = null;
+  if (lineDate) {
+    const cands = state.entries.filter(e => {
+      if (Math.abs(e.amount - line.amount) > 0.01) return false;
+      const eDate = e.payDate ? parseDateKey(e.payDate) : null;
+      if (!eDate) return false;
+      const diff = Math.abs((eDate.year * 12 + eDate.month) - (lineDate.year * 12 + lineDate.month));
+      return diff <= 1;
+    });
+    if (cands.length > 0) {
+      // Prefer exact month match
+      match = cands.find(e => {
+        const eDate = e.payDate ? parseDateKey(e.payDate) : null;
+        return eDate && eDate.year === lineDate.year && eDate.month === lineDate.month;
+      }) || cands[0];
+    }
+  }
+
+  const body = el('div', { className: 'modal-body' }, [
+    el('div', { style: { padding: '10px 12px', background: 'var(--surface-2)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)', marginBottom: 12 } }, [
+      el('div', { style: { fontSize: '11px', color: 'var(--muted)' }, text: line.date }),
+      el('div', { style: { fontWeight: 700, fontFamily: "'DM Mono', monospace", color: line.amount > 0 ? 'var(--safe)' : 'var(--over)', marginTop: 2 }, text: (line.amount > 0 ? '+' : '') + money(line.amount) }),
+      el('div', { style: { fontSize: '12px', color: 'var(--text-2)', marginTop: 2 }, text: line.desc })
+    ]),
+    el('div', { style: { marginBottom: 12 } }, [
+      el('label', { className: 'form-label', text: 'Match to entry' }),
+      (match ? el('div', { style: { padding: '10px 12px', background: 'var(--safe-soft)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--safe)', marginTop: 4 } }, [
+        el('div', { style: { fontWeight: 600 }, text: (state.jobs.find(j => j.id === match.jobId)?.name || 'Unknown') }),
+        el('div', { style: { fontSize: '11px', color: 'var(--text-2)', marginTop: 2 }, text: match.payDate || (MONTHS_SHORT[match.month] + ' ' + match.year) }),
+        el('div', { style: { fontFamily: "'DM Mono', monospace", fontWeight: 600, marginTop: 2 }, text: money(match.amount) }),
+        match.notes ? el('div', { style: { fontSize: '11px', color: 'var(--muted)', marginTop: 2 }, text: match.notes }) : null
+      ]) : el('div', { style: { padding: '10px 12px', background: 'var(--over-soft)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--over)', marginTop: 4 } }, [
+        el('div', { style: { color: 'var(--over)', fontWeight: 600 }, text: 'No matching entry found' }),
+        el('div', { style: { fontSize: '11px', color: 'var(--text-2)', marginTop: 4 }, text: 'Add a PayGuard entry with the same amount in the same or adjacent month.' })
+      ]))
+    ])
+  ]);
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Close', onClick: closeModal }),
+    match ? el('button', { className: 'btn btn-primary', text: 'Confirm Match', onClick: () => {
+      matchBankLine(lineId, match.id);
+      closeModal();
+    }}) : null
+  ].filter(Boolean));
+
+  openModal('Match — ' + line.date, body, footer);
+}
+
+// ── RENDER: TWP Tracker ──
+function renderTwpSection() {
+  const section = el('div', { className: 'section' });
+  const head = el('div', { className: 'section-head' });
+  head.appendChild(el('span', { className: 'section-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'Trial Work Period' })
+  ]));
+  head.appendChild(el('button', { className: 'btn btn-ghost btn-sm', text: 'How it works', onClick: () => {
+    openModal('Trial Work Period', el('div', { className: 'modal-body' }, [
+      el('p', { style: { color: 'var(--text-2)', lineHeight: 1.6, marginBottom: 8 }, text: 'During your trial work period, you can test your ability to work without losing SSDI benefits. You have 9 service months to use over a 60-month (5-year) period.' }),
+      el('p', { style: { color: 'var(--text-2)', lineHeight: 1.6 }, text: 'Once you complete all 9 service months, SSA reviews your earnings. Earnings above ' + money(SGA_SUBSTANTIAL) + '/month may affect your SSDI.' })
+    ]), el('div', { className: 'modal-footer' }, [
+      el('button', { className: 'btn btn-ghost', text: 'Close', onClick: closeModal })
+    ]));
+  }}));
+  section.appendChild(head);
+
+  // TWP dots
+  const dots = el('div', { className: 'twp-dots' });
+  const twpUsed = countTwpUsed();
+  for (let i = 0; i < TWP_TOTAL; i++) {
+    let cls = 'twp-dot';
+    if (i < twpUsed) cls += ' used';
+    else if (i === twpUsed) cls += ' current';
+    else cls += ' future';
+    dots.appendChild(el('div', { className: cls, title: 'Service month ' + (i + 1) }));
+  }
+  section.appendChild(dots);
+
+  // TWP info
+  const info = el('div', { className: 'twp-info' }, [
+    el('span', { html: '<strong>' + twpUsed + ' of ' + TWP_TOTAL + ' service months used.</strong><br>' +
+      'Once you complete 9 service months, SSA reviews your earnings — earnings above <strong>' + money(SGA_SUBSTANTIAL) + '/mo</strong> may affect SSDI.' })
+  ]);
+  section.appendChild(info);
+
+  return section;
+}
+
+function countTwpUsed() {
+  const months = new Set();
+  state.entries.forEach(e => {
+    months.add(e.year + '-' + e.month);
+  });
+  const sorted = Array.from(months).sort();
+  return Math.min(sorted.length, TWP_TOTAL);
+}
+
+// ── RENDER: Your Limit ──
+function renderLimitSection() {
+  const section = el('div', { className: 'section limit-section' });
+
+  // All entries this year, counted
+  const t = today();
+  const currentYear = t.year;
+  const allCountedThisYear = state.entries
+    .filter(e => e.year === currentYear)
+    .reduce((s, e) => {
+      const job = state.jobs.find(j => j.id === e.jobId);
+      return s + (job ? countedAmount(job, e) : 0);
+    }, 0);
+
+  const remainingThisYear = Math.max(0, SGA_TRIAL * 12 - allCountedThisYear);
+  const thisMonthCounted = state.entries
+    .filter(e => e.year === currentYear && e.month === t.month)
+    .reduce((s, e) => {
+      const job = state.jobs.find(j => j.id === e.jobId);
+      return s + (job ? countedAmount(job, e) : 0);
+    }, 0);
+  const remainingThisMonth = Math.max(0, SGA_TRIAL - thisMonthCounted);
+
+  const hoursLeft = hoursRemaining(
+    state.jobs.find(j => j.status === 'ongoing') || state.jobs[0],
+    remainingThisMonth
+  );
+
+  section.appendChild(el('div', { className: 'section-head' }, [
+    el('span', { className: 'section-label' }, [
+      el('span', { className: 'dot' }),
+      el('span', { text: 'Your Limit' })
+    ])
+  ]));
+
+  section.appendChild(el('div', { className: 'limit-title', text: 'Your SGA Trial Work Limits' }));
+  section.appendChild(el('div', { className: 'limit-sub', text: 'While you are in your trial work months' }));
+
+  section.appendChild(el('div', { className: 'limit-amount-big', text: money(SGA_TRIAL) + '/month' }));
+
+  // Stats grid
+  const stats = el('div', { className: 'limit-stats' });
+
+  const stat1 = el('div', { className: 'limit-stat' });
+  stat1.appendChild(el('div', { className: 'limit-stat-value' + (remainingThisMonth <= 0 ? ' over' : remainingThisMonth < SGA_TRIAL * 0.2 ? ' careful' : ' safe'), text: money(remainingThisMonth) }));
+  stat1.appendChild(el('div', { className: 'limit-stat-label', text: 'LEFT THIS MONTH' }));
+  stats.appendChild(stat1);
+
+  const stat2 = el('div', { className: 'limit-stat' });
+  stat2.appendChild(el('div', { className: 'limit-stat-value brand', text: money(thisMonthCounted) }));
+  stat2.appendChild(el('div', { className: 'limit-stat-label', text: 'COUNTED SO FAR' }));
+  stats.appendChild(stat2);
+
+  const stat3 = el('div', { className: 'limit-stat' });
+  if (hoursLeft !== null) {
+    stat3.appendChild(el('div', { className: 'limit-stat-value' + (hoursLeft <= 0 ? ' over' : ' safe'), text: (hoursLeft > 0 ? '~' + hoursLeft : '0') + (hoursLeft !== 1 ? ' hrs' : ' hr') }));
+  } else {
+    stat3.appendChild(el('div', { className: 'limit-stat-value muted', text: '—' }));
+  }
+  stat3.appendChild(el('div', { className: 'limit-stat-label', text: 'HOURS YOU COULD WORK' }));
+  stats.appendChild(stat3);
+
+  const stat4 = el('div', { className: 'limit-stat' });
+  stat4.appendChild(el('div', { className: 'limit-stat-value', text: money(allCountedThisYear) }));
+  stat4.appendChild(el('div', { className: 'limit-stat-label', text: currentYear + ' SO FAR' }));
+  stats.appendChild(stat4);
+
+  section.appendChild(stats);
+
+  // Notice
+  section.appendChild(el('div', { className: 'limit-notice' }, [
+    el('span', { html: 'These are planning figures for ' + currentYear + '. Check them with Social Security before you act on any of them.' })
+  ]));
+
+  return section;
+}
+
+// ── RENDER: Month by Month ──
+function renderMonthGrid() {
+  const section = el('div', { className: 'section' });
+  const head = el('div', { className: 'section-head' });
+  head.appendChild(el('span', { className: 'section-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'Month by Month' })
+  ]));
+  head.appendChild(el('span', { className: 'section-title', text: 'How much room is left in each?' }));
+  section.appendChild(head);
+
+  const grid = el('div', { className: 'month-grid' });
+  const t = today();
+  const currentYear = t.year;
+
+  for (let mi = 0; mi < 12; mi++) {
+    const total = state.entries
+      .filter(e => e.year === currentYear && e.month === mi)
+      .reduce((s, e) => {
+        const job = state.jobs.find(j => j.id === e.jobId);
+        return s + (job ? countedAmount(job, e) : 0);
+      }, 0);
+
+    const remaining = Math.max(0, SGA_TRIAL - total);
+    const isCurrent = mi === t.month;
+    const isOver = total > SGA_TRIAL;
+
+    const box = el('div', { className: 'month-box' + (isCurrent ? ' current' : '') + (isOver ? ' over' : '') });
+    box.appendChild(el('div', { className: 'month-box-name', text: MONTHS_SHORT[mi] }));
+    box.appendChild(el('div', { className: 'month-box-amount' + (isOver ? ' over' : ' safe'), text: money(remaining) }));
+    box.appendChild(el('div', { className: 'month-box-limit', text: 'of ' + money(SGA_TRIAL) }));
+    grid.appendChild(box);
+  }
+
+  section.appendChild(grid);
+
+  // Orange banner
+  section.appendChild(el('div', { className: 'orange-banner' }, [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z' }),
+      el('line', { x1: 12, y1: 9, x2: 12, y2: 13 }),
+      el('line', { x1: 12, y1: 17, x2: 12.01, y2: 17 })
+    ]),
+    el('span', { html: '<strong>Planning figures for ' + currentYear + '.</strong> Check them with Social Security before you act on any of them.' })
+  ]));
+
+  return section;
+}
+
+// ── RENDER: Bank Reconciliation ──
+function renderBankSection() {
+  const section = el('div', { className: 'bank-section' });
+
+  const head = el('div', { className: 'bank-head' });
+  head.appendChild(el('span', { className: 'bank-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'Bank Reconciliation' })
+  ]));
+
+  // Summary stats
+  const depLines = state.bankLines.filter(l => l.amount > 0);
+  const matched = state.bankLines.filter(l => l.matched).length;
+  const unmatched = state.bankLines.filter(l => l.amount > 0 && !l.matched).length;
+  const depTotal = depLines.reduce((s, l) => s + l.amount, 0);
+  const matchedTotal = state.bankLines.filter(l => l.matched && l.amount > 0).reduce((s, l) => s + l.amount, 0);
+  const missedTotal = depTotal - matchedTotal;
+
+  const summary = el('div', { className: 'bank-summary' });
+  summary.appendChild(el('span', { className: 'bank-stat matched', html: 'Matched: <strong>' + matched + '</strong>' }));
+  summary.appendChild(el('span', { className: 'bank-stat', html: 'Deposits: <strong>' + money(depTotal) + '</strong>' }));
+  if (missedTotal > 0) {
+    summary.appendChild(el('span', { className: 'bank-stat missed', html: 'Unmatched: <strong>' + unmatched + '</strong> / ' + money(missedTotal) }));
+  }
+  head.appendChild(summary);
+  section.appendChild(head);
+
+  // Import area
+  const importBox = el('div', { className: 'bank-import' });
+  const textarea = el('textarea', {
+    className: 'bank-import-input',
+    placeholder: 'Paste statement lines here — one per row:\n2026-01-15  Employer Direct Deposit  2800.00\n2026-02-15  Riverside Cafe  1240.50',
+    rows: 3
+  });
+  importBox.appendChild(textarea);
+  importBox.appendChild(el('button', {
+    className: 'btn btn-primary btn-sm',
+    text: 'Import Lines',
+    onClick: () => {
+      const lines = textarea.value.split('\n').filter(l => l.trim());
+      if (lines.length === 0) { toast('Paste some lines first', 'error'); return; }
+      importBankLines(textarea.value);
+      textarea.value = '';
+    }
+  }));
+  importBox.appendChild(el('span', { className: 'bank-hint', text: 'Paste from bank CSV: date, description, amount. Lines with 0.00 are skipped.' }));
+  section.appendChild(importBox);
+
+  // Add line button
+  section.appendChild(el('button', {
+    className: 'btn btn-ghost btn-sm',
+    style: { marginBottom: 10 },
+    text: '+ Add a line manually',
+    onClick: openAddBankLineModal
+  }));
+
+  // Lines table
+  if (state.bankLines.length === 0) {
+    section.appendChild(el('div', { className: 'bank-empty' }, [
+      el('div', { className: 'bank-empty-icon' }, [
+        el('svg', { viewBox: '0 0 24 24', width: 36, height: 36, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          el('path', { d: 'M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6' })
+        ])
+      ]),
+      el('div', { style: { fontWeight: 600, marginBottom: 4 }, text: 'No statement lines yet' }),
+      el('div', { text: 'Paste your bank statement deposits above, or add lines manually. The app will flag deposits that don\'t match any PayGuard entry.' })
+    ]));
+  } else {
+    const table = el('table', { className: 'bank-table' });
+    const thead = el('thead');
+    const hrow = el('tr');
+    hrow.appendChild(el('th', { style: { width: 90 }, text: 'Date' }));
+    hrow.appendChild(el('th', { text: 'Description' }));
+    hrow.appendChild(el('th', { className: 'right', text: 'Amount' }));
+    hrow.appendChild(el('th', { className: 'center', text: 'Status' }));
+    hrow.appendChild(el('th', { className: 'right', text: 'Actions' }));
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+
+    const tbody = el('tbody');
+    const sorted = [...state.bankLines].sort((a, b) => a.date.localeCompare(b.date) || b.amount - a.amount);
+
+    sorted.forEach(line => {
+      const row = el('tr');
+      if (line.matched) row.className = 'bank-matched';
+      else if (line.amount > 0) row.className = 'bank-unmatched';
+      if (line.checked) row.classList.add('bank-viewed');
+
+      row.appendChild(el('td', { style: { fontFamily: "'DM Mono', monospace", fontSize: '12px', whiteSpace: 'nowrap' }, text: line.date }));
+      row.appendChild(el('td', { text: line.desc, style: { maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }));
+
+      const amtCls = line.amount > 0 ? 'bank-deposit' : 'bank-unknown';
+      row.appendChild(el('td', { className: 'right ' + amtCls, text: (line.amount > 0 ? '+' : '') + money(line.amount) }));
+
+      // Status
+      const status = el('td', { className: 'center' });
+      if (line.matched) {
+        const e = state.entries.find(en => en.id === line.matched);
+        const j = e ? state.jobs.find(j => j.id === e.jobId) : null;
+        status.appendChild(el('span', { style: { fontSize: '11px', color: 'var(--safe)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 } }, [
+          el('svg', { viewBox: '0 0 24 24', width: 11, height: 11, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('path', { d: 'M20 6 9 17l-5-5' })
+          ]),
+          el('span', { text: j ? j.name : 'entry' })
+        ]));
+      } else if (line.amount > 0) {
+        status.appendChild(el('span', { style: { fontSize: '11px', color: 'var(--careful)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 } }, [
+          el('svg', { viewBox: '0 0 24 24', width: 11, height: 11, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('circle', { cx: 12, cy: 12, r: 10 }),
+            el('line', { x1: 12, y1: 8, x2: 12, y2: 12 }),
+            el('line', { x1: 12, y1: 16, x2: 12.01, y2: 16 })
+          ]),
+          el('span', { text: 'unmatched' })
+        ]));
+      } else {
+        status.appendChild(el('span', { style: { fontSize: '11px', color: 'var(--muted)' }, text: '—' }));
+      }
+      row.appendChild(status);
+
+      // Actions
+      const act = el('td', { className: 'right bank-action-cell' });
+      act.appendChild(el('button', {
+        className: 'bank-action-btn',
+        text: line.matched ? 'Unmatch' : 'Match',
+        onClick: () => {
+          if (line.matched) unmatchBankLine(line.id);
+          else openBankMatchModal(line.id);
+        }
+      }));
+      act.appendChild(el('button', {
+        className: 'entry-action-btn delete',
+        title: 'Delete',
+        onClick: () => deleteBankLine(line.id)
+      }, [
+        el('svg', { viewBox: '0 0 24 24', width: 11, height: 11, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          el('polyline', { points: '3 6 5 6 21 6' }),
+          el('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })
+        ])
+      ]));
+      row.appendChild(act);
+
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    section.appendChild(table);
+  }
+
+  return section;
+}
+
+// ── BOTTOM NAV ──
+function renderBottomNav() {
+  const nav = el('nav', { className: 'bottom-nav' });
+  const inner = el('div', { className: 'bottom-nav-inner' });
+
+  inner.appendChild(el('button', { className: 'nav-item', onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }), children: [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' }),
+      el('polyline', { points: '9 22 9 12 15 12 15 22' })
+    ]),
+    el('span', { text: 'Jobs' })
+  ]}));
+
+  inner.appendChild(el('button', { className: 'nav-item', onClick: () => {
+    const ledger = document.querySelector('.ledger-section');
+    if (ledger) ledger.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, children: [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('rect', { x: 3, y: 3, width: 18, height: 18, rx: 2 }),
+      el('line', { x1: 3, y1: 9, x2: 21, y2: 9 }),
+      el('line', { x1: 9, y1: 21, x2: 9, y2: 9 })
+    ]),
+    el('span', { text: 'Ledger' })
+  ]}));
+
+  inner.appendChild(el('button', { className: 'nav-item', onClick: () => {
+    const limit = document.querySelector('.limit-section');
+    if (limit) limit.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, children: [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M22 12h-4l-3 9L9 3l-3 9H2' })
+    ]),
+    el('span', { text: 'Limit' })
+  ]}));
+
+  inner.appendChild(el('button', { className: 'nav-item', onClick: () => {
+    const bank = document.querySelector('.bank-section');
+    if (bank) bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, children: [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6' })
+    ]),
+    el('span', { text: 'Bank' })
+  ]}));
+
+  nav.appendChild(inner);
+  return nav;
+}
+
+// ── MAIN RENDER ──
+function render() {
+  const root = $('#root');
+  root.innerHTML = '';
+
+  // Top bar
+  const topbar = el('div', { className: 'topbar' });
+  const inner = el('div', { className: 'topbar-inner' });
+  inner.appendChild(el('a', { className: 'brand', href: '#', text: '' }, [
+    el('span', { className: 'brand-icon' }, [
+      el('svg', { viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'white', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M12 2v20M17 7H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' })
+      ])
+    ]),
+    el('span', { text: 'PayGuard' }),
+    el('span', { className: 'brand-year', text: today().year.toString() })
+  ]));
+
+  // Peek / settings icon
+  inner.appendChild(el('div', { className: 'topbar-actions' }, [
+    el('button', { className: 'icon-btn', 'aria-label': 'Settings', title: 'Settings', onClick: () => {
+      // Reset mode — re-show hinge
+      if (confirmDialog('Reset your working/looking preference?', () => {
+        state.mode = null;
+        saveState();
+        render();
+        openHingeModal();
+      })) { /* confirmation handled inside */ }
+    }}, [
+      el('svg', { viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('circle', { cx: 12, cy: 12, r: 3 }),
+        el('path', { d: 'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42' })
+      ])
+    ])
+  ]));
+
+  topbar.appendChild(inner);
+  root.appendChild(topbar);
+
+  // HINGE: if mode is null, show modal first
+  if (!state.mode) {
+    openHingeModal();
+  }
+
+  // 1. This Month hero
+  const hero = renderHero();
+  if (hero) root.appendChild(hero);
+
+  // 2. Your Income
+  root.appendChild(renderJobsSection());
+
+  // 3. What You Were Paid (ledger)
+  root.appendChild(renderLedgerSection());
+
+  // 4. Your Limit
+  root.appendChild(renderLimitSection());
+
+  // 5. Month by Month
+  root.appendChild(renderMonthGrid());
+
+  // 6. TWP Tracker
+  root.appendChild(renderTwpSection());
+
+  // 7. Bank Reconciliation
+  root.appendChild(renderBankSection());
+
+  // Bottom nav
+  root.appendChild(renderBottomNav());
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  state = loadState();
+  state.bankLines = loadBank();
+  render();
+});
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  state = loadState();
+  state.bankLines = loadBank();
+  render();
+}
+</script>
+</body>
+</html>

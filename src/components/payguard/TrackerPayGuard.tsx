@@ -14,7 +14,8 @@ import {
   X
 } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
-import { copyFor } from '../../domain/copy';
+import { copyFor, hoursLine } from '../../domain/copy';
+import { capacityFor } from '../../domain/capacity';
 import { countableFor, streamYearGross } from '../../domain/earnings';
 import { benefitPhase } from '../../domain/trialWork';
 import { attentionFlags } from '../../domain/attention';
@@ -77,6 +78,7 @@ export function TrackerPayGuard() {
   const now = todayMonth();
   const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
   const phase = benefitPhase(data, asOf);
+  const cap = capacityFor(data, asOf);
 
   const combinedFor = (month: string, type?: 'w2' | 'ten99') => streams
     .filter((s) => !type || s.type === type)
@@ -298,6 +300,10 @@ export function TrackerPayGuard() {
             </div>
 
             <p className="mt-2 text-xs font-semibold pg-muted">{heroWorking}</p>
+
+            {cap && cap.hours !== null ? (
+              <p className="mt-2 text-xs font-semibold pg-muted">{hoursLine(cap.hours)}</p>
+            ) : null}
 
             {/* How much the figure above can be trusted, and the one thing
                 that would improve it. A line under the number, not a panel:

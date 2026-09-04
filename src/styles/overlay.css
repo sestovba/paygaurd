@@ -6,23 +6,91 @@
    ========================================================================= */
 
 /* ---------------------------------------------------------------------------
-   0 · Base scale at :root — GONE, and worth saying why
+   0 · The --pg-* floor, on [data-palette]
 
-   This section re-declared the whole paper palette (34 values, plus a dark
-   set) at :root, because the --pg-* scale was declared on the shell classes
-   and never at the root, so the sign-in, terms and onboarding screens —
-   which render outside any shell — resolved none of it.
+   WHAT WAS HERE, AND WHY IT HAD TO GO
 
-   It was the sixth copy of the palette in this codebase, and it disagreed
-   with the others: --pg-radius-xl here was 1rem while index.css's
-   --radius-xl was 1.25rem, and since this file loads last it silently won
-   for every .panel in the app.
+   This section used to re-declare the whole paper palette at :root — 34
+   values plus a dark set — because the --pg-* scale was declared on the shell
+   classes and never at the root, so the sign-in, terms and onboarding
+   screens, which render outside any shell, resolved none of it. It was the
+   sixth copy of the palette in the codebase and it disagreed with the others.
+   Deleting the copy was right.
 
-   Nothing needs it now. [data-palette] sits on <html>, so every screen in
-   the app — layout or not, signed in or not — is inside it, and payguard.css
-   maps --pg-* off it in one block. The problem this section existed to solve
-   cannot recur.
+   WHY DELETING IT ALONE WAS NOT ENOUGH
+
+   The note left behind said the problem "cannot recur", because "[data-palette]
+   sits on <html> … and payguard.css maps --pg-* off it in one block". The
+   second half is not true. That block is `.pg-payguard {`, a LAYOUT scope, not
+   [data-palette]. So the moment a screen renders outside a layout root there
+   is still nothing mapping --pg-*, and the problem did recur, measurably:
+
+     .btn-primary  border-radius: var(--pg-radius-md)  ->  0px
+     .panel        border-radius: var(--pg-radius-xl)  ->  0px
+     .field-input  border-radius + border-color        ->  0px, unset
+
+   An invalid var() in a shorthand does not fall back, it drops the
+   declaration — so the introduction screen was drawing square buttons and
+   square cards next to .add-job buttons that were correctly rounded, because
+   .add-job happens to read the index.css scale instead. That was the whole of
+   the "rounded corners" complaint.
+
+   WHAT IS HERE NOW
+
+   The mapping the old note described, actually written: one bridge, off
+   [data-palette], which is on <html> on every screen. It is a copy of no
+   values — every line is var(--t-*) — so palette.css is still the only file
+   choosing anything.
+
+   :where() so it has zero specificity. Every layout bridge (.pg-payguard,
+   .pg-overview, …) is 0,1,0 and out-ranks it whatever the load order, which
+   is the point: this is the floor for screens that have no layout, not a
+   competitor for screens that do.
    ------------------------------------------------------------------------ */
+:where([data-palette]) {
+  --pg-bg: var(--t-bg);
+  --pg-border: var(--t-border);
+  --pg-border-soft: var(--t-border-soft);
+  --pg-border-strong: var(--t-border-strong);
+  --pg-fg: var(--t-fg);
+  --pg-fg-dim: var(--t-fg-dim);
+  --pg-fg-muted: var(--t-fg-muted);
+  --pg-head: var(--t-head);
+  --pg-head-fg: var(--t-head-fg);
+  --pg-info: var(--t-info);
+  --pg-invert: var(--t-invert);
+  --pg-invert-border: var(--t-invert-border);
+  --pg-invert-fg: var(--t-invert-fg);
+  --pg-over: var(--t-over);
+  --pg-radius: var(--t-radius);
+  --pg-radius-md: var(--t-radius-md);
+  --pg-radius-sm: var(--t-radius-sm);
+  --pg-radius-xl: var(--t-radius-xl);
+  --pg-radius-xs: var(--t-radius-xs);
+  --pg-ring: var(--t-ring);
+  --pg-safe: var(--t-safe);
+  --pg-se: var(--t-se);
+  --pg-shadow: var(--t-shadow);
+  --pg-shadow-lg: var(--t-shadow-lg);
+  --pg-shadow-md: var(--t-shadow-md);
+  --pg-shadow-sm: var(--t-shadow-sm);
+  --pg-surface: var(--t-surface);
+  --pg-surface-2: var(--t-surface-2);
+  --pg-surface-3: var(--t-surface-3);
+  --pg-topbar: var(--t-topbar);
+  --pg-topbar-accent: var(--t-topbar-accent);
+  --pg-topbar-accent-w: var(--t-topbar-accent-w);
+  --pg-topbar-fg: var(--t-topbar-fg);
+  --pg-twp: var(--t-twp);
+  --pg-w2: var(--t-w2);
+  --pg-warn: var(--t-warn);
+  /* .field-input:focus below reads this, and outside a layout nothing set
+     it — so a focused field on the sign-in and introduction screens drew no
+     ring at all. Solid rather than payguard.css's 52% mix, which stays the
+     answer inside that layout: this is the floor, and a floor that is easier
+     to see is the right way for it to be wrong. */
+  --pg-focus-ring: var(--t-ring);
+}
 
 /* ---------------------------------------------------------------------------
    1 · Spacing on a 4px grid
@@ -154,6 +222,11 @@ h1, h2, .display-figure {
   .hz-btn,
   .wr-hotbar-chip,
   .wr-slab-head-toggle {
+    min-height: 2.75rem;
+  }
+  /* Settings Clear / Reset — same 44px mobile bump as other controls */
+  [data-chrome-root] button.text-destructive,
+  .pg-ledger button.text-destructive {
     min-height: 2.75rem;
   }
   .lg-seg-item,

@@ -36,20 +36,38 @@ export function Onboarding() {
   }
 
   return (
+    /*
+     * Left-aligned, not centred.
+     *
+     * Every line on this screen started at a different x: the brand lockup
+     * was centred as a block, the title as text, the sentence as a ragged
+     * paragraph, and then three full-width buttons below them. Four optical
+     * left edges in six elements, which is what "needs to be aligned" was
+     * looking at. One edge now, all the way down. Centred multi-line prose is
+     * also the harder thing to read for the readers this app is for, and
+     * DESIGN-SYSTEM.md's audience section is the reason to spend the choice
+     * here rather than on symmetry.
+     */
     <div className="min-h-screen w-full bg-background">
-      <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 py-10 text-center">
-        <BrandMark />
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-6 py-10">
+        {/*
+          * The name was on the screen twice — a wordmark inside BrandMark and
+          * a 36px <h1> under it saying "PayGuard" again, the same duplication
+          * the sidebar had. The mark says what the app is called; the heading
+          * gets to say what it is FOR, which is the one thing a person who
+          * has just opened it does not know.
+          *
+          * And the paragraph under it was 45 words in three sentences, on the
+          * first screen, before anything had been asked. Two lines now. The
+          * hours claim survives because it is the product's own argument; the
+          * extra-paycheck warning does not, because it is a thing the app
+          * shows you later rather than something you need before tapping.
+          */}
+        <BrandMark subtitle="Stay under the limit" />
         <div>
-          <h1 className="display-figure text-4xl">PayGuard</h1>
-          {/* The first sentence anyone reads, and it had three jobs in it,
-               a "how much room you have left in it" with two pronouns, and
-               "fortnightly" — a British word, in an app for people on United
-               States disability benefits. Three short sentences instead. */}
+          <h1 className="display-figure text-4xl">How much can you earn this month?</h1>
           <p className="type-muted mt-3">
-            See how much you can earn this month without putting your benefits at
-            risk. We work it out in hours, not just dollars. And we tell you which
-            months pay you an extra time, because those are the ones that catch
-            people out.
+            Stay under your limit — in hours, not just dollars.
           </p>
         </div>
 
@@ -70,10 +88,13 @@ export function Onboarding() {
             </button>
           </div>
         ) : (
-          <div className="flex w-full flex-col items-center gap-3">
+          <div className="flex w-full flex-col gap-3">
+            {/* Was "First, a few questions. Your answers decide which monthly
+                limit applies to you." — the first half of which the button
+                directly under it already says. Only the half that the button
+                cannot say is kept. */}
             <p className="type-muted">
-              First, a few questions. Your answers decide which monthly limit
-              applies to you.
+              Your answers set which monthly limit applies.
             </p>
             <button
               type="button"
@@ -143,10 +164,7 @@ function PaydayStep({ streamId, year, onDone }: {
           <p className="label-caps">Step 2 of 2</p>
           <h2 className="mt-1 text-2xl font-semibold">When does {stream.name} pay you?</h2>
           <p className="type-muted mt-2">
-            A weekly or every-two-weeks job pays an extra time in some months. Those are the
-            months that push people over a limit without their noticing, and these two answers
-            are all it takes to name them in advance.
-          </p>
+            Some schedules pay an extra time in certain months. Those months sit closest to your limit.</p>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -160,7 +178,7 @@ function PaydayStep({ streamId, year, onDone }: {
         </div>
 
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">One real payday, from a paystub or your bank</span>
+          <span className="field-label">One real payday from a paystub or your bank</span>
           <input
             className="field-input"
             type="date"

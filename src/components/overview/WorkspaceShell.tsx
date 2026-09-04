@@ -158,7 +158,7 @@ export function WorkspaceShell() {
       : 'grid-cols-1 md:grid-cols-[minmax(17rem,0.72fr)_minmax(24rem,1.28fr)] xl:grid-cols-[minmax(16rem,0.62fr)_minmax(18rem,0.72fr)_minmax(25rem,1.66fr)]';
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-background" data-chrome-root>
+    <div className="pg-overview flex h-dvh overflow-hidden bg-background" data-chrome-root>
       <DesktopSidebar
         page={page}
         navItems={navItems}
@@ -392,8 +392,8 @@ function RootPane({
           /* "what is left" left out what it was left of, on the sentence
              that introduces the whole screen. */
           description={page === 'overview'
-            ? 'What you have earned this month, how much more you can earn, and the months that pay you extra.'
-            : 'What you can earn this month, and what you have earned so far.'}
+            ? 'This month’s pay, what’s left, and months with an extra check.'
+            : 'What you can earn this month, and what you’ve earned so far.'}
           compact={hasDetail}
         />
 

@@ -52,6 +52,9 @@ export function hasAsk(note: ReviewNote): boolean {
 const NAMES_A_FILE = /\b(?:src|review|docs|public)\/[\w.-]+(?:\/[\w.-]+)*\.\w+/;
 
 /** Has Claude answered since the reviewer last spoke? */
+/** Who spoke last, ignoring reopens. Prefer `hasAnswer`, which is the same
+ *  question asked correctly — this cannot see an explicit Reopen and will
+ *  report a settled note as still answered. */
 export function hasReply(note: ReviewNote): boolean {
   return note.thread?.[note.thread.length - 1]?.from === 'claude';
 }
@@ -59,9 +62,10 @@ export function hasReply(note: ReviewNote): boolean {
 /**
  * Does the last reply say which code changed?
  *
- * This is the evidence the "done is earned" rule asks for, made checkable.
- * `hasReply` only knows who spoke last; any answer at all — including "I
- * could not find it" — would otherwise read as the work having happened.
+ * Once the gate on closing a note, and no longer — see stateOf. It held 144
+ * of 193 finished notes open because their answers were prose without a
+ * path. Kept only as a display hint: a reply that cites a file is worth
+ * showing as such. Nothing may depend on it to decide a state again.
  */
 export function replyNamesChange(note: ReviewNote): boolean {
   const last = note.thread?.[note.thread.length - 1];
@@ -105,19 +109,26 @@ const LEGACY: Record<string, NoteState> = {
 /**
  * The note's state.
  *
- * Two things are decided here rather than trusted, and both are about the one
- * state that is a claim about the world rather than about the reviewer:
+ * **A finished note leaves the queue.** That sounds obvious and it was not
+ * what this function did. Closing used to require the reply to contain a
+ * path like `src/…`, on the theory that only a citation proves work happened.
+ * Measured against the real file, that rule held 144 of 193 finished notes
+ * open forever: 142 of them had a substantive answer — "Removed the Avg
+ * Active Month tile", "Moved Import/Export to Settings" — that simply did not
+ * happen to spell a filename. The rule was scoring prose style, not
+ * completeness, and no amount of work could ever clear the backlog it made.
  *
- *  1. **Closed is never asserted, only earned.** Three things write this file
- *     — the app, a code pass, and a person with an editor — and only one of
- *     them can see the code. A note that still owes a change and has no reply
- *     saying it was made is not closed, whoever typed the word. This is what
- *     reopened the phantom-done backlog and keeps it from re-forming.
+ * What survives of the idea is the part that was actually load-bearing:
  *
- *  2. **Work asked for and received is not the reviewer's to file.** A note
- *     whose reply names the file it changed does not belong in anybody's
- *     queue. It is marked as closed by Claude, not hidden, so it can be
- *     spot-checked and reopened in one press.
+ *  1. **Closed still is not just a word.** A note that asks for a change and
+ *     has NO answer at all is not closed, whoever typed it. That catches the
+ *     real failure — filed as done in silence — and it caught exactly 2 notes,
+ *     which is the size the problem always was.
+ *
+ *  2. **Work asked for and received is not the reviewer's to file.** An
+ *     answered note is marked closed by Claude, not hidden, so it can be
+ *     spot-checked and reopened in one press — and it is listed in the
+ *     history section of REVIEW-NOTES.md so closing leaves a trail.
  */
 export function stateOf(note: ReviewNote): NoteState {
   const stored = note.status as string;
@@ -129,18 +140,43 @@ export function stateOf(note: ReviewNote): NoteState {
 
   if (state === 'closed') {
     if (!owed) return 'closed';
-    return replyNamesChange(note) ? 'closed' : 'sent';
+    return hasAnswer(note) ? 'closed' : 'sent';
   }
 
-  // Answered with evidence, from either side of the board.
-  if (owed && replyNamesChange(note)) return 'closed';
-  if (state === 'sent' && hasReply(note)) return 'yours';
+  // Answered, from either side of the board.
+  if (owed && hasAnswer(note)) return 'closed';
+  if (state === 'sent' && hasAnswer(note)) return 'yours';
   return state;
+}
+
+/**
+ * Has Claude answered **since the reviewer last spoke**?
+ *
+ * The "since" is what makes a closed note reopenable. Answered-at-all would
+ * mean a note could never come back: press Reopen, and the old answer would
+ * close it again on the next render. A thread is a conversation, so the last
+ * word decides whose move it is — and disagreeing is just speaking again.
+ *
+ * `reopenedAt` covers reopening with no words. Sometimes the reviewer only
+ * wants to say "not this" and does not owe anyone an essay for it.
+ */
+export function hasAnswer(note: ReviewNote): boolean {
+  const thread = note.thread ?? [];
+  let lastClaude = -1;
+  let lastReviewer = -1;
+  thread.forEach((m, i) => {
+    if (!m.text?.trim()) return;
+    if (m.from === 'claude') lastClaude = i;
+    else lastReviewer = i;
+  });
+  if (lastClaude < 0 || lastClaude < lastReviewer) return false;
+  const answeredAt = thread[lastClaude].at ?? '';
+  return !(note.reopenedAt && note.reopenedAt > answeredAt);
 }
 
 /** Closed by the work rather than by the reviewer — so the row can say so. */
 export function closedByClaude(note: ReviewNote): boolean {
-  return note.status !== 'closed' && hasAsk(note) && replyNamesChange(note);
+  return note.status !== 'closed' && hasAsk(note) && hasAnswer(note);
 }
 
 /* ------------------------------------------------------------------ */
@@ -170,7 +206,7 @@ export function canMove(note: ReviewNote, next: NoteState): Move {
     return missing.length ? { ok: false, why: missing[0] } : { ok: true };
   }
 
-  if (next === 'closed' && hasAsk(note) && !hasReply(note)) {
+  if (next === 'closed' && hasAsk(note) && !hasAnswer(note)) {
     return {
       ok: false,
       why: 'This one still asks for a change. Send it, or clear what it asks for — Closed means it was dealt with.'
@@ -191,7 +227,9 @@ export function nextStep(note: ReviewNote): { to: NoteState; verb: string; hint:
     case 'sent':
       return { to: 'closed', verb: 'Close', hint: 'Checked the reply — settled' };
     default:
-      return { to: 'yours', verb: 'Reopen', hint: 'Put it back in your queue' };
+      /* From History. "Reopen" rather than "Undo" because the work stays
+         done — this says it was not right, and puts it back on Claude. */
+      return { to: 'sent', verb: 'Reopen', hint: 'Not right — send it back' };
   }
 }
 
@@ -199,7 +237,7 @@ export function nextStep(note: ReviewNote): { to: NoteState; verb: string; hint:
 /* What you can do to a note                                          */
 /* ------------------------------------------------------------------ */
 
-export type DecisionId = 'cut' | 'say' | 'hide' | 'close';
+export type DecisionId = 'cut' | 'say' | 'hide' | 'close' | 'reopen';
 
 export interface Decision {
   id: DecisionId;
@@ -252,16 +290,35 @@ export const DECISIONS: Decision[] = [
     verb: 'Close',
     hint: 'Nothing more owed on this one.',
     to: 'closed'
+  },
+  {
+    /* The way back out of History. Offered only on a settled note — see
+       decisionsFor. Before this the only route back was "Send as cut",
+       which says something the reviewer did not mean, so a note they
+       disagreed with either got mislabelled or stayed closed. */
+    id: 'reopen',
+    verb: 'Reopen',
+    hint: 'Not right — send it back to Claude.',
+    to: 'sent'
   }
 ];
 
 export const DECISION: Record<DecisionId, Decision> =
   Object.fromEntries(DECISIONS.map((d) => [d.id, d])) as Record<DecisionId, Decision>;
 
-/** The same four, in the same order, wherever you are — except that a note
- *  already off the page has nothing to hide. */
+/**
+ * The buttons a row shows: the same set in the same order wherever you are,
+ * with two exceptions that are about what the note already is.
+ *
+ * A note already off the page has nothing to hide. And a SETTLED note gets
+ * exactly one choice — send it back — because everything else is noise on
+ * something finished, and because "Cut" used to be the only route out of
+ * History: a disagreement could only be filed as an agreement to delete.
+ */
 export function decisionsFor(note: ReviewNote): Decision[] {
-  return note.hidden ? DECISIONS.filter((d) => d.id !== 'hide') : DECISIONS;
+  if (stateOf(note) === 'closed') return DECISIONS.filter((d) => d.id === 'reopen');
+  const usable = DECISIONS.filter((d) => d.id !== 'reopen');
+  return note.hidden ? usable.filter((d) => d.id !== 'hide') : usable;
 }
 
 /* ------------------------------------------------------------------ */

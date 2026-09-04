@@ -1,0 +1,3490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayGuard — SSDI Income Planner</title>
+<style>
+/* ============================================================
+   PHASE 1: LIGHT THEME — CSS ONLY (no body, no JS yet)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Page */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --surface-3: #eef0f3;
+  --border: #e2e5ea;
+  --border-strong: #c9ced6;
+
+  /* Text */
+  --text: #1c1f24;
+  --text-2: #4a5058;
+  --muted: #7a828c;
+  --dim: #a3a9b0;
+
+  /* Semantic */
+  --safe: #0d9488;
+  --safe-soft: #ccfbf1;
+  --safe-text: #115e59;
+  --careful: #d97706;
+  --careful-soft: #fef3c7;
+  --careful-text: #92400e;
+  --over: #dc2626;
+  --over-soft: #fee2e2;
+  --over-text: #991b1b;
+
+  /* Job type colors */
+  --w2: #2563eb;
+  --w2-soft: #dbeafe;
+  --1099: #7c3aed;
+  --1099-soft: #ede9fe;
+
+  /* Radius */
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  /* Brand */
+  --brand: #7c3aed;
+  --brand-soft: #ede9fe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+.mono {
+  font-family: 'DM Mono', 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Page layout ── */
+.app-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 120px;
+}
+
+/* ── Header ── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(244, 245, 247, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--brand), #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.brand-year {
+  margin-left: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 3px 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.icon-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.icon-btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--careful);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Section ── */
+section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+}
+
+.btn-primary:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border-color: var(--border);
+}
+
+.btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+
+.btn-danger {
+  background: var(--over);
+  color: white;
+  border-color: var(--over);
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.btn-success {
+  background: var(--safe);
+  color: white;
+  border-color: var(--safe);
+}
+
+.btn-success:hover {
+  background: #0f766e;
+  border-color: #0f766e;
+}
+
+/* ── SGA Gauge ── */
+.gauge-section {
+  padding: 20px;
+}
+
+.gauge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.gauge-dial {
+  flex: none;
+  width: 160px;
+  height: 90px;
+  position: relative;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gauge-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.gauge-fill {
+  fill: none;
+  stroke: var(--safe);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.5s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s;
+}
+
+.gauge-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.gauge-amount {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  line-height: 1;
+}
+
+.gauge-amount.over { color: var(--over); }
+.gauge-amount.careful { color: var(--careful); }
+
+.gauge-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.gauge-note {
+  flex: 1;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.gauge-note strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.gauge-footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gauge-stat {
+  text-align: center;
+}
+
+.gauge-stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.gauge-stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── Add Job Card ── */
+.add-job-card {
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.add-job-card:hover {
+  background: var(--surface-3);
+  border-color: var(--brand);
+}
+
+.add-job-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.add-job-text svg {
+  color: var(--brand);
+}
+
+.add-job-shortcut {
+  font-size: 11px;
+  color: var(--dim);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── Job Cards ── */
+.job-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.job-card:hover {
+  border-color: var(--border-strong);
+}
+
+.job-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.job-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.job-badge.w2 {
+  background: var(--w2-soft);
+  color: var(--w2);
+}
+
+.job-badge.1099,
+.job-badge.gig {
+  background: var(--1099-soft);
+  color: var(--1099);
+}
+
+.job-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+
+.job-name-input {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--brand);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: inherit;
+  outline: none;
+  min-width: 100px;
+}
+
+.job-status {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.status-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: capitalize;
+}
+
+.status-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.status-btn.active-ongoing {
+  background: var(--safe-soft);
+  color: var(--safe-text);
+  border-color: var(--safe);
+}
+
+.status-btn.active-paused {
+  background: var(--careful-soft);
+  color: var(--careful-text);
+  border-color: var(--careful);
+}
+
+.status-btn.active-ended {
+  background: var(--over-soft);
+  color: var(--over-text);
+  border-color: var(--over);
+}
+
+.job-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.job-meta-item .label {
+  color: var(--dim);
+}
+
+.job-meta-item .value {
+  color: var(--text-2);
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+
+.job-actions {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px 12px;
+}
+
+.job-edit-btn {
+  color: var(--muted);
+  padding: 4px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.job-edit-btn:hover {
+  color: var(--text);
+}
+
+.job-delete-btn {
+  color: var(--muted);
+  padding: 4px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.job-delete-btn:hover {
+  color: var(--over);
+}
+
+.job-ytd {
+  margin-left: auto;
+  text-align: right;
+}
+
+.job-ytd-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.01em;
+}
+
+.job-ytd-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.job-edit-panel {
+  border-top: 1px solid var(--border);
+  padding: 14px 16px;
+  background: var(--surface-2);
+}
+
+.job-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.job-edit-row:last-child {
+  margin-bottom: 0;
+}
+
+.job-edit-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-width: 80px;
+}
+
+.job-edit-input {
+  flex: 1;
+  min-width: 100px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.job-edit-input:focus {
+  border-color: var(--brand);
+}
+
+.job-edit-input.mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.job-edit-select {
+  flex: 1;
+  min-width: 100px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+}
+
+.job-edit-select:focus {
+  border-color: var(--brand);
+}
+
+/* ── Ledger ── */
+.ledger-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ledger-scroll {
+  overflow-x: auto;
+  padding: 0 4px 4px;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 680px;
+}
+
+.ledger-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  background: var(--surface-2);
+}
+
+.ledger-table th.right,
+.ledger-table td.right {
+  text-align: right;
+}
+
+.ledger-table th.center,
+.ledger-table td.center {
+  text-align: center;
+}
+
+.ledger-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+
+.ledger-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ledger-group-header td {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13px;
+  border-bottom: 2px solid var(--border);
+  padding: 10px 12px;
+}
+
+.ledger-group-header .job-name {
+  font-size: 14px;
+}
+
+.ledger-row-entry {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.ledger-row-entry:hover {
+  background: var(--surface-2);
+}
+
+.ledger-entry-date {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ledger-entry-amount {
+  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ledger-entry-amount.zero {
+  color: var(--dim);
+  font-weight: 400;
+}
+
+.ledger-entry-amount.over {
+  color: var(--over);
+}
+
+.ledger-month-total {
+  font-weight: 700;
+  color: var(--text) !important;
+  font-family: 'DM Mono', monospace;
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+  padding-top: 10px;
+}
+
+.ledger-month-total .month-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ledger-grand-total td {
+  background: var(--surface-3);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+  padding: 12px;
+}
+
+.ledger-grand-total .amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+}
+
+.ledger-grand-total.over .amount {
+  color: var(--over);
+}
+
+.ledger-grand-total.careful .amount {
+  color: var(--careful);
+}
+
+.ledger-actions-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.entry-edit-btn,
+.entry-delete-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+  color: var(--dim);
+}
+
+.entry-edit-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.entry-delete-btn:hover {
+  background: var(--over-soft);
+  color: var(--over);
+}
+
+/* ── Month columns in ledger ── */
+.month-col {
+  text-align: center;
+  min-width: 56px;
+}
+
+.month-col .month-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.month-col .month-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-top: 2px;
+}
+
+.month-col .month-value.zero {
+  color: var(--dim);
+}
+
+.month-col.current .month-name {
+  color: var(--brand);
+}
+
+.month-col.current .month-value {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ── Active job highlight ── */
+.job-card.active {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+.job-card.active .job-badge {
+  background: var(--brand);
+  color: white;
+}
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dim);
+}
+
+.empty-state-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+
+.empty-state-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── TWP Tracker ── */
+.twp-dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.twp-dot {
+  flex: 1;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.twp-dot.historical {
+  background: var(--border-strong);
+  border-color: var(--border-strong);
+}
+
+.twp-dot.used {
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: 0 0 6px rgba(124, 58, 237, 0.3);
+}
+
+.twp-dot.current {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(124, 58, 237, 0); }
+}
+
+.twp-dot.future {
+  background: var(--surface-3);
+  border-color: var(--border);
+}
+
+.twp-info {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.twp-info strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.twp-info .twp-count {
+  font-family: 'DM Mono', monospace;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+/* ── SGA Limit Panel ── */
+.limit-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.limit-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+
+.limit-threshold {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.limit-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+.limit-unit {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.limit-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.limit-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+
+.limit-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.limit-stat-value.safe { color: var(--safe); }
+.limit-stat-value.careful { color: var(--careful); }
+.limit-stat-value.over { color: var(--over); }
+.limit-stat-value.brand { color: var(--brand); }
+.limit-stat-value.muted { color: var(--muted); }
+
+.limit-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.limit-notice {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.limit-notice strong {
+  color: var(--text-2);
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  transform: translateY(8px);
+  transition: transform 0.2s;
+}
+
+.modal-overlay.open .modal {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.modal-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.modal-close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 16px 18px;
+}
+
+.modal-body .form-row {
+  margin-bottom: 14px;
+}
+
+.modal-body .form-row:last-child {
+  margin-bottom: 0;
+}
+
+.modal-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.modal-input,
+.modal-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.modal-input:focus,
+.modal-select:focus {
+  border-color: var(--brand);
+}
+
+.modal-input.mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.modal-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a828c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+.modal-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Toast ── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.toast {
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.toast.success {
+  background: var(--safe);
+  color: white;
+}
+
+.toast.error {
+  background: var(--over);
+  color: white;
+}
+
+/* ── Divider ── */
+.divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 0 12px 100px;
+  }
+
+  header {
+    padding: 10px 12px;
+  }
+
+  .header-inner {
+    gap: 8px;
+  }
+
+  .brand-year {
+    display: none;
+  }
+
+  section {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .gauge-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .gauge-dial {
+    width: 120px;
+    height: 70px;
+  }
+
+  .gauge-amount {
+    font-size: 24px;
+  }
+
+  .gauge-note {
+    font-size: 13px;
+  }
+
+  .job-card-header {
+    flex-wrap: wrap;
+  }
+
+  .job-status {
+    order: 3;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .job-actions {
+    order: 4;
+    width: 100%;
+    margin-top: 4px;
+    justify-content: flex-end;
+  }
+
+  .job-ytd {
+    display: none;
+  }
+
+  .limit-breakdown {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Bank Reconciliation ── */
+.bank-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.bank-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bank-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bank-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--careful);
+}
+
+.bank-summary {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bank-stat {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.bank-stat strong {
+  color: var(--text);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+.bank-stat.missed strong {
+  color: var(--careful);
+}
+
+.bank-stat.matched strong {
+  color: var(--safe);
+}
+
+.bank-import {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.bank-import-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  background: var(--surface);
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.bank-import-input:focus {
+  border-color: var(--brand);
+}
+
+.bank-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.bank-line-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.bank-line-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--border);
+  background: var(--surface-2);
+}
+
+.bank-line-table th.right,
+.bank-line-table td.right {
+  text-align: right;
+}
+
+.bank-line-table th.center,
+.bank-line-table td.center {
+  text-align: center;
+}
+
+.bank-line-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+
+.bank-line-deposit {
+  color: var(--safe);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+.bank-line-withdrawal {
+  color: var(--over);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+.bank-line-matched {
+  background: var(--safe-soft);
+}
+
+.bank-line-unmatched {
+  background: var(--careful-soft);
+}
+
+.bank-line-viewed {
+  opacity: 0.7;
+}
+
+.bank-match-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.bank-match-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.bank-match-btn.confirmed {
+  background: var(--safe);
+  color: white;
+  border-color: var(--safe);
+}
+
+.bank-action-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.bank-empty {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bank-empty svg {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 10px;
+  color: var(--dim);
+  opacity: 0.6;
+}
+
+/* ── Bottom Nav ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(244, 245, 247, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  z-index: 50;
+  padding: 4px 8px env(safe-area-inset-bottom, 4px);
+}
+
+.bottom-nav-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.15s;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+
+.nav-item.active {
+  color: var(--brand);
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toast" class="toast"></div>
+
+<body>
+<div id="root"></div>
+<div id="toast" class="toast"></div>
+<script>
+// ── CONSTANTS ──
+// This block was lost in the bank-lines update. Every one of these is read
+// before it would have been declared, so the whole script threw on load at
+// defaultState() and the page rendered blank.
+const SGA_TRIAL       = 1210;
+const SGA_SUBSTANTIAL = 1690;
+const TWP_TOTAL       = 9;
+const STORAGE_KEY     = 'payguard_state_v3';
+const BANK_KEY        = 'payguard_bank_v1';
+
+// ── BANK LINES STORAGE ──
+function loadBankLines() {
+  try {
+    const raw = localStorage.getItem(BANK_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch (e) { /* ignore */ }
+  return [];
+}
+function saveBankLines() {
+  try { localStorage.setItem(BANK_KEY, JSON.stringify(bankLines)); } catch (e) {}
+}
+
+let bankLines = loadBankLines();
+
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const BAR_COMMA       = '\u2014'; // em dash
+const BAR_CHECK       = '\u2713'; // check
+const BAR_PLUS        = '\u2212'; // minus
+const BAR_EMPTY       = '\u00A0'; // non-breaking space
+
+const STATUS_TEXT = { ongoing: 'Working', paused: 'Paused', ended: 'Ended' };
+
+let state = loadState();
+let expandedJobId = null;   // which job edit panel is open
+let flashJobId = null;      // job card to flash on edit
+let activeModal = null;     // { type, data?, resolve? }
+
+// ── HELPERS ──
+function $(sel, root) { return (root || document).querySelector(sel); }
+function el(tag, attrs, children) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'className') e.className = attrs[k];
+    else if (k === 'onClick') e.addEventListener('click', attrs[k]);
+    else if (k === 'onChange') e.addEventListener('change', attrs[k]);
+    else if (k === 'onInput') e.addEventListener('input', attrs[k]);
+    else if (k === 'onKeyDown') e.addEventListener('keydown', attrs[k]);
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k === 'style') {
+      for (const sk in attrs[k]) {
+        e.style.setProperty(sk, attrs[k][sk]);
+      }
+    }
+    else if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+  }
+  if (children) {
+    if (typeof children === 'string') e.textContent = children;
+    else if (Array.isArray(children)) children.forEach(c => e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+    else e.appendChild(children);
+  }
+  return e;
+}
+function fmt(n) { const v = Number(n) || 0; return v.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function fmtMoney(n) { const v = Number(n) || 0; return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function min(a, b) { return Math.min(a, b); }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function parseDate(s) { const [y, m] = s.split('-').map(Number); return { year: y, month: m - 1 }; }
+function dateKey(y, m) { return y + '-' + String(m + 1).padStart(2, '0'); }
+function todayMonth() { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; }
+function isCurrentMonth(y, m) { const t = todayMonth(); return y === t.year && m === t.month; }
+function monthIndex(y, m) { // 0-23 relative to year 2026 baseline
+  return (y - 2026) * 12 + m;
+}
+function fromMonthIndex(i) {
+  return { year: 2026 + Math.floor(i / 12), month: i % 12 };
+}
+
+// ── STORAGE ──
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && typeof s === 'object') {
+        if (!Array.isArray(s.jobs)) s.jobs = [];
+        if (!Array.isArray(s.entries)) s.entries = [];
+        if (typeof s.cycle !== 'string') s.cycle = 'monthly';
+        if (typeof s.anchorDay !== 'number') s.anchorDay = 15;
+        if (typeof s.planningRate !== 'number') s.planningRate = SGA_TRIAL;
+        if (typeof s.paychecks !== 'number') s.paychecks = 1;
+        return s;
+      }
+    }
+  } catch (e) { /* ignore corrupt */ }
+  return defaultState();
+}
+function defaultState() {
+  return {
+    jobs: [],
+    entries: [],
+    cycle: 'monthly',
+    anchorDay: 15,
+    planningRate: SGA_TRIAL,
+    paychecks: 1
+  };
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+// ── TOAST ──
+const toastEl = $('#toast');
+function showToast(msg, type) {
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { toastEl.className = 'toast'; }, 2500);
+}
+
+// ── MODAL SYSTEM ──
+const modalOverlay = el('div', { className: 'modal-overlay', id: 'modal-overlay' });
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay && activeModal) closeModal();
+});
+document.body.appendChild(modalOverlay);
+
+function openModal(title, bodyEl, footerEl) {
+  activeModal = { title, bodyEl, footerEl };
+  modalOverlay.innerHTML = '';
+  modalOverlay.className = 'modal-overlay open';
+  const m = el('div', { className: 'modal' });
+  if (title) m.appendChild(el('div', { className: 'modal-header' }, [
+    el('span', { className: 'modal-title', text: title }),
+    el('button', { className: 'modal-close', 'aria-label': 'Close', onClick: closeModal }, [
+      el('svg', { viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M18 6 6 18M6 6l12 12' })
+      ])
+    ])
+  ]));
+  if (bodyEl) m.appendChild(el('div', { className: 'modal-body' }, [bodyEl]));
+  if (footerEl) m.appendChild(el('div', { className: 'modal-footer' }, [footerEl]));
+  modalOverlay.appendChild(m);
+  // Focus first input
+  setTimeout(() => { const i = m.querySelector('input, select, button'); if (i) i.focus(); }, 50);
+}
+function closeModal() {
+  activeModal = null;
+  modalOverlay.className = 'modal-overlay';
+  modalOverlay.innerHTML = '';
+}
+
+// ── CONFIRM DIALOG ──
+function confirmDialog(question, onConfirm) {
+  const body = el('div', { className: 'form-row' }, [
+    el('p', { style: { color: 'var(--text-2)', marginBottom: 8 }, text: question })
+  ]);
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-danger', text: 'Delete', onClick: () => { closeModal(); onConfirm(); } })
+  ]);
+  openModal('Confirm', body, footer);
+}
+
+// ── MONTH PICKER (reusable) ──
+function monthPicker(options) {
+  const { value, onChange, label, includeFuture } = options;
+  const current = todayMonth();
+  const startY = 2025, endY = 2035;
+  const months = [];
+  for (let y = startY; y <= endY; y++) {
+    const maxM = (y === current.year && !includeFuture) ? current.month : 11;
+    for (let m = 0; m <= maxM; m++) months.push({ year: y, month: m, label: MONTHS_SHORT[m] + ' ' + y });
+  }
+  const select = el('select', {
+    className: 'modal-input',
+    onChange: (e) => onChange(parseDate(e.target.value))
+  });
+  select.appendChild(el('option', { value: '', text: 'Select month...' }));
+  months.forEach(mo => {
+    const y = mo.year, m = mo.month;
+    select.appendChild(el('option', {
+      value: dateKey(y, m),
+      text: mo.label,
+      selected: y === value.year && m === value.month
+    }));
+  });
+  return el('div', { className: 'form-row' }, [
+    el('label', { className: 'modal-label', text: label || 'Month' }),
+    select
+  ]);
+}
+
+// ── EDITOR ROW HELPER ──
+function editorRow(label, input) {
+  return el('div', { className: 'form-row' }, [
+    el('label', { className: 'modal-label', text: label }),
+    input
+  ]);
+}
+function textInput(value, opts) {
+  const { placeholder, mono, required, id } = opts || {};
+  return el('input', {
+    type: 'text',
+    className: 'modal-input' + (mono ? ' mono' : ''),
+    placeholder: placeholder || '',
+    value: value || '',
+    required: !!required,
+    id: id
+  });
+}
+function moneyInput(value, opts) {
+  return textInput(value, Object.assign({ mono: true, placeholder: '$0.00' }, opts || {}));
+}
+function numInput(value, opts) {
+  return el('input', {
+    type: 'number',
+    className: 'modal-input mono',
+    value: value !== undefined ? value : '',
+    placeholder: opts && opts.placeholder || '',
+    min: opts && opts.min,
+    max: opts && opts.max,
+    step: opts && opts.step || 'any'
+  });
+}
+function selectInput(options, value, onChange, label) {
+  const sel = el('select', { className: 'modal-input', onChange });
+  sel.appendChild(el('option', { value: '', text: '-- select --' }));
+  options.forEach(([v, t]) => sel.appendChild(el('option', { value: v, text: t, selected: String(v) === String(value) })));
+  return el('div', { className: 'form-row' }, [
+    label ? el('label', { className: 'modal-label', text: label }) : null,
+    sel
+  ].filter(Boolean));
+}
+function dateInput(value, label) {
+  const y = value ? value.year : '';
+  const m = value ? String(value.month + 1).padStart(2, '0') : '';
+  return editorRow(label || 'Date', el('input', {
+    type: 'month',
+    className: 'modal-input',
+    value: y + '-' + m,
+    onChange: (e) => {
+      const [yy, mm] = e.target.value.split('-');
+      return { year: parseInt(yy, 10), month: parseInt(mm, 10) - 1 };
+    }
+  }));
+}
+// ── SVG GAUGE RING ──
+function gaugeRingSVG(pct, color) {
+  const r = 50, cx = 56, cy = 56;
+  const circ = 2 * Math.PI * r;
+  const dash = clamp(pct, 0, 1) * circ;
+  const shift = -Math.PI / 2;
+  // start at top (-90deg), go clockwise
+  const x0 = cx + r * Math.cos(shift), y0 = cy + r * Math.sin(shift);
+  const x1 = cx + r * Math.cos(shift + dash / r), y1 = cy + r * Math.sin(shift + dash / r);
+  const large = dash > circ / 2 ? 1 : 0;
+  const sweep = 1; // clockwise
+  const d = `M ${x0} ${y0} A ${r} ${r} 0 ${large} ${sweep} ${x1} ${y1}`;
+  return `<svg class="gauge-svg" viewBox="0 0 112 112">
+    <circle class="gauge-track" cx="${cx}" cy="${cy}" r="${r}" />
+    <path class="gauge-fill" d="${d}" fill="none" stroke="${color || 'var(--safe)'}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="0" />
+    <circle cx="${cx}" cy="${cy}" r="32" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1" />
+  </svg>`;
+}
+
+// ── COUNTED AMOUNT ──
+function countedAmount(job, entry) {
+  const gross = Number(entry.amount) || 0;
+  if (job.type === 'W-2') {
+    // W-2 counts in full
+    return gross;
+  } else if (job.type === '1099') {
+    // 1099: deduct mileage reimbursement & disability work expenses if provided
+    const deductions = Number(entry.deductions) || 0;
+    return Math.max(0, gross - deductions);
+  } else {
+    // gig: same as 1099
+    const deductions = Number(entry.deductions) || 0;
+    return Math.max(0, gross - deductions);
+  }
+}
+
+// ── JOB CRUD ──
+function addJob(data) {
+  const job = {
+    id: data.id || uid(),
+    name: data.name || 'New Job',
+    type: data.type || 'W-2',
+    rate: data.rate !== undefined ? Number(data.rate) || 0 : 0,
+    cycle: data.cycle || 'monthly',
+    anchorDay: data.anchorDay !== undefined ? Number(data.anchorDay) || 15 : 15,
+    planningRate: data.planningRate !== undefined ? Number(data.planningRate) || SGA_TRIAL : SGA_TRIAL,
+    paychecks: data.paychecks !== undefined ? Number(data.paychecks) || 1 : 1,
+    status: data.status || 'ongoing',
+    startDate: data.startDate || dateKey(todayMonth().year, todayMonth().month),
+    payDate: data.payDate || null,
+    ytdCounted: 0
+  };
+  // Derive payDate from cycle + anchorDay
+  job.payDate = derivePayDate(job);
+  state.jobs.unshift(job);
+  saveState();
+  render();
+  showToast('Job "' + job.name + '" added', 'success');
+}
+
+function editJob(id, data) {
+  const idx = state.jobs.findIndex(j => j.id === id);
+  if (idx < 0) return;
+  const job = state.jobs[idx];
+  if (data.name !== undefined) job.name = data.name || 'Unnamed Job';
+  if (data.type !== undefined) job.type = data.type;
+  if (data.rate !== undefined) job.rate = Number(data.rate) || 0;
+  if (data.cycle !== undefined) job.cycle = data.cycle;
+  if (data.anchorDay !== undefined) job.anchorDay = Number(data.anchorDay) || 15;
+  if (data.planningRate !== undefined) job.planningRate = Number(data.planningRate) || SGA_TRIAL;
+  if (data.paychecks !== undefined) job.paychecks = Number(data.paychecks) || 1;
+  if (data.status !== undefined) job.status = data.status;
+  if (data.startDate !== undefined) job.startDate = data.startDate;
+  job.payDate = derivePayDate(job);
+  flashJobId = id;
+  saveState();
+  render();
+  showToast('Job updated', 'success');
+}
+
+function deleteJob(id) {
+  const job = state.jobs.find(j => j.id === id);
+  if (!job) return;
+  confirmDialog('Delete job "' + job.name + '" and all its entries?', () => {
+    state.jobs = state.jobs.filter(j => j.id !== id);
+    state.entries = state.entries.filter(e => e.jobId !== id);
+    if (expandedJobId === id) expandedJobId = null;
+    saveState();
+    render();
+    showToast('Job deleted', 'success');
+  });
+}
+
+function setJobStatus(id, status) {
+  const job = state.jobs.find(j => j.id === id);
+  if (!job) return;
+  job.status = status;
+  saveState();
+  render();
+}
+
+function derivePayDate(job) {
+  // Derive approximate pay date from cycle + anchor day
+  if (!job.cycle) return '';
+  const d = new Date();
+  switch (job.cycle) {
+    case 'weekly':
+      d.setDate(job.anchorDay || 15);
+      break;
+    case 'biweekly':
+      d.setDate(job.anchorDay || 15);
+      break;
+    case 'semimonthly':
+      d.setDate(Math.min(job.anchorDay || 15, 28));
+      break;
+    case 'monthly':
+    default:
+      d.setDate(Math.min(job.anchorDay || 15, 28));
+      break;
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
+// ── COMPUTE JOB TOTALS ──
+function jobYTD(job) {
+  return state.entries
+    .filter(e => e.jobId === job.id && e.year <= todayMonth().year)
+    .reduce((s, e) => s + countedAmount(job, e), 0);
+}
+
+function jobMonthTotal(job, year, month) {
+  return state.entries
+    .filter(e => e.jobId === job.id && e.year === year && e.month === month)
+    .reduce((s, e) => s + countedAmount(job, e), 0);
+}
+
+function jobMonthlyIncome(job, year) {
+  const totals = [];
+  for (let m = 0; m < 12; m++) totals.push(jobMonthTotal(job, year, m));
+  return totals;
+}
+
+function jobYearTotal(job, year) {
+  return jobMonthlyIncome(job, year).reduce((s, v) => s + v, 0);
+}
+// ── ENTRY CRUD ──
+function addEntry(jobId, data) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  const entry = {
+    id: uid(),
+    jobId: jobId,
+    amount: Number(data.amount) || 0,
+    hours: Number(data.hours) || 0,
+    deductions: Number(data.deductions) || 0,
+    notes: data.notes || '',
+    payDate: data.payDate || null,
+    year: data.payDate ? parseDate(data.payDate).year : todayMonth().year,
+    month: data.payDate ? parseDate(data.payDate).month : todayMonth().month,
+    createdAt: Date.now()
+  };
+  // If payDate string provided, parse year/month from it
+  if (data.payDate) {
+    const d = parseDate(data.payDate);
+    entry.year = d.year;
+    entry.month = d.month;
+  } else if (data.year !== undefined) {
+    entry.year = data.year;
+    entry.month = data.month;
+  }
+  state.entries.push(entry);
+  saveState();
+  render();
+  showToast('Entry added to "' + job.name + '"', 'success');
+}
+
+function editEntry(id, data) {
+  const idx = state.entries.findIndex(e => e.id === id);
+  if (idx < 0) return;
+  const entry = state.entries[idx];
+  if (data.amount !== undefined) entry.amount = Number(data.amount) || 0;
+  if (data.hours !== undefined) entry.hours = Number(data.hours) || 0;
+  if (data.deductions !== undefined) entry.deductions = Number(data.deductions) || 0;
+  if (data.notes !== undefined) entry.notes = data.notes || '';
+  if (data.payDate !== undefined) {
+    const d = parseDate(data.payDate);
+    entry.year = d.year;
+    entry.month = d.month;
+  }
+  // Recompute year/month from payDate if provided
+  if (data.payDate) {
+    const d = parseDate(data.payDate);
+    entry.year = d.year;
+    entry.month = d.month;
+  } else if (data.year !== undefined) {
+    entry.year = data.year;
+    entry.month = data.month;
+  }
+  saveState();
+  render();
+  showToast('Entry updated', 'success');
+}
+
+function deleteEntry(id) {
+  const entry = state.entries.find(e => e.id === id);
+  if (!entry) return;
+  const job = state.jobs.find(j => j.id === entry.jobId);
+  const jobName = job ? job.name : 'unknown';
+  confirmDialog('Delete this entry from "' + jobName + '"?', () => {
+    state.entries = state.entries.filter(e => e.id !== id);
+    saveState();
+    render();
+    showToast('Entry deleted', 'success');
+  });
+}
+
+// ── ENTRY MODAL (add) ──
+function openAddEntryModal(jobId) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  const payDate = dateKey(todayMonth().year, todayMonth().month);
+  const fields = [
+    datePicker({ value: payDate, onChange: () => {}, label: 'Pay Date' }),
+    moneyInput('', { label: 'Gross Amount ($)' }),
+    numInput('', { label: 'Hours Worked', placeholder: 'Optional' }),
+    moneyInput('', { label: 'Deductions ($)', hint: 'Mileage, disability work costs...' }),
+    textInput('', { label: 'Notes', placeholder: 'Optional note...' })
+  ];
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-primary', text: 'Add Entry', onClick: () => {
+      const form = footer.previousElementSibling;
+      const amount = parseFloat(form.querySelector('input[type="text"].mono')?.value) || 0;
+      const hours = parseFloat(form.querySelectorAll('input[type="number"]')[0]?.value) || 0;
+      const deductions = parseFloat(form.querySelectorAll('input[type="text"].mono')[1]?.value) || 0;
+      const notes = form.querySelector('input[type="text"]:not(.mono)')?.value || '';
+      const payDateVal = form.querySelector('select')?.value || payDate;
+      if (!amount && !hours && !deductions && !notes) {
+        showToast('Enter at least an amount or hours', 'error');
+        return;
+      }
+      addEntry(jobId, { amount, hours, deductions, notes, payDate: payDateVal });
+      closeModal();
+    }})
+  ]);
+  openModal('Log Pay — ' + job.name, el('div', {}, fields), footer);
+}
+
+// ── ENTRY MODAL (edit) ──
+function openEditEntryModal(entryId) {
+  const entry = state.entries.find(e => e.id === entryId);
+  if (!entry) return;
+  const job = state.jobs.find(j => j.id === entry.jobId);
+  if (!job) return;
+  const payDateStr = entry.payDate || dateKey(entry.year, entry.month);
+  const fields = [
+    datePicker({ value: payDateStr, label: 'Pay Date' }),
+    moneyInput(String(entry.amount || 0), { label: 'Gross Amount ($)' }),
+    numInput(String(entry.hours || 0), { label: 'Hours Worked' }),
+    moneyInput(String(entry.deductions || 0), { label: 'Deductions ($)', hint: 'Mileage, disability work costs...' }),
+    textInput(entry.notes || '', { label: 'Notes', placeholder: 'Optional note...' })
+  ];
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', { className: 'btn btn-danger', text: 'Delete', onClick: () => {
+      closeModal();
+      deleteEntry(entryId);
+    }}),
+    el('button', { className: 'btn btn-primary', text: 'Save', onClick: () => {
+      const form = footer.previousElementSibling;
+      const amount = parseFloat(form.querySelectorAll('input[type="text"].mono')[0]?.value) || 0;
+      const hours = parseFloat(form.querySelectorAll('input[type="number"]')[0]?.value) || 0;
+      const deductions = parseFloat(form.querySelectorAll('input[type="text"].mono')[1]?.value) || 0;
+      const notes = form.querySelector('input[type="text"]:not(.mono)')?.value || '';
+      const payDateVal = form.querySelector('select')?.value || payDateStr;
+      editEntry(entryId, { amount, hours, deductions, notes, payDate: payDateVal });
+      closeModal();
+    }})
+  ]);
+  openModal('Edit Entry — ' + (job ? job.name : 'Job'), el('div', {}, fields), footer);
+}
+
+// ── DATE PICKER HELPERS ──
+function datePicker({ value, onChange, label }) {
+  const parts = value ? value.split('-') : [];
+  const y = parts[0] || String(todayMonth().year);
+  const m = parts[1] || String(todayMonth().month + 1).padStart(2, '0');
+  const input = el('input', {
+    type: 'month',
+    className: 'modal-input',
+    value: y + '-' + m,
+    onChange: (e) => {
+      const [yy, mm] = e.target.value.split('-');
+      const v = { year: parseInt(yy, 10), month: parseInt(mm, 10) - 1 };
+      if (onChange) onChange(v);
+      return v;
+    }
+  });
+  return el('div', { className: 'form-row' }, [
+    label ? el('label', { className: 'modal-label', text: label }) : null,
+    input
+  ].filter(Boolean));
+}
+
+// Re-export helpers we need in chunk 4
+window.__pg_helpers = {
+  $: $,
+  el: el,
+  fmt: fmt,
+  fmtMoney: fmtMoney,
+  uid: uid,
+  parseDate: parseDate,
+  dateKey: dateKey,
+  todayMonth: todayMonth,
+  isCurrentMonth: isCurrentMonth,
+  monthIndex: monthIndex,
+  fromMonthIndex: fromMonthIndex,
+  clamp: clamp,
+  showToast: showToast,
+  openModal: openModal,
+  closeModal: closeModal,
+  confirmDialog: confirmDialog,
+  state: state,
+  MONTHS_SHORT: MONTHS_SHORT,
+  MONTHS_FULL: MONTHS_FULL,
+  SGA_TRIAL: SGA_TRIAL,
+  SGA_SUBSTANTIAL: SGA_SUBSTANTIAL,
+  TWP_TOTAL: TWP_TOTAL,
+  STORAGE_KEY: STORAGE_KEY,
+  STATUS_TEXT: STATUS_TEXT,
+  addEntry: addEntry,
+  editEntry: editEntry,
+  deleteEntry: deleteEntry,
+  openAddEntryModal: openAddEntryModal,
+  openEditEntryModal: openEditEntryModal,
+  jobYTD: jobYTD,
+  jobMonthTotal: jobMonthTotal,
+  jobMonthlyIncome: jobMonthlyIncome,
+  jobYearTotal: jobYearTotal,
+  countedAmount: countedAmount,
+  gaugeRingSVG: gaugeRingSVG,
+  addJob: addJob,
+  editJob: editJob,
+  deleteJob: deleteJob,
+  setJobStatus: setJobStatus,
+  derivePayDate: derivePayDate,
+  saveState: saveState,
+  loadState: loadState
+};
+// ── RENDER ──
+function render() {
+  const root = $('#root');
+  root.innerHTML = '';
+
+  const appShell = el('div', { className: 'app-shell' });
+
+  // ── HEADER ──
+  const header = el('header');
+  const headerInner = el('div', { className: 'header-inner' });
+  headerInner.appendChild(el('div', { className: 'brand' }, [
+    el('div', { className: 'brand-icon' }, [
+      el('svg', { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'none', stroke: 'white', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M12 2v20M17 7H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' })
+      ])
+    ]),
+    el('span', { text: 'PayGuard' }),
+    el('span', { className: 'brand-year', text: todayMonth().year.toString() })
+  ]));
+  const headerActions = el('div', { className: 'header-actions' });
+  headerActions.appendChild(el('button', { className: 'icon-btn', 'aria-label': 'Settings', title: 'Settings' }, [
+    el('svg', { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('circle', { cx: 12, cy: 12, r: 3 }),
+      el('path', { d: 'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42' })
+    ])
+  ]));
+  headerActions.appendChild(el('button', { className: 'icon-btn', 'aria-label': 'Notifications', title: 'Notifications' }, [
+    el('svg', { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M18 8A6 6 0 0 0 6 8c4 0 6 4 6 4v1c0 1.1-.9 2-2 2h-3c-1.1 0-2-.9-2-2V8.75C4 7.5 4 7 4 6c0-2 2-3.5 4-3.5s4 1.5 4 3.5c0 1.5-1 2.75-2 3.75V18c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2v-1.25c-1-.5-1.75-1.25-2-2.25C3 12.5 3 11 3 9.5 3 7 5 5 7 5s4 2.5 4 5c0 1.5 1 2.75 2 3.75V20c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-1.25c1-.5 1.75-1.25 2-2.25C14 12.5 14 11 14 9.5 14 7 16 5 18 5s4 2.5 4 5' }),
+      el('path', { d: 'M13.73 21a2 2 0 0 1-3.46 0' })
+    ]),
+    el('span', { className: 'badge' })
+  ]));
+  headerInner.appendChild(headerActions);
+  header.appendChild(headerInner);
+  appShell.appendChild(header);
+
+  // ── SGA GAUGE SECTION ──
+  const ytdTotal = state.jobs.reduce((s, j) => s + jobYTD(j), 0);
+  const pct = clamp(ytdTotal / SGA_TRIAL, 0, 1);
+  const gaugeColor = pct >= 1 ? 'var(--careful)' : (pct > 0.85 ? 'var(--careful)' : 'var(--safe)');
+  const gaugeStatus = pct >= 1 ? 'over' : (pct > 0.85 ? 'careful' : 'safe');
+
+  const gaugeSection = el('section', { className: 'gauge-section' });
+  const gaugeWrap = el('div', { className: 'gauge-wrap' });
+  // Gauge dial
+  const gaugeDial = el('div', { className: 'gauge-dial' });
+  gaugeDial.innerHTML = gaugeRingSVG(pct, gaugeColor);
+  const gaugeCenter = el('div', { className: 'gauge-center' });
+  gaugeCenter.appendChild(el('span', {
+    className: 'gauge-amount ' + gaugeStatus,
+    text: fmtMoney(ytdTotal)
+  }));
+  gaugeCenter.appendChild(el('span', { className: 'gauge-label', text: 'YTD' }));
+  gaugeDial.appendChild(gaugeCenter);
+  gaugeWrap.appendChild(gaugeDial);
+  // Note
+  const gaugeNote = el('div', { className: 'gauge-note' });
+  gaugeNote.innerHTML = `<strong> SGA trial work period </strong> $${SGA_TRIAL}/month<br>Counts each W-2 job in full; 1099/gig counts gross minus deductions.`;
+  gaugeWrap.appendChild(gaugeNote);
+  gaugeSection.appendChild(gaugeWrap);
+  // Footer stats
+  const gaugeFooter = el('div', { className: 'gauge-footer' });
+  const gaugeStats = [
+    { label: 'Active jobs', value: String(state.jobs.filter(j => j.status === 'ongoing').length) },
+    { label: 'YTD entries', value: String(state.entries.length) },
+    { label: 'Limit', value: '$' + SGA_TRIAL }
+  ];
+  gaugeStats.forEach(({ label, value }) => {
+    const stat = el('div', { className: 'gauge-stat' });
+    stat.appendChild(el('div', { className: 'gauge-stat-label', text: label }));
+    stat.appendChild(el('div', { className: 'gauge-stat-value', text: value }));
+    gaugeFooter.appendChild(stat);
+  });
+  // TWP mini
+  const twpCount = countTwpUsed();
+  const twpStat = el('div', { className: 'gauge-stat' });
+  twpStat.appendChild(el('div', { className: 'gauge-stat-label', text: 'TWP used' }));
+  twpStat.appendChild(el('div', { className: 'gauge-stat-value brand', text: twpCount + ' / ' + TWP_TOTAL }));
+  gaugeFooter.appendChild(twpStat);
+  gaugeSection.appendChild(gaugeFooter);
+  appShell.appendChild(gaugeSection);
+
+  // ── TWP TRACKER ──
+  const twpSection = el('section');
+  const sectionHead = el('div', { className: 'section-head' });
+  sectionHead.appendChild(el('span', { className: 'section-label', text: 'Trial Work Period' }));
+  sectionHead.appendChild(el('button', { className: 'btn btn-ghost btn-sm', text: 'How it works', 'aria-label': 'TWP info' }));
+  twpSection.appendChild(sectionHead);
+  const twpDots = el('div', { className: 'twp-dots' });
+  for (let i = 0; i < TWP_TOTAL; i++) {
+    const dot = el('div', {
+      className: 'twp-dot ' + twpDotClass(i),
+      title: 'Service month ' + (i + 1)
+    });
+    twpDots.appendChild(dot);
+  }
+  twpSection.appendChild(twpDots);
+  const twpInfo = el('div', { className: 'twp-info' });
+  twpInfo.innerHTML = `<strong>${twpCount} of ${TWP_TOTAL} service months used.</strong><br>
+    Once you complete 9 service months, SSA reviews your earnings — earnings above <strong>$${SGA_SUBSTANTIAL}/mo</strong> may affect SSDI.`;
+  twpSection.appendChild(twpInfo);
+  appShell.appendChild(twpSection);
+
+  // ── JOBS SECTION ──
+  const jobsSection = el('section');
+  const jobsHead = el('div', { className: 'section-head' });
+  const jobsLabel = el('span', { className: 'section-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'Your Income Sources' })
+  ]);
+  jobsHead.appendChild(jobsLabel);
+  const addJobBtn = el('button', {
+    className: 'btn btn-primary btn-sm',
+    text: '+ Add Job',
+    onClick: () => openAddJobModal()
+  });
+  jobsHead.appendChild(addJobBtn);
+  if (state.jobs.length > 0) {
+    jobsHead.appendChild(el('span', { style: { fontSize: '11px', color: 'var(--muted)' }, text: state.jobs.length + ' job' + (state.jobs.length !== 1 ? 's' : '') }));
+  }
+  jobsSection.appendChild(jobsHead);
+
+  if (state.jobs.length === 0) {
+    const empty = el('div', { className: 'empty-state' });
+    empty.appendChild(el('div', { className: 'empty-state-icon' }, [
+      el('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M20 7h-4V5h4V3H7v2H3v2h17V7zM3 17h18v-2H3v2zM12 12v4M10 14h4' })
+      ])
+    ]));
+    empty.appendChild(el('div', { className: 'empty-state-title', text: 'No income sources yet' }));
+    empty.appendChild(el('div', { className: 'empty-state-desc', text: 'Add a job to start tracking your earnings. W-2 jobs count in full; 1099/gig jobs deduct expenses.' }));
+    jobsSection.appendChild(empty);
+  } else {
+    // Render each job card
+    state.jobs.forEach(job => {
+      jobsSection.appendChild(renderJobCard(job));
+    });
+    // Add job card at bottom (dashed)
+    const addCard = el('div', { className: 'add-job-card', onClick: () => openAddJobModal() });
+    addCard.appendChild(el('div', { className: 'add-job-text' }, [
+      el('svg', { viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+        el('path', { d: 'M12 5v14M5 12h14' })
+      ]),
+      el('span', { text: 'Add another income source' })
+    ]));
+    addCard.appendChild(el('span', { className: 'add-job-shortcut', text: 'or click + above' }));
+    jobsSection.appendChild(addCard);
+  }
+  appShell.appendChild(jobsSection);
+
+  // ── LEDGER SECTION (bank statement style) ──
+  appendLedgerSection(appShell);
+
+  // ── BANK RECONCILIATION ──
+  appendBankSection(appShell);
+
+  // ── BOTTOM NAV ──
+  const bottomNav = el('nav', { className: 'bottom-nav' });
+  const inner = el('div', { className: 'bottom-nav-inner' });
+  inner.appendChild(el('button', {
+    className: 'nav-item',
+    onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' }),
+      el('polyline', { points: '9 22 9 12 15 12 15 22' })
+    ]),
+    el('span', { text: 'Jobs' })
+  ]));
+  inner.appendChild(el('button', {
+    className: 'nav-item',
+    onClick: () => {
+      const ledger = root.querySelector('.ledger-scroll');
+      if (ledger) ledger.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('rect', { x: 3, y: 3, width: 18, height: 18, rx: 2 }),
+      el('line', { x1: 3, y1: 9, x2: 21, y2: 9 }),
+      el('line', { x1: 9, y1: 21, x2: 9, y2: 9 })
+    ]),
+    el('span', { text: 'Ledger' })
+  ]));
+  inner.appendChild(el('button', {
+    className: 'nav-item',
+    onClick: () => {
+      const gauge = root.querySelector('.gauge-section');
+      if (gauge) gauge.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M22 12h-4l-3 9L9 3l-3 9H2' })
+    ]),
+    el('span', { text: 'Limit' })
+  ]));
+  inner.appendChild(el('button', {
+    className: 'nav-item',
+    onClick: () => {
+      const bank = root.querySelector('.bank-section');
+      if (bank) bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6' })
+    ]),
+    el('span', { text: 'Bank' })
+  ]));
+  bottomNav.appendChild(inner);
+  appShell.appendChild(bottomNav);
+
+  root.appendChild(appShell);
+}
+
+// ── RENDER JOB CARD ──
+function renderJobCard(job) {
+  const card = el('div', {
+    className: 'job-card' + (expandedJobId === job.id ? ' active' : ''),
+    id: 'job-' + job.id
+  });
+
+  // Header
+  const header = el('div', { className: 'job-card-header', onClick: () => {
+    expandedJobId = expandedJobId === job.id ? null : job.id;
+    flashJobId = job.id;
+    render();
+  }});
+  // Badge
+  const badge = el('span', {
+    className: 'job-badge ' + (job.type === 'W-2' ? 'w2' : '1099'),
+    text: job.type === 'W-2' ? 'W-2' : '1099'
+  });
+  // Name
+  let nameEl;
+  if (flashJobId === job.id) {
+    // Inline editable during flash
+    nameEl = el('input', {
+      className: 'job-name-input',
+      type: 'text',
+      value: job.name,
+      autoFocus: true,
+      onClick: (e) => e.stopPropagation(),
+      onKeyDown: (e) => {
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+          const v = e.target.value.trim();
+          if (v) editJob(job.id, { name: v });
+          flashJobId = null;
+          render();
+        } else if (e.key === 'Escape') {
+          e.stopPropagation();
+          flashJobId = null;
+          render();
+        }
+      },
+      onBlur: () => {
+        const v = e.target.value.trim();
+        if (v && v !== job.name) editJob(job.id, { name: v });
+        flashJobId = null;
+        render();
+      }
+    });
+    header.appendChild(nameEl);
+  } else {
+    header.appendChild(el('span', { className: 'job-name', text: job.name }));
+  }
+  header.appendChild(badge);
+
+  // Status buttons
+  const statusGroup = el('div', { className: 'job-status' });
+  ['ongoing', 'paused', 'ended'].forEach(s => {
+    statusGroup.appendChild(el('button', {
+      className: 'status-btn' + (job.status === s ? ' active-' + s : ''),
+      onClick: (e) => { e.stopPropagation(); setJobStatus(job.id, s); },
+      text: STATUS_TEXT[s],
+      title: s === 'ongoing' ? 'Currently working' : (s === 'paused' ? 'Not working right now' : 'Job ended')
+    }));
+  });
+  header.appendChild(statusGroup);
+  card.appendChild(header);
+
+  // Meta
+  const meta = el('div', { className: 'job-meta' });
+  // Pay cycle
+  const cycleMap = { weekly: 'Weekly', biweekly: 'Bi-weekly', semimonthly: 'Semi-monthly', monthly: 'Monthly' };
+  meta.appendChild(el('span', { className: 'job-meta-item' }, [
+    el('span', { className: 'label', text: 'Cycle' }),
+    el('span', { className: 'value', text: cycleMap[job.cycle] || job.cycle })
+  ]));
+  // Rate
+  meta.appendChild(el('span', { className: 'job-meta-item' }, [
+    el('span', { className: 'label', text: 'Rate' }),
+    el('span', { className: 'value', text: job.rate ? '$' + job.rate.toFixed(2) + '/hr' : '--' })
+  ]));
+  // Pay date
+  meta.appendChild(el('span', { className: 'job-meta-item' }, [
+    el('span', { className: 'label', text: 'Payday' }),
+    el('span', { className: 'value', text: job.payDate || '—' })
+  ]));
+  // YTD
+  const ytd = jobYTD(job);
+  meta.appendChild(el('span', { className: 'job-ytd' }, [
+    el('div', { className: 'job-ytd-value', text: '$' + fmt(ytd) }),
+    el('div', { className: 'job-ytd-label', text: 'YTD counted' })
+  ]));
+  card.appendChild(meta);
+
+  // Actions
+  const actions = el('div', { className: 'job-actions' });
+  actions.appendChild(el('button', {
+    className: 'btn btn-primary btn-xs',
+    text: '+ Add Entry',
+    onClick: (e) => { e.stopPropagation(); openAddEntryModal(job.id); }
+  }));
+  actions.appendChild(el('button', {
+    className: 'job-edit-btn',
+    title: 'Edit job',
+    onClick: (e) => { e.stopPropagation(); openEditJobModal(job.id); }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', width: 14, height: 14, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
+      el('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
+    ])
+  ]));
+  actions.appendChild(el('button', {
+    className: 'job-delete-btn',
+    title: 'Delete job',
+    onClick: (e) => { e.stopPropagation(); deleteJob(job.id); }
+  }, [
+    el('svg', { viewBox: '0 0 24 24', width: 14, height: 14, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('polyline', { points: '3 6 5 6 21 6' }),
+      el('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })
+    ])
+  ]));
+  card.appendChild(actions);
+
+  // Edit panel (if expanded)
+  if (expandedJobId === job.id) {
+    const panel = el('div', { className: 'job-edit-panel' });
+    const editRows = [
+      ({ label: 'Job name', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Name' }),
+        el('input', {
+          className: 'job-edit-input',
+          type: 'text',
+          value: job.name,
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const v = e.target.value.trim();
+              if (v) editJob(job.id, { name: v });
+              expandedJobId = null;
+              render();
+            }
+          }
+        })
+      ]) }),
+      ({ label: 'Type', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Type' }),
+        el('select', {
+          className: 'job-edit-select',
+          onChange: (e) => editJob(job.id, { type: e.target.value }),
+          value: job.type
+        }, [
+          el('option', { value: 'W-2' }, 'W-2 (counts in full)'),
+          el('option', { value: '1099' }, '1099 (deduct expenses)'),
+          el('option', { value: 'gig' }, 'Gig (deduct expenses)')
+        ])
+      ]) }),
+      ({ label: 'Hourly rate', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Rate ($/hr)' }),
+        el('input', {
+          className: 'job-edit-input mono',
+          type: 'number',
+          value: job.rate || '',
+          min: 0,
+          step: 0.01,
+          placeholder: 'Optional',
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const v = parseFloat(e.target.value);
+              if (!isNaN(v)) editJob(job.id, { rate: v });
+              expandedJobId = null;
+              render();
+            }
+          }
+        })
+      ]) }),
+      ({ label: 'Pay cycle', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Cycle' }),
+        el('select', {
+          className: 'job-edit-select',
+          onChange: (e) => editJob(job.id, { cycle: e.target.value }),
+          value: job.cycle
+        }, [
+          el('option', { value: 'weekly' }, 'Weekly'),
+          el('option', { value: 'biweekly' }, 'Bi-weekly'),
+          el('option', { value: 'semimonthly' }, 'Semi-monthly'),
+          el('option', { value: 'monthly' }, 'Monthly')
+        ])
+      ]) }),
+      ({ label: 'Anchor payday', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Day' }),
+        el('input', {
+          className: 'job-edit-input mono',
+          type: 'number',
+          value: job.anchorDay || 15,
+          min: 1,
+          max: 28,
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v) && v >= 1 && v <= 28) editJob(job.id, { anchorDay: v });
+              expandedJobId = null;
+              render();
+            }
+          }
+        })
+      ]) }),
+      ({ label: 'Paychecks per cycle', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Count' }),
+        el('input', {
+          className: 'job-edit-input mono',
+          type: 'number',
+          value: job.paychecks || 1,
+          min: 1,
+          max: 52,
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v) && v >= 1) editJob(job.id, { paychecks: v });
+              expandedJobId = null;
+              render();
+            }
+          }
+        })
+      ]) }),
+      ({ label: 'Planning rate', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Rate ($/mo)' }),
+        el('input', {
+          className: 'job-edit-input mono',
+          type: 'number',
+          value: job.planningRate || SGA_TRIAL,
+          min: 0,
+          step: 10,
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const v = parseFloat(e.target.value);
+              if (!isNaN(v)) editJob(job.id, { planningRate: v });
+              expandedJobId = null;
+              render();
+            }
+          }
+        })
+      ]) }),
+      ({ label: 'Start date', html: el('div', { className: 'job-edit-row' }, [
+        el('label', { className: 'job-edit-label', text: 'Since' }),
+        el('input', {
+          className: 'job-edit-input',
+          type: 'month',
+          value: job.startDate || '',
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              editJob(job.id, { startDate: e.target.value });
+              expandedJobId = null;
+              render();
+            }
+          }
+        })
+      ]) })
+    ];
+    editRows.forEach(r => panel.appendChild(r.html));
+    // Close panel hint
+    panel.appendChild(el('div', { style: { marginTop: 8, fontSize: '11px', color: 'var(--muted)', cursor: 'pointer' }, text: 'Press Enter to save, Esc to cancel', onClick: () => { expandedJobId = null; render(); } }));
+    card.appendChild(panel);
+  }
+
+  return card;
+}
+
+// ── LEDGER (bank-statement style) ──
+function jobDeductionsTotal(job) {
+  return state.entries.filter(e => e.jobId === job.id).reduce((s, e) => s + (Number(e.deductions) || 0), 0);
+}
+
+function appendLedgerSection(root) {
+  const section = el('section', { className: 'ledger-section' });
+  section.appendChild(el('div', { className: 'section-head' }, [
+    el('span', { className: 'section-label' }, [
+      el('span', { className: 'dot' }),
+      el('span', { text: 'Earnings Ledger — ' + todayMonth().year })
+    ]),
+    el('span', { style: { fontSize: '11px', color: 'var(--muted)' }, text: 'Click any entry to edit · grouped by job' })
+  ]));
+
+  const ledgerScroll = el('div', { className: 'ledger-scroll' });
+
+  if (state.jobs.length === 0 || state.entries.length === 0) {
+    const empty = el('div', { className: 'empty-state' });
+    if (state.jobs.length === 0) {
+      empty.appendChild(el('div', { className: 'empty-state-title', text: 'No jobs to show' }));
+      empty.appendChild(el('div', { className: 'empty-state-desc', text: 'Add a job to see your ledger.' }));
+    } else {
+      empty.appendChild(el('div', { className: 'empty-state-title', text: 'No entries yet' }));
+      empty.appendChild(el('div', { className: 'empty-state-desc', text: 'Click + Add Entry on any job to log your pay.' }));
+    }
+    ledgerScroll.appendChild(empty);
+    section.appendChild(ledgerScroll);
+    root.appendChild(section);
+    return;
+  }
+
+  const table = el('table', { className: 'ledger-table' });
+  const currentY = todayMonth().year;
+  const SGA = SGA_TRIAL;
+
+  // HEADER ROW
+  const thead = el('thead');
+  const headerRow = el('tr');
+  headerRow.appendChild(el('th', { style: { width: '30px', minWidth: '30px', paddingLeft: '4px' }, text: '' }));
+  headerRow.appendChild(el('th', { text: 'Pay Date' }));
+  headerRow.appendChild(el('th', { text: 'Source' }));
+  headerRow.appendChild(el('th', { className: 'center', text: 'Hrs' }));
+  headerRow.appendChild(el('th', { className: 'right', text: 'Gross' }));
+  headerRow.appendChild(el('th', { className: 'right', text: 'Deductions' }));
+  headerRow.appendChild(el('th', { className: 'right', text: 'SGA Counted' }));
+  // 12 month columns with SGA threshold label
+  MONTHS_SHORT.forEach((mName, mi) => {
+    const isCurrent = mi === todayMonth().month && currentY === todayMonth().year;
+    headerRow.appendChild(el('th', {
+      className: 'month-col' + (isCurrent ? ' current' : ''),
+      style: { minWidth: '52px', width: '52px', textAlign: 'center', padding: '8px 2px' }
+    }, [
+      el('div', { className: 'month-name', text: mName }),
+      el('div', { style: { fontSize: '9px', color: 'var(--muted)', marginTop: 1, fontFamily: "'DM Mono', monospace" }, text: '$' + SGA })
+    ]));
+  });
+  headerRow.appendChild(el('th', { className: 'right', text: 'Notes' }));
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // BODY
+  const tbody = el('tbody');
+  let grandTotal = 0;
+  const monthlyGrandTotals = new Array(12).fill(0);
+
+  state.jobs.forEach(job => {
+    const jobEntries = state.entries
+      .filter(e => e.jobId === job.id)
+      .sort((a, b) => a.year - b.year || a.month - b.month || (a.payDate || '').localeCompare(b.payDate || ''));
+
+    if (jobEntries.length === 0) return;
+
+    // Group header
+    const groupHeader = el('tr', { className: 'ledger-group-header' });
+    const groupCell = el('td', { colSpan: 7 + 12 + 1, style: { padding: '10px 12px' } });
+    const groupInner = el('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } });
+    groupInner.appendChild(el('span', { className: 'job-name', text: job.name }));
+    const ytd = jobYTD(job);
+    groupInner.appendChild(el('span', { style: { fontFamily: "'DM Mono', monospace", fontSize: '12px', color: 'var(--text-2)', fontWeight: 600 } }, ['$' + fmt(ytd) + ' YTD']));
+    groupCell.appendChild(groupInner);
+    groupHeader.appendChild(groupCell);
+    tbody.appendChild(groupHeader);
+
+    // Entry rows
+    jobEntries.forEach(entry => {
+      const counted = countedAmount(job, entry);
+      const row = el('tr', { className: 'ledger-row-entry' });
+      // Edit button
+      row.appendChild(el('td', { style: { width: '30px', textAlign: 'center', padding: '10px 4px' } }, [
+        el('button', {
+          className: 'entry-edit-btn',
+          onClick: () => openEditEntryModal(entry.id),
+          title: 'Edit entry'
+        }, [
+          el('svg', { viewBox: '0 0 24 24', width: 12, height: 12, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('path', { d: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' }),
+            el('path', { d: 'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' })
+          ])
+        ])
+      ]));
+      row.appendChild(el('td', { className: 'ledger-entry-date', text: entry.payDate || (MONTHS_SHORT[entry.month] + ' ' + entry.year) }));
+      row.appendChild(el('td', { text: job.name, style: { fontSize: '12px', color: 'var(--text-2)' } }));
+      row.appendChild(el('td', { className: 'center mono', text: entry.hours || '—', style: { color: 'var(--muted)' } }));
+      row.appendChild(el('td', { className: 'right ledger-entry-amount', text: fmtMoney(entry.amount) }));
+      row.appendChild(el('td', { className: 'right ledger-entry-amount zero', text: entry.deductions ? fmtMoney(entry.deductions) : '—' }));
+      row.appendChild(el('td', {
+        className: 'right ledger-entry-amount' + (counted > SGA ? ' over' : ''),
+        text: fmtMoney(counted)
+      }));
+
+      // 12 month columns — show amount only in entry's month, TWP dot for months with entries
+      for (let mi = 0; mi < 12; mi++) {
+        const isThisMonth = entry.year === currentY && entry.month === mi;
+        const hasTwp = state.entries.some(e => e.year === currentY && e.month === mi && e.jobId === job.id);
+        const cls = 'month-col' + (isThisMonth ? ' current' : '');
+        row.appendChild(el('td', {
+          className: cls,
+          style: { padding: '10px 2px', fontSize: '12px', textAlign: 'center', verticalAlign: 'middle' }
+        }, [
+          isThisMonth ? el('span', { className: 'month-value', style: { fontWeight: 600 }, text: fmtMoney(entry.amount) }) : el('span', { className: 'month-value zero', text: '' }),
+          hasTwp && !isThisMonth ? el('span', { style: { display: 'inline-block', width: '5px', height: '5px', borderRadius: '50%', background: 'var(--brand-soft)', marginTop: 2, verticalAlign: 'middle' } }) : el('span', { text: '' })
+        ]));
+      }
+
+      // Notes
+      row.appendChild(el('td', { className: 'right', text: entry.notes || '', style: { fontSize: '11px', color: 'var(--muted)', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }));
+
+      tbody.appendChild(row);
+    });
+
+    // Job monthly totals row
+    const jobYearTotalVal = jobYearTotal(job, currentY);
+    const jobDedTotal = jobDeductionsTotal(job);
+    const jobGrossTotal = jobEntries.reduce((s, e) => s + Number(e.amount), 0);
+    const jobTotalRow = el('tr', { className: 'ledger-month-total' });
+    jobTotalRow.appendChild(el('td', { colSpan: 2 }));
+    jobTotalRow.appendChild(el('td', { style: { fontWeight: 600, color: 'var(--text)' } }, [el('span', { text: 'Total — ' + job.name })]));
+    jobTotalRow.appendChild(el('td', { className: 'center', text: '' }));
+    jobTotalRow.appendChild(el('td', { className: 'right ledger-entry-amount', style: { fontWeight: 600 }, text: fmtMoney(jobGrossTotal) }));
+    jobTotalRow.appendChild(el('td', { className: 'right ledger-entry-amount zero', style: { fontWeight: 600 }, text: jobDedTotal ? fmtMoney(jobDedTotal) : '—' }));
+    jobTotalRow.appendChild(el('td', {
+      className: 'right ledger-entry-amount' + (jobYearTotalVal > SGA ? ' over' : ''),
+      style: { fontWeight: 700, fontFamily: "'DM Mono', monospace" },
+      text: fmtMoney(jobYearTotalVal)
+    }));
+
+    // Monthly totals for this job
+    for (let mi = 0; mi < 12; mi++) {
+      const mVal = jobMonthTotal(job, currentY, mi);
+      monthlyGrandTotals[mi] += mVal;
+      const isOver = mVal > SGA;
+      jobTotalRow.appendChild(el('td', {
+        className: 'month-col' + (mi === todayMonth().month ? ' current' : ''),
+        style: { padding: '10px 2px', textAlign: 'center', fontSize: '12px' }
+      }, [
+        el('span', {
+          className: 'month-value' + (mVal === 0 ? ' zero' : '') + (isOver ? ' over' : ''),
+          style: { fontWeight: 600 },
+          text: mVal ? fmtMoney(mVal) : '—'
+        })
+      ]));
+    }
+
+    jobTotalRow.appendChild(el('td', { text: '' }));
+    tbody.appendChild(jobTotalRow);
+
+    grandTotal += jobYearTotalVal;
+  });
+
+  // Grand total row
+  const grandRow = el('tr', {
+    className: 'ledger-grand-total' + (grandTotal > SGA ? ' over' : (grandTotal > SGA * 0.85 ? ' careful' : ''))
+  });
+  grandRow.appendChild(el('td', { text: '' }));
+  grandRow.appendChild(el('td', { text: '' }));
+  const grandLabel = el('td', { style: { fontWeight: 700, fontSize: '14px' } }, [el('span', { text: 'Total — All Jobs (' + currentY + ')' })]);
+  grandRow.appendChild(grandLabel);
+  grandRow.appendChild(el('td', { text: '' }));
+  grandRow.appendChild(el('td', {
+    className: 'right amount',
+    style: { fontFamily: "'DM Mono', monospace", fontSize: '16px', fontWeight: 700 }
+  }, [fmtMoney(state.entries.reduce((s, e) => s + Number(e.amount), 0))]));
+  grandRow.appendChild(el('td', {
+    className: 'right amount',
+    style: { fontFamily: "'DM Mono', monospace", fontSize: '16px', fontWeight: 700 }
+  }, [fmtMoney(state.entries.reduce((s, e) => s + (Number(e.deductions) || 0), 0))]));
+  grandRow.appendChild(el('td', {
+    className: 'right amount',
+    style: { fontFamily: "'DM Mono', monospace", fontSize: '16px', fontWeight: 700 },
+    text: fmtMoney(grandTotal)
+  }));
+
+  for (let mi = 0; mi < 12; mi++) {
+    const mTotal = monthlyGrandTotals[mi];
+    const isOver = mTotal > SGA;
+    grandRow.appendChild(el('td', {
+      className: 'month-col' + (mi === todayMonth().month ? ' current' : ''),
+      style: { padding: '12px 2px', textAlign: 'center', fontWeight: 700, fontSize: '13px' }
+    }, [
+      el('span', {
+        className: 'month-value' + (mTotal === 0 ? ' zero' : '') + (isOver ? ' over' : ''),
+        style: { fontSize: '13px' },
+        text: mTotal ? fmtMoney(mTotal) : '—'
+      })
+    ]));
+  }
+  grandRow.appendChild(el('td', { text: '' }));
+  tbody.appendChild(grandRow);
+
+  table.appendChild(tbody);
+  ledgerScroll.appendChild(table);
+  section.appendChild(ledgerScroll);
+  root.appendChild(section);
+}
+
+// ── TWP DOTS ──
+function twpDotClass(i) {
+  const used = countTwpUsed();
+  const current = todayMonth();
+  // Determine if this dot is historical, current, used, or future
+  if (i < used) return 'used';
+  if (i === used && used < TWP_TOTAL) return 'current';
+  return 'future';
+}
+
+function countTwpUsed() {
+  // Count entries that triggered a TWP service month (one per month with any entry)
+  const months = new Set();
+  state.entries.forEach(e => {
+    months.add(e.year + '-' + e.month);
+  });
+  // Only count months within TWP window (last 9 months from now or starting point)
+  const sorted = Array.from(months).sort();
+  // Count the most recent 9 months that have entries
+  return Math.min(sorted.length, TWP_TOTAL);
+}
+
+// ── BANK RECONCILIATION ──
+function appendBankSection(root) {
+  const section = el('div', { className: 'bank-section' });
+  const currentY = todayMonth().year;
+
+  // Header
+  const head = el('div', { className: 'bank-head' });
+  head.appendChild(el('div', { className: 'bank-label' }, [
+    el('span', { className: 'dot' }),
+    el('span', { text: 'Bank Reconciliation — ' + currentY })
+  ]));
+
+  // Summary stats
+  const matched = bankLines.filter(l => l.matchedEntryId).length;
+  const unmatched = bankLines.filter(l => !l.matchedEntryId && l.amount > 0).length;
+  const depTotal = bankLines.filter(l => l.amount > 0).reduce((s, l) => s + l.amount, 0);
+  const matchedDepTotal = bankLines.filter(l => l.amount > 0 && l.matchedEntryId).reduce((s, l) => s + l.amount, 0);
+  const missedDepTotal = depTotal - matchedDepTotal;
+
+  const summary = el('div', { className: 'bank-summary' });
+  summary.appendChild(el('span', { className: 'bank-stat matched', text: 'Matched: <strong>' + matched + '</strong>' }));
+  summary.appendChild(el('span', { className: 'bank-stat', text: 'Deposits: <strong>' + fmtMoney(depTotal) + '</strong>' }));
+  summary.appendChild(el('span', { className: 'bank-stat missed', text: 'Unmatched: <strong>' + unmatched + '</strong> / ' + fmtMoney(missedDepTotal) }));
+  head.appendChild(summary);
+  section.appendChild(head);
+
+  // Import area
+  const importBox = el('div', { className: 'bank-import' });
+  const textarea = el('textarea', {
+    className: 'bank-import-input',
+    placeholder: 'Paste statement lines here — one per row:\n2026-01-15  Employer Direct Deposit  2800.00\n2026-02-15  Employer Direct Deposit  2800.00',
+    rows: 3
+  });
+  importBox.appendChild(textarea);
+  const importBtn = el('button', {
+    className: 'btn btn-primary btn-sm',
+    text: 'Import Lines',
+    onClick: () => {
+      const lines = textarea.value.split('\n').filter(l => l.trim());
+      let count = 0;
+      for (const line of lines) {
+        // Try formats:
+        //  2026-01-15  Description  2800.00
+        //  01/15/2026  Description  2800.00
+        //  Description,2026-01-15,2800.00
+        const m = line.match(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+\$??([\d,]+\.\d{2})\s*$/i);
+        const m2 = line.match(/^([^,]+),\s*(\d{4}-\d{2}-\d{2}),\s*\$?([\d,]+\.\d{2})\s*$/i);
+        let dateStr, desc, amount;
+        if (m) {
+          dateStr = m[1].includes('/') ? m[1].split('/').reverse().join('-') : m[1];
+          desc = m[2].trim();
+          amount = parseFloat(m[3].replace(/,/g, ''));
+        } else if (m2) {
+          dateStr = m2[2];
+          desc = m2[1].trim();
+          amount = parseFloat(m2[3].replace(/,/g, ''));
+        } else {
+          continue;
+        }
+        if (!dateStr || isNaN(amount)) continue;
+        const [y, mo, d] = dateStr.split('-').map(Number);
+        if (!y || !mo || !d) continue;
+        // Avoid duplicates by date+amount
+        const dup = bankLines.some(l => l.date === dateStr && Math.abs(l.amount - amount) < 0.01);
+        if (!dup) {
+          bankLines.push({
+            id: uid(),
+            date: dateStr,
+            desc: desc,
+            amount: amount,
+            matchedEntryId: null,
+            viewed: false
+          });
+          count++;
+        }
+      }
+      saveBankLines();
+      render();
+      showToast('Imported ' + count + ' line' + (count !== 1 ? 's' : ''), 'success');
+      textarea.value = '';
+    }
+  });
+  importBox.appendChild(importBtn);
+  importBox.appendChild(el('span', { className: 'bank-hint', text: 'Paste from bank CSV: date, description, amount. Lines with 0.00 are skipped.' }));
+  section.appendChild(importBox);
+
+  // Add single line button
+  section.appendChild(el('button', {
+    className: 'btn btn-ghost btn-sm',
+    style: { marginBottom: 12 },
+    text: '+ Add a line manually',
+    onClick: () => openAddBankLineModal()
+  }));
+
+  // Lines table
+  if (bankLines.length === 0) {
+    const empty = el('div', { className: 'bank-empty' });
+    empty.appendChild(el('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+      el('path', { d: 'M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6' })
+    ]));
+    empty.appendChild(el('div', { style: { fontWeight: 600, marginBottom: 4 }, text: 'No statement lines yet' }));
+    empty.appendChild(el('div', { text: 'Paste your bank statement deposits above, or add lines manually. The app will flag deposits that don\'t match any PayGuard entry.' }));
+    section.appendChild(empty);
+  } else {
+    const table = el('table', { className: 'bank-line-table' });
+    const thead = el('thead');
+    const hrow = el('tr');
+    hrow.appendChild(el('th', { style: { width: '90px' }, text: 'Date' }));
+    hrow.appendChild(el('th', { text: 'Description' }));
+    hrow.appendChild(el('th', { className: 'right', text: 'Amount' }));
+    hrow.appendChild(el('th', { className: 'center', text: 'Status' }));
+    hrow.appendChild(el('th', { className: 'right', text: 'Actions' }));
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+
+    const tbody = el('tbody');
+    // Sort by date desc
+    const sorted = [...bankLines].sort((a, b) => a.date.localeCompare(b.date));
+    sorted.forEach(line => {
+      const row = el('tr', {
+        className: (line.matchedEntryId ? 'bank-line-matched' : (line.amount > 0 ? 'bank-line-unmatched' : '')) + (line.viewed ? ' bank-line-viewed' : '')
+      });
+      row.appendChild(el('td', { style: { fontFamily: 'DM Mono, monospace', fontSize: '12px', whiteSpace: 'nowrap' }, text: line.date }));
+      row.appendChild(el('td', { text: line.desc, style: { maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }));
+      const amtCls = line.amount > 0 ? 'bank-line-deposit' : (line.amount < 0 ? 'bank-line-withdrawal' : '');
+      row.appendChild(el('td', { className: 'right ' + amtCls, text: (line.amount > 0 ? '+' : '') + fmtMoney(line.amount) }));
+      // Status
+      const statusCell = el('td', { className: 'center' });
+      if (line.matchedEntryId) {
+        const e = state.entries.find(en => en.id === line.matchedEntryId);
+        statusCell.appendChild(el('span', {
+          style: { fontSize: '11px', color: 'var(--safe)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }
+        }, [
+          el('svg', { viewBox: '0 0 24 24', width: 12, height: 12, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('path', { d: 'M20 6 9 17l-5-5' })
+          ]),
+          el('span', { text: e ? (e.jobId ? (state.jobs.find(j => j.id === e.jobId)?.name || 'unknown') : 'entry') : 'matched' })
+        ]));
+      } else if (line.amount > 0) {
+        statusCell.appendChild(el('span', { style: { fontSize: '11px', color: 'var(--careful)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 } }, [
+          el('svg', { viewBox: '0 0 24 24', width: 12, height: 12, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+            el('circle', { cx: 12, cy: 12, r: 10 }),
+            el('line', { x1: 12, y1: 8, x2: 12, y2: 12 }),
+            el('line', { x1: 12, y1: 16, x2: 12.01, y2: 16 })
+          ]),
+          el('span', { text: 'unmatched' })
+        ]));
+      } else {
+        statusCell.appendChild(el('span', { style: { fontSize: '11px', color: 'var(--muted)' }, text: '—' }));
+      }
+      row.appendChild(statusCell);
+
+      // Actions
+      const actCell = el('td', { className: 'right bank-action-cell' });
+      actCell.appendChild(el('button', {
+        className: 'btn btn-ghost btn-xs',
+        text: 'View',
+        onClick: () => { line.viewed = true; saveBankLines(); render(); }
+      }));
+      if (!line.matchedEntryId || confirm('Unmatch this line?')) {
+        if (line.matchedEntryId) {
+          actCell.appendChild(el('button', {
+            className: 'btn btn-ghost btn-xs',
+            text: 'Unmatch',
+            onClick: () => {
+              line.matchedEntryId = null;
+              saveBankLines();
+              render();
+              showToast('Line unmatched', 'success');
+            }
+          }));
+        }
+      }
+      if (line.matchedEntryId) {
+        actCell.appendChild(el('button', {
+          className: 'btn btn-ghost btn-xs',
+          text: 'Re-match',
+          onClick: () => openMatchModal(line.id)
+        }));
+      }
+      actCell.appendChild(el('button', {
+        className: 'entry-delete-btn',
+        onClick: () => {
+          bankLines = bankLines.filter(l => l.id !== line.id);
+          saveBankLines();
+          render();
+          showToast('Line removed', 'success');
+        },
+        title: 'Delete line'
+      }, [
+        el('svg', { viewBox: '0 0 24 24', width: 13, height: 13, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          el('polyline', { points: '3 6 5 6 21 6' }),
+          el('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' })
+        ])
+      ]));
+      row.appendChild(actCell);
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    section.appendChild(table);
+  }
+
+  root.appendChild(section);
+}
+
+function openAddBankLineModal() {
+  const fields = [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'modal-label', text: 'Date' }),
+      el('input', {
+        type: 'date',
+        className: 'modal-input',
+        id: 'bank-line-date',
+        value: dateKey(todayMonth().year, todayMonth().month) + 'T00:00:00'.slice(0, 10)
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'modal-label', text: 'Description' }),
+      el('input', {
+        type: 'text',
+        className: 'modal-input',
+        placeholder: 'e.g. Employer Direct Deposit',
+        id: 'bank-line-desc'
+      })
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'modal-label', text: 'Amount ($)' }),
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        placeholder: 'e.g. 2800.00',
+        id: 'bank-line-amount',
+        step: 0.01
+      })
+    ])
+  ];
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', {
+      className: 'btn btn-primary',
+      text: 'Add Line',
+      onClick: () => {
+        const dateVal = $('#bank-line-date')?.value;
+        const desc = $('#bank-line-desc')?.value.trim();
+        const amount = parseFloat($('#bank-line-amount')?.value) || 0;
+        if (!dateVal || !desc) {
+          showToast('Fill in date and description', 'error');
+          return;
+        }
+        const d = new Date(dateVal);
+        const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        bankLines.push({
+          id: uid(),
+          date: dateStr,
+          desc,
+          amount,
+          matchedEntryId: null,
+          viewed: false
+        });
+        saveBankLines();
+        closeModal();
+        render();
+        showToast('Line added', 'success');
+      }
+    })
+  ]);
+  openModal('Add Bank Line', el('div', {}, fields), footer);
+  setTimeout(() => { const d = $('#bank-line-date'); if (d) d.focus(); }, 50);
+}
+
+// Match a bank line to a PayGuard entry (by date ±3 days and amount match)
+function findMatchForLine(line) {
+  const lineDate = parseDate(line.date);
+  if (!lineDate) return null;
+  const candidates = state.entries.filter(e => {
+    if (Math.abs(e.amount - line.amount) > 0.01) return false;
+    const eDate = parseDate(e.payDate || '');
+    if (!eDate) return false;
+    const diffDays = Math.abs((lineDate.year * 12 + lineDate.month) - (eDate.year * 12 + eDate.month));
+    return diffDays <= 1; // same month or adjacent
+  });
+  if (candidates.length === 0) return null;
+  // Prefer exact date match
+  const exact = candidates.find(e => {
+    const eDate = parseDate(e.payDate || '');
+    return eDate && eDate.year === lineDate.year && eDate.month === lineDate.month;
+  });
+  return exact || candidates[0];
+}
+
+function openMatchModal(lineId) {
+  const line = bankLines.find(l => l.id === lineId);
+  if (!line) return;
+  const match = findMatchForLine(line);
+  const body = el('div');
+  const fields = [
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'modal-label', text: 'Bank line' }),
+      el('div', {
+        style: {
+          padding: '10px 12px',
+          background: 'var(--surface-2)',
+          borderRadius: '6px',
+          border: '1px solid var(--border)',
+          marginBottom: 10
+        }
+      }, [
+        el('div', { style: { fontSize: '12px', color: 'var(--muted)' }, text: line.date }),
+        el('div', { style: { fontWeight: 600, fontFamily: 'DM Mono, monospace', color: line.amount > 0 ? 'var(--safe)' : 'var(--over)' } }, [
+          (line.amount > 0 ? '+' : '') + fmtMoney(line.amount)
+        ]),
+        el('div', { style: { fontSize: '12px', color: 'var(--text-2)', marginTop: 2 }, text: line.desc })
+      ])
+    ]),
+    el('div', { className: 'form-row' }, [
+      el('label', { className: 'modal-label', text: 'Suggested match' }),
+      match ? el('div', {
+        style: {
+          padding: '10px 12px',
+          background: 'var(--safe-soft)',
+          borderRadius: '6px',
+          border: '1px solid var(--safe)',
+          marginBottom: 10
+        }
+      }, [
+        el('div', { style: { fontWeight: 600 }, text: (match.jobId ? (state.jobs.find(j => j.id === match.jobId)?.name || 'unknown') : 'Entry') }),
+        el('div', { style: { fontSize: '12px', color: 'var(--text-2)', marginTop: 2 }, text: match.payDate || (MONTHS_SHORT[match.month] + ' ' + match.year) }),
+        el('div', { style: { fontFamily: 'DM Mono, monospace', fontWeight: 600, marginTop: 2 }, text: fmtMoney(match.amount) }),
+        match.notes ? el('div', { style: { fontSize: '11px', color: 'var(--muted)', marginTop: 2 }, text: match.notes }) : null
+      ]) : el('div', {
+        style: {
+          padding: '10px 12px',
+          background: 'var(--over-soft)',
+          borderRadius: '6px',
+          border: '1px solid var(--over)',
+          marginBottom: 10
+        }
+      }, [el('span', { style: { color: 'var(--over)', fontWeight: 600 }, text: 'No matching entry found' }),
+          el('div', { style: { fontSize: '11px', color: 'var(--text-2)', marginTop: 4 }, text: 'Add a PayGuard entry with the same amount and a pay date in the same or adjacent month.' })]
+      )
+    ])
+  ];
+
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Close', onClick: closeModal }),
+    match ? el('button', {
+      className: 'btn btn-primary',
+      text: 'Confirm Match',
+      onClick: () => {
+        line.matchedEntryId = match.id;
+        line.viewed = true;
+        saveBankLines();
+        closeModal();
+        render();
+        showToast('Line matched to entry', 'success');
+      }
+    }) : null
+  ].filter(Boolean));
+  openModal('Match — ' + line.date, body, footer);
+}
+
+// ── ADD JOB MODAL ──
+function openAddJobModal() {
+  const body = el('div');
+  const fields = [
+    editorRow('Job name', textInput('', { placeholder: 'e.g. Riverside Market', required: true })),
+    selectInput([
+      ['W-2', 'W-2 — Counts in full'],
+      ['1099', '1099 — Deduct expenses'],
+      ['gig', 'Gig — Deduct expenses']
+    ], 'W-2', (e) => {}, 'Type'),
+    editorRow('Hourly rate ($)',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        placeholder: 'Optional, e.g. 21.50',
+        value: '',
+        min: 0,
+        step: 0.01
+      })
+    ),
+    selectInput([
+      ['weekly', 'Weekly'],
+      ['biweekly', 'Bi-weekly'],
+      ['semimonthly', 'Semi-monthly'],
+      ['monthly', 'Monthly']
+    ], 'monthly', (e) => {}, 'Pay cycle'),
+    editorRow('Anchor payday (day of month)',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        placeholder: '1-28',
+        value: '15',
+        min: 1,
+        max: 28
+      })
+    ),
+    editorRow('Planning rate ($/month)',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        placeholder: 'e.g. 1210',
+        value: String(SGA_TRIAL),
+        min: 0,
+        step: 10
+      })
+    ),
+    editorRow('Paychecks per cycle',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        placeholder: 'e.g. 1',
+        value: '1',
+        min: 1,
+        max: 52
+      })
+    ),
+    editorRow('Start date',
+      el('input', {
+        type: 'month',
+        className: 'modal-input',
+        value: dateKey(todayMonth().year, todayMonth().month)
+      })
+    )
+  ];
+  fields.forEach(f => body.appendChild(f));
+  const hint = el('p', { className: 'modal-hint', text: 'W-2 jobs count your entire gross in the SGA trial. 1099/gig jobs count gross minus deductions (mileage, disability work costs).' });
+  body.appendChild(hint);
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', {
+      className: 'btn btn-primary',
+      text: 'Add Job',
+      onClick: () => {
+        const inputs = body.querySelectorAll('input, select');
+        const name = inputs[0].value.trim();
+        const type = inputs[1].value;
+        const rate = parseFloat(inputs[2].value) || 0;
+        const cycle = inputs[3].value;
+        const anchorDay = parseInt(inputs[4].value, 10) || 15;
+        const planningRate = parseFloat(inputs[5].value) || SGA_TRIAL;
+        const paychecks = parseInt(inputs[6].value, 10) || 1;
+        const startDate = inputs[7].value || dateKey(todayMonth().year, todayMonth().month);
+        if (!name) {
+          showToast('Enter a job name', 'error');
+          return;
+        }
+        addJob({
+          name, type, rate, cycle, anchorDay, planningRate, paychecks, startDate,
+          status: 'ongoing'
+        });
+        closeModal();
+      }
+    })
+  ]);
+  openModal('Add Income Source', body, footer);
+}
+
+// ── EDIT JOB MODAL ──
+function openEditJobModal(jobId) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (!job) return;
+  const body = el('div');
+  const fields = [
+    editorRow('Job name', textInput(job.name, { required: true })),
+    selectInput([
+      ['W-2', 'W-2 — Counts in full'],
+      ['1099', '1099 — Deduct expenses'],
+      ['gig', 'Gig — Deduct expenses']
+    ], job.type, (e) => {}, 'Type'),
+    editorRow('Hourly rate ($)',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        placeholder: 'Optional',
+        value: job.rate || '',
+        min: 0,
+        step: 0.01
+      })
+    ),
+    selectInput([
+      ['weekly', 'Weekly'],
+      ['biweekly', 'Bi-weekly'],
+      ['semimonthly', 'Semi-monthly'],
+      ['monthly', 'Monthly']
+    ], job.cycle, (e) => {}, 'Pay cycle'),
+    editorRow('Anchor payday (day of month)',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        value: job.anchorDay || 15,
+        min: 1,
+        max: 28
+      })
+    ),
+    editorRow('Planning rate ($/month)',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        value: job.planningRate || SGA_TRIAL,
+        min: 0,
+        step: 10
+      })
+    ),
+    editorRow('Paychecks per cycle',
+      el('input', {
+        type: 'number',
+        className: 'modal-input mono',
+        value: job.paychecks || 1,
+        min: 1,
+        max: 52
+      })
+    ),
+    editorRow('Start date',
+      el('input', {
+        type: 'month',
+        className: 'modal-input',
+        value: job.startDate || ''
+      })
+    )
+  ];
+  fields.forEach(f => body.appendChild(f));
+  const footer = el('div', { className: 'modal-footer' }, [
+    el('button', { className: 'btn btn-ghost', text: 'Cancel', onClick: closeModal }),
+    el('button', {
+      className: 'btn btn-primary',
+      text: 'Save',
+      onClick: () => {
+        const inputs = body.querySelectorAll('input, select');
+        const name = inputs[0].value.trim();
+        const type = inputs[1].value;
+        const rate = parseFloat(inputs[2].value) || 0;
+        const cycle = inputs[3].value;
+        const anchorDay = parseInt(inputs[4].value, 10) || 15;
+        const planningRate = parseFloat(inputs[5].value) || SGA_TRIAL;
+        const paychecks = parseInt(inputs[6].value, 10) || 1;
+        const startDate = inputs[7].value || '';
+        editJob(jobId, {
+          name: name || job.name,
+          type,
+          rate,
+          cycle,
+          anchorDay,
+          planningRate,
+          paychecks,
+          startDate
+        });
+        closeModal();
+      }
+    })
+  ]);
+  openModal('Edit — ' + job.name, body, footer);
+}
+
+// ── APP INIT ──
+function init() {
+  // Load from localStorage
+  state = loadState();
+  // Set default planning rate from first job or SGA
+  render();
+}
+document.addEventListener('DOMContentLoaded', init);
+// Also run immediately if DOM already loaded
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  init();
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}
+
+</script>
+</html>

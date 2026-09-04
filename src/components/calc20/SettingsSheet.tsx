@@ -385,7 +385,7 @@ function SettingsMainContent({
                   <div className="rows__row" key={period.fromMonth}>
                     <span className="rows__label">
                       What a work mile is worth{mileage.length > 1
-                        ? ` · ${period.fromMonth === 1 ? 'January to June' : 'July to December'}`
+                        ? ` · ${period.fromMonth === 1 ? 'Jan–Jun' : 'Jul–Dec'}`
                         : ''}
                     </span>
                     <span className="rows__value">

@@ -6,7 +6,8 @@ import {
   countableFor,
   evenSplit,
   grossFor,
-  hoursFor
+  hoursFor,
+  mileageDeduction
 } from '../../domain/earnings';
 import {
   longMonthName,
@@ -22,8 +23,11 @@ import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/p
 import { benefitPhase } from '../../domain/trialWork';
 import { money } from '../../domain/format';
 import { copyFor, periodLabel } from '../../domain/copy';
-import type { PayFrequency, Stream } from '../../domain/types';
+import type { MonthEntry, MonthKey, PayFrequency, Stream, TrackerData } from '../../domain/types';
 import { HelpSpread } from '../HelpSpread';
+import {
+  PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, payPatchFor, payValueFor, usePayBasis
+} from '../PayAmount';
 import { SectionHead } from './PayGuardPrimitives';
 
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
@@ -103,6 +107,154 @@ function FieldCell({ label, hint, children }: { label: string; hint: string; chi
   );
 }
 
+/** W2 month ledger — shared PayAmount bank vs paystub entry. */
+function W2PayGuardLedger({
+  stream, months, data, year, locked, onExtend, onUpdate, onClear
+}: {
+  stream: Stream;
+  months: MonthKey[];
+  data: TrackerData;
+  year: number;
+  locked: boolean;
+  onExtend: (m: MonthKey) => void;
+  onUpdate: (m: MonthKey, patch: Partial<MonthEntry>) => void;
+  onClear: (m: MonthKey) => void;
+}) {
+  const { basis } = usePayBasis();
+  const rules = rulesFor(year);
+
+  return (
+    <>
+      <div className="pg-rule-b px-3 py-2.5 sm:px-3.5">
+        <PayBasisSwitch />
+      </div>
+      <div
+        className="pg-scroll-x"
+        role="region"
+        aria-label={`${year} monthly earnings for ${stream.name}`}
+        tabIndex={0}
+        onScroll={(e) => e.currentTarget.classList.toggle('pg-scrolled', e.currentTarget.scrollLeft > 0)}
+      >
+        <div role="table" aria-label={`${stream.name} monthly earnings ledger`}>
+          <div className="pg-ledger-grid pg-table-head" role="row">
+            <div className="pg-frozen pg-rule-r px-2.5 py-2" role="columnheader">Month</div>
+            <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Hours</div>
+            <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">{PAY_BASIS_WORDS[basis].field}</div>
+            <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Counted</div>
+            <div className="pg-rule-r px-2 py-2 text-center" role="columnheader">Status</div>
+            <div className="px-1 py-2 text-center" role="columnheader"><span className="sr-only">Clear month</span>—</div>
+          </div>
+
+          {months.map((m, idx) => {
+            const blockedByLifecycle = stream.lifecycle !== 'active' && monthIndex(m) >= monthIndex(todayMonth());
+            const blockedByEnd = stream.activeTo != null && monthIndex(m) > monthIndex(stream.activeTo);
+            const disabled = locked || blockedByLifecycle || blockedByEnd;
+            const context = paycheckContextForMonth([stream], m);
+            const entry = stream.months[m];
+            const amount = payValueFor(entry, basis);
+            const hrs = hoursFor(stream, m);
+            const countable = countableFor(stream, m);
+            const phase = benefitPhase(data, m);
+            const isOver = countable > (phase === 'trialWork' ? rules.trialWork : rules.sga);
+            const isHeavy = context.length > 0 && context[0].count > (stream.payFrequency === 'biweekly' ? 2 : 4);
+            const converted = basis === 'bank' && amount ? payPatchFor('bank', amount).gross : undefined;
+
+            return (
+              <div
+                key={m}
+                className="pg-ledger-grid pg-table-row"
+                data-stripe={idx % 2 === 1}
+                data-over={isOver}
+                role="row"
+              >
+                <div
+                  className="pg-frozen flex flex-col justify-center gap-0.5 pg-rule-r px-2.5 py-1.5"
+                  data-stripe={idx % 2 === 1}
+                  data-over={isOver}
+                  role="rowheader"
+                >
+                  <span className="flex items-center justify-between gap-1">
+                    <span className="text-xs font-semibold pg-fg">{shortMonthName(m)}</span>
+                    {isHeavy ? (
+                      <span className="pg-badge pg-badge-warn px-1 py-0" title={`${context[0].count} paychecks this month`}>
+                        {context[0].count}×
+                      </span>
+                    ) : null}
+                  </span>
+                  {isOver ? (
+                    <span className="text-[0.625rem] font-bold pg-text-over">
+                      Over your limit
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="pg-rule-r p-0.5" role="cell">
+                  <CellInput
+                    ariaLabel={`${longMonthName(m)} hours`}
+                    placeholder="—"
+                    disabled={disabled}
+                    value={hrs || undefined}
+                    onCommit={(next) => {
+                      if (next !== undefined) onExtend(m);
+                      onUpdate(m, { hours: next });
+                    }}
+                  />
+                </div>
+
+                <div className="pg-rule-r p-0.5" role="cell">
+                  <CellInput
+                    prefix="$"
+                    ariaLabel={`${longMonthName(m)} ${PAY_BASIS_WORDS[basis].field.toLowerCase()}`}
+                    placeholder="0.00"
+                    disabled={disabled}
+                    value={amount || undefined}
+                    onCommit={(next) => {
+                      if (next !== undefined) onExtend(m);
+                      onUpdate(m, payPatchFor(basis, next));
+                    }}
+                  />
+                  {converted ? (
+                    <span className="block px-1 pb-0.5 text-[0.5625rem] leading-tight pg-muted">
+                      About {money(converted)} before taxes
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="pg-mono flex items-center justify-end pg-rule-r px-2.5 py-2 text-xs font-bold pg-fg" role="cell">
+                  {countable > 0 ? money(countable) : <span className="pg-dim">—</span>}
+                </div>
+
+                <div className="flex items-center justify-center pg-rule-r px-1 py-2" role="cell">
+                  {countable > 0 ? (
+                    <span className={`pg-badge ${isOver ? 'pg-badge-over' : phase === 'trialWork' && countable > rules.trialWork ? 'pg-badge-twp' : 'pg-badge-safe'}`}>
+                      {isOver ? 'Over' : 'Below'}
+                    </span>
+                  ) : (
+                    <span className="text-[0.625rem] pg-dim">—</span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center p-1" role="cell">
+                  <button
+                    type="button"
+                    disabled={disabled || (!amount && !hrs && !entry?.gross)}
+                    onClick={() => onClear(m)}
+                    aria-label={`Clear ${longMonthName(m)}`}
+                    title={`Clear ${longMonthName(m)}`}
+                    className="pg-icon-btn pg-btn-danger pg-touch-target size-7 text-[0.625rem] font-bold uppercase tracking-wider"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function PayGuardJobEditor({
   stream, year, open: cardOpen, onToggleOpen, onRemove
 }: {
@@ -123,13 +275,14 @@ export function PayGuardJobEditor({
      main screen, so it lists exactly what the header's month dropdown says
      — one month, the months behind you, the months ahead, or all twelve. */
   const { months } = useMonthScope('many');
-  const rules = rulesFor(year);
   const activeMonths = activeMonthsInYear(stream, year);
   const eligibleMonths = activeMonths.filter((m) => m <= now);
   const isYearToDate = eligibleMonths.length > 0 && eligibleMonths.length < activeMonths.length;
   const ytdGross = eligibleMonths.reduce((sum, month) => sum + grossFor(stream, month), 0);
   const ytdMiles = eligibleMonths.reduce((sum, month) => sum + (stream.months[month]?.miles ?? 0), 0);
   const ytdHours = eligibleMonths.reduce((sum, month) => sum + hoursFor(stream, month), 0);
+  const ytdMileageOff = eligibleMonths.reduce((sum, month) => sum + mileageDeduction(stream, month), 0);
+  const ytdCountable = eligibleMonths.reduce((sum, month) => sum + countableFor(stream, month), 0);
 
   const plan = stream.payFrequency && stream.anchorDate ? payPlan(year, stream.payFrequency, stream.anchorDate) : null;
   /* Only badge the extra-paycheck months the reader can actually see —
@@ -138,7 +291,7 @@ export function PayGuardJobEditor({
     : plan.heavyMonths.filter((m) => months.includes(monthKey(year, m)));
   const scheduleSummary = stream.payFrequency
     ? `${frequencyLabel(stream.payFrequency)} · ${stream.lifecycle === 'active' && !stream.activeTo ? 'Active all year' : 'Date range set'}`
-    : 'Not scheduled';
+    : 'No schedule';
 
   function autofillRemainingMonths() {
     if (!stream.hourlyRate || stream.hourlyRate <= 0 || !stream.plannedHoursPerWeek || stream.plannedHoursPerWeek <= 0) {
@@ -201,6 +354,7 @@ export function PayGuardJobEditor({
   ];
 
   return (
+    <PayBasisProvider>
     <div id={`pg-job-${stream.id}`} className="pg-card scroll-mt-20 overflow-hidden">
       <h2 className="sr-only">{stream.name}</h2>
       {/* ---------------- Job header ---------------- */}
@@ -239,7 +393,13 @@ export function PayGuardJobEditor({
           />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="hidden items-baseline gap-2 xs:flex">
+          {/* The year figure is the same number the job's own tab shows an
+              inch above this row, and at 416-639px it claimed 190px of a
+              313px header — enough that the chevron, the lock and the type
+              badge overflowed their half and printed on top of it, with the
+              job's name squeezed to nothing between them. It waits for a
+              screen where the name and the figure both fit. */}
+          <span className="hidden items-baseline gap-2 sm:flex">
             <span className="pg-label">{periodLabel(year, isYearToDate)}</span>
             <span className="pg-figure pg-figure-md">{money(ytdGross)}</span>
           </span>
@@ -443,125 +603,20 @@ export function PayGuardJobEditor({
               />
 
               {ledgerOpen ? (
-                <div
-                  className="pg-scroll-x"
-                  role="region"
-                  aria-label={`${year} monthly earnings for ${stream.name}`}
-                  tabIndex={0}
-                  onScroll={(e) => e.currentTarget.classList.toggle('pg-scrolled', e.currentTarget.scrollLeft > 0)}
-                >
-                  <div role="table" aria-label={`${stream.name} monthly earnings ledger`}>
-                  <div className="pg-ledger-grid pg-table-head" role="row">
-                    <div className="pg-frozen pg-rule-r px-2.5 py-2" role="columnheader">Month</div>
-                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Hours</div>
-                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Before taxes</div>
-                    <div className="pg-rule-r px-2.5 py-2 text-right" role="columnheader">Counted</div>
-                    <div className="pg-rule-r px-2 py-2 text-center" role="columnheader">Status</div>
-                    <div className="px-1 py-2 text-center" role="columnheader"><span className="sr-only">Clear month</span>—</div>
-                  </div>
-
-                  {months.map((m, idx) => {
-                    const blockedByLifecycle = stream.lifecycle !== 'active' && monthIndex(m) >= monthIndex(todayMonth());
-                    const blockedByEnd = stream.activeTo != null && monthIndex(m) > monthIndex(stream.activeTo);
-                    const disabled = stream.locked || blockedByLifecycle || blockedByEnd;
-                    const extendIfEarly = () => {
-                      if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
-                    };
-                    const context = paycheckContextForMonth([stream], m);
-                    const gross = grossFor(stream, m);
-                    const hrs = hoursFor(stream, m);
-                    const countable = countableFor(stream, m);
-                    const phase = benefitPhase(data, m);
-                    const isOver = countable > (phase === 'trialWork' ? rules.trialWork : rules.sga);
-                    const isHeavy = context.length > 0 && context[0].count > (stream.payFrequency === 'biweekly' ? 2 : 4);
-
-                    return (
-                      <div
-                        key={m}
-                        className="pg-ledger-grid pg-table-row"
-                        data-stripe={idx % 2 === 1}
-                        data-over={isOver}
-                        role="row"
-                      >
-                        <div
-                          className="pg-frozen flex flex-col justify-center gap-0.5 pg-rule-r px-2.5 py-1.5"
-                          data-stripe={idx % 2 === 1}
-                          data-over={isOver}
-                          role="rowheader"
-                        >
-                          <span className="flex items-center justify-between gap-1">
-                            <span className="text-xs font-semibold pg-fg">{shortMonthName(m)}</span>
-                            {isHeavy ? (
-                              <span className="pg-badge pg-badge-warn px-1 py-0" title={`${context[0].count} paychecks this month`}>
-                                {context[0].count}×
-                              </span>
-                            ) : null}
-                          </span>
-                          {isOver ? (
-                            <span className="text-[0.625rem] font-bold pg-text-over">
-                              Over your limit
-                            </span>
-                          ) : null}
-                        </div>
-
-                        <div className="pg-rule-r p-0.5" role="cell">
-                          <CellInput
-                            ariaLabel={`${longMonthName(m)} hours`}
-                            placeholder="—"
-                            disabled={disabled}
-                            value={hrs || undefined}
-                            onCommit={(next) => {
-                              if (next !== undefined) extendIfEarly();
-                              updateMonthEntry(stream.id, m, { hours: next });
-                            }}
-                          />
-                        </div>
-
-                        <div className="pg-rule-r p-0.5" role="cell">
-                          <CellInput
-                            prefix="$"
-                            ariaLabel={`${longMonthName(m)} gross income`}
-                            placeholder="0.00"
-                            disabled={disabled}
-                            value={gross || undefined}
-                            onCommit={(next) => {
-                              if (next !== undefined) extendIfEarly();
-                              updateMonthEntry(stream.id, m, { gross: next });
-                            }}
-                          />
-                        </div>
-
-                        <div className="pg-mono flex items-center justify-end pg-rule-r px-2.5 py-2 text-xs font-bold pg-fg" role="cell">
-                          {countable > 0 ? money(countable) : <span className="pg-dim">—</span>}
-                        </div>
-
-                        <div className="flex items-center justify-center pg-rule-r px-1 py-2" role="cell">
-                          {countable > 0 ? (
-                            <span className={`pg-badge ${isOver ? 'pg-badge-over' : phase === 'trialWork' && countable > rules.trialWork ? 'pg-badge-twp' : 'pg-badge-safe'}`}>
-                              {isOver ? 'Over' : 'Below'}
-                            </span>
-                          ) : (
-                            <span className="text-[0.625rem] pg-dim">—</span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-center p-1" role="cell">
-                          <button
-                            type="button"
-                            disabled={disabled || (!gross && !hrs)}
-                            onClick={() => updateMonthEntry(stream.id, m, { gross: undefined, hours: undefined })}
-                            aria-label={`Clear ${longMonthName(m)}`}
-                            title={`Clear ${longMonthName(m)}`}
-                            className="pg-icon-btn pg-btn-danger pg-touch-target size-7 text-[0.625rem] font-bold uppercase tracking-wider"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    );
+                <W2PayGuardLedger
+                  stream={stream}
+                  months={months}
+                  data={data}
+                  year={year}
+                  locked={stream.locked}
+                  onExtend={(m) => {
+                    if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
+                  }}
+                  onUpdate={(m, patch) => updateMonthEntry(stream.id, m, patch)}
+                  onClear={(m) => updateMonthEntry(stream.id, m, {
+                    gross: undefined, hours: undefined, net: undefined, basis: undefined
                   })}
-                  </div>
-                </div>
+                />
               ) : null}
             </>
           ) : (
@@ -600,7 +655,9 @@ export function PayGuardJobEditor({
                   <div className="pg-rule-t pg-surface-inset flex flex-col items-start gap-2 p-3 sm:p-3.5">
                     <p className="text-xs leading-relaxed pg-muted">
                       {eligibleMonths.length
-                        ? `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Your ${ytdMiles.toLocaleString()} miles come off first, and what is left is what counts toward your monthly limit.`
+                        ? (ytdMileageOff > 0
+                          ? `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Your ${ytdMiles.toLocaleString()} miles take ${money(ytdMileageOff)} off — ${money(ytdCountable)} counts toward your monthly limit.`
+                          : `Split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Work miles take money off what counts before it meets your monthly limit.`)
                         : `No elapsed active months in ${year} yet to split this across.`}
                     </p>
                     <button
@@ -608,7 +665,7 @@ export function PayGuardJobEditor({
                       onClick={() => setHelpOpen(true)}
                       className="text-xs font-semibold pg-accent hover:underline"
                     >
-                      How SSA self-employment income spread &amp; mileage deductions work →
+                      How your miles change what counts →
                     </button>
                   </div>
                 </>
@@ -620,5 +677,6 @@ export function PayGuardJobEditor({
 
       {helpOpen ? <HelpSpread onClose={() => setHelpOpen(false)} /> : null}
     </div>
+    </PayBasisProvider>
   );
 }

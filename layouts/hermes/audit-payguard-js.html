@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feature Audit — PayGuard JS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');
+:root {
+  --bg:#f4f5f7; --surface:#fff; --surface-2:#f8f9fb; --surface-3:#eef0f3;
+  --border:#e2e5ea; --border-strong:#c9ced6;
+  --text:#1c1f24; --text-2:#4a5058; --muted:#7a828c; --dim:#a3a9b0;
+  --safe:#0d9488; --safe-soft:#ccfbf1; --safe-text:#115e59;
+  --careful:#d97706; --careful-soft:#fef3c7; --careful-text:#92400e;
+  --over:#dc2626; --over-soft:#fee2e2; --over-text:#991b1b;
+  --brand:#7c3aed; --brand-soft:#ede9fe;
+  --radius:12px; --radius-sm:8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',system-ui,-apple-system,sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
+code, .mono { font-family:'DM Mono','JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+code { font-size:.88em; color:var(--brand); }
+
+.page { max-width:960px; margin:0 auto; padding:40px 20px 100px; }
+.masthead { border-bottom:1px solid var(--border); padding-bottom:28px; }
+.eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.16em; color:var(--brand); margin-bottom:12px; }
+h1 { font-size:clamp(28px,5vw,40px); font-weight:700; letter-spacing:-.03em; line-height:1.1; margin-bottom:14px; }
+.lede { color:var(--text-2); font-size:15px; line-height:1.7; max-width:640px; }
+.lede + .lede { margin-top:12px; }
+
+.scoreboard { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:28px 0 0; }
+.score { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; }
+.score-n { font-size:28px; font-weight:700; font-family:'DM Mono',monospace; line-height:1; }
+.score-l { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-top:6px; }
+.score.working .score-n { color:var(--safe); }
+.score.wrong .score-n { color:var(--over); }
+.score.stub .score-n { color:var(--careful); }
+.score.dead .score-n { color:var(--muted); }
+.score.phantom .score-n { color:var(--brand); }
+
+h2.band { font-size:20px; font-weight:700; letter-spacing:-.02em; margin:52px 0 6px; display:flex; align-items:center; gap:10px; }
+h2.band .tag { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:4px 10px; border-radius:999px; border:1px solid; }
+.tag.working { color:var(--safe-text); border-color:var(--safe); background:var(--safe-soft); }
+.tag.wrong { color:var(--over-text); border-color:var(--over); background:var(--over-soft); }
+.tag.stub { color:var(--careful-text); border-color:var(--careful); background:var(--careful-soft); }
+.tag.dead { color:var(--text-2); border-color:var(--border-strong); background:var(--surface-3); }
+.tag.phantom { color:var(--brand); border-color:var(--brand); background:var(--brand-soft); }
+.band-sub { font-size:14px; color:var(--text-2); line-height:1.65; max-width:720px; margin-bottom:18px; }
+
+.item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:10px; }
+.item.severe { border-color:var(--over); border-left-width:3px; }
+.item-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.item-name { font-size:15px; font-weight:700; }
+.item-loc { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
+.item-body { font-size:14px; color:var(--text-2); line-height:1.65; }
+.item-body b { color:var(--text); font-weight:600; }
+.item-body p + p { margin-top:8px; }
+.evidence { margin-top:10px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-family:'DM Mono',monospace; font-size:12px; color:var(--text-2); line-height:1.6; overflow-x:auto; white-space:pre-wrap; }
+.verdict { margin-top:10px; font-size:13px; font-weight:600; display:flex; gap:8px; align-items:baseline; }
+.verdict .v { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:6px; flex:none; }
+.v.keep { background:var(--safe-soft); color:var(--safe-text); }
+.v.fix { background:var(--over-soft); color:var(--over-text); }
+.v.decide { background:var(--careful-soft); color:var(--careful-text); }
+.v.drop { background:var(--surface-3); color:var(--text-2); }
+.verdict span:last-child { font-weight:400; color:var(--text-2); }
+
+table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+th { text-align:left; padding:8px 10px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; border-bottom:2px solid var(--border); background:var(--surface-2); }
+td { padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+td.n { font-family:'DM Mono',monospace; white-space:nowrap; }
+.note { font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; }
+.note b { color:var(--text-2); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div class="eyebrow">Feature audit · payguard-app.html</div>
+  <h1>What the JavaScript<br>actually does</h1>
+  <p class="lede">The component library catalogued how this layout <em>looks</em>. This is the other half: <b>1,627 lines of behaviour, sorted into what was meant, what was meant and is wrong, and what was never finished.</b></p>
+  <p class="lede">Every finding below was checked against the file running in a browser, not read off the source. Where a claim is about what the code produces at runtime, the evidence block is the actual output.</p>
+  <p class="lede"><b>The headline: the two features this layout leads with — the gauge and the trial-month tracker — are the two that do not work.</b> Everything underneath them is sound.</p>
+
+  <div class="scoreboard">
+    <div class="score working"><div class="score-n">15</div><div class="score-l">Working</div></div>
+    <div class="score wrong"><div class="score-n">6</div><div class="score-l">Wrong</div></div>
+    <div class="score stub"><div class="score-n">5</div><div class="score-l">Stubs</div></div>
+    <div class="score dead"><div class="score-n">7</div><div class="score-l">Dead</div></div>
+    <div class="score phantom"><div class="score-n">1</div><div class="score-l">Phantom</div></div>
+  </div>
+</header>
+
+<!-- ══ WORKING ══ -->
+<h2 class="band">Intentional and working <span class="tag working">Keep</span></h2>
+<p class="band-sub">Deliberate, wired, and correct. This is the gold — most of it is worth lifting whole.</p>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Job and entry CRUD, with confirm</span><span class="item-loc">addJob · editJob · deleteJob · addEntry · editEntry · deleteEntry</span></div>
+  <div class="item-body"><p>Full lifecycle on both records, every mutation followed by <code>saveState()</code> then <code>render()</code>, deletes routed through <code>confirmDialog</code>. Deleting a job cascades to its entries. <b>One state object, one save, one re-render</b> — no diffing, no reconciliation, and at this data size it is instant.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>The whole-tree re-render is the right call for a record of this size and should not be "improved" into a framework.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Counted amount — the mileage rule</span><span class="item-loc">countedAmount()</span></div>
+  <div class="item-body"><p>W-2 counts gross in full; 1099 and gig subtract deductions and floor at zero. <b>This is the one piece of real SSA arithmetic in the file and it is correct.</b> It is also the thing <code>ledger</code> and <code>payguard</code> in the main app are missing.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>But see the stub list — the deduction is a number the reader types, not miles they enter. The lever exists; the teaching does not.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Nav as smooth scroll</span><span class="item-loc">render() · scrollIntoView</span></div>
+  <div class="item-body"><p>Three targets — top, ledger, gauge — each a <code>scrollIntoView({ behavior: 'smooth' })</code> onto a section already rendered. <b>No routing, no mount/unmount, no lost scroll position, and the back button is never wrong.</b></p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>Cheapest navigation in the project. Needs <code>scroll-margin-top</code> so headings do not land behind the sticky header.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Ledger grouping and the totals ladder</span><span class="item-loc">appendLedgerSection()</span></div>
+  <div class="item-body"><p>Entries grouped by job, sorted year → month → pay day, with a per-month subtotal and a grand total that <b>recolours itself against the limit</b> — <code>over</code> above it, <code>careful</code> above 85%.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>The grouping and totals. Not the twenty-column width.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Status as three visible pills</span><span class="item-loc">setJobStatus()</span></div>
+  <div class="item-body"><p>Ongoing / paused / ended, always on screen, one tap, no menu. Saves and re-renders immediately.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>Carry to the cousin layouts — it beats a select everywhere it appears.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Persistence with a migration path</span><span class="item-loc">loadState() · STORAGE_KEY = 'payguard_state_v3'</span></div>
+  <div class="item-body"><p>Versioned key, defensive rehydration — every field type-checked and defaulted on load, corrupt JSON falls back to <code>defaultState()</code> rather than throwing. <b>It already survived two schema changes</b>, which is why a third was cheap.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>The field-by-field check on load is why this file can be edited without wiping anyone's data.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Modal and toast system</span><span class="item-loc">openModal · closeModal · confirmDialog · showToast</span></div>
+  <div class="item-body"><p>One overlay reused for every dialog, click-outside to dismiss, focus moved to the first field after 50ms. Toasts carry a success/error variant and self-clear at 2.5s.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>2.5s is short for this reader, and there is no dismiss control.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Pay day: typed, enforced, stored as a day</span><span class="item-loc">sanitizeDay · readDay · dayInput · payDayField · readPayDay</span></div>
+  <div class="item-body"><p>Two digits, 1–31, never 0, never 32 — enforced as you type. The entry stores <code>payDay: 7</code> beside the year and month it is already filed under, so sorting is subtraction and nothing parses anything.</p>
+  <div class="evidence">"0" → ""      "32" → "3"     "30" → "30"
+"00" → ""     "35" → "3"     "31" → "31"
+"05" → "5"    "99" → "9"     "3"  → "3"
+"007" → "7"   "345" → "3"    "12" → "12"
+"abc" → ""    "1a" → "1"</div></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>Added this session. One rule in one place, used by both the job anchor and the entry.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Extra paycheck warning, per job, with an unknown row</span><span class="item-loc">paydayMonthCounts · extraPaycheckMonths · extraPaycheckWarnings</span></div>
+  <div class="item-body"><p>Two jobs paid on different days produce different months and <b>both are warned, separately attributed</b>. A job whose pay day was never given is named as unchecked rather than assumed.</p>
+  <div class="evidence">Riverside Cafe (biweekly, day 6) → March, September
+DoorDash (weekly, day 2)        → January, May, July, October
+Instacart (no pay day)          → unknown, not guessed</div></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>Added this session. Monthly and semi-monthly are excluded because they cannot produce an extra month — correct, but the reader is not told why their monthly job never appears.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Hours field gated on one question</span><span class="item-loc">hoursMatter() · HOURS_MATTER_ABOVE = 18</span></div>
+  <div class="item-body"><p>Below 18 hours a week the 80-hours-a-month test cannot be reached, so the hours box is removed from every entry form. Unanswered shows it — silence is not a low number.</p></div>
+  <div class="verdict"><span class="v decide">Decide</span><span>Added this session and honoured everywhere, but <b>nothing yet asks the question</b>. It needs a screen.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Also working</span><span class="item-loc">—</span></div>
+  <div class="item-body">
+    <table>
+      <tr><td class="n">flashJobId</td><td>After editing a job, its card flashes and the name becomes editable in place. <b>Enter saves.</b> (Blur does not — see Wrong.)</td></tr>
+      <tr><td class="n">expandedJobId</td><td>One edit panel open at a time, opened under the card it edits.</td></tr>
+      <tr><td class="n">empty states</td><td>Distinct copy for no-jobs versus jobs-but-no-entries.</td></tr>
+      <tr><td class="n">gaugeRingSVG</td><td>Arc recomputed as a path per render; correct geometry.</td></tr>
+      <tr><td class="n">month columns</td><td>Twelve totals per job, current month marked by weight and colour.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══ WRONG ══ -->
+<h2 class="band">Intentional and wrong <span class="tag wrong">Fix before reuse</span></h2>
+<p class="band-sub">Deliberate features, incorrect logic. These are the ones that would silently mislead a reader about their benefits, so they matter more than the count suggests.</p>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">The gauge compares a year to a month</span><span class="item-loc">render() line 723</span></div>
+  <div class="item-body"><p>The headline number on the page. It totals <b>every entry ever recorded</b> and divides by the <b>monthly</b> limit.</p>
+  <div class="evidence">const ytdTotal = state.jobs.reduce((s, j) => s + jobYTD(j), 0);
+const pct = clamp(ytdTotal / SGA_TRIAL, 0, 1);   // SGA_TRIAL is $1,210 PER MONTH</div>
+  <p><b>The dial is pinned to full from the second month of any working year</b>, and the big figure under it is a year total wearing a monthly label. A reader earning a safe $400 a month sees "over" by March.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>The gauge should measure <em>this month</em> against the monthly limit. That is the question the layout claims to answer.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">Trial work period is not implemented</span><span class="item-loc">countTwpUsed()</span></div>
+  <div class="item-body"><p>The second most prominent feature. It counts <b>distinct months containing any entry at all</b> — no earnings threshold, no rolling window — then caps the answer at 9.</p>
+  <div class="evidence">const months = new Set();
+state.entries.forEach(e => { months.add(e.year + '-' + e.month); });
+// Only count months within TWP window (last 9 months from now or starting point)
+return Math.min(sorted.length, TWP_TOTAL);</div>
+  <p>Three defects in six lines. <b>A $5 entry burns a service month.</b> The comment describes a window the code does not implement — the real rule is nine months inside a rolling sixty. And <code>Math.min(…, 9)</code> means the count can never exceed nine, so "you have used them all" is a state the tracker can reach but never pass, and never warn about.</p>
+  <p><code>SGA_SUBSTANTIAL</code> ($1,690) exists and is <b>never used in a calculation</b> — it appears once, inside a sentence of explanatory copy.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>Needs the threshold test and the 60-month window. Until then the dots are decoration with a number next to them.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">YTD is not year-to-date</span><span class="item-loc">jobYTD()</span></div>
+  <div class="item-body"><p><code>filter(e =&gt; e.jobId === job.id &amp;&amp; e.year &lt;= todayMonth().year)</code> — <b>every year up to and including this one</b>. The label on screen says YTD. Second year of use, the figure quietly becomes a lifetime total.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>One character: <code>&lt;=</code> to <code>===</code>. It feeds the gauge, the job cards and the ledger group headers.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">Rename-on-blur throws</span><span class="item-loc">renderJobCard() line 954</span></div>
+  <div class="item-body"><p>The inline name editor's blur handler takes no argument but reads one.</p>
+  <div class="evidence">onBlur: () => {
+  const v = e.target.value.trim();   // `e` is not defined in this scope
+  ...
+}</div>
+  <p><b>Clicking away from a renamed job throws a ReferenceError and loses the edit.</b> Only pressing Enter saves. The bug is invisible because the Enter path is the one anyone testing would use.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>Add the parameter. One character of a different kind.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">Gig income has no colour — the CSS rule is invalid</span><span class="item-loc">.job-badge.1099 · renderJobCard line 929</span></div>
+  <div class="item-body"><p>The stylesheet declares <code>.job-badge.1099, .job-badge.gig { … }</code>. <b>A CSS class cannot begin with an unescaped digit</b>, so the selector is invalid — and an invalid selector in a comma list invalidates the entire rule, taking <code>.gig</code> down with it. The JS emits <code>class="job-badge 1099"</code>, which matches nothing.</p>
+  <div class="evidence">rules the browser actually parsed:
+  .job-badge | .job-badge.w2 | .job-card.active .job-badge
+
+computed styles:
+  "job-badge 1099" → background rgba(0,0,0,0)   ← transparent
+  "job-badge w2"   → background rgb(219,234,254) ← blue, as intended</div>
+  <p>So W-2 is colour-coded and <b>self-employment is not</b> — the distinction that changes the arithmetic is the one that lost its badge.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>Rename the class. This also settles the <code>--brand</code> / <code>--1099</code> token collision flagged in the component library.</span></div>
+</div>
+
+<!-- ══ STUBS ══ -->
+<div class="item severe">
+  <div class="item-head"><span class="item-name">Every select in the inline editor showed the wrong value</span><span class="item-loc">el() · the Type and Cycle selects</span></div>
+  <div class="item-body">
+    <p>Both selects were built as <code>el('select', { value: job.type }, [ …options ])</code>. <b>A <code>&lt;select&gt;</code> cannot take its value from an attribute, and it cannot take it before its options exist</b> — and <code>el()</code> sets attributes first, then appends children.</p>
+    <p>So both dropdowns always displayed their <b>first option</b>. Every job read as <b>"W-2 (counts in full)"</b> and <b>"Weekly"</b> regardless of what was stored, while the card header directly above showed the truth — a panel disagreeing with its own header by two fields.</p>
+    <p><b>The Type one is the dangerous half.</b> W-2 versus 1099 is the field that decides whether mileage comes off, and the editor was telling every gig worker their job counted in full.</p>
+    <div class="evidence">before → Type: "W-2"     Cycle: "weekly"     (stored: 1099, biweekly)
+after  → Type: "1099"    Cycle: "biweekly"   (stored: 1099, biweekly)</div>
+    <p>Fixed once in <code>el()</code>: after children are attached, a <code>SELECT</code> takes its <code>value</code> as a property. All eight fields of the expanded panel now match the stored job.</p>
+  </div>
+  <div class="verdict"><span class="v fix">Fixed</span><span>One place, and it covers every select in the file including any added later.</span></div>
+</div>
+
+<h2 class="band">Stubs <span class="tag stub">Finish or remove</span></h2>
+<p class="band-sub">The interface offers these. Nothing behind them does anything.</p>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Settings and Notifications buttons</span><span class="item-loc">render() lines 704, 710</span></div>
+  <div class="item-body"><p>Both header icon buttons render with labels, titles, hover states — and <b>no click handler at all</b>. The notification button also renders a <code>.badge</code> dot with no count and no source.</p>
+  <div class="evidence">[{"label":"Settings","hasClick":false},{"label":"Notifications","hasClick":false}]</div></div>
+  <div class="verdict"><span class="v drop">Remove</span><span>A button that does nothing is worse than an absent one — it costs a tap and teaches the reader the app is unreliable.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Planning rate and paychecks-per-cycle</span><span class="item-loc">job.planningRate · job.paychecks</span></div>
+  <div class="item-body"><p>Both are stored, migrated, defaulted, and <b>editable in two separate places each</b> — the inline panel and the modal editor. Neither is read by a single calculation anywhere in the file.</p></div>
+  <div class="verdict"><span class="v drop">Remove</span><span>Four fields of data entry with no consumer. If planning is wanted, build it; do not collect for it in advance.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Four decorative select handlers</span><span class="item-loc">lines 1435, 1451, 1534, 1550</span></div>
+  <div class="item-body"><p>Type and Pay cycle in both job modals pass <code>onChange: (e) =&gt; {}</code>. Values are read positionally from <code>inputs[n]</code> on save, so the forms work — but <b>the field order is now load-bearing</b>, and inserting a field anywhere above silently shifts every read after it.</p></div>
+  <div class="verdict"><span class="v decide">Decide</span><span>Works today, breaks the next time anyone edits the form. Read by name, not by index.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Mileage is a number you type</span><span class="item-loc">countedAmount() · the Deductions field</span></div>
+  <div class="item-body"><p>The arithmetic is right, but the reader must arrive already knowing that 1,240 miles is $868. <b>The product rule asks for the opposite</b> — type miles, watch the deduction appear — and that is the interaction that teaches the single most valuable rule for a gig worker.</p></div>
+  <div class="verdict"><span class="v decide">Decide</span><span>The highest-value thing that could be added here, and it is small.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Abandoned per-month totals</span><span class="item-loc">appendLedgerSection line 1249</span></div>
+  <div class="item-body"><p><code>const ytdByMonth = MONTHS_SHORT.map(…)</code> is computed for every job group and then discarded, under a comment reading <em>"Show small per-month totals inline? skip for compactness."</em></p></div>
+  <div class="verdict"><span class="v drop">Remove</span><span>Twelve totals per job computed on every render and thrown away.</span></div>
+</div>
+
+<!-- ══ DEAD ══ -->
+<h2 class="band">Dead code <span class="tag dead">Delete</span></h2>
+<p class="band-sub">No caller anywhere in the file.</p>
+<div class="item">
+  <div class="item-body">
+    <table>
+      <tr><th>Name</th><th>What it was for</th></tr>
+      <tr><td class="n">monthPicker()</td><td>A month selector. Superseded and never called.</td></tr>
+      <tr><td class="n">dateInput()</td><td>A date field. Superseded and never called.</td></tr>
+      <tr><td class="n">$()</td><td>The querySelector shim. Its last caller was the line that crashed the page on load; now unused.</td></tr>
+      <tr><td class="n">BAR_COMMA · BAR_CHECK<br>BAR_PLUS · BAR_EMPTY</td><td>Four unicode constants — em dash, check, minus, nbsp — defined at the top and referenced nowhere. Two are misnamed for what they hold.</td></tr>
+      <tr><td class="n">window.__pg_helpers</td><td>A forty-key export surface, commented <em>"helpers we need in chunk 4"</em>. There is no chunk 4 — the file is one script. It also exports <code>state</code> by value, so that reference is stale the moment state is reassigned on load.</td></tr>
+    </table>
+    <p class="note"><b>The four loose <code>.js</code> files beside this one</b> — <code>payguard-app.js</code>, <code>js-chunk1–4.js</code> — are the same code split up, referenced by no HTML. They are how <code>__pg_helpers</code> came to exist. Delete them or wire them; right now they are a second copy that will drift.</p>
+  </div>
+</div>
+
+<!-- ══ PHANTOM ══ -->
+<h2 class="band">Phantom states <span class="tag phantom">Design without code</span></h2>
+<p class="band-sub">Styled, documented, and impossible to reach. I catalogued both of these in the component library as real states — they are not, and that page now says so.</p>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">.twp-dot.historical</span><span class="item-loc">twpDotClass()</span></div>
+  <div class="item-body"><p>The stylesheet defines four dot states. <code>twpDotClass</code> returns three — <code>used</code>, <code>current</code>, <code>future</code>. <b>The word "historical" appears only in a comment describing what the function does not do.</b> It was meant to carry service months used before this app existed, which is exactly the information a reader arriving mid-benefit needs most.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>The missing state is the one that makes the tracker honest for anyone not starting from zero.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">.job-card.active — correction: this one is real</span><span class="item-loc">renderJobCard line 917</span></div>
+  <div class="item-body">
+    <p><b>I reported this as phantom and I was wrong.</b> The class is applied, on the line that builds every card:</p>
+    <div class="evidence">className: 'job-card' + (expandedJobId === job.id ? ' active' : '')</div>
+    <p>My search was for the literal <code>'active'</code> and the code writes <code>' active'</code> with a leading space, so it did not match. Verified live: expanding a card returns <code>expandedGetsActiveClass: true</code>.</p>
+    <p>And it is a good detail. <b>Opening a card for editing rings it in brand violet and fills its type badge solid</b> — the card being edited is unmistakable even when the panel below it is long enough to push the header off screen. It is not a selection model; it is the expanded state wearing one.</p>
+  </div>
+  <div class="verdict"><span class="v keep">Keep</span><span>Phantom count is one, not two.</span></div>
+</div>
+
+<h2 class="band">What this means for the ninth layout</h2>
+<div class="item">
+  <div class="item-body">
+    <p><b>The mining is worth it.</b> Roughly two thirds of this file is sound, and the parts that are sound are the parts that are hard: entry, grouping, in-place editing, persistence that survives schema changes, navigation with no router.</p>
+    <p><b>Do not inherit the domain layer.</b> Every SSA calculation here is either wrong (the gauge, the trial period, YTD) or thin (one deduction subtraction). The real app already has <code>src/domain/</code> — <code>rules.ts</code>, <code>trialWork.ts</code>, <code>capacity.ts</code> — where these questions are answered properly and shared across eight layouts. <b>Take the interface, wire it to the domain that already exists.</b></p>
+    <p>That split is the finding. The value in this file is <em>interaction and structure</em>; the danger is that it also contains confident-looking arithmetic about someone's benefits, and that arithmetic is the part to leave behind.</p>
+    <p class="note"><b>Method.</b> Static reads for structure; a live browser for every runtime claim. Computed styles, parsed stylesheet rules, handler presence and function output were read out of the running page — the evidence blocks are that output, not a description of the source.</p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

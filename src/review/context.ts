@@ -10,6 +10,32 @@ import type { ReviewLayoutId, ReviewNotes } from './types';
  *  same act of pointing at something with a proposal already attached. */
 export type ReviewMode = 'off' | 'pick';
 
+/**
+ * How the framed page is set up.
+ *
+ * `w` and `h` are CSS pixels and are the whole point: the frame is a real
+ * viewport, so these are the numbers the app's media queries answer to. A
+ * preset fills them in; dragging the frame's edge overrides the width, which
+ * is the only way to find the width at which something actually breaks.
+ *
+ * `fullHeight` is a real choice rather than a detail. The device height is the
+ * honest one — it is where the fold is, and this app has ten rules keyed on
+ * `100dvh` — but a full-height frame shows a whole layout at once without
+ * scrolling, which is what you want when reading it rather than checking what
+ * a phone shows first.
+ *
+ * `round` is off by default. A rounded corner is what a device does to the
+ * page, not what the page does, and a note about something clipped by a
+ * simulated bezel would be a note about the simulation.
+ */
+export interface FrameSetup {
+  on: boolean;
+  w: number;
+  h: number;
+  fullHeight: boolean;
+  round: boolean;
+}
+
 export interface SuggestedTarget {
   id: string;
   label: string;

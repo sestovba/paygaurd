@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Loveable Parts</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');
+:root {
+  --bg:#f4f5f7; --surface:#fff; --surface-2:#f8f9fb; --surface-3:#eef0f3;
+  --border:#e2e5ea; --border-strong:#c9ced6;
+  --text:#1c1f24; --text-2:#4a5058; --muted:#7a828c; --dim:#a3a9b0;
+  --safe:#0d9488; --safe-soft:#ccfbf1; --safe-text:#115e59;
+  --careful:#d97706; --careful-soft:#fef3c7; --careful-text:#92400e;
+  --over:#dc2626; --over-soft:#fee2e2; --over-text:#991b1b;
+  --brand:#7c3aed; --brand-soft:#ede9fe;
+  --radius:12px; --radius-sm:8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',system-ui,-apple-system,sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
+code,.mono { font-family:'DM Mono','JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+code { font-size:.88em; color:var(--brand); }
+.page { max-width:960px; margin:0 auto; padding:40px 20px 100px; }
+.masthead { border-bottom:1px solid var(--border); padding-bottom:28px; }
+.eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.16em; color:var(--brand); margin-bottom:12px; }
+h1 { font-size:clamp(28px,5vw,40px); font-weight:700; letter-spacing:-.03em; line-height:1.1; margin-bottom:14px; }
+.lede { color:var(--text-2); font-size:15px; line-height:1.7; max-width:660px; }
+.lede + .lede { margin-top:12px; }
+h2.band { font-size:20px; font-weight:700; letter-spacing:-.02em; margin:52px 0 6px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.tag { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:4px 10px; border-radius:999px; border:1px solid; }
+.tag.ok { color:var(--safe-text); border-color:var(--safe); background:var(--safe-soft); }
+.tag.clash { color:var(--over-text); border-color:var(--over); background:var(--over-soft); }
+.tag.spec { color:var(--brand); border-color:var(--brand); background:var(--brand-soft); }
+.band-sub { font-size:14px; color:var(--text-2); line-height:1.65; max-width:740px; margin-bottom:18px; }
+.item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:10px; }
+.item.clash { border-color:var(--over); border-left-width:3px; }
+.item.star { border-color:var(--safe); border-left-width:3px; }
+.item-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.item-name { font-size:15px; font-weight:700; }
+.item-loc { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
+.item-body { font-size:14px; color:var(--text-2); line-height:1.65; }
+.item-body b { color:var(--text); font-weight:600; }
+.item-body p + p { margin-top:8px; }
+.scroll { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { text-align:left; padding:8px 10px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; border-bottom:2px solid var(--border); background:var(--surface-2); white-space:nowrap; }
+td { padding:9px 10px; border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+td.q { font-weight:600; color:var(--text); white-space:nowrap; }
+td.n { font-family:'DM Mono',monospace; }
+.was { color:var(--over-text); text-decoration:line-through; }
+.now { color:var(--safe-text); font-weight:600; }
+.note { font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; }
+.note b { color:var(--text-2); }
+.moment { counter-reset:step; }
+.step { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+.step:last-child { border-bottom:none; }
+.step-n { counter-increment:step; flex:none; width:26px; height:26px; border-radius:50%; background:var(--brand-soft); color:var(--brand); font-family:'DM Mono',monospace; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.step-n::before { content:counter(step); }
+.step-b { font-size:14px; color:var(--text-2); line-height:1.6; }
+.step-b b { color:var(--text); }
+.quote { font-size:15px; color:var(--text); font-weight:500; padding:10px 14px; background:var(--surface-2); border-left:3px solid var(--brand); border-radius:0 var(--radius-sm) var(--radius-sm) 0; margin:8px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div class="eyebrow">Specification · what makes it loveable</div>
+  <h1>The loveable parts</h1>
+  <p class="lede">You named twelve strings and one moment. <b>This is what they have in common</b> — turned into rules the ninth layout can be written from, rather than a list to copy.</p>
+  <p class="lede">The finding underneath: almost everything you picked out is <em>already</em> what <code>docs/DESIGN-SYSTEM.md</code> asks for. You were not describing a preference. <b>You were recognising the house voice working properly for once.</b></p>
+  <p class="lede">Three of the strings you liked are on the banned list — one of them banned by name. Those are the interesting ones, and they are at the bottom.</p>
+</header>
+
+<h2 class="band">What you named, and why it works <span class="tag ok">Already correct</span></h2>
+<p class="band-sub">Every row checked against the master vocabulary (§1.1) and the four questions every label must answer (§1.2): <b>which number, which period, of what, so what.</b></p>
+<div class="item"><div class="item-body"><div class="scroll">
+<table>
+  <tr><th>The string</th><th>What it does right</th><th>Rule</th></tr>
+  <tr><td class="n">Left this month</td><td>Answers <b>which period</b> in the label itself. Two words, no clause.</td><td>§1.2 Q2</td></tr>
+  <tr><td class="n">of $1,210 monthly limit</td><td>Answers <b>of what</b> — and it sits directly under the figure, so "left" never travels alone. <b>"Limit" is the master word</b>; the doc bans "threshold", "SGA" and "cap" for exactly this slot.</td><td>§1.1 · §1.2 Q3</td></tr>
+  <tr><td class="n">How close are you?</td><td><b>Asks a question instead of naming a field.</b> This is the first sentence pattern in the document, and this is the only heading in either prototype that obeys it.</td><td>§1.4</td></tr>
+  <tr><td class="n">All clear</td><td>A <b>verdict in words</b>, beside the dial rather than inside it. The graphic never has to be learned because the sentence already said it.</td><td>§1.5</td></tr>
+  <tr><td class="n">$0 of $1,210 counted</td><td><b>"Counted" is the master wording</b> for money that counts against the limit. Number, denominator and verb in four words.</td><td>§1.1</td></tr>
+  <tr><td class="n">this month so far</td><td>Answers <b>which period</b> and admits the month is not over. "So far" is doing real work.</td><td>§1.2 Q2</td></tr>
+  <tr><td class="n">Of your limit</td><td>Master wording, verbatim.</td><td>§1.1</td></tr>
+  <tr><td class="n">Months over / this year</td><td>Label and period split across two lines so neither needs a comma.</td><td>§1.2 Q2</td></tr>
+  <tr><td class="n">Remaining after this entry</td><td><b>Says what will happen before it happens.</b> The single most doc-aligned string in either file.</td><td>§1.4</td></tr>
+</table>
+</div></div></div>
+
+<div class="item star">
+  <div class="item-head"><span class="item-name">The pattern under all of them</span></div>
+  <div class="item-body">
+    <p>Every one is the same three-part shape, and never more than three:</p>
+    <div class="quote">quiet label · loud number · quiet context</div>
+    <p><b>The label says which period. The number is the only loud thing. The line underneath says what it is a fraction of.</b> Nothing is a sentence, nothing has a comma, and no part repeats what another part said.</p>
+    <p>That is why your eye rests. The uppercase micro-label is not decoration — it is the demotion that lets the number be the only thing competing for attention. Remove the uppercase and the label starts arguing with the figure.</p>
+  </div>
+</div>
+
+<h2 class="band">The entry moment <span class="tag spec">Specification</span></h2>
+<p class="band-sub">You called this the blissful part. Here is what it is actually made of, in order, so it can be rebuilt rather than copied.</p>
+<div class="item"><div class="item-body moment">
+  <div class="step"><div class="step-n"></div><div class="step-b"><b>The rest of the page goes away.</b> Everything behind dims and softens. One thing is lit.</div></div>
+  <div class="step"><div class="step-n"></div><div class="step-b"><b>The title names the month.</b> "Log Pay — September". You never have to check which cell you tapped.</div></div>
+  <div class="step"><div class="step-n"></div><div class="step-b"><b>One line restates it in plain words.</b> "Record how much you earned in September." Redundant on purpose — it is the sentence that catches a mis-tap.</div></div>
+  <div class="step"><div class="step-n"></div><div class="step-b"><b>One field. Not two, not four.</b> The <code>$</code> sits inside it, so the unit is never typed and never wrong.</div></div>
+  <div class="step"><div class="step-n"></div><div class="step-b"><b>The consequence, before you commit.</b> "Remaining after this entry — $1,210.00", recoloured live as you type. You see the answer to the question you actually have <em>before</em> you take the action.</div></div>
+  <div class="step"><div class="step-n"></div><div class="step-b"><b>Two buttons, and the real one is on the right, filled and gradient.</b> Cancel is a hairline. There is no third option and nothing to weigh up.</div></div>
+</div>
+<div class="note"><b>The rule to carry:</b> a dialog that takes one number should show that number's consequence before the button is pressed. PayGuard's entry modal has four fields and no preview — it is the same job done without this, and the difference is the whole feeling you described.</div>
+</div>
+
+<div class="item clash">
+  <div class="item-head"><span class="item-name">The blur is doing a job, and it cannot come with us</span><span class="item-loc">backdrop-filter: blur(8px) · blur(30px)</span></div>
+  <div class="item-body">
+    <p>You said the background blurs and the right button is in your face. <b>Both halves of that are the same effect: everything except one panel and one button stops competing.</b></p>
+    <p><code>backdrop-filter</code> is banned by the device rule — on an old Android WebView it does not degrade, it silently does nothing, and you are left with a 60%-black overlay and no softening.</p>
+    <p><b>The job is separable from the technique.</b> Focus here comes from four things and only one of them is the blur: the overlay darkening, the panel being opaque and brighter than its surroundings, the single filled button, and the absence of anything else to read. Build those four and the blur is not missed on a device that can do it — and the effect actually arrives on a device that cannot.</p>
+  </div>
+</div>
+
+<h2 class="band">Where what you like collides with the rules <span class="tag clash">Decide</span></h2>
+<p class="band-sub">Three of the strings you named are on the anti-vocabulary list in <code>src/domain/copy.ts</code>. I am not going to quietly overrule either you or the document — here is the collision and what I think resolves it.</p>
+
+<div class="item clash">
+  <div class="item-head"><span class="item-name">"Amount earned"</span><span class="item-loc">§1.3 — both words banned</span></div>
+  <div class="item-body">
+    <p><code>Amount</code> and <code>Earned</code> are <b>both</b> on the never-use list, and the objection is not pedantry — it is question one: <b>which number?</b> Before tax or after? The brief says the number people actually have is the one that reached their bank, and this label does not say which it wants. Against a limit measured in hundreds, that gap is worth hundreds.</p>
+    <p>What you liked is real though — it is two words, and it sits above a field with a <code>$</code> in it. The fix keeps the shape and closes the question:</p>
+    <p><span class="was">Amount earned</span> &nbsp;→&nbsp; <span class="now">How much reached your bank?</span></p>
+    <p>Now it is a question rather than a field name (§1.4), it says which number, and it is still one line. The app converts and says so out loud, which it should be doing anyway.</p>
+  </div>
+</div>
+
+<div class="item clash">
+  <div class="item-head"><span class="item-name">"Plan my hours"</span><span class="item-loc">§1.1 — banned by name</span></div>
+  <div class="item-body">
+    <p>This one is listed explicitly. The master wording for the panel is <b>"Recommended hours"</b>, and the control that opens it is <b>"How many hours can I work?"</b> — with "Plan my hours" named in the <em>Never called</em> column.</p>
+    <p><b>But look at what the tracker actually does:</b> the heading is "Plan my hours" and the subtitle underneath is <em>"How many hours could I work this month?"</em> — which is the master wording, almost exactly, one line lower. <b>The good string is already there. It is just in the wrong slot.</b></p>
+    <p><span class="was">Plan my hours</span> + <span class="now">How many hours could I work this month?</span> &nbsp;→&nbsp; promote the question, drop the heading.</p>
+    <p>That is the beautiful language you were responding to. It was the subtitle.</p>
+  </div>
+</div>
+
+<div class="item clash">
+  <div class="item-head"><span class="item-name">"hrs" and "Sep"</span><span class="item-loc">§1.3 — no abbreviations, including units</span></div>
+  <div class="item-body">
+    <p>You liked the uppercase abbreviated labels, and the <em>style</em> is right — small, quiet, demoted. But <code>hrs</code> is on the banned list and "Counted in Sep" abbreviates the month.</p>
+    <p><b>The style survives the fix.</b> "hours" is two characters longer and still fits in the demoted grey; "September" fits on the label line. The uppercase-and-quiet treatment is the part you were reacting to, and it is untouched by spelling the words out.</p>
+  </div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">And the one you did not mention</span><span class="item-loc">the hero and the caution note</span></div>
+  <div class="item-body">
+    <p>Worth saying that you named twelve good strings and skipped the two worst: the hero — <em>"monthly ceiling"</em>, <em>"in real time"</em>, <em>"without risking your benefits"</em> — and the caution note, which manages <em>"thresholds"</em>, <em>"SGA rules"</em> and <em>"acting on any one"</em> in two sentences.</p>
+    <p><b>Those are the marketing voice, and the rest of the page is the product voice.</b> The parts you love are the parts written as if talking to one person who is already using it.</p>
+  </div>
+</div>
+
+<h2 class="band">Mobile, and the light mode you wanted <span class="tag ok">Done</span></h2>
+
+<div class="item star">
+  <div class="item-head"><span class="item-name">Light mode is in the kit now</span><span class="item-loc">components-ssdi-tracker.html · toggle, top right</span></div>
+  <div class="item-body">
+    <p>Open the Nightfall component library and press <b>Light</b>. Same hues, inverted paper, every component live in both.</p>
+    <p><b>Why it did not have one before:</b> the five display tints — the violet, cyan, emerald, amber and red the numbers are actually painted in — were hardcoded at <b>36 call sites</b> and had no names. There was nothing to redefine. Naming them (<code>--ink-violet</code>, <code>--ink-emerald</code>, and so on) is what made a light palette a twenty-line block instead of a rewrite. That was already flagged as a weakness in the token audit; wanting light mode is what forced it.</p>
+    <p>The tints are <b>darkened, not reused</b> — <code>#34d399</code> on white is 1.9:1 and unreadable. Every light value was measured:</p>
+    <div class="scroll"><table>
+      <tr><th>Element</th><th>Light</th><th>Dark</th></tr>
+      <tr><td>Big money figure</td><td class="n">5.09</td><td class="n">3.68</td></tr>
+      <tr><td>Small stat figure</td><td class="n">6.59</td><td class="n" style="color:var(--over-text);font-weight:600">2.84 ✕</td></tr>
+      <tr><td>Ring percentage</td><td class="n">7.10</td><td class="n">16.42</td></tr>
+      <tr><td>Month amount — over</td><td class="n">6.16</td><td class="n">19.98</td></tr>
+      <tr><td>Body copy</td><td class="n">6.72</td><td class="n">5.97</td></tr>
+      <tr><td>Micro-label</td><td class="n">3.73</td><td class="n">3.10</td></tr>
+    </table></div>
+    <p class="note"><b>Which turned up a real problem in the mode you already liked.</b> The dark kit's small stat figures sit at <b>2.84:1</b> — under the 3:1 floor for large text. The amber and cyan tints are too dim on that card. Light mode is currently the more readable of the two, which was not the intention and is worth fixing in dark.</p>
+  </div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Mobile — you are right, with one exception</span><span class="item-loc">measured at 375 × 812</span></div>
+  <div class="item-body">
+    <p><b>No horizontal overflow at any width</b>, and the month grid steps 6 → 3 → 2 columns cleanly. Compare PayGuard's ledger, which is 680px wide minimum and scrolls sideways on a phone.</p>
+    <p>The exception: the "Plan my hours" panel is <code>grid-template-columns: 1fr 1fr</code> as an <b>inline style</b>, so no media query can reach it. On a phone the rate fields and the answers are jammed into two narrow columns — the one place in the layout where the phone gets a worse version. Ten characters to fix, and it is the panel carrying the product's headline feature.</p>
+  </div>
+</div>
+
+<h2 class="band">What this is for</h2>
+<div class="item"><div class="item-body">
+  <p style="font-size:15px;">Every string above is <b>already approved by the design document</b>, which means the ninth layout does not need a copy pass invented for it — it needs this shape applied consistently: <b>quiet label, loud number, quiet context; ask a question rather than name a field; and show the consequence before the button.</b></p>
+  <p>The three collisions all resolve the same way, and it is worth naming because it will come up again: <b>every banned string in this file is a place where the tracker named a field instead of asking a question.</b> "Amount earned" is a column header. "How much reached your bank?" is a person talking. You already preferred the second one — it is why "How close are you?" was on your list.</p>
+</div></div>
+
+</div>
+</body>
+</html>

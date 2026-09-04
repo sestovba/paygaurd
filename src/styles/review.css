@@ -882,3 +882,224 @@
 @media (prefers-reduced-motion: reduce) {
   .review-toast { animation: none; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Context: what a note is about, and what width it was seen at        */
+/* ------------------------------------------------------------------ */
+/*
+ * The console was built on one assumption — you point at a node, then you say
+ * something about it. That is the common case and it was the only case, so
+ * everything that was not about a node got filed against whatever node the
+ * cursor happened to be over. The scope row is the fix, and it needs to read
+ * as part of the sentence the note is making, not as a settings strip: three
+ * buttons, one on, above the box you are about to type in.
+ */
+
+.review-composer-scope {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 0.6rem;
+}
+
+.review-composer-scope button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  flex: 1;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  background: var(--review-panel);
+  padding: 0.28rem 0.4rem;
+  color: var(--review-faint);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-composer-scope button:hover:not(:disabled) {
+  background: var(--review-panel-2);
+  color: var(--review-text);
+}
+
+.review-composer-scope button[data-on] {
+  background: var(--review-blue);
+  border-color: var(--review-blue);
+  color: #fff;
+}
+
+/* Pointing needs something pointed at. Dimmed rather than removed: a control
+   that vanishes teaches nothing about why it is unavailable. */
+.review-composer-scope button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.review-composer-ref {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.6rem;
+  color: var(--review-faint);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.review-composer-ref select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  background: var(--review-panel);
+  padding: 0.28rem 0.35rem;
+  color: var(--review-text);
+  font: inherit;
+  font-weight: 500;
+}
+
+/* The width the page is drawn at. Sits with Point and Say because it belongs
+   to the same act — it decides what you are looking at when you use them. */
+.review-dock-widths {
+  display: inline-flex;
+  gap: 0.15rem;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  padding: 0.1rem;
+}
+
+.review-dock-widths button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  padding: 0.28rem 0.34rem;
+  color: var(--review-faint);
+  cursor: pointer;
+}
+
+.review-dock-widths button:hover { color: var(--review-text); }
+.review-dock-widths button[data-on] { background: var(--review-blue); color: #fff; }
+
+/*
+ * The page, at the size being reviewed.
+ *
+ * Plain ground, device centred, nothing pretending to be a handset. The
+ * temptation here is a drawn phone with a notch and a bezel, and it is worth
+ * saying why not: everything that frame adds is a thing that can be mistaken
+ * for the app. A rounded corner clipping a header is the simulation clipping
+ * it, not the layout — which is why the corners are a switch, off by default,
+ * rather than the way it always looks.
+ */
+.review-frame-stage {
+  position: fixed;
+  /* The rail insets the page with padding on <body>, which a fixed element
+     does not see — so it reads the rail's own width instead and stops at the
+     same seam everything else does. */
+  inset: 0 var(--review-rail-right, 0px) 0 0;
+  display: grid;
+  place-items: center;
+  /* The console's own ink, graded, and darker than the rail rather than
+     lighter. It was a neutral grey and read as a different tool bolted on:
+     the ground behind the device has to recede, or the eye keeps landing on
+     the surround instead of on the page being judged. */
+  background:
+    radial-gradient(120% 90% at 50% 0%, #131a26 0%, var(--review-ink) 58%, #060a12 100%);
+  padding: 1.25rem 1.25rem 1.75rem;
+}
+
+.review-frame-fit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* The box the layout actually reserves: the device's size AFTER scaling.
+   A transform leaves the original box behind, so without this a shrunk
+   852px frame still asks for 852px, overflows and sits pinned to the top
+   of the stage instead of the middle of it. */
+.review-frame-scaled {
+  position: relative;
+  display: block;
+  flex: none;
+}
+
+.review-frame-grip {
+  flex: none;
+  width: 14px;
+  cursor: ew-resize;
+  align-self: center;
+  height: 64px;
+  border-radius: 999px;
+  margin: 0 6px;
+  background: var(--review-line);
+  opacity: 0.55;
+  transition: opacity 120ms linear, background 120ms linear;
+}
+
+.review-frame-grip:hover,
+.review-frame-grip:active {
+  opacity: 1;
+  background: var(--review-blue);
+}
+
+/* The device controls, under the two verbs and only while framed. */
+.review-frame-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0.55rem 0.5rem;
+}
+
+.review-frame-bar select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  background: var(--review-panel);
+  padding: 0.25rem 0.3rem;
+  color: var(--review-text);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* The live number while dragging. Tabular so it does not jitter as it counts,
+   which on a control you are dragging is the difference between a readout and
+   a distraction. */
+.review-frame-size {
+  flex: none;
+  color: var(--review-faint);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-frame-size span {
+  padding: 0 0.12rem;
+  opacity: 0.5;
+}
+
+.review-frame-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  border: 1px solid var(--review-line);
+  border-radius: 3px;
+  background: var(--review-panel);
+  padding: 0.25rem 0.36rem;
+  color: var(--review-faint);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-frame-bar button:hover { color: var(--review-text); background: var(--review-panel-2); }
+.review-frame-bar button[data-on] {
+  background: var(--review-blue);
+  border-color: var(--review-blue);
+  color: #fff;
+}

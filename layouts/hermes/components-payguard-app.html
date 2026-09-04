@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Component Library — PayGuard App</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500;600&display=swap');
+
+/* ============================================================
+   TOKENS — lifted verbatim from payguard-app.html
+   ============================================================ */
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --surface-3: #eef0f3;
+  --border: #e2e5ea;
+  --border-strong: #c9ced6;
+  --text: #1c1f24;
+  --text-2: #4a5058;
+  --muted: #7a828c;
+  --dim: #a3a9b0;
+  --safe: #0d9488;  --safe-soft: #ccfbf1;  --safe-text: #115e59;
+  --careful: #d97706; --careful-soft: #fef3c7; --careful-text: #92400e;
+  --over: #dc2626;   --over-soft: #fee2e2;   --over-text: #991b1b;
+  --w2: #2563eb;     --w2-soft: #dbeafe;
+  --1099: #7c3aed;   --1099-soft: #ede9fe;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --brand: #7c3aed;  --brand-soft: #ede9fe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+.mono { font-family: 'DM Mono', 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+/* ── SOURCE COMPONENTS (verbatim) ── */
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--text); }
+.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--brand), #a78bfa); display: flex; align-items: center; justify-content: center; color: white; }
+.brand-year { margin-left: 10px; font-size: 12px; font-weight: 500; color: var(--muted); padding: 3px 8px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--border); }
+.header-inner { display: flex; align-items: center; justify-content: space-between; }
+.header-actions { display: flex; align-items: center; gap: 4px; }
+.icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; position: relative; }
+.icon-btn:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); }
+.icon-btn .badge { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--careful); color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+.pg-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.section-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; border: 1px solid transparent; transition: all .15s; line-height: 1; }
+.btn-primary { background: var(--brand); color: white; border-color: var(--brand); }
+.btn-primary:hover { background: #6d28d9; border-color: #6d28d9; }
+.btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; border-radius: 6px; }
+.btn-danger { background: var(--over); color: white; border-color: var(--over); }
+.btn-danger:hover { background: #b91c1c; border-color: #b91c1c; }
+.btn-success { background: var(--safe); color: white; border-color: var(--safe); }
+.btn-success:hover { background: #0f766e; border-color: #0f766e; }
+
+.gauge-wrap { display: flex; align-items: center; gap: 20px; }
+.gauge-dial { flex: none; width: 160px; height: 90px; position: relative; }
+.gauge-svg { width: 100%; height: 100%; }
+.gauge-track { fill: none; stroke: var(--border); stroke-width: 8; stroke-linecap: round; }
+.gauge-fill { fill: none; stroke: var(--safe); stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray .5s cubic-bezier(.4,0,.2,1), stroke .3s; }
+.gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.gauge-amount { font-size: 32px; font-weight: 700; letter-spacing: -.02em; color: var(--text); font-family: 'DM Mono', monospace; line-height: 1; }
+.gauge-amount.over { color: var(--over); }
+.gauge-amount.careful { color: var(--careful); }
+.gauge-label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.gauge-note { flex: 1; color: var(--text-2); font-size: 14px; line-height: 1.5; }
+.gauge-note strong { color: var(--text); font-weight: 600; }
+.gauge-footer { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.gauge-stat { text-align: center; }
+.gauge-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: 2px; }
+.gauge-stat-value { font-size: 15px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+
+.add-job-card { background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: all .15s; }
+.add-job-card:hover { background: var(--surface-3); border-color: var(--brand); }
+.add-job-text { display: flex; align-items: center; gap: 10px; color: var(--text-2); font-size: 14px; font-weight: 500; }
+.add-job-text svg { color: var(--brand); }
+.add-job-shortcut { font-size: 11px; color: var(--dim); font-family: 'DM Mono', monospace; }
+
+.job-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 8px; overflow: hidden; transition: border-color .15s; }
+.job-card:hover { border-color: var(--border-strong); }
+.job-card.active { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+.job-card.active .job-badge { background: var(--brand); color: white; }
+.job-card-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+.job-badge { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; flex-shrink: 0; }
+.job-badge.w2 { background: var(--w2-soft); color: var(--w2); }
+.job-badge.gig { background: var(--1099-soft); color: var(--1099); }
+.job-name { font-size: 15px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
+.job-name-input { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); background: transparent; border: 1px solid var(--brand); border-radius: 4px; padding: 2px 6px; font-family: inherit; outline: none; min-width: 100px; }
+.job-status { display: flex; gap: 2px; flex-shrink: 0; }
+.status-btn { padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; text-transform: capitalize; font-family: inherit; }
+.status-btn:hover { border-color: var(--border-strong); color: var(--text); }
+.status-btn.active-ongoing { background: var(--safe-soft); color: var(--safe-text); border-color: var(--safe); }
+.status-btn.active-paused { background: var(--careful-soft); color: var(--careful-text); border-color: var(--careful); }
+.status-btn.active-ended { background: var(--over-soft); color: var(--over-text); border-color: var(--over); }
+.job-meta { display: flex; align-items: center; gap: 16px; padding: 0 16px 12px; font-size: 12px; color: var(--muted); }
+.job-meta-item { display: flex; align-items: center; gap: 4px; }
+.job-meta-item .label { color: var(--dim); }
+.job-meta-item .value { color: var(--text-2); font-family: 'DM Mono', monospace; font-weight: 500; }
+.job-ytd { margin-left: auto; text-align: right; }
+.job-ytd-value { font-size: 16px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; letter-spacing: -.01em; }
+.job-ytd-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.job-edit-panel { border-top: 1px solid var(--border); padding: 14px 16px; background: var(--surface-2); }
+.job-edit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.job-edit-row:last-child { margin-bottom: 0; }
+.job-edit-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; min-width: 80px; }
+.job-edit-input { flex: 1; min-width: 100px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; transition: border-color .15s; }
+.job-edit-input:focus { border-color: var(--brand); }
+.job-edit-input.mono { font-family: 'DM Mono', monospace; }
+.job-edit-select { flex: 1; min-width: 100px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; cursor: pointer; }
+.job-edit-select:focus { border-color: var(--brand); }
+.job-edit-btn, .job-delete-btn { color: var(--muted); padding: 4px; border-radius: 4px; border: none; background: transparent; cursor: pointer; transition: color .15s; display: flex; align-items: center; }
+.job-edit-btn:hover { color: var(--text); }
+.job-delete-btn:hover { color: var(--over); }
+.job-actions { display: flex; gap: 4px; padding: 0 16px 12px; }
+
+.ledger-scroll { overflow-x: auto; padding: 0 4px 4px; }
+.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 680px; }
+.ledger-table th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; border-bottom: 2px solid var(--border); white-space: nowrap; background: var(--surface-2); }
+.ledger-table th.right, .ledger-table td.right { text-align: right; }
+.ledger-table th.center, .ledger-table td.center { text-align: center; }
+.ledger-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: middle; }
+.ledger-table tr:last-child td { border-bottom: none; }
+.ledger-group-header td { background: var(--surface-2); font-weight: 600; color: var(--text); font-size: 13px; border-bottom: 2px solid var(--border); padding: 10px 12px; }
+.ledger-group-header .job-name { font-size: 14px; }
+.ledger-row-entry { cursor: pointer; transition: background .1s; }
+.ledger-row-entry:hover { background: var(--surface-2); }
+.ledger-entry-date { color: var(--text); font-weight: 500; white-space: nowrap; }
+.ledger-entry-amount { font-family: 'DM Mono', monospace; font-weight: 600; font-size: 13px; color: var(--text); }
+.ledger-entry-amount.zero { color: var(--dim); font-weight: 400; }
+.ledger-entry-amount.over { color: var(--over); }
+.ledger-month-total { font-weight: 700; color: var(--text) !important; font-family: 'DM Mono', monospace; border-top: 2px solid var(--border); border-bottom: none; padding-top: 10px; }
+.ledger-month-total .month-label { color: var(--text); font-weight: 600; }
+.ledger-grand-total td { background: var(--surface-3); font-weight: 700; font-size: 14px; color: var(--text); border-top: 2px solid var(--border); border-bottom: none; padding: 12px; }
+.ledger-grand-total .amount { font-family: 'DM Mono', monospace; font-size: 16px; }
+.ledger-grand-total.over .amount { color: var(--over); }
+.ledger-grand-total.careful .amount { color: var(--careful); }
+.ledger-actions-cell { display: flex; gap: 4px; justify-content: flex-end; }
+.entry-edit-btn, .entry-delete-btn { width: 24px; height: 24px; border-radius: 4px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .1s; color: var(--dim); }
+.entry-edit-btn:hover { background: var(--surface-3); color: var(--text); }
+.entry-delete-btn:hover { background: var(--over-soft); color: var(--over); }
+
+.month-col { text-align: center; min-width: 56px; }
+.month-col .month-name { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.month-col .month-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; color: var(--text-2); margin-top: 2px; }
+.month-col .month-value.zero { color: var(--dim); }
+.month-col.current .month-name { color: var(--brand); }
+.month-col.current .month-value { color: var(--text); font-weight: 700; }
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state-icon { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 12px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; color: var(--dim); }
+.empty-state-title { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 4px; }
+.empty-state-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+.twp-dots { display: flex; gap: 5px; margin-bottom: 10px; }
+.twp-dot { flex: 1; height: 10px; border-radius: 3px; background: var(--surface-3); border: 1px solid var(--border); transition: all .2s; }
+.twp-dot.historical { background: var(--border-strong); border-color: var(--border-strong); }
+.twp-dot.used { background: var(--brand); border-color: var(--brand); box-shadow: 0 0 6px rgba(124,58,237,.3); }
+.twp-dot.current { background: var(--brand-soft); border-color: var(--brand); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100% { box-shadow: 0 0 0 0 rgba(124,58,237,.3); } 50% { box-shadow: 0 0 0 4px rgba(124,58,237,0); } }
+.twp-dot.future { background: var(--surface-3); border-color: var(--border); }
+.twp-info { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.twp-info strong { color: var(--text); font-weight: 600; }
+.twp-info .twp-count { font-family: 'DM Mono', monospace; color: var(--brand); font-weight: 700; }
+
+.limit-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.limit-title { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 4px; }
+.limit-threshold { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+.limit-amount { font-size: 36px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; letter-spacing: -.02em; }
+.limit-unit { font-size: 13px; color: var(--muted); }
+.limit-breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.limit-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.limit-stat-value { font-size: 20px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--text); line-height: 1.2; }
+.limit-stat-value.safe { color: var(--safe); }
+.limit-stat-value.careful { color: var(--careful); }
+.limit-stat-value.over { color: var(--over); }
+.limit-stat-value.brand { color: var(--brand); }
+.limit-stat-value.muted { color: var(--muted); }
+.limit-stat-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: 3px;
+  letter-spacing: 0;
+}
+
+.limit-stat-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+.limit-notice { font-size: 11px; color: var(--muted); line-height: 1.5; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.limit-notice strong { color: var(--text-2); }
+
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,.12); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.modal-close { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .1s; }
+.modal-close:hover { background: var(--surface-2); color: var(--text); }
+.modal-body { padding: 16px 18px; }
+.modal-body .form-row { margin-bottom: 14px; }
+.modal-body .form-row:last-child { margin-bottom: 0; }
+.modal-label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.modal-input, .modal-select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; transition: border-color .15s; }
+.modal-input:focus, .modal-select:focus { border-color: var(--brand); }
+.modal-input.mono { font-family: 'DM Mono', monospace; }
+.modal-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a828c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+.modal-hint { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--border); }
+
+.toast { background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,.15); display: inline-block; }
+.toast.success { background: var(--safe); color: white; }
+.toast.error { background: var(--over); color: white; }
+
+.paycheck-warn { background: var(--careful-soft); border: 1px solid var(--careful); border-radius: var(--radius); padding: 14px 16px; }
+.paycheck-warn-title { font-size: 13px; font-weight: 700; color: var(--careful-text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.paycheck-warn-row { font-size: 13px; color: var(--careful-text); line-height: 1.6; padding: 3px 0; }
+.paycheck-warn-row .month { font-weight: 700; font-family: 'DM Mono', monospace; }
+.paycheck-warn-unknown { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--careful); font-size: 12px; color: var(--careful-text); line-height: 1.6; }
+.pay-day-input { text-align: center; }
+
+.divider { width: 1px; height: 14px; background: var(--border); margin: 0 4px; }
+
+.nav-demo { background: rgba(244,245,247,.9); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 8px; }
+.bottom-nav-inner { display: flex; justify-content: space-between; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; color: var(--muted); transition: color .15s; text-decoration: none; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; border: none; background: transparent; font-family: inherit; }
+.nav-item.active { color: var(--brand); }
+.nav-item svg { width: 20px; height: 20px; }
+
+/* ============================================================
+   CATALOG CHROME — not part of the library. Prefixed .cat-
+   ============================================================ */
+.cat-page { max-width: 960px; margin: 0 auto; padding: 40px 20px 100px; }
+.cat-masthead { border-bottom: 1px solid var(--border); padding-bottom: 28px; }
+.cat-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: var(--brand); margin-bottom: 12px; }
+.cat-masthead h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 14px; }
+.cat-lede { color: var(--text-2); font-size: 15px; line-height: 1.7; max-width: 620px; }
+.cat-lede code { font-family: 'DM Mono', monospace; font-size: .88em; color: var(--brand); }
+
+.cat-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.cat-chip { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 4px 10px; border-radius: 999px; border: 1px solid; }
+.cat-chip.ok { color: var(--safe-text); border-color: var(--safe); background: var(--safe-soft); }
+.cat-chip.warn { color: var(--careful-text); border-color: var(--careful); background: var(--careful-soft); }
+.cat-chip.stop { color: var(--over-text); border-color: var(--over); background: var(--over-soft); }
+
+.cat-toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 4px 20px; margin: 32px 0 0; }
+.cat-toc a { font-size: 13px; color: var(--text-2); text-decoration: none; padding: 5px 0; border-bottom: 1px solid transparent; }
+.cat-toc a:hover { color: var(--text); border-bottom-color: var(--border-strong); }
+.cat-toc a b { color: var(--dim); font-family: 'DM Mono', monospace; font-weight: 500; margin-right: 8px; font-size: 12px; }
+
+.cat-item { margin-top: 52px; scroll-margin-top: 20px; }
+.cat-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+.cat-num { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--dim); margin-right: 10px; }
+.cat-head h2 { font-size: 19px; font-weight: 700; letter-spacing: -.02em; display: inline; }
+.cat-selectors { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--brand); word-break: break-all; }
+.cat-why { font-size: 14px; color: var(--text-2); line-height: 1.65; max-width: 720px; margin-bottom: 16px; }
+.cat-why b { color: var(--text); font-weight: 600; }
+.cat-stage { border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 20px; background: var(--surface-2); }
+.cat-stage.plain { background: var(--bg); }
+.cat-flags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.cat-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.cat-note { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+.cat-note b { color: var(--text-2); }
+.cat-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.cat-sw { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface); }
+.cat-sw-chip { height: 50px; }
+.cat-sw-meta { padding: 8px 10px; }
+.cat-sw-name { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-2); }
+.cat-sw-val { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.cat-scale-row { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cat-scale-row:last-child { border-bottom: none; }
+.cat-scale-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); width: 140px; flex: none; }
+</style>
+</head>
+<body>
+<div class="cat-page">
+
+  <header class="cat-masthead">
+    <div class="cat-eyebrow">Component library · 2 of 2</div>
+    <h1>Daylight<br>the PayGuard App kit</h1>
+    <p class="cat-lede">Every part of <code>payguard-app.html</code>, pulled out and shown on its own. The CSS below is lifted verbatim from the source. This is the other half of the pair — where the tracker kit is a dark landing page that <em>reads</em>, this one is a light working surface that <b>edits</b>: real jobs, real rows, real per-entry controls.</p>
+    <div class="cat-legend">
+      <span class="cat-chip ok">Portable</span>
+      <span class="cat-chip warn">Needs a rewrite for old Android</span>
+      <span class="cat-chip stop">Drop it</span>
+    </div>
+    <p class="cat-note" style="max-width:620px;">Read against the device rule in <b>CLAUDE.md</b>: cheap Android, old WebView, no <code>backdrop-filter</code>, no web fonts, no blurred shadows. This kit is almost entirely flat fills and hairlines, so it comes through far cleaner than its dark sibling — <b>almost everything here is green.</b></p>
+
+    <nav class="cat-toc">
+      <a href="#c01"><b>01</b>Colour tokens</a>
+      <a href="#c02"><b>02</b>Type scale</a>
+      <a href="#c03"><b>03</b>Header</a>
+      <a href="#c04"><b>04</b>Section</a>
+      <a href="#c05"><b>05</b>Buttons</a>
+      <a href="#c06"><b>06</b>Gauge</a>
+      <a href="#c07"><b>07</b>Add job card</a>
+      <a href="#c08"><b>08</b>Job card</a>
+      <a href="#c09"><b>09</b>Job edit panel</a>
+      <a href="#c10"><b>10</b>Ledger table</a>
+      <a href="#c11"><b>11</b>Month columns ♥</a>
+      <a href="#c12"><b>12</b>TWP dots</a>
+      <a href="#c13"><b>13</b>Limit card</a>
+      <a href="#c14"><b>14</b>Empty state</a>
+      <a href="#c15"><b>15</b>Modal</a>
+      <a href="#c16"><b>16</b>Toast</a>
+      <a href="#c17"><b>17</b>Bottom nav</a>
+      <a href="#c18"><b>18</b>Pay day field ♥</a>
+      <a href="#c19"><b>19</b>Extra paycheck warning</a>
+      <a href="#c20"><b>20</b>Typical hours question</a>
+      <a href="#c21"><b>21</b>Interactions</a>
+      <a href="#c22"><b>22</b>Subtle details ♥</a>
+      <a href="#c23"><b>23</b>Expanded card ♥</a>
+    </nav>
+  </header>
+
+  <!-- 01 -->
+  <section class="cat-item" id="c01">
+    <div class="cat-head"><div><span class="cat-num">01</span><h2>Colour tokens</h2></div><div class="cat-selectors">:root</div></div>
+    <p class="cat-why">Four greys of paper, four of ink, and then the part that matters: <b>every semantic colour ships as a triple</b> — the colour, a soft fill, and a dark text tone that is legible on that fill. That is what lets a status chip be a single class instead of three hand-picked values, and it is the most reusable idea in either file.</p>
+    <div class="cat-stage">
+      <div class="cat-swatches">
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#f4f5f7"></div><div class="cat-sw-meta"><div class="cat-sw-name">--bg</div><div class="cat-sw-val">#f4f5f7</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#fff"></div><div class="cat-sw-meta"><div class="cat-sw-name">--surface</div><div class="cat-sw-val">#ffffff</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#f8f9fb"></div><div class="cat-sw-meta"><div class="cat-sw-name">--surface-2</div><div class="cat-sw-val">#f8f9fb · inset</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#eef0f3"></div><div class="cat-sw-meta"><div class="cat-sw-name">--surface-3</div><div class="cat-sw-val">#eef0f3 · totals</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#e2e5ea"></div><div class="cat-sw-meta"><div class="cat-sw-name">--border</div><div class="cat-sw-val">#e2e5ea</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#c9ced6"></div><div class="cat-sw-meta"><div class="cat-sw-name">--border-strong</div><div class="cat-sw-val">#c9ced6</div></div></div>
+      </div>
+      <p class="cat-note" style="margin-bottom:12px;"><b>The semantic triples.</b> Left half is the colour, right half is the soft fill with its own text tone on it.</p>
+      <div class="cat-swatches">
+        <div class="cat-sw"><div class="cat-sw-chip" style="display:flex"><div style="flex:1;background:#0d9488"></div><div style="flex:1;background:#ccfbf1;color:#115e59;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">safe</div></div><div class="cat-sw-meta"><div class="cat-sw-name">--safe</div><div class="cat-sw-val">#0d9488 / #ccfbf1 / #115e59</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="display:flex"><div style="flex:1;background:#d97706"></div><div style="flex:1;background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">careful</div></div><div class="cat-sw-meta"><div class="cat-sw-name">--careful</div><div class="cat-sw-val">#d97706 / #fef3c7 / #92400e</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="display:flex"><div style="flex:1;background:#dc2626"></div><div style="flex:1;background:#fee2e2;color:#991b1b;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">over</div></div><div class="cat-sw-meta"><div class="cat-sw-name">--over</div><div class="cat-sw-val">#dc2626 / #fee2e2 / #991b1b</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="display:flex"><div style="flex:1;background:#2563eb"></div><div style="flex:1;background:#dbeafe;color:#2563eb;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">W-2</div></div><div class="cat-sw-meta"><div class="cat-sw-name">--w2</div><div class="cat-sw-val">#2563eb / #dbeafe</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="display:flex"><div style="flex:1;background:#7c3aed"></div><div style="flex:1;background:#ede9fe;color:#7c3aed;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">1099</div></div><div class="cat-sw-meta"><div class="cat-sw-name">--1099 / --brand</div><div class="cat-sw-val">#7c3aed / #ede9fe</div></div></div>
+      </div>
+      <p class="cat-note"><b>One collision to resolve before adoption:</b> <code>--brand</code> and <code>--1099</code> are the same violet, so "this is the app" and "this is self-employment income" are indistinguishable. Also, <code>--1099</code> is an invalid custom-property name to reference in a class (<code>.job-badge.1099</code> never matches — the source quietly relies on the <code>.gig</code> alias next to it).</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat hex throughout. No <code>color-mix()</code>, no alpha compositing to guess at.</span><span class="cat-chip ok">The colour/soft/text triple is the trait worth taking wholesale.</span></div>
+  </section>
+
+  <!-- 02 -->
+  <section class="cat-item" id="c02">
+    <div class="cat-head"><div><span class="cat-num">02</span><h2>Type scale</h2></div><div class="cat-selectors">DM Sans 400–700 · DM Mono 400–600 · .mono</div></div>
+    <p class="cat-why">Same two-family split as the dark kit, but with one addition that earns its place: <b><code>.mono</code> sets <code>font-variant-numeric: tabular-nums</code></b>, so a column of amounts lines up on the decimal and never jitters as it re-renders. In a ledger that is not a nicety.</p>
+    <div class="cat-stage">
+      <div class="cat-scale-row"><span class="cat-scale-tag">.limit-amount · 36</span><span class="limit-amount">$1,210</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.gauge-amount · 32</span><span class="gauge-amount">$482</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.limit-stat-value · 20</span><span class="limit-stat-value safe">$728</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.job-ytd-value · 16</span><span class="job-ytd-value">$4,120</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.job-name · 15/600</span><span class="job-name">Riverside Cafe</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">body · 14</span><span style="font-size:14px;color:var(--text-2)">Body copy sits at fourteen with a 1.5 line height.</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.section-label · 11 caps</span><span class="section-label">Your income sources</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.gauge-label · 10 caps</span><span class="gauge-label">YTD</span></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip stop">Both faces come from Google Fonts by <code>@import</code>. Banned outright — the scale survives, the files do not.</span><span class="cat-chip warn">10px and 11px caps appear all over. Too small for this reader; the whole scale wants one step up.</span></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="cat-item" id="c03">
+    <div class="cat-head"><div><span class="cat-num">03</span><h2>Header</h2></div><div class="cat-selectors">header · .brand · .brand-icon · .brand-year · .icon-btn · .badge · .divider</div></div>
+    <p class="cat-why">Sticky, hairline bottom, brand left and a row of 36px square icon buttons right. <b>The year lives in a pill next to the wordmark</b> — which quietly answers "which tax year am I looking at" without spending a row on it, and hides itself under 640px.</p>
+    <div class="cat-stage plain">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;">
+        <div class="header-inner">
+          <div class="brand">
+            <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <span>PayGuard</span><span class="brand-year">2026</span>
+          </div>
+          <div class="header-actions">
+            <button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></button>
+            <div class="divider"></div>
+            <button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge">2</span></button>
+            <button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <p class="cat-note">Icons are inline stroke SVG at 16px in a 36px hit area. The count badge rides the corner of its button.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Inline SVG icons — no icon font, no sprite sheet, no network.</span><span class="cat-chip warn">Sticky header uses <code>backdrop-filter: blur(12px)</code> over an 85%-opaque fill. Make it fully opaque and the blur is unnecessary.</span><span class="cat-chip warn">36px is under the 44px touch target these hands need.</span></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="cat-item" id="c04">
+    <div class="cat-head"><div><span class="cat-num">04</span><h2>Section</h2></div><div class="cat-selectors">section · .section-head · .section-label · .section-label .dot</div></div>
+    <p class="cat-why">White card, 1px border, 12px radius, 20px padding — <b>and no shadow at all</b>. The whole page is one flat stack of these. A 6px violet dot leads every label, which is the entire decorative budget of the layout.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section">
+        <div class="section-head">
+          <div class="section-label"><span class="dot"></span>Your income sources</div>
+          <button class="btn btn-primary btn-sm">+ Add job</button>
+        </div>
+        <p style="font-size:14px;color:var(--text-2);margin:0;">Content sits here. The head row wraps on narrow screens rather than squashing the button.</p>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat fill and a hairline. Exactly what the device rule asks for.</span><span class="cat-chip ok">Elevation is done with <code>--surface-2</code>/<code>--surface-3</code> greys instead of shadows — the pattern to copy.</span></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="cat-item" id="c05">
+    <div class="cat-head"><div><span class="cat-num">05</span><h2>Buttons</h2></div><div class="cat-selectors">.btn-primary · .btn-ghost · .btn-danger · .btn-success · .btn-sm · .btn-xs</div></div>
+    <p class="cat-why">Four intents across three sizes, every one built on a 1px border so <b>they all occupy identical space whether or not they are filled</b> — a ghost and a primary swap places without the row reflowing. Hover is a darker shade of the same hue, never a shadow.</p>
+    <div class="cat-stage">
+      <div class="cat-row" style="margin-bottom:14px;">
+        <button class="btn btn-primary">Add job</button>
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-success">Save</button>
+        <button class="btn btn-danger">Delete</button>
+      </div>
+      <div class="cat-row" style="margin-bottom:14px;">
+        <button class="btn btn-primary btn-sm">Primary sm</button>
+        <button class="btn btn-ghost btn-sm">Ghost sm</button>
+        <button class="btn btn-danger btn-sm">Danger sm</button>
+      </div>
+      <div class="cat-row">
+        <button class="btn btn-primary btn-xs">xs</button>
+        <button class="btn btn-ghost btn-xs">xs ghost</button>
+        <button class="btn btn-success btn-xs">xs save</button>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is. No gradients, no shadows, no filters.</span><span class="cat-chip warn"><code>.btn-xs</code> at 3px padding and 11px text is a target no thumb can reliably hit.</span><span class="cat-chip warn">No <code>:active</code> state at all — the dark kit's press-squash is the better feel and belongs here.</span></div>
+  </section>
+
+  <!-- 06 -->
+  <section class="cat-item" id="c06">
+    <div class="cat-head"><div><span class="cat-num">06</span><h2>Gauge</h2></div><div class="cat-selectors">.gauge-wrap · .gauge-dial · .gauge-fill · .gauge-center · .gauge-note · .gauge-footer</div></div>
+    <p class="cat-why">A ring on the left, <b>a full sentence on the right, and a strip of supporting figures beneath a hairline</b>. The sentence is the answer; the dial is the illustration. Stroke colour switches with status, and the arc is drawn as an SVG path recomputed on each render rather than a dash offset.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section" style="margin-bottom:12px;">
+        <div class="gauge-wrap">
+          <div class="gauge-dial">
+            <svg class="gauge-svg" viewBox="0 0 112 112">
+              <circle class="gauge-track" cx="56" cy="56" r="50"/>
+              <path class="gauge-fill" d="M 56 6 A 50 50 0 0 1 103.55 71.35" fill="none" stroke="#0d9488" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="56" cy="56" r="32" fill="#f8f9fb" stroke="#e2e5ea" stroke-width="1"/>
+            </svg>
+            <div class="gauge-center"><div class="gauge-amount">$482</div><div class="gauge-label">counted</div></div>
+          </div>
+          <div class="gauge-note"><strong>You have $728 left this month.</strong> At $21.50 an hour that is about 33 more hours before you reach the limit.</div>
+        </div>
+        <div class="gauge-footer">
+          <div class="gauge-stat"><div class="gauge-stat-label">Active jobs</div><div class="gauge-stat-value">2</div></div>
+          <div class="gauge-stat"><div class="gauge-stat-label">Entries</div><div class="gauge-stat-value">14</div></div>
+          <div class="gauge-stat"><div class="gauge-stat-label">Limit</div><div class="gauge-stat-value">$1,210</div></div>
+          <div class="gauge-stat"><div class="gauge-stat-label">Months used</div><div class="gauge-stat-value">3 / 9</div></div>
+        </div>
+      </div>
+      <div class="pg-section">
+        <div class="gauge-wrap">
+          <div class="gauge-dial">
+            <svg class="gauge-svg" viewBox="0 0 112 112">
+              <circle class="gauge-track" cx="56" cy="56" r="50"/>
+              <path class="gauge-fill" d="M 56 6 A 50 50 0 1 1 47.2 105.2" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="56" cy="56" r="32" fill="#f8f9fb" stroke="#e2e5ea" stroke-width="1"/>
+            </svg>
+            <div class="gauge-center"><div class="gauge-amount over">$1,480</div><div class="gauge-label">counted</div></div>
+          </div>
+          <div class="gauge-note"><strong>You are $270 over for this month.</strong> Same component, one status class — the stroke, the figure and the sentence all move together.</div>
+        </div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Plain SVG, flat strokes. Ports as-is.</span><span class="cat-chip ok"><b>The sentence beside the dial is the keeper</b> — and it is the one place in either file that answers in hours as well as dollars.</span><span class="cat-chip warn"><code>.gauge-dial</code> is 160×90 holding a square 112 viewBox, so the ring letterboxes rather than filling. Cosmetic, but it is why the dial looks small.</span></div>
+  </section>
+
+  <!-- 07 -->
+  <section class="cat-item" id="c07">
+    <div class="cat-head"><div><span class="cat-num">07</span><h2>Add job card</h2></div><div class="cat-selectors">.add-job-card · .add-job-text · .add-job-shortcut</div></div>
+    <p class="cat-why">A dashed placeholder that <b>occupies the shape of the thing it creates</b>, so an empty list still shows you the layout you are about to fill. Border turns brand on hover.</p>
+    <p class="cat-why"><b>It does the same thing as the <code>+ Add Job</code> button in the section header, and does not feel like a repeat.</b> That is the trait. Big and muted against small and filled; dashed against solid; bottom of the list against top of the section. The primary button is the control, this is the invitation — and because they are styled at opposite ends of the scale, neither competes for the same glance.</p>
+    <p class="cat-why">Then the copy does the rest of the work. The right-hand text is not a keyboard shortcut — it reads <b><code>or click + above</code></b>, which <b>acknowledges the duplication out loud instead of hiding it</b>. A reader who was about to wonder "is this the same button?" gets answered before they ask, and the two controls stop being redundant the moment one of them points at the other.</p>
+    <div class="cat-stage plain">
+      <div class="add-job-card">
+        <div class="add-job-text">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add another income source
+        </div>
+        <span class="add-job-shortcut">or click + above</span>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is.</span><span class="cat-chip ok"><b>Two controls, one action, no redundancy</b> — carry this rule, not just this card.</span><span class="cat-chip warn">Earlier revisions of this page showed the right-hand text as a keyboard shortcut. It is not; that was my error and the specimen above is now the real copy.</span></div>
+  </section>
+
+  <!-- 08 -->
+  <section class="cat-item" id="c08">
+    <div class="cat-head"><div><span class="cat-num">08</span><h2>Job card</h2></div><div class="cat-selectors">.job-card · .job-badge.w2|gig · .job-status · .status-btn.active-* · .job-meta · .job-ytd</div></div>
+    <p class="cat-why">The densest component in either file, and it holds. <b>Status as three always-visible pills rather than a dropdown</b> — changing a job from ongoing to ended is one tap with no menu.</p>
+    <p class="cat-why"><b>The ordering is the good part, and it is easy to get backwards.</b> The row is <code>name → badge → status</code>, with the name taking <code>flex: 1</code>. So the name sits alone on the left as the identifier, and <b>the type badge is pushed right, up against the status pills</b> — where it forms a two-chip cluster: what kind of job this is, and whether you are doing it now.</p>
+    <p class="cat-why">Those two facts are the same kind of fact, and they answer together. Putting the badge next to the name instead — which is where an earlier revision of this page wrongly showed it — splits the cluster and makes the badge read as part of the title rather than as a property. The version below is the real DOM order.</p>
+    <div class="cat-stage plain">
+      <div class="job-card">
+        <div class="job-card-header">
+          <span class="job-name">Riverside Cafe</span>
+          <span class="job-badge w2">W-2</span>
+          <div class="job-status">
+            <button class="status-btn active-ongoing">Ongoing</button>
+            <button class="status-btn">Paused</button>
+            <button class="status-btn">Ended</button>
+          </div>
+          <div class="job-ytd"><div class="job-ytd-value">$4,120</div><div class="job-ytd-label">YTD</div></div>
+        </div>
+        <div class="job-meta">
+          <div class="job-meta-item"><span class="label">Rate</span><span class="value">$21.50/hr</span></div>
+          <div class="job-meta-item"><span class="label">Paid</span><span class="value">Every 2 weeks</span></div>
+          <div class="job-meta-item"><span class="label">Started</span><span class="value">Mar 2026</span></div>
+          <button class="job-delete-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+        </div>
+      </div>
+      <div class="job-card">
+        <div class="job-card-header">
+          <span class="job-name">DoorDash</span>
+          <span class="job-badge gig">1099</span>
+          <div class="job-status">
+            <button class="status-btn">Ongoing</button>
+            <button class="status-btn active-paused">Paused</button>
+            <button class="status-btn">Ended</button>
+          </div>
+          <div class="job-ytd"><div class="job-ytd-value">$1,880</div><div class="job-ytd-label">YTD</div></div>
+        </div>
+        <div class="job-meta">
+          <div class="job-meta-item"><span class="label">Miles</span><span class="value">1,240</span></div>
+          <div class="job-meta-item"><span class="label">Deducted</span><span class="value">$868</span></div>
+        </div>
+      </div>
+      <div class="job-card active">
+        <div class="job-card-header">
+          <span class="job-name">Instacart</span>
+          <span class="job-badge gig">1099</span>
+          <div class="job-status">
+            <button class="status-btn">Ongoing</button>
+            <button class="status-btn">Paused</button>
+            <button class="status-btn active-ended">Ended</button>
+          </div>
+          <div class="job-ytd"><div class="job-ytd-value">$640</div><div class="job-ytd-label">YTD</div></div>
+        </div>
+        <div class="job-meta"><div class="job-meta-item"><span class="label">Ended</span><span class="value">Jul 2026</span></div></div>
+      </div>
+      <p class="cat-note"><b>Three states shown:</b> ongoing, paused, and the third card carries <code>.active</code>.<br><br><b><code>.active</code> is the expanded state</b>, not a selection — <code>expandedJobId === job.id</code>. Opening a card to edit it rings the whole card in brand violet and fills its type badge solid, so the card being edited stays unmistakable even when the panel below pushes its header up the screen. See 23.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">All flat. Ports as-is.</span><span class="cat-chip ok">Three visible pills instead of a select is the trait to carry forward.</span><span class="cat-chip warn">Under 640px the source hides <code>.job-ytd</code> entirely — the one number a reader most wants disappears on the primary device.</span><span class="cat-chip warn">"W-2", "1099" and "YTD" are all on the banned vocabulary list. The colour-coding survives; the labels need words.</span></div>
+  </section>
+
+  <!-- 09 -->
+  <section class="cat-item" id="c09">
+    <div class="cat-head"><div><span class="cat-num">09</span><h2>Job edit panel</h2></div><div class="cat-selectors">.job-edit-panel · .job-edit-row · .job-edit-label · .job-edit-input · .job-edit-select</div></div>
+    <p class="cat-why"><b>Editing happens in place, underneath the card, on a grey inset</b> — no modal, no route change, and the card you are editing stays visible above the form. This is the desktop editing pattern the real <code>payguard</code> layout is prized for.</p>
+    <div class="cat-stage plain">
+      <div class="job-card">
+        <div class="job-card-header">
+          <input class="job-name-input" value="Riverside Cafe">
+          <span class="job-badge w2">W-2</span>
+          <div class="job-status"><button class="status-btn active-ongoing">Ongoing</button></div>
+        </div>
+        <div class="job-edit-panel">
+          <div class="job-edit-row"><span class="job-edit-label">Type</span><select class="job-edit-select"><option>W-2 employee</option><option>1099 / gig</option></select></div>
+          <div class="job-edit-row"><span class="job-edit-label">Rate</span><input class="job-edit-input mono" value="21.50"><span class="job-edit-label" style="min-width:0">per hour</span></div>
+          <div class="job-edit-row"><span class="job-edit-label">Paid</span><select class="job-edit-select"><option>Every 2 weeks</option><option>Twice a month</option><option>Weekly</option></select></div>
+          <div class="job-edit-row" style="justify-content:flex-end"><button class="btn btn-ghost btn-sm">Cancel</button><button class="btn btn-success btn-sm">Save</button></div>
+        </div>
+      </div>
+      <p class="cat-note">The name becomes an editable input in the header itself — <code>.job-name-input</code> matches <code>.job-name</code> exactly except for a brand border, so nothing shifts when it flips.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is.</span><span class="cat-chip ok"><b>Edit-in-place under the card is the single best structural idea here</b> and the reason this file is worth mining.</span><span class="cat-chip warn">Inputs are 13px with 6px padding — fine with a mouse, too small for a thumb.</span></div>
+  </section>
+
+  <!-- 10 -->
+  <section class="cat-item" id="c10">
+    <div class="cat-head"><div><span class="cat-num">10</span><h2>Ledger table</h2></div><div class="cat-selectors">.ledger-table · .ledger-group-header · .ledger-row-entry · .ledger-month-total · .ledger-grand-total</div></div>
+    <p class="cat-why">A real table, grouped by job, with <b>four levels of hierarchy done entirely in greys and border weights</b>: group header on <code>--surface-2</code>, entries plain, month total on a 2px rule, grand total on <code>--surface-3</code>. Per-row edit and delete appear as 24px icon buttons.</p>
+    <p class="cat-why" style="border-left:3px solid var(--careful);padding-left:12px;"><b>Correction — this specimen is not verbatim.</b> Every other stage on this page renders the source markup as the file draws it. This one does not: the real ledger is <b>twenty columns</b> — actions, Pay day, Job, Hours, Gross, Deductions, Net, then <b>all twelve months inline</b>, then Notes. I collapsed it to six and renamed Gross/Deductions/Net to Amount/Deducted/Counted. The CSS below is still lifted verbatim, and the structure — grouping, the totals ladder, the triple money column — is genuinely in the file. The width is not. Read the stage as the idea; read the note under it as the real cost.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section" style="padding:0;overflow:hidden;">
+        <div class="ledger-scroll">
+          <table class="ledger-table">
+            <thead><tr><th>Pay day</th><th>Note</th><th class="right">Amount</th><th class="right">Deducted</th><th class="right">Counted</th><th class="right"></th></tr></thead>
+            <tbody>
+              <tr class="ledger-group-header"><td colspan="6"><span class="job-name">Riverside Cafe</span> <span class="job-badge w2" style="margin-left:8px;">W-2</span></td></tr>
+              <tr class="ledger-row-entry"><td class="ledger-entry-date">Sep 12</td><td>Regular shift</td><td class="right ledger-entry-amount">$240.00</td><td class="right ledger-entry-amount zero">—</td><td class="right ledger-entry-amount">$240.00</td>
+                <td class="right"><div class="ledger-actions-cell"><button class="entry-edit-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button class="entry-delete-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td></tr>
+              <tr class="ledger-row-entry"><td class="ledger-entry-date">Sep 5</td><td>Regular shift</td><td class="right ledger-entry-amount">$242.00</td><td class="right ledger-entry-amount zero">—</td><td class="right ledger-entry-amount">$242.00</td>
+                <td class="right"><div class="ledger-actions-cell"><button class="entry-edit-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button class="entry-delete-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td></tr>
+              <tr><td class="ledger-month-total month-label">September</td><td class="ledger-month-total"></td><td class="right ledger-month-total">$482.00</td><td class="right ledger-month-total">—</td><td class="right ledger-month-total">$482.00</td><td class="ledger-month-total"></td></tr>
+              <tr class="ledger-group-header"><td colspan="6"><span class="job-name">DoorDash</span> <span class="job-badge gig" style="margin-left:8px;">1099</span></td></tr>
+              <tr class="ledger-row-entry"><td class="ledger-entry-date">Sep 9</td><td>1,240 miles</td><td class="right ledger-entry-amount">$820.00</td><td class="right ledger-entry-amount">−$868.00</td><td class="right ledger-entry-amount zero">$0.00</td>
+                <td class="right"><div class="ledger-actions-cell"><button class="entry-edit-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button class="entry-delete-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td></tr>
+              <tr class="ledger-grand-total"><td colspan="2">Counted this month</td><td class="right amount">$1,302.00</td><td class="right amount">−$868.00</td><td class="right amount">$482.00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cat-note"><b>Look at the DoorDash row.</b> Gross, deductions and net sit in three columns, so the mileage rule is taught by the table itself — $820 earned, $0 counted. That is the "teach by interaction" rule landing in a spreadsheet, and it is real: those three columns are in the file.</p>
+    </div>
+    <div class="cat-stage plain" style="margin-top:14px;">
+      <div class="paycheck-warn">
+        <div class="paycheck-warn-title">Why it reads as unfinished</div>
+        <div class="paycheck-warn-row">It is <b>two different tables superimposed</b>. A transaction list — pay day, job, hours, gross, deductions, net — and a <b>jobs-by-months matrix</b>, twelve more columns, drawn on the same rows.</div>
+        <div class="paycheck-warn-row">Every row is one transaction, so <b>the matrix is one-twelfth full by construction</b>. Measured on a real row: <code class="mono">—|—|—|—|—|—|—|$500.00|—|—|—|—</code>. Eleven em dashes and one figure.</div>
+        <div class="paycheck-warn-row">And that one figure is <b>the same number already printed three cells to its left</b>, in the Gross column. Every amount appears twice on its own row.</div>
+        <div class="paycheck-warn-row">The <b>Job column repeats the job name on every row inside a group already headed by that job name.</b> Three of the twenty columns are spent restating what the header said.</div>
+        <div class="paycheck-warn-row">The per-month subtotal row is labelled <span class="mono">Total — DoorDash</span>, never with the month. <code>.ledger-month-total .month-label</code> is styled for it; the JS never fills it. A job with entries in two months prints two identically labelled totals.</div>
+        <div class="paycheck-warn-unknown">So the instinct is right and it is not about width. A 20-column table where 11 cells per row are always empty, one is a duplicate, and one is a restatement <b>is a matrix drawn as a list</b>. The transaction list is good and finished. The matrix wants to be a separate, much smaller thing — which is what <b>Month columns (11)</b> already is.</div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat greys and border weights only. Ports as-is.</span><span class="cat-chip ok"><b>The gross / deductions / net triple-column is the most valuable single row in either file</b> — it is exactly the arithmetic the real ledger and payguard layouts are missing.</span><span class="cat-chip stop">Split it. Keep the transaction list, drop the twelve month columns and the Job column, and let component 11 carry the year.</span></div>
+  </section>
+
+  <!-- 11 -->
+  <section class="cat-item" id="c11">
+    <div class="cat-head"><div><span class="cat-num">11</span><h2>Month columns <span style="color:var(--over)">♥</span></h2></div><div class="cat-selectors">.month-col · .month-col.current · .month-value.zero</div></div>
+    <p class="cat-why">Twelve narrow columns of name-over-amount, with <b>the current month marked by colour and weight rather than a box</b>. Empty months grey out instead of vanishing, so the shape of the year stays readable.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section" style="padding:0;overflow:hidden;">
+        <div class="ledger-scroll"><table class="ledger-table" style="min-width:640px;"><tbody><tr>
+          <td class="month-col"><div class="month-name">Jan</div><div class="month-value">$820</div></td>
+          <td class="month-col"><div class="month-name">Feb</div><div class="month-value">$640</div></td>
+          <td class="month-col"><div class="month-name">Mar</div><div class="month-value">$1,150</div></td>
+          <td class="month-col"><div class="month-name">Apr</div><div class="month-value">$1,480</div></td>
+          <td class="month-col"><div class="month-name">May</div><div class="month-value">$710</div></td>
+          <td class="month-col"><div class="month-name">Jun</div><div class="month-value">$980</div></td>
+          <td class="month-col"><div class="month-name">Jul</div><div class="month-value">$1,020</div></td>
+          <td class="month-col"><div class="month-name">Aug</div><div class="month-value">$860</div></td>
+          <td class="month-col current"><div class="month-name">Sep</div><div class="month-value">$482</div></td>
+          <td class="month-col"><div class="month-name">Oct</div><div class="month-value zero">—</div></td>
+          <td class="month-col"><div class="month-name">Nov</div><div class="month-value zero">—</div></td>
+          <td class="month-col"><div class="month-name">Dec</div><div class="month-value zero">—</div></td>
+        </tr></tbody></table></div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Type and colour only.</span><span class="cat-chip warn">Nothing here says which months are over the limit — the amounts are all one grey. The dark kit's coloured month amounts solve this and should be crossed in.</span><span class="cat-chip warn">Twelve columns is the year view <code>focusMode</code> exists to hide.</span></div>
+  </section>
+
+  <!-- 12 -->
+  <section class="cat-item" id="c12">
+    <div class="cat-head"><div><span class="cat-num">12</span><h2>Trial month dots</h2></div><div class="cat-selectors">.twp-dots · .twp-dot.historical|used|current|future · .twp-info</div></div>
+    <p class="cat-why">Nine flex-filled bars for the nine trial months, in four states, with <b>a plain-language sentence underneath doing the actual explaining</b>. The current month pulses with an expanding ring. This is the clearest depiction of the nine-in-sixty rule anywhere in the project.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section">
+        <div class="section-head"><div class="section-label"><span class="dot"></span>Trial work period</div><button class="btn btn-ghost btn-sm">How it works</button></div>
+        <div class="twp-dots">
+          <div class="twp-dot historical"></div><div class="twp-dot historical"></div>
+          <div class="twp-dot used"></div><div class="twp-dot used"></div><div class="twp-dot used"></div>
+          <div class="twp-dot current"></div>
+          <div class="twp-dot future"></div><div class="twp-dot future"></div><div class="twp-dot future"></div>
+        </div>
+        <p class="twp-info"><strong><span class="twp-count">5</span> of 9 service months used.</strong> Once you complete 9 service months, SSA reviews your earnings — earnings above <strong>$1,690/mo</strong> may affect SSDI.</p>
+      </div>
+      <p class="cat-note"><b>Four states, left to right:</b> two historical (grey, before this app), three used (solid violet), one current (soft violet, pulsing), three future (empty).</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip warn">Both <code>.used</code> and <code>.current</code> depend on blurred box-shadows — a 6px glow and a 4px pulse ring. Rebuild with a border and an opacity step.</span><span class="cat-chip warn">"Service months", "SSA reviews your earnings" and "$1,690/mo" all need plainer words.</span><span class="cat-chip ok">The four-state bar itself is the trait. It is better than anything currently in the eight layouts.</span></div>
+  </section>
+
+  <!-- 13 -->
+  <section class="cat-item" id="c13">
+    <div class="cat-head"><div><span class="cat-num">13</span><h2>Limit card</h2></div><div class="cat-selectors">.limit-card · .limit-amount · .limit-breakdown · .limit-stat-value.safe|careful|over|brand · .limit-notice</div></div>
+    <p class="cat-why">One big figure, then <b>an auto-fitting grid of small white tiles on a grey card</b> — inverted elevation, so the parts read as sitting inside the whole. Five colour classes on the stat value carry the status. A hairline notice box closes it off.</p>
+    <div class="cat-stage plain">
+      <div class="limit-card">
+        <div class="limit-title">Most you can earn this month</div>
+        <div class="limit-threshold"><span class="limit-amount">$1,210</span><span class="limit-unit">per month, after deductions</span></div>
+        <div class="limit-breakdown">
+          <div class="limit-stat"><div class="limit-stat-value safe">$728</div><div class="limit-stat-label">Left</div></div>
+          <div class="limit-stat"><div class="limit-stat-value">$482</div><div class="limit-stat-label">Counted</div></div>
+          <div class="limit-stat"><div class="limit-stat-value careful">40%</div><div class="limit-stat-label">Used</div></div>
+          <div class="limit-stat"><div class="limit-stat-value brand">33<span class="limit-stat-unit">hrs</span></div><div class="limit-stat-label">You could still work</div></div>
+        </div>
+        <div class="limit-notice"><strong>These are planning figures.</strong> Confirm the current amounts with SSA before you act on any of them.</div>
+      </div>
+      <p class="cat-note">Tiles auto-fit at a 120px minimum, so the same markup is four across on desktop and two-by-two on a phone. <b>The hours tile carries a demoted unit</b> — a bare <code>33</code> next to three tiles reading <code>$728</code>, <code>$482</code> and <code>40%</code> reads as an unfinished number, because every neighbour states its unit and it did not. <code>.limit-stat-unit</code> is the fix, borrowed from the dark kit's <code>.stat-unit</code>.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is. Grey card, white tiles, no shadows.</span><span class="cat-chip ok"><code>auto-fit minmax(120px, 1fr)</code> gets the responsive behaviour with no media query.</span></div>
+  </section>
+
+  <!-- 14 -->
+  <section class="cat-item" id="c14">
+    <div class="cat-head"><div><span class="cat-num">14</span><h2>Empty state</h2></div><div class="cat-selectors">.empty-state · .empty-state-icon · .empty-state-title · .empty-state-desc</div></div>
+    <p class="cat-why">A rounded grey tile holding a stroke icon, a short title, one explaining line. <b>The description teaches the rule while the list is still empty</b> — "W-2 jobs count in full; 1099 jobs deduct expenses" arrives before there is anything to misread.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section"><div class="empty-state">
+        <div class="empty-state-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div class="empty-state-title">No income sources yet</div>
+        <div class="empty-state-desc">Add a job to start tracking your income. W-2 jobs count in full; 1099 jobs deduct expenses.</div>
+      </div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is.</span><span class="cat-chip ok">Icon in a soft tile, not an emoji — better than the dark kit's version.</span><span class="cat-chip warn">The teaching sentence uses the two banned terms it is teaching.</span></div>
+  </section>
+
+  <!-- 15 -->
+  <section class="cat-item" id="c15">
+    <div class="cat-head"><div><span class="cat-num">15</span><h2>Modal</h2></div><div class="cat-selectors">.modal · .modal-header · .modal-label · .modal-input · .modal-select · .modal-hint · .modal-footer</div></div>
+    <p class="cat-why">Three bands separated by hairlines: header with a close button, scrolling body, right-aligned footer. <b>The select has its chevron inlined as a data-URI SVG</b> rather than a background image or a library — one property, no request, and it looks the same on every platform.</p>
+    <div class="cat-stage">
+      <div style="display:flex;justify-content:center;"><div class="modal">
+        <div class="modal-header"><span class="modal-title">Add entry — September</span><button class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+        <div class="modal-body">
+          <div class="form-row"><label class="modal-label">Job</label><select class="modal-select"><option>Riverside Cafe</option><option>DoorDash</option></select></div>
+          <div class="form-row"><label class="modal-label">Pay day</label><div style="display:flex;gap:10px;align-items:center"><input class="modal-input mono pay-day-input" value="12" maxlength="2" inputmode="numeric" style="width:72px;text-align:center"><span style="font-size:13px;color:var(--text-2)">September 2026</span></div><div class="modal-hint">The day of the month you were paid.</div></div>
+          <div class="form-row"><label class="modal-label">Amount</label><input class="modal-input mono" value="240.00"><div class="modal-hint">What reached your bank, before anything is taken off.</div></div>
+          <div class="form-row"><label class="modal-label">Hours</label><input class="modal-input mono" type="number" value="11"></div>
+
+        </div>
+        <div class="modal-footer"><button class="btn btn-ghost">Cancel</button><button class="btn btn-primary">Add entry</button></div>
+      </div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Structure ports as-is.</span><span class="cat-chip warn">A 60px shadow on the panel. Swap for a stronger border.</span><span class="cat-chip warn">No consequence preview — the dark kit's "remaining after this entry" belongs in this footer.</span></div>
+  </section>
+
+  <!-- 16 -->
+  <section class="cat-item" id="c16">
+    <div class="cat-head"><div><span class="cat-num">16</span><h2>Toast</h2></div><div class="cat-selectors">.toast · .toast.success · .toast.error</div></div>
+    <p class="cat-why">Centred at the bottom, inverted — <b>dark chip on a light page</b> — with success and error variants that recolour rather than add an icon. Fades and slides 8px, auto-clears at 2.5s.</p>
+    <div class="cat-stage">
+      <div class="cat-row">
+        <span class="toast">Entry saved</span>
+        <span class="toast success">Job added</span>
+        <span class="toast error">Could not save that</span>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is once the 16px shadow goes.</span><span class="cat-chip warn">2.5s and no dismiss control — short for a reader who takes longer to read.</span></div>
+  </section>
+
+  <!-- 17 -->
+  <section class="cat-item" id="c17">
+    <div class="cat-head"><div><span class="cat-num">17</span><h2>Bottom nav</h2></div><div class="cat-selectors">.bottom-nav · .nav-item · .nav-item.active</div></div>
+    <p class="cat-why">Fixed, three equal targets, icon over a caps label, active state is <b>brand colour only — no pill, no underline, no background</b>. It respects <code>env(safe-area-inset-bottom)</code>, so it clears the home indicator on a phone.</p>
+    <p class="cat-why"><b>It does not route — it scrolls.</b> Each item is a <code>scrollIntoView({ behavior: 'smooth' })</code> onto a section that is already on the page. There is one page, always fully rendered, and the nav moves you down it. Nothing mounts, nothing unmounts, no state is lost, the back button is never wrong, and a reader who scrolls past a section finds it without touching the nav at all. See 21.</p>
+    <div class="cat-stage plain">
+      <div class="nav-demo"><div class="bottom-nav-inner">
+        <button class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Jobs</button>
+        <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg>Ledger</button>
+        <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Limit</button>
+      </div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok"><code>env(safe-area-inset-bottom)</code> is already handled — worth copying verbatim.</span><span class="cat-chip warn">Same <code>backdrop-filter</code> as the header. Make it opaque.</span><span class="cat-chip warn">10px caps labels. Size up.</span></div>
+  </section>
+
+  <!-- 18 -->
+  <section class="cat-item" id="c18">
+    <div class="cat-head"><div><span class="cat-num">18</span><h2>Pay day field <span style="color:var(--over)">♥</span></h2></div><div class="cat-selectors">.pay-day-input · sanitizeDay() · readDay() · dayInput()</div></div>
+    <p class="cat-why"><b>A pay day is a day of the month and nothing else.</b> Not a calendar, not a dropdown, not a date picker — two digits you type. That is the whole cognitive load argument: "the 15th" is a thing people know about their own job without looking anything up, and a calendar makes them find a specific square to say it.</p>
+    <p class="cat-why">The rule, enforced as you type rather than checked on save: <b>digits only, two at most, 1 to 31, never 0 and never 32.</b> Leading zeros are stripped, so <code>05</code> becomes <code>5</code> and <code>0</code> cannot be entered at all. Typing <code>3</code> then <code>2</code> leaves <code>3</code> rather than accepting <code>32</code> and then rejecting it. A field that will not accept a wrong character never has to tell anyone they were wrong.</p>
+    <p class="cat-why"><b>It is also stored as a day.</b> An entry already knows the year and month it is filed under, so composing those back into a <code>2026-09-07</code> string only to parse them out again on every read added a round trip and two failure modes for one number the reader typed. The entry carries <code>payDay: 7</code>. Sorting is subtraction, display is a lookup, and nothing parses anything.</p>
+    <div class="cat-stage plain">
+      <div class="job-card"><div class="job-edit-panel">
+        <div class="job-edit-row"><span class="job-edit-label">Pay cycle</span><select class="job-edit-select"><option>Every 2 weeks</option></select></div>
+        <div class="job-edit-row"><span class="job-edit-label">Pay day</span><input class="job-edit-input mono pay-day-input" style="max-width:70px;text-align:center" value="15" maxlength="2" inputmode="numeric"><span style="font-size:12px;color:var(--muted)">of the month</span></div>
+        <div class="job-edit-row"><span class="job-edit-label">Not told</span><input class="job-edit-input mono pay-day-input" style="max-width:70px;text-align:center" placeholder="--" maxlength="2" inputmode="numeric"><span style="font-size:12px;color:var(--muted)">blank is a real answer — see 19</span></div>
+      </div></div>
+      <p class="cat-note"><b>Try to break the first field.</b> Letters do nothing, three digits will not fit, <code>0</code> will not stick, and anything over 31 is refused a digit at a time.<br><br>Verified against the live file: <code>"0"</code>→blank, <code>"00"</code>→blank, <code>"05"</code>→<code>5</code>, <code>"007"</code>→<code>7</code>, <code>"abc"</code>→blank, <code>"1a"</code>→<code>1</code>, <code>"32"</code>→<code>3</code>, <code>"35"</code>→<code>3</code>, <code>"99"</code>→<code>9</code>, <code>"345"</code>→<code>3</code>, <code>"30"</code>→<code>30</code>, <code>"31"</code>→<code>31</code>.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">A plain text input with <code>inputmode="numeric"</code> — brings up the number pad on Android without <code>type="number"</code>'s spinners and locale grief.</span><span class="cat-chip ok">One rule in one place; the anchor payday and the entry pay date both go through it.</span><span class="cat-chip warn">Was <code>max: 28</code> in the source. Now 31 — which means a job paid on the 30th can be entered, and February has no 30th. The derivation already clamps short months, so nothing breaks, but "the 31st" will silently mean "the 28th" twice a year and the field does not say so.</span></div>
+  </section>
+
+  <!-- 19 -->
+  <section class="cat-item" id="c19">
+    <div class="cat-head"><div><span class="cat-num">19</span><h2>Extra paycheck warning</h2></div><div class="cat-selectors">.paycheck-warn · extraPaycheckWarnings() · paydayMonthCounts()</div></div>
+    <p class="cat-why"><b>Two jobs paid on different days is not a contradiction to resolve.</b> It is the ordinary case, and each job drops its extra cheque in a different month. So nothing reconciles them into one answer — every month that any ongoing job overpays in gets its own row, naming the job that causes it.</p>
+    <p class="cat-why">The second half matters more than the first. <b>A month we cannot check is not a safe month</b>, and saying nothing about it reads as one. If the reader never told us when a job pays, that job is named as unchecked rather than quietly assumed.</p>
+    <div class="cat-stage plain">
+      <div class="paycheck-warn">
+        <div class="paycheck-warn-title">Months with an extra paycheck</div>
+        <div class="paycheck-warn-row"><span class="month">March</span> pays you an extra time from Riverside Cafe. That month can go over without you working any differently.</div>
+        <div class="paycheck-warn-row"><span class="month">August</span> pays you an extra time from Riverside Cafe. That month can go over without you working any differently.</div>
+        <div class="paycheck-warn-row"><span class="month">October</span> pays you an extra time from DoorDash. That month can go over without you working any differently.</div>
+        <div class="paycheck-warn-unknown">We cannot check Instacart yet. Add the day of the month you get paid and we will tell you which months pay you an extra time.</div>
+      </div>
+      <p class="cat-note"><b>Three months, two jobs, no attempt to pick a winner.</b> March and August come from one job's fortnightly cycle; October from another's. All three are shown. The rule under the hairline is the dependency being stated out loud rather than defaulted away.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat <code>--careful-soft</code> fill with its matching text tone — the semantic triple from 01 doing its job.</span><span class="cat-chip ok"><b>The unknown row is the point.</b> The first version of this defaulted a missing pay day to the 15th, which made every job look answerable and printed invented months for jobs nobody had described.</span><span class="cat-chip warn">Monthly and semi-monthly jobs can never produce an extra month, so they are silently excluded. Correct, but the reader is not told why their monthly job never appears here.</span></div>
+  </section>
+
+  <!-- 20 -->
+  <section class="cat-item" id="c20">
+    <div class="cat-head"><div><span class="cat-num">20</span><h2>Typical hours question</h2></div><div class="cat-selectors">hoursMatter() · HOURS_MATTER_ABOVE · state.typicalWeeklyHours</div></div>
+    <p class="cat-why">Hours are optional on a W-2 job — SSA counts the money, not the clock — and only half-required on 1099, where the 80-hours-a-month test can matter. So rather than showing an optional box to everyone forever, <b>ask once, in the person's own terms, and stop showing it to anyone whose answer means it can never change their result.</b></p>
+    <p class="cat-why">80 hours a month is about 18.5 a week, so the threshold is <b>18</b>. Someone who typically works well under that cannot reach the test and the field is pure friction for them. Unanswered shows the field — <b>silence is not a low number.</b></p>
+    <div class="cat-stage plain">
+      <div class="pg-section" style="margin-bottom:12px;">
+        <div class="section-head"><div class="section-label"><span class="dot"></span>Asked once</div></div>
+        <div class="job-edit-row"><span class="job-edit-label" style="min-width:0">How many hours do you usually work in a week?</span><input class="job-edit-input mono pay-day-input" style="max-width:70px;text-align:center" value="9" maxlength="2" inputmode="numeric"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal" style="max-width:none">
+          <div class="modal-header"><span class="modal-title">Answered 9 — hours hidden</span></div>
+          <div class="modal-body">
+            <div class="form-row"><label class="modal-label">Pay day</label><div style="display:flex;gap:10px;align-items:center"><input class="modal-input mono pay-day-input" value="12" maxlength="2" inputmode="numeric" style="width:72px;text-align:center"><span style="font-size:13px;color:var(--text-2)">September 2026</span></div></div>
+            <div class="form-row"><label class="modal-label">Amount</label><input class="modal-input mono" value="240.00"></div>
+            <div class="form-row"><label class="modal-label">Deductions</label><input class="modal-input mono" value="0.00"></div>
+          </div>
+        </div>
+        <div class="modal" style="max-width:none">
+          <div class="modal-header"><span class="modal-title">Answered 30 — hours shown</span></div>
+          <div class="modal-body">
+            <div class="form-row"><label class="modal-label">Pay day</label><div style="display:flex;gap:10px;align-items:center"><input class="modal-input mono pay-day-input" value="12" maxlength="2" inputmode="numeric" style="width:72px;text-align:center"><span style="font-size:13px;color:var(--text-2)">September 2026</span></div></div>
+            <div class="form-row"><label class="modal-label">Amount</label><input class="modal-input mono" value="240.00"></div>
+            <div class="form-row"><label class="modal-label">Hours worked</label><input class="modal-input mono" value="11"></div>
+            <div class="form-row"><label class="modal-label">Deductions</label><input class="modal-input mono" value="0.00"></div>
+          </div>
+        </div>
+      </div>
+      <p class="cat-note"><b>Same modal, one question answered differently.</b> The left form is a field shorter on every entry the reader will ever make.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Removing a field costs nothing to render and saves a decision on every single entry.</span><span class="cat-chip warn">The threshold is a cliff. Someone answering 17 who then picks up a fortnight of full-time work has no hours field and no prompt to revisit the answer.</span><span class="cat-chip warn">Nothing yet asks the question — it is stored and honoured, but there is no screen that puts it to the reader.</span></div>
+  </section>
+
+  <!-- 21 -->
+  <section class="cat-item" id="c21">
+    <div class="cat-head"><div><span class="cat-num">21</span><h2>Interactions</h2></div><div class="cat-selectors">scrollIntoView · .modal-overlay.open · .toast.show · .job-edit-panel</div></div>
+    <p class="cat-why">The parts that are not markup. This kit has <b>eighteen transitions and exactly one keyframe animation</b>, and everything moves in 100–200ms. Nothing bounces, nothing springs, nothing fades in on load. That restraint is the reason it reads as an application rather than a page — and it is a trait, as much as any card is.</p>
+    <div class="cat-stage plain">
+      <div class="pg-section" style="margin-bottom:12px;">
+        <div class="section-head"><div class="section-label"><span class="dot"></span>How things move</div></div>
+        <table class="ledger-table" style="min-width:0">
+          <thead><tr><th>What</th><th>How</th><th>Why it works</th></tr></thead>
+          <tbody>
+            <tr><td><b>Nav</b></td><td class="mono">scrollIntoView smooth</td><td>One page, always rendered. The nav moves you, it does not swap what exists.</td></tr>
+            <tr><td><b>Modal</b></td><td class="mono">opacity + translateY(8px), 200ms</td><td>Eight pixels is enough to read as arriving. The overlay gates <code>pointer-events</code> so there is no invisible click-catcher.</td></tr>
+            <tr><td><b>Toast</b></td><td class="mono">opacity + translateY(8px), 200ms</td><td>Same distance and duration as the modal — one vocabulary of movement, not two.</td></tr>
+            <tr><td><b>Job edit</b></td><td class="mono">panel appended in place</td><td>Nothing animates. The card grows and the form is simply there, under the thing it edits.</td></tr>
+            <tr><td><b>Buttons, rows, pills</b></td><td class="mono">all 0.1–0.15s</td><td>Colour and border only. No transform, no shadow, nothing that can drop a frame.</td></tr>
+            <tr><td><b>Trial dots</b></td><td class="mono">pulse-dot 2s infinite</td><td>The one looping animation in the file, on the one thing that means "now".</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cat-note"><b>Compare the dark kit.</b> It opens the modal on a spring curve, staggers every block in on load with six delay classes, and floats three background orbs on 14–20 second loops. Both approaches are defensible and they are opposite: <b>Nightfall performs, Daylight responds.</b> Crossbreeding them means picking one, because a page that does both reads as indecisive.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok"><b>Nav-as-scroll is the trait to take.</b> It removes routing, mount/unmount, and lost scroll position from a whole class of layout in exchange for one function call.</span><span class="cat-chip ok">All movement is opacity and transform — the two properties that stay on the compositor on a weak GPU.</span><span class="cat-chip warn">No <code>prefers-reduced-motion</code> guard anywhere, in either kit. Smooth scroll in particular is the one that makes people ill.</span><span class="cat-chip warn">Smooth scroll to a section under a sticky header lands the heading behind the header — needs <code>scroll-margin-top</code>, which neither file sets.</span></div>
+  </section>
+
+  <!-- 22 -->
+  <section class="cat-item" id="c22">
+    <div class="cat-head"><div><span class="cat-num">22</span><h2>Subtle details <span style="color:var(--over)">♥</span></h2></div><div class="cat-selectors">title= · aria-label= · hint rows · focus timing</div></div>
+    <p class="cat-why">The things nobody notices and everybody feels. I went looking through all 1,627 lines for them — <b>there are fourteen, and two of them do not work.</b></p>
+
+    <div class="cat-stage plain">
+      <div class="pg-section" style="margin-bottom:12px;">
+        <div class="section-head"><div class="section-label"><span class="dot"></span>Real — hover the stage below to see several of them</div></div>
+        <div class="scroll" style="overflow-x:auto">
+        <table class="ledger-table" style="min-width:0">
+          <thead><tr><th>Detail</th><th>Where</th><th>Why it lands</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">or click + above</td><td>add card</td><td>Names its own duplicate so the duplicate stops being one.</td></tr>
+            <tr><td class="mono">Service month 1…9</td><td>each trial dot</td><td>Nine <code>title</code> attributes. The dots become readable one at a time instead of only as a bar.</td></tr>
+            <tr><td class="mono">Currently working<br>Not working right now<br>Job ended</td><td>status pills</td><td>Each pill carries a plain-words explanation on hover — the jargon-free version of a label that had to stay short.</td></tr>
+            <tr><td class="mono">Click any entry to edit · grouped by job</td><td>ledger header</td><td>Teaches the interaction and the sort order in six words, in the corner, once.</td></tr>
+            <tr><td class="mono">the hint is a button</td><td>job edit panel</td><td>"Press Enter to save, Esc to cancel" is itself clickable and closes the panel. The instruction is also the control.</td></tr>
+            <tr><td class="mono">setTimeout(…, 50)</td><td>openModal</td><td>Focus lands on the first field one frame after the panel arrives, so the caret does not appear before the box it belongs to.</td></tr>
+            <tr><td class="mono">flash + rename</td><td>after editing a job</td><td>The card flashes and its name becomes an input in place — the edit you just made is where your eye already is.</td></tr>
+            <tr><td class="mono">— not $0.00</td><td>ledger, empty cells</td><td>A zero deduction renders as a dimmed em dash. Nothing is claimed where nothing happened.</td></tr>
+            <tr><td class="mono">tabular-nums</td><td>every figure</td><td>Columns of money stay aligned and do not jitter as they re-render.</td></tr>
+            <tr><td class="mono">current month tinting</td><td>month columns</td><td>Brand colour on the name, bold on the value — no box, no border, no badge.</td></tr>
+            <tr><td class="mono">click-outside to close</td><td>modal overlay</td><td>Checks <code>e.target === overlay</code>, so a drag that ends outside does not dismiss your typing.</td></tr>
+            <tr><td class="mono">sorted by pay day</td><td>ledger</td><td>Year, then month, then the day you were paid — the order a bank statement uses.</td></tr>
+            <tr><td class="mono">1 job / 2 jobs</td><td>section head</td><td>Real pluralisation — <code>length !== 1 ? 's' : ''</code>. Nobody notices it until it says "1 jobs".</td></tr>
+            <tr><td class="mono">two different empties</td><td>ledger</td><td>"No jobs to show → Add a job to see your ledger" and "No entries yet → Click + Add Entry on any job". <b>The empty state names the next action, and the next action differs by cause.</b></td></tr>
+            <tr><td class="mono">explainer in the footer</td><td>add-job modal</td><td>The form ends by saying which income counts in full and which deducts expenses — placed where the choice is made, not in a help page.</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="pg-section" style="border-color:var(--safe);margin-bottom:12px;">
+        <div class="section-head"><div class="section-label" style="color:var(--safe-text)"><span class="dot" style="background:var(--safe)"></span>Now real — the hint used to be lying</div></div>
+        <p style="font-size:14px;color:var(--text-2);line-height:1.65;margin-bottom:10px;"><b>"Press Enter to save, Esc to cancel" had no Escape handler anywhere in the file.</b> The most confident piece of micro-copy in the layout was the one instruction that did nothing — and Escape did not close a modal either.</p>
+        <p style="font-size:14px;color:var(--text-2);line-height:1.65;">One document-level listener now does all four. Verified live:</p>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;line-height:1.7;">escClosedModal:  true<br>enterSaved:      true   → payDay 9, amount 300, saved and closed<br>enterClosed:     true<br>escClosedPanel:  true</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px;">Enter submits the dialog, except from a <code>textarea</code> (where Enter is a newline) and except when focus is on a button (where the reader has tabbed to Cancel and means Cancel). Escape closes the dialog; with no dialog open it closes the job edit panel, exactly as the hint promises.</p>
+      </div>
+      <div class="paycheck-warn">
+        <div class="paycheck-warn-title">Found on the second sweep</div>
+        <div class="paycheck-warn-row"><span class="month">The Add Job button was in the wrong place, and it was a bug.</span> <code>.section-head</code> is <code>justify-content: space-between</code>, and every other head in the layout has exactly <b>two</b> children so the second lands on the right edge. This one grew a <b>third</b> — the "2 jobs" count — which shoved the button into the middle of the row. Fixed by grouping the count beside the label it counts; the button now lines up with "How it works" in the section above it.</div>
+        <div class="paycheck-warn-row"><span class="month">.zero dimmed the wrong cells.</span> The class exists to grey out a cell with nothing in it. It was hardcoded onto <b>every</b> deductions cell, so a real $868 mileage deduction rendered as faint as an absent one — and on the month columns the test was inverted, dimming the one cell that had a figure. Both fixed: <code>$868.00</code> now reads solid, dashes read faint.</div>
+        <div class="paycheck-warn-row"><span class="month">Three different ways to say "nothing"</span> — the job meta row shows <code>--</code> for a missing rate, <code>not set</code> for a missing pay day, and the ledger uses <code>—</code> for missing hours. Three tokens for one idea, two of them on adjacent lines of the same row.</div>
+        <div class="paycheck-warn-row"><span class="month">A stale placeholder</span> — the add-job pay day field still said <code>1-28</code> after the rule moved to 1–31. Fixed.</div>
+        <div class="paycheck-warn-unknown">Still not real: <b>Settings and Notifications</b> — both header buttons have hover states, titles and aria-labels, and no click handler at all. And there are <b>no hidden buttons anywhere</b> — every zero-size node in the tree is an SVG child, and there are zero unlabelled clickables.</div>
+      </div>
+
+      <p class="cat-note"><b>The pattern worth naming:</b> eleven of the twelve real details are <code>title</code> and hint text — <b>explanation placed exactly where the question occurs, and nowhere else.</b> No tooltips library, no help icons, no onboarding tour. The layout never explains itself in advance; it answers at the point of doubt.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">All of it is markup attributes and one <code>setTimeout</code>. Ports as-is.</span><span class="cat-chip warn"><code>title</code> never appears on a touch device — the primary device. Every one of these is invisible on a phone, which is where the plain-words explanations are needed most.</span><span class="cat-chip warn">Wire Escape, or change the hint.</span></div>
+  </section>
+
+  <!-- 23 -->
+  <section class="cat-item" id="c23">
+    <div class="cat-head"><div><span class="cat-num">23</span><h2>Expanded card <span style="color:var(--over)">♥</span></h2></div><div class="cat-selectors">.job-card.active · .job-edit-panel · expandedJobId</div></div>
+    <p class="cat-why"><b>The whole card becomes the editor, and says so with its border.</b> Brand violet ring around the card, type badge filled solid, and the form on a grey inset underneath — so the thing being edited and the form editing it are one object, not a dialog floating over a list.</p>
+    <p class="cat-why">One panel open at a time (<code>expandedJobId</code> is a single id, not a set), the name turns into an input in the header without shifting, and the hint at the bottom is itself the close button.</p>
+    <div class="cat-stage plain">
+      <div class="job-card active">
+        <div class="job-card-header">
+          <input class="job-name-input" value="Riverside Cafe" style="flex:1">
+          <span class="job-badge w2">W-2</span>
+          <div class="job-status"><button class="status-btn">Working</button><button class="status-btn">Paused</button><button class="status-btn active-ended">Ended</button></div>
+        </div>
+        <div class="job-meta">
+          <div class="job-meta-item"><span class="label">Cycle</span><span class="value">Bi-weekly</span></div>
+          <div class="job-meta-item"><span class="label">Rate</span><span class="value">$21.50/hr</span></div>
+          <div class="job-meta-item"><span class="label">Pay day</span><span class="value">6</span></div>
+          <div class="job-ytd"><div class="job-ytd-value">$300</div><div class="job-ytd-label">YTD counted</div></div>
+        </div>
+        <div class="job-edit-panel">
+          <div class="job-edit-row"><span class="job-edit-label">Name</span><input class="job-edit-input" value="Riverside Cafe"></div>
+          <div class="job-edit-row"><span class="job-edit-label">Type</span><select class="job-edit-select"><option>W-2 (counts in full)</option><option>1099 (deduct expenses)</option></select></div>
+          <div class="job-edit-row"><span class="job-edit-label">Rate ($/hr)</span><input class="job-edit-input mono" value="21.5"></div>
+          <div class="job-edit-row"><span class="job-edit-label">Cycle</span><select class="job-edit-select"><option>Bi-weekly</option><option>Weekly</option></select></div>
+          <div class="job-edit-row"><span class="job-edit-label">Pay day</span><input class="job-edit-input mono pay-day-input" value="6" maxlength="2" style="max-width:80px"></div>
+          <div class="job-edit-row"><span class="job-edit-label">Since</span><input class="job-edit-input" type="month" value="2026-01"></div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted);cursor:pointer">Press Enter to save, Esc to cancel</div>
+        </div>
+      </div>
+    </div>
+    <div class="cat-flags">
+      <span class="cat-chip ok">Ports as-is. Border and a background step — no shadow, no overlay, no modal.</span>
+      <span class="cat-chip ok"><b>Ring the object being edited</b> — carry this rule anywhere an inline editor opens.</span>
+      <span class="cat-chip stop"><b>Both dropdowns used to lie.</b> A <code>&lt;select&gt;</code> cannot take its value from an attribute set before its options exist, so Type and Cycle always displayed their first option — every job read as "W-2 (counts in full)" and "Weekly" whatever was stored, contradicting the header two lines above. Type is the field that decides whether mileage comes off. Fixed in <code>el()</code>; all eight fields now match the stored job.</span>
+      <span class="cat-chip warn"><b>Count</b> and <b>Rate ($/mo)</b> are in this panel and are read by no calculation in the file. Two of the eight rows collect nothing.</span>
+      <span class="cat-chip warn">Two rows both labelled "Rate" — one hourly, one monthly. They are different quantities wearing the same word.</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

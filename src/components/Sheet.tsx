@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { ChevronLeft, X } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { IconButton } from './ui';
 
 const DISMISS_PX = 80;
 const DISMISS_VELOCITY = 0.45;
@@ -15,7 +16,7 @@ const COLLAPSE_MIN_OVERFLOW = 56;
  *  reusable as a plain inline pane (variant="inline") for a persistent
  *  detail column instead of a popup. */
 export function Sheet({
-  title, eyebrow, size = 'md', footer, headerActions, onClose, children, variant = 'modal', backLabel
+  title, eyebrow, size = 'md', footer, headerActions, onClose, children, variant = 'modal', backLabel, onBack
 }: {
   title: string;
   eyebrow?: string;
@@ -31,8 +32,19 @@ export function Sheet({
   /** 'inline' fills its container as a plain pane — no backdrop, no
    *  floating card — for a persistent column instead of a popup. */
   variant?: 'modal' | 'inline';
-  /** Inline only: replaces the X with a breadcrumb-style back link. */
+  /** Inline: replaces the X with a breadcrumb-style back link. Modal: shown
+   *  alongside the close button when `onBack` is given. */
   backLabel?: string;
+  /** Makes this sheet a page you can step back from rather than a sheet you
+   *  have to close.
+   *
+   *  Settings used to open Layout, Terms and the income help as sheets on
+   *  top of itself: three surfaces deep, each with its own X, and closing
+   *  the top one looked identical to closing the lot. A drill-down is one
+   *  surface that changes what it is showing, so Back means back to where
+   *  you were and Close still means done. The X stays, because the fastest
+   *  way out of a settings screen should not be three taps. */
+  onBack?: () => void;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -159,13 +171,13 @@ export function Sheet({
         </div>
       )}
 
-      {inline && backLabel ? (
+      {(onBack || (inline && backLabel)) ? (
         <button
           type="button"
-          onClick={onClose}
+          onClick={onBack ?? onClose}
           className="flex shrink-0 items-center gap-1 px-4 pt-4 text-sm sm:text-base font-semibold text-muted-foreground transition-colors hover:text-foreground sm:px-6 sm:pt-6"
         >
-          <ChevronLeft className="size-5" /> {backLabel}
+          <ChevronLeft className="size-5" /> {backLabel ?? 'Back'}
         </button>
       ) : null}
 
@@ -203,14 +215,9 @@ export function Sheet({
           <div className="flex shrink-0 items-center gap-1.5">
             {headerActions}
             {inline && backLabel ? null : (
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className="icon-btn grid text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
+              <IconButton label="Close" onClick={onClose}>
                 <X className="size-5" />
-              </button>
+              </IconButton>
             )}
           </div>
         ) : null}

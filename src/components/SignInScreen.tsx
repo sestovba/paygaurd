@@ -5,29 +5,41 @@ import type { LayoutMode } from '../state/storage';
 import { BrandMark } from './ui';
 import { PayGuardShell } from './payguard/PayGuardShell';
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { AppleMark, GoogleMark } from './signin/marks';
+import { providerOrder, SIGN_IN_COPY as T, useSignInForm } from './signin/form';
 
 /**
- * The Google mark, inlined rather than loaded from /public. This build ships
- * with base './' to arbitrary subpaths, where a URL for the asset resolves
- * against whatever directory the page happens to sit in — an <img> here broke
- * on every deploy that was not the origin root. Inline markup has no path to
- * get wrong, and costs one fewer request on the one screen that blocks entry.
+ * The gate, in PayGuard's skin. Calc20 draws the same screen in its own —
+ * everything that is not markup is shared, in signin/form.ts.
+ *
+ * Three things here are decisions rather than styling:
+ *
+ * 1. Real labels above the fields, not placeholders inside them. A
+ *    placeholder disappears the moment you type, which leaves someone
+ *    checking their own work looking at two unlabelled boxes; it is also the
+ *    lowest-contrast text on the screen, on an app whose readers include
+ *    people who cannot read low-contrast text.
+ * 2. A Show button on the password. Typing a password blind, on a phone, is
+ *    where this form is lost — and the alternative to showing it is three
+ *    failed attempts and a rate limit.
+ * 3. "Use it without an account" is a real way through, not a link to
+ *    somewhere else. Nobody on SSDI should be locked out of a calculator by
+ *    a company's sign-in.
+ * 4. One form, not a sign-in tab and a register tab. Which of the two is
+ *    happening is the server's question to answer, not the reader's — see
+ *    continueWithEmail in auth/useAuth.ts.
  */
-function GoogleMark() {
-  return (
-    <svg width={18} height={18} viewBox="0 0 18 18" aria-hidden="true" focusable="false">
-      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
-      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
-      <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.348 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" />
-      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
-    </svg>
-  );
-}
-
-/** Google is the only sign-in method; the separate layout choice is a
- * device-local preference and never depends on an authenticated session. */
 export function SignInScreen({ auth }: { auth: AuthState }) {
-  const busy = auth.phase === 'signing-in';
+  const form = useSignInForm(auth);
+  const order = providerOrder();
+
+  /* The layout picker is a workshop control, not a step in signing in — it
+   * belongs to whoever is comparing the eight layouts, and everyone else is
+   * here to get in. `?signin` is the flag that renders this screen on a host
+   * that would otherwise skip it (auth/session.ts), so it is exactly the
+   * flag that says a maintainer is looking. Everyone else changes layout in
+   * Settings, where the rest of the preferences are. */
+  const workshop = new URLSearchParams(window.location.search).has('signin');
   const [layout, setLayout] = useState<LayoutMode>(() => loadUi().layout);
 
   function changeLayout(nextLayout: LayoutMode) {
@@ -36,35 +48,102 @@ export function SignInScreen({ auth }: { auth: AuthState }) {
 
   return (
     <PayGuardShell>
-      <div className="panel flex w-full max-w-sm flex-col gap-6 p-6 sm:p-8">
-        <BrandMark />
-        <div>
-          <p className="label-caps text-accent-foreground">PayGuard</p>
-          <h1 className="display-figure mt-1 text-3xl">Sign in to your work record</h1>
-          <p className="type-muted mt-2">
-            Your earnings stay on this device unless you enable cloud sync. Signing in is how the app knows who you are.
-          </p>
+      <div className="pg-signin">
+        <header className="pg-signin-head">
+          <BrandMark />
+          <p className="pg-signin-lede">{T.lede}</p>
+          <p className="pg-signin-sub">{T.sublede}</p>
+        </header>
+
+        <div className="pg-signin-providers">
+          {order.map((provider, index) => (
+            <button
+              key={provider}
+              type="button"
+              className="pg-signin-provider"
+              data-lead={index === 0}
+              onClick={provider === 'apple' ? auth.signInWithApple : auth.signInWithGoogle}
+              disabled={auth.pending !== null}
+            >
+              {provider === 'apple' ? <AppleMark /> : <GoogleMark />}
+              <span>{provider === 'apple' ? T.apple : T.google}</span>
+            </button>
+          ))}
         </div>
 
-        <LayoutSwitcher value={layout} onChange={changeLayout} variant="select" />
+        <div className="pg-signin-or"><span>{T.or}</span></div>
 
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={auth.signIn}
-            disabled={busy}
-            className="pg-btn pg-btn-lg w-full gap-2.5 text-sm disabled:opacity-60"
-          >
-            <GoogleMark />
-            {busy ? 'Signing in…' : 'Continue with Google'}
-          </button>
+        <form className="pg-signin-form" onSubmit={form.submit} noValidate>
+          <div className="pg-signin-row">
+            <label className="pg-signin-label" htmlFor="pg-signin-email">{T.emailLabel}</label>
+            <input
+              id="pg-signin-email"
+              className="pg-signin-input"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={form.email}
+              onChange={(event) => form.setEmail(event.target.value)}
+            />
+          </div>
 
-          {auth.error ? (
-            <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-3 text-sm text-destructive">
-              {auth.error}
+          <div className="pg-signin-row">
+            <div className="pg-signin-label-row">
+              <label className="pg-signin-label" htmlFor="pg-signin-password">{T.passwordLabel}</label>
+              <button type="button" className="pg-signin-reveal" onClick={form.togglePassword}>
+                {form.passwordVisible ? T.hide : T.show}
+              </button>
             </div>
-          ) : null}
+            <input
+              id="pg-signin-password"
+              className="pg-signin-input"
+              type={form.passwordVisible ? 'text' : 'password'}
+              autoComplete="current-password"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={form.password}
+              onChange={(event) => form.setPassword(event.target.value)}
+              aria-describedby="pg-signin-password-hint"
+            />
+            <p className="pg-signin-hint" id="pg-signin-password-hint">{T.passwordHint}</p>
+          </div>
+
+          <button type="submit" className="pg-signin-submit" disabled={auth.pending !== null}>
+            {form.submitLabel}
+          </button>
+          <p className="pg-signin-hint">{T.submitNote}</p>
+
+          <button type="button" className="pg-signin-link" onClick={form.forgot} disabled={form.resetting}>
+            {form.resetting ? T.forgotBusy : T.forgot}
+          </button>
+        </form>
+
+        {form.message ? (
+          <p
+            className="pg-signin-message"
+            data-tone={form.message.tone}
+            role={form.message.tone === 'error' ? 'alert' : 'status'}
+          >
+            {form.message.text}
+          </p>
+        ) : null}
+
+        <div className="pg-signin-local">
+          <button type="button" className="pg-signin-local-btn" onClick={auth.continueWithoutAccount}>
+            {T.localTitle}
+          </button>
+          <p className="pg-signin-note">{T.localNote}</p>
         </div>
+
+        {workshop ? (
+          <div className="pg-signin-workshop">
+            <LayoutSwitcher value={layout} onChange={changeLayout} variant="select" />
+          </div>
+        ) : null}
       </div>
     </PayGuardShell>
   );

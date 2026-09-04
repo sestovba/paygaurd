@@ -2,46 +2,113 @@ import { useMemo } from 'react';
 import type { AuthState } from '../../auth/useAuth';
 import { loadUi } from '../../state/storage';
 import { useAppearance } from './appearance';
+import { AppleMark, GoogleMark } from '../signin/marks';
+import { providerOrder, SIGN_IN_COPY as T, useSignInForm } from '../signin/form';
 
 /**
- * One button. Google is the only way in, so there is nothing to choose
- * between and no form to fill.
+ * The same gate as components/SignInScreen.tsx, in Calc20's skin.
+ *
+ * Two screens, one behaviour: the words, the validation and the order of the
+ * provider buttons all come from signin/form.ts, so this file is markup and
+ * nothing else. If the two ever disagree about what the screen does, this is
+ * the file that has drifted.
  */
 export function SignInScreen({ auth }: { auth: AuthState }) {
-  const busy = auth.phase === 'signing-in';
+  const form = useSignInForm(auth);
+  const order = providerOrder();
 
   return (
     <div className="signin-shell">
       <div className="signin-panel">
         <div>
-          <div className="eyebrow">SSDI Income Tracker</div>
-          <h1 className="signin-title">Sign in to your work record</h1>
-          <p className="signin-note">
-            Your earnings stay on this device. Signing in is how the app knows
-            who you are.
-          </p>
+          <div className="eyebrow">SSDI Tracker</div>
+          <h1 className="signin-title">Your work record</h1>
+          <p className="signin-note">{T.lede}</p>
+          <p className="signin-note">{T.sublede}</p>
         </div>
 
         <div className="signin-actions">
-          <button
-            className="signin-google"
-            type="button"
-            onClick={auth.signIn}
-            disabled={busy}
-          >
-            <img
-              className="signin-google__mark"
-              src="/google-mark.svg"
-              alt=""
-              width={18}
-              height={18}
-            />
-            {busy ? 'Signing in…' : 'Continue with Google'}
-          </button>
+          {order.map((provider, index) => (
+            <button
+              key={provider}
+              type="button"
+              className="signin-provider"
+              data-lead={index === 0}
+              onClick={provider === 'apple' ? auth.signInWithApple : auth.signInWithGoogle}
+              disabled={auth.pending !== null}
+            >
+              {provider === 'apple' ? <AppleMark /> : <GoogleMark />}
+              <span>{provider === 'apple' ? T.apple : T.google}</span>
+            </button>
+          ))}
+        </div>
 
-          {auth.error ? (
-            <div className="signin-error" role="alert">{auth.error}</div>
-          ) : null}
+        <div className="signin-or"><span>{T.or}</span></div>
+
+        <form className="signin-form" onSubmit={form.submit} noValidate>
+          <div className="signin-row">
+            <label className="signin-label" htmlFor="c20-signin-email">{T.emailLabel}</label>
+            <input
+              id="c20-signin-email"
+              className="signin-input"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={form.email}
+              onChange={(event) => form.setEmail(event.target.value)}
+            />
+          </div>
+
+          <div className="signin-row">
+            <div className="signin-label-row">
+              <label className="signin-label" htmlFor="c20-signin-password">{T.passwordLabel}</label>
+              <button type="button" className="signin-reveal" onClick={form.togglePassword}>
+                {form.passwordVisible ? T.hide : T.show}
+              </button>
+            </div>
+            <input
+              id="c20-signin-password"
+              className="signin-input"
+              type={form.passwordVisible ? 'text' : 'password'}
+              autoComplete="current-password"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={form.password}
+              onChange={(event) => form.setPassword(event.target.value)}
+              aria-describedby="c20-signin-password-hint"
+            />
+            <p className="signin-hint" id="c20-signin-password-hint">{T.passwordHint}</p>
+          </div>
+
+          <button type="submit" className="signin-submit" disabled={auth.pending !== null}>
+            {form.submitLabel}
+          </button>
+          <p className="signin-hint">{T.submitNote}</p>
+
+          <button type="button" className="signin-link" onClick={form.forgot} disabled={form.resetting}>
+            {form.resetting ? T.forgotBusy : T.forgot}
+          </button>
+        </form>
+
+        {form.message ? (
+          <p
+            className="signin-message"
+            data-tone={form.message.tone}
+            role={form.message.tone === 'error' ? 'alert' : 'status'}
+          >
+            {form.message.text}
+          </p>
+        ) : null}
+
+        <div className="signin-local">
+          <button type="button" className="signin-local-btn" onClick={auth.continueWithoutAccount}>
+            {T.localTitle}
+          </button>
+          <p className="signin-note">{T.localNote}</p>
         </div>
       </div>
     </div>

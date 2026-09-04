@@ -111,13 +111,13 @@ export const SETTINGS_ROW: Readonly<Record<SettingsRowId, { label: string; help?
   terms: { label: 'Terms & privacy' },
 
   focusMode: {
-    label: 'Focus mode',
+    label: 'Focus',
     /* It used to say "This month only", which stopped being true when the
        layouts built to hold a year got their own month dropdown: there,
        focus mode starts the list at this month and keeps what is behind it.
        So this says what focus mode does everywhere — takes things off the
        screen — and leaves how many months to the control that shows them. */
-    help: 'Takes the charts and the calendars off the screen. Lists start at the month you are in.'
+    help: 'Hides charts and calendars. Lists start at this month.'
   },
   layout: { label: 'Layout' },
   /* Sits directly under Layout because it is a property OF the layout above
@@ -126,8 +126,8 @@ export const SETTINGS_ROW: Readonly<Record<SettingsRowId, { label: string; help?
      otherwise rather than shown greyed out, because a control you cannot use
      is a question you cannot answer. */
   overviewShell: {
-    label: 'How Overview is laid out',
-    help: 'One long page, separate pages, or a job open beside the page you are on.'
+    label: 'Overview layout',
+    help: 'One page, separate pages, or side by side.'
   },
   theme: { label: 'Theme' },
   palette: { label: 'Colour' },
@@ -136,13 +136,13 @@ export const SETTINGS_ROW: Readonly<Record<SettingsRowId, { label: string; help?
     help: 'How see-through the header, menus and sheets are. 0 is see-through, 100 is solid.'
   },
 
-  export: { label: 'Save a copy of everything' },
-  import: { label: 'Load a saved copy' },
+  export: { label: 'Save a backup' },
+  import: { label: 'Restore a backup' },
   clearYear: { label: 'Clear this year' },
-  clearAll: { label: 'Clear all data on this device' },
+  clearAll: { label: 'Erase all data on this device' },
 
-  benefitStatus: { label: 'Where you stand' },
-  howIncomeWorks: { label: 'How your pay is counted' }
+  benefitStatus: { label: 'Your status' },
+  howIncomeWorks: { label: 'How pay is counted' }
 };
 
 /**

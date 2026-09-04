@@ -54,27 +54,28 @@
  */
 
 /* ------------------------------------------------------------------ */
-/* 1 · Shape — follows the variant                                     */
+/* 1 · Chrome shape — follows the variant                              */
 /* ------------------------------------------------------------------ */
+/*
+ * The radius scale used to live here. It moved to metrics.css, which owns
+ * every size, space and shape in the app for the same reason this file owns
+ * every colour: shape had no single source, and by 2026-09-04 the eight
+ * stylesheets between them held 53 distinct border-radius values.
+ *
+ * What stays is the top bar's accent stroke, because it is not part of the
+ * shape scale — it is one of the three chrome tokens a variant is allowed to
+ * speak about outside its choices, and it belongs beside them.
+ */
 :where([data-palette]) {
-  --t-radius-xl: 1rem;
-  --t-radius: 0.75rem;
-  --t-radius-md: 0.5rem;
-  --t-radius-sm: 0.375rem;
-  --t-radius-xs: 0.25rem;
   --t-topbar-accent-w: 1px;
 }
 
-/* calc20 is a softer shape language: one step rounder throughout, and a
-   heavier accent stroke under a top bar that is a plate in its own right
+/* calc20 carries a heavier accent stroke under a top bar that is a plate in
+   its own right (its rounder corners are now in metrics.css)
    rather than more page — see the .pg-topbar block in payguard.css, which
    re-points the control tokens inside it so buttons and fields come out
    light-on-dark automatically. */
 [data-palette='calc20'] {
-  --t-radius-xl: 1.5rem;
-  --t-radius-md: 0.625rem;
-  --t-radius-sm: 0.5rem;
-  --t-radius-xs: 0.375rem;
   --t-topbar-accent-w: 2px;
   --t-topbar: oklch(22% 0.045 258);
   --t-topbar-fg: oklch(98.5% 0.005 250);
@@ -131,30 +132,65 @@
 /* ------------------------------------------------------------------ */
 
 /* Paper — the default. Slate-grey paper, emerald accent. */
+/* Evergreen — the default, and the neutrals now match its name.
+ *
+ * Every grey here used to be slate: --t-bg #f8fafc, --t-border #e2e8f0, a
+ * near-black #0f172a. All blue-biased, on a variant the settings panel calls
+ * "Evergreen" and whose every semantic colour is emerald. The page therefore
+ * read cool and clinical underneath a warm accent, and the mismatch is the
+ * first thing the eye picks up — before it notices a typeface.
+ *
+ * The neutrals are now green-biased to the same degree the accent is
+ * (#f7f8f6 ground, #dde3d9 border, #111a0f ink), taken from the Overview
+ * reference design. Not one semantic colour moved: safe, warn, over, info,
+ * twp, w2 and se are byte-identical to what they were, so nothing that
+ * carries meaning has changed hue.
+ *
+ * The accents were drifting off their own ramps too. The call-to-action slab
+ * was #81ef76 — a spring green, a full hue step toward yellow from the
+ * emerald everything around it uses, which is what made the buttons read
+ * acid. It stays a light slab with dark ink, because --primary is documented
+ * as exactly that and it carries about 12:1 against its own foreground; the
+ * reference's solid #059669 with white is 3.35:1 and fails AA for body text,
+ * so this is one place not to copy it. #6ee7b7 is the same role in the right
+ * family.
+ *
+ * --t-info was #0284c7, a sky blue that reads as a second teal beside an
+ * emerald palette rather than as a different idea. It is now the true blue
+ * the reference uses. That matters here because the hue carries a meaning:
+ * green is money and safety, blue is the calendar, and the two were only a
+ * hue apart.
+ *
+ * One deliberate departure from the reference: it sets its dim text to
+ * #8a9e87, which is about 2.9:1 on its own ground. This audience includes
+ * partially sighted readers, so --t-fg-dim is #6b7d68 instead — the same
+ * green bias at the luminance the slate value already had, and the contrast
+ * it already passed.
+ */
 [data-palette='paper'] {
   color-scheme: light;
-  --t-bg: #f8fafc;
+  --t-bg: #f7f8f6;
   --t-surface: #ffffff;
-  --t-surface-2: #f1f5f9;
-  --t-surface-3: #e2e8f0;
-  --t-fg: #0f172a;
-  --t-fg-muted: #526071;
-  --t-fg-dim: #64748b;
-  --t-border: #e2e8f0;
-  --t-border-soft: #f1f5f9;
-  --t-border-strong: #cbd5e1;
+  --t-surface-2: #f1f5f1;
+  --t-surface-3: #e4ebe2;
+  --t-fg: #111a0f;
+  --t-fg-muted: #556652;
+  --t-fg-dim: #6b7d68;
+  --t-border: #dde3d9;
+  --t-border-soft: #eef2ec;
+  --t-border-strong: #c6d2c2;
   --t-head: #064e3b;
   --t-head-fg: #ffffff;
   --t-ring: #059669;
-  --t-accent: #d6f5e5;
-  --t-accent-fg: #005b3e;
-  --t-primary: #81ef76;
-  --t-primary-fg: #0e2608;
+  --t-accent: #d1fae5;
+  --t-accent-fg: #065f46;
+  --t-primary: #6ee7b7;
+  --t-primary-fg: #04231a;
   --t-w2: #059669;
   --t-se: #ea580c;
   --t-safe: #059669;
-  --t-safe-soft: #d6f5e5;
-  --t-safe-text: #005b3e;
+  --t-safe-soft: #d1fae5;
+  --t-safe-text: #065f46;
   --t-safe-fg: #051b11;
   --t-warn: #d97706;
   --t-warn-soft: #ffebdd;
@@ -165,33 +201,39 @@
   --t-over-text: #9d000c;
   --t-over-fg: #fff6f5;
   --t-twp: #7c3aed;
-  --t-info: #0284c7;
-  --t-info-soft: #dbefff;
-  --t-info-text: #00517d;
-  --t-info-fg: #000000;
-  --t-invert: #0f172a;
-  --t-invert-fg: #f8fafc;
-  --t-invert-border: #334155;
+  --t-info: #2563eb;
+  --t-info-soft: #dbeafe;
+  --t-info-text: #1e3a8a;
+  /* White, not black — and only in the light ink. Moving --t-info from the
+     sky #0284c7 to the true blue #2563eb darkened the fill enough that black
+     text on it dropped to 4.06:1, which is what put unreadable month chips on
+     the extra-paycheck card. White is 5.17:1 on it. The dark ink keeps black,
+     because its blue (#3b82f6) is lighter: black 5.71:1, white 3.68:1. The
+     asymmetry is the point — the foreground follows the fill, not the theme. */
+  --t-info-fg: #ffffff;
+  --t-invert: #111a0f;
+  --t-invert-fg: #f7f8f6;
+  --t-invert-border: #3d4a3a;
 }
 .dark[data-palette='paper'] {
   color-scheme: dark;
-  --t-bg: #0b1117;
-  --t-surface: #111a24;
-  --t-surface-2: #172330;
-  --t-surface-3: #263748;
-  --t-fg: #f8fafc;
-  --t-fg-muted: #cbd5e1;
-  --t-fg-dim: #94a3b8;
-  --t-border: #2a3a4b;
-  --t-border-soft: #1b2a38;
-  --t-border-strong: #496075;
+  --t-bg: #0c110a;
+  --t-surface: #141b12;
+  --t-surface-2: #1b2418;
+  --t-surface-3: #2a3826;
+  --t-fg: #f4f7f2;
+  --t-fg-muted: #c8d4c4;
+  --t-fg-dim: #96a692;
+  --t-border: #2c3a28;
+  --t-border-soft: #1e2a1b;
+  --t-border-strong: #4c6046;
   --t-head: #064e3b;
   --t-head-fg: #ffffff;
   --t-ring: #059669;
   --t-accent: #223b2f;
   --t-accent-fg: #6addab;
-  --t-primary: #81ef76;
-  --t-primary-fg: #0e2608;
+  --t-primary: #6ee7b7;
+  --t-primary-fg: #04231a;
   --t-w2: #059669;
   --t-se: #ea580c;
   --t-safe: #059669;
@@ -207,13 +249,13 @@
   --t-over-text: #ffa99f;
   --t-over-fg: #fff6f5;
   --t-twp: #7c3aed;
-  --t-info: #0284c7;
-  --t-info-soft: #203748;
-  --t-info-text: #87ccff;
+  --t-info: #3b82f6;
+  --t-info-soft: #1e304f;
+  --t-info-text: #93c5fd;
   --t-info-fg: #000000;
-  --t-invert: #f8fafc;
-  --t-invert-fg: #0f172a;
-  --t-invert-border: #cbd5e1;
+  --t-invert: #f4f7f2;
+  --t-invert-fg: #111a0f;
+  --t-invert-border: #c8d4c4;
 }
 
 /* Slate — cool steel, blue accent. */
@@ -519,4 +561,107 @@
   --t-invert: #f8fafc;
   --t-invert-fg: #0f172a;
   --t-invert-border: #cbd5e1;
+}
+
+/* Calm — deep forest green on warm paper.
+ *
+ * The hue and the paper come from the reference Sergey pointed at
+ * (big-beautiful-design.lovable.app), measured off its live DOM on
+ * 2026-09-03. Every value there is authored in `oklch()`, which the WebViews
+ * this app treats as the floor cannot parse — and an unparsed colour is not a
+ * fallback, it is nothing. So they are resolved to hex here, once, and this
+ * is the only place they exist:
+ *
+ *   oklch(44% .11 158)   → #00643a   the green
+ *   oklch(98.5% .006 100)→ #fbfaf6   the paper
+ *   oklch(94% .035 150)  → #dbf2df   the accent
+ *   oklch(91% .008 120)  → #e0e2dc   the border
+ *
+ * Warmer and quieter than anything else here: `paper`'s ground is a cool
+ * #f7f8f6 and its primary is a bright mint, where this one is a dark forest
+ * green that carries white text, so a filled control reads as ink rather than
+ * as a highlight. That is the whole difference in feel. */
+[data-palette='calm'] {
+  color-scheme: light;
+  --t-bg: #fbfaf6;
+  --t-surface: #ffffff;
+  --t-surface-2: #f7f7f1;
+  --t-surface-3: #e8efe6;
+  --t-fg: #131d17;
+  --t-fg-muted: #4c554e;
+  --t-fg-dim: #656e68;
+  --t-border: #e0e2dc;
+  --t-border-soft: #eeede7;
+  --t-border-strong: #c4c8bf;
+  --t-head: #00643a;
+  --t-head-fg: #f8fef7;
+  --t-ring: #00643a;
+  --t-accent: #dbf2df;
+  --t-accent-fg: #004427;
+  --t-primary: #00643a;
+  --t-primary-fg: #f8fef7;
+  --t-w2: #00643a;
+  --t-se: #a1580b;
+  --t-safe: #00733f;
+  --t-safe-soft: #dbf2df;
+  --t-safe-text: #004427;
+  --t-safe-fg: #ffffff;
+  --t-warn: #a1690a;
+  --t-warn-soft: #fbf0d8;
+  --t-warn-text: #6b4405;
+  --t-warn-fg: #ffffff;
+  --t-over: #c92f33;
+  --t-over-soft: #fbe4e3;
+  --t-over-text: #8c1116;
+  --t-over-fg: #ffffff;
+  --t-twp: #4a53a8;
+  --t-info: #2c6289;
+  --t-info-soft: #e0eaf1;
+  --t-info-text: #143a53;
+  --t-info-fg: #ffffff;
+  --t-invert: #131d17;
+  --t-invert-fg: #fbfaf6;
+  --t-invert-border: #3a453c;
+}
+.dark[data-palette='calm'] {
+  color-scheme: dark;
+  --t-bg: #0d120f;
+  --t-surface: #141a16;
+  --t-surface-2: #1a221c;
+  --t-surface-3: #26302a;
+  --t-fg: #eef2ec;
+  --t-fg-muted: #bcc6be;
+  --t-fg-dim: #8d978f;
+  --t-border: #29332c;
+  --t-border-soft: #1d251f;
+  --t-border-strong: #46524a;
+  --t-head: #004b2c;
+  --t-head-fg: #eafaf0;
+  --t-ring: #58cf93;
+  --t-accent: #17301f;
+  --t-accent-fg: #8fe0b2;
+  --t-primary: #58cf93;
+  --t-primary-fg: #052314;
+  --t-w2: #58cf93;
+  --t-se: #e0a353;
+  --t-safe: #34b06f;
+  --t-safe-soft: #17301f;
+  --t-safe-text: #8fe0b2;
+  --t-safe-fg: #052314;
+  --t-warn: #e1a536;
+  --t-warn-soft: #3a2e14;
+  --t-warn-text: #f2ce8b;
+  --t-warn-fg: #2a1c00;
+  --t-over: #e06a6c;
+  --t-over-soft: #3a1d1e;
+  --t-over-text: #f0a9aa;
+  --t-over-fg: #2a0a0b;
+  --t-twp: #8b93e0;
+  --t-info: #6ba6d4;
+  --t-info-soft: #162936;
+  --t-info-text: #a9cfe8;
+  --t-info-fg: #06131c;
+  --t-invert: #eef2ec;
+  --t-invert-fg: #131d17;
+  --t-invert-border: #bcc6be;
 }

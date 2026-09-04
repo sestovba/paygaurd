@@ -43,8 +43,9 @@
 
 import { useState } from 'react';
 import { Settings } from 'lucide-react';
-import { useTracker } from '../../state/TrackerProvider';
-import { LIMIT_NAME, copyFor } from '../../domain/copy';
+import { useMonthScope, useTracker } from '../../state/TrackerProvider';
+import { LIMIT_NAME, copyFor, hoursLine } from '../../domain/copy';
+import { capacityFor } from '../../domain/capacity';
 import { useTheme } from '../../theme';
 import { money } from '../../domain/format';
 import { longMonthName, todayMonth, yearOf } from '../../domain/months';
@@ -58,16 +59,22 @@ import { ToastStack } from '../ToastStack';
 import { SettingsPanel } from '../SettingsPanel';
 import { StreamsPanel } from '../StreamsPanel';
 import { MonthSheet } from '../MonthSheet';
+import { StreamSheet } from '../StreamSheet';
+import { TwpWizard } from '../TwpWizard';
+import { MonthScopePicker } from '../MonthScopePicker';
+import { SafeWorkSimulator } from '../SafeWorkSimulator';
 import { HorizonRunway } from './HorizonRunway';
 import '../../styles/horizon.css';
 
 export function TrackerHorizon() {
   const { data, ui, setUi, resetAll } = useTracker();
+  const { scope, setScope } = useMonthScope('many');
   useTheme(ui.theme, ui.palette);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [openMonth, setOpenMonth] = useState<MonthKey | null>(null);
   const [openStream, setOpenStream] = useState<string | null>(null);
+  const [statusOpen, setStatusOpen] = useState(false);
 
   const now = todayMonth();
   const asOf: MonthKey = yearOf(now) === ui.year ? now : `${ui.year}-12`;
@@ -76,6 +83,7 @@ export function TrackerHorizon() {
   const threshold = activeThreshold(data, asOf);
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
+  const cap = capacityFor(data, asOf);
 
   const items = actionItems(data, ui.year, ui.focusMode);
 
@@ -97,9 +105,8 @@ export function TrackerHorizon() {
 
   return (
     <div className="hz" data-chrome-root>
-      {/* The header carries the year and where you stand. Nothing else: the
-          notes caught palette switchers, theme toggles and import/export all
-          sitting in the highest-value strip on their layouts. */}
+      {/* The header carries the year, how much of it to show, and settings.
+          Palette / theme / import-export stay out — those are housekeeping. */}
       <header className="hz-top">
         <div className="hz-top-id">
           <h1>Horizon</h1>
@@ -110,6 +117,10 @@ export function TrackerHorizon() {
           <span>{ui.year}</span>
           <button type="button" onClick={() => setUi({ year: ui.year + 1 })} aria-label="Next year">›</button>
         </div>
+        {/* Beside the year because it answers the same question one size
+            down: which months am I looking at. The runway already obeys
+            useMonthScope; this is the control it was missing. */}
+        <MonthScopePicker scope={scope} onChange={setScope} className="hz-scope" />
         <button
           type="button"
           className="hz-icon-btn"
@@ -124,8 +135,17 @@ export function TrackerHorizon() {
         {/* 1 — the answer, in one sentence, with how far to trust it. */}
         <section className="hz-answer" data-tone={tone} aria-live="polite">
           <p className="hz-answer-line">{answer}</p>
+          {cap && cap.hours !== null ? (
+            <p className="hz-answer-line">{hoursLine(cap.hours)}</p>
+          ) : null}
           <PrecisionLine reading={precisionFor(data, asOf)} />
         </section>
+
+        {/* 1b — act on the answer: hours you can still work. Shared panel,
+            same as payguard / workrecord / ledger — not a private fork. */}
+        <div className="hz-sim">
+          <SafeWorkSimulator onOpenStatus={() => setStatusOpen(true)} />
+        </div>
 
         {/* 2 — what is coming. The one surface that is new here. */}
         <HorizonRunway onOpenMonth={setOpenMonth} />
@@ -159,6 +179,10 @@ export function TrackerHorizon() {
           onOpenStream={(id) => { setOpenMonth(null); setOpenStream(id); }}
         />
       ) : null}
+      {openStream ? (
+        <StreamSheet streamId={openStream} onClose={() => setOpenStream(null)} />
+      ) : null}
+      {statusOpen ? <TwpWizard onClose={() => setStatusOpen(false)} /> : null}
 
       <ToastStack />
 
@@ -166,7 +190,7 @@ export function TrackerHorizon() {
         <SettingsPanel
           theme={ui.theme}
           onTheme={(theme) => setUi({ theme })}
-          onOpenStatus={() => { setUi({ layout: 'overview' }); setSettingsOpen(false); }}
+          onOpenStatus={() => { setSettingsOpen(false); setStatusOpen(true); }}
           onReset={resetAll}
           onClose={() => setSettingsOpen(false)}
           layout={ui.layout}

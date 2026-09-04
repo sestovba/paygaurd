@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSDI Income Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
+  :root {
+    --bg-primary: #06060e;
+    --bg-secondary: #0c0c18;
+    --bg-card: rgba(18, 18, 35, 0.75);
+    --bg-card-hover: rgba(24, 24, 45, 0.85);
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-medium: rgba(255, 255, 255, 0.1);
+    --border-accent: rgba(139, 92, 246, 0.4);
+    --text-primary: #f1f1f7;
+    --text-secondary: #8a8a9e;
+    --text-muted: #5c5c72;
+    --accent-1: #8b5cf6;  /* violet */
+    --accent-2: #06b6d4;  /* cyan */
+    --accent-3: #10b981;  /* emerald */
+    --accent-4: #f59e0b;  /* amber */
+    --accent-5: #ef4444;  /* red */
+    --gradient-main: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    --gradient-warm: linear-gradient(135deg, #f59e0b, #ef4444);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
+    --shadow-glow-violet: 0 0 40px rgba(139, 92, 246, 0.15);
+    --shadow-glow-cyan: 0 0 40px rgba(6, 182, 212, 0.12);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black 20%, transparent 70%);
+  }
+
+  /* ── Animated orbs ── */
+  .orb {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  }
+  .orb-1 {
+    width: 600px; height: 600px; top: -250px; right: -150px;
+    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+    animation: float1 14s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 500px; height: 500px; bottom: -200px; left: -100px;
+    background: radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 70%);
+    animation: float2 18s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 350px; height: 350px; top: 40%; left: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 60%);
+    animation: float3 20s ease-in-out infinite;
+  }
+  @keyframes float1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-40px, 30px) scale(1.08); }
+    66% { transform: translate(20px, -20px) scale(0.95); }
+  }
+  @keyframes float2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -40px) scale(1.12); }
+  }
+  @keyframes float3 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-40%, -60%) scale(1.2); opacity: 1; }
+  }
+
+  /* ── Grid lines ── */
+  .grid-lines {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(139,92,246,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,92,246,0.025) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black 25%, transparent 75%);
+  }
+
+  /* ── App Container ── */
+  .app {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 32px 24px 60px;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; margin-bottom: 40px;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 0.95rem;
+    letter-spacing: -0.01em;
+  }
+  .brand-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--gradient-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-glow-violet);
+  }
+  .topbar-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pill {
+    font-size: 0.72rem; font-weight: 600;
+    padding: 5px 12px; border-radius: 100px;
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.18);
+    color: #a78bfa;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(6,182,212,0.06);
+    border: 1px solid rgba(6,182,212,0.15);
+    padding: 5px 14px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 600;
+    color: #67e8f9;
+    margin-bottom: 24px;
+    letter-spacing: 0.01em;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.08;
+    margin-bottom: 16px;
+  }
+  .hero h1 .gradient-text {
+    background: var(--gradient-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ── Grid Layout ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── Glass Card ── */
+  .glass {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  }
+  .glass:hover {
+    border-color: var(--border-medium);
+  }
+  .glass-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 0;
+  }
+  .glass-body {
+    padding: 20px 24px;
+  }
+  .glass-full {
+    padding: 24px;
+  }
+
+  /* ── Stat Card ── */
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 120px; height: 120px;
+    border-radius: 0 0 0 120px;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+  .stat-card.violet::after { background: var(--accent-1); }
+  .stat-card.cyan::after { background: var(--accent-2); }
+  .stat-card.emerald::after { background: var(--accent-3); }
+  .stat-card.amber::after { background: var(--accent-4); }
+  .stat-card.red::after { background: var(--accent-5); }
+
+  .stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-family: 'JetBrains Mono', monospace;
+    transition: color 0.4s var(--ease-out);
+  }
+  .stat-value.sm { font-size: 1.8rem; }
+  .stat-unit {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 2px;
+  }
+  .stat-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  .stat-cyan .stat-value { color: #22d3ee; }
+  .stat-violet .stat-value { color: #a78bfa; }
+  .stat-emerald .stat-value { color: #34d399; }
+  .stat-amber .stat-value { color: #fbbf24; }
+  .stat-red .stat-value { color: #f87171; }
+
+  /* ── Progress Ring ── */
+  .progress-ring-container {
+    display: flex; align-items: center; justify-content: center;
+    gap: 24px;
+    padding: 8px 0;
+    flex-wrap: wrap;
+  }
+  .ring-wrapper {
+    position: relative;
+    width: 110px; height: 110px;
+  }
+  .ring-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.06);
+    stroke-width: 5;
+  }
+  .ring-fg {
+    fill: none;
+    stroke: url(#gradient);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.7s var(--ease-out);
+    filter: drop-shadow(0 0 12px rgba(139,92,246,0.4));
+  }
+  .ring-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .ring-percent {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #a78bfa;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+  .ring-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .ring-info h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .ring-info p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── Month Grid ── */
+  .months-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 900px) { .months-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 500px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .month-btn {
+    position: relative;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 14px 8px;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    text-align: center;
+    overflow: hidden;
+  }
+  .month-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--gradient-main);
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-out);
+  }
+  .month-btn:hover {
+    border-color: rgba(139,92,246,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(139,92,246,0.1);
+  }
+  .month-btn:hover::before { opacity: 0.04; }
+  .month-btn:active { transform: translateY(0) scale(0.97); }
+  .month-btn.active {
+    border-color: rgba(139,92,246,0.5);
+    background: rgba(139,92,246,0.06);
+  }
+  .month-btn.active::before { opacity: 0.06; }
+
+  .month-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .month-badge {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    position: relative;
+    z-index: 1;
+  }
+  .month-amount {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .month-amount.safe { color: #34d399; }
+  .month-amount.warning { color: #fbbf24; }
+  .month-amount.over { color: #f87171; }
+  .month-amount.empty { color: var(--text-muted); }
+
+  /* ── Section Headers ── */
+  .section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── Inputs ── */
+  .field {
+    margin-bottom: 18px;
+  }
+  .field:last-child { margin-bottom: 0; }
+  .field > label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .input-wrap {
+    position: relative;
+  }
+  .input-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .field input {
+    width: 100%;
+    padding: 12px 14px 12px 30px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.2s var(--ease-out);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .field input:focus {
+    border-color: rgba(139,92,246,0.4);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+    background: rgba(255,255,255,0.04);
+  }
+  .field input::placeholder { color: #3a3a4e; }
+
+  /* ── Plan Result ── */
+  .plan-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .plan-row:last-child { margin-bottom: 0; }
+  .plan-row:hover { border-color: var(--border-medium); }
+  .plan-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .plan-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #34d399;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+  }
+  .plan-value .unit {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 2px;
+  }
+
+  .plan-cta {
+    margin-top: 14px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .plan-cta .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-3);
+    box-shadow: 0 0 8px rgba(16,185,129,0.5);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* ── Warning Note ── */
+  .note {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 10px 14px;
+    background: rgba(245,158,11,0.04);
+    border: 1px solid rgba(245,158,11,0.12);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 14px;
+  }
+  .note-icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 32px 20px;
+  }
+  .empty-icon {
+    font-size: 2.8rem;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+  .empty-text {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* ── Log List ── */
+  .log-list { max-height: 220px; overflow-y: auto; }
+  .log-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-date {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+  .log-amount {
+    font-weight: 600;
+    font-size: 0.88rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .log-amount.over { color: #f87171; }
+  .log-amount.safe { color: #34d399; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    font-family: 'Inter', sans-serif;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--gradient-main);
+    color: white;
+    box-shadow: 0 4px 20px rgba(139,92,246,0.2);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 24px rgba(139,92,246,0.35);
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+  .btn-primary:active { transform: translateY(0) scale(0.98); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+  }
+  .btn-ghost:hover {
+    border-color: var(--border-medium);
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    animation: modal-fade 0.2s var(--ease-out);
+  }
+  @keyframes modal-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .modal {
+    background: rgba(14, 14, 26, 0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    animation: modal-scale 0.25s var(--ease-spring);
+  }
+  @keyframes modal-scale {
+    from { opacity: 0; transform: scale(0.92) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .modal-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .modal-preview {
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .modal-preview-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .modal-preview-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+  }
+  .modal-actions {
+    display: flex; gap: 8px;
+  }
+  .modal-actions .btn { flex: 1; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: auto;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+  }
+  .footer-text {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .footer-text a {
+    color: #a78bfa;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .footer-text a:hover { text-decoration: underline; }
+
+  /* ── Hidden ── */
+  .hidden { display: none !important; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+  /* ── Entrance Animations ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: reveal 0.5s var(--ease-out) forwards;
+  }
+  @keyframes reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.1s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.2s; }
+  .delay-5 { animation-delay: 0.25s; }
+  .delay-6 { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="grid-lines"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- SVG Gradient for ring -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- Top Bar -->
+  <header class="topbar reveal">
+    <div class="brand">
+      <div class="brand-icon">💰</div>
+      <span>SSDI Tracker</span>
+    </div>
+    <div class="topbar-right">
+      <span class="pill">🔒 Local only · nothing leaves this device</span>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero reveal delay-1">
+    <div class="hero-badge">✦ SSDI / SSI Income Tool</div>
+    <h1>Stay under your<br><span class="gradient-text">$1,210 monthly ceiling</span></h1>
+    <p class="hero-sub">Log what you earn, watch your limit shrink in real time, and plan exactly how many hours you can safely work — without risking your benefits.</p>
+  </section>
+
+  <!-- Primary Stats Row -->
+  <div class="grid-2 reveal delay-2">
+    <!-- Remaining This Month -->
+    <div class="glass stat-card emerald">
+      <div class="glass-full" style="text-align:center;">
+        <div class="stat-label">Left This Month</div>
+        <div class="stat-value" id="remainingDisplay" style="color:#34d399;">$1,210</div>
+        <div class="stat-sub" style="margin-top:6px;">of $1,210 monthly limit</div>
+      </div>
+    </div>
+
+    <!-- Progress + Context -->
+    <div class="glass">
+      <div class="glass-header">
+        <div>
+          <div class="stat-label" style="margin-bottom:14px;">How close are you?</div>
+        </div>
+      </div>
+      <div class="glass-body">
+        <div class="progress-ring-container">
+          <div class="ring-wrapper">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle class="ring-bg" cx="55" cy="55" r="48"/>
+              <circle class="ring-fg" id="progressCircle" cx="55" cy="55" r="48"
+                stroke-dasharray="301.59" stroke-dashoffset="301.59"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-percent" id="percentDisplay">0%</div>
+              <div class="ring-label">used</div>
+            </div>
+          </div>
+          <div class="ring-info">
+            <h3 id="ringStatus" style="color:#34d399;">All clear</h3>
+            <p id="ringDetail">$0 of $1,210 counted this month</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary Stats Row -->
+  <div class="grid-3 reveal delay-3">
+    <div class="glass stat-card violet">
+      <div class="glass-full" style="text-align:center;">
+        <div class="stat-label">Counted in Sep</div>
+        <div class="stat-value sm" id="countedDisplay" style="color:#a78bfa;">$0</div>
+        <div class="stat-sub">this month so far</div>
+      </div>
+    </div>
+    <div class="glass stat-card amber">
+      <div class="glass-full" style="text-align:center;">
+        <div class="stat-label">Of Your Limit</div>
+        <div class="stat-value sm" id="limitPercentDisplay" style="color:#fbbf24;">0%</div>
+        <div class="stat-sub">monthly usage</div>
+      </div>
+    </div>
+    <div class="glass stat-card red">
+      <div class="glass-full" style="text-align:center;">
+        <div class="stat-label">Months Over</div>
+        <div class="stat-value sm" id="overMonthsDisplay" style="color:#f87171;">0 / 12</div>
+        <div class="stat-sub">this year</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Year Total -->
+  <div class="glass reveal delay-3" style="margin-bottom:16px;">
+    <div class="glass-header">
+      <div>
+        <div class="stat-label" style="margin-bottom:4px;">2026 Total</div>
+        <div class="section-sub" style="margin-bottom:0;">Everything logged this year</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:1.8rem; font-weight:800; font-family:'JetBrains Mono',monospace; color:#a78bfa; letter-spacing:-0.03em;" id="yearTotalDisplay">$0.00</div>
+        <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">out of $14,520 annual ceiling</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty / Logs -->
+  <div id="emptyState" class="glass reveal delay-4">
+    <div class="empty-state">
+      <span class="empty-icon">📝</span>
+      <p class="empty-text">Nothing logged yet — every month is wide open. Tap any month above to record your pay.</p>
+    </div>
+  </div>
+
+  <div id="logList" class="glass hidden reveal delay-4">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px 0;">
+      <div>
+        <div class="stat-label" style="margin-bottom:10px;">Logged Entries</div>
+      </div>
+      <button class="btn btn-ghost" onclick="clearAllLogs()" style="font-size:0.75rem; padding:5px 12px;">Clear all</button>
+    </div>
+    <div class="glass-body" style="padding-top:8px;">
+      <div class="log-list" id="logEntries"></div>
+    </div>
+  </div>
+
+  <!-- Month by Month -->
+  <div class="glass reveal delay-5" style="margin-bottom:16px;">
+    <div style="padding:20px 24px 4px;">
+      <div class="stat-label" style="margin-bottom:2px;">Month by Month</div>
+      <div class="section-sub" style="margin-bottom:0;">Tap a month to log pay</div>
+    </div>
+    <div class="months-grid" id="monthsGrid" style="padding:8px 24px 20px;"></div>
+  </div>
+
+  <!-- Plan My Hours -->
+  <div class="glass reveal delay-6">
+    <div style="padding:20px 24px 4px;">
+      <div class="stat-label" style="margin-bottom:2px;">Plan My Hours</div>
+      <div class="section-sub" style="margin-bottom:0;">How many hours could I work this month?</div>
+    </div>
+    <div class="glass-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:4px;">
+        <div>
+          <div class="field">
+            <label>Your hourly pay rate</label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="payRate" placeholder="25" min="0.50" step="0.50"
+                oninput="updatePlan()">
+            </div>
+          </div>
+          <div class="field">
+            <label>Monthly limit (SSA threshold)</label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="monthlyLimit" placeholder="1,210" min="1"
+                oninput="updatePlan()">
+            </div>
+          </div>
+          <div class="note">
+            <span class="note-icon">⚠</span>
+            <span>Thresholds are planning estimates based on 2026 SGA rules. Confirm current figures with SSA before acting on any one.</span>
+          </div>
+        </div>
+        <div>
+          <div class="plan-row">
+            <span class="plan-label">Per week</span>
+            <span class="plan-value" id="weeklyHours">— <span class="unit">hrs</span></span>
+          </div>
+          <div class="plan-row">
+            <span class="plan-label">Per month</span>
+            <span class="plan-value" id="monthlyHours">— <span class="unit">hrs</span></span>
+          </div>
+          <div class="plan-cta" style="margin-top:14px;">
+            <span class="dot"></span>
+            <span>Ceiling before your limit. Watch months with an extra paycheck.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer reveal delay-6">
+    <p class="footer-text">
+      Everything you enter stays on this device. No servers, no tracking, no accounts, no uploads.
+      <br>
+      Built with care · <a href="https://lovable.dev/projects/lovp_2vv8es7j1385d9avfgc74m3cz9" target="_blank">Edit with Lovable</a>
+    </p>
+  </footer>
+
+</div>
+
+<!-- Log Entry Modal -->
+<div id="logModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Log Pay — <span id="modalMonthName">September</span></h3>
+    <div class="modal-sub">Record how much you earned in <span id="modalMonthName2">September</span></div>
+
+    <div class="field">
+      <label>Amount earned</label>
+      <div class="input-wrap">
+        <span class="input-prefix">$</span>
+        <input type="number" id="logAmount" placeholder="0.00" min="0" step="0.01"
+          autofocus onkeydown="if(event.key==='Enter') confirmLog()">
+      </div>
+    </div>
+
+    <div class="modal-preview">
+      <div class="modal-preview-label">Remaining after this entry</div>
+      <div class="modal-preview-value" id="modalRemaining" style="color:#34d399;">$1,210.00</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmLog()">Log It</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+const STORAGE_KEY = 'ssdi_tracker_v2';
+
+function defaultState() {
+  return {
+    monthlyLimit: 1210,
+    logs: {},
+    selectedMonth: null,
+    year: new Date().getFullYear()
+  };
+}
+
+let state;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        if (!parsed.logs) parsed.logs = {};
+        if (!parsed.year) parsed.year = new Date().getFullYear();
+        return parsed;
+      }
+    }
+  } catch(e) { /* ignore */ }
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function monthKey(monthIndex) {
+  return `${state.year}-${String(monthIndex + 1).padStart(2, '0')}`;
+}
+
+function getLogs(monthIndex) {
+  return state.logs[monthKey(monthIndex)] || [];
+}
+
+function totalForMonth(monthIndex) {
+  return getLogs(monthIndex).reduce((s, v) => s + v, 0);
+}
+
+function yearTotal() {
+  let total = 0;
+  const yearPrefix = String(state.year);
+  for (const key in state.logs) {
+    if (key.startsWith(yearPrefix)) {
+      total += state.logs[key].reduce((s, v) => s + v, 0);
+    }
+  }
+  return total;
+}
+
+function overMonthsCount() {
+  let count = 0;
+  for (let i = 0; i < 12; i++) {
+    if (totalForMonth(i) > state.monthlyLimit) count++;
+  }
+  return count;
+}
+
+// ── Render ──
+function render() {
+  renderHeroStats();
+  renderYearTotal();
+  renderMonths();
+  renderLogs();
+  updatePlan();
+}
+
+function renderHeroStats() {
+  const now = new Date();
+  const monthIndex = now.getMonth();
+  const counted = totalForMonth(monthIndex);
+  const remaining = Math.max(0, state.monthlyLimit - counted);
+  const percent = Math.min(100, (counted / state.monthlyLimit) * 100);
+
+  document.getElementById('remainingDisplay').textContent =
+    '$' + remaining.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+  document.getElementById('countedDisplay').textContent =
+    '$' + counted.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('limitPercentDisplay').textContent = percent.toFixed(1) + '%';
+  document.getElementById('overMonthsDisplay').textContent = overMonthsCount() + ' / 12';
+  document.getElementById('percentDisplay').textContent = percent.toFixed(0) + '%';
+
+  // Progress ring
+  const circumference = 301.59;
+  const offset = circumference - (percent / 100) * circumference;
+  const circle = document.getElementById('progressCircle');
+  circle.style.strokeDashoffset = offset;
+
+  // Ring color
+  let ringColor, ringStatus, ringDetail;
+  if (percent >= 100) {
+    ringColor = '#f87171';
+    ringStatus = 'Over limit';
+    ringDetail = `$${counted.toFixed(2)} — $${(counted - state.monthlyLimit).toFixed(2)} over`;
+    document.getElementById('remainingDisplay').style.color = '#f87171';
+  } else if (percent >= 80) {
+    ringColor = '#fbbf24';
+    ringStatus = 'Getting close';
+    ringDetail = `$${counted.toFixed(2)} of $${state.monthlyLimit.toFixed(2)} used`;
+    document.getElementById('remainingDisplay').style.color = '#fbbf24';
+  } else {
+    ringColor = '#34d399';
+    ringStatus = counted === 0 ? 'All clear' : 'Good shape';
+    ringDetail = `$${counted.toFixed(2)} of $${state.monthlyLimit.toFixed(2)} counted`;
+    document.getElementById('remainingDisplay').style.color = '#34d399';
+  }
+  document.getElementById('ringStatus').textContent = ringStatus;
+  document.getElementById('ringStatus').style.color = ringColor;
+  document.getElementById('ringDetail').textContent = ringDetail;
+  document.getElementById('percentDisplay').style.color = ringColor;
+  circle.style.stroke = `url(#gradient)`;
+  if (percent >= 100) {
+    circle.style.filter = 'drop-shadow(0 0 12px rgba(239,68,68,0.4))';
+  } else if (percent >= 80) {
+    circle.style.filter = 'drop-shadow(0 0 12px rgba(245,158,11,0.4))';
+  } else {
+    circle.style.filter = 'drop-shadow(0 0 12px rgba(139,92,246,0.4))';
+  }
+}
+
+function renderYearTotal() {
+  const total = yearTotal();
+  document.getElementById('yearTotalDisplay').textContent =
+    '$' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function renderMonths() {
+  const grid = document.getElementById('monthsGrid');
+  grid.innerHTML = '';
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  MONTHS.forEach((name, i) => {
+    const total = totalForMonth(i);
+    const remaining = Math.max(0, state.monthlyLimit - total);
+    const isCurrent = (i === currentMonth && state.year === currentYear);
+    const hasLogs = getLogs(i).length > 0;
+    const isOver = total > state.monthlyLimit;
+    const threshold = state.monthlyLimit * 0.8;
+
+    let amountClass = 'empty';
+    let displayText;
+    if (hasLogs) {
+      if (isOver) { amountClass = 'over'; displayText = '⚠ Over'; }
+      else if (remaining < state.monthlyLimit * 0.2) { amountClass = 'warning'; displayText = '$' + remaining.toFixed(0); }
+      else { amountClass = 'safe'; displayText = '$' + remaining.toFixed(0); }
+    } else {
+      displayText = '$' + state.monthlyLimit.toFixed(0);
+    }
+
+    const badge = isCurrent ? 'this month' : hasLogs ? 'logged' : '';
+
+    const btn = document.createElement('button');
+    btn.className = 'month-btn' + (isCurrent ? ' active' : '');
+    btn.setAttribute('onclick', `openLogModal(${i})`);
+    btn.innerHTML = `
+      <div class="month-name">${name.slice(0,3)}</div>
+      <div class="month-badge">${badge}</div>
+      <div class="month-amount ${amountClass}">${displayText}</div>
+    `;
+    grid.appendChild(btn);
+  });
+}
+
+function renderLogs() {
+  const container = document.getElementById('logEntries');
+  container.innerHTML = '';
+
+  let entries = [];
+  if (state.selectedMonth !== null) {
+    const monthLogs = getLogs(state.selectedMonth);
+    monthLogs.forEach((amount, idx) => {
+      entries.push({ monthIndex: state.selectedMonth, amount, idx });
+    });
+  } else {
+    const all = [];
+    for (const key in state.logs) {
+      const [year, month] = key.split('-');
+      state.logs[key].forEach((amount, idx) => {
+        all.push({ monthIndex: parseInt(month) - 1, amount, idx });
+      });
+    }
+    all.sort((a, b) => {
+      if (a.monthIndex !== b.monthIndex) return b.monthIndex - a.monthIndex;
+      return b.idx - a.idx;
+    });
+    entries = all.slice(0, 15);
+  }
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:20px 0; color:var(--text-muted); font-size:0.82rem;">No entries yet</div>';
+    return;
+  }
+
+  entries.forEach(entry => {
+    const name = MONTHS[entry.monthIndex];
+    const isOver = entry.amount > state.monthlyLimit;
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    div.innerHTML = `
+      <span class="log-date">${name} ${state.year}</span>
+      <span class="log-amount ${isOver ? 'over' : 'safe'}">$${entry.amount.toFixed(2)}</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updatePlan() {
+  const rate = parseFloat(document.getElementById('payRate').value);
+  const limit = parseFloat(document.getElementById('monthlyLimit').value);
+  const effectiveLimit = (limit && limit > 0) ? limit : state.monthlyLimit;
+
+  const weeklyEl = document.getElementById('weeklyHours');
+  const monthlyEl = document.getElementById('monthlyHours');
+
+  if (!rate || rate <= 0) {
+    weeklyEl.innerHTML = '— <span class="unit">hrs</span>';
+    monthlyEl.innerHTML = '— <span class="unit">hrs</span>';
+    return;
+  }
+
+  const monthlyHours = effectiveLimit / rate;
+  const weeklyHours = monthlyHours / 4.33;
+
+  weeklyEl.innerHTML = `${weeklyHours.toFixed(1)} <span class="unit">hrs</span>`;
+  monthlyEl.innerHTML = `${monthlyHours.toFixed(1)} <span class="unit">hrs</span>`;
+}
+
+// ── Modal ──
+function openLogModal(monthIndex) {
+  state.selectedMonth = monthIndex;
+  const name = MONTHS[monthIndex];
+  document.getElementById('modalMonthName').textContent = name;
+  document.getElementById('modalMonthName2').textContent = name;
+
+  const currentTotal = totalForMonth(monthIndex);
+  const remaining = state.monthlyLimit - currentTotal;
+  const el = document.getElementById('modalRemaining');
+  el.textContent = '$' + remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  el.style.color = remaining < 0 ? '#f87171' : remaining < state.monthlyLimit * 0.2 ? '#fbbf24' : '#34d399';
+
+  document.getElementById('logAmount').value = '';
+  document.getElementById('logModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('logAmount').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('logModal').classList.add('hidden');
+  state.selectedMonth = null;
+}
+
+function confirmLog() {
+  const amount = parseFloat(document.getElementById('logAmount').value);
+  if (!amount || amount < 0) {
+    document.getElementById('logAmount').focus();
+    return;
+  }
+
+  const key = monthKey(state.selectedMonth);
+  if (!state.logs[key]) state.logs[key] = [];
+  state.logs[key].push(amount);
+  saveState();
+  closeModal();
+  render();
+}
+
+function clearAllLogs() {
+  if (!confirm('Clear all logged entries? This cannot be undone.')) return;
+  state.logs = {};
+  saveState();
+  render();
+}
+
+// ── Init ──
+state = loadState();
+render();
+</script>
+</body>
+</html>

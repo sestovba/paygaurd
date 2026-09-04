@@ -9,6 +9,7 @@
 
 import type { ReviewLayoutId } from './types';
 import type { ReviewNote, ReviewNotes } from './types';
+import { pageDocument } from './root';
 
 /** Switched off on the page. Never a verdict, and it never touches the code:
  *  it is a light turned off to find out whether the room is better without
@@ -20,7 +21,7 @@ export function isHidden(note: ReviewNote): boolean {
 export function safeQuery(selector?: string): HTMLElement | null {
   if (!selector) return null;
   try {
-    return document.querySelector<HTMLElement>(selector);
+    return pageDocument().querySelector<HTMLElement>(selector);
   } catch {
     return null;
   }
@@ -38,7 +39,7 @@ export function applyHiddenAttributes(
    *  argument exists to stop. */
   peekId?: string | null
 ): void {
-  document.querySelectorAll('[data-review-hidden]').forEach((el) => {
+  pageDocument().querySelectorAll('[data-review-hidden]').forEach((el) => {
     el.removeAttribute('data-review-hidden');
   });
 

@@ -13,7 +13,8 @@ import { SOURCE_SHORT } from '../../domain/copy';
 import {
   streamYearTotal, streamYearHours, streamYearMiles, streamsMissingMonth
 } from '../../domain/earnings';
-import { addMonths, formatMonth, todayMonth } from '../../domain/months';
+import { addMonths, formatMonth, monthsShownLabel, todayMonth } from '../../domain/months';
+import { MonthScopePicker } from '../MonthScopePicker';
 import { MonthGrid, fieldsFor } from './MonthGrid';
 import { EditableName } from './EditableName';
 import { PaycheckLedger } from './PaycheckLedger';
@@ -25,7 +26,7 @@ import {
 } from './Icons';
 import { AnchoredPopover, useAnchoredPopover } from './Popover';
 import { useIsHandset, useViewportBand } from './useIsWide';
-import { layoutFor } from './state';
+import { layoutFor, useMonthScope } from './state';
 import { useSlabBounce } from './useSlabBounce';
 
 type FieldId = 'gross' | 'hours' | 'miles';
@@ -329,6 +330,12 @@ export function StreamsSection({
   const viewport = useViewportBand();
   const phone = viewport === 'phone';
   const handset = useIsHandset();
+  /* The same months every other list on this layout is showing. The grid
+     inside a job card is the first one a reader meets — it sits above the
+     Months card that carries the only other copy of this control — so a
+     year of cells arrives here with nothing on screen saying it is a year
+     or that it can be less. */
+  const { scope, setScope, months: scopedMonths } = useMonthScope('many');
   const prefs = layoutFor(ui, viewport);
   const pivot = prefs.pivot;
   const columnsAuto = prefs.monthColumnsAuto;
@@ -482,6 +489,12 @@ export function StreamsSection({
   const fieldChips = () => (
       <div className="stream-panel-fields">
         <div className="stream-panel-end">
+          {/* What the grid under this is showing, and the one control that
+              changes it. It names the period rather than counting cells —
+              "All year" over twelve tiles answers "what are all of these
+              months?" where the question gets asked, instead of two cards
+              further down the page. */}
+          <span className="stream-panel-months">{monthsShownLabel(scopedMonths)}</span>
           {layoutLocked ? null : (
             <>
               <div className="seg" role="group" aria-label="Month layout">
@@ -510,6 +523,11 @@ export function StreamsSection({
               {pivot ? null : <MonthColAuto />}
             </>
           )}
+          <MonthScopePicker
+            scope={scope}
+            onChange={setScope}
+            className="stream-panel-edit"
+          />
         </div>
       </div>
     );

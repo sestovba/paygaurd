@@ -10,7 +10,8 @@ import {
   X
 } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
-import { copyFor } from '../../domain/copy';
+import { copyFor, hoursLine } from '../../domain/copy';
+import { capacityFor } from '../../domain/capacity';
 import { attentionFlags } from '../../domain/attention';
 import { precisionFor } from '../../domain/precision';
 import { PrecisionLine } from '../PrecisionLine';
@@ -80,6 +81,7 @@ export function TrackerWorkRecord() {
   const threshold = activeThreshold(data, focusMonth);
   const over = threshold ? status.countable > threshold.amount : false;
   const room = threshold ? Math.max(0, threshold.amount - status.countable) : 0;
+  const cap = capacityFor(data, focusMonth);
 
   const usedTrialMonth = phase === 'trialWork' && status.isServiceMonth;
   const headlineStatus = !threshold
@@ -275,6 +277,9 @@ export function TrackerWorkRecord() {
                       Tell us where you stand
                     </button>
                   )}
+                  {cap && cap.hours !== null ? (
+                    <p className="wr-headline-of">{hoursLine(cap.hours)}</p>
+                  ) : null}
                 </div>
               </div>
             </div>

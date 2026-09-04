@@ -5,6 +5,7 @@
 
 import type { MonthKey } from '../../domain/types';
 import { useTracker } from '../../state/TrackerProvider';
+import { copyFor } from '../../domain/copy';
 import { money } from '../../domain/format';
 import { formatMonth, monthsOfYear, shortMonthName, todayMonth, yearOf } from '../../domain/months';
 import { monthStatus, yearTotal } from '../../domain/earnings';
@@ -152,7 +153,7 @@ export function WorkRecordStatus({ onReviewStatus }: { onReviewStatus: () => voi
 
       <ReviewTarget
         id="workrecord-safe-work-simulator"
-        label="Hours you can work"
+        label={copyFor('workrecord').hoursPanel}
         reason="The multi-input planner overwhelms the core status view and belongs in an optional advanced tool."
         layout="workrecord"
       >

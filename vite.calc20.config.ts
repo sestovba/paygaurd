@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { pgLayouts } from './vite.layouts-plugin';
 
 /*
  * The standalone Calc20 export — `npm run build:calc20`.
@@ -91,7 +92,7 @@ export default defineConfig({
   // Nothing in public/ belongs to this page: google-mark.svg is the sign-in
   // screen's, and the sign-in screen is not in this build.
   publicDir: false,
-  plugins: [react(), tailwindcss(), singleFile()],
+  plugins: [react(), tailwindcss(), pgLayouts(), singleFile()],
   resolve: {
     alias: [
       {

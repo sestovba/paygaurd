@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feature Audit — Tracker JS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');
+:root {
+  --bg:#f4f5f7; --surface:#fff; --surface-2:#f8f9fb; --surface-3:#eef0f3;
+  --border:#e2e5ea; --border-strong:#c9ced6;
+  --text:#1c1f24; --text-2:#4a5058; --muted:#7a828c; --dim:#a3a9b0;
+  --safe:#0d9488; --safe-soft:#ccfbf1; --safe-text:#115e59;
+  --careful:#d97706; --careful-soft:#fef3c7; --careful-text:#92400e;
+  --over:#dc2626; --over-soft:#fee2e2; --over-text:#991b1b;
+  --brand:#7c3aed; --brand-soft:#ede9fe;
+  --radius:12px; --radius-sm:8px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',system-ui,-apple-system,sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
+code, .mono { font-family:'DM Mono','JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+code { font-size:.88em; color:var(--brand); }
+.page { max-width:960px; margin:0 auto; padding:40px 20px 100px; }
+.masthead { border-bottom:1px solid var(--border); padding-bottom:28px; }
+.eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.16em; color:var(--brand); margin-bottom:12px; }
+h1 { font-size:clamp(28px,5vw,40px); font-weight:700; letter-spacing:-.03em; line-height:1.1; margin-bottom:14px; }
+.lede { color:var(--text-2); font-size:15px; line-height:1.7; max-width:640px; }
+.lede + .lede { margin-top:12px; }
+.scoreboard { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:28px; }
+.score { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; }
+.score-n { font-size:28px; font-weight:700; font-family:'DM Mono',monospace; line-height:1; }
+.score-l { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-top:6px; }
+.score.working .score-n { color:var(--safe); }
+.score.wrong .score-n { color:var(--over); }
+.score.stub .score-n { color:var(--careful); }
+.score.dead .score-n { color:var(--muted); }
+h2.band { font-size:20px; font-weight:700; letter-spacing:-.02em; margin:52px 0 6px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+h2.band .tag { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:4px 10px; border-radius:999px; border:1px solid; }
+.tag.working { color:var(--safe-text); border-color:var(--safe); background:var(--safe-soft); }
+.tag.wrong { color:var(--over-text); border-color:var(--over); background:var(--over-soft); }
+.tag.stub { color:var(--careful-text); border-color:var(--careful); background:var(--careful-soft); }
+.tag.dead { color:var(--text-2); border-color:var(--border-strong); background:var(--surface-3); }
+.tag.verdict { color:var(--brand); border-color:var(--brand); background:var(--brand-soft); }
+.band-sub { font-size:14px; color:var(--text-2); line-height:1.65; max-width:720px; margin-bottom:18px; }
+.item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:10px; }
+.item.severe { border-color:var(--over); border-left-width:3px; }
+.item.star { border-color:var(--safe); border-left-width:3px; }
+.item-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.item-name { font-size:15px; font-weight:700; }
+.item-loc { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
+.item-body { font-size:14px; color:var(--text-2); line-height:1.65; }
+.item-body b { color:var(--text); font-weight:600; }
+.item-body p + p { margin-top:8px; }
+.evidence { margin-top:10px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-family:'DM Mono',monospace; font-size:12px; color:var(--text-2); line-height:1.6; overflow-x:auto; white-space:pre-wrap; }
+.verdict { margin-top:10px; font-size:13px; display:flex; gap:8px; align-items:baseline; }
+.verdict .v { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:6px; flex:none; }
+.v.keep { background:var(--safe-soft); color:var(--safe-text); }
+.v.fix { background:var(--over-soft); color:var(--over-text); }
+.v.decide { background:var(--careful-soft); color:var(--careful-text); }
+.v.drop { background:var(--surface-3); color:var(--text-2); }
+.verdict span:last-child { color:var(--text-2); }
+table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+th { text-align:left; padding:8px 10px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; border-bottom:2px solid var(--border); background:var(--surface-2); }
+td { padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+td.n { font-family:'DM Mono',monospace; white-space:nowrap; }
+td.yes { color:var(--safe-text); font-weight:600; }
+td.no { color:var(--over-text); font-weight:600; }
+.note { font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; }
+.note b { color:var(--text-2); }
+.scroll { overflow-x:auto; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div class="eyebrow">Feature audit · ssdi-tracker-improved.html</div>
+  <h1>The light one</h1>
+  <p class="lede">289 lines of JavaScript against PayGuard's 1,627 — and you were right that it is light. <b>No jobs, no entries, no types: a month is a bucket, and you push numbers into it.</b></p>
+  <p class="lede">That subtraction is why the file is worth reading. It is not a smaller version of the other one; it answers a different question, and it contains <b>the single most product-aligned function in either file</b>.</p>
+  <div class="scoreboard">
+    <div class="score working"><div class="score-n">6</div><div class="score-l">Working</div></div>
+    <div class="score wrong"><div class="score-n">6</div><div class="score-l">Wrong</div></div>
+    <div class="score stub"><div class="score-n">2</div><div class="score-l">Missing</div></div>
+    <div class="score dead"><div class="score-n">3</div><div class="score-l">Dead</div></div>
+  </div>
+</header>
+
+<h2 class="band">The good part <span class="tag working">Keep</span></h2>
+
+<div class="item star">
+  <div class="item-head"><span class="item-name">Hours from a rate — live</span><span class="item-loc">updatePlan()</span></div>
+  <div class="item-body">
+    <p>Eight lines, no dependencies, recalculating on every keystroke.</p>
+    <div class="evidence">const monthlyHours = effectiveLimit / rate;
+const weeklyHours  = monthlyHours / 4.33;</div>
+    <p><b>This is the product's headline rule, implemented.</b> Nothing is hard-coded — the answer is 10 hours at $21.50, 15 at $15, 6 at $35, exactly as the brief demands, because it is derived every time rather than written down once.</p>
+    <p>It also lets the reader <b>edit the limit itself</b>, so someone whose figure differs from the built-in $1,210 is not stuck with a wrong answer.</p>
+  </div>
+  <div class="verdict"><span class="v keep">Keep</span><span>See the Wrong list — it answers "hours from zero", not "hours left". The equation is right; the input is not.</span></div>
+</div>
+
+<div class="item star">
+  <div class="item-head"><span class="item-name">The month cells count down, not up</span><span class="item-loc">renderMonths()</span></div>
+  <div class="item-body">
+    <p>Every cell shows <b>what is left</b>, not what was earned — an untouched month reads <code>$1,210</code>, not <code>$0</code>, and a month that went over stops showing money entirely and says <code>⚠ Over</code>.</p>
+    <p>It is one line of display logic and it changes what the grid is <em>for</em>. A row of zeros is a record; a row of ceilings is a plan. <b>The decision the reader is making is how much room they have, and this is the only surface in either file that answers it without arithmetic.</b></p>
+  </div>
+  <div class="verdict"><span class="v keep">Keep</span><span>The strongest idea in this file after <code>updatePlan</code>, and it costs nothing.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Consequence before commit</span><span class="item-loc">openLogModal()</span></div>
+  <div class="item-body"><p>Opening the log dialog computes what will be left after the entry and colours it green, amber or red before anything is saved. Teaching by interaction, as the brief asks.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>PayGuard's modal has no equivalent. Cross it in.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">One threshold, applied everywhere</span><span class="item-loc">renderHeroStats · renderMonths · openLogModal</span></div>
+  <div class="item-body"><p>0–80% clear, 80–100% close, over 100% over. <b>The same three bands drive the ring colour, the ring's sentence, the remaining figure, every month cell and the modal preview.</b> Change one number and the whole page agrees with itself.</p></div>
+  <div class="verdict"><span class="v keep">Keep</span><span>The threshold is repeated as a literal in four places rather than named once. Same behaviour, one constant away from being maintainable.</span></div>
+</div>
+
+<h2 class="band">Wrong <span class="tag wrong">Fix before reuse</span></h2>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">The year never advances</span><span class="item-loc">loadState()</span></div>
+  <div class="item-body">
+    <div class="evidence">if (!parsed.year) parsed.year = new Date().getFullYear();</div>
+    <p>The year is stamped once, on first run, and <b>never updated again</b>. Nothing in the interface changes it. Come January the app keeps showing last year's months, last year's total and last year's limit, with this year's data being filed under a key the display no longer reads.</p>
+    <p>Every downstream figure inherits it — <code>monthKey</code>, <code>yearTotal</code>, <code>overMonthsCount</code> and the "2026 Total" heading.</p>
+  </div>
+  <div class="verdict"><span class="v fix">Fix</span><span>The most damaging bug in the file, and invisible for eleven months of testing.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">"Hours I could work" ignores what you already earned</span><span class="item-loc">updatePlan()</span></div>
+  <div class="item-body">
+    <p>The card is headed <em>"How many hours could I work this month?"</em>. The function divides the <b>full monthly limit</b> by the rate and never subtracts what has already been counted.</p>
+    <p>So on the 28th of a month where you have earned $1,100 of your $1,210, it still answers <b>56 hours</b>. The correct answer is five. <b>It is wrong in the direction that costs someone their benefits</b>, which is the one direction the brief singles out.</p>
+  </div>
+  <div class="verdict"><span class="v fix">Fix</span><span>Use remaining, not the limit. One term. This is the difference between a calculator and an answer.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">Entries from other years leak into the list</span><span class="item-loc">renderLogs()</span></div>
+  <div class="item-body">
+    <div class="evidence">const [year, month] = key.split('-');   // `year` is destructured and never used
+all.push({ monthIndex: parseInt(month) - 1, amount, idx });
+...
+&lt;span class="log-date"&gt;${name} ${state.year}&lt;/span&gt;   // stamped with the CURRENT year</div>
+    <p>The loop walks <b>every key in storage regardless of year</b>, then labels each row with <code>state.year</code>. A 2026 entry and a 2027 entry for the same month appear as two identical rows, both claiming the same date.</p>
+  </div>
+  <div class="verdict"><span class="v fix">Fix</span><span>The variable that would have prevented it is already destructured on the line above.</span></div>
+</div>
+
+<div class="item severe">
+  <div class="item-head"><span class="item-name">Logs are push-only</span><span class="item-loc">confirmLog() · clearAllLogs()</span></div>
+  <div class="item-body">
+    <p><code>state.logs[key].push(amount)</code> is the only write. There is no edit, no delete, no undo — <b>the only correction available is "Clear all", which wipes every month of every year.</b></p>
+    <p>The bare number array is why: an entry has no id, no date and no note, so there is nothing to address it by. That is the same subtraction that makes the file small, and this is its bill.</p>
+  </div>
+  <div class="verdict"><span class="v fix">Fix</span><span>A mistyped amount currently costs the reader their whole history. Entries need identity.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Rejection is silent</span><span class="item-loc">confirmLog()</span></div>
+  <div class="item-body"><p><code>if (!amount || amount &lt; 0) { focus(); return; }</code> — a blank or zero entry just moves the cursor. Nothing is said. The reader presses "Log It" and the dialog sits there.</p></div>
+  <div class="verdict"><span class="v fix">Fix</span><span>It also rejects <code>0</code>, which is a legitimate thing to record for a month with no work.</span></div>
+</div>
+
+<div class="item">
+  <div class="item-head"><span class="item-name">Safe only because nothing is typed</span><span class="item-loc">renderMonths · renderLogs</span></div>
+  <div class="item-body"><p>Rows are built with <code>innerHTML</code> templates and buttons with <code>setAttribute('onclick', …)</code>. There is no free-text field anywhere in the app, so nothing hostile can reach either. <b>Add a notes field and both become injection points on the same day.</b></p></div>
+  <div class="verdict"><span class="v decide">Decide</span><span>Not a bug today. It is a trap laid for whoever adds the feature PayGuard already has.</span></div>
+</div>
+
+<h2 class="band">Missing and dead <span class="tag dead">Delete or build</span></h2>
+<div class="item">
+  <div class="item-body">
+    <table>
+      <tr><th>Name</th><th>What</th></tr>
+      <tr><td class="n">threshold</td><td><code>renderMonths</code> computes <code>monthlyLimit * 0.8</code> and never reads it — the same figure is recomputed inline two lines later.</td></tr>
+      <tr><td class="n">year</td><td>Destructured in <code>renderLogs</code>, never used. See Wrong.</td></tr>
+      <tr><td class="n">state.selectedMonth branch</td><td><code>renderLogs</code> has a per-month path, but <code>closeModal()</code> nulls <code>selectedMonth</code> before <code>render()</code> runs, so <b>the branch is unreachable</b> — the list is always "most recent 15, all months".</td></tr>
+      <tr><td class="n">no deductions</td><td>No mileage, no 1099, no net-to-gross. Every dollar counts in full — which for a delivery driver overstates countable income by hundreds a month.</td></tr>
+      <tr><td class="n">no trial months</td><td>No concept of the nine-in-sixty rule at all. PayGuard at least attempts it.</td></tr>
+    </table>
+  </div>
+</div>
+
+<h2 class="band">Is any of this cleverer than what we have? <span class="tag verdict">The answer</span></h2>
+<p class="band-sub">Checked against <code>src/domain/</code> — 2,338 lines across fourteen modules — rather than assumed.</p>
+
+<div class="item">
+  <div class="item-body">
+    <p><b>On domain logic: no. Not one thing.</b> The real app is ahead on every question both prototypes attempt, and in several places it already implements the exact feature I built into the hermes file this session.</p>
+    <div class="scroll">
+    <table>
+      <tr><th>Question</th><th>Hermes</th><th>src/domain/</th><th>Ahead</th></tr>
+      <tr><td>Hours from a rate</td><td class="n">limit ÷ rate ÷ 4.33</td><td class="n">capacity.ts — capacityFor(), Binding 'money' | 'hours', outcomeOf(), NET_ESTIMATE_BAND</td><td class="no">src</td></tr>
+      <tr><td>Trial months</td><td class="n">count of months with any entry, capped at 9</td><td class="n">trialWork.ts — ROLLING_WINDOW = 60, computedServiceMonths(), benefitPhase(), activeThreshold()</td><td class="no">src</td></tr>
+      <tr><td>Extra paycheck months</td><td class="n">what I added this session</td><td class="n">paySchedule.ts — extraPaycheckMonths(), <b>paycheckContextForMonth()</b>: which jobs land an extra check this month, and how many</td><td class="no">src</td></tr>
+      <tr><td>Mileage / net→gross</td><td class="n">one subtraction (PayGuard); none (tracker)</td><td class="n">earnings.ts — 329 lines</td><td class="no">src</td></tr>
+      <tr><td>Month scope</td><td class="n">hardcoded 12</td><td class="n">months.ts — scopedMonths(), four scopes</td><td class="no">src</td></tr>
+      <tr><td>Pay schedules</td><td class="n">cycle + anchor day</td><td class="n">paySchedule.ts — payPlan(), paceWarning(), 246 lines</td><td class="no">src</td></tr>
+    </table>
+    </div>
+    <p class="note"><b>Worth saying plainly:</b> the extra-paycheck warning I built into <code>payguard-app.html</code> earlier in this session duplicates <code>paycheckContextForMonth()</code>, which already does it per-stream and better. It was worth building to prove the interaction, and it should not be ported — the interface should call the domain function that exists.</p>
+  </div>
+</div>
+
+<div class="item star">
+  <div class="item-body">
+    <p><b>On interface and framing: yes, four things.</b> These are not calculations, which is exactly why they survived the comparison — they are decisions about what to put on screen.</p>
+    <table>
+      <tr><td class="n" style="width:190px">Cells count down</td><td>Showing the ceiling instead of the total. Turns a record into a plan. Nothing in the eight layouts does this.</td></tr>
+      <tr><td class="n">Nav that scrolls</td><td>One page, always rendered, <code>scrollIntoView</code> instead of a router. Removes mount/unmount and lost scroll position from a whole class of layout.</td></tr>
+      <tr><td class="n">Consequence preview</td><td>What will be left, shown before you commit, updating as you type.</td></tr>
+      <tr><td class="n">Status as three pills</td><td>Always visible, one tap, no select. Beats a dropdown everywhere it appears.</td></tr>
+    </table>
+    <p style="margin-top:12px;"><b>And one gap neither side has closed.</b> <code>hours → rate</code> — <em>"I can manage 10 hours, what can I be paid?"</em> — is absent from all eight layouts, from <code>src/domain/</code>, and from both hermes files. The brief calls it the actual job-search criterion. <b>It is the same equation solved for the other unknown, and nobody has written it.</b></p>
+  </div>
+</div>
+
+<div class="item">
+  <div class="item-body">
+    <p style="font-size:15px;"><b>The shape of the answer:</b> mine these files for <em>interface</em>, and wire that interface to <code>src/domain/</code>. Every prototype calculation is either behind what exists or duplicating it, and two of them — PayGuard's gauge and its trial-month tracker — are confidently wrong about someone's benefits.</p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

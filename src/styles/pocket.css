@@ -2,45 +2,108 @@
  * Pocket — built for the phone this product's users actually have
  * ===================================================================
  *
- * Someone tracking earnings against SGA and TWP limits is, by definition, on
- * a low income. A large share of them are carrying a Lifeline handset: a
- * cheap Android, 1–2GB of RAM, a 320–360px screen, an un-updated WebView,
- * and metered data. The rest of this app is not written for that phone, and
- * this file is deliberate about every way it differs.
+ * Someone tracking earnings against a monthly limit is, by definition, on a
+ * low income. A large share are carrying a Lifeline handset: a cheap Android,
+ * 1–2GB of RAM, a 320–360px screen, an un-updated WebView, metered data.
  *
- * WHAT IS BANNED HERE, AND WHY
+ * THE FLOOR, AND WHY IT IS A FLOOR
  *
- *   color-mix()       Chrome 111 (Mar 2023). The app uses it 265 times. On an
- *                     older WebView the whole declaration is dropped, so a
- *                     "subtle" background becomes transparent and a border
- *                     disappears — silent, and worst on exactly the screens
- *                     that most need contrast. Every colour here is literal.
- *   backdrop-filter   129 uses elsewhere. It forces a compositor pass per
- *                     frame; on a weak GPU that is jank on every scroll, and
- *                     it is only ever decoration.
- *   @container        Chrome 105. Media queries do the same job here.
- *   dvh units         Chrome 108. `min-height: 100%` is older than all of it.
- *   text-wrap         Chrome 114.
- *   box-shadow blur   Cheap to write, expensive to paint on a long list.
- *                     Borders instead.
+ * Everything below renders completely with no @supports block ever matching.
+ * That is the version most of this audience sees and it is not a degraded
+ * one. Above the floor, a better rendering for a current engine is free — see
+ * CLAUDE.md § The device is the floor, not the ceiling. What stays banned
+ * outright is not a support question:
+ *
+ *   backdrop-filter   A compositor pass per frame. On a weak GPU that is jank
+ *                     on every scroll, and it is only ever decoration.
+ *                     Supported widely — still wrong here. A budget, not a
+ *                     capability.
+ *   box-shadow blur   Cheap to write, expensive to paint down a long list.
+ *                     Depth here comes from a ground/surface split and
+ *                     hairlines, which cost nothing to paint.
+ *   web fonts         A download on a metered connection for something the
+ *                     system stack already does. No FOIT, no layout shift.
  *
  * The floor is 320px — the real one, not 360. Touch targets are 44px. Type
  * never goes below 15px for anything you have to read, because these screens
- * get used outdoors and by people whose eyes are not 20.
+ * get used outdoors by people whose eyes are not 20.
+ *
+ * WHAT THIS SCREEN IS DOING VISUALLY
+ *
+ * One statement, one action, one list — in that order, at three clearly
+ * different weights. The old version drew all three as identical bordered
+ * white cards on a white page, so nothing led and the answer the reader came
+ * for carried the same visual weight as a section heading. Hierarchy is now
+ * typographic: the answer is the largest thing on the screen and sits in no
+ * box at all, because it is the page's statement rather than an object on it.
+ * Boxes are reserved for things you can act on.
  */
 
+/* @override pocket — the layout's own scale, not yet on the palette.
+ *
+ * These 14 names are new, and they are the point of this pass rather than a
+ * regression: pocket had 42 raw hex values scattered through its rules and
+ * not one custom property, so theme:check could not see its colours at all
+ * and nothing could be restyled without editing forty places. Naming them
+ * first is what makes mapping them onto --t-* a mechanical change instead of
+ * a redesign, and that mapping is the next piece of work — see
+ * task-pocket-still-off-the-design-system. Until then this block is the one
+ * place pocket chooses a colour. */
 .pk {
-  min-height: 100%;
-  background: #ffffff;
-  color: #16191f;
-  /* System stack: no webfont means no download, no FOIT, no layout shift. */
+  /* Ground and surface, so a card is a card without a shadow. Two flat fills
+     do the whole job that an elevation system usually costs a compositor. */
+  --pk-ground: #f1f3f5;
+  --pk-surface: #ffffff;
+  --pk-sunken: #f7f8fa;
+  --pk-ink: #14171c;
+  --pk-ink-2: #5b636e;
+  --pk-ink-3: #858d98;
+  --pk-hairline: #e6e9ed;
+  --pk-edge: #d7dce2;
+  --pk-green: #17693a;
+  --pk-green-press: #115430;
+  --pk-green-tint: #eaf3ed;
+  --pk-link: #14497e;
+  --pk-warn: #8a5200;
+
+  display: flex;
+  flex-direction: column;
+  /* 100vh, not 100%. A percentage height only resolves when every ancestor
+     has one, and #root does not — so on a short screen the ground stopped
+     where the content stopped and the rest of the page showed the app shell's
+     own near-white through it, as a hard band under the last card. vh is
+     ancient (dvh is the one this file avoids) and a background that runs a
+     URL-bar's height too far is invisible; a white band is not. */
+  min-height: 100vh;
+  background: var(--pk-ground);
+  color: var(--pk-ink);
+  /* System stack: no download, no FOIT, no layout shift. */
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-text-size-adjust: 100%;
 }
 
+/* @override pocket — the dark half of the same scale, same reason as above. */
 .dark .pk {
-  background: #12151b;
-  color: #eef1f5;
+  --pk-ground: #0d1014;
+  --pk-surface: #171b21;
+  --pk-sunken: #12161b;
+  --pk-ink: #eef1f5;
+  --pk-ink-2: #98a2b1;
+  --pk-ink-3: #79828f;
+  --pk-hairline: #232830;
+  --pk-edge: #333a44;
+  --pk-green: #43d692;
+  --pk-green-press: #35b077;
+  --pk-green-tint: #16241d;
+  --pk-link: #9dc4f2;
+  --pk-warn: #f2c078;
+}
+
+/* One visible focus treatment for every control on the screen. */
+.pk :focus-visible {
+  outline: 3px solid var(--pk-ink);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* ---- header ---- */
@@ -49,16 +112,46 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid #dfe3e9;
-  background: #ffffff;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--pk-hairline);
+  background: var(--pk-surface);
 }
-.dark .pk-top { background: #12151b; border-bottom-color: #2a2f39; }
 
 .pk-top-when { flex: 1 1 auto; min-width: 0; }
-.pk-top-when b { display: block; font-size: 16px; font-weight: 700; }
-.pk-top-when span { display: block; font-size: 13px; color: #5c6572; }
-.dark .pk-top-when span { color: #98a2b1; }
+.pk-top-when b {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.pk-top-when span,
+.pk-top-sources {
+  display: block;
+  margin-top: 1px;
+  font-size: 13px;
+  color: var(--pk-ink-3);
+}
+
+/* The source line is a control — tap it to manage jobs — without looking
+   like a second header button beside Settings. */
+.pk-top-sources {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pk-top-sources:focus-visible {
+  outline: 3px solid var(--pk-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 
 .pk-btn {
   display: inline-flex;
@@ -67,77 +160,115 @@
   gap: 6px;
   min-width: 44px;
   min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid #c9cfd8;
-  border-radius: 8px;
-  background: #ffffff;
+  padding: 0 14px;
+  border: 1px solid var(--pk-edge);
+  border-radius: 10px;
+  background: var(--pk-surface);
   color: inherit;
   font: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }
-.dark .pk-btn { border-color: #39404d; background: #1a1f27; }
-.pk-btn:active { background: #eceff3; }
-.dark .pk-btn:active { background: #232935; }
+.pk-btn:active { background: var(--pk-sunken); }
 
-.pk-main { padding: 12px; }
-.pk-main > * + * { margin-top: 12px; }
+/* The column. Pocket is a phone layout and was spanning the full width of
+   whatever it was opened on; past ~460px the line length stops being
+   readable and the screen stops looking designed. */
+.pk-main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 16px 14px 32px;
+}
+.pk-main > * + * { margin-top: 16px; }
 
 /* ---- the answer ----
- * One sentence, large, with a solid colour bar. No gradient, no shadow, no
- * translucency: three things that cost paint time and say nothing.
+ *
+ * The largest thing on the screen, and the only block with no border around
+ * it. It used to be a bordered card carrying a 5px status stripe, which made
+ * the page's own statement look like one item in a list of three.
+ *
+ * The stripe is gone with it. It was the only thing saying which state the
+ * month was in back when the headline was a bare dollar figure; the sentence
+ * now says it outright ("46 hours left this month", "You are past the $1,000
+ * we aim for, and that is allowed"), so the stripe repeated the words in a
+ * code the reader had to learn. State is a word here, not only a colour —
+ * which also means it survives a cheap panel in daylight, and the roughly one
+ * man in twelve who cannot separate the red from the green.
  */
 
-.pk-answer {
-  padding: 14px;
-  border: 1px solid #dfe3e9;
-  border-left-width: 5px;
-  border-radius: 10px;
-}
-.dark .pk-answer { border-color: #2a2f39; }
+.pk-hero { padding: 2px 2px 0; }
 
-.pk-answer[data-tone='over'] { border-left-color: #c62828; }
-.pk-answer[data-tone='near'] { border-left-color: #b26a00; }
-.pk-answer[data-tone='clear'] { border-left-color: #1b7f3b; }
-.pk-answer[data-tone='unknown'] { border-left-color: #5c6572; }
-
-.pk-answer-line {
+.pk-hero-line {
   margin: 0;
-  font-size: 20px;
+  font-size: 31px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+  font-variant-numeric: tabular-nums;
 }
 
-.pk-answer-sub {
-  margin: 6px 0 0;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #5c6572;
+.pk-hero-sub {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--pk-ink-2);
 }
-.dark .pk-answer-sub { color: #98a2b1; }
+/* The second and later sub-lines are supporting detail behind the first. */
+.pk-hero-sub ~ .pk-hero-sub {
+  margin-top: 7px;
+  font-size: 14px;
+  color: var(--pk-ink-3);
+}
+
+/* Above the floor: better ragging on the one line that is set large enough
+   for a bad break to be visible. Absent on an old WebView, and nothing about
+   the layout depends on it. */
+@supports (text-wrap: balance) {
+  .pk-hero-line { text-wrap: balance; }
+}
 
 /* ---- the one big action ----
- * Logging a paycheck is the task people open this app to do. It is a
- * full-width 52px target near the top of the thumb arc, not an icon in a
- * corner.
+ * Logging pay is the task people open this app to do. Full-width, 54px, and
+ * the only saturated fill on the screen — so it is not competing with a
+ * second one anywhere.
  */
 
 .pk-log {
   display: block;
   width: 100%;
-  min-height: 52px;
-  padding: 14px;
+  min-height: 54px;
+  padding: 15px;
   border: 0;
-  border-radius: 10px;
-  background: #17693a;
+  border-radius: 12px;
+  background: var(--pk-green);
   color: #ffffff;
   font: inherit;
   font-size: 17px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   cursor: pointer;
 }
-.pk-log:active { background: #115430; }
+.pk-log:active { background: var(--pk-green-press); }
+/* @override pocket — a disabled fill has to read as "not yet" rather than as
+   a second colour, so it is a neutral chosen against this green specifically. */
+.pk-log:disabled { background: #b9c0c8; color: #ffffff; cursor: default; }
+.dark .pk-log { color: #08130d; }
+.dark .pk-log:disabled { background: #333a44; color: #79828f; }
+
+/* ---- panels ----
+ * A bordered surface for anything you act on: the log form, the job picker.
+ * This is the class the answer used to share, which is why nothing led.
+ */
+
+.pk-answer {
+  padding: 16px;
+  border: 1px solid var(--pk-hairline);
+  border-radius: 12px;
+  background: var(--pk-surface);
+}
 
 /* ---- months ----
  * A vertical list, never a horizontal track. Sideways scrolling on a 320px
@@ -145,18 +276,22 @@
  * it fights the page's own vertical scroll.
  */
 
-.pk-months { border: 1px solid #dfe3e9; border-radius: 10px; overflow: hidden; }
-.dark .pk-months { border-color: #2a2f39; }
+.pk-months {
+  border: 1px solid var(--pk-hairline);
+  border-radius: 12px;
+  background: var(--pk-surface);
+  overflow: hidden;
+}
 
 .pk-month {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  min-height: 52px;
-  padding: 10px 12px;
+  min-height: 60px;
+  padding: 12px 14px;
   border: 0;
-  border-top: 1px solid #e8ebef;
+  border-top: 1px solid var(--pk-hairline);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -164,38 +299,61 @@
   cursor: pointer;
 }
 .pk-month:first-child { border-top: 0; }
-.dark .pk-month { border-top-color: #232935; }
-.pk-month:active { background: #eceff3; }
-.dark .pk-month:active { background: #1c222b; }
+.pk-month:active { background: var(--pk-sunken); }
+
+/* Says the row is a control. A border and a radius mean "container", and a
+   container is not obviously something you press — so the one thing on the
+   row that could signal a tap was doing no work. */
+.pk-month::after {
+  content: "\203A";
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 4px;
+  color: var(--pk-ink-3);
+  font-size: 20px;
+  line-height: 1;
+}
 
 .pk-month-name {
-  flex: 0 0 42px;
-  font-size: 13px;
+  flex: 0 0 40px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #5c6572;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--pk-ink-3);
 }
-.dark .pk-month-name { color: #98a2b1; }
 
 .pk-month-mid { flex: 1 1 auto; min-width: 0; }
 
-.pk-month-amount { font-size: 16px; font-weight: 700; }
+.pk-month-amount {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
 
-.pk-month-note { display: block; font-size: 13px; line-height: 1.35; color: #5c6572; }
-.dark .pk-month-note { color: #98a2b1; }
+.pk-month-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--pk-ink-2);
+}
 
-/* State is a word, not only a colour. On a cheap panel in daylight, hue is
-   the first thing to go — and roughly one man in twelve cannot separate the
-   red from the green regardless of the screen. */
+/* The only flag left on a row is the paycheck count — the one fact the
+   figure beside it cannot state. See TrackerPocket for why the others went. */
 .pk-tag {
   flex: 0 0 auto;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border: 1px solid;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 }
+/* @override pocket — status chips carry their own literal pairs so each one
+   is legible on a cheap panel in daylight; they predate the token pass. */
 .pk-tag[data-kind='over'] { color: #a01c1c; border-color: #e0a3a3; background: #fdf0f0; }
 .pk-tag[data-kind='used'] { color: #8a5200; border-color: #e3c08a; background: #fdf6e9; }
 .pk-tag[data-kind='near'] { color: #8a5200; border-color: #e3c08a; background: #fdf6e9; }
@@ -205,51 +363,73 @@
 .dark .pk-tag[data-kind='near'] { color: #f2c078; border-color: #6a4d1c; background: #29200f; }
 .dark .pk-tag[data-kind='pay'] { color: #9dc4f2; border-color: #27456b; background: #141d29; }
 
+/* A list inside a panel does not need a box of its own — the panel is already
+   the box, and two nested borders 16px apart read as a mistake. The rows
+   full-bleed to the panel's edges instead, which is what a list in a card
+   should look like. */
+.pk-answer > .pk-months {
+  margin: 12px -16px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.pk-answer > .pk-months .pk-month { padding-left: 16px; padding-right: 16px; }
+.pk-answer > .pk-months .pk-month:first-child { border-top: 1px solid var(--pk-hairline); }
+.pk-answer > .pk-months + .pk-plain { margin-top: 4px; }
+
 /* ---- inline detail ----
  * Expands in place instead of opening a sheet. A modal on a 1GB phone means
  * a second tree, a transition and a scroll lock; this is a div.
  */
 
 .pk-detail {
-  padding: 12px;
-  border-top: 1px solid #e8ebef;
-  background: #f7f8fa;
+  padding: 14px;
+  border-top: 1px solid var(--pk-hairline);
+  background: var(--pk-sunken);
   font-size: 15px;
   line-height: 1.5;
 }
-.dark .pk-detail { border-top-color: #232935; background: #171c24; }
 
-.pk-detail dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0; }
-.pk-detail dt { color: #5c6572; }
-.dark .pk-detail dt { color: #98a2b1; }
-.pk-detail dd { margin: 0; font-weight: 700; text-align: right; }
+.pk-detail dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px 14px;
+  margin: 0;
+}
+.pk-detail dt { color: var(--pk-ink-2); }
+.pk-detail dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 
 .pk-section-title {
-  margin: 0 0 6px;
-  font-size: 13px;
+  margin: 0 0 8px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #5c6572;
+  color: var(--pk-ink-3);
 }
-.dark .pk-section-title { color: #98a2b1; }
 
 .pk-empty {
-  padding: 14px;
-  border: 1px dashed #c9cfd8;
-  border-radius: 10px;
+  padding: 16px;
+  border: 1px dashed var(--pk-edge);
+  border-radius: 12px;
+  background: var(--pk-surface);
   font-size: 15px;
   line-height: 1.5;
-  color: #5c6572;
+  color: var(--pk-ink-2);
 }
-.dark .pk-empty { border-color: #39404d; color: #98a2b1; }
 
 /* The floor. Everything above already fits; this only tightens the gutters
    so nothing clips on a 320px screen. */
 @media (max-width: 22.5em) {
-  .pk-main { padding: 8px; }
-  .pk-answer-line { font-size: 18px; }
-  .pk-month-name { flex-basis: 36px; }
+  .pk-main { padding: 12px 10px 24px; }
+  .pk-hero-line { font-size: 26px; }
+  .pk-month-name { flex-basis: 34px; }
+  .pk-month { padding: 12px 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -258,171 +438,381 @@
 
 /* ---- editing a month in place ---- */
 
-.pk-edit + .pk-edit { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e8ebef; }
-.dark .pk-edit + .pk-edit { border-top-color: #232935; }
+.pk-edit + .pk-edit {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pk-hairline);
+}
 
 .pk-edit-name {
   display: block;
-  margin: 8px 0 4px;
-  font-size: 14px;
+  margin: 14px 0 4px;
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.35;
 }
 .pk-edit-name:first-child { margin-top: 0; }
 .pk-edit-name span {
   margin-left: 6px;
   font-size: 12px;
   font-weight: 700;
-  color: #5c6572;
+  color: var(--pk-ink-3);
 }
-.dark .pk-edit-name span { color: #98a2b1; }
 
 .pk-edit-field {
   width: 100%;
+  min-height: 52px;
   justify-content: flex-start;
-  font-size: 17px;
+  border-radius: 10px;
+  font-size: 20px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
+.pk-edit-field:focus { border-color: var(--pk-green); }
 
 .pk-edit-note {
-  margin: 6px 0 0;
+  margin: 7px 0 0;
   font-size: 13px;
-  line-height: 1.4;
-  color: #5c6572;
+  line-height: 1.45;
+  color: var(--pk-ink-2);
 }
-.dark .pk-edit-note { color: #98a2b1; }
-.pk-edit-note[data-warn] { color: #8a5200; font-weight: 700; }
-.dark .pk-edit-note[data-warn] { color: #f2c078; }
+.pk-edit-note[data-warn] { color: var(--pk-warn); font-weight: 700; }
+/* Full-strength ink, not amber and not green. The mileage deduction is the
+   most valuable fact this form produces — often the difference between
+   thinking you are nearly out of room and having most of it left — so it
+   cannot be set as quiet grey supporting text. It is also not a caution, so
+   it does not take the warn colour, and green here would read as the action
+   rather than the news. Weight alone does the work. */
+.pk-edit-note[data-good] { color: var(--pk-ink); font-weight: 700; }
 
 /* ---- the "I cannot find that number" path ---- */
 
 /* A plain text button, not a second big green one. There is one primary
-   action on this screen and it is saving the pay; the way out for someone
-   who cannot find the number should be findable without competing with it. */
+   action on this screen and it is adding the pay; the way out for someone who
+   cannot find the number should be findable without competing with it. */
 .pk-plain {
   display: block;
   width: 100%;
   min-height: 44px;
-  margin-top: 10px;
+  margin-top: 8px;
   padding: 10px;
   border: 0;
   background: none;
-  color: #14497e;
+  color: var(--pk-link);
   font: inherit;
   font-size: 15px;
   font-weight: 700;
   text-align: center;
   text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
 }
-.dark .pk-plain { color: #9dc4f2; }
 
 .pk-guess {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e8ebef;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pk-hairline);
 }
-.dark .pk-guess { border-top-color: #232935; }
-
-.pk-log:disabled { background: #9aa5b1; cursor: default; }
-.dark .pk-log:disabled { background: #39404d; }
 
 /* ---- basis switch in log pay ---- */
 .pk-switch {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .pk-switch-btn {
   flex: 1 1 0;
-  min-height: 44px;
+  min-height: 46px;
   padding: 8px 12px;
-  border: 1px solid #c9cfd8;
-  border-radius: 8px;
-  background: #f7f8fa;
-  color: #5c6572;
+  border: 1px solid var(--pk-edge);
+  border-radius: 10px;
+  background: var(--pk-sunken);
+  color: var(--pk-ink-2);
   font: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
 }
-.dark .pk-switch-btn {
-  border-color: #39404d;
-  background: #171c24;
-  color: #98a2b1;
-}
 
+/* 2px in, 1px padding out — the box does not move when it is chosen. */
 .pk-switch-btn[data-active] {
-  background: #ffffff;
-  border-color: #17693a;
-  border-width: 2px;
-  color: #17693a;
-  font-weight: 700;
   padding: 7px 11px;
-}
-.dark .pk-switch-btn[data-active] {
-  background: #1a1f27;
-  border-color: #43d692;
-  color: #43d692;
+  border: 2px solid var(--pk-green);
+  background: var(--pk-green-tint);
+  color: var(--pk-green);
+  font-weight: 700;
 }
 
 /* ---- future preference prompt ---- */
 .pk-prompt {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px solid #dfe3e9;
-  border-radius: 8px;
-  background: #f7f8fa;
-}
-.dark .pk-prompt {
-  border-color: #2a2f39;
-  background: #171c24;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--pk-hairline);
+  border-radius: 10px;
+  background: var(--pk-sunken);
 }
 
 .pk-prompt-title {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
   color: inherit;
 }
 
-.pk-prompt-choices {
-  display: flex;
-  gap: 8px;
-}
+.pk-prompt-choices { display: flex; gap: 8px; }
 
 .pk-prompt-btn {
   flex: 1 1 0;
-  min-height: 40px;
-  padding: 6px 10px;
-  border: 1px solid #c9cfd8;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #5c6572;
+  min-height: 42px;
+  padding: 7px 10px;
+  border: 1px solid var(--pk-edge);
+  border-radius: 8px;
+  background: var(--pk-surface);
+  color: var(--pk-ink-2);
   font: inherit;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
 }
-.dark .pk-prompt-btn {
-  border-color: #39404d;
-  background: #1a1f27;
-  color: #98a2b1;
-}
 
 .pk-prompt-btn[data-selected] {
-  border-color: #17693a;
-  border-width: 2px;
-  background: #ffffff;
-  color: #17693a;
+  padding: 6px 9px;
+  border: 2px solid var(--pk-green);
+  background: var(--pk-green-tint);
+  color: var(--pk-green);
   font-weight: 700;
-  padding: 5px 9px;
 }
-.dark .pk-prompt-btn[data-selected] {
-  border-color: #43d692;
-  background: #1a1f27;
-  color: #43d692;
+
+/* ---- manage / add sources ----
+ *
+ * Pocket used to send you to Settings to add a job, and Settings cannot do
+ * that. These two surfaces are local, spoken, and small: name a source, list
+ * them, delete one. The thin purple bar matches the PayGuard reference chrome
+ * without borrowing its editor.
+ */
+
+.pk-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(10, 12, 16, 0.45);
+}
+
+.pk-modal {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  max-height: min(92dvh, 40rem);
+  overflow: auto;
+  border: 1px solid var(--pk-edge);
+  border-radius: 16px;
+  background: var(--pk-surface);
+  color: var(--pk-ink);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.pk-modal-accent {
+  height: 3px;
+  background: #7c3aed;
+}
+
+.pk-modal-head {
+  padding: 18px 18px 0;
+}
+
+.pk-modal-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.pk-modal-sub {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--pk-ink-2);
+}
+
+.pk-modal-body {
+  padding: 16px 18px;
+}
+
+.pk-modal-empty {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed var(--pk-edge);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--pk-ink-2);
+}
+
+.pk-modal-label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pk-ink-3);
+}
+
+.pk-modal-input {
+  width: 100%;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.pk-modal-foot {
+  display: flex;
+  gap: 10px;
+  padding: 0 18px 18px;
+}
+
+.pk-modal-btn {
+  flex: 1 1 0;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pk-modal-btn-outline {
+  border: 1px solid var(--pk-edge);
+  background: var(--pk-surface);
+  color: var(--pk-ink);
+}
+
+.pk-modal-btn-outline:active {
+  background: var(--pk-sunken);
+}
+
+.pk-modal-btn-primary {
+  border: 0;
+  background: var(--pk-green);
+  color: #ffffff;
+}
+
+.pk-modal-btn-primary:active {
+  background: var(--pk-green-press);
+}
+
+.pk-modal-btn-primary:disabled {
+  background: #b9c0c8;
+  color: #ffffff;
+  cursor: default;
+}
+
+.dark .pk-modal-btn-primary {
+  color: #08130d;
+}
+
+.dark .pk-modal-btn-primary:disabled {
+  background: #333a44;
+  color: #79828f;
+}
+
+.pk-source-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pk-source-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid var(--pk-hairline);
+  border-radius: 14px;
+  background: var(--pk-sunken);
+}
+
+.pk-source-avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dark .pk-source-avatar {
+  background: #2a2140;
+  color: #c4b5fd;
+}
+
+.pk-source-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pk-source-name {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pk-source-total {
+  font-size: 13px;
+  color: var(--pk-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-source-trash {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: #b42318;
+  cursor: pointer;
+}
+
+.pk-source-trash:active {
+  background: #fdf0f0;
+}
+
+.dark .pk-source-trash {
+  color: #ff9d9d;
+}
+
+.dark .pk-source-trash:active {
+  background: #2a1618;
+}
+
+@media (min-width: 30em) {
+  .pk-modal-scrim {
+    align-items: center;
+  }
 }

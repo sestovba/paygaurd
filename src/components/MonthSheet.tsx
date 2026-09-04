@@ -13,7 +13,7 @@ import { InfoNote } from './InfoNote';
 import { NumericInput } from './NumericInput';
 import { PayAmountField, PayBasisProvider, PayBasisSwitch } from './PayAmount';
 import { Sheet } from './Sheet';
-import { AddJobButton, ButtonRow, Chip, Switch } from './ui';
+import { AddJobButton, ButtonRow, Chip, IconButton, Switch } from './ui';
 import type { MonthKey, Stream } from '../domain/types';
 
 /**
@@ -177,16 +177,14 @@ export function MonthSheet({
                     </Chip>
                     <span className="truncate text-base font-semibold">{stream.name}</span>
                   </div>
-                  <button
-                    type="button"
-                    aria-label={`Remove ${stream.name}`}
-                    title={stream.locked ? 'Unlock this job to remove it' : `Remove ${stream.name}`}
+                  <IconButton
+                    label={stream.locked ? `Unlock ${stream.name} to remove it` : `Remove ${stream.name}`}
+                    tone="danger"
                     disabled={stream.locked}
                     onClick={() => removeStream(stream.id)}
-                    className="icon-btn grid text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
                   >
                     <Trash2 className="size-5" />
-                  </button>
+                  </IconButton>
                 </div>
                 {stream.type === 'ten99' ? (
                   <SelfEmployedMonth stream={stream} month={month} onOpenStream={onOpenStream} />

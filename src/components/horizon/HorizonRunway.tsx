@@ -23,6 +23,7 @@ import { AlertTriangle, Zap } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { money } from '../../domain/format';
 import { formatMonth, scopedMonths, shortMonthName, todayMonth } from '../../domain/months';
+import { MONTH_SCOPE_LABEL } from '../MonthScopePicker';
 import { monthStatus, nearLimit } from '../../domain/earnings';
 import { extraPaycheckMonths } from '../../domain/paySchedule';
 import { activeThreshold, benefitPhase } from '../../domain/trialWork';
@@ -47,10 +48,10 @@ const KEY_ORDER: ReadonlyArray<{ fill: Fill; label: string }> = [
   /* Each entry finishes its own sentence. "Close" and "Under" were
      comparatives with the thing compared to left out, on the key whose whole
      job is explaining the colours. */
-  { fill: 'over', label: 'Over your limit' },
-  { fill: 'used', label: 'Uses a trial work month' },
-  { fill: 'near', label: 'Close to your limit' },
-  { fill: 'clear', label: 'Under your limit' }
+  { fill: 'over', label: 'Over' },
+  { fill: 'used', label: 'Trial month' },
+  { fill: 'near', label: 'Near' },
+  { fill: 'clear', label: 'Under' }
 ];
 
 export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey) => void }) {
@@ -107,10 +108,14 @@ export function HorizonRunway({ onOpenMonth }: { onOpenMonth?: (month: MonthKey)
   const onTrack = new Set(stops.map((stop) => stop.fill));
   const key = KEY_ORDER.filter((entry) => onTrack.has(entry.fill));
 
+  const runwayTitle = scope === 'month'
+    ? MONTH_SCOPE_LABEL.month
+    : `The rest of ${ui.year}`;
+
   return (
-    <section className="hz-runway" aria-label={`The rest of ${ui.year}`}>
+    <section className="hz-runway" aria-label={runwayTitle}>
       <header className="hz-runway-head">
-        <h2 className="hz-label">The rest of {ui.year}</h2>
+        <h2 className="hz-label">{runwayTitle}</h2>
         {crossing ? (
           <p className="hz-runway-lede" data-tone="warn">
             <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />

@@ -31,9 +31,16 @@ export const getAuth = absent;
 export const signInWithPopup = absent;
 export const onAuthStateChanged = absent;
 export const signOut = absent;
+export const signInWithEmailAndPassword = absent;
+export const createUserWithEmailAndPassword = absent;
+export const sendPasswordResetEmail = absent;
 export class GoogleAuthProvider {
   constructor() { absent(); }
   setCustomParameters(): void { absent(); }
+}
+export class OAuthProvider {
+  constructor(_providerId: string) { absent(); }
+  addScope(): void { absent(); }
 }
 
 /* firebase/firestore */

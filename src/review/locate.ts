@@ -7,6 +7,7 @@
 
 import type { ReviewNote } from './types';
 import { safeQuery } from './hidden';
+import { pageDocument } from './root';
 
 /** On the screen, as the browser understands it. `getClientRects()` was the
  *  test, and it answers 0 for any element with `display: contents` — which
@@ -52,8 +53,8 @@ function searchForNote(note: ReviewNote): HTMLElement | null {
   // Class hooks narrow the field enormously when they exist; otherwise the
   // sweep is over elements that carry their own text rather than every node.
   const pool = hooks.length
-    ? document.querySelectorAll<HTMLElement>(hooks.map((h) => `.${CSS.escape(h)}`).join(''))
-    : document.querySelectorAll<HTMLElement>('[class]');
+    ? pageDocument().querySelectorAll<HTMLElement>(hooks.map((h) => `.${CSS.escape(h)}`).join(''))
+    : pageDocument().querySelectorAll<HTMLElement>('[class]');
 
   for (const el of pool) {
     if (isReviewUi(el) || !onScreen(el)) continue;
@@ -91,8 +92,8 @@ function searchForNote(note: ReviewNote): HTMLElement | null {
 /** The element itself, or null when it is not on this screen. */
 export function elementForNote(note: ReviewNote): HTMLElement | null {
   const byId = note.anchor.reviewId
-    ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
-    : document.querySelector(`[data-review-id="${note.id}"]`);
+    ? pageDocument().querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
+    : pageDocument().querySelector(`[data-review-id="${note.id}"]`);
   // Exact handles first, then the search — which is what keeps Locate working
   // after the layout it was recorded against has been rebuilt.
   const found = byId ?? safeQuery(note.anchor.domPath) ?? searchForNote(note);
@@ -116,12 +117,12 @@ export function elementForNote(note: ReviewNote): HTMLElement | null {
  */
 export function nearestVisible(note: ReviewNote): HTMLElement | null {
   const exact = note.anchor.reviewId
-    ? document.querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
+    ? pageDocument().querySelector(`[data-review-id="${note.anchor.reviewId}"]`)
     : safeQuery(note.anchor.domPath);
   // Found but hidden: its own ancestors are the best answer there is.
   if (exact instanceof HTMLElement) {
     let node: HTMLElement | null = exact.parentElement;
-    while (node && node !== document.body) {
+    while (node && node !== pageDocument().body) {
       if (onScreen(node) && !node.closest('[data-review-ui]')) return node;
       node = node.parentElement;
     }
@@ -158,7 +159,7 @@ export function flashElement(target: HTMLElement, tone: 'exact' | 'near' = 'exac
  *  "what am I looking at" continuously, which is the question you have while
  *  sweeping a list of twelve. */
 export function showPeek(note: ReviewNote | null): void {
-  document.querySelectorAll('[data-review-peek]').forEach((el) => {
+  pageDocument().querySelectorAll('[data-review-peek]').forEach((el) => {
     el.removeAttribute('data-review-peek');
   });
   if (!note) return;
@@ -171,7 +172,7 @@ export function showPeek(note: ReviewNote | null): void {
  *  to press the same nav control the reader would press. */
 export function openPage(page: string): boolean {
   const wanted = page.trim().toLowerCase();
-  const controls = Array.from(document.querySelectorAll<HTMLElement>(
+  const controls = Array.from(pageDocument().querySelectorAll<HTMLElement>(
     'nav button, nav a, [role="tab"], .pg-bottom-nav-item, .pg-tab, .v2-nav-item'
   ));
   const hit = controls.find((el) => {

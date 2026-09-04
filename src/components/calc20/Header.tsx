@@ -55,7 +55,7 @@ export function Header({
     <header className="topbar">
       <div className="topbar__row">
         <div className="topbar__title">
-          <div className="topbar__eyebrow">SSDI Income Tracker</div>
+          <div className="topbar__eyebrow">SSDI Tracker</div>
           <h1>{ui.year} work record</h1>
         </div>
 

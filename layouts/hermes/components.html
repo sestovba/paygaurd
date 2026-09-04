@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayGuard Components</title>
+<style>
+/* ============================================================
+   PAYGUARD COMPONENTS — ours, borrowed from hermes.
+   Rebuilt to the device rule in CLAUDE.md:
+     no color-mix()  ·  no backdrop-filter  ·  no web fonts  ·  no blurred shadows
+   Every colour is chosen here and nowhere else. Elevation is a surface step,
+   never a shadow. Both inks are complete: a variant never inherits a choice.
+   ============================================================ */
+:root {
+  --bg:#f4f5f7; --surface:#ffffff; --surface-2:#f7f8fa; --surface-3:#eceef2;
+  --border:#dfe3e9; --border-strong:#c3c9d2;
+  --text:#171a1f; --text-2:#464c55; --muted:#6f7681; --dim:#9aa1ab;
+
+  --safe:#0f766e;    --safe-soft:#d6f5f0;   --safe-text:#0c5850;
+  --careful:#b45309; --careful-soft:#fdefd0; --careful-text:#8a4708;
+  --over:#c2261e;    --over-soft:#fce0de;   --over-text:#8f1c16;
+
+  /* Where money comes from. Two doors, two hues, and neither is the brand —
+     the hermes kit painted gig work in the brand violet, so "this is the app"
+     and "this is self-employment" were the same colour.
+     Both are named for what the reader does, not for what the tax form is
+     called: "part time" and "gig work" are things people say about themselves,
+     where "employer" is a category someone else put them in. */
+  --parttime:#1d4ed8; --parttime-soft:#dce7fd;
+  --gig:#a3541c;      --gig-soft:#fbe8d5;
+
+  --brand:#6d3fd4; --brand-soft:#e9e2fb; --brand-ink:#5730ad;
+
+  --focus:#6d3fd4;
+  /* The pulse ring. Flat rgba, no blur — a spread-only shadow is a hard edge,
+     which the device rule allows; the blurred glow hermes puts on the used
+     slots is the part that does not come with us. */
+  --pulse:rgba(109,63,212,.32);
+  --pulse-out:rgba(109,63,212,0);
+  /* ── SCALES ──────────────────────────────────────────────
+     Seven type steps, seven space steps, three radii, two control heights.
+     Nothing in a component is allowed a number of its own: if a value is not
+     on a scale it is a decision nobody made on purpose. */
+  --text-xs:12px;   /* the smallest thing allowed on screen */
+  --text-sm:13px;   /* micro-labels, counts, column heads */
+  --text-md:15px;   /* every control, every hint */
+  --text-lg:17px;   /* body, and a job's name */
+  --text-xl:20px;   /* a figure inside a dense cell */
+  --text-2xl:26px;  /* the answer in a dialog */
+  --text-3xl:34px;  /* the one number a screen is about */
+
+  /* 16px on inputs is not a style choice and is not on the scale: below it,
+     iOS zooms the page on focus. It is a fix wearing a token. */
+  --text-input:16px;
+
+  --space-2xs:4px; --space-xs:6px;  --space-sm:8px;  --space-md:12px;
+  --space-lg:16px; --space-xl:20px; --space-2xl:28px;
+
+  --radius-sm:8px; --radius-md:12px; --radius-pill:999px;
+
+  /* Two control heights. Tall for anything you press or type into; short for
+     a secondary control sitting inside a dense row. */
+  --control-sm:36px;
+  --control-md:44px;
+
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+:root[data-ink="dark"] {
+  --bg:#12141a; --surface:#191c23; --surface-2:#1f232b; --surface-3:#272c36;
+  --border:#2e343f; --border-strong:#454d5b;
+  --text:#eef0f4; --text-2:#c0c6d0; --muted:#8d95a2; --dim:#6b7280;
+
+  --safe:#3ec9b0;    --safe-soft:#123c38;   --safe-text:#8ee8d8;
+  --careful:#e0a132; --careful-soft:#402d10; --careful-text:#f3cd85;
+  --over:#f2726a;    --over-soft:#40201e;   --over-text:#f8b0aa;
+
+  --parttime:#7aa5f8; --parttime-soft:#1b2a47;
+  --gig:#e0a06a;      --gig-soft:#3b2716;
+
+  --brand:#a98bf0; --brand-soft:#2a2140; --brand-ink:#c9b6f7;
+  --focus:#a98bf0;
+  --pulse:rgba(169,139,240,.38);
+  --pulse-out:rgba(169,139,240,0);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { color-scheme: light; }
+:root[data-ink="dark"] { color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ── 1 · STAT BLOCK ──────────────────────────────────────────
+   quiet label · loud number · quiet context. Never a fourth part. */
+.stat { }
+.stat__label {
+  font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;
+}
+.stat__value {
+  font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:var(--text-3xl); font-weight:700; letter-spacing:-.02em; line-height:1.05;
+  color:var(--text);
+}
+.stat__value--sm { font-size:var(--text-2xl); }
+.stat__unit { font-size:var(--text-sm); font-weight:500; color:var(--muted); margin-left:4px; letter-spacing:0; }
+.stat__context { font-size:var(--text-sm); color:var(--muted); margin-top:6px; line-height:1.45; }
+.stat--safe .stat__value { color:var(--safe); }
+.stat--careful .stat__value { color:var(--careful); }
+.stat--over .stat__value { color:var(--over); }
+
+/* ── 2 · CARD & SECTION ───────────────────────────────────── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); padding:18px 20px;
+}
+.card--inset { background:var(--surface-2); }
+.card__head {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:14px;
+}
+.card__head-left { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.card__label {
+  font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  letter-spacing:.04em; text-transform:uppercase;
+  display:flex; align-items:center; gap:8px;
+}
+.card__label .dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--brand); flex:none;
+}
+.card__count { font-size:var(--text-sm); color:var(--muted); }
+.card__question { font-size:var(--text-md); color:var(--text-2); margin-top:-6px; margin-bottom:14px; }
+
+/* ── 3 · BUTTONS ──────────────────────────────────────────── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:var(--control-md); padding:11px 18px;
+  border-radius:var(--radius-sm); border:1px solid transparent;
+  font-family:inherit; font-size:var(--text-md); font-weight:600; line-height:1;
+  cursor:pointer; transition:background .12s, border-color .12s, color .12s, transform .06s;
+}
+.btn:active { transform:translateY(1px); }
+.btn:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.btn--primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+.btn--primary:hover { background:var(--brand-ink); border-color:var(--brand-ink); }
+:root[data-ink="dark"] .btn--primary { color:#1a1230; }
+.btn--quiet { background:transparent; border-color:var(--border-strong); color:var(--text-2); }
+.btn--quiet:hover { background:var(--surface-2); color:var(--text); }
+.btn--danger { background:var(--over); border-color:var(--over); color:#fff; }
+:root[data-ink="dark"] .btn--danger { color:#2a1210; }
+.btn--sm { min-height:var(--control-sm); padding:8px 13px; font-size:var(--text-sm); }
+
+/* ── 4 · FIELD ────────────────────────────────────────────── */
+.field { margin-bottom:16px; }
+.field:last-child { margin-bottom:0; }
+.field__label { display:block; font-size:var(--text-md); font-weight:600; color:var(--text); margin-bottom:6px; }
+.field__hint { font-size:var(--text-md); color:var(--muted); margin-top:6px; line-height:1.5; }
+.input {
+  width:100%; min-height:var(--control-md); padding:11px 12px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+  font-family:inherit; font-size:var(--text-input); /* not on the ramp — see the token */
+  outline:none; transition:border-color .12s;
+}
+.input:focus { border-color:var(--focus); box-shadow:0 0 0 2px var(--brand-soft); }
+.input.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.input--day { width:82px; text-align:left; }
+.field__row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.field__aside { font-size:var(--text-md); color:var(--text-2); }
+select.input { cursor:pointer; }
+
+/* ── 5 · CHIPS ────────────────────────────────────────────── */
+/* A label is not a control and must not look like one.
+   The chip is SOLID, BORDERLESS and SHORTER than the pills beside it — three
+   differences, so it never reads as a fourth thing you could press. Give it a
+   border and pill height, as an earlier pass did, and it becomes a button. */
+.chip {
+  display:inline-flex; align-items:center;
+  height:var(--control-md); padding:0 16px;
+  font-size:var(--text-md); font-weight:700; letter-spacing:.01em;
+  border-radius:var(--radius-pill); border:none;
+  flex:none; white-space:nowrap;
+}
+.chip--parttime { background:var(--parttime); color:#fff; }
+.chip--gig { background:var(--gig); color:#fff; }
+:root[data-ink="dark"] .chip--parttime { color:#0e1830; }
+:root[data-ink="dark"] .chip--gig { color:#2a1a0c; }
+
+.pills { display:flex; gap:4px; flex:none; }
+.pill {
+  min-height:var(--control-md); padding:8px 16px; font-family:inherit;
+  font-size:var(--text-md); font-weight:600; border-radius:var(--radius-pill);
+  border:1px solid var(--border-strong); background:transparent;
+  color:var(--muted); cursor:pointer; transition:background .12s, color .12s, border-color .12s;
+}
+.pill:hover { color:var(--text); border-color:var(--text-2); }
+.pill:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.pill[aria-pressed="true"] { background:var(--safe-soft); color:var(--safe-text); border-color:var(--safe); }
+.pill--paused[aria-pressed="true"] { background:var(--careful-soft); color:var(--careful-text); border-color:var(--careful); }
+.pill--ended[aria-pressed="true"] { background:var(--over-soft); color:var(--over-text); border-color:var(--over); }
+
+/* ── 6 · JOB CARD ─────────────────────────────────────────── */
+.job {
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  background:var(--surface); margin-bottom:10px; overflow:hidden;
+}
+.job--open {
+  border-color:var(--brand);
+  outline:2px solid var(--brand);
+  outline-offset:-2px;   /* drawn inside the border box — nothing reflows */
+}
+.job__head {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:14px 16px; cursor:pointer;
+}
+.job__name { font-size:var(--text-lg); font-weight:600; flex:1; min-width:120px; }
+/* The chip is last and is given a width, so it forms a straight column down a
+   list of jobs. Status changes over a job's life; what kind of work it is does
+   not — so the fixed fact takes the fixed position and stays scannable. */
+.job__head .chip { justify-content:center; }
+.job__head .pills { margin-left:auto; }
+.job__facts {
+  display:flex; gap:18px; flex-wrap:wrap;
+  padding:0 16px 14px; font-size:var(--text-sm); color:var(--muted);
+}
+.job__fact b { color:var(--text-2); font-weight:600; font-family:var(--mono); }
+.job__fact--none b { color:var(--dim); font-family:var(--sans); font-weight:400; font-style:italic; }
+.job__total { margin-left:auto; text-align:right; }
+.job__panel { border-top:1px solid var(--border); background:var(--surface-2); padding:16px; }
+.job__hint { font-size:var(--text-lg); color:var(--muted); margin-top:14px; line-height:1.5; }
+.job__hint kbd {
+  font-family:var(--mono); font-size:var(--text-sm); background:var(--surface-3);
+  border:1px solid var(--border-strong); border-radius:4px; padding:2px 6px; color:var(--text-2);
+}
+
+/* ── 7 · ADD CARD ─────────────────────────────────────────── */
+.add {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:18px 20px; min-height:64px;
+  background:var(--surface-2); border:2px dashed var(--border-strong);
+  border-radius:var(--radius-md); cursor:pointer; font-family:inherit; text-align:left;
+  color:var(--text-2); font-size:var(--text-lg); font-weight:500;
+  transition:background .12s, border-color .12s, color .12s;
+}
+.add:hover { background:var(--surface-3); border-color:var(--brand); color:var(--text); }
+.add:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.add__echo { font-size:var(--text-sm); color:var(--dim); font-weight:400; }
+
+/* ── 8 · MONTH CELLS ──────────────────────────────────────── */
+.months { display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:8px; }
+.month {
+  padding:12px 10px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--surface); text-align:left; cursor:pointer; font-family:inherit;
+  transition:border-color .12s, background .12s;
+}
+.month:hover { border-color:var(--border-strong); background:var(--surface-2); }
+.month:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.month--now { border-color:var(--brand); outline:2px solid var(--brand); outline-offset:-2px; }
+.month__name { font-size:var(--text-sm); font-weight:600; color:var(--muted); }
+.month__left {
+  font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:var(--text-xl); font-weight:700; margin-top:4px; color:var(--safe);
+}
+.month--careful .month__left { color:var(--careful); }
+.month--over .month__left { color:var(--over); }
+.month__note { font-size:var(--text-xs); color:var(--muted); margin-top:2px; }
+
+/* ── 9 · TRIAL MONTHS ─────────────────────────────────────── */
+.trial { display:flex; gap:5px; }
+.trial__slot {
+  flex:1; height:14px; border-radius:4px;
+  background:var(--surface-3); border:1px solid var(--border);
+}
+.trial__slot--before { background:var(--border-strong); border-color:var(--border-strong); }
+.trial__slot--used { background:var(--brand); border-color:var(--brand); }
+.trial__slot--now {
+  background:var(--brand-soft); border:2px solid var(--brand);
+  animation:pulse-now 2s ease-in-out infinite;
+}
+/* Spread only, never blur. It reads as "this is the month you are in" without
+   a label, and it is the one animation in the kit — the thing that means NOW
+   is the only thing allowed to move. */
+@keyframes pulse-now {
+  0%, 100% { box-shadow:0 0 0 0 var(--pulse); }
+  60%      { box-shadow:0 0 0 5px var(--pulse-out); }
+}
+
+/* ── 10 · NOTICE ──────────────────────────────────────────── */
+.notice {
+  border-radius:var(--radius-md); padding:14px 16px;
+  border:1px solid var(--careful); background:var(--careful-soft); color:var(--careful-text);
+}
+.notice__title { font-size:var(--text-md); font-weight:700; margin-bottom:8px; }
+.notice__row { font-size:var(--text-md); line-height:1.55; padding:3px 0; }
+.notice__row b { font-weight:700; }
+.notice__unknown { margin-top:10px; padding-top:10px; border-top:1px solid var(--careful); font-size:var(--text-sm); }
+
+/* ── 11 · DIALOG ──────────────────────────────────────────── */
+.scrim {
+  position:fixed; inset:0; z-index:100; padding:20px;
+  background:rgba(12,14,18,.62);
+  display:flex; align-items:center; justify-content:center;
+}
+.scrim[hidden] { display:none; }
+.dialog {
+  background:var(--surface); border:1px solid var(--border-strong);
+  border-radius:var(--radius-md); width:100%; max-width:430px;
+  max-height:86vh; overflow-y:auto;
+}
+.dialog__head { padding:16px 18px; border-bottom:1px solid var(--border); }
+.dialog__title { font-size:var(--text-xl); font-weight:700; }
+.dialog__restate { font-size:var(--text-sm); color:var(--muted); margin-top:2px; }
+.dialog__body { padding:16px 18px; }
+.dialog__foot {
+  display:flex; gap:8px; padding:14px 18px; border-top:1px solid var(--border);
+  background:var(--surface-2);
+}
+.dialog__foot .btn { flex:1; }
+
+.outcome {
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--surface-2); padding:12px 14px; margin-top:4px;
+}
+.outcome__label { font-size:var(--text-sm); color:var(--muted); margin-bottom:2px; }
+.outcome__value {
+  font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:var(--text-2xl); font-weight:700; letter-spacing:-.02em; color:var(--safe);
+}
+.outcome--careful .outcome__value { color:var(--careful); }
+.outcome--over .outcome__value { color:var(--over); }
+.outcome__note { font-size:var(--text-sm); color:var(--muted); margin-top:4px; }
+
+/* ── 11b · LEDGER ─────────────────────────────────────────────
+   The transaction list only. No month matrix — that was eleven empty cells
+   per row in hermes, and it is component 08's job. */
+.ledger { overflow-x:auto; }
+.ledger table { width:100%; border-collapse:collapse; font-size:var(--text-md); min-width:520px; }
+.ledger th {
+  padding:9px 12px; font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  letter-spacing:.03em; text-transform:uppercase;
+  background:var(--surface-2); border-bottom:2px solid var(--border);
+  white-space:nowrap; text-align:left;
+}
+/* Money headings sit over money, so they align with it. A left-aligned label
+   above a right-aligned column leaves the eye no edge to follow down. */
+.ledger th.num, .ledger td.num {
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.ledger td {
+  padding:11px 12px; border-bottom:1px solid var(--border);
+  color:var(--text-2); vertical-align:middle;
+}
+.ledger td.num { font-family:var(--mono); color:var(--text); font-weight:600; }
+.ledger td.num--off { color:var(--gig); }
+.ledger td.num--none { color:var(--dim); font-weight:400; }
+.ledger tr:last-child td { border-bottom:none; }
+.ledger__group td {
+  background:var(--surface-2); border-bottom:2px solid var(--border);
+  color:var(--text); font-weight:600; padding:10px 12px;
+}
+.ledger__groupline { display:flex; align-items:center; gap:10px; }
+.ledger__when { color:var(--text); font-weight:500; white-space:nowrap; }
+.ledger__row:hover td { background:var(--surface-2); cursor:pointer; }
+.ledger__sub td {
+  font-weight:700; color:var(--text); border-top:2px solid var(--border); border-bottom:none;
+}
+.ledger__sub td.num { font-family:var(--mono); }
+.ledger__total td {
+  background:var(--surface-3); font-weight:700; border-top:2px solid var(--border-strong);
+  border-bottom:none; padding:13px 12px; color:var(--text);
+}
+.ledger__total td.num { font-family:var(--mono); font-size:var(--text-lg); }
+
+/* ── 12 · TOAST ───────────────────────────────────────────── */
+.toast {
+  display:inline-block; padding:11px 18px; border-radius:var(--radius-sm);
+  font-size:var(--text-md); font-weight:500; border:1px solid transparent;
+  background:var(--text); color:var(--bg);
+}
+.toast--done { background:var(--safe-soft); color:var(--safe-text); border-color:var(--safe); }
+.toast--wrong { background:var(--over-soft); color:var(--over-text); border-color:var(--over); }
+
+/* ── 12c · TOP BAR ────────────────────────────────────────────
+   Brand left, one promise right. The most valuable strip on the screen
+   spends itself saying where the data lives, not on navigation. */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--space-md); flex-wrap:wrap;
+  padding:var(--space-md) 0;
+}
+.brand { display:flex; align-items:center; gap:var(--space-sm); font-size:var(--text-lg); font-weight:700; }
+.brand__mark {
+  width:32px; height:32px; border-radius:var(--radius-sm); flex:none;
+  background:var(--brand); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+:root[data-ink="dark"] .brand__mark { color:#1a1230; }
+.promise {
+  display:inline-flex; align-items:center; gap:var(--space-xs);
+  height:var(--control-sm); padding:0 14px; border-radius:var(--radius-pill);
+  background:var(--safe-soft); color:var(--safe-text);
+  font-size:var(--text-sm); font-weight:600;
+}
+
+/* ── 13 · TAB BAR ─────────────────────────────────────────── */
+.tabs {
+  display:flex; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); overflow:hidden;
+}
+.tab {
+  flex:1; min-height:52px; padding:8px 6px; border:none; background:transparent;
+  font-family:inherit; font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
+  border-bottom:3px solid transparent; transition:color .12s, border-color .12s;
+}
+.tab[aria-current="true"] { color:var(--brand); border-bottom-color:var(--brand); }
+.tab:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.tab svg { width:20px; height:20px; }
+
+/* ── 14 · NOTHING YET ─────────────────────────────────────── */
+.nothing { text-align:center; padding:32px 20px; }
+.nothing__mark {
+  width:44px; height:44px; margin:0 auto 12px; border-radius:var(--radius-sm);
+  background:var(--surface-3); color:var(--dim);
+  display:flex; align-items:center; justify-content:center;
+}
+.nothing__title { font-size:var(--text-lg); font-weight:600; color:var(--text-2); margin-bottom:4px; }
+.nothing__next { font-size:var(--text-sm); color:var(--muted); line-height:1.5; max-width:38ch; margin:0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration:.01ms !important; animation-duration:.01ms !important; }
+}
+
+/* ============================================================
+   PAGE CHROME — not part of the kit.
+   ============================================================ */
+.page { max-width:900px; margin:0 auto; padding:36px 20px 90px; }
+.top { border-bottom:1px solid var(--border); padding-bottom:24px; margin-bottom:8px; }
+.top__eyebrow { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.14em; color:var(--brand); margin-bottom:10px; }
+.top h1 { font-size:clamp(26px,5vw,36px); font-weight:700; letter-spacing:-.02em; line-height:1.12; margin-bottom:12px; }
+.top p { color:var(--text-2); font-size:16px; line-height:1.65; max-width:62ch; }
+.top p + p { margin-top:10px; }
+.inkswitch { position:fixed; top:14px; right:14px; z-index:80; }
+.spec { margin-top:44px; }
+.spec__head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+.spec__n { font-family:var(--mono); font-size:13px; color:var(--dim); margin-right:8px; }
+.spec__head h2 { font-size:19px; font-weight:700; display:inline; letter-spacing:-.01em; }
+.spec__sel { font-family:var(--mono); font-size:12px; color:var(--brand); }
+.spec__why { font-size:15px; color:var(--text-2); line-height:1.6; max-width:66ch; margin-bottom:14px; }
+.spec__why b { color:var(--text); font-weight:600; }
+.stage { border:1px dashed var(--border-strong); border-radius:var(--radius-md); padding:20px; background:var(--bg); }
+.stage + .stage { margin-top:10px; }
+.row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+.from { font-size:13px; color:var(--muted); margin-top:10px; line-height:1.55; }
+.from b { color:var(--text-2); }
+</style>
+</head>
+<body>
+
+<button class="btn btn--quiet btn--sm inkswitch" id="ink" type="button">Dark</button>
+
+<div class="page">
+
+<header class="top">
+  <div class="top__eyebrow">PayGuard components</div>
+  <h1>A design system,<br>borrowed from hermes</h1>
+  <p>Not a tour of the prototypes — <b>the kit itself</b>. Every trait worth keeping from the two hermes layouts, rebuilt against the rules the product actually has to meet.</p>
+  <p><b>What changed in the rebuild:</b> no web fonts, no <code>backdrop-filter</code>, no blurred shadows, no <code>color-mix()</code> — the device rule, so this runs on an old Android WebView. Every touch target is at least 44px. Inputs are 16px so iOS does not zoom on focus. Light and dark are both complete.</p>
+  <p><b>The writing is hermes's, in the register the design system already has a name for.</b> Dense surfaces — cards, facts, table headings — speak <b>compact</b>: the shortest <em>complete</em> label, two to four words, no sentence. The entry dialog speaks <b>spoken</b>: questions, one idea a line. That is the shift you feel between the tracker's <em>"Left this month"</em> and its <em>"How close are you?"</em>, and it is deliberate rather than inconsistent.</p>
+  <p>Shortening drops words the surrounding row already supplies. It never drops the word carrying the meaning — a column under a job's name need not repeat <em>you</em>, but a row of miles must still say <em>for work</em>, because personal miles are not deductible.</p>
+</header>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">§</span><h2>Where this sits</h2></div></div>
+  <p class="spec__why">Two authorities already exist and neither is replaced here. <b><code>docs/DESIGN-SYSTEM.md</code> owns the words</b> — master vocabulary, the four questions every label answers, the banned list, the three tones. <b><code>src/styles/palette.css</code> owns colour</b> — 39 choices, five variants, and the rule that every stylesheet is either a bridge or a marked override.</p>
+  <p class="spec__why"><b>What was missing is the layer between them: how a thing is built.</b> Heights, weights, states, which box owns an emphasis, what a label may not look like. That is what this page is, and every rule below came out of measuring two prototypes rather than out of taste.</p>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th>Question</th><th>Answered by</th></tr></thead>
+      <tbody>
+        <tr><td>What do we call it?</td><td class="num" style="text-align:left"><code>DESIGN-SYSTEM.md §1.1</code></td></tr>
+        <tr><td>What colour is it?</td><td class="num" style="text-align:left"><code>palette.css</code></td></tr>
+        <tr><td>How big, how heavy, what states?</td><td class="num" style="text-align:left"><b>this page</b></td></tr>
+        <tr><td>What does the number mean?</td><td class="num" style="text-align:left"><code>src/domain/</code></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">§</span><h2>The rules</h2></div></div>
+  <p class="spec__why">Eight, each one earned by something that went wrong in hermes. A component that breaks one of these is wrong even if it looks right.</p>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th style="width:34%">Rule</th><th>Because</th></tr></thead>
+      <tbody>
+        <tr><td><b>One control height, one control type size.</b></td><td><code>--control-h</code> 44px and <code>--control-text</code> 15px. Anything sharing a row shares both, so a row of mixed things sits on one baseline.</td></tr>
+        <tr><td><b>Weight goes up as you go in.</b></td><td>A section stays at 1px however deep the nesting. The card being edited takes the 2px ring — the box that holds it never competes with the box you opened.</td></tr>
+        <tr><td><b>An emphasis may not change layout.</b></td><td>Rings are drawn inside with <code>outline-offset:-2px</code>. Swapping 1px for 2px grows the box and shifts every row in it the moment you open it.</td></tr>
+        <tr><td><b>A label may not look like a control.</b></td><td>Carried by fill, not size: solid and borderless against outlined and transparent. Same height is fine; same treatment is not.</td></tr>
+        <tr><td><b>Colour is never the only carrier.</b></td><td>Every month cell says <em>left</em>, <em>over</em> or <em>all of it</em> in words. It has to survive being printed, dimmed, or read by someone who cannot separate the greens from the reds.</td></tr>
+        <tr><td><b>Missing is not zero.</b></td><td>An em dash means a real zero; italic words mean we were never told. A month with no earnings is safe; a month we cannot check is not.</td></tr>
+        <tr><td><b>Explain at the point of doubt, never in advance.</b></td><td>Hints under the field, plain-words titles on the control, the consequence beside the button. No tour, no help icons, no tooltip library.</td></tr>
+        <tr><td><b>One thing moves.</b></td><td>The pulse on the month you are in is the only animation. Give a second thing motion and the first stops meaning <em>now</em>.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="from"><b>And one that is not ours to break.</b> No <code>color-mix()</code>, no <code>backdrop-filter</code>, no web fonts, no blurred shadows — the device rule in <code>CLAUDE.md</code>. Every one of those fails silently rather than degrading, which is the worst way for a thing to fail on a phone you cannot test on.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">§</span><h2>How a line is shaped</h2></div></div>
+  <p class="spec__why">Twenty-six shapes lifted from hermes. <b>The shapes are the best writing in either prototype and the words are mostly on the banned list</b> — so the shapes come with us and the words get replaced. Nothing structural changes in the rebuild.</p>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th style="width:26%">Shape</th><th>Hermes</th><th>Ours</th></tr></thead>
+      <tbody>
+        <tr><td><b>Rule beside the number</b><br><span style="font-size:var(--text-sm);color:var(--muted)">state what governs a figure on the line under it, never in a help page</span></td>
+            <td><em>SGA trial work period $1210/month</em><br><em>Counts each W-2 job in full; 1099/gig counts gross minus deductions.</em></td>
+            <td>Trial work months — your limit is $1,210 a month<br>A part time job counts in full. Gig work counts what you were paid, minus what it cost you to earn it.</td></tr>
+        <tr><td><b>Fact strip</b><br><span style="font-size:var(--text-sm);color:var(--muted)">label over value, four at most, no sentences</span></td>
+            <td><em>Active jobs · YTD entries · Limit · TWP used</em></td>
+            <td>Working now · Written down this year · Your limit · Trial months used</td></tr>
+        <tr><td><b>N of M used</b></td>
+            <td><em>0 of 9 service months used.</em></td>
+            <td>You have used 0 of your 9 trial work months.</td></tr>
+        <tr><td><b>Condition, then consequence, threshold inline</b></td>
+            <td><em>Once you complete 9 service months, SSA reviews your earnings — earnings above $1690/mo may affect SSDI.</em></td>
+            <td>After the ninth, a month where you are paid more than $1,690 can stop your payments.</td></tr>
+        <tr><td><b>Quiet escape hatch</b><br><span style="font-size:var(--text-sm);color:var(--muted)">beside the heading, never in the flow</span></td>
+            <td><em>How it works</em></td>
+            <td>How it works <span style="color:var(--safe-text)">— kept exactly</span></td></tr>
+        <tr><td><b>Title carries its scope</b></td>
+            <td><em>Earnings Ledger — 2026</em></td>
+            <td>What you were paid — 2026</td></tr>
+        <tr><td><b>Interaction hint in the corner</b><br><span style="font-size:var(--text-sm);color:var(--muted)">the affordance and the sort order, once, in six words</span></td>
+            <td><em>Click any entry to edit · grouped by job</em></td>
+            <td>Tap any line to change it · grouped by job</td></tr>
+        <tr><td><b>The figure is the headline</b><br><span style="font-size:var(--text-sm);color:var(--muted)">the page opens by telling you your number, not asking for it</span></td>
+            <td><em>Stay under your<br>$1,210 monthly ceiling</em></td>
+            <td>Stay under<br>$1,210 a month <span style="color:var(--muted)">— "ceiling" is a metaphor, and metaphors are banned</span></td></tr>
+        <tr><td><b>Three verbs, then the stake</b></td>
+            <td><em>Log what you earn, watch your limit shrink in real time, and plan exactly how many hours you can safely work — without risking your benefits.</em></td>
+            <td>Write down what you are paid, watch what is left, and work out how many hours you can take on. Going over can stop your payments.</td></tr>
+        <tr><td><b>A total carries its denominator</b><br><span style="font-size:var(--text-sm);color:var(--muted)">and the denominator is derived, never typed</span></td>
+            <td><em>2026 Total · Everything logged this year · $0.00 · out of $14,520 annual ceiling</em></td>
+            <td>2026 so far · $0.00 · of $14,520 for the year <span style="color:var(--muted)">— 1,210 × 12, computed, so it can never drift from the monthly figure</span></td></tr>
+        <tr><td><b>Title, then what to do with it</b></td>
+            <td><em>Month by Month</em> / <em>Tap a month to log pay</em></td>
+            <td>Month by month / Tap a month to write down pay</td></tr>
+        <tr><td><b>The label names who says so</b></td>
+            <td><em>Monthly limit (SSA threshold)</em></td>
+            <td>Your limit each month (what Social Security allows)</td></tr>
+        <tr><td><b>The answer waits, visibly</b><br><span style="font-size:var(--text-sm);color:var(--muted)">an empty answer keeps its shape and its unit</span></td>
+            <td><em>Per week — hrs</em> · <em>Per month — hrs</em></td>
+            <td>Each week — hours · Each month — hours</td></tr>
+        <tr><td><b>Say the figures are estimates, and who to check with</b></td>
+            <td><em>Thresholds are planning estimates based on 2026 SGA rules. Confirm current figures with SSA before acting on any one.</em></td>
+            <td>These are planning figures for 2026. Check them with Social Security before you act on any of them.</td></tr>
+        <tr><td><b>Close with the thing that catches people out</b></td>
+            <td><em>Ceiling before your limit. Watch months with an extra paycheck.</em></td>
+            <td>This is the most you can work. Watch the months that pay you an extra time.</td></tr>
+        <tr><td><b>The title is a verb plus its scope</b></td>
+            <td><em>Log Pay — September</em></td>
+            <td>Write down pay — September</td></tr>
+        <tr><td><b>The line under it restates the scope</b><br><span style="font-size:var(--text-sm);color:var(--muted)">redundant on purpose — it is what catches a mis-tap</span></td>
+            <td><em>Record how much you earned in September</em></td>
+            <td>Riverside Cafe, September 2026.</td></tr>
+        <tr><td><b>The button repeats the title's verb</b><br><span style="font-size:var(--text-sm);color:var(--muted)">you finish with the word you started with</span></td>
+            <td><em>Log Pay</em> … <em>Log It</em></td>
+            <td>Write down pay … Write it down</td></tr>
+        <tr><td><b>The consequence is labelled, not implied</b></td>
+            <td><em>Remaining after this entry</em></td>
+            <td>Left after this entry</td></tr>
+        <tr><td><b>The promise goes where navigation would</b></td>
+            <td><em>🔒 Local only · nothing leaves this device</em></td>
+            <td>Stays on this phone · nothing is sent anywhere <span style="color:var(--muted)">— padlock as SVG, not emoji</span></td></tr>
+        <tr><td><b>The option says what choosing it does</b><br><span style="font-size:var(--text-sm);color:var(--muted)">consequence inside the choice, not after it</span></td>
+            <td><em>Gig — Deduct expenses</em><br><em>W-2 — Counts in full</em></td>
+            <td>Gig work — your costs come off first<br>Part time job — counts in full</td></tr>
+        <tr><td><b>The placeholder is an example, not the label again</b></td>
+            <td><em>e.g. Riverside Market</em><br><em>Optional, e.g. 21.50</em></td>
+            <td>kept — <span style="color:var(--safe-text)">both shapes exactly</span>. The second does two jobs at once: says the field is optional <em>and</em> shows the format</td></tr>
+        <tr><td><b>Unit in brackets after the noun</b></td>
+            <td><em>Hourly rate ($)</em> · <em>Planning rate ($/month)</em></td>
+            <td>Rate (an hour) · Rate (a week) — shape kept, abbreviation spelled out</td></tr>
+        <tr><td><b>The form explains itself at the foot</b><br><span style="font-size:var(--text-sm);color:var(--muted)">where the choice was made, not before it</span></td>
+            <td><em>W-2 jobs count your entire gross in the SGA trial. 1099/gig jobs count gross minus deductions (mileage, disability work costs).</em></td>
+            <td>A part time job counts everything they pay you. Gig work counts what you were paid minus what it cost you — miles you drove for work, and costs your disability adds to working.</td></tr>
+        <tr><td><b>A tab is a place, not a sentence</b></td>
+            <td><em>Jobs · Ledger · Limit · Bank</em></td>
+            <td>Jobs · Pay · Limit · Bank <span style="color:var(--safe-text)">— shape kept</span></td></tr>
+        <tr><td><b>Empty state names cause and next action</b></td>
+            <td><em>No jobs to show / Add a job to see your ledger.</em><br><em>No income sources yet / Add a job to start tracking your earnings. W-2 jobs count in full; 1099/gig jobs deduct expenses.</em></td>
+            <td>No jobs yet / Add a job and what you are paid shows up here.<br>No jobs yet / Add a job to start writing down what you are paid. A part time job counts in full; gig work takes your costs off first.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>Trial work months</span></div><button class="btn btn--quiet btn--sm">How it works</button></div>
+      <div class="stat" style="margin-bottom:12px">
+        <div class="stat__label">Your limit while you are in them</div>
+        <div class="stat__value">$1,210<span class="stat__unit">a month</span></div>
+        <div class="stat__context">A part time job counts in full. Gig work counts what you were paid, minus what it cost you to earn it.</div>
+      </div>
+      <div class="trial">
+        <div class="trial__slot trial__slot--before"></div><div class="trial__slot trial__slot--before"></div>
+        <div class="trial__slot trial__slot--used"></div><div class="trial__slot trial__slot--used"></div><div class="trial__slot trial__slot--used"></div>
+        <div class="trial__slot trial__slot--now"></div>
+        <div class="trial__slot"></div><div class="trial__slot"></div><div class="trial__slot"></div>
+      </div>
+      <p style="font-size:var(--text-lg);color:var(--text-2);line-height:1.6;margin-top:12px">You have used <b>5 of your 9 trial work months</b>. After the ninth, a month where you are paid more than $1,690 can stop your payments.</p>
+      <div class="grid2" style="margin-top:16px">
+        <div class="stat"><div class="stat__label">Working now</div><div class="stat__value stat__value--sm">2</div></div>
+        <div class="stat"><div class="stat__label">Written down this year</div><div class="stat__value stat__value--sm">14</div></div>
+        <div class="stat"><div class="stat__label">Your limit</div><div class="stat__value stat__value--sm">$1,210</div></div>
+        <div class="stat"><div class="stat__label">Trial months used</div><div class="stat__value stat__value--sm">5<span class="stat__unit">of 9</span></div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>How many hours can I work?</span></div></div>
+      <div class="grid2">
+        <div>
+          <div class="field"><label class="field__label" for="hr">Your rate an hour</label><input class="input mono" id="hr" inputmode="decimal" placeholder="21.50"></div>
+          <div class="field"><label class="field__label" for="lim">Your limit each month</label><input class="input mono" id="lim" inputmode="decimal" value="1210">
+            <p class="field__hint">What Social Security allows.</p></div>
+        </div>
+        <div>
+          <div class="card card--inset" style="margin-bottom:var(--space-sm)"><div class="stat"><div class="stat__label">Each week</div><div class="stat__value stat__value--sm" style="color:var(--dim)">—<span class="stat__unit">hours</span></div></div></div>
+          <div class="card card--inset"><div class="stat"><div class="stat__label">Each month</div><div class="stat__value stat__value--sm" style="color:var(--dim)">—<span class="stat__unit">hours</span></div></div></div>
+          <p class="field__hint" style="margin-top:var(--space-md)">This is the most you can work. Watch the months that pay you an extra time.</p>
+        </div>
+      </div>
+      <div class="notice" style="margin-top:var(--space-lg)"><div class="notice__row">These are planning figures for 2026. Check them with Social Security before you act on any of them.</div></div>
+    </div>
+    <p class="from"><b>The answer waits in place.</b> Before you type a rate, both slots already show <b>—&nbsp;hours</b> in the size and position the real answer will take. The panel never changes shape when it fills in, so the reader is not surprised by a layout that grows under their thumb — and the unit is there from the start, so the number arrives meaning something.</p>
+    <p class="from"><b>What all eight have in common:</b> the rule is stated where the number is. Not in a tooltip, not behind "How it works", not in an onboarding step — <b>on the line underneath the figure it governs</b>. That is why the hermes screens read as calm despite carrying a benefits rulebook, and it is the single most transferable thing in the copy.</p>
+    <p class="from"><b>What had to change, and why it is not negotiable.</b> <code>SGA</code>, <code>TWP</code>, <code>Trial Work Period</code>, <code>W-2</code>, <code>1099</code>, <code>Gross</code>, <code>YTD</code>, <code>Earnings</code> and <code>Sources</code> are all on the never list in <code>src/domain/copy.ts</code>. Three of them can cost the reader money: a driver who does not recognise "1099" cannot know the mileage deduction is theirs, and "gross" is the number almost nobody can find. <b>The banned words are exactly the ones that make these lines sound authoritative</b> — which is the trap, because sounding authoritative to someone who already knows the jargon is not the job.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">§</span><h2>The scales</h2></div><div class="spec__sel">--text-* · --space-* · --control-* · --radius-*</div></div>
+  <p class="spec__why">Seven type steps, seven space steps, two control heights, three radii. <b>Nothing in a component is allowed a number of its own</b> — a value that is not on a scale is a decision nobody made on purpose, and hermes is full of them: 10px, 11px, 12px, 13px, 14px, 15px and 16px all appear as label sizes in one file.</p>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th>Step</th><th class="num">Size</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">--text-xs</td><td class="num">12</td><td>the smallest thing allowed on screen</td></tr>
+        <tr><td class="mono">--text-sm</td><td class="num">13</td><td>micro-labels, counts, column heads</td></tr>
+        <tr><td class="mono">--text-md</td><td class="num">15</td><td>every control, every hint</td></tr>
+        <tr><td class="mono">--text-lg</td><td class="num">17</td><td>body, and a job's name</td></tr>
+        <tr><td class="mono">--text-xl</td><td class="num">20</td><td>a figure inside a dense cell</td></tr>
+        <tr><td class="mono">--text-2xl</td><td class="num">26</td><td>the answer in a dialog</td></tr>
+        <tr><td class="mono">--text-3xl</td><td class="num">34</td><td>the one number a screen is about</td></tr>
+        <tr><td class="mono">--text-input</td><td class="num">16</td><td><b>not on the ramp.</b> Below 16 iOS zooms the page on focus — a fix wearing a token</td></tr>
+      </tbody>
+    </table></div>
+    <div style="margin-top:14px">
+      <div style="font-size:var(--text-3xl);font-weight:700;letter-spacing:-.02em;line-height:1.1">$728 <span style="font-size:var(--text-sm);color:var(--muted);font-weight:600">3xl</span></div>
+      <div style="font-size:var(--text-2xl);font-weight:700;margin-top:6px">$488.00 <span style="font-size:var(--text-sm);color:var(--muted);font-weight:600">2xl</span></div>
+      <div style="font-size:var(--text-xl);font-weight:700;margin-top:6px">$1,210 <span style="font-size:var(--text-sm);color:var(--muted);font-weight:600">xl</span></div>
+      <div style="font-size:var(--text-lg);margin-top:6px">Riverside Cafe <span style="font-size:var(--text-sm);color:var(--muted);font-weight:600">lg</span></div>
+      <div style="font-size:var(--text-md);margin-top:6px">Every control and every hint <span style="font-size:var(--text-sm);color:var(--muted);font-weight:600">md</span></div>
+      <div style="font-size:var(--text-sm);color:var(--muted);margin-top:6px">LEFT THIS MONTH <span style="font-weight:600">sm</span></div>
+      <div style="font-size:var(--text-xs);color:var(--muted);margin-top:6px">left · this month <span style="font-weight:600">xs</span></div>
+    </div>
+    <div class="row" style="margin-top:18px;align-items:flex-end">
+      <div style="text-align:center"><div style="width:var(--space-2xs);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">2xs<br>4</div></div>
+      <div style="text-align:center"><div style="width:var(--space-xs);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">xs<br>6</div></div>
+      <div style="text-align:center"><div style="width:var(--space-sm);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">sm<br>8</div></div>
+      <div style="text-align:center"><div style="width:var(--space-md);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">md<br>12</div></div>
+      <div style="text-align:center"><div style="width:var(--space-lg);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">lg<br>16</div></div>
+      <div style="text-align:center"><div style="width:var(--space-xl);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">xl<br>20</div></div>
+      <div style="text-align:center"><div style="width:var(--space-2xl);height:26px;background:var(--brand)"></div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">2xl<br>28</div></div>
+      <div style="margin-left:14px"><span class="btn btn--sm btn--quiet">control-sm 36</span></div>
+      <div><span class="btn btn--quiet">control-md 44</span></div>
+    </div>
+    <p class="from"><b>Two steps carry a rule rather than a taste.</b> <code>--text-input</code> is 16 because anything smaller makes iOS zoom the page when a field is focused, and a page that jumps when you tap a box is a page people stop trusting. <code>--control-md</code> is 44 because that is the smallest target a thumb hits reliably — hermes had an 11px control at 3px padding.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">§</span><h2>The tokens</h2></div><div class="spec__sel">:root · :root[data-ink="dark"]</div></div>
+  <p class="spec__why">Both inks answer every choice — a variant never inherits one. Semantic colours ship as a <b>triple</b>: the colour, a soft fill, and a text tone legible on that fill, so a status chip is one class rather than three hand-picked values.</p>
+  <div class="stage">
+    <div class="grid2">
+      <div class="card"><div class="stat__label" style="margin-bottom:10px">Safe</div><div class="row"><span class="chip" style="background:var(--safe);color:#fff">solid</span><span class="chip" style="background:var(--safe-soft);color:var(--safe-text)">soft + text</span></div></div>
+      <div class="card"><div class="stat__label" style="margin-bottom:10px">Careful</div><div class="row"><span class="chip" style="background:var(--careful);color:#fff">solid</span><span class="chip" style="background:var(--careful-soft);color:var(--careful-text)">soft + text</span></div></div>
+      <div class="card"><div class="stat__label" style="margin-bottom:10px">Over</div><div class="row"><span class="chip" style="background:var(--over);color:#fff">solid</span><span class="chip" style="background:var(--over-soft);color:var(--over-text)">soft + text</span></div></div>
+      <div class="card"><div class="stat__label" style="margin-bottom:10px">Where money comes from</div><div class="row"><span class="chip chip--parttime">Part time</span><span class="chip chip--gig">Gig work</span></div></div>
+    </div>
+    <p class="from"><b>Neither income hue is the brand.</b> Hermes painted gig work in brand violet, so "this is the app" and "this is self-employment" were the same colour — and its <code>.job-badge.1099</code> selector was invalid anyway (a class cannot start with a digit), which took the whole rule down and left gig income with no colour at all.</p>
+  </div>
+</section>
+
+<!-- 1 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">01</span><h2>Stat block</h2></div><div class="spec__sel">.stat · .stat__label · .stat__value · .stat__context</div></div>
+  <p class="spec__why"><b>Quiet label, loud number, quiet context.</b> Never a fourth part, no commas, and no part repeating another. The label answers <em>which period</em>, the context answers <em>of what</em> — so the number never travels alone.</p>
+  <div class="stage">
+    <div class="grid2">
+      <div class="card"><div class="stat stat--safe"><div class="stat__label">Left this month</div><div class="stat__value">$728</div><div class="stat__context">of your $1,210 limit</div></div></div>
+      <div class="card"><div class="stat stat--over"><div class="stat__label">Left this month</div><div class="stat__value">−$270</div><div class="stat__context">over your $1,210 limit</div></div></div>
+      <div class="card"><div class="stat stat--careful"><div class="stat__label">Counted in September</div><div class="stat__value stat__value--sm">$482</div><div class="stat__context">this month so far</div></div></div>
+      <div class="card"><div class="stat"><div class="stat__label">Hours you could work</div><div class="stat__value stat__value--sm">33<span class="stat__unit">hours</span></div><div class="stat__context">at $21.50 an hour</div></div></div>
+    </div>
+    <p class="from"><b>From:</b> the tracker's "Left this month / of $1,210 monthly limit". <b>Changed:</b> the unit is spelled out — <code>hrs</code> is on the banned list — and it is demoted rather than dropped, because a bare <code>33</code> beside three dollar figures reads as unfinished.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">02</span><h2>Card and section head</h2></div><div class="spec__sel">.card · .card__head · .card__label · .card__question</div></div>
+  <p class="spec__why">Flat fill, one hairline, no shadow — elevation is a surface step. <b>The head has exactly two sides</b>: everything descriptive on the left, the one action on the right. Anything added goes on the left, or the action drifts into the middle.</p>
+  <div class="stage">
+    <div class="card">
+      <div class="card__head">
+        <div class="card__head-left"><span class="card__label"><span class="dot"></span>Your income</span><span class="card__count">2 jobs</span></div>
+        <button class="btn btn--primary btn--sm">Add a job</button>
+      </div>
+      <p class="card__question">Where does your money come from?</p>
+    </div>
+    <p class="from"><b>From:</b> PayGuard's section head, and the tracker's question-as-subtitle. <b>Fixed:</b> the count now sits with the label. In hermes it was a third child of a <code>space-between</code> row, which pushed the button into the centre.</p>
+    <p class="from"><b>The dot.</b> Six pixels, brand violet, one per section — and it is the entire decorative budget of the layout. Everything else on the page is doing a job; this is the only mark that exists to give the eye a place to start. That is why it is worth keeping and why it must stay <b>meaningless</b>: the moment it turns amber on a section that needs attention it becomes a signal, and then every section without one is making a claim too. <b>A rhythm mark and a status light cannot be the same 6 pixels.</b></p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">03</span><h2>Buttons</h2></div><div class="spec__sel">.btn--primary · .btn--quiet · .btn--danger · .btn--sm</div></div>
+  <p class="spec__why">Three intents, all built on a 1px border so a quiet button and a loud one occupy identical space. <b>44px minimum</b>, always — hermes had an 11px control at 3px padding.</p>
+  <div class="stage">
+    <div class="row"><button class="btn btn--primary">Save this</button><button class="btn btn--quiet">Cancel</button><button class="btn btn--danger">Delete</button></div>
+    <div class="row" style="margin-top:12px"><button class="btn btn--primary btn--sm">Add a job</button><button class="btn btn--quiet btn--sm">How this works</button></div>
+    <p class="from"><b>Changed:</b> hover is a darker shade, never a shadow. Press is a 1px drop. Focus is a real visible ring — neither prototype had one.</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">04</span><h2>Pay day field</h2></div><div class="spec__sel">.input--day · sanitiseDay()</div></div>
+  <p class="spec__why"><b>A pay day is a day of the month and nothing else.</b> No calendar, no dropdown, no month picker — two digits you type. The month is stated beside the field as a fact, because the entry is already filed under one.</p>
+  <p class="spec__why">Enforced as you type: <b>digits only, two at most, 1 to 31, never 0 and never 32.</b> Leading zeros are stripped. A field that will not accept a wrong character never has to tell anyone they were wrong.</p>
+  <div class="stage">
+    <div class="card" style="max-width:420px">
+      <div class="field">
+        <label class="field__label" for="d1">Pay day</label>
+        <div class="field__row">
+          <input class="input input--day mono" id="d1" inputmode="numeric" maxlength="2" value="15" data-day>
+          <span class="field__aside">September 2026</span>
+        </div>
+        <p class="field__hint">The day of the month you were paid.</p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="d2">Pay day</label>
+        <div class="field__row">
+          <input class="input input--day mono" id="d2" inputmode="numeric" maxlength="2" placeholder="--" data-day>
+          <span class="field__aside">October 2026</span>
+        </div>
+        <p class="field__hint">Leave it empty if you do not know yet. Nothing here guesses the 15th.</p>
+      </div>
+    </div>
+    <p class="from"><b>Try to break it.</b> Letters do nothing, three digits will not fit, <code>0</code> will not stick, <code>32</code> keeps only the <code>3</code>. <b>Changed:</b> left-aligned like every other field, and the label says Pay day everywhere — hermes called the same value "Day", "Payday" and "Anchor payday (day of month)" on three screens.</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">05</span><h2>Job card</h2></div><div class="spec__sel">.job · .chip--parttime · .chip--gig · .pill</div></div>
+  <p class="spec__why"><b>Name, then the kind of work, then status.</b> The chip sits directly against the pills, so the two read as one cluster on the right — what kind of work this is, and whether you are doing it now. Two facts of the same kind, answering together, with the name left alone as the identifier.</p>
+  <p class="spec__why">Status is <b>three visible pills, one tap, no menu</b>, and each carries a plain-words title on hover.</p>
+  <p class="spec__why"><b>Everything in the row is one height and one type size</b> — <code>--control-h</code> 44px, <code>--control-text</code> 15px. Buttons, inputs, pills and the chip all read off those two tokens, so a row of mixed things still sits on one line with one baseline.</p>
+  <p class="spec__why">The chip is still not a control, and the difference is carried by <b>fill instead of size</b>: solid and borderless against outlined and transparent. That is the distinction that survives being the same height — sizing a label down to prove it is not a button just makes the row ragged.</p>
+  <div class="stage">
+    <div class="job">
+      <div class="job__head">
+        <span class="job__name">Riverside Cafe</span>
+        <span class="chip chip--parttime">Part time</span>
+        <div class="pills">
+          <button class="pill" type="button" aria-pressed="true" title="You are working here now">Working</button>
+          <button class="pill pill--paused" type="button" aria-pressed="false" title="Not working here right now">Paused</button>
+          <button class="pill pill--ended" type="button" aria-pressed="false" title="This job has ended">Ended</button>
+        </div>
+      </div>
+      <div class="job__facts">
+        <span class="job__fact">Paid <b>every 2 weeks</b></span>
+        <span class="job__fact">Pay day <b>6</b></span>
+        <span class="job__fact">Rate <b>$21.50</b> an hour</span>
+        <div class="job__total"><div class="stat__value stat__value--sm">$4,120</div><div class="stat__label" style="margin:0">Counted this year</div></div>
+      </div>
+    </div>
+    <div class="job">
+      <div class="job__head">
+        <span class="job__name">DoorDash</span>
+        <span class="chip chip--gig">Gig work</span>
+        <div class="pills">
+          <button class="pill" type="button" aria-pressed="false">Working</button>
+          <button class="pill pill--paused" type="button" aria-pressed="true">Paused</button>
+          <button class="pill pill--ended" type="button" aria-pressed="false">Ended</button>
+        </div>
+      </div>
+      <div class="job__facts">
+        <span class="job__fact">Paid <b>every week</b></span>
+        <span class="job__fact job__fact--none">Pay day <b>not told yet</b></span>
+        <div class="job__total"><div class="stat__value stat__value--sm">$1,880</div><div class="stat__label" style="margin:0">Counted this year</div></div>
+      </div>
+    </div>
+    <p class="from"><b>Changed:</b> "W-2" and "1099" are on the banned list, so the chips read <b>Part time</b> and <b>Gig work</b> — both named for what the reader does rather than what the tax form is called. "Employer" is a category someone else put you in; "I have a part time job" and "I do gig work" are things people say about themselves, and every job here is part time anyway. Gig also gets its own hue: in hermes it was painted brand violet, and its CSS rule was invalid, so gig income rendered with no colour at all.</p>
+    <p class="from"><b>One thing this costs, and where it has to be paid back.</b> "Employer" quietly said <em>which door you came in</em>, and the mileage deduction only exists behind one of them. "Part time" no longer says that — gig work is part time too. So the distinction has to be carried by the copy at the point of choosing, which is why the panel in 06 reads <em>"Gig work takes miles off before anything counts"</em> under the selector rather than leaving the chip to imply it. A driver who does not know they are "1099" must still pick the right door.</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">06</span><h2>Open for editing</h2></div><div class="spec__sel">.job--open · .job__panel · .job__hint</div></div>
+  <p class="spec__why"><b>The card becomes the editor and says so with its border.</b> No modal, no route change — the thing being edited and the form editing it are one object. One open at a time.</p>
+  <div class="stage">
+    <div class="job job--open">
+      <div class="job__head">
+        <input class="input" style="flex:1;min-width:140px" value="Riverside Cafe" aria-label="Job name">
+        <span class="chip chip--parttime">Part time</span>
+      </div>
+      <div class="job__panel">
+        <div class="field"><label class="field__label" for="e1">Kind of work</label>
+          <select class="input" id="e1"><option>A part time job</option><option>Delivery or gig work</option></select>
+          <p class="field__hint">Gig work takes miles off before anything counts.</p></div>
+        <div class="field"><label class="field__label" for="e2">How often you are paid</label>
+          <select class="input" id="e2"><option>Every 2 weeks</option><option selected>Every week</option><option>Twice a month</option><option>Once a month</option></select></div>
+        <div class="field"><label class="field__label" for="e3">Pay day</label>
+          <input class="input input--day mono" id="e3" inputmode="numeric" maxlength="2" value="6" data-day></div>
+        <div class="field"><label class="field__label" for="e4">Rate (an hour)</label>
+          <input class="input mono" id="e4" inputmode="decimal" value="21.50"></div>
+        <div class="field"><label class="field__label" for="e5">Rate (a week)</label>
+          <input class="input mono" id="e5" inputmode="decimal" value="430.00">
+          <p class="field__hint">Fill in either one and the other follows.</p></div>
+        <p class="job__hint"><kbd>Enter</kbd> saves · <kbd>Esc</kbd> cancels</p>
+      </div>
+    </div>
+    <p class="from"><b>Fixed:</b> both selects show the stored value. In hermes they were given a <code>value</code> attribute before their options existed, so every job displayed the first option — every job read "W-2" and "Weekly" whatever was stored. And the hint is real here: hermes promised <kbd>Esc</kbd> with no Escape handler anywhere in the file.</p>
+    <p class="from"><b>The keyboard hint is 16px, and that is deliberate.</b> In hermes it asks for 11 and renders at 16 — the code passes <code>fontSize</code> to <code>setProperty</code>, which only takes kebab-case, so the request was silently dropped and it inherited body size. I first called that a bug and shrank it to the 11 the author intended. Wrong call: <b>11px is the size the rest of this audit keeps flagging as too small for this reader</b>, and an instruction nobody can read is not a quiet instruction, it is an absent one. The accident was better than the intent, so the kit keeps the accident and means it.</p>
+    <p class="from"><b>Borrowed:</b> hermes's <code>Rate ($/hr)</code> and <code>Rate ($/mo)</code> — <b>a shared noun with the unit in brackets.</b> Two fields that measure one thing at different scales read as a pair rather than as two unrelated boxes, and the eye picks the unit without re-reading the noun. <b>Changed:</b> the unit is spelled out, because abbreviations are banned outright — and <code>$/hr</code> is the exact case the rule exists for.</p>
+    <p class="from"><b>One caution on the pattern.</b> It only works when the two really are the same quantity at a different scale. In hermes the second Rate was a monthly planning figure — not a rate at all, and read by no calculation in the file — so the shared noun was hiding a difference instead of exposing one. Here they are an hourly rate and its weekly equivalent, which is a genuine pair, and the product's own rule says it should also run backwards: type the week and the hour follows.</p>
+  </div>
+</section>
+
+<!-- 6b -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">06b</span><h2>States, and which box owns them</h2></div><div class="spec__sel">.card · .job · .job--open · .input:focus</div></div>
+  <p class="spec__why"><b>The 2px brand ring belongs to the card being edited — never to the section holding it.</b> Three boxes are nested here and each keeps its own weight, so the eye can always tell which one you opened.</p>
+  <div class="stage">
+    <div class="card">
+      <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>Your income</span><span class="card__count">3 jobs</span></div></div>
+
+      <div class="job">
+        <div class="job__head"><span class="job__name">Resting</span>
+          <span class="chip chip--parttime">Part time</span>
+          <div class="pills"><button class="pill" type="button" aria-pressed="true">Working</button></div></div>
+        <div class="job__facts"><span class="job__fact">1px border, surface fill</span></div>
+      </div>
+
+      <div class="job" style="border-color:var(--border-strong);background:var(--surface-2)">
+        <div class="job__head"><span class="job__name">Hover</span>
+          <span class="chip chip--parttime">Part time</span>
+          <div class="pills"><button class="pill" type="button" aria-pressed="true">Working</button></div></div>
+        <div class="job__facts"><span class="job__fact">border darkens, fill steps down one</span></div>
+      </div>
+
+      <div class="job job--open">
+        <div class="job__head">
+          <input class="input" style="flex:1;min-width:140px" value="Open for editing" aria-label="Job name">
+          <span class="chip chip--parttime">Part time</span>
+        </div>
+        <div class="job__panel">
+          <div class="field"><label class="field__label" for="s1">Pay day</label>
+            <input class="input input--day mono" id="s1" inputmode="numeric" maxlength="2" value="6" data-day>
+            <p class="field__hint">Click into the field above — a focused input rings at 1px and adds a soft halo, so it never competes with the card's 2px.</p></div>
+          <p class="job__hint"><kbd>Enter</kbd> saves · <kbd>Esc</kbd> cancels</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ledger" style="margin-top:14px">
+      <table style="min-width:0">
+        <thead><tr><th>Box</th><th>Resting</th><th>Active</th></tr></thead>
+        <tbody>
+          <tr><td>Section</td><td>1px <code>--border</code></td><td><em>never changes</em> — it holds, it does not participate</td></tr>
+          <tr><td>Job card</td><td>1px <code>--border</code></td><td><b>2px <code>--brand</code></b>, drawn inside</td></tr>
+          <tr><td>Input</td><td>1px <code>--border-strong</code></td><td>1px <code>--focus</code> + 2px soft halo</td></tr>
+          <tr><td>Pill</td><td>1px, muted text</td><td>soft fill + matching text + coloured border</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="from"><b>Two rules the weights encode.</b> Weight goes <em>up</em> as you go <em>in</em> — outer boxes never out-shout the thing inside them, so the section stays at 1px however deep the nesting goes. And the ring is drawn <b>inside</b> the border box with <code>outline-offset:-2px</code>: swapping a 1px border for 2px would grow the card and shift every row in it by a pixel when you open it.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">07</span><h2>Add card</h2></div><div class="spec__sel">.add · .add__echo</div></div>
+  <p class="spec__why">Same action as the button in the section head, and it does not read as a repeat: <b>big and muted against small and filled, dashed against solid, bottom against top.</b> The primary button is the control; this is the invitation.</p>
+  <p class="spec__why">Then the copy closes it — <b>it names its own duplicate out loud</b>, so a reader about to wonder "is this the same button?" is answered before they ask.</p>
+  <div class="stage">
+    <button class="add" type="button">Add another income source<span class="add__echo">or Add a job, above</span></button>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">08</span><h2>Month cells</h2></div><div class="spec__sel">.months · .month__left</div></div>
+  <p class="spec__why"><b>They count down, not up.</b> An untouched month reads $1,210, not $0. One line of display logic, and it changes what the grid is for — a row of zeros is a record, a row of ceilings is a plan.</p>
+  <div class="stage">
+    <div class="months">
+      <button class="month" type="button"><div class="month__name">June</div><div class="month__left">$390</div><div class="month__note">left</div></button>
+      <button class="month month--careful" type="button"><div class="month__name">July</div><div class="month__left">$60</div><div class="month__note">left</div></button>
+      <button class="month month--over" type="button"><div class="month__name">August</div><div class="month__left">−$270</div><div class="month__note">over</div></button>
+      <button class="month month--now" type="button"><div class="month__name">September</div><div class="month__left">$728</div><div class="month__note">left · this month</div></button>
+      <button class="month" type="button"><div class="month__name">October</div><div class="month__left">$1,210</div><div class="month__note">all of it</div></button>
+    </div>
+    <p class="from"><b>Changed:</b> the colour is never the only carrier — every cell says <em>left</em>, <em>over</em> or <em>all of it</em> in words, so it survives being printed, dimmed, or read by someone who cannot separate the greens from the reds.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">09</span><h2>Trial months</h2></div><div class="spec__sel">.trial__slot--before|used|now</div></div>
+  <p class="spec__why">Nine slots, four states, <b>and a sentence underneath doing the explaining.</b> The graphic never has to be learned.</p>
+  <div class="stage">
+    <div class="card">
+      <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>Trial work months</span></div><button class="btn btn--quiet btn--sm">What these are</button></div>
+      <div class="trial">
+        <div class="trial__slot trial__slot--before" title="Used before you started using this app"></div>
+        <div class="trial__slot trial__slot--before"></div>
+        <div class="trial__slot trial__slot--used"></div>
+        <div class="trial__slot trial__slot--used"></div>
+        <div class="trial__slot trial__slot--used"></div>
+        <div class="trial__slot trial__slot--now"></div>
+        <div class="trial__slot"></div><div class="trial__slot"></div><div class="trial__slot"></div>
+      </div>
+      <p style="font-size:15px;color:var(--text-2);line-height:1.6;margin-top:12px">You have used <b>5 of your 9 trial work months</b>. Two of those were before you started here. After the ninth, months where you earn more than $1,690 can stop your payments.</p>
+    </div>
+    <p class="from"><b>Added:</b> the grey "before you started here" state. Hermes styled it and never emitted it — and it is the state that makes the tracker honest for anyone not starting from zero.</p>
+    <p class="from"><b>Borrowed:</b> the pulse on the month you are in. It is the <b>only animation in the kit</b>, and that is what makes it work — the thing that means <em>now</em> is the only thing allowed to move, so it needs no label and competes with nothing. Hermes has exactly one keyframe animation too, on exactly this. <b>Changed:</b> the ring is spread-only, so it stays a hard edge and survives the no-blurred-shadows rule, and it stops entirely under <code>prefers-reduced-motion</code>. Hermes also puts a 6px blurred glow on the used slots — that part does not come with us.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">10</span><h2>Months that pay you extra</h2></div><div class="spec__sel">.notice</div></div>
+  <p class="spec__why"><b>Two jobs paid on different days is not a contradiction.</b> Each drops its extra cheque in a different month, so every month either job overpays in gets its own line, naming the job. And a month we cannot check is not a safe month — so a job with no pay day is named, not assumed.</p>
+  <div class="stage">
+    <div class="notice">
+      <div class="notice__title">Two months pay you extra this year</div>
+      <div class="notice__row"><b>March</b> pays you an extra time from Riverside Cafe.</div>
+      <div class="notice__row"><b>October</b> pays you an extra time from DoorDash.</div>
+      <div class="notice__row" style="margin-top:6px">Those months can go over without you working any differently.</div>
+      <div class="notice__unknown">Instacart is not checked — no pay day yet. Add one and it appears here.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">11</span><h2>The entry moment</h2></div><div class="spec__sel">.dialog · .outcome</div></div>
+  <p class="spec__why">The best thing in either prototype. <b>The rest of the page goes away; the title names the month; one line restates it; one field; and then the consequence, before you commit.</b></p>
+  <div class="stage">
+    <div class="row"><button class="btn btn--primary" id="openEntry" type="button">Open it</button><span class="from" style="margin:0">Type in the amount and watch the figure below it move. <kbd>Esc</kbd> closes, <kbd>Enter</kbd> saves.</span></div>
+    <p class="from"><b>Changed:</b> the focus comes from a dim scrim and an opaque panel, not a blur — <code>backdrop-filter</code> silently does nothing on the devices this is for. <b>Fixed:</b> every field has a label. In hermes four fields had none, two of them an identical <code>$0.00</code>, with nothing saying which was the pay and which the deduction.</p>
+  </div>
+</section>
+
+<!-- 11b -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">11b</span><h2>Ledger</h2></div><div class="spec__sel">.ledger · th.num · .ledger__group · .ledger__sub · .ledger__total</div></div>
+  <p class="spec__why"><b>Money headings sit over money.</b> Every numeric column is right-aligned and so is its label — a left-aligned heading above a right-aligned column leaves the eye no edge to follow down the page. Words stay left; figures and their labels stay right.</p>
+  <p class="spec__why">Grouped by job, with a subtotal per month and one total at the foot. <b>Six columns, not twenty</b> — the twelve month columns are gone, because each row is one payment and the matrix was eleven empty cells wide by construction. The year lives in component 08.</p>
+  <div class="stage">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="ledger">
+        <table>
+          <thead><tr>
+            <th>Pay day</th><th>Note</th>
+            <th class="num">Paid to you</th><th class="num">Comes off</th><th class="num">Counted</th>
+          </tr></thead>
+          <tbody>
+            <tr class="ledger__group"><td colspan="5"><span class="ledger__groupline">Riverside Cafe <span class="chip chip--parttime">Part time</span></span></td></tr>
+            <tr class="ledger__row"><td class="ledger__when">5 September</td><td>Regular shift</td><td class="num">$242.00</td><td class="num num--none">—</td><td class="num">$242.00</td></tr>
+            <tr class="ledger__row"><td class="ledger__when">12 September</td><td>Regular shift</td><td class="num">$240.00</td><td class="num num--none">—</td><td class="num">$240.00</td></tr>
+            <tr class="ledger__sub"><td>September</td><td></td><td class="num">$482.00</td><td class="num num--none">—</td><td class="num">$482.00</td></tr>
+            <tr class="ledger__group"><td colspan="5"><span class="ledger__groupline">DoorDash <span class="chip chip--gig">Gig work</span></span></td></tr>
+            <tr class="ledger__row"><td class="ledger__when">9 September</td><td>1,240 miles driven for work</td><td class="num">$820.00</td><td class="num num--off">−$868.00</td><td class="num num--none">$0.00</td></tr>
+            <tr class="ledger__sub"><td>September</td><td></td><td class="num">$820.00</td><td class="num num--off">−$868.00</td><td class="num num--none">$0.00</td></tr>
+            <tr class="ledger__total"><td colspan="2">Counted in September</td><td class="num">$1,302.00</td><td class="num num--off">−$868.00</td><td class="num">$482.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="from"><b>The DoorDash row is the whole argument for three columns.</b> $820 paid, $868 of miles comes off, $0 counted — the mileage rule taught by the table rather than explained beside it. <b>Changed:</b> "Gross" and "Net" are banned, so the headings are <em>Paid to you</em>, <em>Comes off</em> and <em>Counted</em>. And a real deduction is coloured, not dimmed — in hermes every deductions cell carried the dimming class, so $868 looked as absent as nothing.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">12</span><h2>Nothing yet, and said out loud</h2></div><div class="spec__sel">.nothing · .toast</div></div>
+  <p class="spec__why">An empty state <b>names the next action, and the next action differs by cause.</b> A toast says what happened in the same words the button used.</p>
+  <div class="stage">
+    <div class="grid2">
+      <div class="card"><div class="nothing">
+        <div class="nothing__mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div class="nothing__title">No jobs yet</div>
+        <p class="nothing__next">Nothing written down yet — every month is wide open. Add a job to see how much room you have.</p>
+      </div></div>
+      <div class="card"><div class="nothing">
+        <div class="nothing__mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+        <div class="nothing__title">No pay written down yet</div>
+        <p class="nothing__next">Your jobs are set up. Tap Add pay on any of them to write down what you were paid.</p>
+      </div></div>
+    </div>
+    <div class="row" style="margin-top:12px"><span class="toast toast--done">Pay written down</span><span class="toast toast--wrong">That day has to be between 1 and 31</span></div>
+  </div>
+</section>
+
+<!-- 12b -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">12b</span><h2>Not told yet</h2></div><div class="spec__sel">.job__fact--none · .num--none · .notice__unknown</div></div>
+  <p class="spec__why"><b>Missing is a value, and the kit says it one way.</b> Hermes had three on adjacent lines of the same row — <code>--</code> for a rate, <code>not set</code> for a pay day, <code>—</code> for hours — so a reader could not tell whether the three meant the same thing.</p>
+  <p class="spec__why">The rule here: <b>an em dash means a real zero. Italic words mean we were never told.</b> They are different facts and they must not look alike — a month with no earnings is safe, a month we cannot check is not.</p>
+  <div class="stage">
+    <div class="grid2">
+      <div class="card">
+        <div class="stat__label" style="margin-bottom:10px">In a row of facts</div>
+        <div class="job__facts" style="padding:0">
+          <span class="job__fact">Pay day <b>6</b></span>
+          <span class="job__fact job__fact--none">Rate <b>not told yet</b></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat__label" style="margin-bottom:10px">In a column of money</div>
+        <div class="ledger"><table style="min-width:0"><tbody>
+          <tr><td>Comes off</td><td class="num num--none">—</td></tr>
+          <tr><td>Counted</td><td class="num">$242.00</td></tr>
+        </tbody></table></div>
+        <p class="field__hint">The dash is a real zero, not a gap.</p>
+      </div>
+    </div>
+    <div class="notice" style="margin-top:12px">
+      <div class="notice__title">One job we cannot check</div>
+      <div class="notice__row">Instacart has no pay day yet, so we cannot say which months pay it extra.</div>
+    </div>
+    <p class="from"><b>Why it earns a component:</b> the whole extra-paycheck warning depends on it. A job with no pay day cannot be checked, and a warning that quietly leaves it out reads as "you are fine". <b>Never default a missing fact to a plausible one</b> — hermes filled in the 15th, which made every job look answerable and printed invented months for jobs nobody had described.</p>
+  </div>
+</section>
+
+<!-- 12c -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">12c</span><h2>Top bar</h2></div><div class="spec__sel">.topbar · .brand · .promise</div></div>
+  <p class="spec__why">Brand left, <b>one promise right — and no navigation at all</b>. The most valuable strip on the screen spends itself saying where the data lives.</p>
+  <p class="spec__why">That is the right call for this reader specifically. Someone deciding whether to type their benefits income into an app has exactly one question first, and it is not "where do I go next".</p>
+  <div class="stage">
+    <div class="topbar">
+      <div class="brand">
+        <span class="brand__mark"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        PayGuard
+      </div>
+      <span class="promise">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Stays on this phone · nothing is sent anywhere
+      </span>
+    </div>
+    <p class="from"><b>From:</b> the tracker's <em>"🔒 Local only · nothing leaves this device"</em>. <b>Changed:</b> the padlock is an inline SVG rather than an emoji — emoji rasterise differently on every Android build and some render as a blank box. And it is stated in the reader's terms: "local only" is developer wording for the same promise.</p>
+    <p class="from"><b>The tracker also repeats this in the footer</b>, in full words. First thing seen and last thing seen say the same thing, which for a promise is worth the duplication.</p>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">13</span><h2>Tab bar</h2></div><div class="spec__sel">.tabs · .tab</div></div>
+  <p class="spec__why">It scrolls rather than routes — one page, always rendered, so nothing mounts, nothing unmounts, no scroll position is lost and the back button is never wrong.</p>
+  <div class="stage">
+    <div class="tabs">
+      <button class="tab" type="button" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Jobs</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Pay</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Limit</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="10" rx="1"/><path d="M12 3 2 9h20L12 3M6 20v-8M18 20v-8"/></svg>Bank</button>
+    </div>
+    <p class="from"><b>One word each.</b> Hermes gets this right and my first pass did not — I had "What you were paid" and "Your limit" in a tab, which wraps to two lines on a phone and turns a bar of destinations into a paragraph. <b>A tab is a place, not a sentence</b>: the word only has to be different from the other three, because the icon and the screen it lands on carry the rest.</p>
+    <p class="from"><b>Changed:</b> 52px targets and 13px labels, up from 10px uppercase. The active state is colour <em>and</em> a 3px underline, so it is not carried by hue alone.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">—</span><h2>What is deliberately not here</h2></div></div>
+  <div class="stage">
+    <p class="spec__why" style="margin:0"><b>No gauge, and no arithmetic of our own.</b> The gauge in hermes divides a year of earnings by a monthly limit, so it pins to full by February; its trial tracker counts any month with any entry, with no earnings test and no sixty-month window. Those are not components to borrow — they are questions <code>src/domain/</code> already answers — <code>capacity.ts</code>, <code>trialWork.ts</code>, <code>paySchedule.ts</code>.</p>
+    <p class="spec__why" style="margin-top:10px"><b>This kit is the interface half.</b> Wire it to the domain that exists rather than reimplementing arithmetic about someone's benefits.</p>
+  </div>
+</section>
+
+</div>
+
+<!-- The entry moment, live -->
+<div class="scrim" id="scrim" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="dialog__head">
+      <div class="dialog__title" id="dlgTitle">Write down pay — September</div>
+      <div class="dialog__restate">Riverside Cafe, September 2026.</div>
+    </div>
+    <div class="dialog__body">
+      <div class="field">
+        <label class="field__label" for="amt">How much did they pay you?</label>
+        <input class="input mono" id="amt" inputmode="decimal" placeholder="0.00" value="240.00">
+        <p class="field__hint">What reached your bank.</p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="pd">Pay day</label>
+        <div class="field__row">
+          <input class="input input--day mono" id="pd" inputmode="numeric" maxlength="2" value="12" data-day>
+          <span class="field__aside">September 2026</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="outcome" id="outcome">
+          <div class="outcome__label">Left after this entry</div>
+          <div class="outcome__value" id="outValue">$488.00</div>
+          <div class="outcome__note" id="outNote">of your $1,210 limit</div>
+        </div>
+      </div>
+    </div>
+    <div class="dialog__foot">
+      <button class="btn btn--quiet" id="cancel" type="button">Cancel</button>
+      <button class="btn btn--primary" id="save" type="button">Write it down</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── The pay day rule, in one place ──────────────────────────
+// Two digits at most, 1 to 31, never 0 and never 32. Enforced as you type.
+var DAY_MIN = 1, DAY_MAX = 31;
+function sanitiseDay(raw) {
+  var t = String(raw == null ? '' : raw).replace(/[^0-9]/g, '');
+  t = t.replace(/^0+/, '');            // kills "0" and "05" both
+  t = t.slice(0, 2);                   // two digits, never three
+  if (t && Number(t) > DAY_MAX) t = t.slice(0, 1);  // 3 then 2 leaves 3
+  return t;
+}
+document.querySelectorAll('[data-day]').forEach(function (input) {
+  input.addEventListener('input', function () { input.value = sanitiseDay(input.value); });
+});
+
+// ── The entry moment ────────────────────────────────────────
+var LIMIT = 1210, COUNTED = 482;
+var scrim = document.getElementById('scrim');
+var amt = document.getElementById('amt');
+var outcome = document.getElementById('outcome');
+var outValue = document.getElementById('outValue');
+var outNote = document.getElementById('outNote');
+
+function money(n) {
+  return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function updateOutcome() {
+  var typed = parseFloat(String(amt.value).replace(/[^0-9.]/g, '')) || 0;
+  var left = LIMIT - COUNTED - typed;
+  outValue.textContent = money(left);
+  outcome.className = 'outcome' + (left < 0 ? ' outcome--over' : (left < LIMIT * 0.15 ? ' outcome--careful' : ''));
+  outNote.textContent = left < 0 ? 'over your $1,210 limit' : 'of your $1,210 limit';
+}
+amt.addEventListener('input', updateOutcome);
+
+function openEntry() {
+  scrim.hidden = false;
+  updateOutcome();
+  setTimeout(function () { amt.focus(); amt.select(); }, 50);
+}
+function closeEntry() { scrim.hidden = true; }
+document.getElementById('openEntry').addEventListener('click', openEntry);
+document.getElementById('cancel').addEventListener('click', closeEntry);
+document.getElementById('save').addEventListener('click', closeEntry);
+scrim.addEventListener('click', function (e) { if (e.target === scrim) closeEntry(); });
+
+// Enter saves, Escape cancels — the two keys everyone tries first.
+document.addEventListener('keydown', function (e) {
+  if (scrim.hidden) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeEntry(); }
+  else if (e.key === 'Enter' && document.activeElement.tagName !== 'BUTTON') { e.preventDefault(); closeEntry(); }
+});
+
+// ── Status pills ────────────────────────────────────────────
+document.querySelectorAll('.pills').forEach(function (group) {
+  group.addEventListener('click', function (e) {
+    var hit = e.target.closest('.pill');
+    if (!hit) return;
+    group.querySelectorAll('.pill').forEach(function (p) { p.setAttribute('aria-pressed', String(p === hit)); });
+  });
+});
+
+// ── Ink ─────────────────────────────────────────────────────
+var ink = document.getElementById('ink');
+ink.addEventListener('click', function () {
+  var dark = document.documentElement.getAttribute('data-ink') === 'dark';
+  document.documentElement.setAttribute('data-ink', dark ? 'light' : 'dark');
+  ink.textContent = dark ? 'Dark' : 'Light';
+});
+</script>
+</body>
+</html>

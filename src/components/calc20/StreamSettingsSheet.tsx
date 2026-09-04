@@ -125,7 +125,7 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
 
           <fieldset className="settings-fieldset">
           <label className="field">
-            <span className="eyebrow">{stream.type === 'w2' ? 'Employer' : 'Client or business'}</span>
+            <span className="eyebrow">{stream.type === 'w2' ? 'Job' : 'Gig'}</span>
             <input
               type="text"
               value={stream.name}

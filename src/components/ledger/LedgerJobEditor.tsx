@@ -1,24 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronDown, Lock, LockOpen, TriangleAlert, Zap } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import {
-  activeMonthsInYear, evenSplit, grossFor, hoursFor
+  activeMonthsInYear, countableFor, evenSplit, grossFor, hoursFor, mileageDeduction
 } from '../../domain/earnings';
 import {
-  longMonthName, monthIndex, monthKey, monthsShownLabel, parseMonth, shortMonthName, todayMonth
+  longMonthName, monthIndex, monthKey, parseMonth, shortMonthName, todayMonth
 } from '../../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/rules';
 import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
-import type { PayFrequency, Stream } from '../../domain/types';
+import type { MonthEntry, MonthKey, PayFrequency, Stream } from '../../domain/types';
 import { HelpSpread } from '../HelpSpread';
+import {
+  PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, payPatchFor, payValueFor, usePayBasis
+} from '../PayAmount';
 import { miles0, money2 } from './ledgerFormat';
 import { periodLabel } from '../../domain/copy';
 
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
 
 /** Collapsible sections nested inside a job card. */
-export type JobSection = 'settings' | 'ledger';
-export const JOB_SECTIONS: JobSection[] = ['settings', 'ledger'];
+export type JobSection = 'settings' | 'history';
+export const JOB_SECTIONS: JobSection[] = ['settings', 'history'];
 /** Namespaced key so one collapsed-set in the parent can hold cards and sections. */
 export const jobSectionKey = (streamId: string, section: JobSection) => `${streamId}::${section}`;
 
@@ -75,10 +78,13 @@ function SectionToggle({ label, meta, open, onToggle }: {
     <button
       type="button"
       onClick={onToggle}
+      aria-expanded={open}
       data-open={open}
       className="lg-section-toggle"
     >
-      <ChevronDown className="size-5 shrink-0 transition-transform lg-chevron" data-collapsed={!open} />
+      <span className="lg-toggle-lead" aria-hidden="true">
+        <ChevronDown className="lg-chevron" data-collapsed={!open} />
+      </span>
       <span>{label}</span>
       {meta ? <span className="lg-section-toggle-meta">{meta}</span> : null}
     </button>
@@ -91,16 +97,146 @@ function SectionToggle({ label, meta, open, onToggle }: {
    twice. Where there is nothing to add, the row is not drawn at all. */
 function SettingTile({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col gap-2 p-2.5 sm:p-3 lg-bg-surface lg-summary-tile">
+    <div className="flex flex-1 flex-col gap-2 lg-bg-surface lg-summary-tile">
       <span className="lg-label">{label}</span>
       {children}
-      {help ? <span className="text-[0.8125rem] leading-snug lg-text-muted">{help}</span> : null}
+      {help ? <span className="lg-type-body leading-snug lg-text-muted">{help}</span> : null}
     </div>
   );
 }
 
+/** W2 month rows — bank vs paystub via shared PayAmount helpers.
+ *  Hours are optional on a W-2 (they decide nothing about countable pay),
+ *  so the Worked column stays out until a month has hours or the reader
+ *  asks for it — otherwise every cell is an em dash and a right-aligned
+ *  "HOURS WORKED" header crops to "ORKED" on a narrow pane. */
+function W2MonthLedger({
+  stream, months, locked, onExtend, onUpdate, onClear
+}: {
+  stream: Stream;
+  months: MonthKey[];
+  locked: boolean;
+  onExtend: (m: MonthKey) => void;
+  onUpdate: (m: MonthKey, patch: Partial<MonthEntry>) => void;
+  onClear: (m: MonthKey) => void;
+}) {
+  const { basis } = usePayBasis();
+  const anyHours = months.some((m) => hoursFor(stream, m) > 0);
+  /* Offer once asked for — clearing the last hour must not yank the column
+     mid-edit. */
+  const [offerHours, setOfferHours] = useState(false);
+  const showHours = offerHours || anyHours;
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="lg-pay-basis">
+        <PayBasisSwitch />
+        {!showHours ? (
+          <button
+            type="button"
+            className="lg-add-hours"
+            disabled={locked}
+            onClick={() => setOfferHours(true)}
+          >
+            Add hours
+          </button>
+        ) : null}
+      </div>
+      <div className="lg-ledger-scroll" data-hours={showHours || undefined}>
+        <table className="lg-ledger-table">
+          <colgroup>
+            <col className="lg-col-month" />
+            <col className="lg-col-amount" />
+            {showHours ? <col className="lg-col-hours" /> : null}
+            <col className="lg-col-clear" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="lg-label lg-ledger-hcell lg-ledger-hcell--month">Month</th>
+              <th scope="col" className="lg-label lg-ledger-hcell lg-ledger-hcell--num">{PAY_BASIS_WORDS[basis].field}</th>
+              {showHours ? (
+                <th scope="col" className="lg-label lg-ledger-hcell lg-ledger-hcell--num">Hours</th>
+              ) : null}
+              <th scope="col" className="lg-label lg-ledger-hcell lg-ledger-hcell--clear">Clear</th>
+            </tr>
+          </thead>
+          <tbody>
+            {months.map((m) => {
+              const blockedByLifecycle = stream.lifecycle !== 'active' && monthIndex(m) >= monthIndex(todayMonth());
+              const blockedByEnd = stream.activeTo != null && monthIndex(m) > monthIndex(stream.activeTo);
+              const disabled = locked || blockedByLifecycle || blockedByEnd;
+              const context = paycheckContextForMonth([stream], m);
+              const entry = stream.months[m];
+              const amount = payValueFor(entry, basis);
+              const hrs = hoursFor(stream, m);
+              const converted = basis === 'bank' && amount ? payPatchFor('bank', amount).gross : undefined;
+
+              return (
+                <tr key={m} className="lg-ledger-row">
+                  <td className="lg-ledger-cell lg-ledger-cell--month">
+                    <span>{shortMonthName(m)}</span>
+                    {context.length ? (
+                      <span className="lg-type-micro font-medium uppercase leading-tight lg-text-warn">
+                        {context[0].count} paychecks
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="lg-ledger-cell lg-ledger-cell-field lg-ledger-cell--num">
+                    <LedgerNumberInput
+                      ariaLabel={`${longMonthName(m)} ${PAY_BASIS_WORDS[basis].field.toLowerCase()}`}
+                      placeholder="0.00"
+                      disabled={disabled}
+                      value={amount || undefined}
+                      onCommit={(next) => {
+                        if (next !== undefined) onExtend(m);
+                        onUpdate(m, payPatchFor(basis, next));
+                      }}
+                      className="lg-ledger-input"
+                    />
+                    {converted ? (
+                      <span className="lg-ledger-hint">
+                        About {money2(converted)} before taxes
+                      </span>
+                    ) : null}
+                  </td>
+                  {showHours ? (
+                    <td className="lg-ledger-cell lg-ledger-cell-field lg-ledger-cell--num">
+                      <LedgerNumberInput
+                        ariaLabel={`${longMonthName(m)} hours`}
+                        placeholder="—"
+                        disabled={disabled}
+                        value={hrs || undefined}
+                        onCommit={(next) => {
+                          if (next !== undefined) onExtend(m);
+                          onUpdate(m, { hours: next });
+                        }}
+                        className="lg-ledger-input"
+                      />
+                    </td>
+                  ) : null}
+                  <td className="lg-ledger-cell lg-ledger-cell--clear">
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onClear(m)}
+                      className="lg-quiet-action"
+                    >
+                      Clear
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+
 export function LedgerJobEditor({
-  stream, year, open: cardOpen, onToggleOpen, sectionOpen, onToggleSection
+  stream, year, open: cardOpen, onToggleOpen, sectionOpen, onToggleSection, afterIncome
 }: {
   stream: Stream;
   year: number;
@@ -110,10 +246,12 @@ export function LedgerJobEditor({
   /** Also lifted, so "Expand All" cascades into the sections nested in each card. */
   sectionOpen: (section: JobSection) => boolean;
   onToggleSection: (section: JobSection) => void;
+  /** Not ongoing chips — sit inside the card after the Income table. */
+  afterIncome?: ReactNode;
 }) {
   const { updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
   const settingsOpen = sectionOpen('settings');
-  const ledgerOpen = sectionOpen('ledger');
+  const historyOpen = sectionOpen('history');
   const [helpOpen, setHelpOpen] = useState(false);
 
   const now = todayMonth();
@@ -127,81 +265,85 @@ export function LedgerJobEditor({
   const ytdGross = eligibleMonths.reduce((sum, month) => sum + grossFor(stream, month), 0);
   const ytdMiles = eligibleMonths.reduce((sum, month) => sum + (stream.months[month]?.miles ?? 0), 0);
   const ytdHours = eligibleMonths.reduce((sum, month) => sum + hoursFor(stream, month), 0);
+  const ytdMileageOff = eligibleMonths.reduce((sum, month) => sum + mileageDeduction(stream, month), 0);
+  const ytdCountable = eligibleMonths.reduce((sum, month) => sum + countableFor(stream, month), 0);
 
   const plan = stream.payFrequency && stream.anchorDate ? payPlan(year, stream.payFrequency, stream.anchorDate) : null;
   const scheduleSummary = stream.payFrequency
     ? frequencyLabel(stream.payFrequency) + ' · ' + (stream.lifecycle === 'active' && !stream.activeTo ? 'Active all year' : 'Date range set')
-    : 'Not scheduled';
+    : 'No schedule';
+  const historySection = afterIncome ? (
+    <>
+      <SectionToggle label="History" open={historyOpen} onToggle={() => onToggleSection('history')} />
+      {historyOpen ? afterIncome : null}
+    </>
+  ) : null;
 
   return (
+    <PayBasisProvider>
     <div className="lg-job-card" data-type={stream.type}>
       {/* header */}
-      <div className="lg-job-card-header flex flex-wrap items-center gap-2.5 px-3.5 py-3 sm:px-4" data-open={cardOpen}>
+      <div className="lg-job-card-header" data-open={cardOpen}>
         <button
           type="button"
           onClick={onToggleOpen}
           aria-label={cardOpen ? 'Collapse' : 'Expand'}
-          className="grid size-8 shrink-0 place-items-center lg-text-muted"
+          className="lg-toggle-lead lg-text-muted"
         >
-          <ChevronDown className="size-5 transition-transform lg-chevron" data-collapsed={!cardOpen} />
+          <ChevronDown className="lg-chevron" data-collapsed={!cardOpen} />
         </button>
-        {/* Review note: "I understand the importance of the lock icon but is
-            it really that important to be there always?" No — when the card
-            is unlocked the lock is a control you might use, and it was drawn
-            as a bordered button competing with the job's own name. It keeps
-            its box only when it is locked, where it is not a control but the
-            reason every field below is disabled. It is still always present:
-            on a touch screen there is no hover to reveal it, and a lock you
-            cannot find is how somebody loses an edit they meant to make. */}
-        <button
-          type="button"
-          onClick={() => updateStream(stream.id, { locked: !stream.locked })}
-          aria-label={stream.locked ? 'Unlock' : 'Lock'}
-          data-locked={stream.locked || undefined}
-          className="grid size-8 shrink-0 place-items-center lg-lock-btn"
-        >
-          {stream.locked ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
-        </button>
-        <span className="lg-type-badge" data-type={stream.type}>
-          {stream.type === 'w2' ? 'W-2' : '1099'}
-        </span>
+        {/* Type lives on the tab; repeating the badge here was chrome. */}
         <input
-          aria-label={`${stream.type === 'w2' ? 'W-2' : '1099'} stream name`}
+          aria-label="Job name"
           value={stream.name}
           disabled={stream.locked}
           onChange={(e) => updateStream(stream.id, { name: e.target.value })}
-          className="lg-name-input lg-name-input-visible lg-sans min-w-0 flex-1 text-lg font-semibold disabled:cursor-not-allowed disabled:opacity-60 lg-text-fg"
+          className="lg-name-input lg-name-input-visible lg-band-head__title min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-60 lg-text-fg"
         />
-        <div className="flex shrink-0 flex-col items-end gap-0.5">
-          <span className="lg-label">Before taxes, {periodLabel(year, isYearToDate).toLowerCase()}</span>
-          <span className="text-lg font-semibold">{money2(ytdGross)}</span>
+        <div className="flex shrink-0 items-baseline gap-1.5">
+          <span className="lg-label">{periodLabel(year, isYearToDate)}</span>
+          <span className="lg-band-head__title">{money2(ytdGross)}</span>
         </div>
       </div>
 
       {cardOpen ? (
       <>
-      {/* status row */}
-      <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 lg-border-b-soft">
-        <div className="lg-seg">
-          {(['active', 'inactive', 'completed'] as const).map((lifecycle) => (
-            <button
-              key={lifecycle}
-              type="button"
-              disabled={stream.locked}
-              data-on={stream.lifecycle === lifecycle}
-              className="lg-seg-item disabled:cursor-not-allowed disabled:opacity-45"
-              onClick={() => updateStream(stream.id, {
-                lifecycle,
-                activeTo: lifecycle === 'completed'
-                  ? (stream.activeTo ?? todayMonth())
-                  : lifecycle === 'active' ? null : stream.activeTo
-              })}
-            >
-              {lifecycle === 'active' ? 'Ongoing' : lifecycle === 'inactive' ? 'Paused' : 'Ended'}
-            </button>
-          ))}
+      <div className="lg-job-status">
+        {/* Same three states as calc20 settings. Tabs only show Ongoing;
+            Paused / Ended land under Not ongoing with Return to ongoing. */}
+        <div className="lg-seg" role="group" aria-label="Job status">
+          <button
+            type="button"
+            disabled={stream.locked}
+            data-on={stream.lifecycle === 'active'}
+            className="lg-seg-item disabled:cursor-not-allowed disabled:opacity-45"
+            onClick={() => updateStream(stream.id, { lifecycle: 'active', activeTo: null })}
+          >
+            Ongoing
+          </button>
+          <button
+            type="button"
+            disabled={stream.locked}
+            data-on={stream.lifecycle === 'inactive'}
+            className="lg-seg-item disabled:cursor-not-allowed disabled:opacity-45"
+            onClick={() => updateStream(stream.id, { lifecycle: 'inactive' })}
+          >
+            Paused
+          </button>
+          <button
+            type="button"
+            disabled={stream.locked}
+            data-on={stream.lifecycle === 'completed'}
+            className="lg-seg-item disabled:cursor-not-allowed disabled:opacity-45"
+            onClick={() => updateStream(stream.id, {
+              lifecycle: 'completed',
+              activeTo: stream.activeTo ?? todayMonth()
+            })}
+          >
+            Ended
+          </button>
         </div>
-        <label className="flex items-center gap-1.5 text-[0.8125rem] lg-text-muted">
+        <label className="flex items-center gap-1.5 lg-type-body lg-text-muted">
           Since
           <input
             type="month"
@@ -213,7 +355,7 @@ export function LedgerJobEditor({
           />
         </label>
         {stream.lifecycle === 'completed' ? (
-          <label className="flex items-center gap-1.5 text-[0.8125rem] lg-text-muted">
+          <label className="flex items-center gap-1.5 lg-type-body lg-text-muted">
             Ended
             <select
               value={parseMonth(stream.activeTo ?? todayMonth()).month1}
@@ -240,18 +382,28 @@ export function LedgerJobEditor({
           </label>
         ) : null}
         {stream.lifecycle === 'completed' ? (
-          <span className="ml-auto flex items-center gap-1 text-[0.75rem] uppercase tracking-wider lg-text-warn">
-            <TriangleAlert className="size-4" /> Needs a new anchor payday if it resumes
+          <span className="ml-auto flex items-center gap-1 lg-type-body lg-text-warn">
+            <TriangleAlert className="size-4" /> History stays — Return to ongoing under Not ongoing
           </span>
         ) : null}
+        <button
+          type="button"
+          onClick={() => updateStream(stream.id, { locked: !stream.locked })}
+          aria-label={stream.locked ? 'Unlock' : 'Lock'}
+          data-locked={stream.locked || undefined}
+          className="lg-lock-btn lg-job-status-lock"
+          title={stream.locked ? 'Unlock this job' : 'Lock this job'}
+        >
+          {stream.locked ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
+        </button>
       </div>
 
       {stream.type === 'w2' ? (
         <>
-          <SectionToggle label="How you are paid" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} />
+          <SectionToggle label="Pay cycle" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} />
           {settingsOpen ? (
             <div className="flex flex-wrap lg-settings-grid">
-              <SettingTile label="How often">
+              <SettingTile label="Frequency">
                 <select
                   value={stream.payFrequency}
                   disabled={stream.locked}
@@ -263,7 +415,7 @@ export function LedgerJobEditor({
               </SettingTile>
               <SettingTile
                 label="Payday"
-                help={stream.anchorDate ? 'We work out every other payday from this one.' : 'Any one payday will do. We need it to find the months that pay you extra.'}
+                help={stream.anchorDate ? 'Other paydays follow from this.' : 'Any real payday — finds months with an extra check.'}
               >
                 <input
                   type="date"
@@ -273,142 +425,71 @@ export function LedgerJobEditor({
                   className="lg-field"
                 />
               </SettingTile>
-              <SettingTile label="Your pay rate" help="Optional. It lets us work out what a month with an extra paycheck would pay you.">
+              <SettingTile label="Rate" help="Optional. Finds extra-check months.">
                 <div className="grid grid-cols-2 gap-1.5">
-                  <span className="lg-field flex min-w-0 items-center gap-1">
-                    <span className="lg-text-muted">$</span>
+                  <label className="lg-field flex min-w-0 cursor-text items-center gap-1.5">
+                    <span className="lg-field-prefix">$</span>
                     <LedgerNumberInput
                       ariaLabel="Hourly rate"
                       value={stream.hourlyRate}
                       placeholder="0.00"
                       disabled={stream.locked}
                       onCommit={(hourlyRate) => updateStream(stream.id, { hourlyRate })}
-                      className="min-w-0 flex-1 bg-transparent text-right outline-none"
+                      className="text-right"
                     />
-                    <span className="text-[0.625rem] lg-text-muted">an hour</span>
-                  </span>
-                  <span className="lg-field flex min-w-0 items-center gap-1">
+                    <span className="lg-field-suffix lg-type-micro">an hour</span>
+                  </label>
+                  <label className="lg-field flex min-w-0 cursor-text items-center gap-1.5">
                     <LedgerNumberInput
                       ariaLabel="Planned hours per week"
                       value={stream.plannedHoursPerWeek}
                       placeholder="0"
                       disabled={stream.locked}
                       onCommit={(plannedHoursPerWeek) => updateStream(stream.id, { plannedHoursPerWeek })}
-                      className="min-w-0 flex-1 bg-transparent text-right outline-none"
+                      className="text-right"
                     />
-                    <span className="text-[0.625rem] lg-text-muted">hours a week</span>
-                  </span>
+                    <span className="lg-field-suffix lg-type-micro">hours a week</span>
+                  </label>
                 </div>
               </SettingTile>
               <SettingTile
-                label={'Paychecks in ' + year}
-                help={plan ? (plan.heavyMonths.length ? `${plan.heavyMonths.length} ${plan.heavyMonths.length === 1 ? 'month has' : 'months have'} an extra check.` : 'Same number every month.') : 'Set a payday to forecast.'}
+                label="Checks"
+                help={plan ? (plan.heavyMonths.length ? `${year}: ${plan.heavyMonths.length} ${plan.heavyMonths.length === 1 ? 'month has' : 'months have'} an extra check.` : `${year}: same number every month.`) : `Set a payday to forecast ${year}.`}
               >
-                <span className="text-lg font-semibold">{plan ? plan.total : '—'}</span>
+                <span className="lg-type-title">{plan ? plan.total : '—'}</span>
               </SettingTile>
             </div>
           ) : null}
           {settingsOpen && plan && plan.heavyMonths.length ? (
-            <div className="flex items-center gap-2 px-3 py-2 text-[0.75rem] font-medium sm:px-4 lg-warn-banner">
+            <div className="flex items-center gap-2 lg-pad-cell-y lg-type-caption font-medium lg-card-inset lg-warn-banner">
               <Zap className="size-3.5 shrink-0" />
               {plan.typicalCount + 1} paychecks in {plan.heavyMonths.length} month{plan.heavyMonths.length === 1 ? '' : 's'} this year
             </div>
           ) : null}
 
-          <SectionToggle
-            /* "Month by month" is what the analysis panel already calls this
-               same idea one screen over, so the two now say it with the same
-               words — which is the "more global labels where possible" half
-               of el-kmzpns. "Ledger" is an accounting word; the year is
-               already in the meta beside it. */
-            label="Month by month"
-            meta={monthsShownLabel(months)}
-            open={ledgerOpen}
-            onToggle={() => onToggleSection('ledger')}
+          {historySection}
+
+          <W2MonthLedger
+            stream={stream}
+            months={months}
+            locked={stream.locked}
+            onExtend={(m) => {
+              if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
+            }}
+            onUpdate={(m, patch) => updateMonthEntry(stream.id, m, patch)}
+            onClear={(m) => updateMonthEntry(stream.id, m, {
+              gross: undefined, hours: undefined, net: undefined, basis: undefined
+            })}
           />
-          {ledgerOpen ? (
-            <div className="overflow-x-auto">
-              <div className="lg-ledger-scroll">
-                <div className="lg-ledger-head flex">
-                  <div className="lg-label w-24 shrink-0 border-r px-2 py-2 lg-label-border">Month</div>
-                  <div className="lg-label flex-1 border-r px-2 py-2 text-right lg-label-border">Hours worked</div>
-                  <div className="lg-label flex-[1.3] border-r px-2 py-2 text-right lg-label-border">Before taxes</div>
-                  <div className="lg-label w-14 shrink-0 px-2 py-2 text-center">Clear</div>
-                </div>
 
-                {months.map((m) => {
-                  const blockedByLifecycle = stream.lifecycle !== 'active' && monthIndex(m) >= monthIndex(todayMonth());
-                  const blockedByEnd = stream.activeTo != null && monthIndex(m) > monthIndex(stream.activeTo);
-                  const disabled = stream.locked || blockedByLifecycle || blockedByEnd;
-                  const extendIfEarly = () => {
-                    if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
-                  };
-                  const context = paycheckContextForMonth([stream], m);
-                  const gross = grossFor(stream, m);
-                  const hrs = hoursFor(stream, m);
-
-                  return (
-                    <div key={m} className="lg-ledger-row">
-                      <div className="lg-ledger-cell w-24 shrink-0 flex-col !items-start gap-0.5">
-                        <span>{shortMonthName(m)}</span>
-                        {context.length ? (
-                          <span className="text-[0.5625rem] font-medium uppercase leading-tight lg-text-warn">
-                            {context[0].count} paychecks
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="lg-ledger-cell lg-ledger-cell-field flex-1">
-                        <LedgerNumberInput
-                          ariaLabel={`${longMonthName(m)} hours`}
-                          placeholder="—"
-                          disabled={disabled}
-                          value={hrs || undefined}
-                          onCommit={(next) => {
-                            if (next !== undefined) extendIfEarly();
-                            updateMonthEntry(stream.id, m, { hours: next });
-                          }}
-                          className="lg-ledger-input"
-                        />
-                      </div>
-                      <div className="lg-ledger-cell lg-ledger-cell-field flex-[1.3]">
-                        <LedgerNumberInput
-                          ariaLabel={`${longMonthName(m)} gross income`}
-                          placeholder="0.00"
-                          disabled={disabled}
-                          value={gross || undefined}
-                          onCommit={(next) => {
-                            if (next !== undefined) extendIfEarly();
-                            updateMonthEntry(stream.id, m, { gross: next });
-                          }}
-                          className="lg-ledger-input"
-                        />
-                      </div>
-                      <div className="flex w-14 shrink-0 items-stretch">
-                        <button
-                          type="button"
-                          disabled={disabled}
-                          onClick={() => updateMonthEntry(stream.id, m, { gross: undefined, hours: undefined })}
-                          className="w-full text-[0.625rem] font-medium uppercase tracking-wider disabled:opacity-30 lg-text-muted"
-                        >
-                          Clear
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
         </>
       ) : (
         <>
-          <SectionToggle label="What this work brought in" meta={periodLabel(year, isYearToDate)} open={ledgerOpen} onToggle={() => onToggleSection('ledger')} />
-          {ledgerOpen ? (
-            <div className="flex flex-wrap gap-3 p-3 sm:p-4">
+          <div className="lg-se-form flex flex-wrap gap-3">
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className="lg-label">Paid to you</span>
-                <span className="lg-field flex items-center gap-1">
-                  <span className="lg-text-muted">$</span>
+                <span className="lg-label">Paid</span>
+                <span className="lg-field flex cursor-text items-center gap-1.5">
+                  <span className="lg-field-prefix">$</span>
                   <LedgerNumberInput
                     ariaLabel={`Money they paid you, ${periodLabel(year, isYearToDate).toLowerCase()}`}
                     placeholder="0.00"
@@ -419,13 +500,13 @@ export function LedgerJobEditor({
                       updateMonthEntries(stream.id, evenSplit(next ?? 0, eligibleMonths.length)
                         .map((gross, i) => ({ month: eligibleMonths[i], patch: { gross } })));
                     }}
-                    className="min-w-0 flex-1 bg-transparent text-right outline-none"
+                    className="text-right"
                   />
                 </span>
               </label>
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className="lg-label">Work miles</span>
-                <span className="lg-field flex items-center gap-1">
+                <span className="lg-label">Miles</span>
+                <span className="lg-field flex cursor-text items-center gap-1.5">
                   <LedgerNumberInput
                     ariaLabel={`Miles you drove for work, ${periodLabel(year, isYearToDate).toLowerCase()}`}
                     placeholder="0"
@@ -436,14 +517,14 @@ export function LedgerJobEditor({
                       updateMonthEntries(stream.id, evenSplit(next ?? 0, eligibleMonths.length)
                         .map((miles, i) => ({ month: eligibleMonths[i], patch: { miles } })));
                     }}
-                    className="min-w-0 flex-1 bg-transparent text-right outline-none"
+                    className="text-right"
                   />
-                  <span className="text-[0.625rem] lg-text-muted">miles</span>
+                  <span className="lg-field-suffix lg-type-micro">miles</span>
                 </span>
               </label>
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className="lg-label">Hours worked</span>
-                <span className="lg-field flex items-center gap-1">
+                <span className="lg-label">Hours</span>
+                <span className="lg-field flex cursor-text items-center gap-1.5">
                   <LedgerNumberInput
                     ariaLabel={`Hours you worked, ${periodLabel(year, isYearToDate).toLowerCase()}`}
                     placeholder="0"
@@ -454,33 +535,39 @@ export function LedgerJobEditor({
                       updateMonthEntries(stream.id, evenSplit(next ?? 0, eligibleMonths.length)
                         .map((hours, i) => ({ month: eligibleMonths[i], patch: { hours } })));
                     }}
-                    className="min-w-0 flex-1 bg-transparent text-right outline-none"
+                    className="text-right"
                   />
-                  <span className="text-[0.625rem] lg-text-muted">hours</span>
+                  <span className="lg-field-suffix lg-type-micro">hours</span>
                 </span>
               </label>
-              <div className="flex w-full items-center justify-between pt-1">
+              <div className="flex w-full items-center justify-between lg-pad-micro-t">
                 <button
                   type="button"
                   onClick={() => setHelpOpen(true)}
-                  className="text-xs font-semibold hover:underline lg-text-w2"
+                  className="lg-type-caption font-semibold hover:underline lg-text-w2"
                 >
                   How your miles change what counts →
                 </button>
               </div>
-              <p className="w-full text-[0.8125rem] leading-relaxed lg-text-muted">
+              <p className="w-full lg-type-body leading-relaxed lg-text-muted">
                 {eligibleMonths.length
-                  ? `Each total is split evenly across the ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Your ${miles0(ytdMiles)} come off first, and what is left counts toward your monthly limit. Working more than ${TWP_SELF_EMPLOYMENT_HOURS} hours in one month uses a trial work month too.`
+                  ? (ytdMileageOff > 0
+                    ? `Split across ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} · ${miles0(ytdMiles)} take ${money2(ytdMileageOff)} off · ${money2(ytdCountable)} counts toward your limit.`
+                    : `Split evenly across ${eligibleMonths.length} month${eligibleMonths.length === 1 ? '' : 's'} you have worked in ${year}. Over ${TWP_SELF_EMPLOYMENT_HOURS} hours in a month uses a trial work month.`)
                   : `No active months in ${year} yet to split this across.`}
               </p>
-            </div>
-          ) : null}
+          </div>
+
+          {historySection}
+
         </>
       )}
+
       </>
       ) : null}
 
       {helpOpen ? <HelpSpread onClose={() => setHelpOpen(false)} /> : null}
     </div>
+    </PayBasisProvider>
   );
 }

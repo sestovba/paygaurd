@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import '../../styles/overview.css';
 import { useTracker } from '../../state/TrackerProvider';
 
 /**

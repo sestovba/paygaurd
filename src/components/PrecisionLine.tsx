@@ -1,5 +1,8 @@
 import type { Precision, PrecisionGap, PrecisionReading } from '../domain/precision';
-import { PRECISION_NAME, precisionSentence } from '../domain/precision';
+import { precisionSentence } from '../domain/precision';
+import { copyFor } from '../domain/copy';
+import { useTracker } from '../state/TrackerProvider';
+import type { Vocabulary } from '../domain/copy';
 
 /** The scale, in order. Three states is a scale, and a scale can be drawn. */
 const LEVELS: Precision[] = ['estimated', 'scheduled', 'exact'];
@@ -40,6 +43,8 @@ export function PrecisionLine({
    *  rather than the whole editor when that is all it needs. */
   onFix?: (gap: PrecisionGap) => void;
 }) {
+  const { ui } = useTracker();
+  const words = copyFor(ui.layout);
   const gap = reading.gaps[0];
   const fixable = Boolean(gap && onFix);
   const filled = LEVELS.indexOf(reading.level) + 1;
@@ -55,8 +60,15 @@ export function PrecisionLine({
           <span key={level} className="precision-pip" data-on={i < filled || undefined} />
         ))}
       </span>
-      <span className="precision-level">{PRECISION_NAME[reading.level]}</span>
-      {gap ? <span className="precision-why">{gap.streamName} · {askFor(gap)}</span> : null}
+      <span className="precision-level">{gradeName(reading.level, words)}</span>
+      {gap ? (
+        <span className="precision-why">
+          <span className="precision-sep" aria-hidden="true">·</span>
+          {gap.streamName}
+          {' · '}
+          {askFor(gap, words)}
+        </span>
+      ) : null}
     </>
   );
 
@@ -82,11 +94,19 @@ export function PrecisionLine({
   );
 }
 
-/** The ask, as a thing to do rather than a thing that is wrong. */
-function askFor(gap: PrecisionGap): string {
-  if (gap.kind === 'schedule') return 'add a payday';
-  if (gap.kind === 'checks') return 'add a paystub';
-  return 'add hours worked';
+/** The ask, as a thing to do rather than a thing that is wrong — in the
+ *  words of the layout it is being shown on. */
+function askFor(gap: PrecisionGap, words: Vocabulary): string {
+  if (gap.kind === 'schedule') return words.askPayday;
+  if (gap.kind === 'checks') return words.askPaystub;
+  return words.askHours;
+}
+
+/** The grade, in the layout's own words. */
+function gradeName(level: Precision, words: Vocabulary): string {
+  if (level === 'estimated') return words.precisionGuessed;
+  if (level === 'scheduled') return words.precisionPredicted;
+  return words.precisionExact;
 }
 
 /**
@@ -113,6 +133,8 @@ function PrecisionGauge({ reading, onFix }: {
   reading: PrecisionReading;
   onFix?: (gap: PrecisionGap) => void;
 }) {
+  const { ui } = useTracker();
+  const words = copyFor(ui.layout);
   const gap = reading.gaps[0];
   const pct = Math.max(0, Math.min(100, reading.confidence));
 
@@ -158,7 +180,7 @@ function PrecisionGauge({ reading, onFix }: {
               Tell us {reading.missing} more {reading.missing === 1 ? 'thing' : 'things'}
               {' '}and this number becomes exact
             </strong>
-            {gap ? <span>{gap.streamName} · {askFor(gap)}</span> : null}
+            {gap ? <span>{gap.streamName} · {askFor(gap, words)}</span> : null}
           </p>
           {gap && onFix ? (
             <button type="button" className="precision-gauge-go" onClick={() => onFix(gap)}>

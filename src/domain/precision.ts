@@ -20,25 +20,17 @@ import { yearOf } from './months';
 
 export type Precision = 'estimated' | 'scheduled' | 'exact';
 
-/* One word each. The three pips beside them carry the scale now, so the name
-   only has to say which rung this is — "Pay Schedule Set" and "Exact (From
-   Paystubs)" were explaining the rung as well as naming it.
-
-   "Scheduled" was the odd one and the content audit took it out: it named a
-   state of our data ("a pay schedule is on file") rather than a state of the
-   reader's number, so on a scale about how sure a figure is, the middle rung
-   was answering a different question from the two either side. Three words,
-   three distinct meanings, all of them about the figure: it was guessed, it
-   was worked out from your pay days, or it came off your paystubs. */
-export const PRECISION_NAME: Record<Precision, string> = {
-  estimated: 'Guessed',
-  scheduled: 'Predicted',
-  exact: 'Exact'
-};
+/* The three grades used to be named here, in a flat table. They are keys in
+   the vocabulary now (precisionGuessed / precisionPredicted / precisionExact
+   in domain/copy.ts), because the grade on a number is exactly the kind of
+   thing a dense monospace strip and a roomy panel should be free to say
+   differently — calc20 stamps "Estimate / Scheduled / Confirmed" where the
+   others say "Guessed / Predicted / Exact". Same three rungs, same meaning;
+   only the register moves. This type still orders them. */
 
 /** Which field is missing — so a layout can send you to the fastest way of
  *  filling it in rather than to the whole editor every time. */
-export type PrecisionGapKind = 'schedule' | 'checks' | 'hours';
+export type PrecisionGapKind = 'schedule' | 'checks' | 'hours' | 'miles';
 
 /** One thing the app has not been told, and what it costs. */
 export interface PrecisionGap {
@@ -126,6 +118,38 @@ function ten99Gap(stream: Stream, month: MonthKey): PrecisionGap | null {
          shown and puts a number on it that means nothing without it. What
          they need to know is what the app cannot tell them. */
       cost: 'we cannot tell you whether your hours use a trial work month',
+      level: 'estimated'
+    };
+  }
+
+  /* The biggest number this app can be wrong about, and it was not asked for.
+   *
+   * 1099 income counts *after* mileage — countableFor subtracts
+   * mileageDeduction before anything is compared to a limit. With no miles on
+   * file that deduction is zero, so every dollar paid counts, and CLAUDE.md
+   * puts $1,000 of delivery work at under $300 countable once the miles come
+   * off. Until now precision reported the hours gap and stopped: once hours
+   * were entered the month was declared complete while the largest source of
+   * error in the product sat unmentioned.
+   *
+   * It errs in the direction nobody notices. A missing paystub makes somebody
+   * cautious; missing miles makes them turn down work they are legally
+   * entitled to take, and nothing on screen ever says so.
+   *
+   * Deliberately second, behind hours. Hours decide whether a trial month
+   * gets used, which is a risk to benefits; miles decide how much can be
+   * earned, which is money on the table. Protect first, then maximise — which
+   * is also the order the reader's confidence arrives in. */
+  if ((entry?.gross ?? 0) > 0 && !(entry?.miles ?? 0)) {
+    return {
+      streamId: stream.id,
+      streamName: stream.name,
+      kind: 'miles',
+      missing: 'the miles you drove this month',
+      /* Framed as what it buys, not as a correction. This is the one gap
+         where filling it in almost always means the reader can earn more, so
+         the sentence has to sound like the opportunity it is. */
+      cost: 'every dollar you were paid counts, and miles usually take a large part off',
       level: 'estimated'
     };
   }

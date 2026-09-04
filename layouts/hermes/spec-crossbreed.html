@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>If These Had A Baby</title>
+<style>
+
+/* ============================================================
+   PAYGUARD COMPONENTS — ours, borrowed from hermes.
+   Rebuilt to the device rule in CLAUDE.md:
+     no color-mix()  ·  no backdrop-filter  ·  no web fonts  ·  no blurred shadows
+   Every colour is chosen here and nowhere else. Elevation is a surface step,
+   never a shadow. Both inks are complete: a variant never inherits a choice.
+   ============================================================ */
+:root {
+  --bg:#f4f5f7; --surface:#ffffff; --surface-2:#f7f8fa; --surface-3:#eceef2;
+  --border:#dfe3e9; --border-strong:#c3c9d2;
+  --text:#171a1f; --text-2:#464c55; --muted:#6f7681; --dim:#9aa1ab;
+
+  --safe:#0f766e;    --safe-soft:#d6f5f0;   --safe-text:#0c5850;
+  --careful:#b45309; --careful-soft:#fdefd0; --careful-text:#8a4708;
+  --over:#c2261e;    --over-soft:#fce0de;   --over-text:#8f1c16;
+
+  /* Where money comes from. Two doors, two hues, and neither is the brand —
+     the hermes kit painted gig work in the brand violet, so "this is the app"
+     and "this is self-employment" were the same colour.
+     Both are named for what the reader does, not for what the tax form is
+     called: "part time" and "gig work" are things people say about themselves,
+     where "employer" is a category someone else put them in. */
+  --parttime:#1d4ed8; --parttime-soft:#dce7fd;
+  --gig:#a3541c;      --gig-soft:#fbe8d5;
+
+  --brand:#6d3fd4; --brand-soft:#e9e2fb; --brand-ink:#5730ad;
+
+  --focus:#6d3fd4;
+  /* The pulse ring. Flat rgba, no blur — a spread-only shadow is a hard edge,
+     which the device rule allows; the blurred glow hermes puts on the used
+     slots is the part that does not come with us. */
+  --pulse:rgba(109,63,212,.32);
+  --pulse-out:rgba(109,63,212,0);
+  /* ── SCALES ──────────────────────────────────────────────
+     Seven type steps, seven space steps, three radii, two control heights.
+     Nothing in a component is allowed a number of its own: if a value is not
+     on a scale it is a decision nobody made on purpose. */
+  --text-xs:12px;   /* the smallest thing allowed on screen */
+  --text-sm:13px;   /* micro-labels, counts, column heads */
+  --text-md:15px;   /* every control, every hint */
+  --text-lg:17px;   /* body, and a job's name */
+  --text-xl:20px;   /* a figure inside a dense cell */
+  --text-2xl:26px;  /* the answer in a dialog */
+  --text-3xl:34px;  /* the one number a screen is about */
+
+  /* 16px on inputs is not a style choice and is not on the scale: below it,
+     iOS zooms the page on focus. It is a fix wearing a token. */
+  --text-input:16px;
+
+  --space-2xs:4px; --space-xs:6px;  --space-sm:8px;  --space-md:12px;
+  --space-lg:16px; --space-xl:20px; --space-2xl:28px;
+
+  --radius-sm:8px; --radius-md:12px; --radius-pill:999px;
+
+  /* Two control heights. Tall for anything you press or type into; short for
+     a secondary control sitting inside a dense row. */
+  --control-sm:36px;
+  --control-md:44px;
+
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+:root[data-ink="dark"] {
+  --bg:#12141a; --surface:#191c23; --surface-2:#1f232b; --surface-3:#272c36;
+  --border:#2e343f; --border-strong:#454d5b;
+  --text:#eef0f4; --text-2:#c0c6d0; --muted:#8d95a2; --dim:#6b7280;
+
+  --safe:#3ec9b0;    --safe-soft:#123c38;   --safe-text:#8ee8d8;
+  --careful:#e0a132; --careful-soft:#402d10; --careful-text:#f3cd85;
+  --over:#f2726a;    --over-soft:#40201e;   --over-text:#f8b0aa;
+
+  --parttime:#7aa5f8; --parttime-soft:#1b2a47;
+  --gig:#e0a06a;      --gig-soft:#3b2716;
+
+  --brand:#a98bf0; --brand-soft:#2a2140; --brand-ink:#c9b6f7;
+  --focus:#a98bf0;
+  --pulse:rgba(169,139,240,.38);
+  --pulse-out:rgba(169,139,240,0);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { color-scheme: light; }
+:root[data-ink="dark"] { color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ── 1 · STAT BLOCK ──────────────────────────────────────────
+   quiet label · loud number · quiet context. Never a fourth part. */
+.stat { }
+.stat__label {
+  font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  letter-spacing:.04em; text-transform:uppercase; margin-bottom:6px;
+}
+.stat__value {
+  font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:var(--text-3xl); font-weight:700; letter-spacing:-.02em; line-height:1.05;
+  color:var(--text);
+}
+.stat__value--sm { font-size:var(--text-2xl); }
+.stat__unit { font-size:var(--text-sm); font-weight:500; color:var(--muted); margin-left:4px; letter-spacing:0; }
+.stat__context { font-size:var(--text-sm); color:var(--muted); margin-top:6px; line-height:1.45; }
+.stat--safe .stat__value { color:var(--safe); }
+.stat--careful .stat__value { color:var(--careful); }
+.stat--over .stat__value { color:var(--over); }
+
+/* ── 2 · CARD & SECTION ───────────────────────────────────── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); padding:18px 20px;
+}
+.card--inset { background:var(--surface-2); }
+.card__head {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:14px;
+}
+.card__head-left { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.card__label {
+  font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  letter-spacing:.04em; text-transform:uppercase;
+  display:flex; align-items:center; gap:8px;
+}
+.card__label .dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--brand); flex:none;
+}
+.card__count { font-size:var(--text-sm); color:var(--muted); }
+.card__question { font-size:var(--text-md); color:var(--text-2); margin-top:-6px; margin-bottom:14px; }
+
+/* ── 3 · BUTTONS ──────────────────────────────────────────── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:var(--control-md); padding:11px 18px;
+  border-radius:var(--radius-sm); border:1px solid transparent;
+  font-family:inherit; font-size:var(--text-md); font-weight:600; line-height:1;
+  cursor:pointer; transition:background .12s, border-color .12s, color .12s, transform .06s;
+}
+.btn:active { transform:translateY(1px); }
+.btn:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.btn--primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+.btn--primary:hover { background:var(--brand-ink); border-color:var(--brand-ink); }
+:root[data-ink="dark"] .btn--primary { color:#1a1230; }
+.btn--quiet { background:transparent; border-color:var(--border-strong); color:var(--text-2); }
+.btn--quiet:hover { background:var(--surface-2); color:var(--text); }
+.btn--danger { background:var(--over); border-color:var(--over); color:#fff; }
+:root[data-ink="dark"] .btn--danger { color:#2a1210; }
+.btn--sm { min-height:var(--control-sm); padding:8px 13px; font-size:var(--text-sm); }
+
+/* ── 4 · FIELD ────────────────────────────────────────────── */
+.field { margin-bottom:16px; }
+.field:last-child { margin-bottom:0; }
+.field__label { display:block; font-size:var(--text-md); font-weight:600; color:var(--text); margin-bottom:6px; }
+.field__hint { font-size:var(--text-md); color:var(--muted); margin-top:6px; line-height:1.5; }
+.input {
+  width:100%; min-height:var(--control-md); padding:11px 12px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+  font-family:inherit; font-size:var(--text-input); /* not on the ramp — see the token */
+  outline:none; transition:border-color .12s;
+}
+.input:focus { border-color:var(--focus); box-shadow:0 0 0 2px var(--brand-soft); }
+.input.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.input--day { width:82px; text-align:left; }
+.field__row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.field__aside { font-size:var(--text-md); color:var(--text-2); }
+select.input { cursor:pointer; }
+
+/* ── 5 · CHIPS ────────────────────────────────────────────── */
+/* A label is not a control and must not look like one.
+   The chip is SOLID, BORDERLESS and SHORTER than the pills beside it — three
+   differences, so it never reads as a fourth thing you could press. Give it a
+   border and pill height, as an earlier pass did, and it becomes a button. */
+.chip {
+  display:inline-flex; align-items:center;
+  height:var(--control-md); padding:0 16px;
+  font-size:var(--text-md); font-weight:700; letter-spacing:.01em;
+  border-radius:var(--radius-pill); border:none;
+  flex:none; white-space:nowrap;
+}
+.chip--parttime { background:var(--parttime); color:#fff; }
+.chip--gig { background:var(--gig); color:#fff; }
+:root[data-ink="dark"] .chip--parttime { color:#0e1830; }
+:root[data-ink="dark"] .chip--gig { color:#2a1a0c; }
+
+.pills { display:flex; gap:4px; flex:none; }
+.pill {
+  min-height:var(--control-md); padding:8px 16px; font-family:inherit;
+  font-size:var(--text-md); font-weight:600; border-radius:var(--radius-pill);
+  border:1px solid var(--border-strong); background:transparent;
+  color:var(--muted); cursor:pointer; transition:background .12s, color .12s, border-color .12s;
+}
+.pill:hover { color:var(--text); border-color:var(--text-2); }
+.pill:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.pill[aria-pressed="true"] { background:var(--safe-soft); color:var(--safe-text); border-color:var(--safe); }
+.pill--paused[aria-pressed="true"] { background:var(--careful-soft); color:var(--careful-text); border-color:var(--careful); }
+.pill--ended[aria-pressed="true"] { background:var(--over-soft); color:var(--over-text); border-color:var(--over); }
+
+/* ── 6 · JOB CARD ─────────────────────────────────────────── */
+.job {
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  background:var(--surface); margin-bottom:10px; overflow:hidden;
+}
+.job--open {
+  border-color:var(--brand);
+  outline:2px solid var(--brand);
+  outline-offset:-2px;   /* drawn inside the border box — nothing reflows */
+}
+.job__head {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:14px 16px; cursor:pointer;
+}
+.job__name { font-size:var(--text-lg); font-weight:600; flex:1; min-width:120px; }
+/* The chip is last and is given a width, so it forms a straight column down a
+   list of jobs. Status changes over a job's life; what kind of work it is does
+   not — so the fixed fact takes the fixed position and stays scannable. */
+.job__head .chip { justify-content:center; }
+.job__head .pills { margin-left:auto; }
+.job__facts {
+  display:flex; gap:18px; flex-wrap:wrap;
+  padding:0 16px 14px; font-size:var(--text-sm); color:var(--muted);
+}
+.job__fact b { color:var(--text-2); font-weight:600; font-family:var(--mono); }
+.job__fact--none b { color:var(--dim); font-family:var(--sans); font-weight:400; font-style:italic; }
+.job__total { margin-left:auto; text-align:right; }
+.job__panel { border-top:1px solid var(--border); background:var(--surface-2); padding:16px; }
+.job__hint { font-size:var(--text-lg); color:var(--muted); margin-top:14px; line-height:1.5; }
+.job__hint kbd {
+  font-family:var(--mono); font-size:var(--text-sm); background:var(--surface-3);
+  border:1px solid var(--border-strong); border-radius:4px; padding:2px 6px; color:var(--text-2);
+}
+
+/* ── 7 · ADD CARD ─────────────────────────────────────────── */
+.add {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:18px 20px; min-height:64px;
+  background:var(--surface-2); border:2px dashed var(--border-strong);
+  border-radius:var(--radius-md); cursor:pointer; font-family:inherit; text-align:left;
+  color:var(--text-2); font-size:var(--text-lg); font-weight:500;
+  transition:background .12s, border-color .12s, color .12s;
+}
+.add:hover { background:var(--surface-3); border-color:var(--brand); color:var(--text); }
+.add:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.add__echo { font-size:var(--text-sm); color:var(--dim); font-weight:400; }
+
+/* ── 8 · MONTH CELLS ──────────────────────────────────────── */
+.months { display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:8px; }
+.month {
+  padding:12px 10px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--surface); text-align:left; cursor:pointer; font-family:inherit;
+  transition:border-color .12s, background .12s;
+}
+.month:hover { border-color:var(--border-strong); background:var(--surface-2); }
+.month:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.month--now { border-color:var(--brand); outline:2px solid var(--brand); outline-offset:-2px; }
+.month__name { font-size:var(--text-sm); font-weight:600; color:var(--muted); }
+.month__left {
+  font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:var(--text-xl); font-weight:700; margin-top:4px; color:var(--safe);
+}
+.month--careful .month__left { color:var(--careful); }
+.month--over .month__left { color:var(--over); }
+.month__note { font-size:var(--text-xs); color:var(--muted); margin-top:2px; }
+
+/* ── 9 · TRIAL MONTHS ─────────────────────────────────────── */
+.trial { display:flex; gap:5px; }
+.trial__slot {
+  flex:1; height:14px; border-radius:4px;
+  background:var(--surface-3); border:1px solid var(--border);
+}
+.trial__slot--before { background:var(--border-strong); border-color:var(--border-strong); }
+.trial__slot--used { background:var(--brand); border-color:var(--brand); }
+.trial__slot--now {
+  background:var(--brand-soft); border:2px solid var(--brand);
+  animation:pulse-now 2s ease-in-out infinite;
+}
+/* Spread only, never blur. It reads as "this is the month you are in" without
+   a label, and it is the one animation in the kit — the thing that means NOW
+   is the only thing allowed to move. */
+@keyframes pulse-now {
+  0%, 100% { box-shadow:0 0 0 0 var(--pulse); }
+  60%      { box-shadow:0 0 0 5px var(--pulse-out); }
+}
+
+/* ── 10 · NOTICE ──────────────────────────────────────────── */
+.notice {
+  border-radius:var(--radius-md); padding:14px 16px;
+  border:1px solid var(--careful); background:var(--careful-soft); color:var(--careful-text);
+}
+.notice__title { font-size:var(--text-md); font-weight:700; margin-bottom:8px; }
+.notice__row { font-size:var(--text-md); line-height:1.55; padding:3px 0; }
+.notice__row b { font-weight:700; }
+.notice__unknown { margin-top:10px; padding-top:10px; border-top:1px solid var(--careful); font-size:var(--text-sm); }
+
+/* ── 11 · DIALOG ──────────────────────────────────────────── */
+.scrim {
+  position:fixed; inset:0; z-index:100; padding:20px;
+  background:rgba(12,14,18,.62);
+  display:flex; align-items:center; justify-content:center;
+}
+.scrim[hidden] { display:none; }
+.dialog {
+  background:var(--surface); border:1px solid var(--border-strong);
+  border-radius:var(--radius-md); width:100%; max-width:430px;
+  max-height:86vh; overflow-y:auto;
+}
+.dialog__head { padding:16px 18px; border-bottom:1px solid var(--border); }
+.dialog__title { font-size:var(--text-xl); font-weight:700; }
+.dialog__restate { font-size:var(--text-sm); color:var(--muted); margin-top:2px; }
+.dialog__body { padding:16px 18px; }
+.dialog__foot {
+  display:flex; gap:8px; padding:14px 18px; border-top:1px solid var(--border);
+  background:var(--surface-2);
+}
+.dialog__foot .btn { flex:1; }
+
+.outcome {
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--surface-2); padding:12px 14px; margin-top:4px;
+}
+.outcome__label { font-size:var(--text-sm); color:var(--muted); margin-bottom:2px; }
+.outcome__value {
+  font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:var(--text-2xl); font-weight:700; letter-spacing:-.02em; color:var(--safe);
+}
+.outcome--careful .outcome__value { color:var(--careful); }
+.outcome--over .outcome__value { color:var(--over); }
+.outcome__note { font-size:var(--text-sm); color:var(--muted); margin-top:4px; }
+
+/* ── 11b · LEDGER ─────────────────────────────────────────────
+   The transaction list only. No month matrix — that was eleven empty cells
+   per row in hermes, and it is component 08's job. */
+.ledger { overflow-x:auto; }
+.ledger table { width:100%; border-collapse:collapse; font-size:var(--text-md); min-width:520px; }
+.ledger th {
+  padding:9px 12px; font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  letter-spacing:.03em; text-transform:uppercase;
+  background:var(--surface-2); border-bottom:2px solid var(--border);
+  white-space:nowrap; text-align:left;
+}
+/* Money headings sit over money, so they align with it. A left-aligned label
+   above a right-aligned column leaves the eye no edge to follow down. */
+.ledger th.num, .ledger td.num {
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.ledger td {
+  padding:11px 12px; border-bottom:1px solid var(--border);
+  color:var(--text-2); vertical-align:middle;
+}
+.ledger td.num { font-family:var(--mono); color:var(--text); font-weight:600; }
+.ledger td.num--off { color:var(--gig); }
+.ledger td.num--none { color:var(--dim); font-weight:400; }
+.ledger tr:last-child td { border-bottom:none; }
+.ledger__group td {
+  background:var(--surface-2); border-bottom:2px solid var(--border);
+  color:var(--text); font-weight:600; padding:10px 12px;
+}
+.ledger__groupline { display:flex; align-items:center; gap:10px; }
+.ledger__when { color:var(--text); font-weight:500; white-space:nowrap; }
+.ledger__row:hover td { background:var(--surface-2); cursor:pointer; }
+.ledger__sub td {
+  font-weight:700; color:var(--text); border-top:2px solid var(--border); border-bottom:none;
+}
+.ledger__sub td.num { font-family:var(--mono); }
+.ledger__total td {
+  background:var(--surface-3); font-weight:700; border-top:2px solid var(--border-strong);
+  border-bottom:none; padding:13px 12px; color:var(--text);
+}
+.ledger__total td.num { font-family:var(--mono); font-size:var(--text-lg); }
+
+/* ── 12 · TOAST ───────────────────────────────────────────── */
+.toast {
+  display:inline-block; padding:11px 18px; border-radius:var(--radius-sm);
+  font-size:var(--text-md); font-weight:500; border:1px solid transparent;
+  background:var(--text); color:var(--bg);
+}
+.toast--done { background:var(--safe-soft); color:var(--safe-text); border-color:var(--safe); }
+.toast--wrong { background:var(--over-soft); color:var(--over-text); border-color:var(--over); }
+
+/* ── 12c · TOP BAR ────────────────────────────────────────────
+   Brand left, one promise right. The most valuable strip on the screen
+   spends itself saying where the data lives, not on navigation. */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--space-md); flex-wrap:wrap;
+  padding:var(--space-md) 0;
+}
+.brand { display:flex; align-items:center; gap:var(--space-sm); font-size:var(--text-lg); font-weight:700; }
+.brand__mark {
+  width:32px; height:32px; border-radius:var(--radius-sm); flex:none;
+  background:var(--brand); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+:root[data-ink="dark"] .brand__mark { color:#1a1230; }
+.promise {
+  display:inline-flex; align-items:center; gap:var(--space-xs);
+  height:var(--control-sm); padding:0 14px; border-radius:var(--radius-pill);
+  background:var(--safe-soft); color:var(--safe-text);
+  font-size:var(--text-sm); font-weight:600;
+}
+
+/* ── 13 · TAB BAR ─────────────────────────────────────────── */
+.tabs {
+  display:flex; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); overflow:hidden;
+}
+.tab {
+  flex:1; min-height:52px; padding:8px 6px; border:none; background:transparent;
+  font-family:inherit; font-size:var(--text-sm); font-weight:600; color:var(--muted);
+  cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
+  border-bottom:3px solid transparent; transition:color .12s, border-color .12s;
+}
+.tab[aria-current="true"] { color:var(--brand); border-bottom-color:var(--brand); }
+.tab:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.tab svg { width:20px; height:20px; }
+
+/* ── 14 · NOTHING YET ─────────────────────────────────────── */
+.nothing { text-align:center; padding:32px 20px; }
+.nothing__mark {
+  width:44px; height:44px; margin:0 auto 12px; border-radius:var(--radius-sm);
+  background:var(--surface-3); color:var(--dim);
+  display:flex; align-items:center; justify-content:center;
+}
+.nothing__title { font-size:var(--text-lg); font-weight:600; color:var(--text-2); margin-bottom:4px; }
+.nothing__next { font-size:var(--text-sm); color:var(--muted); line-height:1.5; max-width:38ch; margin:0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration:.01ms !important; animation-duration:.01ms !important; }
+}
+
+
+/* ── page chrome, not part of the kit ── */
+.page { max-width:940px; margin:0 auto; padding:36px 20px 90px; }
+.top { border-bottom:1px solid var(--border); padding-bottom:24px; }
+.top__eyebrow { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.14em; color:var(--brand); margin-bottom:10px; }
+.top h1 { font-size:clamp(26px,5vw,38px); font-weight:700; letter-spacing:-.02em; line-height:1.12; margin-bottom:12px; }
+.top p { color:var(--text-2); font-size:16px; line-height:1.65; max-width:64ch; }
+.top p + p { margin-top:10px; }
+.inkswitch { position:fixed; top:14px; right:14px; z-index:80; }
+.spec { margin-top:46px; }
+.spec__head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+.spec__n { font-family:var(--mono); font-size:13px; color:var(--dim); margin-right:8px; }
+.spec__head h2 { font-size:20px; font-weight:700; display:inline; letter-spacing:-.01em; }
+.spec__sel { font-family:var(--mono); font-size:12px; color:var(--brand); }
+.spec__why { font-size:16px; color:var(--text-2); line-height:1.62; max-width:66ch; margin-bottom:14px; }
+.spec__why b { color:var(--text); font-weight:600; }
+.stage { border:1px dashed var(--border-strong); border-radius:var(--radius-md); padding:20px; background:var(--bg); }
+.from { font-size:14px; color:var(--muted); margin-top:12px; line-height:1.6; }
+.from b { color:var(--text-2); }
+.row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+.phone { max-width:400px; margin:0 auto; }
+.parent { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+.parent__box { border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; background:var(--surface); }
+.parent__name { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:8px; }
+.mode { display:flex; gap:8px; margin-bottom:16px; }
+.mode button { flex:1; }
+
+</style>
+</head>
+<body>
+
+<button class="btn btn--quiet btn--sm inkswitch" id="ink" type="button">Dark</button>
+<div class="page">
+
+<header class="top">
+  <div class="top__eyebrow">Crossbreed spec · the ninth layout</div>
+  <h1>If these two had a baby</h1>
+  <p>They look similar and feel different, and the reason is not styling. <b>The two hermes layouts are the two halves of the product, built separately by accident.</b></p>
+  <p>The tracker has no jobs, no types and no ledger — a month is a bucket you push numbers into, and its best screen answers <em>how many hours could I work</em>. PayGuard has jobs, types, entries, a ledger and trial months, and its best screen answers <em>am I about to go over</em>.</p>
+  <p><b>Those are Phase 1 and Phase 2 in <code>CLAUDE.md</code>, drawn by two people who had not read it.</b> So the child is not a visual blend of two designs. It is one layout that carries both phases, and the hinge between them.</p>
+</header>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">01</span><h2>The finding</h2></div></div>
+  <div class="stage">
+    <div class="parent">
+      <div class="parent__box">
+        <div class="parent__name">Nightfall · the tracker</div>
+        <p style="font-size:15px;color:var(--text-2);line-height:1.6">No jobs. No types. No deductions. A month is a bucket. <b style="color:var(--text)">Asks: what should I apply for?</b></p>
+        <p style="font-size:14px;color:var(--muted);margin-top:8px;line-height:1.55">289 lines of behaviour. Its one real calculation is <code>limit ÷ rate ÷ 4.33</code> — the hours answer, live on every keystroke.</p>
+      </div>
+      <div class="parent__box">
+        <div class="parent__name">Daylight · payguard</div>
+        <p style="font-size:15px;color:var(--text-2);line-height:1.6">Jobs, types, entries, a ledger, trial months, a bank tab. <b style="color:var(--text)">Asks: am I about to go over?</b></p>
+        <p style="font-size:14px;color:var(--muted);margin-top:8px;line-height:1.55">1,627 lines. Its one correct calculation is <code>countedAmount</code> — pay in full for a job, minus costs for gig work.</p>
+      </div>
+    </div>
+    <p class="from"><b>Neither is a draft of the other.</b> They share almost no surfaces — the tracker's month grid and PayGuard's job cards do not overlap at all — because they were answering different questions. Merging their stylesheets would produce a page that does both jobs badly. <b>Carrying both questions, and asking which one you are in, produces the product.</b></p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">02</span><h2>The hinge</h2></div></div>
+  <p class="spec__why">One question, asked once, right after onboarding — never buried in settings. It is the only thing that decides which half of the app you see first.</p>
+  <div class="stage">
+    <div class="card phone">
+      <p class="card__question" style="font-size:20px;color:var(--text);font-weight:600;margin-bottom:16px">Are you working right now, or looking for work?</p>
+      <div class="row" style="gap:8px">
+        <button class="btn btn--primary" style="flex:1" id="mWorking" type="button">I'm working</button>
+        <button class="btn btn--quiet" style="flex:1" id="mLooking" type="button">I'm looking</button>
+      </div>
+      <p class="field__hint" style="margin-top:14px">You can change this whenever it changes. Nothing you have written down is lost either way.</p>
+    </div>
+    <p class="from"><b>Why it cannot be a setting.</b> Someone looking for work has no hourly rate yet — they have a body that manages a certain number of hours. Ask them to fill in a job first and the app is useless to them on the day they most need it. The hinge is the difference between a record keeper and a job-search tool, and it costs one question.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">03</span><h2>The child, both ways</h2></div><div class="spec__sel">press the hinge above to switch</div></div>
+  <p class="spec__why">One page, one nav, one set of components. <b>The top third changes with the answer; everything below it does not.</b></p>
+  <div class="stage">
+    <div class="phone">
+      <div class="topbar" style="padding-top:0">
+        <div class="brand"><span class="brand__mark"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>PayGuard</div>
+        <span class="promise"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Stays on this phone</span>
+      </div>
+
+      <!-- LOOKING -->
+      <div id="looking" hidden>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>What to look for</span></div></div>
+          <div class="stat" style="margin-bottom:14px">
+            <div class="stat__label">Hours you could work</div>
+            <div class="stat__value">13<span class="stat__unit">a week</span></div>
+            <div class="stat__context">at $21.50 an hour, staying under $1,000 a month</div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="rate">If you were paid this an hour</label>
+            <input class="input mono" id="rate" inputmode="decimal" value="21.50">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="field__label" for="hrs">Or if you can manage this many hours a week</label>
+            <input class="input mono" id="hrs" inputmode="numeric" value="13">
+            <p class="field__hint">Fill in either one. The other follows.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKING -->
+      <div id="working">
+        <div class="card" style="margin-bottom:12px">
+          <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>This month</span></div></div>
+          <div class="stat stat--safe" style="margin-bottom:14px">
+            <div class="stat__label">Left this month</div>
+            <div class="stat__value">$728</div>
+            <div class="stat__context">of your $1,210 limit · about 33 more hours at $21.50</div>
+          </div>
+          <div class="job" style="margin-bottom:0">
+            <div class="job__head" style="padding:12px 14px">
+              <span class="job__name">Riverside Cafe</span>
+              <span class="chip chip--parttime">Part time</span>
+            </div>
+            <div class="job__facts" style="padding:0 14px 12px">
+              <span class="job__fact">Pay day <b>6</b></span>
+              <div class="job__total"><div class="stat__value stat__value--sm">$482</div><div class="stat__label" style="margin:0">Counted</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHARED -->
+      <div class="notice" style="margin-bottom:12px">
+        <div class="notice__title">March pays you an extra time</div>
+        <div class="notice__row">That month can go over without you working any differently.</div>
+      </div>
+
+      <!-- ── JOBS ── -->
+      <div id="secJobs" style="scroll-margin-top:10px">
+        <div class="card" style="margin-bottom:12px">
+          <div class="card__head">
+            <div class="card__head-left"><span class="card__label"><span class="dot"></span>Your income</span><span class="card__count">2 jobs</span></div>
+            <button class="btn btn--primary btn--sm" type="button">Add a job</button>
+          </div>
+          <div class="job">
+            <div class="job__head" style="padding:12px 14px">
+              <span class="job__name">Riverside Cafe</span>
+              <span class="chip chip--parttime">Part time</span>
+              <div class="pills"><button class="pill" type="button" aria-pressed="true">Working</button></div>
+            </div>
+            <div class="job__facts" style="padding:0 14px 12px">
+              <span class="job__fact">Pay day <b>6</b></span>
+              <span class="job__fact">Rate <b>$21.50</b> an hour</span>
+              <div class="job__total"><div class="stat__value stat__value--sm">$482</div><div class="stat__label" style="margin:0">Counted</div></div>
+            </div>
+          </div>
+          <div class="job" style="margin-bottom:0">
+            <div class="job__head" style="padding:12px 14px">
+              <span class="job__name">DoorDash</span>
+              <span class="chip chip--gig">Gig work</span>
+              <div class="pills"><button class="pill pill--paused" type="button" aria-pressed="true">Paused</button></div>
+            </div>
+            <div class="job__facts" style="padding:0 14px 12px">
+              <span class="job__fact job__fact--none">Pay day <b>not told yet</b></span>
+              <div class="job__total"><div class="stat__value stat__value--sm">$0</div><div class="stat__label" style="margin:0">Counted</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAY ── -->
+      <div id="secPay" style="scroll-margin-top:10px">
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+          <div class="card__head" style="padding:16px 18px 12px;margin-bottom:0">
+            <div class="card__head-left"><span class="card__label"><span class="dot"></span>What you were paid</span><span class="card__count">2026</span></div>
+            <button class="btn btn--primary btn--sm" type="button">Add pay</button>
+          </div>
+          <p style="font-size:var(--text-sm);color:var(--muted);padding:0 18px 12px">Tap any line to change it · grouped by job</p>
+          <div class="ledger">
+            <table>
+              <thead><tr><th>Pay day</th><th>Note</th><th class="num">Paid to you</th><th class="num">Comes off</th><th class="num">Counted</th></tr></thead>
+              <tbody>
+                <tr class="ledger__group"><td colspan="5"><span class="ledger__groupline">Riverside Cafe <span class="chip chip--parttime">Part time</span></span></td></tr>
+                <tr class="ledger__row"><td class="ledger__when">5 September</td><td>Regular shift</td><td class="num">$242.00</td><td class="num num--none">—</td><td class="num">$242.00</td></tr>
+                <tr class="ledger__row"><td class="ledger__when">12 September</td><td>Regular shift</td><td class="num">$240.00</td><td class="num num--none">—</td><td class="num">$240.00</td></tr>
+                <tr class="ledger__sub"><td>September</td><td></td><td class="num">$482.00</td><td class="num num--none">—</td><td class="num">$482.00</td></tr>
+                <tr class="ledger__group"><td colspan="5"><span class="ledger__groupline">DoorDash <span class="chip chip--gig">Gig work</span></span></td></tr>
+                <tr class="ledger__row"><td class="ledger__when">9 September</td><td>1,240 miles driven for work</td><td class="num">$820.00</td><td class="num num--off">−$868.00</td><td class="num num--none">$0.00</td></tr>
+                <tr class="ledger__sub"><td>September</td><td></td><td class="num">$820.00</td><td class="num num--off">−$868.00</td><td class="num num--none">$0.00</td></tr>
+                <tr class="ledger__total"><td colspan="2">Counted in September</td><td class="num">$1,302.00</td><td class="num num--off">−$868.00</td><td class="num">$482.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LIMIT ── -->
+      <div id="secLimit" style="scroll-margin-top:10px">
+        <div class="card" style="margin-bottom:12px">
+          <div class="card__head">
+            <div class="card__head-left"><span class="card__label"><span class="dot"></span>Your limit</span></div>
+            <button class="btn btn--quiet btn--sm" type="button">How it works</button>
+          </div>
+          <div class="stat" style="margin-bottom:14px">
+            <div class="stat__label">While you are in your trial work months</div>
+            <div class="stat__value">$1,210<span class="stat__unit">a month</span></div>
+            <div class="stat__context">A part time job counts in full. Gig work counts what you were paid, minus what it cost you to earn it.</div>
+          </div>
+          <div class="grid2" style="margin-bottom:14px">
+            <div class="card card--inset"><div class="stat stat--safe"><div class="stat__label">Left this month</div><div class="stat__value stat__value--sm">$728</div></div></div>
+            <div class="card card--inset"><div class="stat"><div class="stat__label">Counted so far</div><div class="stat__value stat__value--sm">$482</div></div></div>
+            <div class="card card--inset"><div class="stat"><div class="stat__label">Hours you could work</div><div class="stat__value stat__value--sm">33<span class="stat__unit">more</span></div></div></div>
+            <div class="card card--inset"><div class="stat"><div class="stat__label">2026 so far</div><div class="stat__value stat__value--sm">$4,120</div></div></div>
+          </div>
+          <p class="field__hint" style="margin-bottom:14px">$4,120 of $14,520 for the year — twelve months at your limit.</p>
+
+          <div class="trial">
+            <div class="trial__slot trial__slot--before"></div><div class="trial__slot trial__slot--before"></div>
+            <div class="trial__slot trial__slot--used"></div><div class="trial__slot trial__slot--used"></div><div class="trial__slot trial__slot--used"></div>
+            <div class="trial__slot trial__slot--now"></div>
+            <div class="trial__slot"></div><div class="trial__slot"></div><div class="trial__slot"></div>
+          </div>
+          <p style="font-size:var(--text-md);color:var(--text-2);line-height:1.55;margin-top:10px">You have used <b>5 of your 9 trial work months</b>. After the ninth, a month where you are paid more than $1,690 can stop your payments.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div class="card__head"><div class="card__head-left"><span class="card__label"><span class="dot"></span>Month by month</span></div></div>
+          <p class="card__question">How much room is left in each?</p>
+          <div class="months">
+            <button class="month month--now" type="button"><div class="month__name">September</div><div class="month__left">$728</div><div class="month__note">left · this month</div></button>
+            <button class="month" type="button"><div class="month__name">October</div><div class="month__left">$1,210</div><div class="month__note">all of it</div></button>
+            <button class="month month--careful" type="button"><div class="month__name">November</div><div class="month__left">$60</div><div class="month__note">left</div></button>
+            <button class="month" type="button"><div class="month__name">December</div><div class="month__left">$1,210</div><div class="month__note">all of it</div></button>
+          </div>
+        </div>
+
+        <div class="notice" style="margin-bottom:12px">
+          <div class="notice__row">These are planning figures for 2026. Check them with Social Security before you act on any of them.</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab" type="button" aria-current="true" data-go="secJobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Jobs</button>
+        <button class="tab" type="button" data-go="secPay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Pay</button>
+        <button class="tab" type="button" data-go="secLimit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Limit</button>
+      </div>
+    </div>
+    <p class="from"><b>Only the first card swaps.</b> Everything below it is identical in both modes — "which months pay me extra" and "how many trial months are left" are questions you have whether or not you have found the job yet.</p>
+    <p class="from"><b>Pay and Limit are not screens.</b> Press the tabs — they scroll. There is one page, always rendered, so nothing mounts or unmounts, no scroll position is lost, and the back button is never wrong. It also means a reader who never touches the nav still finds the ledger by scrolling past it, which is how most people will meet it.</p>
+    <p class="from"><b>Still open: the Bank tab.</b> Your PayGuard has a fourth destination for reconciling bank lines against entries. It is not in this spec because I have not audited it — it arrived in the update that overwrote the session's work. It is the one part of the crossbreed I would want to look at before committing to three tabs or four.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">04</span><h2>What each parent gives</h2></div></div>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th>Trait</th><th>From</th><th>Why it is worth carrying</th></tr></thead>
+      <tbody>
+        <tr><td><b>Hours from a rate, live</b></td><td class="mono">Nightfall</td><td>The product's headline rule, and it is in 2 of the 8 existing layouts. Runs both ways here — the reverse is in none of them.</td></tr>
+        <tr><td><b>Month cells that count down</b></td><td class="mono">Nightfall</td><td>Ceilings, not records. Turns a grid from a diary into a plan.</td></tr>
+        <tr><td><b>Consequence before commit</b></td><td class="mono">Nightfall</td><td>The best interaction in either file. PayGuard's entry dialog has no equivalent.</td></tr>
+        <tr><td><b>One threshold everywhere</b></td><td class="mono">Nightfall</td><td>Clear / close / over drives the ring, the cells, the dialog and the copy. One number to change.</td></tr>
+        <tr><td><b>Edit in place</b></td><td class="mono">Daylight</td><td>The card becomes the editor. No modal, no route change, no lost context.</td></tr>
+        <tr><td><b>Status as three pills</b></td><td class="mono">Daylight</td><td>One tap, no menu, always visible.</td></tr>
+        <tr><td><b>Paid / comes off / counted</b></td><td class="mono">Daylight</td><td>Teaches the mileage rule with a table instead of a paragraph. Missing from the real ledger and payguard layouts.</td></tr>
+        <tr><td><b>Trial months as a bar</b></td><td class="mono">Daylight</td><td>Clearest depiction of the nine-in-sixty rule anywhere in the project — once it has the fourth state.</td></tr>
+        <tr><td><b>Nav that scrolls</b></td><td class="mono">Daylight</td><td>One page always rendered. No router, no mount, no lost scroll position.</td></tr>
+        <tr><td><b>The privacy promise</b></td><td class="mono">Nightfall</td><td>Spends the top strip on the reader's first question instead of on navigation.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">05</span><h2>What is not inherited</h2></div></div>
+  <p class="spec__why">Named explicitly, because a refactor would take these along and a rebuild should not.</p>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th>Left behind</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Every calculation in both files</td><td>The gauge divides a year by a monthly limit. The trial tracker counts any month with any entry. "YTD" includes all prior years. <code>src/domain/</code> answers all three correctly and is shared by eight layouts.</td></tr>
+        <tr><td>The 20-column ledger</td><td>Eleven empty cells per row by construction — a matrix drawn as a list. The transaction half comes; the month matrix is the month cells' job.</td></tr>
+        <tr><td>The atmosphere</td><td>Three animated 600px gradients repainting continuously. Beautiful, and a battery bill on the device this is for.</td></tr>
+        <tr><td>Blur, glow, web fonts</td><td>The device rule. All four fail silently rather than degrading.</td></tr>
+        <tr><td>The banned vocabulary</td><td>SGA, TWP, W-2, 1099, gross, YTD, sources, earnings. Three of them can cost the reader money.</td></tr>
+        <tr><td>The twelve-cell year grid</td><td><code>focusMode</code> exists to remove it. The child shows this month and the ones after it, and offers the year on request.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">06</span><h2>The budget</h2></div></div>
+  <p class="spec__why"><b>Budget the lines before writing them.</b> A trait that only works because of 4,000 lines of scaffolding did not actually work.</p>
+  <div class="stage">
+    <div class="ledger"><table style="min-width:0">
+      <thead><tr><th>Part</th><th class="num">Lines</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Styles</td><td class="num">~420</td><td>The design system, already written and measured.</td></tr>
+        <tr><td>The hinge and mode</td><td class="num">~40</td><td>One preference, one branch on the first card.</td></tr>
+        <tr><td>Looking mode</td><td class="num">~120</td><td>Two fields solving one equation both ways.</td></tr>
+        <tr><td>Working mode</td><td class="num">~260</td><td>Job cards, edit in place, entry dialog.</td></tr>
+        <tr><td>Ledger</td><td class="num">~160</td><td>Transaction list only, six columns.</td></tr>
+        <tr><td>Shared sections</td><td class="num">~180</td><td>Trial months, extra-paycheck warning, month cells, nav.</td></tr>
+        <tr class="ledger__total"><td>Total</td><td class="num">~1,180</td><td>Against PayGuard's 1,627 for one phase, and calc20's 11,000.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="from"><b>Nothing here recomputes a benefits rule.</b> Every number comes from <code>capacity.ts</code>, <code>trialWork.ts</code>, <code>paySchedule.ts</code> and <code>earnings.ts</code>. That is most of the saving, and it is also the only way the child can be correct — the prototypes are confidently wrong about the exact things people would rely on.</p>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="spec__head"><div><span class="spec__n">07</span><h2>The one thing neither parent has</h2></div></div>
+  <div class="stage">
+    <p class="spec__why" style="margin:0"><b>Hours → rate.</b> "I can manage 10 hours a week — what do I need to be paid?" It is the same equation solved for the other unknown, it is the actual job-search criterion, and it is absent from both prototypes, from all eight layouts, and from <code>src/domain/</code>.</p>
+    <p class="spec__why" style="margin-top:10px">Nightfall's <code>updatePlan</code> is one line away from it, which is why the child inherits from that parent rather than reinventing: <code>limit ÷ rate</code> becomes <code>limit ÷ hours</code>, and the looking mode above fills either box from the other. <b>That is the trait that makes this a job-search tool rather than a ninth way to record income.</b></p>
+  </div>
+</section>
+
+</div>
+<script>
+  var w=document.getElementById('working'), l=document.getElementById('looking');
+  document.getElementById('mWorking').addEventListener('click',function(){w.hidden=false;l.hidden=true;});
+  document.getElementById('mLooking').addEventListener('click',function(){w.hidden=true;l.hidden=false;});
+  // Nav-as-scroll, demonstrated rather than claimed: one page, always
+  // rendered, nothing mounts or unmounts.
+  document.querySelectorAll('.tab[data-go]').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab[data-go]').forEach(function(x){ x.removeAttribute('aria-current'); });
+      t.setAttribute('aria-current','true');
+      var el=document.getElementById(t.getAttribute('data-go'));
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+
+  var ink=document.getElementById('ink');
+  ink.addEventListener('click',function(){
+    var d=document.documentElement.getAttribute('data-ink')==='dark';
+    document.documentElement.setAttribute('data-ink',d?'light':'dark');
+    ink.textContent=d?'Dark':'Light';
+  });
+</script>
+
+</body>
+</html>

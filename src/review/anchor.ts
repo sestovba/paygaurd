@@ -1,6 +1,10 @@
 // Turns a DOM element into something an AI can find again from a text file.
 
-import type { ReviewAnchor, ReviewLayoutId, ReviewTheme } from './types';
+import type { OverviewShell } from '../state/storage';
+import type {
+  DocRef, ReviewAnchor, ReviewLayoutId, ReviewScope, ReviewTheme, Viewport
+} from './types';
+import { pageDocument } from './root';
 
 /** Class names that identify a section in this codebase, versus the hundreds
  *  of Tailwind utilities that identify nothing. */
@@ -45,7 +49,7 @@ function domPath(el: Element): string {
   const parts: string[] = [];
   let node: Element | null = el;
 
-  while (node && node !== document.body && parts.length < 8) {
+  while (node && node !== el.ownerDocument.body && parts.length < 8) {
     let part = node.tagName.toLowerCase();
     if (node.id) {
       parts.unshift(`${part}#${node.id}`);
@@ -74,7 +78,7 @@ function visible(el: Element): boolean {
 
 /** The tab or nav item currently lit up, so a note says which page it is on. */
 function currentPage(): string | undefined {
-  const marker = Array.from(document.querySelectorAll('[aria-current="page"]')).find(visible);
+  const marker = Array.from(pageDocument().querySelectorAll('[aria-current="page"]')).find(visible);
   if (!marker) return undefined;
   // Nav items stack an icon, a label and sometimes an amount; the accessible
   // name is the only one of those that reads like a page name.
@@ -87,19 +91,90 @@ function currentPage(): string | undefined {
 /** Layouts carry their own palette on the root node; the app-wide light/dark
  *  toggle sits on <html>. Both are worth restoring when returning to a note. */
 function currentTheme(): ReviewTheme | undefined {
-  const host = document.querySelector('[data-palette]');
+  const doc = pageDocument();
+  const host = doc.querySelector('[data-palette]');
   const sub = host?.getAttribute('data-palette') ?? undefined;
-  const dark = document.documentElement.classList.contains('dark');
+  const dark = doc.documentElement.classList.contains('dark');
   return sub || dark ? { sub, dark } : undefined;
 }
 
-export function describeElement(el: Element, layout: ReviewLayoutId): ReviewAnchor {
+/**
+ * The width the note was written at.
+ *
+ * The bands are this app's own breakpoints, counted off its stylesheets — 640
+ * and 1024 are where its rules actually change — not a device's screen size.
+ * What matters to a note is which set of CSS the reviewer was looking at.
+ *
+ * Captured on every note, whatever its scope, because a third of the open
+ * queue says some version of "taller in mobile" and not one of those notes
+ * records how wide the screen was. Without the number, "taller" is an
+ * instruction nobody can check they have carried out — including the person
+ * who wrote it.
+ */
+/**
+ * The width the page is being reviewed at, when that is not this window's.
+ *
+ * The console can render the app in a narrow frame so its real breakpoints
+ * apply — see the width control in ReviewDock. While that is on, the window
+ * is a desktop and the page is not, and it is the page's width that every
+ * note is about. Set from one place and read here so no caller has to know
+ * which of the two it wants.
+ */
+let emulated: { w: number; h: number } | null = null;
+
+export function setEmulatedViewport(size: { w: number; h: number } | null): void {
+  emulated = size;
+}
+
+export function viewportNow(): Viewport {
+  const w = emulated?.w ?? window.innerWidth;
+  return {
+    w,
+    h: emulated?.h ?? window.innerHeight,
+    band: w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop'
+  };
+}
+
+/**
+ * An anchor for a note that is not about a node: this layout, or the product.
+ *
+ * It still records the layout and the theme it was written under. "I was on
+ * payguard when I noticed this" is evidence about where a project-wide
+ * problem shows itself, and dropping it to express "this is not a payguard
+ * note" would throw that away. `scope` says what the note is about; `layout`
+ * says where it was seen.
+ */
+export function describeScope(
+  scope: Exclude<ReviewScope, 'element'>,
+  layout: ReviewLayoutId,
+  doc: DocRef | undefined,
+  shell?: OverviewShell
+): ReviewAnchor {
+  return {
+    scope,
+    doc,
+    layout,
+    shell: layout === 'overview' ? shell : undefined,
+    page: currentPage(),
+    theme: currentTheme(),
+    viewport: viewportNow()
+  };
+}
+
+export function describeElement(
+  el: Element,
+  layout: ReviewLayoutId,
+  shell?: OverviewShell
+): ReviewAnchor {
   const text = (el as HTMLElement).innerText?.replace(/\s+/g, ' ').trim();
   const hooks = usefulClasses(el).join(' ');
   return {
+    scope: 'element',
     layout,
+    shell: layout === 'overview' ? shell : undefined,
     page: currentPage(),
     theme: currentTheme(),
+    viewport: viewportNow(),
     reviewId: el.closest('[data-review-id]')?.getAttribute('data-review-id') ?? undefined,
     ...reactInfo(el),
     domPath: domPath(el),
@@ -176,7 +251,7 @@ export function shortName(el: Element): string {
 export function elementPath(el: Element): HTMLElement[] {
   const chain: HTMLElement[] = [];
   let node: Element | null = el;
-  while (node instanceof HTMLElement && node !== document.body && chain.length < 7) {
+  while (node instanceof HTMLElement && node !== el.ownerDocument.body && chain.length < 7) {
     chain.unshift(node);
     if (node.hasAttribute('data-review-id')) break;
     node = node.parentElement;
@@ -191,10 +266,20 @@ export function anchorId(anchor: ReviewAnchor): string {
   // thresholds). They are useful when locating an old note, but must not be
   // part of its identity or the same element becomes a second journal row
   // every time its value changes.
-  const seed = `${anchor.layout}|${anchor.source ?? ''}|${anchor.domPath ?? ''}|${anchor.hooks ?? ''}`;
+  /* A note about a rule is identified by the rule, not by the screen it was
+     noticed on — otherwise the same objection raised from three layouts
+     becomes three notes, which is the duplication this scope exists to end.
+     A global note about "Round down, always" is one note however many times
+     it is written. A layout note keeps its layout, because that IS its
+     subject. */
+  const seed = anchor.doc
+    ? (anchor.scope === 'global' ? '' : `${anchor.layout}|`)
+      + `${anchor.doc.file}|${anchor.doc.heading ?? ''}`
+    : `${anchor.layout}|${anchor.source ?? ''}|${anchor.domPath ?? ''}|${anchor.hooks ?? ''}`;
   let hash = 5381;
   for (let i = 0; i < seed.length; i += 1) hash = ((hash * 33) ^ seed.charCodeAt(i)) >>> 0;
-  return `el-${hash.toString(36)}`;
+  const prefix = anchor.scope === 'global' ? 'all' : anchor.scope === 'layout' ? 'lay' : 'el';
+  return `${prefix}-${hash.toString(36)}`;
 }
 
 /* --- Widening and narrowing the aim ----------------------------------------
@@ -216,7 +301,7 @@ export function widerThan(el: Element): Element | null {
   const box = el.getBoundingClientRect();
   let node = el.parentElement;
   let wrapper: Element | null = null;
-  while (node && node !== document.body) {
+  while (node && node !== el.ownerDocument.body) {
     if (node.closest('[data-review-ui]')) return null;
     if (!sameBox(node.getBoundingClientRect(), box)) return node;
     wrapper = wrapper ?? node;

@@ -93,10 +93,10 @@ export function PayGuardChart({ streams, year, limit }: {
         </p>
         <div className="flex flex-wrap items-center gap-2.5 text-[0.6875rem] font-semibold sm:gap-4 sm:text-xs">
           <span className="flex items-center gap-1.5 pg-muted">
-            <span className="size-2 sm:size-2.5 rounded-full pg-fill-w2" /> Employer
+            <span className="size-2 sm:size-2.5 rounded-full pg-fill-w2" /> Job
           </span>
           <span className="flex items-center gap-1.5 pg-muted">
-            <span className="size-2 sm:size-2.5 rounded-full pg-fill-se" /> Gig work
+            <span className="size-2 sm:size-2.5 rounded-full pg-fill-se" /> Gig
           </span>
           <span className="pg-dim font-mono">
             Peak: {money(maxIncome)}
@@ -257,7 +257,7 @@ export function PayGuardChart({ streams, year, limit }: {
                           {item.se > 0 ? (
                             <div className="pg-tip-row">
                               <span className="pg-tip-key">
-                                <span className="pg-tip-swatch pg-fill-se" /> Gig work
+                                <span className="pg-tip-swatch pg-fill-se" /> Gig
                               </span>
                               <span className="pg-tip-val">{money(item.se)}</span>
                             </div>

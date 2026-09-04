@@ -1,0 +1,238 @@
+{
+  "src/components/ActionBanner.tsx": {
+    "raw-button": 2
+  },
+  "src/components/LayoutSwitcher.tsx": {
+    "raw-button": 1
+  },
+  "src/components/MonthGrid.tsx": {
+    "raw-button": 2
+  },
+  "src/components/MonthSheet.tsx": {
+    "raw-button": 1
+  },
+  "src/components/NotificationsBell.tsx": {
+    "raw-button": 3
+  },
+  "src/components/Onboarding.tsx": {
+    "raw-button": 5
+  },
+  "src/components/PageNav.tsx": {
+    "raw-button": 4
+  },
+  "src/components/PaycheckRadar.tsx": {
+    "raw-button": 3
+  },
+  "src/components/PrecisionLine.tsx": {
+    "raw-button": 2
+  },
+  "src/components/QuickPaydaySheet.tsx": {
+    "raw-button": 2
+  },
+  "src/components/SafeWorkSimulator.tsx": {
+    "raw-button": 1
+  },
+  "src/components/SafetyHero.tsx": {
+    "raw-button": 1
+  },
+  "src/components/SettingsPanel.tsx": {
+    "raw-button": 2
+  },
+  "src/components/Sheet.tsx": {
+    "raw-button": 1
+  },
+  "src/components/SignInScreen.tsx": {
+    "raw-button": 5
+  },
+  "src/components/StreamSheet.tsx": {
+    "raw-button": 2
+  },
+  "src/components/StreamsPanel.tsx": {
+    "raw-button": 5
+  },
+  "src/components/TermsGate.tsx": {
+    "raw-button": 1
+  },
+  "src/components/ToastStack.tsx": {
+    "raw-button": 2
+  },
+  "src/components/TwpStatusForm.tsx": {
+    "raw-button": 1
+  },
+  "src/components/TwpStatusPicker.tsx": {
+    "raw-button": 1
+  },
+  "src/components/TwpWizard.tsx": {
+    "raw-button": 11
+  },
+  "src/components/VerifyCompleteSheet.tsx": {
+    "raw-button": 2
+  },
+  "src/components/calc20/AccountMenu.tsx": {
+    "raw-button": 3
+  },
+  "src/components/calc20/EditableName.tsx": {
+    "raw-button": 1
+  },
+  "src/components/calc20/Header.tsx": {
+    "raw-button": 6
+  },
+  "src/components/calc20/MonthGrid.tsx": {
+    "raw-button": 2
+  },
+  "src/components/calc20/MonthHotbar.tsx": {
+    "raw-button": 1
+  },
+  "src/components/calc20/MonthSquares.tsx": {
+    "raw-button": 1
+  },
+  "src/components/calc20/PaycheckLedger.tsx": {
+    "raw-button": 3
+  },
+  "src/components/calc20/Popover.tsx": {
+    "raw-button": 2
+  },
+  "src/components/calc20/SettingsSheet.tsx": {
+    "raw-button": 21
+  },
+  "src/components/calc20/SheetSurface.tsx": {
+    "raw-button": 2
+  },
+  "src/components/calc20/SignInScreen.tsx": {
+    "raw-button": 5
+  },
+  "src/components/calc20/StreamSettingsSheet.tsx": {
+    "raw-button": 7
+  },
+  "src/components/calc20/StreamsSection.tsx": {
+    "raw-button": 28
+  },
+  "src/components/calc20/TermsGate.tsx": {
+    "raw-button": 1
+  },
+  "src/components/calc20/Toast.tsx": {
+    "raw-button": 2
+  },
+  "src/components/calc20/TotalsByMonth.tsx": {
+    "raw-button": 1
+  },
+  "src/components/calc20/TrackerCalc20.tsx": {
+    "raw-button": 7
+  },
+  "src/components/calc20/TwpStatusControl.tsx": {
+    "raw-button": 1
+  },
+  "src/components/horizon/HorizonRunway.tsx": {
+    "raw-button": 1
+  },
+  "src/components/horizon/TrackerHorizon.tsx": {
+    "raw-button": 3
+  },
+  "src/components/ledger/LedgerAnalysis.tsx": {
+    "raw-button": 4
+  },
+  "src/components/ledger/LedgerJobEditor.tsx": {
+    "raw-button": 6
+  },
+  "src/components/ledger/TrackerLedger.tsx": {
+    "raw-button": 15
+  },
+  "src/components/overview/PagesShell.tsx": {
+    "raw-button": 6
+  },
+  "src/components/overview/ScrollShell.tsx": {
+    "raw-button": 3
+  },
+  "src/components/overview/WorkspaceShell.tsx": {
+    "raw-button": 15
+  },
+  "src/components/payguard/PayGuardAnalysis.tsx": {
+    "raw-button": 3
+  },
+  "src/components/payguard/PayGuardChart.tsx": {
+    "raw-button": 2
+  },
+  "src/components/payguard/PayGuardJobEditor.tsx": {
+    "raw-button": 7
+  },
+  "src/components/payguard/PayGuardPrimitives.tsx": {
+    "raw-button": 1
+  },
+  "src/components/payguard/TrackerPayGuard.tsx": {
+    "raw-button": 14
+  },
+  "src/components/plan/TrackerPlan.tsx": {
+    "raw-button": 15
+  },
+  "src/components/pocket/TrackerPocket.tsx": {
+    "raw-button": 15
+  },
+  "src/components/ui/legacy.tsx": {
+    "raw-button": 6
+  },
+  "src/components/workrecord/TrackerWorkRecord.tsx": {
+    "raw-button": 13
+  },
+  "src/components/workrecord/WorkRecordMonths.tsx": {
+    "raw-button": 1
+  },
+  "src/components/workrecord/WorkRecordStatus.tsx": {
+    "raw-button": 1
+  },
+  "src/index.css": {
+    "literal-size": 10,
+    "literal-radius": 5,
+    "literal-text": 13
+  },
+  "src/styles/calc20.css": {
+    "literal-size": 119,
+    "literal-radius": 93,
+    "literal-text": 203
+  },
+  "src/styles/chrome.css": {
+    "literal-size": 3,
+    "literal-radius": 2,
+    "literal-text": 17
+  },
+  "src/styles/horizon.css": {
+    "literal-size": 3,
+    "literal-radius": 6,
+    "literal-text": 13
+  },
+  "src/styles/ledger.css": {
+    "literal-size": 11,
+    "literal-radius": 6,
+    "literal-text": 8
+  },
+  "src/styles/overlay.css": {
+    "literal-size": 22,
+    "literal-text": 5
+  },
+  "src/styles/overview.css": {
+    "literal-text": 5
+  },
+  "src/styles/payguard.css": {
+    "literal-size": 10,
+    "literal-radius": 11,
+    "literal-text": 58
+  },
+  "src/styles/plan.css": {
+    "literal-size": 21,
+    "literal-radius": 16,
+    "literal-text": 45
+  },
+  "src/styles/pocket.css": {
+    "literal-size": 8,
+    "literal-radius": 11,
+    "literal-text": 24
+  },
+  "src/styles/review.css": {
+    "literal-size": 6,
+    "literal-radius": 38,
+    "literal-text": 39
+  },
+  "src/styles/workrecord.css": {
+    "literal-size": 2,
+    "literal-text": 15
+  }
+}

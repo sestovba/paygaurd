@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
+import { copyFor } from '../domain/copy';
 import { money } from '../domain/format';
 import { formatMonth, monthsOfYear, todayMonth, yearOf } from '../domain/months';
 import { countableFor, streamYearHours, streamYearGross } from '../domain/earnings';
@@ -46,6 +47,7 @@ function groupPaydayRisks(risks: PaydayRisk[]): string[] {
 
 export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {
   const { data, ui } = useTracker();
+  const words = copyFor(ui.layout);
   const asOf = monthsOfYear(ui.year)[11];
   const phase = benefitPhase(data, asOf);
   const threshold = activeThreshold(data, asOf);
@@ -55,7 +57,14 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
       if (stream.type !== 'w2' || stream.lifecycle !== 'active') continue;
       const hours = streamYearHours(stream, ui.year);
       const gross = streamYearGross(stream, ui.year);
-      if (hours > 0 && gross > 0) return gross / hours;
+      /* To the cent. This is a division — $667 over 30 hours — and it went
+         straight into a field labelled with a dollar sign, so the screen that
+         tells somebody what to aim for opened on "$ 22.233333333333332",
+         overflowing its own input. Nobody is paid a repeating decimal, and a
+         figure printed to fourteen places reads as a machine's number rather
+         than theirs. It is an estimate either way; the extra digits add no
+         accuracy, only noise. */
+      if (hours > 0 && gross > 0) return Math.round((gross / hours) * 100) / 100;
     }
     return 20;
   }, [data.streams, ui.year]);
@@ -115,7 +124,7 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
     if (!onOpenStatus) return null;
     return (
       <section className="panel p-4 sm:p-5">
-        <h2 className="display-figure">How many hours can you work?</h2>
+        <h2 className="display-figure">{words.hoursAsk}</h2>
         <button type="button" className="btn-primary mt-3" onClick={onOpenStatus}>
           Answer a few questions
         </button>
@@ -129,23 +138,30 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         <ShieldCheck className="size-4 shrink-0 text-good" />
         {/* el-8lyfa5: "safe" never says safe from what. The eyebrow says
             which number this is; the sentence below says what it keeps you
-            under. */}
-        <p className="label-caps">Hours you can work</p>
+            under. The words come from the vocabulary, not from here — five
+            screens open this panel and they were calling it four things. */}
+        <p className="label-caps">{words.hoursPanel}</p>
       </div>
       <h2 className="display-figure mt-1.5">
         Aim for {Math.floor(safeFiveWeekHours)} hours a week
       </h2>
       <p className="type-muted mt-1 max-w-prose">
-        That stays under your limit even in a month that pays you an extra time.
-        {otherValue > 0 ? ` Your ${money(otherValue)} of self-employment pay this month is already taken off.` : ''}
+        Holds even with an extra paycheck.
+        {otherValue > 0 ? ` ${money(otherValue)} self-employment this month already counted.` : ''}
       </p>
 
+      {/* A label sits over its own field and is as wide as it — so when it
+          needs two lines the field under it drops with it, and the pair
+          beside it no longer lines up. Two columns only where the label fits
+          on one line at that width; below that each field takes the row and
+          gets the whole width to say its name in. Same rule the Calc20
+          simulator has had at 520px. */}
       <div className="mt-4 grid grid-cols-2 gap-2.5 sm:max-w-sm">
-        <label className="flex flex-col gap-1.5">
+        <label className="flex flex-col justify-end gap-1.5">
           <span className="field-label">Hourly rate</span>
           <NumericInput prefix="$" className="num field-input w-full" value={rate} onCommit={setRate} />
         </label>
-        <label className="flex flex-col gap-1.5">
+        <label className="flex flex-col justify-end gap-1.5">
           <span className="field-label">Weekly hours</span>
           <NumericInput className="num field-input w-full" placeholder="0" value={hoursPerWeek} onCommit={setHoursPerWeek} />
         </label>
@@ -153,19 +169,18 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
 
       <details className="mt-3">
         <summary className="type-muted cursor-pointer list-none text-base">
-          Safety margin: {bufferValue + varianceValue}% under your limit — recommended. You do
-          not need to change this.
+          {bufferValue + varianceValue}% under — recommended.
         </summary>
-        <div className="mt-3 grid grid-cols-2 gap-2.5 sm:max-w-sm">
-          <label className="flex flex-col gap-1.5">
+        <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:max-w-xl">
+          <label className="flex flex-col justify-end gap-1.5">
             <span className="field-label">Stay this far under (%)</span>
             <NumericInput className="num field-input w-full" placeholder="10" value={buffer} onCommit={setBuffer} />
           </label>
-          <label className="flex flex-col gap-1.5">
+          <label className="flex flex-col justify-end gap-1.5">
             <span className="field-label">Allow for a bigger check (%)</span>
             <NumericInput className="num field-input w-full" placeholder="5" value={variance} onCommit={setVariance} />
           </label>
-          <label className="col-span-2 flex flex-col gap-1.5">
+          <label className="flex flex-col justify-end gap-1.5 sm:col-span-2">
             <span className="field-label">Self-employment pay counted this month</span>
             <NumericInput
               prefix="$"
@@ -185,7 +200,7 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface-2 p-3">
           {/* "closer to the line" is a figure of speech for a limit the
                reader has never been shown a line for. */}
-          <span className="label-caps">Still under, closer to your limit</span>
+          <span className="label-caps">Still under, close to your limit</span>
           <span className="display-figure">{Math.floor(safeAverageHours)} hours a week</span>
         </div>
       </div>
@@ -194,9 +209,8 @@ export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void 
         'mt-3 rounded-lg border p-3 text-base '
         + (over ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-surface-2')
       }>
-        At <strong>{hoursValue} hours a week</strong>, a month that pays you an extra time comes
-        to <strong>{money(fiveWeekProjection)}</strong> — {over ? 'over' : 'under'} the
-        {' '}{money(safeTarget)} we aim for.
+        <strong>{hoursValue} hrs/week</strong> with an extra check → <strong>{money(fiveWeekProjection)}</strong>
+        {' '}({over ? 'over' : 'under'} {money(safeTarget)}).
       </p>
 
       {paydayRisks.length ? (

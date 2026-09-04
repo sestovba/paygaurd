@@ -43,7 +43,12 @@ function stateLabel(status: MonthStatus, phase: BenefitPhase): string | null {
 
 export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {
   const { data, ui } = useTracker();
-  const { scope, months: listed, setScope } = useMonthScope('many');
+  /* 'month', not 'ahead'. This component answers one-month range by rendering
+     MonthUpClose — a different drawing, not this grid with eleven twelfths
+     filtered out — so the reason many-shaped surfaces default to the rest of
+     the year does not apply to it. The reader's own pick still wins, and
+     MonthUpClose carries the scope picker to change it. */
+  const { scope, months: listed, setScope } = useMonthScope('many', 'month');
   const now = todayMonth();
   const extraPay = extraPaycheckMonths(data.streams, ui.year);
 

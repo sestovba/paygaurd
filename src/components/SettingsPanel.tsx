@@ -9,9 +9,9 @@ import { displayNameFor, initialsFor } from '../auth/session';
 import type { LayoutMode, LedgerTheme } from '../state/storage';
 import { InfoNote } from './InfoNote';
 import { Sheet } from './Sheet';
-import { Segmented, SwatchPicker, Switch } from './ui';
+import { Button, ButtonRow, IconButton, Input, Segmented, SwatchPicker, Switch } from './ui';
 import { TermsContent } from './TermsContent';
-import { HelpSpread } from './HelpSpread';
+import { HelpSpreadBody } from './HelpSpread';
 import { LAYOUTS, LayoutSwitcher } from './LayoutSwitcher';
 import { SETTINGS_ROW, sectionsFor, type SettingsRowId } from './settingsModel';
 
@@ -21,6 +21,7 @@ const SUB_THEMES: { id: LedgerTheme; label: string; colors: [string, string, str
   { id: 'slate', label: 'Coastal', colors: ['#e8eef5', '#2563eb', '#ea580c'] },
   { id: 'ledger', label: 'Warm Ledger', colors: ['#faf7ed', '#14532d', '#c2410c'] },
   { id: 'carbon', label: 'Midnight', colors: ['#111827', '#10b981', '#f97316'] },
+  { id: 'calm', label: 'Calm', colors: ['#fbfaf6', '#00643a', '#dbf2df'] },
   // Ported from the sibling sga_calc20 project's "2026 Work Record" design.
   { id: 'calc20', label: 'Studio Blue', colors: ['#eef1f6', '#2f2a44', '#7cc0e8'] }
 ];
@@ -71,6 +72,19 @@ function GuardPanel({ tone = 'plain', title, children }: {
   );
 }
 
+/** The pages Settings can drill into, and what each is called once you are
+ *  there. A row in Settings and the page it opens should not have to be kept
+ *  in step by hand, so the page owns its own title. */
+type SubPage = 'layout' | 'terms' | 'help' | null;
+
+const SUBPAGES: Record<Exclude<SubPage, null>, {
+  title: string; eyebrow?: string; size?: 'md' | 'lg';
+}> = {
+  layout: { title: SETTINGS_ROW.layout.label, eyebrow: 'Appearance' },
+  terms: { title: 'Terms, privacy, and liability', eyebrow: 'Legal' },
+  help: { title: 'How gig work is counted', eyebrow: 'Why your miles matter' }
+};
+
 export function SettingsPanel({
   theme, onTheme, onOpenStatus, onReset, onClose, variant = 'sheet', backLabel,
   layout, onLayoutChange
@@ -96,13 +110,13 @@ export function SettingsPanel({
     data, ui, setUi, replaceAll,
     session, signOut, canSync, cloudSyncEnabled, cloudSyncStatus, setCloudSyncEnabled
   } = useTracker();
-  const [helpSpreadOpen, setHelpSpreadOpen] = useState(false);
-  const [termsOpen, setTermsOpen] = useState(false);
+  /* One drill-down at a time, instead of three sheets that could stack on
+     top of Settings and on top of each other. See SUBPAGES below. */
+  const [page, setPage] = useState<SubPage>(null);
   /* The layout list is seven options with a line of prose each — a screenful
      inside a sheet you opened to do something else. It is a choice you make
      once, so it gets a row that names the current one and a page of its
      own. */
-  const [layoutOpen, setLayoutOpen] = useState(false);
   const layoutName = LAYOUTS.find((option) => option.id === layout)?.label ?? 'Choose';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -184,15 +198,9 @@ export function SettingsPanel({
               <span className="block truncate text-base font-semibold">{displayNameFor(session)}</span>
               {session.email ? <span className="type-muted block truncate text-sm">{session.email}</span> : null}
             </span>
-            <button
-              type="button"
-              onClick={signOut}
-              aria-label="Sign out"
-              title="Sign out"
-              className="icon-btn grid shrink-0 text-muted-foreground hover:bg-muted"
-            >
+            <IconButton label="Sign out" onClick={signOut}>
               <LogOut className="size-5" />
-            </button>
+            </IconButton>
           </div>
         );
 
@@ -222,22 +230,10 @@ export function SettingsPanel({
                   device see them after you sign in. Turning it off again deletes the
                   Firebase copy — it does not pause it.
                 </p>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={syncGuard.turnOn}
-                    className="rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-accent-foreground"
-                  >
-                    I agree — turn on
-                  </button>
-                  <button
-                    type="button"
-                    onClick={syncGuard.cancel}
-                    className="rounded-lg px-4 py-2.5 text-base font-semibold text-muted-foreground hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <ButtonRow className="mt-1">
+                  <Button variant="tonal" onClick={syncGuard.turnOn}>I agree — turn on</Button>
+                  <Button variant="ghost" onClick={syncGuard.cancel}>Cancel</Button>
+                </ButtonRow>
               </GuardPanel>
             ) : null}
 
@@ -248,31 +244,23 @@ export function SettingsPanel({
                   not a pause and it cannot be undone. A copy downloads to this device
                   the moment you confirm. Type {SYNC_OFF_CONFIRM_WORD} to continue.
                 </p>
-                <input
+                <Input
                   type="text"
                   value={syncGuard.confirmText}
                   onChange={(e) => syncGuard.setConfirmText(e.target.value)}
                   placeholder={SYNC_OFF_CONFIRM_WORD}
                   aria-label={`Type ${SYNC_OFF_CONFIRM_WORD} to confirm`}
-                  className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-base"
                 />
-                <div className="mt-1 flex flex-wrap gap-2">
-                  <button
-                    type="button"
+                <ButtonRow className="mt-1">
+                  <Button
+                    variant="danger"
                     disabled={!syncGuard.canConfirmOff}
                     onClick={syncGuard.turnOffWithBackup}
-                    className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-base font-semibold text-destructive disabled:opacity-40"
                   >
                     Download backup &amp; delete
-                  </button>
-                  <button
-                    type="button"
-                    onClick={syncGuard.cancel}
-                    className="rounded-lg px-4 py-2.5 text-base font-semibold text-muted-foreground hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                  </Button>
+                  <Button variant="ghost" onClick={syncGuard.cancel}>Cancel</Button>
+                </ButtonRow>
               </GuardPanel>
             ) : null}
           </div>
@@ -284,7 +272,7 @@ export function SettingsPanel({
             key={id}
             icon={<FileText className="size-5 text-muted-foreground" />}
             label={SETTINGS_ROW.terms.label}
-            onClick={() => setTermsOpen(true)}
+            onClick={() => setPage('terms')}
           />
         );
 
@@ -317,7 +305,7 @@ export function SettingsPanel({
             key={id}
             icon={<LayoutTemplate className="size-5 text-muted-foreground" />}
             label={`${SETTINGS_ROW.layout.label} · ${layoutName}`}
-            onClick={() => setLayoutOpen(true)}
+            onClick={() => setPage('layout')}
           />
         );
 
@@ -374,22 +362,22 @@ export function SettingsPanel({
          on 'export' and 'import' draws nothing. */
       case 'export':
         return (
-          <div key={id} className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
+          <ButtonRow key={id}>
+            <Button
+              variant="outlined"
               onClick={exportJson}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-3 text-base font-semibold hover:bg-muted"
+              icon={<Download className="size-4 text-muted-foreground" />}
             >
-              <Download className="size-4 text-muted-foreground" /> {SETTINGS_ROW.export.label}
-            </button>
-            <button
-              type="button"
+              {SETTINGS_ROW.export.label}
+            </Button>
+            <Button
+              variant="outlined"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-3 text-base font-semibold hover:bg-muted"
+              icon={<Upload className="size-4 text-muted-foreground" />}
             >
-              <Upload className="size-4 text-muted-foreground" /> {SETTINGS_ROW.import.label}
-            </button>
-          </div>
+              {SETTINGS_ROW.import.label}
+            </Button>
+          </ButtonRow>
         );
       case 'import':
         return null;
@@ -426,13 +414,36 @@ export function SettingsPanel({
             key={id}
             icon={<HelpCircle className="size-5 text-muted-foreground" />}
             label={SETTINGS_ROW.howIncomeWorks.label}
-            onClick={() => setHelpSpreadOpen(true)}
+            onClick={() => setPage('help')}
           />
         );
 
       default:
         return null;
     }
+  }
+
+  /* The drill-down. One Sheet, showing either the settings list or one
+     sub-page — never a sheet on top of a sheet. `onBack` gives the sub-page
+     a "Back to Settings" step; the X still closes the whole thing, so the
+     way out of Settings is one tap from any depth. */
+  if (page) {
+    const sub = SUBPAGES[page];
+    return (
+      <Sheet
+        title={sub.title}
+        eyebrow={sub.eyebrow}
+        size={sub.size}
+        onClose={onClose}
+        onBack={() => setPage(null)}
+        backLabel="Settings"
+        variant={variant === 'inline' ? 'inline' : 'modal'}
+      >
+        {page === 'layout' ? <LayoutSwitcher value={layout} onChange={onLayoutChange} /> : null}
+        {page === 'terms' ? <TermsContent /> : null}
+        {page === 'help' ? <HelpSpreadBody /> : null}
+      </Sheet>
+    );
   }
 
   return (
@@ -460,19 +471,6 @@ export function SettingsPanel({
         </Section>
       ))}
 
-      {layoutOpen ? (
-        <Sheet title="Layout" eyebrow="Appearance" onClose={() => setLayoutOpen(false)}>
-          <LayoutSwitcher value={layout} onChange={onLayoutChange} />
-        </Sheet>
-      ) : null}
-
-      {termsOpen ? (
-        <Sheet title="Terms, privacy, and liability" eyebrow="Legal" onClose={() => setTermsOpen(false)}>
-          <TermsContent />
-        </Sheet>
-      ) : null}
-
-      {helpSpreadOpen ? <HelpSpread onClose={() => setHelpSpreadOpen(false)} /> : null}
     </Sheet>
   );
 }

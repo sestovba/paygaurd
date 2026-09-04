@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Component Library — SSDI Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
+/* ============================================================
+   TOKENS — lifted verbatim from ssdi-tracker-improved.html
+   ============================================================ */
+:root {
+  --bg-primary: #06060e;
+  --bg-secondary: #0c0c18;
+  --bg-card: rgba(18, 18, 35, 0.75);
+  --bg-card-hover: rgba(24, 24, 45, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(139, 92, 246, 0.4);
+  --text-primary: #f1f1f7;
+  --text-secondary: #8a8a9e;
+  --text-muted: #5c5c72;
+  --accent-1: #8b5cf6;
+  --accent-2: #06b6d4;
+  --accent-3: #10b981;
+  --accent-4: #f59e0b;
+  --accent-5: #ef4444;
+  --gradient-main: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  --gradient-warm: linear-gradient(135deg, #f59e0b, #ef4444);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
+  --shadow-glow-violet: 0 0 40px rgba(139, 92, 246, 0.15);
+  --shadow-glow-cyan: 0 0 40px rgba(6, 182, 212, 0.12);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* The display tints. In the source these were hardcoded at 36 call sites and
+     had no names — which is exactly why the kit had no light form: there was
+     nothing to redefine. Naming them is what made the light palette possible. */
+  --ink-violet:  var(--ink-violet);
+  --ink-cyan:    var(--ink-cyan);
+  --ink-emerald: var(--ink-emerald);
+  --ink-amber:   var(--ink-amber);
+  --ink-red:     var(--ink-red);
+  --ink-badge:   var(--ink-badge);
+
+  /* Surfaces that light mode has to change but dark mode leaves alone. */
+  --card-blur: blur(20px);
+  --noise-opacity: 0.4;
+  --grid-ink: rgba(139,92,246,0.025);
+  --field-fill: rgba(255,255,255,0.03);
+  --row-fill: rgba(255,255,255,0.02);
+  --scrollbar: rgba(255,255,255,0.08);
+}
+
+/* ── LIGHT ─────────────────────────────────────────────────────────────
+   Same hues, inverted paper. The accents are darkened rather than reused:
+   var(--ink-emerald) on white is 1.9:1 and unreadable, so every tint drops to a shade
+   that carries the same meaning and passes contrast. The orbs and the grid
+   survive at lower opacity; the card blur does not survive at all — on white
+   a translucent panel over a gradient is mud, so the card becomes opaque.  */
+:root[data-theme="light"] {
+  --bg-primary: #f6f6fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fdfdff;
+  --border-subtle: #e7e7f0;
+  --border-medium: #d3d3e2;
+  --border-accent: rgba(109,40,217,0.35);
+  --text-primary: #16161f;
+  --text-secondary: #55556b;
+  --text-muted: #7d7d93;
+
+  --accent-1: #7c3aed;
+  --accent-2: #0891b2;
+  --accent-3: #059669;
+  --accent-4: #d97706;
+  --accent-5: #dc2626;
+  --gradient-main: linear-gradient(135deg, #7c3aed, #0891b2);
+  --gradient-warm: linear-gradient(135deg, #d97706, #dc2626);
+
+  --ink-violet:  #6d28d9;
+  --ink-cyan:    #0e7490;
+  --ink-emerald: #047857;
+  --ink-amber:   #b45309;
+  --ink-red:     #b91c1c;
+  --ink-badge:   #0e7490;
+
+  --shadow-card: none;
+  --shadow-glow-violet: none;
+  --shadow-glow-cyan: none;
+
+  --card-blur: none;
+  --noise-opacity: 0;
+  --grid-ink: rgba(124,58,237,0.05);
+  --field-fill: #f7f7fb;
+  --row-fill: #f9f9fc;
+  --scrollbar: rgba(0,0,0,0.14);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── ATMOSPHERE (component 01) ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: var(--noise-opacity);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black 20%, transparent 70%);
+}
+.orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+.orb-1 { width: 600px; height: 600px; top: -250px; right: -150px;
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  animation: float1 14s ease-in-out infinite; }
+.orb-2 { width: 500px; height: 500px; bottom: -200px; left: -100px;
+  background: radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 70%);
+  animation: float2 18s ease-in-out infinite; }
+.orb-3 { width: 350px; height: 350px; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 60%);
+  animation: float3 20s ease-in-out infinite; }
+@keyframes float1 { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(-40px,30px) scale(1.08);} 66%{transform:translate(20px,-20px) scale(0.95);} }
+@keyframes float2 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(30px,-40px) scale(1.12);} }
+@keyframes float3 { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.5;} 50%{transform:translate(-40%,-60%) scale(1.2);opacity:1;} }
+.grid-lines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-ink) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-ink) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black 25%, transparent 75%);
+}
+
+/* ── SOURCE COMPONENTS (verbatim) ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; flex-wrap: wrap; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; letter-spacing: -0.01em; }
+.brand-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--gradient-main); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: var(--shadow-glow-violet); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.pill { font-size: 0.72rem; font-weight: 600; padding: 5px 12px; border-radius: 100px; background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.18); color: var(--ink-violet); letter-spacing: 0.02em; }
+
+.hero { text-align: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.15); padding: 5px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; color: var(--ink-badge); margin-bottom: 24px; letter-spacing: 0.01em; }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.08; margin-bottom: 16px; }
+.hero h1 .gradient-text { background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { color: var(--text-secondary); font-size: 1.05rem; max-width: 520px; margin: 0 auto; line-height: 1.7; font-weight: 400; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+.glass { background: var(--bg-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); transition: border-color .3s var(--ease-out), box-shadow .3s var(--ease-out), transform .3s var(--ease-out); }
+.glass:hover { border-color: var(--border-medium); }
+.glass-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+.glass-body { padding: 20px 24px; }
+.glass-full { padding: 24px; }
+
+.stat-card { position: relative; overflow: hidden; cursor: default; }
+.stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 120px; height: 120px; border-radius: 0 0 0 120px; opacity: .08; pointer-events: none; }
+.stat-card.violet::after { background: var(--accent-1); }
+.stat-card.cyan::after { background: var(--accent-2); }
+.stat-card.emerald::after { background: var(--accent-3); }
+.stat-card.amber::after { background: var(--accent-4); }
+.stat-card.red::after { background: var(--accent-5); }
+.stat-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 10px; }
+.stat-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-family: 'JetBrains Mono', monospace; transition: color .4s var(--ease-out); }
+.stat-value.sm { font-size: 1.8rem; }
+.stat-unit { font-size: 1rem; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
+.stat-sub { font-size: .75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+
+.progress-ring-container { display: flex; align-items: center; justify-content: center; gap: 24px; padding: 8px 0; flex-wrap: wrap; }
+.ring-wrapper { position: relative; width: 110px; height: 110px; }
+.ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 5; }
+.ring-fg { fill: none; stroke: url(#gradient); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .7s var(--ease-out); filter: drop-shadow(0 0 12px rgba(139,92,246,0.4)); }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-percent { font-size: 1.5rem; font-weight: 800; color: var(--ink-violet); font-family: 'JetBrains Mono', monospace; line-height: 1; }
+.ring-label { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+.ring-info h3 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+.ring-info p { font-size: .82rem; color: var(--text-secondary); line-height: 1.5; }
+
+.months-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+@media (max-width: 900px) { .months-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 500px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
+.month-btn { position: relative; background: var(--row-fill); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px 8px; cursor: pointer; transition: all .25s var(--ease-out); text-align: center; overflow: hidden; }
+.month-btn::before { content: ''; position: absolute; inset: 0; background: var(--gradient-main); opacity: 0; transition: opacity .25s var(--ease-out); }
+.month-btn:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(139,92,246,0.1); }
+.month-btn:hover::before { opacity: .04; }
+.month-btn:active { transform: translateY(0) scale(.97); }
+.month-btn.active { border-color: rgba(139,92,246,0.5); background: rgba(139,92,246,0.06); }
+.month-btn.active::before { opacity: .06; }
+.month-name { font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; position: relative; z-index: 1; }
+.month-badge { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); position: relative; z-index: 1; }
+.month-amount { font-size: 1.05rem; font-weight: 700; margin-top: 6px; position: relative; z-index: 1; font-family: 'JetBrains Mono', monospace; }
+.month-amount.safe { color: var(--ink-emerald); }
+.month-amount.warning { color: var(--ink-amber); }
+.month-amount.over { color: var(--ink-red); }
+.month-amount.empty { color: var(--text-muted); }
+
+.section-title { font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); margin-bottom: 4px; }
+.section-sub { font-size: .8rem; color: var(--text-muted); margin-bottom: 16px; }
+
+.field { margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+.field > label { display: block; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 8px; }
+.input-wrap { position: relative; }
+.input-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600; font-size: .95rem; font-family: 'JetBrains Mono', monospace; }
+.field input { width: 100%; padding: 12px 14px 12px 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 1rem; font-weight: 500; outline: none; transition: all .2s var(--ease-out); font-family: 'JetBrains Mono', monospace; }
+.field input:focus { border-color: rgba(139,92,246,0.4); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); background: rgba(255,255,255,0.04); }
+.field input::placeholder { color: #3a3a4e; }
+
+.plan-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; background: var(--row-fill); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 10px; transition: border-color .2s; }
+.plan-row:last-child { margin-bottom: 0; }
+.plan-row:hover { border-color: var(--border-medium); }
+.plan-label { font-size: .78rem; color: var(--text-secondary); }
+.plan-value { font-size: 1.4rem; font-weight: 700; color: var(--ink-emerald); font-family: 'JetBrains Mono', monospace; letter-spacing: -.02em; }
+.plan-value .unit { font-size: .75rem; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
+.plan-cta { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: .75rem; color: var(--text-muted); }
+.plan-cta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 8px rgba(16,185,129,0.5); animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:.5;transform:scale(1);} 50%{opacity:1;transform:scale(1.2);} }
+
+.note { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.12); border-radius: var(--radius-sm); font-size: .75rem; color: var(--text-muted); line-height: 1.5; margin-top: 14px; }
+.note-icon { font-size: .9rem; flex-shrink: 0; margin-top: 1px; }
+
+.empty-state { text-align: center; padding: 32px 20px; }
+.empty-icon { font-size: 2.8rem; display: block; margin-bottom: 12px; opacity: .6; }
+.empty-text { font-size: .88rem; color: var(--text-muted); line-height: 1.6; max-width: 320px; margin: 0 auto; }
+
+.log-list { max-height: 220px; overflow-y: auto; }
+.log-entry { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border-subtle); }
+.log-entry:last-child { border-bottom: none; }
+.log-date { font-size: .82rem; color: var(--text-secondary); }
+.log-amount { font-weight: 600; font-size: .88rem; font-family: 'JetBrains Mono', monospace; }
+.log-amount.over { color: var(--ink-red); }
+.log-amount.safe { color: var(--ink-emerald); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 18px; border-radius: var(--radius-sm); font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .2s var(--ease-out); font-family: 'Inter', sans-serif; border: none; }
+.btn-primary { background: var(--gradient-main); color: white; box-shadow: 0 4px 20px rgba(139,92,246,0.2); }
+.btn-primary:hover { box-shadow: 0 6px 24px rgba(139,92,246,0.35); transform: translateY(-1px); filter: brightness(1.05); }
+.btn-primary:active { transform: translateY(0) scale(.98); }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+.btn-ghost:hover { border-color: var(--border-medium); color: var(--text-primary); background: rgba(255,255,255,0.03); }
+
+.modal { background: var(--bg-secondary); backdrop-filter: var(--card-blur); -webkit-backdrop-filter: var(--card-blur); border: 1px solid var(--border-medium); border-radius: var(--radius-xl); padding: 28px; width: 100%; max-width: 400px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
+.modal h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 2px; }
+.modal-sub { font-size: .82rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+.modal-preview { padding: 14px 16px; background: var(--row-fill); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 18px; text-align: center; }
+.modal-preview-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 4px; }
+.modal-preview-value { font-size: 1.6rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; letter-spacing: -.02em; }
+.modal-actions { display: flex; gap: 8px; }
+.modal-actions .btn { flex: 1; }
+
+.footer { padding-top: 30px; border-top: 1px solid var(--border-subtle); text-align: center; }
+.footer-text { font-size: .72rem; color: var(--text-muted); line-height: 1.7; }
+.footer-text a { color: var(--ink-violet); text-decoration: none; font-weight: 500; }
+
+.reveal { opacity: 0; transform: translateY(16px); animation: reveal .5s var(--ease-out) forwards; }
+@keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+.delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}.delay-3{animation-delay:.15s}
+.delay-4{animation-delay:.2s}.delay-5{animation-delay:.25s}.delay-6{animation-delay:.3s}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+
+/* ============================================================
+   CATALOG CHROME — not part of the library. Prefixed .cat-
+   ============================================================ */
+.cat-page { position: relative; z-index: 2; max-width: 1060px; margin: 0 auto; padding: 40px 24px 80px; }
+.cat-masthead { border-bottom: 1px solid var(--border-subtle); padding-bottom: 28px; margin-bottom: 8px; }
+.cat-eyebrow { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: var(--accent-2); margin-bottom: 12px; }
+.cat-masthead h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -.035em; line-height: 1.1; margin-bottom: 14px; }
+.cat-lede { color: var(--text-secondary); font-size: .95rem; line-height: 1.7; max-width: 620px; }
+.cat-lede code { font-family: 'JetBrains Mono', monospace; font-size: .85em; color: var(--ink-violet); }
+
+.cat-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.cat-chip { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: 4px 10px; border-radius: 100px; border: 1px solid; }
+.cat-chip.ok { color: var(--ink-emerald); border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.06); }
+.cat-chip.warn { color: var(--ink-amber); border-color: rgba(245,158,11,.3); background: rgba(245,158,11,.06); }
+.cat-chip.stop { color: var(--ink-red); border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.06); }
+
+.cat-toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px 20px; margin: 32px 0 8px; }
+.cat-toc a { font-size: .8rem; color: var(--text-secondary); text-decoration: none; padding: 5px 0; border-bottom: 1px solid transparent; transition: color .2s, border-color .2s; }
+.cat-toc a:hover { color: var(--text-primary); border-bottom-color: var(--border-medium); }
+.cat-toc a b { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-weight: 500; margin-right: 8px; font-size: .75rem; }
+
+.cat-item { margin-top: 56px; scroll-margin-top: 24px; }
+.cat-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+.cat-num { font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: var(--text-muted); margin-right: 10px; }
+.cat-head h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; display: inline; }
+.cat-selectors { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--ink-violet); word-break: break-all; }
+.cat-why { font-size: .84rem; color: var(--text-secondary); line-height: 1.65; max-width: 720px; margin-bottom: 16px; }
+.cat-why b { color: var(--text-primary); font-weight: 600; }
+.cat-stage { border: 1px dashed rgba(255,255,255,.07); border-radius: var(--radius-md); padding: 24px; }
+.cat-stage.tight { padding: 16px; }
+.cat-flags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.cat-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.cat-sw { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); overflow: hidden; }
+.cat-sw-chip { height: 54px; }
+.cat-sw-meta { padding: 8px 10px; }
+.cat-sw-name { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--text-secondary); }
+.cat-sw-val { font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--text-muted); margin-top: 2px; }
+
+.cat-scale-row { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+.cat-scale-row:last-child { border-bottom: none; }
+.cat-scale-tag { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--text-muted); width: 130px; flex: none; }
+
+.cat-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.cat-theme {
+  position: fixed; top: 18px; right: 18px; z-index: 50;
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 9px 16px; border-radius: 100px; cursor: pointer;
+  background: var(--bg-card); color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  transition: color .2s, border-color .2s;
+}
+.cat-theme:hover { color: var(--text-primary); border-color: var(--accent-1); }
+.cat-note { font-size: .75rem; color: var(--text-muted); margin-top: 12px; line-height: 1.6; }
+.cat-note b { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<button class="cat-theme" id="themeToggle" type="button">Light</button>
+<div class="grid-lines"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="cat-page">
+
+  <header class="cat-masthead reveal">
+    <div class="cat-eyebrow">Component library · 1 of 2</div>
+    <h1>Nightfall<br><span style="background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">the SSDI Tracker kit</span></h1>
+    <p class="cat-lede">Every part of <code>ssdi-tracker-improved.html</code>, pulled out and shown on its own. The CSS below is lifted verbatim from the source — nothing here is a redraw. Approve the parts you want and they become the palette and the primitives for the next layout.</p>
+    <div class="cat-legend">
+      <span class="cat-chip ok">Portable</span>
+      <span class="cat-chip warn">Needs a rewrite for old Android</span>
+      <span class="cat-chip stop">Drop it</span>
+    </div>
+    <p class="cat-note" style="max-width:620px;">Those three read against the device rule in <b>CLAUDE.md</b>: cheap Android, old WebView, no <code>backdrop-filter</code>, no web fonts, no blurred shadows. A yellow chip is not a rejection — it means the idea survives and the technique has to change.</p>
+  </header>
+
+  <nav class="cat-toc reveal delay-1">
+    <a href="#c01"><b>01</b>Atmosphere</a>
+    <a href="#c02"><b>02</b>Colour tokens</a>
+    <a href="#c03"><b>03</b>Type scale</a>
+    <a href="#c04"><b>04</b>Top bar</a>
+    <a href="#c05"><b>05</b>Hero</a>
+    <a href="#c06"><b>06</b>Glass card</a>
+    <a href="#c07"><b>07</b>Stat card</a>
+    <a href="#c08"><b>08</b>Progress ring</a>
+    <a href="#c09"><b>09</b>Month grid</a>
+    <a href="#c10"><b>10</b>Section header</a>
+    <a href="#c11"><b>11</b>Money field</a>
+    <a href="#c12"><b>12</b>Answer rows</a>
+    <a href="#c13"><b>13</b>Caution note</a>
+    <a href="#c14"><b>14</b>Empty state</a>
+    <a href="#c15"><b>15</b>Log list</a>
+    <a href="#c16"><b>16</b>Buttons</a>
+    <a href="#c17"><b>17</b>Modal</a>
+    <a href="#c18"><b>18</b>Footer</a>
+    <a href="#c19"><b>19</b>Entrance</a>
+  </nav>
+
+  <!-- 01 -->
+  <section class="cat-item" id="c01">
+    <div class="cat-head"><div><span class="cat-num">01</span><h2>Atmosphere</h2></div><div class="cat-selectors">.orb-1 .orb-2 .orb-3 · .grid-lines · body::before</div></div>
+    <p class="cat-why">Three fixed radial-gradient orbs drifting on 14/18/20-second loops, an 80px grid, and an SVG turbulence noise film — all masked to fade out below the fold. <b>You are looking at it right now:</b> it is the background of this page. It costs nothing in markup and it is the single biggest reason the layout reads as expensive rather than as a form.</p>
+    <div class="cat-stage">
+      <p class="cat-why" style="margin:0;">Nothing to render in a box — scroll and watch the top-right violet bloom move against the grid. Turn it off and every card below looks like a spreadsheet.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip warn">Three animated 600px gradients repaint continuously — battery and jank on an old WebView. Keep the look, kill the motion: bake the orbs into one static background image.</span></div>
+  </section>
+
+  <!-- 02 -->
+  <section class="cat-item" id="c02">
+    <div class="cat-head"><div><span class="cat-num">02</span><h2>Colour tokens</h2></div><div class="cat-selectors">:root</div></div>
+    <p class="cat-why">Five accents doing semantic work, three text weights, three border weights, two gradients. <b>The accents are already the status vocabulary</b> — emerald safe, amber careful, red over — with violet as brand and cyan as the second brand note.</p>
+    <div class="cat-stage">
+      <div class="cat-swatches">
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#06060e"></div><div class="cat-sw-meta"><div class="cat-sw-name">--bg-primary</div><div class="cat-sw-val">#06060e</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#0c0c18"></div><div class="cat-sw-meta"><div class="cat-sw-name">--bg-secondary</div><div class="cat-sw-val">#0c0c18</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:rgba(18,18,35,.75)"></div><div class="cat-sw-meta"><div class="cat-sw-name">--bg-card</div><div class="cat-sw-val">rgba(18,18,35,.75)</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#8b5cf6"></div><div class="cat-sw-meta"><div class="cat-sw-name">--accent-1 violet</div><div class="cat-sw-val">#8b5cf6 · brand</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#06b6d4"></div><div class="cat-sw-meta"><div class="cat-sw-name">--accent-2 cyan</div><div class="cat-sw-val">#06b6d4 · second</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#10b981"></div><div class="cat-sw-meta"><div class="cat-sw-name">--accent-3 emerald</div><div class="cat-sw-val">#10b981 · safe</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#f59e0b"></div><div class="cat-sw-meta"><div class="cat-sw-name">--accent-4 amber</div><div class="cat-sw-val">#f59e0b · careful</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#ef4444"></div><div class="cat-sw-meta"><div class="cat-sw-name">--accent-5 red</div><div class="cat-sw-val">#ef4444 · over</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:linear-gradient(135deg,#8b5cf6,#06b6d4)"></div><div class="cat-sw-meta"><div class="cat-sw-name">--gradient-main</div><div class="cat-sw-val">135deg violet → cyan</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:linear-gradient(135deg,#f59e0b,#ef4444)"></div><div class="cat-sw-meta"><div class="cat-sw-name">--gradient-warm</div><div class="cat-sw-val">135deg amber → red</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#f1f1f7"></div><div class="cat-sw-meta"><div class="cat-sw-name">--text-primary</div><div class="cat-sw-val">#f1f1f7</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#8a8a9e"></div><div class="cat-sw-meta"><div class="cat-sw-name">--text-secondary</div><div class="cat-sw-val">#8a8a9e</div></div></div>
+        <div class="cat-sw"><div class="cat-sw-chip" style="background:#5c5c72"></div><div class="cat-sw-meta"><div class="cat-sw-name">--text-muted</div><div class="cat-sw-val">#5c5c72</div></div></div>
+      </div>
+      <p class="cat-note"><b>The display tints are not the tokens.</b> Text uses lighter cousins — <span style="color:var(--ink-violet)">var(--ink-violet)</span>, <span style="color:var(--ink-cyan)">var(--ink-cyan)</span>, <span style="color:var(--ink-emerald)">var(--ink-emerald)</span>, <span style="color:var(--ink-amber)">var(--ink-amber)</span>, <span style="color:var(--ink-red)">var(--ink-red)</span> — hardcoded rather than tokenised. If this kit gets adopted, those five want names.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat hex and rgba. No <code>color-mix()</code> anywhere.</span></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="cat-item" id="c03">
+    <div class="cat-head"><div><span class="cat-num">03</span><h2>Type scale</h2></div><div class="cat-selectors">Inter 400–900 · JetBrains Mono 500/700</div></div>
+    <p class="cat-why">Two families with one job each: <b>Inter carries the words, JetBrains Mono carries every number.</b> That split is the whole typographic idea and it is worth keeping — money in a tabular mono is legible at a glance and never shifts width as it counts.</p>
+    <div class="cat-stage">
+      <div class="cat-scale-row"><span class="cat-scale-tag">hero h1 · 900</span><span style="font-size:2.4rem;font-weight:900;letter-spacing:-.04em;line-height:1.1;">Stay under your limit</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.stat-value · mono 800</span><span class="stat-value" style="color:var(--ink-emerald)">$1,210</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.stat-value.sm</span><span class="stat-value sm" style="color:var(--ink-violet)">$482</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.plan-value</span><span class="plan-value">12 <span class="unit">hrs</span></span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.hero-sub · 1.05rem</span><span class="hero-sub" style="margin:0;">Log what you earn and watch the limit shrink.</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.stat-label · .7rem</span><span class="stat-label" style="margin:0">Left this month</span></div>
+      <div class="cat-scale-row"><span class="cat-scale-tag">.stat-sub · .75rem</span><span class="stat-sub" style="margin:0">of $1,210 monthly limit</span></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip stop">Both faces arrive by <code>@import</code> from Google Fonts. The device rule bans web fonts outright — the scale survives, the files do not. Nearest local pair: system sans + <code>ui-monospace</code>.</span></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="cat-item" id="c04">
+    <div class="cat-head"><div><span class="cat-num">04</span><h2>Top bar</h2></div><div class="cat-selectors">.topbar · .brand · .brand-icon · .pill</div></div>
+    <p class="cat-why">Brand left, one pill right. <b>The pill is the interesting part:</b> it spends the most valuable strip on the screen saying where the data lives, not on navigation. For a reader deciding whether to type their income into something, that is the right thing to lead with.</p>
+    <div class="cat-stage">
+      <header class="topbar" style="padding:0;">
+        <div class="brand"><div class="brand-icon">💰</div><span>SSDI Tracker</span></div>
+        <div class="topbar-right"><span class="pill">🔒 Local only · nothing leaves this device</span></div>
+      </header>
+    </div>
+    <div class="cat-flags"><span class="cat-chip warn"><code>.brand-icon</code> carries a 40px violet glow shadow. Flatten to a solid fill.</span><span class="cat-chip warn">Emoji as the mark rasterises differently on every Android build.</span></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="cat-item" id="c05">
+    <div class="cat-head"><div><span class="cat-num">05</span><h2>Hero</h2></div><div class="cat-selectors">.hero · .hero-badge · .gradient-text · .hero-sub</div></div>
+    <p class="cat-why">A badge, a two-line 900-weight headline with the number set in the brand gradient, one sentence under it. <b>Putting the actual dollar figure in the headline</b> is the move worth stealing — the page opens by telling you your ceiling instead of asking you for it.</p>
+    <div class="cat-stage">
+      <section class="hero">
+        <div class="hero-badge">✦ SSDI / SSI Income Tool</div>
+        <h1 style="font-size:clamp(1.9rem,4.5vw,2.9rem)">Stay under your<br><span class="gradient-text">$1,210 monthly ceiling</span></h1>
+        <p class="hero-sub">Log what you earn, watch your limit shrink in real time, and plan exactly how many hours you can safely work — without risking your benefits.</p>
+      </section>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Gradient text is <code>background-clip</code>, widely supported.</span><span class="cat-chip warn">"Ceiling", "in real time" and "risking your benefits" all fail the plain-words rule in <code>DESIGN-SYSTEM.md</code>. The shape is right; the sentence needs rewriting.</span></div>
+  </section>
+
+  <!-- 06 -->
+  <section class="cat-item" id="c06">
+    <div class="cat-head"><div><span class="cat-num">06</span><h2>Glass card</h2></div><div class="cat-selectors">.glass · .glass-header · .glass-body · .glass-full</div></div>
+    <p class="cat-why">The one container the whole layout is built from: translucent fill, 20px backdrop blur, hairline border, 24px radius. Three padding presets — <b>header + body</b> when there is a title row, <b>full</b> when the card is one block.</p>
+    <div class="cat-stage">
+      <div class="grid-2">
+        <div class="glass">
+          <div class="glass-header"><div><div class="stat-label" style="margin-bottom:4px;">Header + body</div><div class="section-sub" style="margin-bottom:0;">A title row, then content</div></div><button class="btn btn-ghost" style="font-size:.75rem;padding:5px 12px;">Action</button></div>
+          <div class="glass-body"><p class="hero-sub" style="font-size:.85rem;margin:0;text-align:left;">.glass-header is 20px 24px 0 — it deliberately has no bottom padding so the body butts against it.</p></div>
+        </div>
+        <div class="glass"><div class="glass-full"><div class="stat-label">Full</div><p class="hero-sub" style="font-size:.85rem;margin:0;text-align:left;">One block, 24px all round.</p></div></div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip warn"><code>backdrop-filter: blur(20px)</code> is the component. On an old WebView it silently drops and you get a flat 75%-opaque panel — which, over the orbs, is muddy. Rebuild as an opaque fill, one hairline border, no blur.</span><span class="cat-chip warn"><code>--shadow-card</code> is a 32px blur. Banned; use the border alone.</span></div>
+  </section>
+
+  <!-- 07 -->
+  <section class="cat-item" id="c07">
+    <div class="cat-head"><div><span class="cat-num">07</span><h2>Stat card</h2></div><div class="cat-selectors">.stat-card.violet|cyan|emerald|amber|red · .stat-label · .stat-value · .stat-sub</div></div>
+    <p class="cat-why">Label above, big mono number, one line of context below, and a <b>quarter-circle wash of the accent bled into the top-right corner at 8% opacity</b> — the cheapest colour-coding in the kit. Three sizes of the same idea sit next to each other without competing.</p>
+    <div class="cat-stage">
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div class="glass stat-card emerald"><div class="glass-full" style="text-align:center;"><div class="stat-label">Left this month</div><div class="stat-value" style="color:var(--ink-emerald);">$1,210</div><div class="stat-sub" style="margin-top:6px;">of $1,210 monthly limit</div></div></div>
+        <div class="glass stat-card red"><div class="glass-full" style="text-align:center;"><div class="stat-label">Left this month</div><div class="stat-value" style="color:var(--ink-red);">−$240</div><div class="stat-sub" style="margin-top:6px;">over by $240 · same card, one class</div></div></div>
+      </div>
+      <div class="grid-3">
+        <div class="glass stat-card violet"><div class="glass-full" style="text-align:center;"><div class="stat-label">Counted in Sep</div><div class="stat-value sm" style="color:var(--ink-violet);">$482</div><div class="stat-sub">this month so far</div></div></div>
+        <div class="glass stat-card amber"><div class="glass-full" style="text-align:center;"><div class="stat-label">Of your limit</div><div class="stat-value sm" style="color:var(--ink-amber);">40%</div><div class="stat-sub">monthly usage</div></div></div>
+        <div class="glass stat-card cyan"><div class="glass-full" style="text-align:center;"><div class="stat-label">Months over</div><div class="stat-value sm" style="color:var(--ink-cyan);">0 / 12</div><div class="stat-sub">this year</div></div></div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">The corner wash is a plain <code>::after</code> with one border-radius. Ports as-is.</span><span class="cat-chip warn">Colour is set twice — a class on the card and an inline <code>style</code> on the value. One of the two should win.</span></div>
+  </section>
+
+  <!-- 08 -->
+  <section class="cat-item" id="c08">
+    <div class="cat-head"><div><span class="cat-num">08</span><h2>Progress ring</h2></div><div class="cat-selectors">.ring-wrapper · .ring-bg · .ring-fg · .ring-center · .ring-info</div></div>
+    <p class="cat-why">110px SVG circle, 5px stroke on the brand gradient, percentage stacked in the middle, and — the part that matters — <b>a verdict in words beside it</b>. The ring alone is decoration; "All clear" next to it is the answer. Animated by <code>stroke-dashoffset</code> over 0.7s.</p>
+    <div class="cat-stage">
+      <div class="grid-2">
+        <div class="glass"><div class="glass-body"><div class="progress-ring-container">
+          <div class="ring-wrapper"><svg width="110" height="110" viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48"/><circle class="ring-fg" cx="55" cy="55" r="48" stroke-dasharray="301.59" stroke-dashoffset="181" transform="rotate(-90 55 55)"/></svg><div class="ring-center"><div class="ring-percent">40%</div><div class="ring-label">used</div></div></div>
+          <div class="ring-info"><h3 style="color:var(--ink-emerald);">All clear</h3><p>$482 of $1,210 counted this month</p></div>
+        </div></div></div>
+        <div class="glass"><div class="glass-body"><div class="progress-ring-container">
+          <div class="ring-wrapper"><svg width="110" height="110" viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48"/><circle class="ring-fg" cx="55" cy="55" r="48" stroke-dasharray="301.59" stroke-dashoffset="27" transform="rotate(-90 55 55)"/></svg><div class="ring-center"><div class="ring-percent" style="color:var(--ink-amber)">91%</div><div class="ring-label">used</div></div></div>
+          <div class="ring-info"><h3 style="color:var(--ink-amber);">Getting close</h3><p>$1,101 of $1,210 counted this month</p></div>
+        </div></div></div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">SVG stroke animation is cheap and universal.</span><span class="cat-chip warn"><code>.ring-fg</code> adds a 12px <code>drop-shadow</code> filter. Drop it — the stroke reads fine flat.</span><span class="cat-chip ok">The verdict-beside-the-dial pattern is the trait to carry forward, ring or no ring.</span></div>
+  </section>
+
+  <!-- 09 -->
+  <section class="cat-item" id="c09">
+    <div class="cat-head"><div><span class="cat-num">09</span><h2>Month grid</h2></div><div class="cat-selectors">.months-grid · .month-btn · .month-amount.safe|warning|over|empty</div></div>
+    <p class="cat-why">Six across, dropping to three then two. Each cell is name, badge, amount — and <b>the amount's colour is the whole verdict</b>, so twelve months of status read in one pass with no legend. Hover lifts 2px and floods the gradient in at 4%.</p>
+    <div class="cat-stage tight">
+      <div class="months-grid">
+        <button class="month-btn"><div class="month-name">Jan</div><div class="month-badge">logged</div><div class="month-amount safe">$820</div></button>
+        <button class="month-btn"><div class="month-name">Feb</div><div class="month-badge">logged</div><div class="month-amount safe">$640</div></button>
+        <button class="month-btn"><div class="month-name">Mar</div><div class="month-badge">close</div><div class="month-amount warning">$1,150</div></button>
+        <button class="month-btn"><div class="month-name">Apr</div><div class="month-badge">over</div><div class="month-amount over">$1,480</div></button>
+        <button class="month-btn active"><div class="month-name">May</div><div class="month-badge">this month</div><div class="month-amount safe">$482</div></button>
+        <button class="month-btn"><div class="month-name">Jun</div><div class="month-badge">—</div><div class="month-amount empty">$0</div></button>
+      </div>
+      <p class="cat-note"><b>Read the states left to right:</b> safe, safe, close, over, current (bordered violet), empty. Hover any cell.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat fills and a 1px border. Ports cleanly.</span><span class="cat-chip warn">Hover shadow is a 20px blur — drop it, keep the 2px lift.</span><span class="cat-chip warn">A twelve-cell grid is exactly what <code>focusMode</code> exists to remove. Beautiful, and against the house rule unless the reader asks for the year.</span></div>
+  </section>
+
+  <!-- 10 -->
+  <section class="cat-item" id="c10">
+    <div class="cat-head"><div><span class="cat-num">10</span><h2>Section header</h2></div><div class="cat-selectors">.stat-label · .section-sub</div></div>
+    <p class="cat-why">Uppercase micro-label, then <b>a subtitle written as a question in plain language</b>. "How many hours could I work this month?" is doing more work than the title above it, and it is the pattern that makes the page feel like it is talking to you.</p>
+    <div class="cat-stage">
+      <div class="glass"><div style="padding:20px 24px 4px;">
+        <div class="stat-label" style="margin-bottom:2px;">Plan my hours</div>
+        <div class="section-sub" style="margin-bottom:0;">How many hours could I work this month?</div>
+      </div><div class="glass-body"><p class="hero-sub" style="font-size:.85rem;margin:0;text-align:left;">Content sits here.</p></div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Type only.</span><span class="cat-chip ok">The question-as-subtitle is the trait. Carry it everywhere.</span></div>
+  </section>
+
+  <!-- 11 -->
+  <section class="cat-item" id="c11">
+    <div class="cat-head"><div><span class="cat-num">11</span><h2>Money field</h2></div><div class="cat-selectors">.field · .input-wrap · .input-prefix</div></div>
+    <p class="cat-why">Uppercase label, absolutely-positioned <code>$</code>, mono input, and a focus ring that is a 3px violet halo rather than a colour change. <b>Everything the reader types is money or hours, so every field is mono</b> — figures line up down the column.</p>
+    <div class="cat-stage">
+      <div class="glass"><div class="glass-body" style="max-width:420px;">
+        <div class="field"><label>Your hourly pay rate</label><div class="input-wrap"><span class="input-prefix">$</span><input type="number" placeholder="25" value="21.50"></div></div>
+        <div class="field"><label>Monthly limit</label><div class="input-wrap"><span class="input-prefix">$</span><input type="number" placeholder="1,210"></div></div>
+        <p class="cat-note" style="margin-top:14px;">Click into either — the focus state is the point.</p>
+      </div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Focus ring is a hard <code>box-shadow</code> spread, not a blur. Fine on old WebViews.</span><span class="cat-chip warn">Labels are uppercase at 0.72rem — small for this reader. Size up, drop the caps.</span></div>
+  </section>
+
+  <!-- 12 -->
+  <section class="cat-item" id="c12">
+    <div class="cat-head"><div><span class="cat-num">12</span><h2>Answer rows</h2></div><div class="cat-selectors">.plan-row · .plan-label · .plan-value · .plan-cta .dot</div></div>
+    <p class="cat-why">The output half of the calculator: label left, big emerald mono number right, unit demoted to a small grey suffix. <b>Answers in hours, which is the unit the decision is actually made in.</b> Underneath, a pulsing dot and one caveat sentence.</p>
+    <div class="cat-stage">
+      <div class="glass"><div class="glass-body" style="max-width:460px;">
+        <div class="plan-row"><span class="plan-label">Per week</span><span class="plan-value">13 <span class="unit">hrs</span></span></div>
+        <div class="plan-row"><span class="plan-label">Per month</span><span class="plan-value">56 <span class="unit">hrs</span></span></div>
+        <div class="plan-cta"><span class="dot"></span><span>Ceiling before your limit. Watch months with an extra paycheck.</span></div>
+      </div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Flat rows, one hairline. Ports as-is.</span><span class="cat-chip warn">The dot has an 8px glow and a 2s pulse. Keep the dot, drop the glow.</span><span class="cat-chip ok">This is the closest thing in either file to the product's own "answer in hours" rule.</span></div>
+  </section>
+
+  <!-- 13 -->
+  <section class="cat-item" id="c13">
+    <div class="cat-head"><div><span class="cat-num">13</span><h2>Caution note</h2></div><div class="cat-selectors">.note · .note-icon</div></div>
+    <p class="cat-why">Amber at 4% fill and 12% border — <b>loud enough to find, quiet enough to ignore</b>. The one place the layout admits uncertainty, and it does it without an alert box.</p>
+    <div class="cat-stage">
+      <div style="max-width:520px;"><div class="note" style="margin-top:0;"><span class="note-icon">⚠</span><span>Thresholds are planning estimates based on 2026 SGA rules. Confirm current figures with SSA before acting on any one.</span></div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Two rgba values and a radius.</span><span class="cat-chip warn">"Thresholds", "SGA" and "acting on any one" are all on the banned list. Same box, plainer sentence.</span></div>
+  </section>
+
+  <!-- 14 -->
+  <section class="cat-item" id="c14">
+    <div class="cat-head"><div><span class="cat-num">14</span><h2>Empty state</h2></div><div class="cat-selectors">.empty-state · .empty-icon · .empty-text</div></div>
+    <p class="cat-why">Centred, 32px of air, and a sentence that <b>reframes emptiness as good news</b> — "every month is wide open" — then names the next tap. No illustration, no button.</p>
+    <div class="cat-stage">
+      <div class="glass"><div class="empty-state"><span class="empty-icon">📝</span><p class="empty-text">Nothing logged yet — every month is wide open. Tap any month above to record your pay.</p></div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Type and spacing only.</span><span class="cat-chip warn">Emoji icon. Swap for an inline SVG.</span></div>
+  </section>
+
+  <!-- 15 -->
+  <section class="cat-item" id="c15">
+    <div class="cat-head"><div><span class="cat-num">15</span><h2>Log list</h2></div><div class="cat-selectors">.log-list · .log-entry · .log-date · .log-amount</div></div>
+    <p class="cat-why">Date left, mono amount right, hairline between, capped at 220px and scrolled. <b>The lightest possible record view</b> — no table, no columns, no per-row controls.</p>
+    <div class="cat-stage">
+      <div class="glass">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;"><div class="stat-label" style="margin-bottom:10px;">Logged entries</div><button class="btn btn-ghost" style="font-size:.75rem;padding:5px 12px;">Clear all</button></div>
+        <div class="glass-body" style="padding-top:8px;"><div class="log-list">
+          <div class="log-entry"><span class="log-date">Sep 12</span><span class="log-amount safe">$240.00</span></div>
+          <div class="log-entry"><span class="log-date">Sep 5</span><span class="log-amount safe">$242.00</span></div>
+          <div class="log-entry"><span class="log-date">Aug 29</span><span class="log-amount over">$1,480.00</span></div>
+          <div class="log-entry"><span class="log-date">Aug 22</span><span class="log-amount safe">$310.00</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is.</span><span class="cat-chip warn">No edit or delete per row — the trade for the lightness. Compare with the payguard ledger, which pays markup for exactly that.</span></div>
+  </section>
+
+  <!-- 16 -->
+  <section class="cat-item" id="c16">
+    <div class="cat-head"><div><span class="cat-num">16</span><h2>Buttons</h2></div><div class="cat-selectors">.btn · .btn-primary · .btn-ghost</div></div>
+    <p class="cat-why">Two only. Primary is the brand gradient with a lift on hover and a 2% squash on press; ghost is a hairline that fills faintly. <b>Two is the right number</b> — nothing on the page has to guess which is the real action.</p>
+    <div class="cat-stage">
+      <div class="cat-row">
+        <button class="btn btn-primary">Log it</button>
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-ghost" style="font-size:.75rem;padding:5px 12px;">Clear all</button>
+      </div>
+      <p class="cat-note">Press the primary — the <code>:active</code> scale is what makes it feel physical.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip warn">Primary carries a 20px violet blur that grows to 24px on hover. Replace with a 1px darker bottom edge.</span><span class="cat-chip ok">The lift-and-squash timing is the trait. Keep the curve, lose the shadow.</span><span class="cat-chip warn">Small variants are inline styles, not classes. Needs a <code>.btn-sm</code>.</span></div>
+  </section>
+
+  <!-- 17 -->
+  <section class="cat-item" id="c17">
+    <div class="cat-head"><div><span class="cat-num">17</span><h2>Modal</h2></div><div class="cat-selectors">.modal · .modal-sub · .modal-preview · .modal-actions</div></div>
+    <p class="cat-why">Title, one-line restatement, the field, then <b>the consequence of what you just typed, before you commit it</b> — "remaining after this entry" updating live. That preview block is the best single idea in this file. Enters on a spring curve.</p>
+    <div class="cat-stage">
+      <div style="display:flex;justify-content:center;"><div class="modal">
+        <h3>Log pay — <span>September</span></h3>
+        <div class="modal-sub">Record how much you earned in September</div>
+        <div class="field"><label>Amount earned</label><div class="input-wrap"><span class="input-prefix">$</span><input type="number" value="240.00"></div></div>
+        <div class="modal-preview"><div class="modal-preview-label">Remaining after this entry</div><div class="modal-preview-value" style="color:var(--ink-emerald);">$970.00</div></div>
+        <div class="modal-actions"><button class="btn btn-ghost">Cancel</button><button class="btn btn-primary">Log it</button></div>
+      </div></div>
+    </div>
+    <div class="cat-flags"><span class="cat-chip stop">Overlay and panel both blur the backdrop, and the panel has an 80px shadow. All three go.</span><span class="cat-chip ok"><b>The preview block is the keeper</b> — teaching by interaction, exactly as the product rule asks.</span></div>
+  </section>
+
+  <!-- 18 -->
+  <section class="cat-item" id="c18">
+    <div class="cat-head"><div><span class="cat-num">18</span><h2>Footer</h2></div><div class="cat-selectors">.footer · .footer-text</div></div>
+    <p class="cat-why">One hairline, one paragraph. <b>It repeats the privacy promise from the top bar in full words</b> — first thing seen and last thing seen say the same thing.</p>
+    <div class="cat-stage">
+      <footer class="footer" style="padding-top:0;border-top:none;"><p class="footer-text">Everything you enter stays on this device. No servers, no tracking, no accounts, no uploads.<br>Built with care · <a href="#">Edit with Lovable</a></p></footer>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Ports as-is.</span><span class="cat-chip stop">The Lovable attribution link goes.</span></div>
+  </section>
+
+  <!-- 19 -->
+  <section class="cat-item" id="c19">
+    <div class="cat-head"><div><span class="cat-num">19</span><h2>Entrance</h2></div><div class="cat-selectors">.reveal · .delay-1 … .delay-6</div></div>
+    <p class="cat-why">16px rise and a fade, staggered in 50ms steps down the page. Six delay classes, no JS, no observer. <b>It is why the page feels assembled rather than dumped</b> — and every block in this catalog is using it.</p>
+    <div class="cat-stage">
+      <p class="cat-why" style="margin:0;">Reload the page and watch the top three sections arrive in order. Cost: two rules and six one-line classes.</p>
+    </div>
+    <div class="cat-flags"><span class="cat-chip ok">Transform and opacity only — the two properties that stay on the compositor.</span><span class="cat-chip warn">Fires on every element regardless of <code>prefers-reduced-motion</code>. Needs the guard.</span></div>
+  </section>
+
+</div>
+<script>
+  // Light is a palette, not a second stylesheet: one attribute on <html>,
+  // and every rule below reads from the tokens it swaps.
+  var btn = document.getElementById('themeToggle');
+  var root = document.documentElement;
+  btn.addEventListener('click', function () {
+    var light = root.getAttribute('data-theme') === 'light';
+    root.setAttribute('data-theme', light ? 'dark' : 'light');
+    btn.textContent = light ? 'Light' : 'Dark';
+  });
+</script>
+</body>
+</html>

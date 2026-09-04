@@ -1,0 +1,648 @@
+/*
+ * Big Beautiful — the ninth layout.
+ *
+ * Built from a spec rather than refactored out of one of the eight, per
+ * CLAUDE.md § Crossbreeding, not transforming. The spec is the teardown of
+ * big-beautiful-design.lovable.app: every measurement here was read off that
+ * page's live DOM on 2026-09-03 rather than guessed, because twice in that
+ * session a guessed value (12px month cards, an invented editing panel) took
+ * one DOM read to correct.
+ *
+ * WHAT IT TAKES FROM THE REFERENCE
+ *   672px column, 24px gutter, 32px cards, 26px month cards
+ *   the 11px/1.54px caps label, the 56px mono figure at -1.12px
+ *   the 12px meter, and the edit row — see § the edit click style below
+ *
+ * WHAT IT TAKES FROM THE EIGHT
+ *   pocket      the headline-and-consequence shape: a number, then what it
+ *               means, and no chart between them
+ *   horizon     the forward view — months as stops, and its line budget
+ *   plan        the safety line drawn ON the scale rather than implied
+ *
+ * NO LITERAL VALUES. Every radius, control height and font size reads a
+ * token, so `npm run debt` passes on a file with no baseline and this layout
+ * cannot start by inventing a forty-ninth button. Local --bb-* vars exist
+ * only where a value is genuinely this layout's own (the meter's thickness,
+ * the column width) and each is derived from the scale.
+ *
+ * @override beautiful — the frosted header. backdrop-filter is a budget, not
+ * a capability (CLAUDE.md § The device is the floor): the flat 92% fill below
+ * is the floor and is complete on its own; the blur is added inside @supports
+ * for the phones that can afford it. Sergey asked for the frost explicitly.
+ */
+
+.bb {
+  --bb-col: 42rem;          /* 672px — the reference's own measure */
+  --bb-gutter: var(--t-space-6);
+  --bb-meter: 0.75rem;      /* 12px track */
+  --bb-caps-tracking: 0.14em;
+  --bb-mcard: 8.5rem;       /* 136px — the month card's floor */
+
+  min-height: 100%;
+  background: var(--t-bg);
+  color: var(--t-fg);
+  font-family: var(--t-font-sans);
+}
+
+.bb-page {
+  max-width: var(--bb-col);
+  margin: 0 auto;
+  padding: var(--t-space-6) var(--t-space-5) var(--t-space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--t-space-4);
+}
+
+/* ---- the caps label. One definition; six call sites used to spell it. ---- */
+.bb-caps {
+  margin: 0;
+  font-size: var(--t-text-xs);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: var(--bb-caps-tracking);
+  text-transform: uppercase;
+  color: var(--t-fg-dim);
+}
+
+.bb-num {
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sergey asked for "Sep / Oct / Nov / Dec" on the strip, which overrules the
+   no-abbreviations rule in DESIGN-SYSTEM 1.3 for the visible text. It does
+   not have to cost the reader who cannot see it: the card carries the full
+   month name here, so a screen reader says "November" where the eye reads
+   "Nov". Nothing in the app had a class for this. */
+.bb-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Header — full bleed, sticky, frosted                                */
+/* ------------------------------------------------------------------ */
+.bb-head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--t-bg);
+  border-bottom: 1px solid var(--t-border-soft);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bb-head {
+    /* Opaque enough that the blur is a texture, not a legibility risk. */
+    background: color-mix(in srgb, var(--t-bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+  }
+}
+.bb-head-in {
+  max-width: var(--bb-col);
+  margin: 0 auto;
+  padding: var(--t-space-4) var(--t-space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-3);
+}
+/* The mark is a circle. Sergey read the reference's 26px-on-40px as one and
+   asked for it outright; a rounded square in its place reads as a tile. */
+.bb-mark {
+  flex: 0 0 auto;
+  inline-size: var(--t-control-h);
+  block-size: var(--t-control-h);
+  border-radius: var(--t-radius-full);
+  background: var(--t-primary);
+  color: var(--t-primary-fg);
+  display: grid;
+  place-items: center;
+}
+.bb-head-t { flex: 1; min-width: 0; }
+/* Both lines truncate rather than wrap: the header is one row on the
+   reference and a title block that grows pushes the year stepper off. */
+.bb-head-t h1, .bb-head-t p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bb-head-t h1 {
+  margin: 0;
+  font-size: var(--t-text-lg);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.bb-head-t p {
+  margin: 0;
+  font-size: var(--t-text-sm);
+  color: var(--t-fg-dim);
+}
+.bb-year {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-1);
+  padding: var(--t-space-1);
+  border-radius: var(--t-radius-full);
+  background: var(--t-surface-3);
+}
+.bb-year-n {
+  min-width: 2.5rem;
+  text-align: center;
+  font-size: var(--t-text-sm);
+  font-weight: var(--t-weight-semibold);
+}
+
+/* On a phone the mark, the title, the stepper and settings do not fit on one
+   row — the title lost, ellipsising to nothing. The stepper drops to its own
+   row instead: the title is what the reader needs on arrival and the year is
+   what they change least. This block sits AFTER the rules it overrides; at
+   equal specificity source order decides, and putting it above .bb-year is
+   how the first attempt silently did nothing. */
+@media (max-width: 26rem) {
+  .bb-head-in { flex-wrap: wrap; padding-inline: var(--t-space-4); gap: var(--t-space-2); }
+  .bb-mark { order: 0; }
+  .bb-head-t { order: 1; }
+  .bb-head-set { order: 2; }
+  .bb-year { order: 3; flex: 1 0 100%; justify-content: center; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Cards                                                               */
+/* ------------------------------------------------------------------ */
+.bb-card {
+  background: var(--t-surface);
+  border: 1px solid var(--t-border-soft);
+  border-radius: var(--t-radius-xl);
+  overflow: hidden;
+}
+.bb-block { padding: var(--bb-gutter); }
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+.bb-hero { padding: var(--t-space-6) var(--bb-gutter) 0; }
+.bb-fig {
+  margin: var(--t-space-3) 0 0;
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-4xl);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--t-safe-text);
+}
+.bb-fig[data-stage='careful'] { color: var(--t-warn-text); }
+.bb-fig[data-stage='over'] { color: var(--t-over-text); }
+.bb-say {
+  margin: var(--t-space-3) 0 0;
+  font-size: var(--t-text-lg);
+  font-weight: var(--t-weight-medium);
+  line-height: 1.35;
+  color: var(--t-fg-muted);
+}
+.bb-sub {
+  margin: var(--t-space-3) 0 0;
+  font-size: var(--t-text-sm);
+  color: var(--t-fg-dim);
+}
+.bb-sub b { color: var(--t-fg); font-weight: var(--t-weight-semibold); }
+
+/* The meter. Discrete marks on a continuous track: the fill answers "how
+   much", the notch answers "how much is wise", and the notch is the whole
+   reason this app exists — see SAFE_MONTHLY. The pale run past the fill is
+   the estimate band, drawn rather than hidden, because a hidden margin just
+   deletes hours somebody was allowed to work. */
+.bb-meter {
+  position: relative;
+  display: flex;
+  margin: var(--t-space-6) 0 0;
+  block-size: var(--bb-meter);
+  border-radius: var(--t-radius-full);
+  background: var(--t-surface-3);
+  overflow: hidden;
+}
+.bb-meter i { display: block; block-size: 100%; background: var(--t-safe); }
+.bb-meter i[data-stage='careful'] { background: var(--t-warn); }
+.bb-meter i[data-stage='over'] { background: var(--t-over); }
+.bb-meter i.bb-band { background: var(--t-accent-fg); opacity: 0.35; }
+.bb-meter u {
+  position: absolute;
+  top: 0;
+  inline-size: 2px;
+  block-size: 100%;
+  background: var(--t-surface);
+}
+.bb-aim {
+  position: relative;
+  block-size: var(--t-space-4);
+  margin: var(--t-space-2) 0 0;
+}
+.bb-aim b {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: var(--t-text-xs);
+  font-weight: var(--t-weight-semibold);
+  color: var(--t-fg-dim);
+}
+
+/* ---- the four tiles. A hairline grid from a gap over a border fill. ---- */
+.bb-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: var(--t-space-6) 0 0;
+  background: var(--t-border);
+}
+.bb-tiles > div {
+  background: var(--t-surface);
+  padding: var(--t-space-5) var(--bb-gutter);
+}
+.bb-tiles dl { margin: 0; }
+.bb-tiles dd {
+  margin: var(--t-space-2) 0 0;
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-xl);
+  font-weight: var(--t-weight-semibold);
+}
+
+/* ------------------------------------------------------------------ */
+/* Forward strip                                                       */
+/* ------------------------------------------------------------------ */
+.bb-lead {
+  margin: var(--t-space-2) 0 0;
+  font-size: var(--t-text-base);
+  font-weight: var(--t-weight-medium);
+  line-height: 1.35;
+}
+.bb-strip {
+  display: flex;
+  gap: var(--t-space-3);
+  margin: var(--t-space-5) calc(var(--bb-gutter) * -1) 0;
+  padding: 0 var(--bb-gutter) var(--t-space-1);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.bb-strip::-webkit-scrollbar { display: none; }
+/* Measured off big-beautiful-design.lovable.app — 136×105 card, 16px pad,
+   ~26px radius, NOW pill primary green on pale accent wash. */
+.bb-mcard {
+  flex: 0 0 auto;
+  inline-size: var(--bb-mcard);
+  min-block-size: 6.5625rem; /* 105px */
+  scroll-snap-align: start;
+  padding: var(--t-space-4); /* 16px */
+  border: 1px solid color-mix(in srgb, var(--t-primary) 35%, transparent);
+  border-radius: 1.625rem; /* 26px */
+  background: var(--t-surface-2);
+}
+.bb-mcard[data-now='true'] {
+  background: var(--t-accent); /* calm ≈ #DBF2DF */
+  border-color: color-mix(in srgb, var(--t-primary) 35%, transparent);
+}
+.bb-mcard[data-heavy='true'] { border-color: var(--t-warn); }
+.bb-mcard-r {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem; /* 8px — badge beside SEP */
+}
+.bb-mn {
+  font-size: 0.75rem; /* 12px */
+  font-weight: var(--t-weight-bold);
+  letter-spacing: 0.075em; /* ~1.2px at 12px */
+  text-transform: uppercase;
+  color: var(--t-fg-dim);
+}
+.bb-mcard[data-now='true'] .bb-mn { color: var(--t-fg-dim); /* reference keeps SEP muted */ }
+.bb-mv {
+  margin: 0.5rem 0 0; /* 8px */
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.125rem; /* 18px */
+  font-weight: var(--t-weight-bold);
+  line-height: 1.55; /* ~28px */
+  color: var(--t-fg);
+}
+.bb-mcard[data-over='true'] .bb-mv { color: var(--t-over-text); }
+.bb-mu {
+  margin: 0;
+  font-size: 0.75rem; /* 12px */
+  font-weight: var(--t-weight-medium);
+  line-height: 1.35;
+  color: var(--t-fg-dim);
+}
+
+/* NOW pill — measured: ~42×19, 2×8 pad, 10px bold, primary green / near-white. */
+.bb-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--t-radius-full);
+  background: var(--t-primary); /* calm ≈ #00643A */
+  color: #f8fef7;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 700;
+  letter-spacing: 0.05em; /* 0.5px */
+  text-transform: uppercase;
+  line-height: 1.5; /* 15px */
+}
+.bb-badge[data-kind='heavy'] { background: var(--t-warn); color: var(--t-warn-fg); }
+
+/* ------------------------------------------------------------------ */
+/* Month rows                                                          */
+/* ------------------------------------------------------------------ */
+.bb-rows { list-style: none; margin: var(--t-space-4) 0 0; padding: 0; }
+.bb-rows > li + li { border-top: 1px solid var(--t-border-soft); }
+
+/* Full-bleed row: hover paints the whole <li>, not a child. The main button
+   and the action icons sit inside with their own padding so the gutter stays
+   content, not a white strip beside the highlight.
+   @override beautiful — a list row is full-bleed and left-aligned. */
+.bb-row {
+  display: flex;
+  align-items: stretch;
+  min-block-size: var(--t-control-h-lg);
+}
+.bb-row:hover,
+.bb-row:focus-within {
+  background: var(--t-surface-2);
+}
+.bb-row-main.ui-btn {
+  flex: 1;
+  min-width: 0;
+  inline-size: auto;
+  block-size: auto;
+  min-block-size: var(--t-control-h-lg);
+  justify-content: flex-start;
+  gap: var(--t-space-4);
+  padding-block: var(--t-space-4);
+  padding-inline-start: var(--bb-gutter);
+  padding-inline-end: var(--t-space-2);
+  border-radius: 0;
+  text-align: left;
+  font-weight: var(--t-weight-normal);
+}
+/* The row already paints hover — the ghost button must not paint a second
+   inset highlight that stops short of the icons. */
+.bb-row-main.ui-btn:hover:not(:disabled),
+.bb-row-main.ui-btn:focus-visible {
+  background: transparent;
+  color: inherit;
+}
+.bb-row-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-1);
+  padding-inline-end: var(--bb-gutter);
+  flex: 0 0 auto;
+}
+.bb-dot {
+  flex: 0 0 auto;
+  inline-size: var(--t-space-3);
+  block-size: var(--t-space-3);
+  border-radius: var(--t-radius-full);
+  background: var(--t-border-strong);
+}
+.bb-dot[data-stage='safe'] { background: var(--t-safe); }
+.bb-dot[data-stage='careful'] { background: var(--t-warn); }
+.bb-dot[data-stage='over'] { background: var(--t-over); }
+.bb-nm {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-text-base);
+  font-weight: var(--t-weight-medium);
+  color: var(--t-fg);
+}
+.bb-now {
+  margin-left: var(--t-space-2);
+  font-size: var(--t-text-xs);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t-safe-text);
+}
+.bb-val { text-align: right; }
+.bb-vl {
+  display: block;
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-lg);
+  font-weight: var(--t-weight-semibold);
+  color: var(--t-fg);
+}
+.bb-vl[data-none='true'] { color: var(--t-fg-dim); }
+.bb-vl[data-over='true'] { color: var(--t-over-text); }
+/* The only second line on a row, and only when a month went over. */
+.bb-ov {
+  display: block;
+  font-family: var(--t-font-mono);
+  font-size: var(--t-text-xs);
+  color: var(--t-fg-dim);
+}
+.bb-pencil.ui-btn-icon,
+.bb-clear.ui-btn-icon {
+  flex: 0 0 auto;
+  color: var(--t-fg-dim);
+  background: transparent;
+  border-radius: var(--t-radius-full);
+}
+.bb-pencil.ui-btn-icon:hover:not(:disabled),
+.bb-clear.ui-btn-icon:hover:not(:disabled) {
+  background: transparent;
+  color: var(--t-fg);
+}
+
+/* ---- the edit click style ----------------------------------------
+ * Measured off the reference. The row does not open a panel; the row
+ * BECOMES the field. The month name drops to the caps label, a currency
+ * mark and one input appear under it, and a round check sits at the end.
+ * Tapping away is the cancel, so there is no second button. */
+.bb-edit {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-3);
+  padding: var(--t-space-4) var(--bb-gutter);
+  background: var(--t-surface-2);
+}
+.bb-edit > label { flex: 1; min-width: 0; display: block; }
+.bb-field {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-2);
+  margin: var(--t-space-1) 0 0;
+}
+.bb-cur {
+  font-family: var(--t-font-mono);
+  font-size: var(--t-text-xl);
+  font-weight: var(--t-weight-semibold);
+  color: var(--t-fg-dim);
+}
+.bb-edit input.ui-field-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-xl);
+  font-weight: var(--t-weight-semibold);
+  border-radius: var(--t-radius-full);
+  border-color: var(--t-safe);
+}
+.bb-save.ui-btn-icon {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  inline-size: var(--t-control-h);
+  block-size: var(--t-control-h);
+  padding: 0;
+  border-radius: var(--t-radius-full);
+  background: var(--t-safe);
+  /* Reference check is white on green; --t-safe-fg is near-black on several
+     palettes, so do not use it here. */
+  color: #fff;
+}
+.bb-save.ui-btn-icon:hover:not(:disabled) {
+  background: var(--t-safe);
+  color: #fff;
+  filter: brightness(0.95);
+}
+
+.bb-more.ui-btn {
+  inline-size: 100%;
+  border-radius: 0;
+  border-top: 1px solid var(--t-border-soft);
+  font-size: var(--t-text-sm);
+}
+
+/* ------------------------------------------------------------------ */
+/* Hours card — the one inverted surface                               */
+/* ------------------------------------------------------------------ */
+.bb-hours {
+  padding: var(--t-space-6) var(--bb-gutter);
+  border-radius: var(--t-radius-xl);
+  background: var(--t-head);
+  color: var(--t-head-fg);
+}
+.bb-hours-k { display: flex; align-items: center; gap: var(--t-space-2); }
+.bb-hours-k p {
+  margin: 0;
+  font-size: var(--t-text-xs);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: var(--bb-caps-tracking);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.bb-hours h2 {
+  margin: var(--t-space-3) 0 0;
+  font-size: var(--t-text-xl);
+  font-weight: var(--t-weight-semibold);
+  line-height: 1.35;
+}
+.bb-hours label { display: block; margin: var(--t-space-5) 0 0; }
+.bb-hours-lab {
+  font-size: var(--t-text-xs);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+/* On the inverted hours card, nested surfaces are a light wash with a faint
+   border — translucent so the green shows through, not a white inset and not
+   a dark overlay. */
+.bb-rate {
+  display: flex;
+  align-items: center;
+  gap: var(--t-space-3);
+  margin: var(--t-space-2) 0 0;
+  padding: 0 var(--t-control-px);
+  border-radius: var(--t-radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: inherit;
+}
+.bb-rate .bb-cur { color: inherit; opacity: 0.85; }
+.bb-rate input.ui-field-input {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-xl);
+  font-weight: var(--t-weight-semibold);
+}
+.bb-rate input.ui-field-input::placeholder { color: inherit; opacity: 0.45; }
+.bb-rate-post {
+  flex: 0 0 auto;
+  font-size: var(--t-text-sm);
+  font-weight: var(--t-weight-medium);
+  opacity: 0.85;
+}
+/* Two equal tiles — per week and per month — as the reference draws them. */
+.bb-answer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--t-space-3);
+  margin: var(--t-space-5) 0 0;
+}
+.bb-answer-tile {
+  margin: 0;
+  padding: var(--t-space-4) var(--t-space-5);
+  border-radius: var(--t-radius-md);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: inherit;
+}
+.bb-answer-tile > p:first-child {
+  margin: 0;
+  font-size: var(--t-text-xs);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.bb-answer-big {
+  margin: var(--t-space-2) 0 0;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-2xl);
+  font-weight: var(--t-weight-semibold);
+  letter-spacing: -0.02em;
+}
+.bb-hours-foot {
+  margin: var(--t-space-4) 0 0;
+  font-size: var(--t-text-sm);
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------------ */
+/* Limit                                                               */
+/* ------------------------------------------------------------------ */
+.bb-limit { display: flex; align-items: center; gap: var(--t-space-3); margin: var(--t-space-3) 0 0; }
+.bb-limit .bb-cur { font-size: var(--t-text-2xl); }
+.bb-limit input.ui-field-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--t-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-text-2xl);
+  font-weight: var(--t-weight-semibold);
+  border-radius: var(--t-radius-xl);
+  background: var(--t-surface-2);
+}
+.bb-source {
+  margin: var(--t-space-2) 0 0;
+  font-size: var(--t-text-sm);
+  font-weight: var(--t-weight-medium);
+  color: var(--t-accent-fg);
+}
+.bb-fine {
+  margin: var(--t-space-3) 0 0;
+  font-size: var(--t-text-sm);
+  line-height: 1.55;
+  color: var(--t-fg-dim);
+}

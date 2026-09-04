@@ -73,6 +73,15 @@
   --chrome-info-border: var(--t-info);
   --chrome-info-fg: var(--t-info-text);
 
+  /* The precision line's four inks — see section 5. It is the one shared
+     component that lands on a surface a layout chose rather than on the
+     app's own paper, so the ink is a contract a surface can answer in one
+     block rather than a colour this file picks for everybody. */
+  --precision-ink: var(--chrome-muted);
+  --precision-mark: var(--chrome-fg);
+  --precision-mark-exact: var(--chrome-safe);
+  --precision-hover: var(--chrome-hover);
+
   /* Shape defaults — index.css's `icon-btn` is a 2.75rem circle. */
   --chrome-font: var(--font-sans);
   --chrome-radius: 0.75rem;
@@ -523,9 +532,34 @@ html.pg-calc20 {
  * defined on that layout, so the line was painted in a slate that belongs to
  * no theme in the app. That is the drift this file exists to stop.
  *
- * Structure and colour are here, once. A layout may still set its own
- * register — the dense monospace ones say ESTIMATED in small caps — and that
- * is two declarations, not twelve.
+ * Structure is here, once. Colour is a CONTRACT, because this is the one
+ * shared component that lands on a surface the layout chose — calc20's navy
+ * header, payguard's hero card, the ledger's paper — rather than on the app's
+ * own background. Four names, answered in :root from the palette and
+ * re-answerable by any surface in one block:
+ *
+ *   --precision-ink         the sentence
+ *   --precision-mark        the grade word and the pips
+ *   --precision-mark-exact  the same, once every figure is real
+ *   --precision-hover       the wash, where the line is pressable
+ *
+ * Review notes el-19yd1tw (calc20) and el-1oyil8c (ledger), the same
+ * sentence twice: "style it like the layout", "it should happen on all theme
+ * where this is used". The first pass answered it on calc20 with five
+ * selectors, which is a patch for one screen; a surface answers four
+ * variables now, and most surfaces need to answer none.
+ *
+ * The mark is the surface's own ink, not the warn colour, and that is the
+ * substance of the fix. Measured on the ledger, --chrome-warn-fg was the only
+ * hue on the whole card that nothing else used — 7 elements, all of them this
+ * line — and on payguard it was the only warm colour on a blue-and-green
+ * screen. The gauge below already made this call and wrote down why: at any
+ * size, a warn-coloured reading says something has gone wrong, and nothing
+ * has. We have not been told something yet. That is an offer, not a fault.
+ * The grade is picked out by weight and by the pips beside it instead.
+ *
+ * A layout may still set its own register — the dense monospace ones say
+ * GUESSED in small caps — and that is two declarations, not twelve.
  */
 .precision-line {
   display: flex;
@@ -539,7 +573,7 @@ html.pg-calc20 {
   border-radius: var(--chrome-radius-sm);
   background: transparent;
   padding: 0.25rem 0;
-  color: var(--chrome-muted);
+  color: var(--precision-ink);
   font-family: var(--chrome-font);
   font-size: 0.75rem;
   line-height: 1.45;
@@ -558,28 +592,30 @@ html.pg-calc20 {
 .precision-pip {
   width: 0.4rem;
   height: 0.4rem;
-  border: 1px solid currentColor;
+  border: 1px solid var(--precision-mark);
   border-radius: 999px;
   opacity: 0.35;
 }
 
 .precision-pip[data-on] {
-  background: currentColor;
+  background: var(--precision-mark);
   opacity: 1;
 }
 
 .precision-level {
   flex: none;
+  color: var(--precision-mark);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
-.precision-why { min-width: 0; }
+.precision-why { min-width: 0; display: inline-flex; align-items: center; gap: 0.35rem; min-width: 0; }
+.precision-sep { opacity: 0.45; flex: none; }
 
-/* Estimated is the one worth acting on, so it is the one that carries any
-   colour at all. The other two are statements of fact. */
-.precision-line[data-level='estimated'] { color: var(--chrome-warn-fg); }
-.precision-line[data-level='exact'] { color: var(--chrome-safe); }
+/* Only the earned state changes colour. Estimated and Scheduled are both
+   "we have not been told yet", and the difference between them is one more
+   filled pip — which is the scale doing its job. */
+.precision-line[data-level='exact'] { --precision-mark: var(--precision-mark-exact); }
 
 /* Pressable, where there is a source editor to open. */
 .precision-line[data-fix] {
@@ -589,7 +625,7 @@ html.pg-calc20 {
   transition: background-color 140ms, color 140ms;
 }
 
-.precision-line[data-fix]:hover { background: var(--chrome-hover); }
+.precision-line[data-fix]:hover { background: var(--precision-hover); }
 
 /* ------------------------------------------------------------------ */
 /* 5b. The precision gauge                                            */

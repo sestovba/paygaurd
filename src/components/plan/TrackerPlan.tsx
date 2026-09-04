@@ -15,7 +15,9 @@ import { useTracker } from '../../state/TrackerProvider';
 import { useTheme } from '../../theme';
 import { money } from '../../domain/format';
 import { SOURCE_SHORT } from '../../domain/copy';
-import { longMonthName, todayMonth } from '../../domain/months';
+import { longMonthName, todayMonth, yearOf } from '../../domain/months';
+import { extraPaycheckMonths } from '../../domain/paySchedule';
+import { precisionFor } from '../../domain/precision';
 import {
   estimatedGrossFromHours, grossFor, grossFromNet, hoursFor, isActive,
   mileageDeduction
@@ -30,6 +32,7 @@ import { SettingsPanel } from '../SettingsPanel';
 import { StreamSheet } from '../StreamSheet';
 import { ToastStack } from '../ToastStack';
 import { TwpWizard } from '../TwpWizard';
+import { PrecisionLine } from '../PrecisionLine';
 import '../../styles/plan.css';
 
 /** One tap of the hours stepper — about half a shift. */
@@ -306,6 +309,9 @@ function Answer({
     over, hours, rate, room, roomToLimit, threshold, safeTarget, counted, stage
   } = capacity;
 
+  const heavy = extraPaycheckMonths(data.streams, yearOf(month));
+  const isHeavy = heavy.has(month);
+
   const shownRoom = stage === 'safe' ? room : roomToLimit;
   const big = over > 0
     ? money(over)
@@ -318,8 +324,8 @@ function Answer({
   const lead = over > 0
     ? 'over your limit'
     : hours !== null
-      ? 'you can still work safely'
-      : 'you can still earn safely';
+      ? 'you can still work'
+      : 'you can still earn';
 
   // Missing fields as one-word chips. Each opens what fills it.
   const live = data.streams.filter((st) => st.lifecycle === 'active' && isActive(st, month));
@@ -350,6 +356,12 @@ function Answer({
           : money(counted)}
         {rate ? ` · ${rate.basis === 'observed' ? 'about ' : ''}${hourly(rate.rate)} an hour` : ''}
       </p>
+      <PrecisionLine reading={precisionFor(data, month)} />
+      {isHeavy ? (
+        <p className="pl-answer-sub">
+          This month has an extra paycheck. Watch what is left.
+        </p>
+      ) : null}
       {/* Each badge wears the mark it names, in the colour it is drawn in on
           the bar above.
           Deliberately the same words in both phases. Which line is in force —
@@ -672,7 +684,7 @@ function LogPay({ month, onOpenStream, onSaved }: {
      lives in already marks it as the place you put something in. */
   return (
     <section className="pl-log">
-      <Plate>I got paid</Plate>
+      <Plate>Log Pay</Plate>
 
       {active.length > 1 ? (
         <label className="pl-field">
@@ -709,8 +721,8 @@ function LogPay({ month, onOpenStream, onSaved }: {
             names the figure the person is holding. */}
         <span className="pl-label">
           {route === 'hours' ? 'Hours worked'
-            : route === 'net' ? 'What reached your bank'
-              : 'What your paystub says before taxes'}
+            : route === 'net' ? 'Direct deposit'
+              : 'Pay before taxes'}
         </span>
         <span className="pl-money" data-unit={route === 'hours' ? 'hours' : '$'}>
           <input

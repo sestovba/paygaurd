@@ -43,17 +43,22 @@ export function toIdentity(user: User): Identity {
 }
 
 /**
- * Google sign-in.
+ * The popup guard.
  *
  * Web only. A Capacitor WebView cannot complete signInWithPopup — native
- * builds need @capacitor-firebase/authentication with Google Sign-In
- * configured (SHA-1 fingerprint plus google-services.json). Guarded here so
- * the failure is a clear message rather than a hung popup.
+ * builds need @capacitor-firebase/authentication with the provider
+ * configured (for Google, an SHA-1 fingerprint plus google-services.json).
+ * Guarded here so the failure is a clear message rather than a hung popup.
  */
-export async function signInWithGoogle(): Promise<Identity> {
+function assertPopupPossible(): void {
   if (typeof window !== 'undefined' && window.location.protocol === 'capacitor:') {
     throw new Error('NATIVE_AUTH_REQUIRED');
   }
+}
+
+/** Google sign-in. */
+export async function signInWithGoogle(): Promise<Identity> {
+  assertPopupPossible();
 
   const { auth, mod } = await getAuthInstance();
   const provider = new mod.GoogleAuthProvider();
@@ -61,6 +66,63 @@ export async function signInWithGoogle(): Promise<Identity> {
 
   const result = await mod.signInWithPopup(auth, provider);
   return toIdentity(result.user);
+}
+
+/**
+ * Apple sign-in.
+ *
+ * Needs Apple switched on in Firebase Console → Authentication → Sign-in
+ * method, which in turn needs a paid Apple Developer team, a Services ID and
+ * a key. Until that is done Firebase answers `auth/operation-not-allowed`,
+ * and useAuth turns that into a sentence saying so rather than a dead button.
+ *
+ * Apple returns the name and email only on the very first authorisation, so
+ * both scopes are asked for; after that `displayName` is null and the app
+ * falls back to the email, which is what `initialsFor` already expects.
+ */
+export async function signInWithApple(): Promise<Identity> {
+  assertPopupPossible();
+
+  const { auth, mod } = await getAuthInstance();
+  const provider = new mod.OAuthProvider('apple.com');
+  provider.addScope('email');
+  provider.addScope('name');
+
+  const result = await mod.signInWithPopup(auth, provider);
+  return toIdentity(result.user);
+}
+
+/**
+ * Email and password.
+ *
+ * The third way in, and the only one that needs no other company's account.
+ * A lot of this app's users are on a cheap Android handset signed in to
+ * somebody else's Google account, or to none — a password they chose is the
+ * one route that is always theirs.
+ */
+export async function signInWithEmail(email: string, password: string): Promise<Identity> {
+  const { auth, mod } = await getAuthInstance();
+  const result = await mod.signInWithEmailAndPassword(auth, email.trim(), password);
+  return toIdentity(result.user);
+}
+
+export async function createAccountWithEmail(email: string, password: string): Promise<Identity> {
+  const { auth, mod } = await getAuthInstance();
+  const result = await mod.createUserWithEmailAndPassword(auth, email.trim(), password);
+  return toIdentity(result.user);
+}
+
+/** Sends the reset link. Resolves the same way whether or not the address has
+ *  an account, so the screen never becomes a way to test which emails exist. */
+export async function sendResetEmail(email: string): Promise<void> {
+  const { auth, mod } = await getAuthInstance();
+  try {
+    await mod.sendPasswordResetEmail(auth, email.trim());
+  } catch (err) {
+    const code = (err as { code?: string })?.code ?? '';
+    if (code === 'auth/user-not-found') return;
+    throw err;
+  }
 }
 
 export async function signOutOfFirebase(): Promise<void> {

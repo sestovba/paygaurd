@@ -83,12 +83,12 @@ export const PAY_BASIS_WORDS: Record<PayBasis, {
   ask: string;
 }> = {
   bank: {
-    tab: 'What reached my bank',
-    field: 'Reached your bank',
+    tab: 'Direct deposit',
+    field: 'Bank deposit',
     ask: 'Type what actually landed in your account.'
   },
   paystub: {
-    tab: 'What my paystub says',
+    tab: 'Gross pay',
     field: 'Before taxes',
     ask: 'Type the amount before anything was taken out.'
   }
@@ -99,13 +99,12 @@ export const PAY_BASIS_WORDS: Record<PayBasis, {
  *
  * Not a bare pair of tabs: which one somebody picks changes how exact the
  * app can be, and that is the kind of thing this product says rather than
- * hides. The sentence is one clause and it names the consequence, not the
- * mechanism.
+ * hides. Keep the consequence short.
  */
 export function PayBasisSwitch() {
   const { basis, setBasis } = usePayBasis();
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="lg-pay-basis-switch flex flex-col">
       <Segmented
         value={basis}
         onChange={setBasis}
@@ -114,9 +113,10 @@ export function PayBasisSwitch() {
           { id: 'paystub', label: PAY_BASIS_WORDS.paystub.tab }
         ]}
       />
-      <p className="type-muted text-sm">
+      {/* Pattern 9: segment is the label; under-copy is body, full-bleed paycycle rail. */}
+      <p className="lg-pay-basis-note lg-type-body lg-text-muted">
         {basis === 'bank'
-          ? 'Social Security counts your pay before taxes, so we work that out from this. It is a careful guess, and it leaves you room to be safe.'
+          ? 'SSA counts before-tax pay. We estimate that from this, with room to spare.'
           : 'This is the exact number Social Security counts, so nothing has to be guessed.'}
       </p>
     </div>

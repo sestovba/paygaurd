@@ -340,9 +340,24 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 0 0 64px;
 }
 
+/* How wide the layout is allowed to get.
+ *
+ * It was 1180px, which on a laptop is a dashboard sprawling the full width —
+ * and this is not a dashboard, it is one person's work record read top to
+ * bottom. The reference Sergey pointed at caps its column at 430px and
+ * `plan` caps at 34rem/544px; both are phone-shaped, and calc20 cannot go
+ * that narrow because its month grid genuinely has twelve columns of data
+ * behind it.
+ *
+ * 760px is the compromise: unmistakably a column rather than a spread, wide
+ * enough to keep three month cells on a row, and narrow enough that the
+ * headline figure and the strip under it stay in one eyeful. One value, so
+ * it is one edit to tune. */
+.pg-calc20 { --c20-max: 760px; }
+
 .pg-calc20 .app-main {
   width: 100%;
-  max-width: 1180px;
+  max-width: var(--c20-max);
   display: flex;
   flex-direction: column;
 }
@@ -1605,6 +1620,20 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .stream-panel-end > .stream-panel-edit:last-child {
   margin-left: auto;
   flex: 0 0 auto;
+}
+
+/* Which months the grid under this row is showing, in words. Sits at the
+   head of the row so the picker beside it reads as the thing that changes
+   it; truncates rather than wrapping, because the row is 28px tall. */
+.pg-calc20 .stream-panel-months {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .pg-calc20 .stream-panel-end .seg {
@@ -3594,7 +3623,7 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
  * eyebrow text — and this is the first screen of the app. On --paper the same
  * pairing is 5.21:1. */
 .pg-calc20 .signin-shell { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--paper); }
-.pg-calc20 .signin-panel { width: min(392px, 100%); display: flex; flex-direction: column; gap: 22px; }
+.pg-calc20 .signin-panel { width: min(392px, 100%); display: flex; flex-direction: column; gap: 20px; }
 
 .pg-calc20 .signin-title {
   margin: 4px 0 0;
@@ -3607,7 +3636,10 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 .pg-calc20 .signin-note { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .pg-calc20 .signin-actions { display: flex; flex-direction: column; gap: 10px; }
 
-.pg-calc20 .signin-google {
+/* Every control on this screen is 48px and full width. It is the one screen
+ * hit once, one-handed, before anything is loaded — see the same note in
+ * payguard.css, which draws the same gate in the other skin. */
+.pg-calc20 .signin-provider {
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -3618,16 +3650,147 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   border-radius: 999px;
   background: var(--card);
   color: var(--ink);
+  font-family: inherit;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 150ms var(--motion), border-color 150ms var(--motion);
+  transition: background 150ms var(--motion), border-color 150ms var(--motion), opacity 150ms var(--motion);
 }
 
-.pg-calc20 .signin-google:hover:not(:disabled) { background: var(--paper); border-color: var(--muted); }
-.pg-calc20 .signin-google:disabled { opacity: .6; cursor: default; }
-.pg-calc20 .signin-google__mark { flex: 0 0 auto; display: block; width: 18px; height: 18px; }
-.pg-calc20 .signin-error { color: var(--over-label); font-size: 13px; line-height: 1.5; }
+/* The likelier provider leads and takes the solid treatment — signin/form.ts
+ * decides which. Ink on card inverts correctly in both inks with no second
+ * colour: dark button in light, light button in dark. */
+.pg-calc20 .signin-provider[data-lead='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--card);
+}
+
+.pg-calc20 .signin-provider:hover:not(:disabled) { background: var(--paper); border-color: var(--muted); }
+.pg-calc20 .signin-provider[data-lead='true']:hover:not(:disabled) { background: var(--ink); opacity: .88; }
+.pg-calc20 .signin-provider:disabled { opacity: .6; cursor: default; }
+
+.pg-calc20 .signin-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pg-calc20 .signin-or::before,
+.pg-calc20 .signin-or::after { content: ''; flex: 1 1 auto; height: 1px; background: var(--line); }
+
+.pg-calc20 .signin-form { display: flex; flex-direction: column; gap: 14px; }
+.pg-calc20 .signin-row { display: flex; flex-direction: column; gap: 6px; }
+.pg-calc20 .signin-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pg-calc20 .signin-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+
+/* A label, not a placeholder — a placeholder is gone by the time anyone
+ * wants to check what they typed. 16px keeps iOS from zooming on focus. */
+.pg-calc20 .signin-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 150ms var(--motion);
+}
+
+.pg-calc20 .signin-input:focus { border-color: var(--accent); }
+.pg-calc20 .signin-hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
+
+.pg-calc20 .signin-reveal {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pg-calc20 .signin-reveal:hover { color: var(--ink); }
+
+.pg-calc20 .signin-submit {
+  min-height: 48px;
+  margin-top: 2px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--card);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 150ms var(--motion);
+}
+
+.pg-calc20 .signin-submit:hover:not(:disabled) { opacity: .88; }
+.pg-calc20 .signin-submit:disabled { opacity: .5; cursor: default; }
+
+.pg-calc20 .signin-link {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pg-calc20 .signin-link:hover { color: var(--ink); }
+.pg-calc20 .signin-link:disabled { opacity: .5; cursor: default; }
+
+.pg-calc20 .signin-message {
+  margin: 0;
+  padding: 6px 0 6px 12px;
+  border-left: 2px solid currentColor;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pg-calc20 .signin-message[data-tone='error'] { color: var(--over-label); }
+.pg-calc20 .signin-message[data-tone='notice'] { color: var(--muted); }
+
+.pg-calc20 .signin-local {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.pg-calc20 .signin-local .signin-note { margin: 0; }
+
+.pg-calc20 .signin-local-btn {
+  border: none;
+  background: none;
+  padding: 4px 0;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pg-calc20 .signin-local-btn:hover { text-decoration: underline; }
 
 .pg-calc20 .terms-panel { width: min(560px, 100%); max-height: 88dvh; }
 .pg-calc20 .terms-scroll {
@@ -4573,8 +4736,10 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 /* Layout chips render an empty wrapper when customize is off — it still
- * ate a 9px panel gap above the month grid. */
-.pg-calc20 .stream-grid > .stream-card .stream-panel-fields:not(:has(.seg, .pg-calc20 .col-auto, .pg-calc20 .chip, .pg-calc20 .stream-panel-edit)) {
+ * ate a 9px panel gap above the month grid. The descendant selectors inside
+ * :has() were read as "a .col-auto inside a .pg-calc20 inside this row",
+ * which nothing is, so only .seg was ever keeping the row alive. */
+.pg-calc20 .stream-grid > .stream-card .stream-panel-fields:not(:has(.seg, .col-auto, .chip, .stream-panel-edit, .stream-panel-months)) {
   display: none;
 }
 
@@ -4864,7 +5029,10 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
 }
 
 /* Dark surfaces that still had light-only fills after the token swap. */
-.pg-calc20[data-theme='dark'] .popover-surface, .pg-calc20[data-theme='dark'] .popover-drawer, .pg-calc20[data-theme='dark'] .sheet, .pg-calc20[data-theme='dark'] .signin-panel, .pg-calc20[data-theme='dark'] .terms-panel {
+.pg-calc20[data-theme='dark'] .popover-surface, .pg-calc20[data-theme='dark'] .popover-drawer, .pg-calc20[data-theme='dark'] .sheet, .pg-calc20[data-theme='dark'] .terms-panel {
+/* .signin-panel was in this list while it was a card. It is a column on
+ * the page now, and the glass gradient drew a lit rectangle down the
+ * middle of the first screen with nothing inside it to explain the edge. */
   border-color: var(--glass-edge);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, calc(.08 * var(--glass-strength))), transparent 58%),
@@ -4942,8 +5110,18 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 12px 12px 54px;
 }
 
+/* The width, and the only place it is decided.
+ *
+ * This was a ladder — 48rem, widening to 72rem at 64rem and to 80rem beyond
+ * it — so on a laptop the layout ran 1280px wide and read as a dashboard.
+ * There is a second `max-width` on .app-main 4,600 lines above this one, and
+ * it never won anything: whatever it said, this block overrode it. Both are
+ * the token now, so the width has one answer and one edit changes it.
+ *
+ * The header shares it, because a topbar wider than the content it heads is
+ * how the old ladder made the page look like two pages. */
 .pg-calc20 .app-main, .pg-calc20 .topbar {
-  max-width: 48rem;
+  max-width: var(--c20-max);
 }
 
 @media (min-width: 780px) {
@@ -4952,14 +5130,6 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
     gap: 16px;
     padding: 24px 24px 70px;
   }
-}
-
-@media (min-width: 64rem) {
-  .pg-calc20 .app-main, .pg-calc20 .topbar { max-width: 72rem; }
-}
-
-@media (min-width: 80rem) {
-  .pg-calc20 .app-main, .pg-calc20 .topbar { max-width: 80rem; }
 }
 
 /* Header — one navy rectangular card. Packing from the Apple-like
@@ -5467,8 +5637,21 @@ html.pg-calc20, .pg-calc20 body { height: 100%; background: var(--desk); }
   padding: 12px;
 }
 
+/* A 7rem tile is sized for a desk. On a phone the same grid is two columns
+   deep, so a year of them is a 790px wall inside one job card — the reader
+   scrolls past six screens of empty months to reach the ledger under it. A
+   read cell holds a month and a figure and has to be tappable; 4rem does
+   both, and the tile comes back at tablet width where there is room for it. */
 .pg-calc20 .stream-card .month-cell--comfortable:not(.month-cell--pivot) {
-  min-height: 7rem;
+  min-height: 4rem;
+  padding: 10px;
+}
+
+@media (min-width: 40rem) {
+  .pg-calc20 .stream-card .month-cell--comfortable:not(.month-cell--pivot) {
+    min-height: 7rem;
+    padding: 12px;
+  }
 }
 
 .pg-calc20 .stream-card .month-cell__read-value {
@@ -6148,3 +6331,19 @@ html.pg-calc20, .pg-calc20 body, .pg-calc20 .app-shell {
    hex fallbacks beside them, which belong to no theme in the app. */
 .pg-calc20 .precision-line { font-size: 0.6875rem; line-height: 1.4; }
 .pg-calc20 .precision-level { text-transform: uppercase; }
+
+/* @override calc20 — this is the one surface in the app where the line is
+   not on paper. chrome.css answers its four inks from the palette, which is
+   chosen against a light page: on navy the muted grey goes murky and the
+   pressable wash is invisible. The header already has its own three tokens
+   for exactly this — ink, muted, and the sky accent — and the sky is what
+   this header uses everywhere else to mean "tell us and this gets better",
+   which is the whole content of an unconfirmed grade.
+
+   Four declarations, no selectors: see chrome.css section 5. */
+.pg-calc20 .calc20-precision {
+  --precision-ink: var(--header-muted);
+  --precision-mark: var(--header-accent);
+  --precision-mark-exact: var(--header-ink);
+  --precision-hover: rgba(255, 255, 255, 0.06);
+}

@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { Plugin } from 'vite';
 import { notesToMarkdown } from './src/review/markdown';
@@ -137,6 +137,20 @@ function withResolvedSources(root: string, notes: ReviewNotes): ReviewNotes {
 
   const out: ReviewNotes = {};
   for (const [id, note] of Object.entries(notes)) {
+    /* A note that points at a rule is checked against the rule's file, not
+       against the component corpus — where it would find nothing and report
+       `unknown` forever. Its heading's line is refreshed on every write:
+       unlike `sourceLine` there is no ambiguity worth preserving, because the
+       heading text is itself the evidence. */
+    if (note.anchor.doc) {
+      const { found, line: at } = locateDoc(root, note.anchor.doc);
+      out[id] = {
+        ...note,
+        found,
+        anchor: { ...note.anchor, doc: { ...note.anchor.doc, line: at ?? note.anchor.doc.line } }
+      };
+      continue;
+    }
     const { source, line } = resolveSource(root, note);
     out[id] = {
       ...note,
@@ -155,6 +169,137 @@ function withResolvedSources(root: string, notes: ReviewNotes): ReviewNotes {
     };
   }
   return out;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Reference points                                                         */
+/* ------------------------------------------------------------------------ */
+/*
+ * Not every note is about something on the screen.
+ *
+ * "Default should be rest of the year on all layouts" is not a note about the
+ * scope picker that happened to be under the cursor; it is a note about the
+ * product. Filed against that element it reads as a local tweak, gets fixed
+ * locally, and comes back on the next layout — which is measurably what has
+ * been happening: the same instruction has been re-filed on five different
+ * screens because there was nowhere else to put it.
+ *
+ * So a note can point at a rule instead of a node. The rules are already
+ * written down and already have names, so the reference points are harvested
+ * from the markdown rather than typed fresh: "Round down, always", "The
+ * device is the constraint", "Who this is for". A note filed against one of
+ * those arrives in the same words the answer will be written in, and — the
+ * part that matters — the next session finds it by reading the rule.
+ *
+ * Read off disk on every request. These files are edited by the same person
+ * writing the notes, often in the same sitting, and a menu of headings that
+ * is one dev-server restart out of date is a menu that offers a rule that has
+ * since been rewritten.
+ */
+
+/** Where the rules live. Order is the order they are offered in. */
+const DOC_FILES = [
+  'CLAUDE.md',
+  'docs/WORKING-WITH-SERGEY.md',
+  'docs/DESIGN-SYSTEM.md',
+  'docs/THE-THREAD.md',
+  'src/review/VOCABULARY.md'
+];
+
+export interface DocHeading {
+  text: string;
+  line: number;
+  level: number;
+}
+
+export interface DocFile {
+  file: string;
+  title: string;
+  /** 'global' — a rule about the product. 'layout' — one layout's README. */
+  scope: 'global' | 'layout';
+  /** Which layout, when scope is 'layout'. */
+  layout?: string;
+  headings: DocHeading[];
+}
+
+/** `##` and `###` only. `#` is the file's own title and is offered as the
+ *  file itself; anything deeper is a paragraph with a label on it. */
+function headingsOf(md: string): DocHeading[] {
+  const out: DocHeading[] = [];
+  const lines = md.split('\n');
+  let fenced = false;
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (/^\s*```/.test(line)) { fenced = !fenced; continue; }
+    if (fenced) continue;
+    const hit = /^(#{2,3})\s+(.+?)\s*$/.exec(line);
+    if (!hit) continue;
+    const text = hit[2]
+      .replace(/^[▶§\s]+/, '')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/[`*_]/g, '')
+      .trim();
+    if (text) out.push({ text, line: i + 1, level: hit[1].length });
+  }
+  return out;
+}
+
+function titleOf(md: string, fallback: string): string {
+  return /^#\s+(.+?)\s*$/m.exec(md)?.[1]?.replace(/[`*_]/g, '').trim() || fallback;
+}
+
+function readDocs(root: string): DocFile[] {
+  const out: DocFile[] = [];
+
+  for (const file of DOC_FILES) {
+    const path = resolve(root, file);
+    if (!existsSync(path)) continue;
+    let md: string;
+    try { md = readFileSync(path, 'utf8'); } catch { continue; }
+    out.push({ file, title: titleOf(md, file), scope: 'global', headings: headingsOf(md) });
+  }
+
+  /* Each layout's README, which is also where the layout switcher gets its
+     list. One file per layout, kept current because it is the file you read
+     when you work on that layout — which is exactly what makes it the right
+     thing for "this layout, as a whole" to point at. */
+  let dirs: string[] = [];
+  try {
+    dirs = readdirSync(resolve(root, 'src/components'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+  } catch {
+    dirs = [];
+  }
+  for (const layout of dirs.sort()) {
+    const file = `src/components/${layout}/README.md`;
+    const path = resolve(root, file);
+    if (!existsSync(path)) continue;
+    let md: string;
+    try { md = readFileSync(path, 'utf8'); } catch { continue; }
+    out.push({ file, title: titleOf(md, layout), scope: 'layout', layout, headings: headingsOf(md) });
+  }
+
+  return out;
+}
+
+/**
+ * Is the rule this note points at still there?
+ *
+ * The same question `locate()` asks of an element, asked of a heading — and
+ * easier to answer, because a heading is its own evidence. There is no
+ * "moved versus gone" ambiguity to preserve: the text either appears in the
+ * file or it does not.
+ */
+function locateDoc(root: string, doc: { file: string; heading?: string }): {
+  found: 'present' | 'absent' | 'unknown';
+  line?: number;
+} {
+  let md: string;
+  try { md = readFileSync(resolve(root, doc.file), 'utf8'); } catch { return { found: 'absent' }; }
+  if (!doc.heading) return { found: 'present' };
+  const hit = headingsOf(md).find((heading) => heading.text === doc.heading);
+  return hit ? { found: 'present', line: hit.line } : { found: 'absent' };
 }
 
 const JSON_PATH = 'review/review-notes.json';
@@ -248,6 +393,19 @@ export function reviewNotes(): Plugin {
             res.end(JSON.stringify({ ok: false, error: String(error) }));
           }
         });
+      });
+
+      /* The reference points, read off disk per request so a heading renamed
+         a minute ago is the heading the console offers. */
+      server.middlewares.use('/__review/refs', (req, res) => {
+        if (req.method !== 'GET') {
+          res.statusCode = 405;
+          res.end();
+          return;
+        }
+        res.setHeader('content-type', 'application/json');
+        res.setHeader('cache-control', 'no-store');
+        res.end(JSON.stringify({ docs: readDocs(server.config.root) }));
       });
 
       server.middlewares.use('/__review/notes', (req, res) => {

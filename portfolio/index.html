@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sergey Stovba — Rebuilt, Not Remembered</title>
+<meta name="description" content="Senior Visual Designer and Design Technologist. Enterprise product work rebuilt as live, interactive specimens.">
+<style>
+/* ============================================================
+   TOKENS — the page's own system
+   ============================================================ */
+:root{
+  --paper:#f7f5f1;
+  --paper-2:#efece5;
+  --card:#ffffff;
+  --ink:#16150f;
+  --ink-2:#4a473e;
+  --ink-3:#7c786c;
+  --line:#ddd8cd;
+  --line-2:#c9c2b4;
+  --accent:#b3401c;
+  --accent-2:#8f3115;
+  --accent-soft:#f6e7e0;
+  --stage:#14130f;
+  --stage-2:#1e1c17;
+  --stage-line:#33302a;
+  --stage-ink:#eae6dd;
+  --stage-ink-2:#9a948a;
+  --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --wrap:1180px;
+  --r:10px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:74px;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+button{font:inherit;color:inherit}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.narrow{max-width:760px}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(247,245,241,.94);border-bottom:1px solid var(--line);
+}
+.nav-in{max-width:var(--wrap);margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:28px}
+.brandmark{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-.015em;margin-right:auto}
+.brandmark span{color:var(--accent)}
+.nav a{color:var(--ink-2);font-size:13.5px;font-weight:500;letter-spacing:.01em;text-decoration:none}
+.nav a:hover{color:var(--accent)}
+.nav .cta{
+  background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:13px;
+}
+.nav .cta:hover{background:var(--accent);text-decoration:none}
+@media(max-width:760px){.nav-links{display:none}}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:92px 0 64px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 22px;
+}
+.hero h1{
+  font-family:var(--serif);font-weight:400;letter-spacing:-.028em;line-height:1.02;
+  font-size:clamp(42px,7.4vw,84px);margin:0 0 26px;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-lede{font-size:19px;line-height:1.62;color:var(--ink-2);max-width:640px;margin:0 0 34px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{
+  display:inline-block;padding:12px 22px;border-radius:999px;font-size:14.5px;font-weight:500;
+  border:1px solid transparent;cursor:pointer;text-decoration:none;transition:background .16s,color .16s,border-color .16s;
+}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:var(--accent)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink-2);background:transparent}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ============================================================
+   THESIS — the framing statement
+   ============================================================ */
+.thesis{background:var(--stage);color:var(--stage-ink);padding:76px 0}
+.thesis h2{
+  font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.2vw,44px);line-height:1.14;
+  letter-spacing:-.02em;margin:0 0 24px;max-width:20ch;
+}
+.thesis h2 em{font-style:italic;color:#e8a087}
+.thesis p{color:#b8b2a6;font-size:17px;line-height:1.68;max-width:62ch;margin:0 0 16px}
+.thesis strong{color:var(--stage-ink);font-weight:600}
+.thesis-rule{height:1px;background:var(--stage-line);margin:34px 0 30px;max-width:62ch}
+.thesis-kicker{
+  font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.5;color:var(--stage-ink);
+  max-width:44ch;margin:0;
+}
+
+/* ============================================================
+   SECTION SCAFFOLD
+   ============================================================ */
+.sec{padding:82px 0}
+.sec-head{margin-bottom:38px}
+.sec-title{
+  font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,40px);letter-spacing:-.022em;
+  line-height:1.1;margin:0 0 12px;
+}
+.sec-sub{color:var(--ink-3);font-size:16.5px;margin:0;max-width:60ch}
+
+/* ============================================================
+   PROJECT BLOCK
+   ============================================================ */
+.proj{padding:74px 0;border-top:1px solid var(--line)}
+.proj-head{display:grid;grid-template-columns:1fr;gap:22px;margin-bottom:30px}
+@media(min-width:900px){.proj-head{grid-template-columns:1.05fr .95fr;gap:56px;align-items:start}}
+.proj-num{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--ink-3);
+  display:block;margin-bottom:14px;
+}
+.proj-title{
+  font-family:var(--serif);font-weight:400;font-size:clamp(27px,3.6vw,38px);letter-spacing:-.022em;
+  line-height:1.08;margin:0 0 14px;
+}
+.proj-meta{
+  font-family:var(--mono);font-size:11.5px;line-height:1.85;color:var(--ink-3);
+  margin:0 0 18px;
+}
+.proj-meta b{color:var(--ink-2);font-weight:500}
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-2);
+  border:1px solid #ecd5ca;
+}
+.proj-body p{margin:0 0 14px;color:var(--ink-2);font-size:15.5px;line-height:1.68}
+.proj-body p:last-child{margin-bottom:0}
+.decision{
+  border-left:2px solid var(--accent);padding:2px 0 2px 18px;margin:0 0 16px;
+}
+.decision-label{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent-2);display:block;margin-bottom:7px;
+}
+.decision p{margin:0;color:var(--ink);font-size:15.5px}
+
+/* ============================================================
+   THE STAGE — dark plinth the prototypes sit on
+   ============================================================ */
+.stage{
+  background:var(--stage);
+  background-image:radial-gradient(115% 78% at 50% 0%,#252118 0%,var(--stage) 62%);
+  border-radius:16px;padding:26px 26px 22px;position:relative;overflow:hidden;
+}
+@media(max-width:620px){.stage{padding:16px 14px 14px;border-radius:12px}}
+.stage-top{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;
+}
+.live-dot{
+  width:7px;height:7px;border-radius:50%;background:#5ec27a;flex:none;
+  box-shadow:0 0 0 0 rgba(94,194,122,.55);animation:pulse 2.6s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(94,194,122,.5)}
+  70%{box-shadow:0 0 0 9px rgba(94,194,122,0)}
+  100%{box-shadow:0 0 0 0 rgba(94,194,122,0)}
+}
+@media(prefers-reduced-motion:reduce){.live-dot{animation:none}}
+.stage-label{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--stage-ink-2);
+}
+.stage-label b{color:var(--stage-ink);font-weight:500}
+.stage-hint{
+  margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:#c9a08d;
+  border:1px solid #4a3b32;background:#241d18;padding:5px 11px;border-radius:999px;
+}
+.stage-foot{
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--stage-line);
+  display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;
+}
+.stage-src{font-family:var(--mono);font-size:10.5px;line-height:1.7;color:#6f6a61;max-width:80ch}
+.stage-src b{color:var(--stage-ink-2);font-weight:400}
+
+/* segmented control on the stage */
+.seg{display:inline-flex;background:#26231d;border:1px solid var(--stage-line);border-radius:999px;padding:3px}
+.seg button{
+  border:0;background:transparent;color:var(--stage-ink-2);cursor:pointer;
+  padding:7px 15px;border-radius:999px;font-size:12.5px;font-weight:500;transition:background .15s,color .15s;
+}
+.seg button:hover{color:var(--stage-ink)}
+.seg button[aria-pressed="true"]{background:var(--stage-ink);color:var(--stage)}
+.stage-controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.stage-note{font-size:12.5px;color:var(--stage-ink-2);line-height:1.5}
+.stage-note b{color:var(--stage-ink);font-weight:500}
+
+/* ============================================================
+   DEVICE FRAMES
+   ============================================================ */
+.frame{
+  background:#fff;border-radius:10px;overflow:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.09),0 18px 44px rgba(0,0,0,.45);
+}
+.frame-bar{
+  height:34px;background:#e6e4e0;border-bottom:1px solid #d3d0ca;
+  display:flex;align-items:center;gap:7px;padding:0 12px;flex:none;
+}
+/* macOS traffic lights — glyphs reveal on hover, the way the real ones do */
+.dot{
+  width:11px;height:11px;border-radius:50%;background:#d3cfc8;flex:none;
+  display:grid;place-items:center;line-height:1;font-weight:700;
+  color:rgba(0,0,0,.52);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.09);
+  transition:background .15s,transform .12s;
+}
+.dot::after{content:"";font-size:9px;opacity:0;transition:opacity .13s;transform:translateY(-.5px)}
+.dot.r{background:#ff5f57}
+.dot.y{background:#febc2e}
+.dot.g{background:#28c840}
+.frame-bar:hover .dot::after{opacity:1}
+.frame-bar:hover .dot.r::after{content:"✕";font-size:8px}
+.frame-bar:hover .dot.y::after{content:"–";font-size:11px}
+.frame-bar:hover .dot.g::after{content:"⤢";font-size:8.5px;transform:rotate(45deg)}
+.frame-bar .dot:hover{transform:scale(1.12)}
+.url{
+  margin-left:8px;background:#f6f5f2;border:1px solid #d8d5cf;border-radius:5px;
+  font-family:var(--mono);font-size:10.5px;color:#8a867e;padding:3px 12px;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.frame-body{overflow:hidden}
+
+/* phone */
+.phone-wrap{display:flex;justify-content:center}
+.phone{
+  width:340px;max-width:100%;background:#0b0b0c;border-radius:38px;padding:11px;flex:none;
+  box-shadow:0 1px 0 rgba(255,255,255,.1),0 20px 46px rgba(0,0,0,.5);
+}
+.phone-screen{background:#fff;border-radius:28px;overflow:hidden;position:relative}
+.phone-notch{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:104px;height:22px;background:#0b0b0c;border-radius:999px;z-index:5;
+}
+.phone-status{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 20px 6px;font-size:11.5px;font-weight:600;color:#111;
+}
+
+/* ============================================================
+   SPECIMEN 1 · AWS EDUCATE  (Cloudscape-derived)
+   ============================================================ */
+.brand-aws{
+  --b-blue:#0972d3;--b-blue-d:#065299;--b-ink:#000716;--b-ink2:#414d5c;
+  --b-line:#e9ebed;--b-line2:#d1d5db;--b-bg:#f2f3f3;--b-nav:#0f1b2a;--b-orange:#ff9900;
+  --b-green:#037f0c;--b-r:8px;
+  font-family:'Open Sans','Helvetica Neue',var(--sans);color:var(--b-ink);
+  font-size:14px;background:var(--b-bg);
+}
+.aws-nav{
+  background:var(--b-nav);color:#d1d5db;display:flex;align-items:center;gap:16px;
+  padding:0 18px;height:42px;font-size:13px;
+}
+.aws-logo{display:flex;align-items:baseline;gap:2px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.aws-logo i{font-style:normal;color:var(--b-orange);font-size:15px}
+.aws-nav .sp{margin-left:auto}
+.aws-av{width:24px;height:24px;border-radius:50%;background:#3f4d5f;color:#fff;display:grid;place-items:center;font-size:10.5px;font-weight:600}
+.aws-progs{
+  background:#fff;border-bottom:1px solid var(--b-line);display:flex;gap:2px;padding:0 18px;
+}
+.aws-prog{
+  border:0;background:transparent;cursor:pointer;padding:13px 16px 11px;font-size:13.5px;font-weight:600;
+  color:var(--b-ink2);border-bottom:2px solid transparent;white-space:nowrap;
+}
+.aws-prog:hover{color:var(--b-blue)}
+.aws-prog[aria-selected="true"]{color:var(--b-blue);border-bottom-color:var(--b-blue)}
+.aws-main{padding:20px 18px 24px;min-height:342px}
+.aws-h{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
+.aws-sub{color:var(--b-ink2);font-size:13px;margin:0 0 16px}
+.aws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:14px}
+.aws-card{
+  background:#fff;border:1px solid var(--b-line);border-radius:var(--b-r);padding:15px;
+  display:flex;flex-direction:column;gap:9px;transition:border-color .15s,box-shadow .15s,transform .15s;
+}
+.aws-card:hover{border-color:var(--b-blue);box-shadow:0 4px 14px rgba(0,7,22,.1);transform:translateY(-2px)}
+.aws-badge{
+  align-self:flex-start;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;background:#f0f7ff;color:var(--b-blue-d);border:1px solid #cfe3f7;
+}
+.aws-ct{font-size:14.5px;font-weight:700;margin:0;line-height:1.3}
+.aws-cm{font-size:12px;color:var(--b-ink2);margin:0}
+.aws-bar{height:5px;border-radius:99px;background:var(--b-line);overflow:hidden}
+.aws-bar i{display:block;height:100%;background:var(--b-blue);border-radius:99px;transition:width .55s cubic-bezier(.22,1,.36,1)}
+.aws-btn{
+  margin-top:auto;border:1px solid var(--b-blue);background:var(--b-blue);color:#fff;cursor:pointer;
+  border-radius:20px;padding:6px 16px;font-size:12.5px;font-weight:700;align-self:flex-start;
+  transition:background .15s,border-color .15s;
+}
+.aws-btn:hover{background:var(--b-blue-d);border-color:var(--b-blue-d)}
+.aws-btn.done{background:#fff;color:var(--b-green);border-color:var(--b-green);cursor:default}
+/* --- what unification actually buys: only exists in the "after" --- */
+.aws-unified{display:grid;gap:12px;margin-bottom:16px}
+.brand-aws.is-split .aws-unified,
+.brand-aws.is-split .aws-facets,
+.brand-aws.is-split .aws-skills,
+.brand-aws.is-split .aws-credit,
+.brand-aws.is-split .aws-pct{display:none}
+
+.aws-resume{
+  display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:var(--b-r);
+  background:linear-gradient(180deg,#f7fbff,#eef6ff);border:1px solid #cfe3f7;
+}
+.aws-resume-ic{
+  width:30px;height:30px;border-radius:50%;background:var(--b-blue);color:#fff;flex:none;
+  display:grid;place-items:center;font-size:11px;padding-left:2px;
+}
+.aws-resume-txt{min-width:0;flex:1}
+.aws-resume-txt em{
+  display:block;font-style:normal;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--b-blue-d);font-weight:700;margin-bottom:2px;
+}
+.aws-resume-txt b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em}
+.aws-resume-txt span{font-size:11.5px;color:var(--b-ink2)}
+.aws-resume-pct{font-size:16px;font-weight:700;color:var(--b-blue-d);font-variant-numeric:tabular-nums;flex:none}
+
+.aws-path{padding:13px 15px;border:1px solid var(--b-line);border-radius:var(--b-r);background:#fff}
+.aws-path-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:13px}
+.aws-path-hd b{font-size:12.5px;font-weight:700}
+.aws-path-hd span{margin-left:auto;font-size:11px;color:var(--b-ink2);font-variant-numeric:tabular-nums}
+.aws-path-track{display:grid;grid-template-columns:repeat(3,1fr);position:relative}
+.aws-node{position:relative;text-align:center;padding-top:32px}
+.aws-node::before{
+  content:"";position:absolute;top:13px;left:0;right:0;height:2px;background:var(--b-line);
+}
+.aws-node:first-child::before{left:50%}
+.aws-node:last-child::before{right:50%}
+.aws-ring{
+  position:absolute;top:2px;left:50%;margin-left:-12px;width:24px;height:24px;z-index:1;
+  transform:rotate(-90deg);background:#fff;border-radius:50%;
+}
+.aws-ring .track{fill:#fff;stroke:var(--b-line);stroke-width:3}
+.aws-ring .fill{
+  fill:none;stroke:var(--b-blue);stroke-width:3;stroke-linecap:round;
+  transition:stroke-dasharray .55s cubic-bezier(.22,1,.36,1);
+}
+.aws-node.done .aws-ring .fill{stroke:var(--b-green)}
+.aws-node em{display:block;font-style:normal;font-size:11.5px;font-weight:700;margin-bottom:1px}
+.aws-node span{font-size:10px;color:var(--b-ink2);font-variant-numeric:tabular-nums}
+.aws-node.done span{color:var(--b-green);font-weight:600}
+
+.aws-facets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.aws-facet{
+  border:1px solid var(--b-line2);background:#fff;color:var(--b-ink2);cursor:pointer;
+  border-radius:16px;padding:4px 12px;font-size:11.5px;font-weight:600;transition:all .14s;
+}
+.aws-facet:hover{border-color:var(--b-blue);color:var(--b-blue)}
+.aws-facet[aria-pressed="true"]{background:var(--b-ink);border-color:var(--b-ink);color:#fff}
+
+.aws-card-hd{display:flex;align-items:center;gap:8px}
+.aws-pct{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--b-ink2);font-variant-numeric:tabular-nums}
+.aws-skills{display:flex;gap:4px;flex-wrap:wrap}
+.aws-skills span{
+  font-size:10px;font-weight:600;color:var(--b-ink2);background:var(--b-bg);
+  border:1px solid var(--b-line);border-radius:3px;padding:1px 6px;
+}
+.aws-credit{
+  margin:0;font-size:10.5px;color:var(--b-ink2);padding-top:8px;border-top:1px solid var(--b-line);
+}
+.aws-credit b{color:var(--b-blue-d);font-weight:700}
+
+/* --- fragmented ("before") variants --- */
+.brand-aws.is-split .aws-progs{background:var(--v-navbg,#fff);border-bottom-color:var(--v-line,var(--b-line))}
+.brand-aws.is-split .aws-main{background:var(--v-bg,var(--b-bg));font-family:var(--v-font,inherit)}
+.brand-aws.is-split .aws-h{font-size:var(--v-h,19px);font-weight:var(--v-hw,700);color:var(--v-hc,var(--b-ink))}
+.brand-aws.is-split .aws-card{
+  border-radius:var(--v-r,8px);border-color:var(--v-line,var(--b-line));
+  background:var(--v-card,#fff);padding:var(--v-pad,15px);
+}
+.brand-aws.is-split .aws-btn:not(.done){
+  border-radius:var(--v-btnr,20px);background:var(--v-acc,var(--b-blue));border-color:var(--v-acc,var(--b-blue));
+  text-transform:var(--v-btntt,none);letter-spacing:var(--v-btnls,0);
+}
+.brand-aws.is-split .aws-btn.done{
+  border-radius:var(--v-btnr,20px);text-transform:var(--v-btntt,none);letter-spacing:var(--v-btnls,0);
+}
+.brand-aws.is-split .aws-bar i{background:var(--v-acc,var(--b-blue))}
+.brand-aws.is-split .aws-badge{background:var(--v-badgebg,#f0f7ff);color:var(--v-acc,var(--b-blue-d));border-color:var(--v-badgeline,#cfe3f7)}
+.brand-aws.is-split .aws-prog[aria-selected="true"]{color:var(--v-acc,var(--b-blue));border-bottom-color:var(--v-acc,var(--b-blue))}
+.brand-aws.is-split[data-prog="restart"]{
+  --v-acc:#1b7f5a;--v-r:0px;--v-btnr:2px;--v-bg:#eef1ef;--v-line:#c8d2cc;--v-h:22px;--v-hc:#123a2b;
+  --v-badgebg:#e4f0ea;--v-badgeline:#bfd9cd;--v-btntt:uppercase;--v-btnls:.06em;--v-pad:18px;
+  --v-font:Verdana,Geneva,sans-serif;
+}
+.brand-aws.is-split[data-prog="academy"]{
+  --v-acc:#7b3fb5;--v-r:16px;--v-btnr:999px;--v-bg:#faf7fd;--v-line:#e3d6f0;--v-h:16px;--v-hw:600;--v-hc:#3d1f5c;
+  --v-badgebg:#f2e9fb;--v-badgeline:#e0cdf2;--v-card:#fff;--v-pad:12px;
+  --v-font:Georgia,serif;
+}
+.brand-aws.is-split[data-prog="restart"] .aws-nav,
+.brand-aws.is-split[data-prog="academy"] .aws-nav{background:var(--v-acc)}
+.aws-flag{
+  display:flex;gap:9px;align-items:flex-start;margin:0 0 14px;padding:9px 12px;border-radius:6px;
+  font-size:12.5px;line-height:1.5;background:#fef6f0;border:1px solid #f5d5bf;color:#7a3a12;
+}
+.aws-flag.ok{background:#f0f8f1;border-color:#c9e3cc;color:#1a5c21}
+.aws-flag b{font-weight:700}
+
+/* ============================================================
+   SPECIMEN 2 · AT&T  (order lookup → status)
+   ============================================================ */
+.brand-att{
+  --b-blue:#009fdb;--b-blue-d:#0568ae;--b-ink:#191919;--b-ink2:#5a5a5a;
+  --b-line:#d2d2d2;--b-bg:#f2f2f2;--b-green:#1c7c3e;--b-red:#cd040b;
+  font-family:'Helvetica Neue',var(--sans);color:var(--b-ink);font-size:14px;background:#fff;
+}
+.att-nav{
+  background:#000;color:#fff;display:flex;align-items:center;gap:14px;padding:0 18px;height:46px;font-size:13px;
+}
+.att-globe{display:block;flex:none;line-height:0}
+.att-globe svg{display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.att-nav b{font-weight:600;letter-spacing:.01em}
+.att-nav .sp{margin-left:auto;color:#b9b9b9;font-size:12.5px}
+.att-body{padding:26px 20px 30px;min-height:352px;background:#fff;max-width:560px;margin:0 auto}
+.att-h{font-size:22px;font-weight:600;letter-spacing:-.015em;margin:0 0 6px}
+.att-sub{color:var(--b-ink2);font-size:13.5px;margin:0 0 18px;max-width:52ch}
+.att-seg{display:inline-flex;border:1px solid var(--b-line);border-radius:999px;padding:3px;margin-bottom:18px;background:var(--b-bg)}
+.att-seg button{
+  border:0;background:transparent;cursor:pointer;padding:7px 18px;border-radius:999px;
+  font-size:13px;font-weight:600;color:var(--b-ink2);
+}
+.att-seg button[aria-pressed="true"]{background:var(--b-blue);color:#fff}
+.att-form{display:grid;gap:14px;max-width:400px}
+.att-field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--b-ink)}
+.att-field input{
+  width:100%;padding:11px 13px;border:1px solid #8f8f8f;border-radius:6px;font-size:14px;
+  font-family:inherit;background:#fff;color:var(--b-ink);
+}
+.att-field input:focus{outline:2px solid var(--b-blue);outline-offset:0;border-color:var(--b-blue)}
+.att-field.bad input{border-color:var(--b-red);border-width:2px}
+.att-err{
+  display:none;gap:7px;align-items:flex-start;margin-top:7px;font-size:12.5px;color:var(--b-red);line-height:1.45;
+}
+.att-field.bad .att-err{display:flex}
+.att-err i{font-style:normal;font-weight:700;flex:none}
+.att-hint{font-size:12px;color:var(--b-ink2);margin:2px 0 0}
+.att-hint code{
+  font-family:var(--mono);background:var(--b-bg);border:1px solid var(--b-line);
+  border-radius:4px;padding:1px 6px;font-size:11.5px;cursor:pointer;color:var(--b-blue-d);
+}
+.att-hint code:hover{background:#e6f6fd;border-color:var(--b-blue)}
+.att-cta{
+  border:0;background:var(--b-blue);color:#fff;cursor:pointer;border-radius:999px;
+  padding:12px 30px;font-size:14.5px;font-weight:600;justify-self:start;transition:background .15s;
+}
+.att-cta:hover{background:var(--b-blue-d)}
+.att-link{
+  border:0;background:transparent;color:var(--b-blue-d);cursor:pointer;font-size:13px;
+  font-weight:600;text-decoration:underline;padding:0;justify-self:start;
+}
+/* email view */
+.att-email{
+  border:1px solid var(--b-line);border-radius:8px;overflow:hidden;max-width:440px;background:#fff;
+}
+.att-email-hd{background:var(--b-bg);border-bottom:1px solid var(--b-line);padding:10px 14px;font-size:12px;color:var(--b-ink2)}
+.att-email-hd b{color:var(--b-ink);display:block;font-size:13px;margin-bottom:2px}
+.att-email-bd{padding:18px 16px}
+.att-email-bd h4{margin:0 0 8px;font-size:16px;font-weight:600}
+.att-email-bd p{margin:0 0 14px;font-size:13px;color:var(--b-ink2);line-height:1.55}
+.att-order-line{
+  display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-top:1px solid var(--b-line);
+}
+.att-order-line b{font-weight:600}
+/* status view */
+.att-track{display:grid;gap:0;margin:6px 0 20px;max-width:460px}
+.att-step{display:grid;grid-template-columns:26px 1fr;gap:14px;position:relative;padding-bottom:20px}
+.att-step:last-child{padding-bottom:0}
+.att-step::before{
+  content:"";position:absolute;left:12px;top:22px;bottom:-2px;width:2px;background:var(--b-line);
+}
+.att-step:last-child::before{display:none}
+.att-step.on::before{background:var(--b-green)}
+.att-bullet{
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--b-line);background:#fff;
+  display:grid;place-items:center;font-size:12px;color:#b0b0b0;z-index:1;font-weight:700;
+}
+.att-step.on .att-bullet{border-color:var(--b-green);background:var(--b-green);color:#fff}
+.att-step.now .att-bullet{border-color:var(--b-blue);background:var(--b-blue);color:#fff;box-shadow:0 0 0 4px #d7f0fb}
+.att-step h5{margin:2px 0 3px;font-size:14px;font-weight:600}
+.att-step p{margin:0;font-size:12.5px;color:var(--b-ink2)}
+.att-step.off h5,.att-step.off p{color:#a3a3a3}
+.att-summary{background:var(--b-bg);border:1px solid var(--b-line);border-radius:8px;padding:14px 16px;max-width:460px}
+.att-summary h5{margin:0 0 10px;font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--b-ink2)}
+.att-view{display:none}
+.att-view.show{display:block;animation:fade .32s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.att-view.show{animation:none}}
+
+/* ============================================================
+   SPECIMEN 3 · OPTUM STEPWISE
+   The grid on the left IS the broker site on the right.
+   ============================================================ */
+.brand-optum{
+  --b-orange:#ff612b;--b-blue:#0c55b8;--b-blue-d:#083f8a;--b-ink:#282a2e;--b-ink2:#5c6069;
+  --b-line:#e3e1dd;--b-grid:#d6d3cd;--b-bg:#faf8f5;--b-green:#007000;--b-red:#c40000;--b-amber:#8a5b00;
+  font-family:var(--sans);color:var(--b-ink);font-size:13px;background:var(--b-bg);
+}
+.opt-bar{
+  display:flex;align-items:center;gap:9px;padding:8px 14px;background:#fff;
+  border-bottom:1px solid var(--b-line);flex-wrap:wrap;
+}
+.opt-brand{display:flex;align-items:center;gap:7px}
+.opt-brand i{width:9px;height:9px;border-radius:50%;background:var(--b-orange);flex:none}
+.opt-brand b{font-size:14px;font-weight:700;letter-spacing:-.02em}
+.opt-brand span{font-size:10px;color:var(--b-ink2);font-weight:500;letter-spacing:.02em}
+.opt-by{font-size:11.5px;color:var(--b-ink2);letter-spacing:.01em}
+.opt-by b{
+  color:var(--b-orange);font-weight:700;font-size:13.5px;letter-spacing:-.03em;
+  font-family:'Helvetica Neue',var(--sans);
+}
+.opt-crumb{font-size:11.5px;color:var(--b-ink2);margin:0 0 0 6px;padding-left:11px;border-left:1px solid var(--b-line)}
+.opt-crumb b{color:var(--b-ink);font-weight:600}
+.opt-reset{
+  margin-left:auto;border:1px solid var(--b-line);background:#fff;color:var(--b-ink2);cursor:pointer;
+  border-radius:4px;padding:7px 13px;font-size:12px;font-weight:600;
+}
+.opt-reset:hover{border-color:var(--b-orange);color:var(--b-orange)}
+.opt-publish{
+  border:0;background:var(--b-orange);color:#fff;cursor:pointer;border-radius:4px;
+  padding:7px 15px;font-size:12px;font-weight:700;
+}
+.opt-publish:hover{background:#e8501d}
+.opt-publish:disabled{background:#d8d5cf;color:#8d8a84;cursor:not-allowed}
+
+/* split: builder | output */
+.opt-split{display:grid;grid-template-columns:1fr;min-height:430px}
+@media(min-width:900px){.opt-split{grid-template-columns:1.14fr .86fr}}
+.opt-pane{min-width:0;display:flex;flex-direction:column}
+.opt-pane+.opt-pane{border-top:1px solid var(--b-line)}
+@media(min-width:900px){.opt-pane+.opt-pane{border-top:0;border-left:1px solid var(--b-line)}}
+.opt-pane-hd{
+  display:flex;align-items:center;gap:8px;padding:8px 13px;background:#f4f2ee;
+  border-bottom:1px solid var(--b-line);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;color:var(--b-ink2);
+}
+.opt-pane-hd em{font-style:normal;margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;font-size:11px}
+
+/* --- formula bar --- */
+.opt-formula{
+  display:flex;align-items:center;gap:0;background:#fff;border-bottom:1px solid var(--b-line);font-size:12px;
+}
+.opt-cellref{
+  font-family:var(--mono);font-size:11px;padding:6px 10px;min-width:56px;color:var(--b-ink2);
+  border-right:1px solid var(--b-line);background:#faf9f7;
+}
+.opt-fx{font-family:var(--mono);font-size:11px;padding:6px 10px;color:var(--b-ink);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* --- the spreadsheet --- */
+.opt-sheetwrap{overflow:auto;background:#fff;flex:1}
+table.opt{border-collapse:collapse;font-size:12px;min-width:530px;width:100%}
+table.opt th,table.opt td{border:1px solid var(--b-grid);padding:0;white-space:nowrap}
+table.opt thead th{
+  background:#f0eeea;font-size:10.5px;font-weight:700;color:var(--b-ink2);
+  padding:5px 8px;text-align:center;letter-spacing:.04em;position:sticky;top:0;z-index:2;
+}
+table.opt thead th.lbl{text-align:left}
+table.opt .rownum{
+  background:#f0eeea;color:#9a968f;font-size:10px;font-family:var(--mono);text-align:center;
+  width:26px;padding:0 4px;font-weight:600;
+}
+.opt-cell{
+  padding:6px 9px;font-variant-numeric:tabular-nums;cursor:cell;position:relative;
+  background:#fff;transition:background .1s;
+}
+.opt-cell:hover{background:#fdf6f2}
+.opt-cell.txt{text-align:left;font-weight:600;cursor:default}
+.opt-cell.txt:hover{background:#fff}
+.opt-cell.num{text-align:right}
+.opt-cell.calc{background:#f7f6f3;color:var(--b-ink2);cursor:default}
+.opt-cell.calc:hover{background:#f7f6f3}
+.opt-cell.empty{height:27px;cursor:default}
+.opt-cell.empty:hover{background:#fff}
+.opt-cell.sel{
+  box-shadow:inset 0 0 0 2px var(--b-orange);background:#fff6f2;z-index:1;
+}
+.opt-cell.bad{background:#fdeceb}
+.opt-cell input{
+  width:100%;border:0;background:transparent;font:inherit;font-variant-numeric:tabular-nums;
+  text-align:right;color:inherit;padding:0;margin:0;
+}
+.opt-cell input:focus{outline:none}
+.opt-flag{
+  position:absolute;top:1px;right:1px;width:0;height:0;
+  border-top:6px solid var(--b-red);border-left:6px solid transparent;
+}
+
+/* --- inline validation --- */
+.opt-alert{
+  display:none;gap:9px;padding:10px 13px;font-size:12px;line-height:1.5;border-top:1px solid var(--b-line);
+}
+.opt-alert.show{display:flex}
+.opt-alert .ic{font-weight:700;flex:none}
+.opt-alert b{display:block;margin-bottom:2px}
+.opt-alert.err{background:#fdecec;color:#7a1414}
+.opt-alert.warn{background:#fdf6ea;color:#6b4600}
+.opt-alert.ok{background:#eef6ee;color:#0f4d13}
+.opt-alert .fix{
+  border:0;background:transparent;color:inherit;text-decoration:underline;cursor:pointer;
+  font-weight:700;font-size:12px;padding:0;margin-top:5px;display:inline-block;
+}
+
+/* --- contribution control --- */
+.opt-contrib{padding:11px 13px;background:#faf9f7;border-top:1px solid var(--b-line)}
+.opt-contrib-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.opt-contrib-top label{font-size:11.5px;font-weight:700;color:var(--b-ink)}
+.opt-contrib-top output{font-size:13px;font-weight:700;color:var(--b-orange);font-variant-numeric:tabular-nums}
+.opt-contrib input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer;margin:0;
+}
+.opt-contrib input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--b-grid);border-radius:99px}
+.opt-contrib input[type=range]::-moz-range-track{height:4px;background:var(--b-grid);border-radius:99px}
+.opt-contrib input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;
+  border:2px solid var(--b-orange);margin-top:-7px;box-shadow:0 1px 3px rgba(0,0,0,.24);
+}
+.opt-contrib input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--b-orange);
+}
+.opt-contrib p{margin:4px 0 0;font-size:11px;color:var(--b-ink2)}
+
+/* --- the broker site output --- */
+.opt-site{flex:1;background:#eef0f2;padding:12px;overflow:auto}
+.opt-sitecard{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.09)}
+.opt-sitenav{
+  background:#fff;border-bottom:1px solid var(--b-line);padding:11px 14px;display:flex;align-items:center;gap:8px;
+}
+.opt-sitenav i{width:8px;height:8px;border-radius:50%;background:var(--b-orange);flex:none}
+.opt-sitenav b{font-size:13px;font-weight:700;letter-spacing:-.01em}
+.opt-sitenav span{margin-left:auto;font-size:10.5px;color:var(--b-ink2)}
+.opt-sitebody{padding:14px}
+.opt-sitebody h5{margin:0 0 3px;font-size:15px;font-weight:700;letter-spacing:-.015em}
+.opt-sitebody>p{margin:0 0 12px;font-size:11.5px;color:var(--b-ink2);line-height:1.5}
+.opt-plan{
+  border:1px solid var(--b-line);border-radius:7px;padding:11px 12px;margin-bottom:9px;
+  transition:border-color .15s,box-shadow .15s;cursor:pointer;
+}
+.opt-plan:last-child{margin-bottom:0}
+.opt-plan:hover{border-color:var(--b-orange);box-shadow:0 2px 10px rgba(255,97,43,.14)}
+.opt-plan.flag{border-color:#f0b8b4;background:#fef7f6}
+.opt-plan-top{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
+.opt-plan-top b{font-size:13px;font-weight:700}
+.opt-plan-top span{font-size:10.5px;color:var(--b-ink2);margin-left:auto;white-space:nowrap}
+.opt-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b-line);border-radius:5px;overflow:hidden}
+.opt-tier{background:#fff;padding:7px 5px;text-align:center}
+.opt-tier em{
+  display:block;font-style:normal;font-size:9px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--b-ink2);font-weight:700;margin-bottom:3px;
+}
+.opt-tier b{display:block;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.opt-tier s{display:block;font-size:9.5px;color:#a29e97;text-decoration:line-through;font-variant-numeric:tabular-nums}
+.opt-planwarn{
+  margin-top:8px;font-size:10.5px;color:#8a2b24;background:#fdecea;border-radius:4px;padding:6px 8px;line-height:1.45;
+}
+.opt-sitefoot{
+  margin-top:11px;padding-top:10px;border-top:1px solid var(--b-line);
+  font-size:10.5px;color:var(--b-ink2);line-height:1.5;
+}
+.opt-stale{
+  display:none;align-items:center;gap:7px;margin-bottom:10px;padding:7px 10px;border-radius:5px;
+  background:#fdf6ea;border:1px solid #f0dcbb;color:#6b4600;font-size:10.5px;font-weight:600;
+}
+.opt-stale.show{display:flex}
+
+/* --- @override optum(before) — the legacy tool: no preview, no plain-language rules --- */
+.opt-nopreview{display:none}
+.brand-optum.is-legacy .opt-site{display:none}
+.brand-optum.is-legacy .opt-nopreview{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  flex:1;padding:26px 22px;background:#f1efec;gap:5px;
+}
+.opt-nopreview-ic{font-size:26px;color:#b3aea6;line-height:1;margin-bottom:5px}
+.opt-nopreview b{font-size:13px;font-weight:700;color:#6f6a63}
+.opt-nopreview span{font-size:11.5px;color:#8d8880;line-height:1.55;max-width:34ch}
+.opt-nopreview-ref{font-family:var(--mono);font-size:10px;color:#a9a49c;margin-top:9px}
+.brand-optum.is-legacy .opt-contrib{display:none}
+.brand-optum.is-legacy .opt-reset{display:none}
+.brand-optum.is-legacy #optWho{display:none}
+/* legacy validation: a code, at save time, with no way to act on it */
+.brand-optum.is-legacy .opt-alert{
+  background:#f1efec;color:#6f6a63;border-top-color:var(--b-line);font-family:var(--mono);font-size:11px;
+}
+.brand-optum.is-legacy .opt-alert.err{background:#f7eceb;color:#7a1414}
+.brand-optum.is-legacy .opt-alert .fix{display:none}
+.brand-optum.is-legacy .opt-cell.bad{background:#fff}
+.brand-optum.is-legacy .opt-flag{display:none}
+
+/* ============================================================
+   SPECIMEN 4 · CAPITAL ONE  (neutral retirement projection)
+   ============================================================ */
+.brand-neutral{
+  --b-ink:#1d232b;--b-ink2:#616b78;--b-line:#e2e5ea;--b-bg:#f6f7f9;
+  --b-acc:#2f6f7e;--b-acc-d:#245a66;--b-good:#2e7d4f;--b-warn:#a4671b;
+  font-family:var(--sans);color:var(--b-ink);font-size:14px;background:#fff;
+}
+.n-head{padding:6px 20px 14px}
+.n-head h4{margin:0 0 2px;font-size:19px;font-weight:700;letter-spacing:-.02em}
+.n-head p{margin:0;font-size:12.5px;color:var(--b-ink2)}
+.n-tabs{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--b-line)}
+.n-tab{
+  border:0;background:transparent;cursor:pointer;padding:9px 12px;font-size:12.5px;font-weight:600;
+  color:var(--b-ink2);border-bottom:2px solid transparent;
+}
+.n-tab[aria-selected="true"]{color:var(--b-acc);border-bottom-color:var(--b-acc)}
+.n-body{padding:16px 20px 22px;min-height:392px}
+.n-big{font-size:30px;font-weight:700;letter-spacing:-.03em;margin:0 0 2px;font-variant-numeric:tabular-nums}
+.n-cap{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--b-ink2);margin:0 0 14px;font-weight:600}
+.n-chart{width:100%;height:132px;display:block;margin-bottom:6px;overflow:visible}
+.n-legend{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 7px}
+.n-key{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--b-ink2)}
+.n-key i{width:14px;height:0;border-top:2px solid;flex:none}
+.n-key i.solid{border-color:var(--b-acc)}
+.n-key i.dash{border-top-style:dashed;border-color:#c98a2e}
+.n-key b{color:var(--b-ink);font-weight:700;font-variant-numeric:tabular-nums}
+.n-xaxis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--b-ink2);margin-bottom:16px}
+.n-ctrl{margin-bottom:15px}
+.n-ctrl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.n-ctrl-top label{font-size:12.5px;font-weight:600}
+.n-ctrl-top output{font-size:13.5px;font-weight:700;color:var(--b-acc);font-variant-numeric:tabular-nums}
+input[type=range].n-range{
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;margin:0;
+}
+input[type=range].n-range::-webkit-slider-runnable-track{height:4px;background:var(--b-line);border-radius:99px}
+input[type=range].n-range::-moz-range-track{height:4px;background:var(--b-line);border-radius:99px}
+input[type=range].n-range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;
+  border:2px solid var(--b-acc);margin-top:-8px;box-shadow:0 1px 4px rgba(0,0,0,.22);
+}
+input[type=range].n-range::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--b-acc);
+  box-shadow:0 1px 4px rgba(0,0,0,.22);
+}
+.n-callout{
+  display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-radius:8px;font-size:12.5px;line-height:1.5;
+  background:#eef4f5;border:1px solid #cfe0e3;color:#16414a;
+}
+.n-callout.short{background:#fdf4ea;border-color:#f0dcc2;color:#6d4413}
+.n-callout .ic{flex:none;font-weight:700}
+.n-callout b{display:block;margin-bottom:2px}
+.n-panel{display:none}
+.n-panel.show{display:block}
+.n-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--b-line);font-size:13px}
+.n-row:last-child{border-bottom:0}
+.n-row b{font-weight:600}
+.n-row span{color:var(--b-ink2);font-size:12px;display:block;font-weight:400}
+.n-amt{font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ============================================================
+   SPECIMEN 5 · AMENPRAYERS
+   ============================================================ */
+.brand-amen{
+  --b-ink:#241f1a;--b-ink2:#6d655b;--b-line:#e8e1d6;--b-bg:#fbf8f3;--b-acc:#8a6a3f;
+  font-family:var(--sans);color:var(--b-ink);font-size:14px;background:var(--b-bg);
+}
+.am-head{padding:4px 18px 12px;display:flex;align-items:center;gap:10px}
+.am-head h4{margin:0;font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.02em;flex:1}
+.am-new{
+  border:0;background:var(--b-ink);color:#fff;border-radius:999px;padding:7px 15px;
+  font-size:12.5px;font-weight:600;cursor:pointer;
+}
+.am-new:hover{background:var(--b-acc)}
+.am-chips{display:flex;gap:7px;padding:0 18px 12px;overflow-x:auto}
+.am-chip{
+  border:1px solid var(--b-line);background:#fff;color:var(--b-ink2);cursor:pointer;
+  border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600;white-space:nowrap;
+}
+.am-chip[aria-pressed="true"]{background:var(--b-ink);color:#fff;border-color:var(--b-ink)}
+.am-feed{padding:0 18px 18px;display:grid;gap:10px;min-height:340px;align-content:start}
+.am-card{
+  background:#fff;border:1px solid var(--b-line);border-radius:12px;padding:13px 14px;
+  transition:border-color .15s,transform .15s;
+}
+.am-card:hover{border-color:var(--b-acc);transform:translateY(-1px)}
+.am-card-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.am-av{width:24px;height:24px;border-radius:50%;background:#e6dccb;display:grid;place-items:center;font-size:10.5px;font-weight:700;color:#6d5b3d;flex:none}
+.am-who{font-size:12px;font-weight:600}
+.am-when{font-size:11px;color:var(--b-ink2);margin-left:auto}
+.am-txt{margin:0 0 9px;font-size:13.5px;line-height:1.55}
+.am-foot{display:flex;align-items:center;gap:14px}
+.am-star{
+  border:0;background:transparent;cursor:pointer;font-size:14px;color:#c4bcae;padding:2px;line-height:1;
+}
+.am-star[aria-pressed="true"]{color:#d9a441}
+.am-tag{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--b-acc)}
+.am-count{margin-left:auto;font-size:11.5px;color:var(--b-ink2)}
+.am-empty{text-align:center;color:var(--b-ink2);font-size:13px;padding:34px 12px}
+.am-compose{padding:0 18px 18px}
+.am-compose textarea{
+  width:100%;min-height:84px;padding:11px 12px;border:1px solid var(--b-line);border-radius:10px;
+  font:inherit;font-size:13.5px;resize:vertical;background:#fff;color:var(--b-ink);
+}
+.am-compose textarea:focus{outline:2px solid var(--b-acc);border-color:var(--b-acc)}
+.am-compose-row{display:flex;gap:8px;margin-top:9px;align-items:center}
+.am-toast{
+  position:absolute;left:14px;right:14px;bottom:14px;background:var(--b-ink);color:#fff;
+  border-radius:10px;padding:11px 13px;font-size:12.5px;display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:6;
+}
+.am-toast[hidden]{display:none}
+.am-toast button{border:0;background:transparent;color:#e3b96a;font-weight:700;cursor:pointer;margin-left:auto;font-size:12.5px}
+
+/* ============================================================
+   APPROACH / TIMELINE / FOOTER
+   ============================================================ */
+.grid3{display:grid;gap:26px;grid-template-columns:1fr}
+@media(min-width:820px){.grid3{grid-template-columns:repeat(3,1fr);gap:38px}}
+.pill-num{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--accent-2);
+  display:block;margin-bottom:10px;
+}
+.grid3 h3{font-family:var(--serif);font-weight:400;font-size:21px;margin:0 0 9px;letter-spacing:-.015em}
+.grid3 p{margin:0;color:var(--ink-2);font-size:14.5px;line-height:1.65}
+
+.tl{border-top:1px solid var(--line)}
+.tl-row{
+  display:grid;grid-template-columns:1fr;gap:4px;padding:20px 0;border-bottom:1px solid var(--line);
+}
+@media(min-width:760px){.tl-row{grid-template-columns:150px 1fr 190px;gap:28px;align-items:baseline}}
+.tl-when{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.03em}
+.tl-what b{font-weight:600;font-size:16px;display:block;margin-bottom:3px;letter-spacing:-.01em}
+.tl-what span{color:var(--ink-2);font-size:14px;line-height:1.6}
+.tl-where{font-size:12.5px;color:var(--ink-3)}
+.tl-now{
+  display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);padding:2px 7px;border-radius:999px;margin-left:8px;vertical-align:2px;
+}
+
+.skills{display:grid;gap:24px;grid-template-columns:1fr}
+@media(min-width:760px){.skills{grid-template-columns:repeat(2,1fr);gap:24px 44px}}
+.skills h4{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 11px;font-weight:400;
+}
+.skills ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.skills li{
+  font-size:12.5px;background:var(--paper-2);border:1px solid var(--line);
+  border-radius:999px;padding:4px 11px;color:var(--ink-2);
+}
+
+.foot{background:var(--stage);color:var(--stage-ink);padding:76px 0 40px}
+.foot h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.6vw,46px);letter-spacing:-.024em;margin:0 0 16px;line-height:1.08}
+.foot p{color:#b8b2a6;font-size:16.5px;max-width:52ch;margin:0 0 28px}
+.foot .btn-primary{background:var(--stage-ink);color:var(--stage)}
+.foot .btn-primary:hover{background:#e8a087}
+.foot .btn-ghost{border-color:#413d36;color:#b8b2a6}
+.foot .btn-ghost:hover{border-color:var(--stage-ink);color:var(--stage-ink)}
+.legal{
+  margin-top:56px;padding:22px 24px;border:1px solid var(--stage-line);border-radius:10px;
+  background:rgba(255,255,255,.028);
+}
+.legal h3{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:#9a948a;margin:0 0 12px;font-weight:400;
+}
+.legal p{font-size:12.5px;line-height:1.7;color:#8d8880;margin:0 0 11px;max-width:none}
+.legal p:last-child{margin-bottom:0}
+.legal b{color:#b8b2a6;font-weight:600}
+.legal a{color:#c9a08d}
+.foot-btm{
+  margin-top:52px;padding-top:22px;border-top:1px solid var(--stage-line);
+  display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:#6f6a61;align-items:center;
+}
+.foot-btm a{color:#9a948a}
+.foot-btm a:hover{color:var(--stage-ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <span class="brandmark">Sergey Stovba<span>.</span></span>
+    <span class="nav-links" style="display:flex;gap:22px;align-items:center">
+      <a href="#work">Work</a>
+      <a href="#approach">Approach</a>
+      <a href="#history">History</a>
+      <a href="#contact" class="cta">Get in touch</a>
+    </span>
+  </div>
+</nav>
+
+<!-- ========================= HERO ========================= -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Senior Visual Designer · Design Systems · Seattle</p>
+    <h1>I build visual systems<br>that <em>hold up</em>.</h1>
+    <p class="hero-lede">
+      17 years designing and shipping digital products for AWS, AT&amp;T, Optum, Capital One and Microsoft.
+      Typography, colour, hierarchy and grids that stay coherent when the product gets complex
+      and the engineering gets real.
+    </p>
+    <div class="hero-actions">
+      <a href="#work" class="btn btn-primary">See the rebuilds</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+  </div>
+</header>
+
+<!-- ========================= THESIS ========================= -->
+<section class="thesis">
+  <div class="wrap">
+    <h2>These are rebuilds,<br><em>not screenshots.</em></h2>
+    <p>
+      Most of this work shipped between 2016 and 2025 — behind enterprise logins, under NDA, on
+      platforms that other teams have since redesigned. <strong>I can't show you the original pixels.</strong>
+      Nobody who worked on enterprise software a decade ago can.
+    </p>
+    <p>
+      So I rebuilt them. Every specimen below is live code running in your browser right now,
+      reconstructed from the client's <strong>public design language</strong> and the decisions I actually made
+      on the engagement. You can click them, hover them, break them, and watch them respond.
+    </p>
+    <p>
+      Even the logos are rebuilds. Anime has solved this problem for decades —
+      <strong>WcDonald's, not McDonald's</strong> — and it's the honest answer here too: close enough to
+      tell you whose product you're looking at, different enough that nobody mistakes it for the real
+      mark. So it's <strong>awz</strong>, <strong>VT&amp;T</strong>, <strong>Qptum</strong> and <strong>StepMise</strong> below.
+      No client trademark appears on this page.
+    </p>
+    <div class="thesis-rule"></div>
+    <p class="thesis-kicker">
+      A screenshot proves I was in the room.<br>
+      This proves I can still do the work.
+    </p>
+  </div>
+</section>
+
+<!-- ========================= WORK ========================= -->
+<div id="work"></div>
+
+<!-- ---------- 01 · AWS ---------- -->
+<section class="proj">
+  <div class="wrap">
+    <div class="proj-head">
+      <div>
+        <span class="proj-num">01 — Modernization</span>
+        <h2 class="proj-title">Amazon Web Services<br>Educate</h2>
+        <p class="proj-meta">
+          <b>Client</b> Amazon Web Services · <b>Agency</b> Fiduciary Tech<br>
+          <b>Role</b> Design Consultant · <b>Team</b> AWS Educate<br>
+          <b>When</b> Feb – May 2025
+        </p>
+        <span class="tag">Design system unification</span>
+      </div>
+      <div class="proj-body">
+        <p>
+          AWS's education programs — <b>Educate</b>, <b>re/Start</b> and <b>Academy</b> — were built independently over
+          several years. Learners moving between them hit different navigation, different visual language,
+          and different levels of accessibility. It felt like three products, not one ecosystem.
+        </p>
+        <div class="decision">
+          <span class="decision-label">The decision I made</span>
+          <p>
+            Build <b>one shared UX foundation</b>, not three separate redesigns. Align layouts, navigation
+            and content patterns to Skill Builder standards — so each program keeps its purpose but
+            stops paying the cost of being different.
+          </p>
+        </div>
+        <p>
+          Flow efficiency up <b>15%</b>, engagement up <b>10%</b>, customer satisfaction up <b>15%</b> — inside a single quarter.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-top">
+        <span class="live-dot"></span>
+        <span class="stage-label">Live specimen · <b>Learner console</b></span>
+        <span class="stage-hint">Switch programs, then flip Before / After</span>
+      </div>
+
+      <div class="stage-controls">
+        <div class="seg" role="group" aria-label="Before or after the unification">
+          <button type="button" data-aws-mode="before" aria-pressed="true">Before</button>
+          <button type="button" data-aws-mode="after" aria-pressed="false">After</button>
+        </div>
+        <p class="stage-note" id="awsNote"><b>Before:</b> three programs, three design languages. Click the tabs — the whole shell changes under you.</p>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="url">awz.amason.com/training — rebuild</span>
+        </div>
+        <div class="frame-body brand-aws is-split" id="awsApp" data-prog="educate">
+          <div class="aws-nav">
+            <span class="aws-logo" aria-label="awz — parody mark">
+              <svg viewBox="0 0 54 30" width="42" height="23" role="img" aria-hidden="true">
+                <text x="0" y="16" font-family="Helvetica Neue,Helvetica,Arial" font-size="16.5"
+                      font-weight="700" letter-spacing="-.6" fill="currentColor">awz</text>
+                <path d="M1.5 23.5 Q 19 30.5 38 22.5" stroke="#ff9900" stroke-width="2.5"
+                      fill="none" stroke-linecap="round"/>
+                <path d="M34.5 19.6 L41 22.2 L34.8 25.4 Z" fill="#ff9900"/>
+              </svg>
+            </span>
+            <span>Training and Certification</span>
+            <span class="sp"></span>
+            <span class="aws-av">SS</span>
+          </div>
+          <div class="aws-progs" role="tablist" aria-label="AWS education programs">
+            <button class="aws-prog" role="tab" data-prog="educate" aria-selected="true">AWS Educate</button>
+            <button class="aws-prog" role="tab" data-prog="restart" aria-selected="false">AWS re/Start</button>
+            <button class="aws-prog" role="tab" data-prog="academy" aria-selected="false">AWS Academy</button>
+          </div>
+          <div class="aws-main">
+            <div class="aws-flag" id="awsFlag"></div>
+
+            <div class="aws-unified">
+              <div class="aws-resume">
+                <span class="aws-resume-ic">▶</span>
+                <span class="aws-resume-txt">
+                  <em>Continue where you left off</em>
+                  <b id="awsResumeT">Networking and Security</b>
+                  <span id="awsResumeM">AWS re/Start · Week 4 of 12</span>
+                </span>
+                <span class="aws-resume-pct" id="awsResumeP">41%</span>
+                <button type="button" class="aws-btn" id="awsResumeBtn">Resume</button>
+              </div>
+
+              <div class="aws-path">
+                <div class="aws-path-hd">
+                  <b>Your cloud path</b>
+                  <span id="awsPathPct">3 programs · 47% complete</span>
+                </div>
+                <div class="aws-path-track" id="awsPath"></div>
+              </div>
+            </div>
+
+            <h3 class="aws-h" id="awsH"></h3>
+            <p class="aws-sub" id="awsSub"></p>
+            <div class="aws-facets" id="awsFacets" role="group" aria-label="Filter by level"></div>
+            <div class="aws-grid" id="awsGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <p class="stage-src">
+          <b>Rebuilt from:</b> the Cloudscape Design System (AWS's public open-source design system) and public
+          AWS Skill Builder patterns. Course titles are representative, not real catalogue data.
+          The <b>awz</b> mark is a deliberate parody, not the AWS logo. Not affiliated with or endorsed by Amazon Web Services.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- 02 · AT&T ---------- -->
+<section class="proj">
+  <div class="wrap">
+    <div class="proj-head">
+      <div>
+        <span class="proj-num">02 — Modernization</span>
+        <h2 class="proj-title">AT&amp;T<br>Order Lookup &amp; Status</h2>
+        <p class="proj-meta">
+          <b>Client</b> AT&amp;T · <b>Agency</b> Axelon<br>
+          <b>Role</b> Senior UX Designer · <b>Team</b> Cart &amp; Checkout<br>
+          <b>When</b> Jan – Dec 2022
+        </p>
+        <span class="tag">Post-purchase experience</span>
+      </div>
+      <div class="proj-body">
+        <p>
+          The moment after someone pays is where trust is most fragile. I owned the order confirmation
+          email and the order status lookup, for both <b>guest</b> and <b>signed-in</b> customers — two audiences
+          whose journeys kept diverging into different-looking screens.
+        </p>
+        <div class="decision">
+          <span class="decision-label">The decision I made</span>
+          <p>
+            Standardise the components and the messaging hierarchy <b>first</b>, then fix the handoff
+            between email and web — so the journey stops feeling like a black box halfway through.
+          </p>
+        </div>
+        <p>
+          Mobile usability up <b>20%</b> through purposeful motion and responsive layouts; design-to-development
+          handoff velocity up <b>25%</b> off the back of a Figma sub-design-system with shared components and tokens.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-top">
+        <span class="live-dot"></span>
+        <span class="stage-label">Live specimen · <b>Order status lookup</b></span>
+        <span class="stage-hint">Try a wrong order number, then the real one</span>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="url">vtt.com/orderstatus — rebuild</span>
+        </div>
+        <div class="frame-body brand-att" id="attApp">
+          <div class="att-nav">
+            <span class="att-globe" aria-label="VT&amp;T — parody mark">
+              <svg viewBox="0 0 32 32" width="27" height="27" role="img" aria-hidden="true">
+                <defs>
+                  <radialGradient id="vttBall" cx="34%" cy="26%" r="80%">
+                    <stop offset="0%"   stop-color="#9ae2fa"/>
+                    <stop offset="34%"  stop-color="#2badE3"/>
+                    <stop offset="74%"  stop-color="#0576b6"/>
+                    <stop offset="100%" stop-color="#014b7c"/>
+                  </radialGradient>
+                  <linearGradient id="vttGloss" x1="0" y1="0" x2="0.2" y2="1">
+                    <stop offset="0%"   stop-color="#fff" stop-opacity=".5"/>
+                    <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                  </linearGradient>
+                  <clipPath id="vttClip"><circle cx="16" cy="16" r="15"/></clipPath>
+                </defs>
+                <circle cx="16" cy="16" r="15" fill="url(#vttBall)"/>
+                <!-- latitude gaps: equal angular spacing, so they compress toward the poles -->
+                <g clip-path="url(#vttClip)" stroke="#fff" fill="none" stroke-linecap="butt">
+                  <path d="M-1 1.73  Q16 3.5  33 1.73"  stroke-width=".95"/>
+                  <path d="M-1 3.86  Q16 5.8  33 3.86"  stroke-width="1.1"/>
+                  <path d="M-1 7.18  Q16 9.3  33 7.18"  stroke-width="1.25"/>
+                  <path d="M-1 11.36 Q16 13.6 33 11.36" stroke-width="1.4"/>
+                  <path d="M-1 16    Q16 18.3 33 16"    stroke-width="1.45"/>
+                  <path d="M-1 20.64 Q16 22.9 33 20.64" stroke-width="1.4"/>
+                  <path d="M-1 24.82 Q16 26.9 33 24.82" stroke-width="1.25"/>
+                  <path d="M-1 28.14 Q16 30.0 33 28.14" stroke-width="1.1"/>
+                  <path d="M-1 30.27 Q16 31.9 33 30.27" stroke-width=".95"/>
+                </g>
+                <ellipse cx="12.2" cy="8.2" rx="7.6" ry="4.5" transform="rotate(-20 12.2 8.2)"
+                         fill="url(#vttGloss)" clip-path="url(#vttClip)"/>
+                <circle cx="16" cy="16" r="14.5" fill="none" stroke="#00223a" stroke-opacity=".3" stroke-width="1"/>
+              </svg>
+            </span>
+            <b>VT&amp;T</b>
+            <span class="sp">Order status</span>
+          </div>
+          <div class="att-body">
+
+            <!-- view: lookup -->
+            <div class="att-view show" data-att-view="lookup">
+              <h3 class="att-h">Check your order status</h3>
+              <p class="att-sub">Enter the order number from your confirmation email. No sign-in needed.</p>
+
+              <div class="att-seg" role="group" aria-label="Customer type">
+                <button type="button" data-att-who="guest" aria-pressed="true">Guest</button>
+                <button type="button" data-att-who="member" aria-pressed="false">Signed in</button>
+              </div>
+
+              <form class="att-form" id="attForm" novalidate>
+                <div class="att-field" id="attF1">
+                  <label for="attOrder">Order number</label>
+                  <input id="attOrder" type="text" inputmode="numeric" placeholder="0000-000-0000" autocomplete="off">
+                  <p class="att-err"><i>!</i><span id="attErrMsg">Enter your 11-digit order number, including dashes.</span></p>
+                  <p class="att-hint">Demo order: <code id="attFill">0293-441-8827</code> — tap to fill</p>
+                </div>
+                <div class="att-field" id="attF2">
+                  <label for="attZip">Billing ZIP code</label>
+                  <input id="attZip" type="text" inputmode="numeric" placeholder="98004" maxlength="5" autocomplete="off">
+                </div>
+                <button type="submit" class="att-cta">Check status</button>
+                <button type="button" class="att-link" data-att-go="email">I still have the confirmation email →</button>
+              </form>
+            </div>
+
+            <!-- view: email -->
+            <div class="att-view" data-att-view="email">
+              <h3 class="att-h">Your confirmation email</h3>
+              <p class="att-sub">The same components, the same hierarchy, the same status language — so the jump to the web is continuous, not a restart.</p>
+              <div class="att-email">
+                <div class="att-email-hd">
+                  <b>Your VT&amp;T order is confirmed</b>
+                  VT&amp;T &lt;orders@vtt.com&gt; · to you
+                </div>
+                <div class="att-email-bd">
+                  <h4>Thanks — we've got your order.</h4>
+                  <p>We'll email you again the moment it ships. You can check where it is at any time.</p>
+                  <button type="button" class="att-cta" data-att-go="status">Track your order</button>
+                  <div style="margin-top:16px">
+                    <div class="att-order-line"><span>Order number</span><b>0293-441-8827</b></div>
+                    <div class="att-order-line"><span>Placed</span><b>Sep 1, 2026</b></div>
+                    <div class="att-order-line"><span>Total</span><b>$412.68</b></div>
+                  </div>
+                </div>
+              </div>
+              <p style="margin-top:16px"><button type="button" class="att-link" data-att-go="lookup">← Back to lookup</button></p>
+            </div>
+
+            <!-- view: status -->
+            <div class="att-view" data-att-view="status">
+              <h3 class="att-h">Order 0293-441-8827</h3>
+              <p class="att-sub" id="attStatusSub">Arriving Thursday, September 10.</p>
+
+              <div class="att-track">
+                <div class="att-step on"><div class="att-bullet">✓</div><div><h5>Order placed</h5><p>Sep 1 · Confirmation sent to your email</p></div></div>
+                <div class="att-step on"><div class="att-bullet">✓</div><div><h5>Order processed</h5><p>Sep 3 · Payment authorised</p></div></div>
+                <div class="att-step now"><div class="att-bullet">●</div><div><h5>Shipped</h5><p>Sep 8 · Left the facility in Fort Worth, TX</p></div></div>
+                <div class="att-step off"><div class="att-bullet">○</div><div><h5>Delivered</h5><p>Estimated Thursday, Sep 10</p></div></div>
+              </div>
+
+              <div class="att-summary">
+                <h5>Order summary</h5>
+                <div class="att-order-line" style="border-top:0"><span>iPhone 17 Pro · 256GB</span><b>$1,099.00</b></div>
+                <div class="att-order-line"><span>Trade-in credit</span><b>−$720.00</b></div>
+                <div class="att-order-line"><span>Activation</span><b>$35.00</b></div>
+                <div class="att-order-line"><span>Total</span><b>$412.68</b></div>
+              </div>
+              <p style="margin-top:16px"><button type="button" class="att-link" data-att-go="lookup">← Look up another order</button></p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <p class="stage-src">
+          <b>Rebuilt from:</b> AT&amp;T's public brand guidelines — AT&amp;T Blue <code style="color:#8f8a80">#009FDB</code>,
+          the striped globe, and the pill button geometry used across att.com. The <b>VT&amp;T</b> mark is a
+          deliberate parody, not the AT&amp;T logo. Order data is fictional.
+          Not affiliated with or endorsed by AT&amp;T.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- 03 · OPTUM ---------- -->
+<section class="proj">
+  <div class="wrap">
+    <div class="proj-head">
+      <div>
+        <span class="proj-num">03 — Modernization</span>
+        <h2 class="proj-title">Optum<br>StepWise PLM</h2>
+        <p class="proj-meta">
+          <b>Client</b> Optum · <b>Agency</b> TEKsystems<br>
+          <b>Role</b> Senior UX Designer · <b>Team</b> StepWise<br>
+          <b>When</b> May 2018 – Oct 2019
+        </p>
+        <span class="tag">Regulated healthcare SaaS</span>
+      </div>
+      <div class="proj-body">
+        <p>
+          StepWise is a web tool with an unusual shape: the people using it are
+          <b>actuaries, underwriters, compliance and product managers</b> who think in spreadsheets — but what
+          the tool <em>produces</em> is a website. Brokers and employers land on it to work out
+          <b>what each employee actually pays</b> for health coverage.
+        </p>
+        <div class="decision">
+          <span class="decision-label">The decision I made</span>
+          <p>
+            Don't take the spreadsheet away — they're fluent in it, and fighting that mental model was
+            never going to work. Instead, <b>put the output next to the input</b>: render the broker-facing
+            site live beside the grid, so every cell edit has a visible consequence in the thing the
+            customer will see.
+          </p>
+        </div>
+        <p>
+          Customer satisfaction up <b>15%</b>, task completion up <b>10%</b>, friction in the onboarding and
+          customization wizards down <b>30%</b>.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-top">
+        <span class="live-dot"></span>
+        <span class="stage-label">Live specimen · <b>Plan builder → broker site</b></span>
+        <span class="stage-hint">Edit any rate cell — the site on the right redraws</span>
+      </div>
+
+      <div class="stage-controls">
+        <div class="seg" role="group" aria-label="Before or after the redesign">
+          <button type="button" data-opt-mode="before" aria-pressed="false">Before</button>
+          <button type="button" data-opt-mode="after" aria-pressed="true">After</button>
+        </div>
+        <p class="stage-note" id="optNote"><b>After:</b> the output sits beside the input, and the rules explain themselves in the language of the job.</p>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="url">stepmise.qptum.com/plm — rebuild</span>
+        </div>
+        <div class="frame-body brand-optum" id="optApp">
+          <div class="opt-bar">
+            <span class="opt-brand"><i></i><b>StepMise</b><span>PLM</span></span>
+            <span class="opt-by">by <b>Qptum</b></span>
+            <span class="opt-crumb">Commercial / Small Group / <b>Plan Year 2027</b></span>
+            <button type="button" class="opt-reset" id="optReset">Reset rates</button>
+            <button type="button" class="opt-publish" id="optPublish" disabled>Published</button>
+          </div>
+
+          <div class="opt-split">
+
+            <!-- LEFT · the builder -->
+            <div class="opt-pane">
+              <div class="opt-pane-hd">Plan definition and rules <em>Monthly premium by tier</em></div>
+
+              <div class="opt-formula">
+                <span class="opt-cellref" id="optRef">—</span>
+                <span class="opt-fx" id="optFx">Select a cell to edit</span>
+              </div>
+
+              <div class="opt-sheetwrap">
+                <table class="opt">
+                  <thead>
+                    <tr>
+                      <th class="rownum"></th>
+                      <th class="lbl">A · Plan</th>
+                      <th>B · Ded.</th>
+                      <th>C · Employee</th>
+                      <th>D · +Spouse</th>
+                      <th>E · +Child</th>
+                      <th>F · Family</th>
+                    </tr>
+                  </thead>
+                  <tbody id="optRows"></tbody>
+                </table>
+              </div>
+
+              <div class="opt-alert" id="optAlert">
+                <span class="ic" id="optAlertIc">!</span>
+                <div>
+                  <b id="optAlertTitle"></b>
+                  <span id="optAlertBody"></span>
+                  <button type="button" class="fix" id="optFix" hidden></button>
+                </div>
+              </div>
+
+              <div class="opt-contrib">
+                <div class="opt-contrib-top">
+                  <label for="optEr">Employer contributes</label>
+                  <output id="optErOut">70%</output>
+                </div>
+                <input type="range" id="optEr" min="0" max="100" step="5" value="70">
+                <p>Applied to the employee tier; dependants are charged at the full rate.</p>
+              </div>
+            </div>
+
+            <!-- RIGHT · the output -->
+            <div class="opt-pane">
+              <div class="opt-pane-hd">Broker site <em id="optWho">What your employees pay</em></div>
+              <div class="opt-nopreview">
+                <span class="opt-nopreview-ic">◴</span>
+                <b>No preview available</b>
+                <span>Rate changes appear on the broker site after the overnight publish job. Verify against the printed rate sheet before saving.</span>
+                <span class="opt-nopreview-ref">PLM-UI · build 4.2.17</span>
+              </div>
+              <div class="opt-site">
+                <div class="opt-stale" id="optStale">● Unpublished changes — the live site still shows the old rates</div>
+                <div class="opt-sitecard">
+                  <div class="opt-sitenav"><i></i><b>Meridian Health</b><span>Plan Year 2027</span></div>
+                  <div class="opt-sitebody">
+                    <h5>Choose your coverage</h5>
+                    <p>Monthly cost after your employer's contribution. Rates shown are per employee.</p>
+                    <div id="optPlans"></div>
+                    <p class="opt-sitefoot">
+                      Rates are effective 1 Jan 2027 and subject to final regulatory filing.
+                      Generated from StepMise PLM · Meridian Health, a fictional carrier.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <p class="stage-src">
+          <b>Rebuilt from:</b> Optum's public brand palette (brand orange <code style="color:#8f8a80">#FF612B</code>, Optum Sans)
+          and the capabilities published in Optum's own StepWise PLM fact sheet — plan definition and rules,
+          plan customization, benefit loading, and generating "accurate plan and benefit information to provide
+          customers with the information they need to make informed decisions." The <b>Qptum</b> and <b>StepMise</b> marks are deliberate parodies, not the Optum or StepWise logos.
+          The 3:1 age-band rate rule is real ACA small-group law; carrier, plans and rates are fictional.
+          Not affiliated with or endorsed by Optum.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- 04 · CAPITAL ONE ---------- -->
+<section class="proj">
+  <div class="wrap">
+    <div class="proj-head">
+      <div>
+        <span class="proj-num">04 — Concept validation</span>
+        <h2 class="proj-title">Capital One<br>Investments</h2>
+        <p class="proj-meta">
+          <b>Client</b> Capital One · <b>Agency</b> Pyramid Consulting<br>
+          <b>Role</b> Senior UX Designer · <b>Team</b> Web &amp; App Design<br>
+          <b>When</b> Oct 2017 – Feb 2018
+        </p>
+        <span class="tag">Unreleased · NDA</span>
+      </div>
+      <div class="proj-body">
+        <p>
+          Early-stage research, ideation and prototyping for unreleased personal-banking features —
+          validated across <b>5 prototype rounds</b> on UserTesting.com, presented to <b>10+ stakeholders</b>
+          across product, design and engineering.
+        </p>
+        <div class="decision">
+          <span class="decision-label">The decision I made</span>
+          <p>
+            Lead with research and <b>deliberately unbranded</b> prototypes. Testing branded screens
+            measures how people feel about the bank; testing neutral ones measures whether the
+            <b>interaction</b> works. So this specimen has no Capital One brand in it — that absence is the method,
+            not an omission.
+          </p>
+        </div>
+        <p>
+          Task success up <b>18%</b>. Confusion in retirement data-visualisation sessions down <b>20%</b>
+          through colour coding and type hierarchy under Material Design guidelines.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-top">
+        <span class="live-dot"></span>
+        <span class="stage-label">Live specimen · <b>Retirement projection</b></span>
+        <span class="stage-hint">Drag the sliders — the chart and the verdict both move</span>
+      </div>
+
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen brand-neutral">
+            <div class="phone-notch"></div>
+            <div class="phone-status"><span>9:41</span><span>▮▮▮ ⌁</span></div>
+
+            <div class="n-head">
+              <h4>Retirement</h4>
+              <p>Projected to age 90 · 6% average return</p>
+            </div>
+
+            <div class="n-tabs" role="tablist">
+              <button class="n-tab" role="tab" data-n-tab="proj" aria-selected="true">Projection</button>
+              <button class="n-tab" role="tab" data-n-tab="contrib" aria-selected="false">Contributions</button>
+              <button class="n-tab" role="tab" data-n-tab="acct" aria-selected="false">Accounts</button>
+            </div>
+
+            <div class="n-body">
+              <!-- projection -->
+              <div class="n-panel show" data-n-panel="proj">
+                <p class="n-big" id="nBig">$0</p>
+                <p class="n-cap">Projected at retirement</p>
+
+                <svg class="n-chart" id="nChart" viewBox="0 0 300 132" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="nFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#2f6f7e" stop-opacity=".26"/>
+                      <stop offset="100%" stop-color="#2f6f7e" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="nGapFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#c98a2e" stop-opacity=".2"/>
+                      <stop offset="100%" stop-color="#c98a2e" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path id="nGoalLine" stroke="#c2c8d0" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+                  <path id="nGap"  fill="url(#nGapFill)"/>
+                  <path id="nArea" fill="url(#nFill)"/>
+                  <path id="nRec"  fill="none" stroke="#c98a2e" stroke-width="2" stroke-dasharray="4 3.5"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                  <path id="nLine" fill="none" stroke="#2f6f7e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle id="nDot" r="3.2" fill="#2f6f7e" stroke="#fff" stroke-width="1.6"/>
+                </svg>
+                <div class="n-legend">
+                  <span class="n-key"><i class="solid"></i>Your pace<b id="nKeyNow"></b></span>
+                  <span class="n-key"><i class="dash"></i>To hit goal<b id="nKeyRec"></b></span>
+                </div>
+                <div class="n-xaxis"><span>Today · 42</span><span id="nXMid"></span><span id="nXEnd"></span></div>
+
+                <div class="n-ctrl">
+                  <div class="n-ctrl-top">
+                    <label for="nContrib">Monthly contribution</label>
+                    <output id="nContribOut">$600</output>
+                  </div>
+                  <input class="n-range" id="nContrib" type="range" min="0" max="2500" step="50" value="600">
+                </div>
+
+                <div class="n-ctrl">
+                  <div class="n-ctrl-top">
+                    <label for="nAge">Retire at age</label>
+                    <output id="nAgeOut">65</output>
+                  </div>
+                  <input class="n-range" id="nAge" type="range" min="55" max="72" step="1" value="65">
+                </div>
+
+                <div class="n-callout" id="nCallout">
+                  <span class="ic">✓</span>
+                  <div><b id="nCalloutT">On track</b><span id="nCalloutB"></span></div>
+                </div>
+              </div>
+
+              <!-- contributions -->
+              <div class="n-panel" data-n-panel="contrib">
+                <p class="n-big" id="nYr">$7,200</p>
+                <p class="n-cap">Contributed this year</p>
+                <div class="n-row"><div><b>Your contribution</b><span>Monthly, automatic</span></div><span class="n-amt" id="nRowYou">$600</span></div>
+                <div class="n-row"><div><b>Employer match</b><span>50% up to 6%</span></div><span class="n-amt" id="nRowEmp">$300</span></div>
+                <div class="n-row"><div><b>Annual limit remaining</b><span>2026 · $23,500 cap</span></div><span class="n-amt" id="nRowCap">$16,300</span></div>
+                <div class="n-callout" style="margin-top:16px">
+                  <span class="ic">↑</span>
+                  <div><b>Raising by $150/mo</b><span>adds roughly <b id="nWhatIf">$0</b> by retirement.</span></div>
+                </div>
+              </div>
+
+              <!-- accounts -->
+              <div class="n-panel" data-n-panel="acct">
+                <p class="n-big">$184,200</p>
+                <p class="n-cap">Total balance today</p>
+                <div class="n-row"><div><b>401(k) · Current employer</b><span>Target date 2049</span></div><span class="n-amt">$112,400</span></div>
+                <div class="n-row"><div><b>Rollover IRA</b><span>Three funds</span></div><span class="n-amt">$54,900</span></div>
+                <div class="n-row"><div><b>Roth IRA</b><span>Index</span></div><span class="n-amt">$16,900</span></div>
+                <div class="n-callout" style="margin-top:16px">
+                  <span class="ic">i</span>
+                  <div><b>Neutral prototype palette</b><span>No Capital One brand appears here — not even a parody one. That absence is how the concepts were actually tested.</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <p class="stage-src">
+          <b>Rebuilt from:</b> nothing branded — intentionally. This reconstructs the <em>interaction pattern</em>
+          and data-visualisation hierarchy under Android Material Design guidelines, in the neutral palette
+          concepts were tested in. All figures fictional. Not affiliated with or endorsed by Capital One.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- 05 · AMENPRAYERS ---------- -->
+<section class="proj">
+  <div class="wrap">
+    <div class="proj-head">
+      <div>
+        <span class="proj-num">05 — New app</span>
+        <h2 class="proj-title">AmenPrayers</h2>
+        <p class="proj-meta">
+          <b>Client</b> Self-directed · <b>Agency</b> —<br>
+          <b>Role</b> Visual design, prototyping, React<br>
+          <b>When</b> May 2025 – present
+        </p>
+        <span class="tag">0 → 1</span>
+      </div>
+      <div class="proj-body">
+        <p>
+          A community platform built from zero — Firebase authentication, role-based access control and
+          content moderation, iterated through <b>20+ releases</b> on usability feedback.
+        </p>
+        <div class="decision">
+          <span class="decision-label">Why it exists</span>
+          <p>
+            No inherited brand system, nobody telling me what to do. It's where I prove I can still hold
+            the fundamentals — hierarchy, typography, colour and grid — <b>from scratch</b>, not just fit a
+            design into someone else's system.
+          </p>
+        </div>
+        <p>
+          This one isn't a reconstruction. It's the actual thing, running.
+        </p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-top">
+        <span class="live-dot"></span>
+        <span class="stage-label">Live specimen · <b>Feed and composer</b></span>
+        <span class="stage-hint">Filter, bookmark, write one — undo works too</span>
+      </div>
+
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen brand-amen" style="position:relative">
+            <div class="phone-notch"></div>
+            <div class="phone-status"><span>9:41</span><span>▮▮▮ ⌁</span></div>
+
+            <div class="am-head">
+              <h4>Prayers</h4>
+              <button class="am-new" id="amNew" type="button">New</button>
+            </div>
+
+            <div class="am-chips" id="amChips" role="group" aria-label="Filter">
+              <button class="am-chip" data-am-f="all" aria-pressed="true">All</button>
+              <button class="am-chip" data-am-f="saved" aria-pressed="false">★ Saved</button>
+              <button class="am-chip" data-am-f="health" aria-pressed="false">Health</button>
+              <button class="am-chip" data-am-f="family" aria-pressed="false">Family</button>
+              <button class="am-chip" data-am-f="work" aria-pressed="false">Work</button>
+            </div>
+
+            <div class="am-compose" id="amCompose" hidden>
+              <textarea id="amText" placeholder="Write a prayer…" aria-label="Write a prayer"></textarea>
+              <div class="am-compose-row">
+                <button class="am-new" id="amPost" type="button">Post</button>
+                <button class="am-chip" id="amCancel" type="button">Cancel</button>
+              </div>
+            </div>
+
+            <div class="am-feed" id="amFeed"></div>
+
+            <div class="am-toast" id="amToast" hidden>
+              <span id="amToastMsg">Posted</span>
+              <button type="button" id="amUndo">Undo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <p class="stage-src">
+          <b>Not a rebuild —</b> this is the real interaction model from the app, running here.
+          Content shown is placeholder, not community data.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= APPROACH ========================= -->
+<section class="sec" id="approach" style="background:var(--paper-2);border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head narrow">
+      <h2 class="sec-title">How I think about design</h2>
+      <p class="sec-sub">Three things that shape every one of the specimens above.</p>
+    </div>
+    <div class="grid3">
+      <div>
+        <span class="pill-num">01</span>
+        <h3>Systems, not screens</h3>
+        <p>
+          I don't design pages. I design systems that happen to produce pages. The AWS specimen is the
+          whole argument in one toggle — the "after" state isn't prettier, it's <em>the same</em>, and that's the point.
+        </p>
+      </div>
+      <div>
+        <span class="pill-num">02</span>
+        <h3>Craft survives handoff</h3>
+        <p>
+          If the design can't survive engineering, it isn't finished. Figma deeply — auto layout, variants,
+          tokens — and then HTML, CSS, JavaScript and React to carry it through. This page is that claim,
+          executed rather than asserted.
+        </p>
+      </div>
+      <div>
+        <span class="pill-num">03</span>
+        <h3>Evidence over opinion</h3>
+        <p>
+          Usability testing, journey mapping, analytics, competitive analysis. I let the numbers argue with
+          my first draft — and where they mattered, I measured them: usability, task success, satisfaction, handoff speed.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= HISTORY ========================= -->
+<section class="sec" id="history">
+  <div class="wrap">
+    <div class="sec-head narrow">
+      <h2 class="sec-title">17 years, in order</h2>
+      <p class="sec-sub">From web producer to senior visual designer and design technologist. Nine stops, one thread.</p>
+    </div>
+    <div class="tl">
+      <div class="tl-row">
+        <span class="tl-when">2025 — present</span>
+        <span class="tl-what"><b>Independent Visual Design &amp; Prototyping<span class="tl-now">Current</span></b>
+        <span>0-to-1 product prototypes with React. A community platform with Firebase auth, role-based access and content moderation — 20+ releases. Integrating AI-assisted prototyping into design-to-code workflows.</span></span>
+        <span class="tl-where">Self-directed · Seattle, WA</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">Feb — May 2025</span>
+        <span class="tl-what"><b>Design Consultant — Amazon Web Services</b>
+        <span>Discovery, product mapping and stakeholder alignment for AWS Educate. Roadmap and a cohesive visual language in a single quarter; shared tokens scaled across teams.</span></span>
+        <span class="tl-where">Fiduciary Tech · Bellevue, WA</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">Jan — Dec 2022</span>
+        <span class="tl-what"><b>Senior UX Designer — AT&amp;T</b>
+        <span>High-fidelity pages and components for att.com order management. Built a team sub-design-system in Figma — handoff velocity up 25%, mobile usability up 20%.</span></span>
+        <span class="tl-where">Axelon · Bothell, WA</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">May 2018 — Oct 2019</span>
+        <span class="tl-what"><b>Senior UX Designer — Optum</b>
+        <span>Visual and onboarding redesign for StepWise, a regulated healthcare SaaS platform. Satisfaction up 15%, task completion up 10%, wizard friction down 30%.</span></span>
+        <span class="tl-where">TEKsystems · Bellevue, WA</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">Oct 2017 — Feb 2018</span>
+        <span class="tl-what"><b>Senior UX Designer — Capital One</b>
+        <span>Validated mobile concepts across 5 prototype rounds on UserTesting.com — task success up 18%. Retirement-planning data visualisation under Material Design.</span></span>
+        <span class="tl-where">Pyramid Consulting · Seattle, WA</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">May 2016 — Oct 2017</span>
+        <span class="tl-what"><b>Lead Design Technologist — Microsoft</b>
+        <span>Directed a JSON-based authoring tool in Ember.js, HTML5, CSS3 and Azure — content creation efficiency up 60% for 20+ creators. UI pattern libraries, internal CMS and marketing tooling; publishing time down 50%.</span></span>
+        <span class="tl-where">HCLTech · Redmond, WA</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">Dec 2013 — Jan 2016</span>
+        <span class="tl-what"><b>Design Technologist — Constellant</b>
+        <span>End-to-end visual and responsive redesign of DeveloperProgram.com — IA, responsive UI and HTML/CSS/JS implementation. Qualified leads up 15%.</span></span>
+        <span class="tl-where">Round Rock, TX</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">Dec 2010 — Dec 2013</span>
+        <span class="tl-what"><b>Web Producer / UX Designer — 6Qube</b>
+        <span>Responsive sites, templates, logos and icons for 30+ clients in HTML, CSS and jQuery. Legacy-to-CMS migrations cut content update time 60%; 95% client satisfaction.</span></span>
+        <span class="tl-where">Freelance · Austin, TX</span>
+      </div>
+      <div class="tl-row">
+        <span class="tl-when">Dec 2008 — Dec 2010</span>
+        <span class="tl-what"><b>Web Designer — FDGweb</b>
+        <span>50+ web and e-commerce layouts and brand assets across WordPress, Shopify, Magento and Joomla. 4.8/5 average client rating.</span></span>
+        <span class="tl-where">Arlington, WA</span>
+      </div>
+    </div>
+
+    <div style="margin-top:52px">
+      <div class="skills">
+        <div>
+          <h4>Visual &amp; UI design</h4>
+          <ul><li>Visual design</li><li>Typography</li><li>Colour theory</li><li>Visual hierarchy</li><li>Layout &amp; grid systems</li><li>Iconography</li><li>Style guides</li><li>Motion design</li><li>Design systems</li><li>Component libraries</li><li>Design tokens</li><li>Responsive &amp; mobile-first</li></ul>
+        </div>
+        <div>
+          <h4>Accessibility &amp; platforms</h4>
+          <ul><li>WCAG colour contrast</li><li>ARIA</li><li>Keyboard navigation</li><li>Focus states</li><li>Inclusive design</li><li>iOS Human Interface Guidelines</li><li>Android Material Design</li></ul>
+        </div>
+        <div>
+          <h4>Design engineering</h4>
+          <ul><li>Figma — auto layout, variants, tokens</li><li>FigJam</li><li>Sketch</li><li>Axure</li><li>Adobe CC</li><li>HTML, CSS, SASS</li><li>JavaScript, React</li><li>Bootstrap</li><li>Git</li><li>WordPress</li><li>AI-assisted prototyping</li></ul>
+        </div>
+        <div>
+          <h4>Research, product &amp; delivery</h4>
+          <ul><li>User research synthesis</li><li>Usability testing</li><li>Journey mapping</li><li>Competitive analysis</li><li>UX audits</li><li>A/B testing</li><li>UX metrics &amp; KPIs</li><li>Roadmapping</li><li>Backlog prioritisation</li><li>Stakeholder alignment</li><li>Agile / Scrum</li><li>Jira, Confluence</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= CONTACT ========================= -->
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <h2>Let's build something<br>that holds up.</h2>
+    <p>
+      Available for senior design roles where visual systems, product craft and design-to-code fluency
+      actually matter. Seattle, WA — or remote.
+    </p>
+    <div class="hero-actions">
+      <a href="mailto:sergey@stovba.com" class="btn btn-primary">sergey@stovba.com</a>
+      <a href="https://linkedin.com/in/sstovba" class="btn btn-ghost" rel="noopener">LinkedIn</a>
+      <a href="tel:+14255219777" class="btn btn-ghost">(425) 521-9777</a>
+    </div>
+    <div class="legal">
+      <h3>Note on trade names and marks</h3>
+      <p>
+        <b>All trade names, logos and product names shown inside the interactive specimens on this page
+        have been deliberately modified for legal purposes.</b> The marks rendered as
+        <b>awz</b>, <b>VT&amp;T</b>, <b>Qptum</b> and <b>StepMise</b> are altered parodies created for this
+        portfolio — they are not the logos of Amazon Web Services, AT&amp;T, Optum or StepWise, and are not
+        presented as such. Domain names shown in the browser chrome are fictional for the same reason.
+      </p>
+      <p>
+        Each specimen is an independent reconstruction built from publicly available brand and design-system
+        documentation, and from my own description of work I performed. No client source code, design file,
+        asset, screenshot, customer data or confidential material has been reproduced. All plans, rates,
+        orders, balances, carriers and account figures shown are fictional. The Capital One specimen carries
+        no brand or parody mark at all, in keeping with the confidential nature of that engagement.
+      </p>
+      <p>
+        Client names appearing in the written case studies and career history are factual statements of
+        engagements I worked on, used for identification only. I am not affiliated with, endorsed by, or
+        speaking for any company named on this page. Any trademarks referenced remain the property of their
+        respective owners. If you represent one of these companies and would like something changed, please
+        <a href="mailto:sergey@stovba.com">email me</a> and I will act on it.
+      </p>
+    </div>
+    <div class="foot-btm">
+      <span>© Sergey Stovba · Seattle, WA</span>
+      <span style="margin-left:auto">Rebuilt from public sources · No trademark reproduced</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* ==========================================================
+     01 · AWS EDUCATE
+     ========================================================== */
+  var awsData={
+    educate:{
+      h:"AWS Educate",
+      sub:"Free, self-paced cloud learning — no account or credit card required.",
+      flagBefore:"This program uses its own header, card shape and button style.",
+      cards:[
+        {b:"Foundational",t:"Introduction to Cloud 101",m:"6 modules · 2h 30m",p:64,sk:["EC2","S3","IAM"],cr:"Cloud Practitioner"},
+        {b:"Foundational",t:"Getting Started with Storage",m:"4 modules · 1h 15m",p:100,sk:["S3","EBS"],cr:"Cloud Practitioner"},
+        {b:"Intermediate",t:"Machine Learning Foundations",m:"9 modules · 5h",p:0,sk:["SageMaker"],cr:"AI Practitioner"},
+        {b:"Foundational",t:"Cloud Security Essentials",m:"5 modules · 2h",p:20,sk:["IAM","KMS"],cr:"Cloud Practitioner"}
+      ]
+    },
+    restart:{
+      h:"AWS re/Start",
+      sub:"A full-time, cohort-based program for people entering cloud careers.",
+      flagBefore:"Different typeface, square cards, green accent, uppercase buttons — a different product entirely.",
+      cards:[
+        {b:"Cohort",t:"Linux Fundamentals",m:"Week 2 · Instructor-led",p:88,sk:["Linux","Bash"],cr:"Cloud Practitioner"},
+        {b:"Cohort",t:"Networking and Security",m:"Week 4 · Instructor-led",p:41,sk:["VPC","IAM"],cr:"Solutions Architect"},
+        {b:"Career",t:"Interview Preparation",m:"Week 11 · Workshop",p:0,sk:["Career"],cr:"Job placement track"},
+        {b:"Cohort",t:"Python for Cloud",m:"Week 6 · Instructor-led",p:12,sk:["Python","Lambda"],cr:"Developer Associate"}
+      ]
+    },
+    academy:{
+      h:"AWS Academy",
+      sub:"Curriculum delivered through participating educational institutions.",
+      flagBefore:"Serif headings, pill buttons, purple accent, rounded cards — a third visual language.",
+      cards:[
+        {b:"Course",t:"Cloud Foundations",m:"Semester 1 · 20 hours",p:75,sk:["EC2","VPC"],cr:"Cloud Practitioner"},
+        {b:"Course",t:"Cloud Architecting",m:"Semester 2 · 40 hours",p:30,sk:["VPC","RDS"],cr:"Solutions Architect"},
+        {b:"Course",t:"Data Engineering",m:"Semester 2 · 40 hours",p:0,sk:["Glue","Athena"],cr:"Data Engineer"},
+        {b:"Lab",t:"Hands-on Labs Bundle",m:"Self-paced · 12 labs",p:55,sk:["Labs"],cr:"Counts as elective"}
+      ]
+    }
+  };
+  var awsProgMeta={educate:"AWS Educate",restart:"AWS re/Start",academy:"AWS Academy"};
+  var awsApp=$("#awsApp");
+  if(awsApp){
+    var awsMode="before", awsProg="educate", awsFacet="all";
+    var awsGrid=$("#awsGrid"), awsH=$("#awsH"), awsSub=$("#awsSub"),
+        awsFlag=$("#awsFlag"), awsNote=$("#awsNote");
+
+    function awsPct(k){
+      var c=awsData[k].cards;
+      return Math.round(c.reduce(function(a,x){return a+x.p},0)/c.length);
+    }
+    function awsRenderPath(){
+      var order=["educate","restart","academy"];
+      var C=2*Math.PI*9; /* r=9 */
+      $("#awsPath").innerHTML=order.map(function(k){
+        var pct=awsPct(k), state=pct>=100?"done":"";
+        var dash=(C*pct/100).toFixed(2)+" "+C.toFixed(2);
+        return '<div class="aws-node '+state+'">'+
+          '<svg class="aws-ring" viewBox="0 0 24 24" aria-hidden="true">'+
+            '<circle class="track" cx="12" cy="12" r="9"/>'+
+            '<circle class="fill" cx="12" cy="12" r="9" style="stroke-dasharray:'+dash+'"/>'+
+          '</svg>'+
+          '<em>'+awsProgMeta[k].replace("AWS ","")+'</em><span>'+
+          (pct>=100?"Complete":pct>0?pct+"% done":"Not started")+'</span></div>';
+      }).join("");
+      var all=order.reduce(function(a,k){return a+awsPct(k)},0)/3;
+      $("#awsPathPct").textContent="3 programs · "+Math.round(all)+"% complete";
+
+      /* the resume card points at the furthest-along unfinished course, anywhere */
+      var best=null;
+      order.forEach(function(k){
+        awsData[k].cards.forEach(function(c){
+          if(c.p>0&&c.p<100&&(!best||c.p>best.c.p)) best={k:k,c:c};
+        });
+      });
+      if(best){
+        $("#awsResumeT").textContent=best.c.t;
+        $("#awsResumeM").textContent=awsProgMeta[best.k]+" · "+best.c.m;
+        $("#awsResumeP").textContent=best.c.p+"%";
+        $("#awsResumeBtn").onclick=function(){
+          best.c.p=Math.min(100,best.c.p+30);
+          awsProg=best.k;
+          $$(".aws-prog").forEach(function(x){x.setAttribute("aria-selected",String(x.dataset.prog===best.k))});
+          awsRender();
+        };
+      }
+    }
+    function awsRenderFacets(){
+      var levels=["all"].concat(awsData[awsProg].cards.map(function(c){return c.b})
+        .filter(function(v,i,a){return a.indexOf(v)===i}));
+      if(levels.indexOf(awsFacet)<0) awsFacet="all";
+      $("#awsFacets").innerHTML=levels.map(function(l){
+        return '<button type="button" class="aws-facet" data-f="'+l+'" aria-pressed="'+
+          (l===awsFacet)+'">'+(l==="all"?"All levels":l)+'</button>';
+      }).join("");
+    }
+
+    function awsRender(){
+      var d=awsData[awsProg];
+      awsApp.setAttribute("data-prog",awsProg);
+      awsApp.classList.toggle("is-split",awsMode==="before");
+      awsH.textContent=d.h;
+      awsSub.textContent=d.sub;
+
+      if(awsMode==="before"){
+        awsFlag.className="aws-flag";
+        awsFlag.innerHTML="<b>Fragmented:</b> "+d.flagBefore+" Progress stops at the edge of each program.";
+      }else{
+        awsFlag.className="aws-flag ok";
+        awsFlag.innerHTML="<b>Unified:</b> one shell — and now progress and credit follow the learner across all three programs.";
+      }
+
+      awsRenderPath();
+      awsRenderFacets();
+
+      var unified=(awsMode==="after");
+      awsGrid.innerHTML="";
+      d.cards.forEach(function(c,i){
+        if(unified&&awsFacet!=="all"&&c.b!==awsFacet) return;
+        var el=document.createElement("div");
+        el.className="aws-card";
+        var done=c.p>=100;
+        el.innerHTML=
+          '<div class="aws-card-hd"><span class="aws-badge">'+c.b+'</span>'+
+            '<span class="aws-pct">'+(done?"Done":c.p+"%")+'</span></div>'+
+          '<p class="aws-ct">'+c.t+'</p>'+
+          '<p class="aws-cm">'+c.m+'</p>'+
+          '<div class="aws-skills">'+c.sk.map(function(s){return "<span>"+s+"</span>"}).join("")+'</div>'+
+          '<div class="aws-bar"><i style="width:'+c.p+'%"></i></div>'+
+          '<p class="aws-credit">Counts toward <b>'+c.cr+'</b></p>'+
+          '<button type="button" class="aws-btn'+(done?" done":"")+'" data-i="'+i+'">'+
+            (done?"✓ Complete":(c.p>0?"Resume":"Start course"))+
+          '</button>';
+        awsGrid.appendChild(el);
+      });
+    }
+
+    $("#awsFacets").addEventListener("click",function(e){
+      var b=e.target.closest(".aws-facet"); if(!b)return;
+      awsFacet=b.dataset.f; awsRender();
+    });
+
+    awsGrid.addEventListener("click",function(e){
+      var b=e.target.closest(".aws-btn"); if(!b||b.classList.contains("done"))return;
+      var c=awsData[awsProg].cards[+b.dataset.i];
+      c.p=Math.min(100,(c.p||0)+35);
+      awsRender();
+    });
+
+    $$(".aws-prog").forEach(function(t){
+      t.addEventListener("click",function(){
+        $$(".aws-prog").forEach(function(x){x.setAttribute("aria-selected","false")});
+        t.setAttribute("aria-selected","true");
+        awsProg=t.dataset.prog; awsRender();
+      });
+    });
+
+    $$("[data-aws-mode]").forEach(function(b){
+      b.addEventListener("click",function(){
+        $$("[data-aws-mode]").forEach(function(x){x.setAttribute("aria-pressed","false")});
+        b.setAttribute("aria-pressed","true");
+        awsMode=b.dataset.awsMode;
+        awsNote.innerHTML = awsMode==="before"
+          ? "<b>Before:</b> three design languages, and progress that dies at each program's border. Click the tabs — the whole shell changes under you."
+          : "<b>After:</b> the shell stops moving, and a path, a resume point and transferable credit become possible. Consistency was the precondition, not the prize.";
+        awsRender();
+      });
+    });
+    awsRender();
+  }
+
+  /* ==========================================================
+     02 · AT&T
+     ========================================================== */
+  var attApp=$("#attApp");
+  if(attApp){
+    var GOOD="0293-441-8827";
+    function attShow(v){
+      $$(".att-view",attApp).forEach(function(x){x.classList.toggle("show",x.dataset.attView===v)});
+    }
+    $$("[data-att-go]",attApp).forEach(function(b){
+      b.addEventListener("click",function(){attShow(b.dataset.attGo)});
+    });
+    $$("[data-att-who]",attApp).forEach(function(b){
+      b.addEventListener("click",function(){
+        $$("[data-att-who]",attApp).forEach(function(x){x.setAttribute("aria-pressed","false")});
+        b.setAttribute("aria-pressed","true");
+        var member=b.dataset.attWho==="member";
+        $("#attF2").style.display=member?"none":"";
+        $(".att-sub",$('[data-att-view="lookup"]',attApp)).textContent = member
+          ? "Signed in as Sergey S. — pick the order, or paste a number."
+          : "Enter the order number from your confirmation email. No sign-in needed.";
+      });
+    });
+    $("#attFill").addEventListener("click",function(){
+      $("#attOrder").value=GOOD; $("#attZip").value="98004";
+      $("#attF1").classList.remove("bad");
+    });
+    $("#attForm").addEventListener("submit",function(e){
+      e.preventDefault();
+      var v=$("#attOrder").value.trim(), f=$("#attF1");
+      if(!v){ $("#attErrMsg").textContent="Enter your order number to continue."; f.classList.add("bad"); return; }
+      if(v!==GOOD){
+        $("#attErrMsg").textContent="We couldn't find order "+v+". Check the number in your confirmation email — it's 11 digits with dashes.";
+        f.classList.add("bad"); return;
+      }
+      f.classList.remove("bad"); attShow("status");
+    });
+    $("#attOrder").addEventListener("input",function(){$("#attF1").classList.remove("bad")});
+  }
+
+  /* ==========================================================
+     03 · OPTUM STEPWISE — the grid drives the broker site
+     ========================================================== */
+  var optRows=$("#optRows");
+  if(optRows){
+    var COLS=["ded","ee","es","ec","fam"];
+    var COLLET={ded:"B",ee:"C",es:"D",ec:"E",fam:"F"};
+    var COLNAME={ded:"Deductible",ee:"Employee only",es:"Employee + spouse",
+                 ec:"Employee + child(ren)",fam:"Family"};
+    var SEED=[
+      {n:"Platinum PPO 500", ded: 500, ee:812, es:1706, ec:1462, fam:2356},
+      {n:"Gold PPO 1500",    ded:1500, ee:642, es:1349, ec:1155, fam:1862},
+      {n:"Silver HMO 3000",  ded:3000, ee:498, es:1046, ec: 896, fam:1444},
+      {n:"Bronze HDHP 6500", ded:6500, ee:361, es: 758, ec: 650, fam:1047},
+      {n:"Bronze HDHP 7500", ded:7500, ee:318, es: 668, ec: 572, fam: 922}
+    ];
+    var plans=SEED.map(function(p){return Object.assign({},p)});
+    var sel={r:0,c:"ee"}, dirty=false, optLegacy=false;
+    var alertEl=$("#optAlert"), erEl=$("#optEr"), optApp=$("#optApp");
+
+    function money(n){return "$"+Math.round(n).toLocaleString("en-US")}
+
+    /* Real rule: ACA small-group premiums may not vary by more than 3:1.
+       Also: dependant tiers must exceed the employee-only rate. */
+    function validate(){
+      var rates=plans.map(function(p){return p.ee}).filter(function(v){return v>0});
+      var lo=Math.min.apply(null,rates), hi=Math.max.apply(null,rates);
+      for(var i=0;i<plans.length;i++){
+        var p=plans[i];
+        if(p.es<=p.ee||p.ec<=p.ee||p.fam<=p.ee){
+          return {level:"err",row:i,
+            title:p.n+": a dependant tier costs less than employee-only",
+            body:"Every dependant tier must exceed the employee-only rate, or the broker site will show a family paying less than an individual. Claims and billing will both reject the load.",
+            fix:"Rebuild tiers from employee rate"};
+        }
+        if(p.fam>p.ee*4){
+          return {level:"warn",row:i,
+            title:p.n+": family rate is more than 4× employee-only",
+            body:"Above the market benchmark for small group. Competitive analysis will flag this in portfolio review before filing.",
+            fix:null};
+        }
+      }
+      if(hi>lo*3){
+        return {level:"err",row:-1,
+          title:"Premium spread exceeds the 3:1 ratio",
+          body:"ACA small-group rating limits the highest premium to three times the lowest. "+money(hi)+" against "+money(lo)+" is "+(hi/lo).toFixed(1)+":1 and will fail regulatory filing.",
+          fix:"Cap the highest plan at 3:1"};
+      }
+      return {level:"ok",row:-1,
+        title:"Passes plan definition rules",
+        body:"Rates are within ACA rating limits and tier ordering is valid. Ready to publish to the broker site.",
+        fix:null};
+    }
+
+    function renderSheet(){
+      var v=validate();
+      optRows.innerHTML="";
+      plans.forEach(function(p,i){
+        var tr=document.createElement("tr");
+        var cells='<td class="rownum">'+(i+1)+'</td>'+
+                  '<td class="opt-cell txt">'+p.n+'</td>';
+        COLS.forEach(function(c){
+          var isSel=(sel.r===i&&sel.c===c);
+          var bad=(v.level==="err"&&v.row===i&&c!=="ded");
+          cells+='<td class="opt-cell num'+(c==="ded"?" calc":"")+(isSel?" sel":"")+(bad?" bad":"")+
+                 '" data-r="'+i+'" data-c="'+c+'">'+
+                 (bad?'<span class="opt-flag"></span>':'')+
+                 (c==="ded"?money(p.ded):money(p[c]))+'</td>';
+        });
+        tr.innerHTML=cells;
+        optRows.appendChild(tr);
+      });
+      /* empty rows, the way a real sheet has them */
+      for(var e=0;e<3;e++){
+        var er=document.createElement("tr");
+        er.innerHTML='<td class="rownum">'+(plans.length+1+e)+'</td>'+
+          '<td class="opt-cell empty"></td>'.repeat(6);
+        optRows.appendChild(er);
+      }
+      $("#optRef").textContent=COLLET[sel.c]+(sel.r+1);
+      $("#optFx").textContent=COLNAME[sel.c]+" · "+plans[sel.r].n+" = "+money(plans[sel.r][sel.c])+
+        (sel.c==="ded"?"  (set in Benefit loading)":"  — type to edit");
+
+      alertEl.className="opt-alert show "+v.level;
+      $("#optAlertIc").textContent=v.level==="err"?"✕":v.level==="warn"?"!":"✓";
+      if(optLegacy){
+        /* the legacy tool knew the rule was broken; it just wouldn't say which or why */
+        $("#optAlertTitle").textContent = v.level==="ok"
+          ? "VALIDATION_OK" : "ERR_RATE_VALIDATION_"+(v.level==="err"?"014":"031");
+        $("#optAlertBody").textContent = v.level==="ok"
+          ? "0 constraint violations. Submit batch to queue."
+          : "Constraint violation at PLAN_RATE["+(v.row>-1?v.row:0)+"]. See PLM Administrator Guide, appendix C.";
+      }else{
+        $("#optAlertTitle").textContent=v.title;
+        $("#optAlertBody").textContent=v.body;
+      }
+      var fix=$("#optFix");
+      fix.hidden=!v.fix; if(v.fix)fix.textContent=v.fix+" →";
+      fix.onclick=function(){
+        if(v.row>-1){
+          var p=plans[v.row];
+          p.es=Math.round(p.ee*2.1); p.ec=Math.round(p.ee*1.8); p.fam=Math.round(p.ee*2.9);
+        }else{
+          var rates=plans.map(function(x){return x.ee});
+          var lo=Math.min.apply(null,rates), cap=lo*3;
+          plans.forEach(function(x){
+            if(x.ee>cap){
+              x.ee=Math.round(cap);
+              x.es=Math.round(x.ee*2.1); x.ec=Math.round(x.ee*1.8); x.fam=Math.round(x.ee*2.9);
+            }
+          });
+        }
+        touch();
+      };
+
+      $("#optPublish").disabled=(v.level==="err"||!dirty);
+      $("#optPublish").textContent=v.level==="err"?"Fix to publish":(dirty?"Publish to site":"Published");
+      $("#optStale").classList.toggle("show",dirty&&v.level!=="err");
+      return v;
+    }
+
+    function renderSite(v){
+      var er=+erEl.value;
+      $("#optErOut").textContent=er+"%";
+      var wrap=$("#optPlans"); wrap.innerHTML="";
+      plans.forEach(function(p,i){
+        var bad=(v.level==="err"&&(v.row===i||v.row===-1));
+        var el=document.createElement("div");
+        el.className="opt-plan"+(bad?" flag":"");
+        var tiers="";
+        [["EE only","ee"],["+Spouse","es"],["+Child","ec"],["Family","fam"]].forEach(function(t){
+          var full=p[t[1]];
+          var pay=t[1]==="ee" ? full*(1-er/100) : full-(p.ee*er/100);
+          tiers+='<div class="opt-tier"><em>'+t[0]+'</em><b>'+money(Math.max(0,pay))+
+                 '</b>'+(er>0?'<s>'+money(full)+'</s>':'')+'</div>';
+        });
+        el.innerHTML=
+          '<div class="opt-plan-top"><b>'+p.n+'</b><span>'+money(p.ded)+' deductible</span></div>'+
+          '<div class="opt-tiers">'+tiers+'</div>'+
+          (bad?'<div class="opt-planwarn">This plan cannot be published — '+
+               (v.row===i?"its tier rates are out of order.":"the portfolio exceeds the 3:1 rating limit.")+
+               '</div>':'');
+        wrap.appendChild(el);
+      });
+      $("#optWho").textContent="Employer pays "+er+"%";
+    }
+
+    function touch(){ dirty=true; renderSite(renderSheet()); }
+    function paint(){ renderSite(renderSheet()); }
+
+    optRows.addEventListener("click",function(e){
+      var td=e.target.closest(".opt-cell"); if(!td||!td.dataset.c)return;
+      sel={r:+td.dataset.r,c:td.dataset.c};
+      paint();
+      if(td.dataset.c==="ded")return;
+      edit();
+    });
+
+    function edit(){
+      var td=optRows.querySelector('[data-r="'+sel.r+'"][data-c="'+sel.c+'"]');
+      if(!td)return;
+      var cur=plans[sel.r][sel.c];
+      td.innerHTML='<input type="number" min="0" step="1" value="'+cur+'" aria-label="'+COLNAME[sel.c]+'">';
+      var inp=td.querySelector("input");
+      inp.focus(); inp.select();
+      function commit(){
+        var v=Math.max(0,Math.round(+inp.value||0));
+        plans[sel.r][sel.c]=v; touch();
+      }
+      inp.addEventListener("blur",commit);
+      inp.addEventListener("keydown",function(ev){
+        if(ev.key==="Enter"){ev.preventDefault();commit();
+          if(sel.r<plans.length-1){sel.r++;paint();edit()}}
+        if(ev.key==="Escape"){ev.preventDefault();paint()}
+        if(ev.key==="Tab"){
+          ev.preventDefault(); commit();
+          var i=COLS.indexOf(sel.c);
+          if(i<COLS.length-1){sel.c=COLS[i+1]}
+          else if(sel.r<plans.length-1){sel.r++;sel.c="ee"}
+          paint(); if(sel.c!=="ded")edit();
+        }
+      });
+    }
+
+    erEl.addEventListener("input",function(){renderSite(validate())});
+    $("#optPublish").addEventListener("click",function(){
+      dirty=false; paint();
+    });
+    $("#optReset").addEventListener("click",function(){
+      plans=SEED.map(function(p){return Object.assign({},p)});
+      sel={r:0,c:"ee"}; dirty=false; erEl.value=70; paint();
+    });
+
+    $$("[data-opt-mode]").forEach(function(b){
+      b.addEventListener("click",function(){
+        $$("[data-opt-mode]").forEach(function(x){x.setAttribute("aria-pressed","false")});
+        b.setAttribute("aria-pressed","true");
+        optLegacy=(b.dataset.optMode==="before");
+        optApp.classList.toggle("is-legacy",optLegacy);
+        $("#optNote").innerHTML = optLegacy
+          ? "<b>Before:</b> the grid, alone. You changed a rate and found out what it did to the customer the next morning — and the rule that stopped you was an error code."
+          : "<b>After:</b> the output sits beside the input, and the rules explain themselves in the language of the job.";
+        paint();
+      });
+    });
+    paint();
+  }
+
+  /* ==========================================================
+     04 · RETIREMENT PROJECTION
+     ========================================================== */
+  var nChart=$("#nChart");
+  if(nChart){
+    var START_AGE=42, START_BAL=184200, R=0.06, GOAL=1400000;
+    var elC=$("#nContrib"), elA=$("#nAge");
+
+    function fmt(n){
+      if(n>=1e6) return "$"+(n/1e6).toFixed(2)+"M";
+      return "$"+Math.round(n).toLocaleString("en-US");
+    }
+    function project(monthly,retireAge){
+      var yrs=retireAge-START_AGE, pts=[], bal=START_BAL;
+      for(var y=0;y<=yrs;y++){
+        pts.push(bal);
+        bal=bal*(1+R)+monthly*12*(1+R/2);
+      }
+      return pts;
+    }
+    function path(pts,w,h,max){
+      var n=pts.length-1, d="";
+      pts.forEach(function(v,i){
+        var x=(i/n)*w, y=h-(v/max)*h;
+        d+=(i?" L":"M")+x.toFixed(1)+" "+y.toFixed(1);
+      });
+      return d;
+    }
+    /* FV is linear in the monthly contribution, so solve for the one that lands on GOAL */
+    function needed(age){
+      var base=project(0,age), b0=base[base.length-1];
+      var one=project(1,age), b1=one[one.length-1];
+      var per=b1-b0;
+      if(per<=0) return 0;
+      return Math.max(0,(GOAL-b0)/per);
+    }
+
+    function draw(){
+      var monthly=+elC.value, age=+elA.value;
+      var pts=project(monthly,age), fin=pts[pts.length-1];
+      var rec=needed(age), recPts=project(rec,age), recFin=recPts[recPts.length-1];
+      var max=Math.max(fin,recFin,GOAL)*1.12, W=300, H=132;
+
+      var dNow=path(pts,W,H,max), dRec=path(recPts,W,H,max);
+      $("#nLine").setAttribute("d",dNow);
+      $("#nArea").setAttribute("d",dNow+" L"+W+" "+H+" L0 "+H+" Z");
+
+      /* the recommended line only means anything while you're behind it */
+      var behind=rec>monthly+1;
+      $("#nRec").setAttribute("d",behind?dRec:"");
+      if(behind){
+        /* the shortfall band: recommended out, current back */
+        var xy=function(v,i,n){return [((i/n)*W).toFixed(1),(H-(v/max)*H).toFixed(1)].join(" ")};
+        var fwd=recPts.map(function(v,i){return xy(v,i,recPts.length-1)});
+        var back=pts.map(function(v,i){return xy(v,i,pts.length-1)}).reverse();
+        $("#nGap").setAttribute("d","M"+fwd.join(" L")+" L"+back.join(" L")+" Z");
+      }else{
+        $("#nGap").setAttribute("d","");
+      }
+
+      var gy=(H-(GOAL/max)*H).toFixed(1);
+      $("#nGoalLine").setAttribute("d","M0 "+gy+" L"+W+" "+gy);
+      $("#nDot").setAttribute("cx",W); $("#nDot").setAttribute("cy",(H-(fin/max)*H).toFixed(1));
+
+      $("#nKeyNow").textContent="$"+monthly.toLocaleString("en-US")+"/mo";
+      $("#nKeyRec").textContent=behind?("$"+Math.round(rec).toLocaleString("en-US")+"/mo"):"reached";
+
+      $("#nBig").textContent=fmt(fin);
+      $("#nContribOut").textContent="$"+monthly.toLocaleString("en-US");
+      $("#nAgeOut").textContent=age;
+      $("#nXMid").textContent="Age "+Math.round((START_AGE+age)/2);
+      $("#nXEnd").textContent="Retire · "+age;
+
+      var call=$("#nCallout"), ok=fin>=GOAL;
+      call.className="n-callout"+(ok?"":" short");
+      call.querySelector(".ic").textContent=ok?"✓":"!";
+      $("#nCalloutT").textContent=ok?"On track":"Short of your goal";
+      $("#nCalloutB").textContent=ok
+        ? "You're projected to pass your "+fmt(GOAL)+" goal with "+fmt(fin-GOAL)+" to spare."
+        : "You're "+fmt(GOAL-fin)+" short. Contributing $"+Math.round(rec).toLocaleString("en-US")+
+          " a month closes it — or retire later and the same money has longer to work.";
+
+      $("#nYr").textContent="$"+(monthly*12).toLocaleString("en-US");
+      $("#nRowYou").textContent="$"+monthly.toLocaleString("en-US");
+      $("#nRowEmp").textContent="$"+Math.round(monthly*0.5).toLocaleString("en-US");
+      $("#nRowCap").textContent="$"+Math.max(0,23500-monthly*12).toLocaleString("en-US");
+      var more=project(monthly+150,age);
+      $("#nWhatIf").textContent=fmt(more[more.length-1]-fin);
+    }
+    elC.addEventListener("input",draw);
+    elA.addEventListener("input",draw);
+    $$("[data-n-tab]").forEach(function(t){
+      t.addEventListener("click",function(){
+        $$("[data-n-tab]").forEach(function(x){x.setAttribute("aria-selected","false")});
+        t.setAttribute("aria-selected","true");
+        $$("[data-n-panel]").forEach(function(p){p.classList.toggle("show",p.dataset.nPanel===t.dataset.nTab)});
+      });
+    });
+    draw();
+  }
+
+  /* ==========================================================
+     05 · AMENPRAYERS
+     ========================================================== */
+  var amFeed=$("#amFeed");
+  if(amFeed){
+    var prayers=[
+      {who:"Marta R.",init:"MR",when:"12m",tag:"health",txt:"For my mother's surgery on Thursday morning. That her hands would be steady and her heart calm.",n:24,saved:false},
+      {who:"Dev P.",init:"DP",when:"1h",tag:"work",txt:"Starting a new job Monday after eight months of looking. Grateful, and a little terrified.",n:41,saved:true},
+      {who:"Anon",init:"A",when:"3h",tag:"family",txt:"For patience with my teenager. We keep having the same argument and I keep losing it.",n:88,saved:false},
+      {who:"Joan T.",init:"JT",when:"6h",tag:"health",txt:"Six months clear today. Thank you to everyone who prayed in January when I couldn't.",n:213,saved:false},
+      {who:"Sam K.",init:"SK",when:"9h",tag:"family",txt:"My sister and I spoke for the first time in four years last night. Please pray it holds.",n:57,saved:true}
+    ];
+    var filter="all", lastRemoved=null, toastT=null;
+    var toast=$("#amToast");
+
+    function render(){
+      var list=prayers.filter(function(p){
+        return filter==="all" ? true : filter==="saved" ? p.saved : p.tag===filter;
+      });
+      amFeed.innerHTML="";
+      if(!list.length){
+        amFeed.innerHTML='<p class="am-empty">Nothing here yet.<br>Try another filter, or write one.</p>';
+        return;
+      }
+      list.forEach(function(p){
+        var i=prayers.indexOf(p);
+        var el=document.createElement("article");
+        el.className="am-card";
+        el.innerHTML=
+          '<div class="am-card-top"><span class="am-av">'+p.init+'</span>'+
+          '<span class="am-who">'+p.who+'</span><span class="am-when">'+p.when+'</span></div>'+
+          '<p class="am-txt">'+p.txt+'</p>'+
+          '<div class="am-foot">'+
+            '<button class="am-star" data-i="'+i+'" aria-pressed="'+p.saved+'" aria-label="Save">'+(p.saved?"★":"☆")+'</button>'+
+            '<span class="am-tag">'+p.tag+'</span>'+
+            '<span class="am-count">'+p.n+' prayed</span>'+
+          '</div>';
+        amFeed.appendChild(el);
+      });
+    }
+    amFeed.addEventListener("click",function(e){
+      var s=e.target.closest(".am-star"); if(!s)return;
+      var p=prayers[+s.dataset.i]; p.saved=!p.saved;
+      showToast(p.saved?"Saved to your list":"Removed from your list",null);
+      render();
+    });
+    $$(".am-chip[data-am-f]").forEach(function(c){
+      c.addEventListener("click",function(){
+        $$(".am-chip[data-am-f]").forEach(function(x){x.setAttribute("aria-pressed","false")});
+        c.setAttribute("aria-pressed","true");
+        filter=c.dataset.amF; render();
+      });
+    });
+    $("#amNew").addEventListener("click",function(){
+      var c=$("#amCompose"); c.hidden=!c.hidden;
+      if(!c.hidden)$("#amText").focus();
+    });
+    $("#amCancel").addEventListener("click",function(){$("#amCompose").hidden=true;$("#amText").value=""});
+    $("#amPost").addEventListener("click",function(){
+      var t=$("#amText").value.trim(); if(!t)return;
+      var p={who:"You",init:"SS",when:"now",tag:"family",txt:t,n:0,saved:false};
+      prayers.unshift(p); $("#amText").value=""; $("#amCompose").hidden=true;
+      filter="all";
+      $$(".am-chip[data-am-f]").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.amF==="all")});
+      render();
+      showToast("Posted",function(){
+        var i=prayers.indexOf(p); if(i>-1)prayers.splice(i,1); render();
+      });
+    });
+    function showToast(msg,undo){
+      $("#amToastMsg").textContent=msg;
+      $("#amUndo").style.display=undo?"":"none";
+      $("#amUndo").onclick=function(){ if(undo)undo(); toast.hidden=true; };
+      toast.hidden=false;
+      clearTimeout(toastT);
+      toastT=setTimeout(function(){toast.hidden=true},3200);
+    }
+    render();
+  }
+})();
+</script>
+</body>
+</html>

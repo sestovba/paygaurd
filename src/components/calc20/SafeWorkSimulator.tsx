@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTracker } from './state';
+import { copyFor } from '../../domain/copy';
 import { money } from '../../domain/format';
 import { formatMonth, monthsOfYear, todayMonth, yearOf } from '../../domain/months';
 import { countableFor, streamYearHours, streamYearGross } from '../../domain/earnings';
@@ -42,6 +43,7 @@ function groupPaydayRisks(risks: PaydayRisk[]): string[] {
 
 export function SafeWorkSimulator() {
   const { data, ui } = useTracker();
+  const words = copyFor('calc20');
   const asOf = monthsOfYear(ui.year)[11];
   const phase = benefitPhase(data, asOf);
   const threshold = activeThreshold(data, asOf);
@@ -51,7 +53,14 @@ export function SafeWorkSimulator() {
       if (stream.type !== 'w2' || stream.lifecycle !== 'active') continue;
       const hours = streamYearHours(stream, ui.year);
       const gross = streamYearGross(stream, ui.year);
-      if (hours > 0 && gross > 0) return gross / hours;
+      /* To the cent. This is a division — $667 over 30 hours — and it went
+         straight into a field labelled with a dollar sign, so the screen that
+         tells somebody what to aim for opened on "$ 22.233333333333332",
+         overflowing its own input. Nobody is paid a repeating decimal, and a
+         figure printed to fourteen places reads as a machine's number rather
+         than theirs. It is an estimate either way; the extra digits add no
+         accuracy, only noise. */
+      if (hours > 0 && gross > 0) return Math.round((gross / hours) * 100) / 100;
     }
     return 20;
   }, [data.streams, ui.year]);
@@ -109,7 +118,7 @@ export function SafeWorkSimulator() {
   if (phase === 'unknown' || phase === 'verifyComplete' || !threshold) {
     return (
       <div className="simulator simulator--paused">
-        <div className="simulator__eyebrow">Hours you can work</div>
+        <div className="simulator__eyebrow">{words.hoursPanel}</div>
         <div className="simulator__title">We need your limit first</div>
         <p className="help-note">
           Hours only mean something against a limit, and yours is not set yet.
@@ -121,8 +130,10 @@ export function SafeWorkSimulator() {
 
   return (
     <div className="simulator">
-      {/* el-8lyfa5 — same rename as the shared simulator. */}
-      <div className="simulator__eyebrow">Hours you can work</div>
+      {/* el-8lyfa5 — same rename as the shared simulator, and from the same
+          key: this layout has its own copy of the panel, which is exactly how
+          one name became four. */}
+      <div className="simulator__eyebrow">{words.hoursPanel}</div>
       {/* The heading is the answer, not the panel's job description — the
           same change the shared simulator got for "Stay below SGA — Duh".
           It also stops this layout naming a regime the reader is not in. */}

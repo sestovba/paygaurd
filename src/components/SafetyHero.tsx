@@ -1,7 +1,8 @@
 import { CircleAlert, CircleCheck, CircleDashed, TriangleAlert } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
-import { roomToTargetLine, trialMonthsLine } from '../domain/copy';
+import { roomToTargetLine, trialPermissionLine } from '../domain/copy';
+import { LimitRuler } from './LimitRuler';
 import { longMonthName, todayMonth, yearOf } from '../domain/months';
 import { monthStatus } from '../domain/earnings';
 import { capacityFor } from '../domain/capacity';
@@ -56,20 +57,20 @@ export function SafetyHero({
                    benefits, made by accident, on the largest line of the
                    screen. It is a list of months waiting to be checked. */}
               {phase === 'unknown'
-                ? 'Every number here is a guess so far'
-                : 'Nine months are waiting for you to check them'}
+                ? 'These numbers are still a guess'
+                : 'Nine months need a quick check'}
             </div>
             <p className="type-muted mt-1.5">
               {phase === 'unknown'
-                ? 'We do not know your monthly limit yet. A few questions, and these numbers become yours instead of an average.'
-                : 'Check these nine months against your own records. Once they agree, the limit shown here is the one that really applies to you.'}
+                ? 'A few questions set your real monthly limit.'
+                : 'Match them to your records. Then the limit here is yours.'}
             </p>
             <button
               type="button"
               onClick={phase === 'unknown' ? onTakeQuiz : onReviewStatus}
               className="btn-primary mt-4"
             >
-              {phase === 'unknown' ? 'Answer a few questions' : 'Check the months'}
+              {phase === 'unknown' ? 'Answer a few questions' : 'Check months'}
             </button>
           </div>
         </div>
@@ -123,17 +124,18 @@ export function SafetyHero({
         <>
           <p className="mt-6 text-lg font-semibold">
             {capacity.over > 0
-              ? `${money(capacity.over)} over your limit of ${money(capacity.threshold)} this month`
+              ? `${money(capacity.over)} over your ${money(capacity.threshold)} limit`
               : capacity.stage === 'careful'
-                ? `Past the ${money(capacity.safeTarget)} we aim for. ${money(capacity.roomToLimit)} left before your limit of ${money(capacity.threshold)}.`
+                ? `Past the ${money(capacity.safeTarget)} aim. ${money(capacity.roomToLimit)} left to ${money(capacity.threshold)}.`
                 : roomToTargetLine(capacity.room, capacity.safeTarget, capacity.threshold)}
           </p>
           {/* Hours, when we know what an hour is worth here. Dollars are the
               unit the rule is written in; hours are the unit the decision is
               made in. */}
+          <LimitRuler capacity={capacity} />
           {capacity.hours !== null && capacity.over === 0 ? (
             <p className="type-muted mt-1">
-              About {capacity.hours} more {capacity.hours === 1 ? 'hour' : 'hours'} of work
+              About {capacity.hours} more {capacity.hours === 1 ? 'hour' : 'hours'}
               {capacity.rate ? ` at ${money(capacity.rate.rate)} an hour` : ''}.
             </p>
           ) : null}
@@ -167,9 +169,17 @@ export function SafetyHero({
         <div className="mt-6">
           {/* Was "Trial Work Period · 3 of 9 months used, 6 left" — a proper
                noun the reader has not been taught, then the same fact stated
-               twice in two directions. */}
+               twice in two directions. Then "0 of your 9 trial work months
+               used", which fixed the noun and kept the wrong end of the
+               sentence: it counts what has been spent, on a screen read by
+               someone whose defining fear is losing their payments, and at the
+               start it opens on a zero. What the rule actually grants is nine
+               months in which earnings cannot cost them anything, so the
+               permission is said first and the arithmetic second. This is the
+               stated exception in DESIGN-SYSTEM.md § 1.5 — still a remainder,
+               just a remainder of something good. */}
           <p className="type-muted min-w-0">
-            {trialMonthsLine(twp.used, TRIAL_MONTH_LIMIT)}
+            {trialPermissionLine(twp.remaining, TRIAL_MONTH_LIMIT)}
           </p>
           <TrialMeter used={twp.used} prior={data.priorTrialMonths.length} />
         </div>

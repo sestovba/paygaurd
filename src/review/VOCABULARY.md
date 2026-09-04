@@ -29,6 +29,30 @@ one thing in the app and another in the file is worth nothing.
 | **Group** | One of the three bands in Notes: Yours, Claude, Closed. | A panel; a state. |
 | **Lens** | A filter chip over the one list — Comments, Hidden. | A panel. |
 | **Certainty** | How sure a proposal I made is: Sure, Likely, Hunch. | A state; a verdict. |
+| **Scope** | What a note is about: **This**, **Layout** or **Everywhere**. | Where it was seen; the layout it was written in. |
+| **Reference point** | The heading a scoped note is filed against — a real heading in a real markdown file. | A topic; a tag. |
+| **Frame** | The page rendered at a chosen device size, in its own viewport. | The rail; the window. |
+
+**Scope** answers a different question from **Where**, and keeping them apart
+is the whole reason it exists. Where a note was *seen* is a layout and a page;
+what it is *about* may be the product. A note that says "default should be
+rest of the year on all layouts" is filed under Everywhere and was seen on
+workrecord, and both facts are kept — collapsing them into one is how the same
+instruction came to be re-filed on five separate screens.
+
+The three scopes are named for what they point at, not for how big they are:
+
+| Scope | Points at | Filed against |
+|---|---|---|
+| **This** | The element under the crosshair. | Its source file and line. |
+| **Layout** | One layout, whole. | That layout's `README.md`. |
+| **Everywhere** | The product. | The rule it is about, in `CLAUDE.md`, `WORKING-WITH-SERGEY.md`, `DESIGN-SYSTEM.md` or `THE-THREAD.md`. |
+
+A **reference point** is deliberately not a topic the reviewer types. The
+rules of this product are already written down and already have names, so a
+note filed against one arrives in the same words the answer will be written
+in — and, the part that matters, the next session finds it by reading the
+rule.
 
 There is no **Archive** and no **Shelf**. Version control is the archive:
 nothing that reaches the code is lost by cutting it. In the console, "where
@@ -48,7 +72,7 @@ a note, said nothing at all.
 | **Select** | Designate what the next action applies to — an element on the page, or rows in Notes. Same act, two kinds of object. | Audit. |
 | **Audit** | Walk the cuts the AI proposed, answering each. | Select. |
 | **Locate** | Take you to the element: switch layout and open the page if that is what it takes, scroll it into view, and flash it. | Select; Comment. |
-| **Comment** | Say what should change about an element. Starts a note. | Reply. |
+| **Comment** | Say what should change. Starts a note. Needs no element — with nothing selected it opens against the layout. | Reply. |
 | **Reply** | Add to an existing note's thread. | Comment. |
 | **Cut** | Take the element out of the product. A decision for the code, queued for a pass — nothing disappears when you press it. | Delete; Hide. |
 | **Delete** | Throw away the note and its thread. The element is untouched. | Remove. |

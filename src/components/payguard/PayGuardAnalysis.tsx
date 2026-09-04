@@ -11,6 +11,7 @@ import { benefitPhase } from '../../domain/trialWork';
 import type { BenefitPhase } from '../../domain/trialWork';
 import type { MonthStatus, TrackerData } from '../../domain/types';
 import { SafeWorkSimulator } from '../SafeWorkSimulator';
+import { copyFor } from '../../domain/copy';
 
 type StatusKind = 'none' | 'review' | 'safe' | 'warn' | 'twp' | 'over';
 
@@ -85,12 +86,11 @@ function thresholdGapLabel(value: number, threshold: number): string {
   return `${money(Math.abs(gap))} ${gap > 0 ? 'over' : 'below'}`;
 }
 
-type Mode = 'cards' | 'table' | 'activeOnly';
+type Mode = 'cards' | 'table';
 
 const MODES: { id: Mode; label: string }[] = [
   { id: 'cards', label: 'Cards' },
-  { id: 'table', label: 'Table' },
-  { id: 'activeOnly', label: 'Activity' }
+  { id: 'table', label: 'Table' }
 ];
 
 function StatusDot({ kind, size = 'sm' }: { kind: StatusKind; size?: 'sm' | 'md' }) {
@@ -109,7 +109,10 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
   onOpenStatus?: () => void;
 }) {
   const [mode, setMode] = useState<Mode>('cards');
+  /* Active filters either view; default on. Not a third layout. */
+  const [activeOnly, setActiveOnly] = useState(true);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
+  const words = copyFor('payguard');
   const rules = rulesFor(year);
   const now = todayMonth();
   const asOf = year < Number(now.slice(0, 4)) ? `${year}-12` : now;
@@ -135,7 +138,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
     };
   }), [data, months, rules]);
 
-  const visible = mode === 'activeOnly'
+  const visible = activeOnly
     ? cards.filter((c) => c.status.countable > 0 || c.status.isServiceMonth)
     : cards;
   /* One month listed is drawn as the month itself rather than as a
@@ -174,7 +177,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
             + (focused ? 'sm:items-end' : 'sm:items-center')}>
             <div className="flex min-w-0 flex-col gap-1.5">
               <h2 className="pg-section-title pg-fg sm:text-[0.8125rem]">
-                {focused ? longMonthName(focused.month) : 'Month by month'}
+                {focused ? longMonthName(focused.month) : 'By month'}
               </h2>
 
               {focused ? (
@@ -192,16 +195,16 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                     {money(analysisPhase === 'trialWork' ? rules.trialWork : rules.sga)}
                   </span>
                   <span className="flex items-center gap-1.5 pg-text-warn">
-                    <StatusDot kind="warn" /> Close to it
+                    <StatusDot kind="warn" /> Near
                   </span>
                   {/* The regime you are not in is not drawn. */}
                   {analysisPhase === 'trialWork' ? (
                     <span className="flex items-center gap-1.5 pg-text-twp">
-                      <StatusDot kind="twp" /> Uses a trial work month
+                      <StatusDot kind="twp" /> Trial month
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5 pg-text-over">
-                      <StatusDot kind="over" /> Over your limit
+                      <StatusDot kind="over" /> Over
                     </span>
                   )}
                 </div>
@@ -213,23 +216,31 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                 {focused.label}
               </span>
             ) : null) : (
-              <div
-                className="pg-seg w-fit justify-self-start sm:justify-self-end"
-                role="group"
-                aria-label="Monthly analysis view"
-              >
-                {MODES.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    data-on={mode === m.id}
-                    aria-pressed={mode === m.id}
-                    onClick={() => setMode(m.id)}
-                    className="pg-seg-item"
-                  >
-                    {m.label}
-                  </button>
-                ))}
+              <div className="pg-view-tools justify-self-start sm:justify-self-end" role="toolbar" aria-label="By month view">
+                <div className="pg-seg w-fit" role="group" aria-label="Layout">
+                  {MODES.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      data-on={mode === m.id}
+                      aria-pressed={mode === m.id}
+                      onClick={() => setMode(m.id)}
+                      className="pg-seg-item"
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="pg-filter-chip"
+                  data-on={activeOnly || undefined}
+                  aria-pressed={activeOnly}
+                  onClick={() => setActiveOnly((v) => !v)}
+                >
+                  <span className="pg-filter-chip-mark" aria-hidden="true" />
+                  Active only
+                </button>
               </div>
             )}
           </div>
@@ -276,15 +287,23 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
             )}
           </div>
         ) : visible.length === 0 ? (
+          /* el-16owyjf, carried over from the ledger: a label beside a month
+             list has to describe the rows under it, not the calendar. All
+             three strings here counted the calendar — the year in the title
+             and "all 12 months" twice below — while the list itself is
+             scopedMonths(year, scope), which in focus mode is one row. The
+             months on screen are named once, by the picker above this panel,
+             so nothing here has to name them a second time and get it
+             wrong. */
           <div className="pg-empty">
             <CalendarOff className="size-5 pg-dim" />
-            <span className="pg-empty-title">No activity recorded for {year}</span>
+            <span className="pg-empty-title">Nothing recorded yet</span>
             <span className="pg-empty-body">
-              This shows the months you earned in, and the months that used a trial work
-              month. Add earnings above, or choose Cards to see all 12 months.
+              This shows months with earnings or a trial work month. Add earnings above, or
+              turn off Active only to see every month on this list.
             </span>
-            <button type="button" className="pg-btn mt-1" onClick={() => setMode('cards')}>
-              Show all months
+            <button type="button" className="pg-btn mt-1" onClick={() => setActiveOnly(false)}>
+              Show every month
             </button>
           </div>
         ) : mode === 'table' ? (
@@ -418,7 +437,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
         <div className="grid gap-3 px-3.5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5 sm:py-4">
           <div className="min-w-0">
             <h2 className="text-sm font-bold pg-fg">
-              {needsTwpConfirmation ? 'Set your limit before planning hours' : 'How many hours could I work?'}
+              {needsTwpConfirmation ? 'Set your limit before planning hours' : words.hoursAsk}
             </h2>
             <p className="mt-0.5 text-xs leading-relaxed pg-muted">
               {needsTwpConfirmation

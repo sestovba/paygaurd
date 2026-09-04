@@ -68,6 +68,29 @@
 .hz-icon-btn:hover { background: var(--color-accent); }
 .hz-icon-btn { border: 1px solid var(--color-border); }
 
+/* Month scope — same question as the year stepper, one size down. Native
+   select on purpose (see MonthScopePicker); skin it to match the year pill. */
+.hz-scope {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.hz-scope select {
+  max-width: 10.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  background: var(--color-background);
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Shared SafeWorkSimulator panel sits in the answer → act slot. */
+.hz-sim { min-width: 0; }
+.hz-sim > .panel { margin: 0; }
+
 .hz-main {
   display: flex;
   flex-direction: column;
@@ -112,20 +135,15 @@
 .hz-answer[data-tone='near'] { border-left-color: var(--color-warn, #d97706); }
 .hz-answer[data-tone='clear'] { border-left-color: var(--color-good, #16a34a); }
 
-.hz-answer .precision-line {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  margin-top: 0.6rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 0.75rem;
-  text-align: left;
-  color: var(--color-muted-foreground);
-}
-.hz-answer .precision-level { font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+/* Register only. This block used to restate the whole of chrome.css's
+   .precision-line — display, gap, border, background — and then paint it
+   --color-muted-foreground, which is a base-theme token rather than one of
+   the four the component asks for. The restatement won on specificity, so
+   horizon was the one layout where the grade word had no colour of its own
+   at all: GUESSED, PREDICTED and EXACT all came out the same grey. What is
+   left here is the two things that are genuinely horizon's. */
+.hz-answer .precision-line { margin-top: 0.6rem; }
+.hz-answer .precision-level { text-transform: uppercase; letter-spacing: 0.03em; }
 
 /* ---- 2. the runway -------------------------------------------------
  * A track, read left to right, because it is time. Not a grid: a grid of

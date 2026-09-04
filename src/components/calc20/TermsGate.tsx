@@ -12,7 +12,7 @@ export function TermsGate({ onAgree }: { onAgree: () => void }) {
     <div className="signin-shell">
       <div className="signin-panel terms-panel">
         <div>
-          <div className="eyebrow">SSDI Income Tracker</div>
+          <div className="eyebrow">SSDI Tracker</div>
           <h1 className="signin-title">Terms, privacy, and liability</h1>
           <p className="signin-note">
             Read this before continuing — it explains what this tool can and
@@ -34,7 +34,7 @@ export function TermsGate({ onAgree }: { onAgree: () => void }) {
             <span>I've read and agree to these terms.</span>
           </label>
           <button
-            className="signin-google"
+            className="signin-submit"
             type="button"
             disabled={!checked}
             onClick={onAgree}

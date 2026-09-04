@@ -13,9 +13,12 @@ import { MONTH_SCOPES } from '../domain/months';
  * Four positions, each a phrase about the months and none about the app: no
  * "focus", no "filter", no "range". "So far" and "the rest" are a pair and
  * read as opposites, and both include the month you are in — it is not over
- * yet, so it belongs to both halves. "So far this year" is the default on
- * these layouts, because the months with anything in them are the ones
- * behind you.
+ * yet, so it belongs to both halves. "Rest of the year" is the default on
+ * these layouts. It used to be "So far this year", on the grounds that the
+ * months with anything in them are the ones behind you — true, and beside
+ * the point, because nothing behind you can be acted on. An explicit choice
+ * still wins and is remembered, so a reader who picked "So far this year"
+ * keeps it until they change it.
  */
 export const MONTH_SCOPE_LABEL: Readonly<Record<MonthScope, string>> = {
   month: 'This month',

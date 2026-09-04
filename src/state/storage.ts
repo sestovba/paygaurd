@@ -8,7 +8,7 @@ const DATA_KEY = 'pg-data-v1';
 const UI_KEY = 'pg-ui-v1';
 
 export type ThemePref = 'system' | 'light' | 'dark';
-export type LayoutMode = 'overview' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket' | 'plan';
+export type LayoutMode = 'overview' | 'ledger' | 'payguard' | 'workrecord' | 'calc20' | 'horizon' | 'pocket' | 'charm' | 'plan' | 'beautiful';
 
 /**
  * How the Overview layout is navigated.
@@ -52,7 +52,7 @@ export function isLegacyLayoutId(value: unknown): value is LegacyLayoutId {
  * the *same* CSS, so keeping payguard and workrecord looking alike meant
  * setting the same value twice. They are one field now: `palette`.
  */
-export type Palette = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20';
+export type Palette = 'paper' | 'slate' | 'ledger' | 'carbon' | 'calc20' | 'calm';
 
 /** @deprecated The old name. Kept so imports elsewhere keep compiling. */
 export type LedgerTheme = Palette;
@@ -195,7 +195,7 @@ export interface UiState {
 export const DEFAULT_UI: UiState = {
   year: new Date().getFullYear(),
   theme: 'system',
-  layout: 'plan',
+  layout: 'beautiful',
   overviewShell: 'pages',
   palette: 'paper',
   wrStreamsOpen: true,

@@ -5,13 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run theme:check && tsc --noEmit && vite build",
+    "dev:lan": "vite --host",
+    "build": "npm run theme:check && npm run debt && tsc --noEmit && vite build",
     "build:calc20": "tsc --noEmit && vite build --config vite.calc20.config.ts",
     "flatten": "node scripts/flatten.mjs",
     "preview": "vite preview",
     "state": "node scripts/state.mjs",
     "typecheck": "tsc --noEmit",
-    "theme:check": "node scripts/theme-check.mjs"
+    "theme:check": "node scripts/theme-check.mjs",
+    "debt": "node scripts/design-debt.mjs",
+    "debt:update": "node scripts/design-debt.mjs --update",
+    "review": "node scripts/review-report.mjs",
+    "review:check": "node scripts/review-report.mjs --check",
+    "layouts": "node scripts/layouts.mjs",
+    "words": "node scripts/words.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

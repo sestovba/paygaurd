@@ -1,0 +1,298 @@
+/*
+ * The metrics. Every size, space and shape this app can be, chosen in one place.
+ * ============================================================================
+ *
+ * WHY THIS FILE EXISTS
+ *
+ * palette.css settled colour: 39 choices, one source, and theme:check failing
+ * the build if a variant misses one. Measured across the eight layouts, colour
+ * is the one thing that did not drift.
+ *
+ * Nothing did that for size, and the result was measured on 2026-09-04:
+ *
+ *     48 distinct button class names   (.pg-btn .lg-btn .hz-btn .pk-btn …)
+ *     24 distinct control heights      (28 30 32 34 36 38 40 42 44 46 48 52
+ *                                       56 62 72 82 92px + 7 rem values)
+ *     53 distinct border-radius values
+ *     62 distinct font-sizes
+ *    224 distinct padding values
+ *
+ * Same codebase, same authors, same week. The difference was not discipline.
+ * Colour had a source of truth and a checker; size had neither. This file is
+ * the source, and theme:check is the checker.
+ *
+ * THE MODEL — deliberately not palette.css's model
+ *
+ * A colour variant answers all 39 choices because a variant silently wearing
+ * another's semantic colour is invisible-wrong: `slate` wore paper's warn
+ * amber and nobody could see it. Size is not like that. A theme that wants
+ * paper's 4dp grid should say nothing and get it; forcing every theme to
+ * restate `--t-space-2: 0.5rem` would be noise that hides the one line that
+ * actually differs. So metrics split in two:
+ *
+ *   SCALE    Universal. Never set by a theme, never overridden. The 4dp
+ *            grid, the type ramp, the motion durations, the focus ring.
+ *            These are the values that must not drift, so nothing may
+ *            move them.
+ *
+ *   SHAPE    Per theme. The 14 choices below — how tall a control is, how
+ *            round, which typefaces. A theme answers ALL 14 or NONE; a
+ *            block that answers some is the partial-patch failure that
+ *            took palette.css nine selector blocks to unpick.
+ *
+ * SPINNING OFF A NEW THEME
+ *
+ * Two blocks, and theme:check tells you exactly what is missing in both:
+ *
+ *   palette.css   [data-palette='mytheme']  + .dark[data-palette='mytheme']
+ *   metrics.css   [data-palette='mytheme']    (14 lines, no dark form —
+ *                                              shape does not follow ink)
+ *
+ * Then add the id to UiState.palette's union. That is the whole procedure.
+ * Copy `paper`'s block, change what you mean, run `npm run theme:check`.
+ *
+ * WHERE THE VALUES COME FROM
+ *
+ * Material 3's scales, which is what M3 actually ships now — a token set,
+ * not a CSS framework. The 4dp spacing grid, the shape scale and the type
+ * ramp are taken as-is. Two deliberate departures, both about this audience:
+ *
+ *   1. --t-control-h is 3rem (48px), not M3's 40px default. 48dp is
+ *      Android's own touch-target minimum and WCAG 2.5.8's. This app is
+ *      used one-handed on cheap phones by people with motor impairments;
+ *      40px is the desktop answer.
+ *   2. --t-text-base is 1rem and nothing user-facing goes below
+ *      --t-text-sm (0.875rem). The audience includes partially sighted
+ *      readers. The 11px label that appeared in six stylesheets is gone.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1 · Scale — universal. A theme never sets these.                    */
+/* ------------------------------------------------------------------ */
+/*
+ * Written on :root, not :where([data-palette]), precisely because they are
+ * not a theme's business — they resolve before a palette is chosen, so a
+ * control is the right size on the very first paint, before applyTheme runs.
+ */
+:root {
+  /* Space — M3's 4dp grid. --t-space-N is N × 4px. */
+  --t-space-1: 0.25rem;
+  --t-space-2: 0.5rem;
+  --t-space-3: 0.75rem;
+  --t-space-4: 1rem;
+  --t-space-5: 1.25rem;
+  --t-space-6: 1.5rem;
+  --t-space-8: 2rem;
+  --t-space-12: 3rem;
+
+  /* Type — the ramp. Seven steps, and 62 font-sizes have to land on them. */
+  --t-text-xs: 0.75rem;    /* 12px — numerals and chips only, never prose */
+  --t-text-sm: 0.875rem;   /* 14px — the floor for anything a user reads   */
+  --t-text-base: 1rem;     /* 16px — body                                  */
+  --t-text-lg: 1.125rem;   /* 18px — a control's own label                 */
+  --t-text-xl: 1.375rem;   /* 22px — section titles                        */
+  --t-text-2xl: 1.75rem;   /* 28px — a figure worth reading first          */
+  --t-text-3xl: 2.25rem;   /* 36px — the one number on the screen          */
+  --t-text-4xl: 3.5rem;    /* 56px — that number when it IS the screen     */
+
+  --t-weight-normal: 400;
+  --t-weight-medium: 500;
+  --t-weight-semibold: 600;
+
+  /* Motion — M3's durations. `short` is the only one a control may use;
+     anything slower is a surface moving, not a button reacting. */
+  --t-motion-short: 150ms;
+  --t-motion-medium: 250ms;
+  --t-motion-long: 400ms;
+  --t-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Focus — one ring, app-wide. It was six. Keyboard focus is the single
+     most-skipped detail in this codebase and the one an assistive-tech
+     user needs most, so it is not a per-theme choice. */
+  --t-focus-w: 2px;
+  --t-focus-offset: 2px;
+
+  /* Icons — sized off the control they sit in, so they cannot drift apart. */
+  --t-icon-sm: 1rem;
+  --t-icon: 1.25rem;
+  --t-icon-lg: 1.5rem;
+}
+
+/* Reduced motion is a system setting, not a preference we get to weigh. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-motion-short: 0ms;
+    --t-motion-medium: 0ms;
+    --t-motion-long: 0ms;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 2 · Shape — the 14 choices, per theme                               */
+/* ------------------------------------------------------------------ */
+/*
+ * `paper` is the reference block: theme:check reads the names and the order
+ * out of it, exactly as it reads the 39 colours out of paper's palette block.
+ * Every other theme answers the same 14 in the same order.
+ *
+ * Zero specificity, so a theme's own [data-palette='x'] block wins wherever
+ * it sits in the file — the ordering bug that turned calc20's dark top bar
+ * white is documented in palette.css and is not repeatable here.
+ */
+:where([data-palette]) {
+  /* Control heights. --t-control-h is the touch target; sm is for controls
+     that sit inside another control (a chip in a row), lg for the one
+     primary action on a phone screen. */
+  --t-control-h-sm: 2.25rem;
+  --t-control-h: 3rem;
+  --t-control-h-lg: 3.5rem;
+
+  /* Control padding and internal gap. One horizontal padding per height,
+     so `px-4 py-3.5` beside `px-3 py-3` cannot happen again. */
+  --t-control-px-sm: 0.625rem;
+  --t-control-px: 1rem;
+  --t-control-px-lg: 1.5rem;
+  --t-control-gap: 0.5rem;
+
+  /* Shape — M3's shape scale. `full` is the pill. */
+  --t-radius-xs: 0.25rem;
+  --t-radius-sm: 0.375rem;
+  --t-radius-md: 0.5rem;
+  --t-radius: 0.75rem;
+  --t-radius-xl: 1rem;
+  --t-radius-full: 9999px;
+
+  /* Type families. A theme is allowed its own voice; it is not allowed its
+     own size ramp, which is why only the families are here. */
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Paper — the reference. It answers every choice with the default, which is
+   what makes it readable as the baseline a new theme is diffed against. */
+[data-palette='paper'] {
+  --t-control-h-sm: 2.25rem;
+  --t-control-h: 3rem;
+  --t-control-h-lg: 3.5rem;
+  --t-control-px-sm: 0.625rem;
+  --t-control-px: 1rem;
+  --t-control-px-lg: 1.5rem;
+  --t-control-gap: 0.5rem;
+  --t-radius-xs: 0.25rem;
+  --t-radius-sm: 0.375rem;
+  --t-radius-md: 0.5rem;
+  --t-radius: 0.75rem;
+  --t-radius-xl: 1rem;
+  --t-radius-full: 9999px;
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Slate — paper's shape. Its identity is entirely in the hue. */
+[data-palette='slate'] {
+  --t-control-h-sm: 2.25rem;
+  --t-control-h: 3rem;
+  --t-control-h-lg: 3.5rem;
+  --t-control-px-sm: 0.625rem;
+  --t-control-px: 1rem;
+  --t-control-px-lg: 1.5rem;
+  --t-control-gap: 0.5rem;
+  --t-radius-xs: 0.25rem;
+  --t-radius-sm: 0.375rem;
+  --t-radius-md: 0.5rem;
+  --t-radius: 0.75rem;
+  --t-radius-xl: 1rem;
+  --t-radius-full: 9999px;
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Ledger — a tighter, squarer shape. It is the desktop-leaning theme and the
+   one the owner describes as having "the vibe": denser rows, harder corners,
+   and the display serif dropped for a single sans voice throughout. */
+[data-palette='ledger'] {
+  --t-control-h-sm: 2rem;
+  --t-control-h: 2.75rem;
+  --t-control-h-lg: 3.25rem;
+  --t-control-px-sm: 0.5rem;
+  --t-control-px: 0.875rem;
+  --t-control-px-lg: 1.25rem;
+  --t-control-gap: 0.5rem;
+  --t-radius-xs: 0.125rem;
+  --t-radius-sm: 0.25rem;
+  --t-radius-md: 0.375rem;
+  --t-radius: 0.5rem;
+  --t-radius-xl: 0.75rem;
+  --t-radius-full: 9999px;
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Carbon — paper's shape on a dark ground. Single-ink; see palette.css. */
+[data-palette='carbon'] {
+  --t-control-h-sm: 2.25rem;
+  --t-control-h: 3rem;
+  --t-control-h-lg: 3.5rem;
+  --t-control-px-sm: 0.625rem;
+  --t-control-px: 1rem;
+  --t-control-px-lg: 1.5rem;
+  --t-control-gap: 0.5rem;
+  --t-radius-xs: 0.25rem;
+  --t-radius-sm: 0.375rem;
+  --t-radius-md: 0.5rem;
+  --t-radius: 0.75rem;
+  --t-radius-xl: 1rem;
+  --t-radius-full: 9999px;
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Calc20 — one step rounder throughout. This was already true and already
+   argued in palette.css section 1; it moves here because it is shape, and
+   the point of this file is that shape lives in one place. The softer
+   corners are half of why that layout reads as the smoothest in the product. */
+[data-palette='calc20'] {
+  --t-control-h-sm: 2.25rem;
+  --t-control-h: 3rem;
+  --t-control-h-lg: 3.5rem;
+  --t-control-px-sm: 0.625rem;
+  --t-control-px: 1rem;
+  --t-control-px-lg: 1.5rem;
+  --t-control-gap: 0.5rem;
+  --t-radius-xs: 0.375rem;
+  --t-radius-sm: 0.5rem;
+  --t-radius-md: 0.625rem;
+  --t-radius: 0.75rem;
+  --t-radius-xl: 1.5rem;
+  --t-radius-full: 9999px;
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Calm — paper's heights, twice paper's roundness. The reference this theme
+   comes from puts 32px on a card and a pill on every control, and that
+   softness is most of what makes it read as calm rather than as a form. */
+[data-palette='calm'] {
+  --t-control-h-sm: 2.25rem;
+  --t-control-h: 3rem;
+  --t-control-h-lg: 3.5rem;
+  --t-control-px-sm: 0.75rem;
+  --t-control-px: 1.25rem;
+  --t-control-px-lg: 1.5rem;
+  --t-control-gap: 0.625rem;
+  --t-radius-xs: 0.5rem;
+  --t-radius-sm: 0.75rem;
+  --t-radius-md: 1rem;
+  --t-radius: 1.25rem;
+  --t-radius-xl: 2rem;
+  --t-radius-full: 9999px;
+  --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}

@@ -1,0 +1,241 @@
+/* ============================================================================
+   Overview — the desktop layout, and the one that had no stylesheet
+   ============================================================================
+
+   BRIDGE + a short list of marked overrides. See CLAUDE.md § One palette.
+
+   THE BUG THIS FILE FIXES
+
+   Overview was the only layout with no stylesheet of its own. That is not a
+   tidiness problem: the app's components are written against a `--pg-*` scale
+   which every other layout maps onto the palette in its own file, and with no
+   file to do the mapping Overview resolved none of it. It fell through to the
+   starter defaults instead — measured in the running app, `.panel` came out
+   with `border-radius: 0` and a near-black `#0f172a` border, on a layout whose
+   palette says 1rem and a soft grey. Nothing looked deliberately hard-edged;
+   it looked like a page that had lost its stylesheet, because it had.
+
+   So the redesign is mostly this bridge. Restoring it gives Overview its
+   rounded cards, its soft borders and its five palette variants back at once,
+   and every value stays the palette's rather than becoming a second opinion
+   about what colour a border is.
+   ========================================================================= */
+
+.pg-overview {
+  /* ---- bridge: the app's names, the palette's values. No choices here. ---- */
+  --pg-bg: var(--t-bg);
+  --pg-border: var(--t-border);
+  --pg-border-soft: var(--t-border-soft);
+  --pg-border-strong: var(--t-border-strong);
+  --pg-fg: var(--t-fg);
+  --pg-fg-dim: var(--t-fg-dim);
+  --pg-fg-muted: var(--t-fg-muted);
+  --pg-head: var(--t-head);
+  --pg-head-fg: var(--t-head-fg);
+  --pg-info: var(--t-info);
+  --pg-invert: var(--t-invert);
+  --pg-invert-border: var(--t-invert-border);
+  --pg-invert-fg: var(--t-invert-fg);
+  --pg-over: var(--t-over);
+  --pg-radius: var(--t-radius);
+  --pg-radius-md: var(--t-radius-md);
+  --pg-radius-sm: var(--t-radius-sm);
+  --pg-radius-xl: var(--t-radius-xl);
+  --pg-radius-xs: var(--t-radius-xs);
+  --pg-ring: var(--t-ring);
+  --pg-safe: var(--t-safe);
+  --pg-se: var(--t-se);
+  --pg-shadow: var(--t-shadow);
+  --pg-shadow-lg: var(--t-shadow-lg);
+  --pg-shadow-md: var(--t-shadow-md);
+  --pg-shadow-sm: var(--t-shadow-sm);
+  --pg-surface: var(--t-surface);
+  --pg-surface-2: var(--t-surface-2);
+  --pg-surface-3: var(--t-surface-3);
+  --pg-topbar: var(--t-topbar);
+  --pg-topbar-accent: var(--t-topbar-accent);
+  --pg-topbar-accent-w: var(--t-topbar-accent-w);
+  --pg-topbar-fg: var(--t-topbar-fg);
+  --pg-twp: var(--t-twp);
+  --pg-w2: var(--t-w2);
+  --pg-warn: var(--t-warn);
+}
+
+/* ---------------------------------------------------------------------------
+   @override overview — the sidebar is the raised plane, the bar is not
+
+   Both were transparent, so they showed the page ground through and the only
+   thing separating the navigation from the content was a single hairline.
+   The first correction put BOTH on white, on the stated grounds that "the
+   reference sits them on white". Measured in the reference, it does not: the
+   aside is rgb(255 255 255) and the header is rgb(247 248 246), which is its
+   page background. Two planes, not one — and the difference is the whole
+   point, because it is what tells you the sidebar is a thing standing on the
+   page and the bar is part of the page's own top edge.
+
+   Painting both white merged them into one white L and left the content
+   ground as the only thing that was not white, which reads as the content
+   being the odd one out. Nothing here picks a colour; it names which of the
+   palette's two planes each belongs to.
+   ------------------------------------------------------------------------ */
+
+/* Every primary nav is raised chrome: the sidebar, the drawer behind it, and
+   the phone tab bar. `header.app-bar` rather than `.app-bar`, because the tab
+   bar carries that class too and is on the other side of this distinction. */
+.pg-overview nav[aria-label="Primary"] {
+  background: var(--pg-surface);
+}
+
+.pg-overview header.app-bar {
+  background: var(--pg-bg);
+}
+
+/* ---------------------------------------------------------------------------
+   @override overview — a serif voice, measured off the reference
+
+   Overview is the only layout the owner rates superb on a desktop, and the
+   only one carrying all eight primaries: it is read down rather than glanced
+   at, and that earns a display face. Instrument Serif is already loaded and
+   was being used for the money figure alone, so the page had a beautiful
+   number and no voice around it.
+
+   Sizes are taken from the reference rather than invented — 48 / 30 / 60 at
+   weight 400, line-height 1, tracking -0.02em. Serif names a section; it never
+   states a fact. Labels stay in the sans that carries the vocabulary rules.
+   ------------------------------------------------------------------------ */
+
+.pg-overview h1,
+.pg-overview .ov-title {
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: clamp(2.25rem, 1.6rem + 2vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--pg-fg);
+}
+
+.pg-overview h2,
+.pg-overview .ov-section {
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: 1.875rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--pg-fg);
+}
+
+/* The money figure keeps its serif and gains tabular figures — it was
+   shifting every digit beside it when the number changed. */
+.pg-overview .display-figure {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   The page header — eyebrow, title, one sentence
+
+   Overview had no <h1> at all. It opened on a tracked caps label and went
+   straight into a card, so the page never said what it was, and the serif had
+   nothing to be the voice of. Three lines, in three registers: what window you
+   are looking at, what the page is, and what it is for.
+
+   The eyebrow is DM Sans, not the mono face. That was tried and it was wrong:
+   a mono eyebrow reads as an instrument label on a screen that is trying to
+   sound like a person, and the reference — built on this same font stack —
+   uses the sans at 11px/600 with 0.1em tracking. Measured, not guessed.
+   ------------------------------------------------------------------------ */
+
+.pg-overview .ov-head { display: flex; flex-direction: column; gap: 0.5rem; }
+.pg-overview .ov-head .ov-title { margin: 0; }
+
+.pg-overview .label-caps,
+.pg-overview .ov-eyebrow {
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.pg-overview .ov-lede {
+  max-width: 60ch;
+  font-size: 0.875rem;
+  line-height: 1.625;
+  color: var(--pg-fg-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   On the blue — deliberately NOT filled in
+
+   PaycheckRadar already carries --t-info on its heading, month chips and row
+   borders, so it follows the palette variant like everything else. The only
+   difference from the reference is how much of the card is tinted, and that is
+   a taste call rather than a system one. No dead rules kept for a decision
+   nobody has taken.
+
+   What the hue means: green is money and safety, blue is the calendar. A month
+   that pays an extra time is not a risk to colour amber and not a reassurance
+   to colour green — it is a fact about the year to plan around, and a third
+   safety colour would read as a third safety state.
+   ------------------------------------------------------------------------ */
+
+/* ---------------------------------------------------------------------------
+   The month in focus — day chips
+
+   A payday is a date, and a date is short. These are the actual days of the
+   month a check lands, drawn as small square chips rather than written into a
+   sentence, because two of them side by side answer "when does this month get
+   heavy" at a glance and a sentence does not.
+   ------------------------------------------------------------------------ */
+
+.pg-overview .ov-days { display: flex; flex-wrap: wrap; gap: 0.375rem; margin: 0; padding: 0; list-style: none; }
+.pg-overview .ov-day {
+  display: grid;
+  place-items: center;
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius-sm);
+  background: var(--pg-surface-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--pg-fg-dim);
+}
+
+/* ---------------------------------------------------------------------------
+   @override overview — the sidebar's controls are all one curve
+
+   Four controls sit in a 240px column — Add income, then three nav items,
+   then Settings — and they arrived at three different radii, because each
+   reads a different rung of the ladder:
+
+     .btn-primary   --pg-radius-md   8px   (set in overlay.css)
+     .nav-item      --radius-md      8px   (via the metrics bridge)
+     panels around them              16px
+
+   The reference draws every one of them at 12px, which is this palette's own
+   --t-radius, so nothing new is chosen here — both utilities just stop
+   picking a rung the layout does not otherwise use. Two declarations rather
+   than one because they read different names for the same intent.
+
+   These are scoped rather than fixed in the utilities themselves because
+   index.css is being rewritten in another session as this is written. The
+   general version is filed as a note; if .nav-item and .btn-primary move up
+   a rung, both lines here become redundant and should go.
+   ------------------------------------------------------------------------ */
+
+.pg-overview .nav-item,
+/* The shared editors moved to .ui-btn / .ui-btn-icon (components/ui). This
+   layout's override has to name both while the migration runs, or its own
+   identity silently stops reaching the sheets — which is exactly what
+   happened the first time: the close button came out round in a layout whose
+   whole rule is that nothing is round. Drop the old name when the last
+   call site for it is gone. */
+.pg-overview .btn-primary,
+.pg-overview .ui-btn-filled { border-radius: var(--pg-radius); }
+
+/* Cards read as one family. */
+.pg-overview .panel { border-color: var(--pg-border); }

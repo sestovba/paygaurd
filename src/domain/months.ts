@@ -68,9 +68,16 @@ export function monthsOfYear(year: number): MonthKey[] {
  * | `ahead`  | this month and everything after  | oldest first |
  * | `year`   | all twelve                      | this month, back, then ahead |
  *
- * `sofar` is the honest default for a layout built to hold a year: the months
- * with anything in them are the ones behind you, so the screen is never empty
- * and nothing about the future is being guessed at.
+ * `ahead` is the default for a layout built to hold a year. The argument for
+ * `sofar` was that the months with anything in them are the ones behind you,
+ * so the screen is never empty — true, and beside the point. Nothing behind
+ * you can be acted on. The decision this product exists to support is "can I
+ * take that shift", "which months pay me extra", and every month that answers
+ * either of those is in front of you. A screen that opens on the past is a
+ * record; this one is supposed to be a plan.
+ *
+ * (Owner's call, and it overrides the earlier reasoning above it: "Rest of
+ * the year is the better default.")
  */
 export type MonthScope = 'month' | 'sofar' | 'ahead' | 'year';
 
@@ -126,11 +133,11 @@ export function scopedMonths(
  * Focus mode stays the one switch in Settings — it is what takes the charts,
  * the year totals and the calendars off the screen. What it does to the month
  * list depends on the layout: one month on the two built for one month, and
- * the months behind you on the ones built to hold a year.
+ * the rest of the year on the ones built to hold a year.
  */
 export function defaultScope(focus: boolean, shape: MonthShape): MonthScope {
   if (!focus) return 'year';
-  return shape === 'single' ? 'month' : 'sofar';
+  return shape === 'single' ? 'month' : 'ahead';
 }
 
 /**
@@ -144,10 +151,29 @@ export function defaultScope(focus: boolean, shape: MonthShape): MonthScope {
 export function resolveScope(
   chosen: MonthScope | undefined,
   focus: boolean,
-  shape: MonthShape
+  shape: MonthShape,
+  /**
+   * What focus mode should mean on THIS surface, when the reader has not said.
+   *
+   * `many` defaults to `ahead` because a year-shaped table showing one row
+   * reads as a page that failed to load. That is true of a table — it is not
+   * true of a surface that answers `month` by drawing something else
+   * entirely. `MonthGrid` does exactly that: at one-month range it renders
+   * `MonthUpClose`, which is a different and complete drawing showing the
+   * paydays on the days they fall, not a calendar with eleven twelfths
+   * removed.
+   *
+   * Those two facts used to sit in two files contradicting each other, and
+   * the grid lost: Overview drew nine months nobody can act on in order to
+   * show the one they can. A surface that can draw a single month properly
+   * says so here, and the reader's own choice still outranks it.
+   */
+  fallback?: MonthScope
 ): MonthScope {
   if (shape === 'single') return defaultScope(focus, shape);
-  return chosen ?? defaultScope(focus, shape);
+  if (chosen) return chosen;
+  if (!focus) return 'year';
+  return fallback ?? defaultScope(focus, shape);
 }
 
 /**
@@ -160,14 +186,15 @@ export function resolveScope(
  * that question has the same answer on every layout, so it is answered here
  * rather than in each editor.
  *
- * Full month names: a unit or a period is the last word to shorten.
+ * Ranges use short names (Sep–Dec) so the meta beside a section title stays
+ * compact; a single month still gets the full name.
  */
 export function monthsShownLabel(months: MonthKey[]): string {
   if (months.length === 0) return 'No months';
   if (months.length === 1) return longMonthName(months[0]);
   if (months.length === 12) return 'All 12 months';
   const ordered = [...months].sort();
-  return longMonthName(ordered[0]) + ' to ' + longMonthName(ordered[ordered.length - 1]);
+  return shortMonthName(ordered[0]) + '–' + shortMonthName(ordered[ordered.length - 1]);
 }
 
 export function monthOfDate(date: DateKey): MonthKey {

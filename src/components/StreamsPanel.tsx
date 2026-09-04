@@ -56,6 +56,14 @@ export function StreamsPanel({
                   <Chip tone={stream.type === 'w2' ? 'good' : 'info'}>
                     {SOURCE_SHORT[stream.type]}
                   </Chip>
+                  {/* What this source has actually paid this year. The row
+                      named the job and its kind and then stopped, so the list
+                      answered "which jobs do I have" and not "which one is
+                      most of my income" — which is the question somebody
+                      deciding where to cut back is actually asking. */}
+                  <span className="num shrink-0 text-sm font-semibold text-foreground">
+                    {money(streamYearTotal(stream, ui.year))}
+                  </span>
                 </button>
               </li>
             ))}

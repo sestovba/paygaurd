@@ -14,10 +14,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   ChevronDown, Copy, Crosshair, LayoutGrid, MessageSquarePlus, Monitor, Moon,
-  ScanSearch, Sun, Undo2, X
+  MoveVertical, ScanSearch, Smartphone, Squircle, Sun, Tablet, Undo2, X
 } from 'lucide-react';
 import type { ComponentType } from 'react';
-import type { ReviewMode } from './context';
+import type { FrameSetup, ReviewMode } from './context';
 import { useTracker } from '../state/TrackerProvider';
 import { LAYOUT_GROUPS } from '../components/LayoutSwitcher';
 
@@ -28,11 +28,122 @@ const MAX = 720;
  *  remembered from a monitor must not swallow a laptop. */
 const PAGE_FLOOR = 420;
 
+/**
+ * The devices the page can be reviewed at.
+ *
+ * Real dimensions in CSS pixels, not round numbers. The height matters as
+ * much as the width and is the thing a narrow column could never give — this
+ * app has ten rules keyed on `100dvh`, and a frame stretched to a desktop
+ * window's height puts the fold where no phone has it, so everything below it
+ * reads as visible when it is not.
+ *
+ * What the frame is: a real viewport. Media queries resolve against it, so
+ * 640 and 1024 break where they actually break, and the app inside is the app.
+ *
+ * What it is not, and cannot be made into: Safari on a phone. It is the same
+ * engine as this window, so font rasterisation, `env(safe-area-inset-*)` —
+ * which the browser supplies and no stylesheet can fake — rubber-band
+ * scrolling, the shrinking URL bar and iOS text inflation are all absent. For
+ * those, open the dev server on the phone itself: `npm run dev:lan` prints a
+ * LAN address, the console runs there too, and that is a real device.
+ */
+export interface Device {
+  id: string;
+  label: string;
+  w: number;
+  h: number;
+  kind: 'phone' | 'tablet';
+}
+
+export const DEVICES: ReadonlyArray<Device> = [
+  { id: 'se', label: 'iPhone SE', w: 375, h: 667, kind: 'phone' },
+  { id: 'ip', label: 'iPhone 15/16', w: 393, h: 852, kind: 'phone' },
+  { id: 'max', label: 'iPhone Pro Max', w: 440, h: 956, kind: 'phone' },
+  { id: 'px', label: 'Pixel 7', w: 412, h: 915, kind: 'phone' },
+  { id: 'mini', label: 'iPad mini', w: 744, h: 1133, kind: 'tablet' },
+  { id: 'pad', label: 'iPad 11"', w: 834, h: 1194, kind: 'tablet' }
+];
+
+/** The two defaults the icon buttons snap to. A width found by dragging is
+ *  worth keeping; getting back to a known device has to be one click. */
+export const DEFAULT_PHONE = DEVICES.find((d) => d.id === 'ip')!;
+export const DEFAULT_TABLET = DEVICES.find((d) => d.id === 'pad')!;
+
+/** Which preset a size matches, or null when the width was dragged. */
+export function deviceFor(w: number, h: number): Device | null {
+  return DEVICES.find((device) => device.w === w && device.h === h) ?? null;
+}
+
 const THEMES: [string, ComponentType<{ className?: string }>, string][] = [
   ['light', Sun, 'Light'],
   ['dark', Moon, 'Dark'],
   ['system', Monitor, 'System']
 ];
+
+/**
+ * The device controls: which preset, how tall, and whether to round it off.
+ *
+ * The width is also draggable on the frame itself, and that is the control
+ * that finds where a layout actually breaks — but a width arrived at by
+ * dragging has to be one click away from a known device again, or every
+ * session ends at some number nobody can reproduce. That is what the preset
+ * list is for, and why it says "Custom" out loud rather than quietly showing
+ * the nearest match.
+ */
+function FrameBar({
+  frame,
+  onFrame
+}: {
+  frame: FrameSetup;
+  onFrame: (patch: Partial<FrameSetup>) => void;
+}) {
+  const preset = deviceFor(frame.w, frame.h);
+  return (
+    <div className="review-frame-bar" role="group" aria-label="Device">
+      <select
+        aria-label="Device preset"
+        value={preset?.id ?? 'custom'}
+        onChange={(event) => {
+          const next = DEVICES.find((device) => device.id === event.currentTarget.value);
+          if (next) onFrame({ w: next.w, h: next.h });
+        }}
+      >
+        {/* Names only. The readout beside this already carries the numbers,
+            and repeating them here just truncates the name in a narrow rail. */}
+        {preset ? null : <option value="custom">Custom</option>}
+        {DEVICES.map((device) => (
+          <option key={device.id} value={device.id}>{device.label}</option>
+        ))}
+      </select>
+
+      <span className="review-frame-size" aria-live="polite">{frame.w}<span>×</span>{frame.h}</span>
+
+      <button
+        type="button"
+        data-on={frame.fullHeight || undefined}
+        aria-pressed={frame.fullHeight}
+        title={frame.fullHeight
+          ? 'Full height — the whole layout at once, but the fold is not where a phone puts it'
+          : 'Device height — where the fold actually is'}
+        onClick={() => onFrame({ fullHeight: !frame.fullHeight })}
+      >
+        <MoveVertical className="size-3.5" />
+        {frame.fullHeight ? 'Full' : 'Device'}
+      </button>
+
+      <button
+        type="button"
+        data-on={frame.round || undefined}
+        aria-pressed={frame.round}
+        title="Round the corners — how the device clips the page, not how the page draws"
+        onClick={() => onFrame({ round: !frame.round })}
+      >
+        <Squircle className="size-3.5" />
+        Corners
+      </button>
+    </div>
+  );
+}
 
 function loadSize(): number {
   const saved = Number(localStorage.getItem(RAIL_KEY));
@@ -45,6 +156,8 @@ export function ReviewDock({
   mode,
   onMode,
   onSay,
+  frame,
+  onFrame,
   counts,
   undoDepth,
   onUndo,
@@ -56,6 +169,14 @@ export function ReviewDock({
   mode: ReviewMode;
   onMode: (next: ReviewMode) => void;
   onSay: () => void;
+  /** How the PAGE is framed — not `width` below, which is the rail's own.
+   *  Two different widths in one component, so both are named. */
+  frame: FrameSetup;
+  /* A patch, not a whole object. Two of these controls pressed before React
+     re-renders would each spread a `frame` captured at the same render, so the
+     second would quietly undo the first — toggle the corners and the height
+     quickly and only one of them takes. */
+  onFrame: (patch: Partial<FrameSetup>) => void;
   counts: { yours: number; sent: number; replies: number };
   undoDepth: number;
   onUndo: () => void;
@@ -134,7 +255,7 @@ export function ReviewDock({
         <span>Review</span>
         {counts.replies ? <span className="review-rail-count" data-new>{counts.replies}</span>
           : counts.yours ? <span className="review-rail-count">{counts.yours}</span> : null}
-        <kbd>⌘R</kbd>
+        <kbd>⌥R</kbd>
       </button>
     );
   }
@@ -237,7 +358,7 @@ export function ReviewDock({
           className="review-rail-close"
           onClick={onToggle}
           aria-label="Close the review console"
-          title="Close · ⌘R"
+          title="Close · ⌥R"
         >
           <X className="size-4" />
         </button>
@@ -268,7 +389,49 @@ export function ReviewDock({
           <span className="review-dock-name">Say</span>
           <kbd className="review-dock-key">c</kbd>
         </button>
+
+        {/* The size the page is drawn at. Narrowing the rail is not the same
+            thing and never was: a media query reads the viewport, so a page
+            squeezed into a narrow column still resolves every desktop rule
+            and shows a layout that ships to nobody. These render the app in a
+            frame of that size, where its own breakpoints apply. */}
+        <span className="review-dock-widths" role="group" aria-label="Page size">
+          <button
+            type="button"
+            data-on={!frame.on || undefined}
+            aria-pressed={!frame.on}
+            title="The window as it is"
+            onClick={() => onFrame({ on: false })}
+          >
+            <Monitor className="size-4" />
+            <span className="sr-only">Full</span>
+          </button>
+          <button
+            type="button"
+            data-on={(frame.on && frame.w < 640) || undefined}
+            aria-pressed={frame.on && frame.w < 640}
+            title={`Phone — ${DEFAULT_PHONE.w}×${DEFAULT_PHONE.h}`}
+            onClick={() => onFrame({ on: true, w: DEFAULT_PHONE.w, h: DEFAULT_PHONE.h })}
+          >
+            <Smartphone className="size-4" />
+            <span className="sr-only">Phone</span>
+          </button>
+          <button
+            type="button"
+            data-on={(frame.on && frame.w >= 640) || undefined}
+            aria-pressed={frame.on && frame.w >= 640}
+            title={`Tablet — ${DEFAULT_TABLET.w}×${DEFAULT_TABLET.h}`}
+            onClick={() => onFrame({ on: true, w: DEFAULT_TABLET.w, h: DEFAULT_TABLET.h })}
+          >
+            <Tablet className="size-4" />
+            <span className="sr-only">Tablet</span>
+          </button>
+        </span>
       </div>
+
+      {/* The device bar. Only while framed, because every control on it is a
+          question about a frame that is not there otherwise. */}
+      {frame.on ? <FrameBar frame={frame} onFrame={onFrame} /> : null}
 
       <div className="review-rail-body">{children}</div>
 

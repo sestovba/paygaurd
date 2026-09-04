@@ -109,6 +109,41 @@ export interface Vocabulary {
   paidToYou: string;
   /** The same, asked as a question. */
   paidToYouAsk: string;
+  /* How sure a figure is, and the one thing that would sharpen it. These
+     were a flat table in domain/precision.ts, which meant the grade on a
+     number read the same on a roomy screen and inside a dense monospace
+     strip — the one place a layout most needs its own register. They are
+     keys now, so a tone sets them and a layout can override them locally. */
+
+  /** Nothing real behind the figure yet. */
+  precisionGuessed: string;
+  /** Worked out from a pay schedule we know. */
+  precisionPredicted: string;
+  /** Off a real paystub. */
+  precisionExact: string;
+  /** The ask, when a pay schedule is missing. */
+  askPayday: string;
+  /** The ask, when this month's real paycheck is missing. */
+  askPaystub: string;
+  /** The ask, when 1099 hours are missing. */
+  askHours: string;
+
+  /* The panel that turns the limit into a number of hours, and the control
+     that opens it. Two keys because they do different jobs — one names the
+     thing, one asks the question — and one meaning, because it was four
+     spellings across five screens: "Hours you can work", "How many hours
+     could I work?", "How many hours should I work?" and "Plan my hours" were
+     all the same panel. el-8lyfa5, whose ask was that this stop being named
+     after its own maths, and el-16owyjf, whose ask was that labels like this
+     be variables rather than typed into each layout. */
+
+  /** What the panel is: the answer it gives, in the reader's words. Their
+   *  own rename — "Hours you can work > Recommended hours". */
+  hoursPanel: string;
+  /** The question that opens it. First person: it is the reader's question,
+   *  and it is on a control they press. */
+  hoursAsk: string;
+
   /** Hours worked. Never "hrs". */
   hoursWorked: string;
   /** Business miles. Never "mi", and never bare "Miles" — the word has to
@@ -142,9 +177,9 @@ export interface Vocabulary {
  *
  * The line between them is meaning. A tone may change the register, the
  * length, the person and the punctuation. It may never change the fact, the
- * subject or the number. "Reached your bank", "Into your bank" and "How much
- * reached your bank?" are one meaning in three voices; "Pay" and "Amount"
- * are not a voice, they are a missing answer to *which number*.
+ * subject or the number. "Direct deposit" and "Bank deposit" are one meaning
+ * in two lengths; "Pay" and "Amount" are not a voice, they are a missing
+ * answer to *which number*.
  */
 
 export type Tone =
@@ -167,7 +202,9 @@ export const LAYOUT_TONE: Record<LayoutMode, Tone> = {
   workrecord: 'compact',
   calc20: 'compact',
   pocket: 'spoken',
-  plan: 'spoken'
+  charm: 'spoken',
+  plan: 'spoken',
+  beautiful: 'plain'
 };
 
 /*
@@ -204,10 +241,18 @@ const PLAIN: Vocabulary = {
 
   gross: 'Pay before taxes',
   grossAsk: 'What were you paid before taxes?',
-  net: 'Money that reached your bank',
-  netAsk: 'How much reached your bank?',
+  net: 'Direct deposit',
+  netAsk: 'Direct deposit',
   paidToYou: 'Money they paid you',
   paidToYouAsk: 'How much did they pay you?',
+  precisionGuessed: 'Guessed',
+  precisionPredicted: 'Predicted',
+  precisionExact: 'Exact',
+  askPayday: 'add a payday',
+  askPaystub: 'add a paystub',
+  askHours: 'add hours worked',
+  hoursPanel: 'Recommended hours',
+  hoursAsk: 'How many hours should I work?',
   hoursWorked: 'Hours you worked',
   workMiles: 'Miles you drove for work'
 };
@@ -222,15 +267,15 @@ const COMPACT: Vocabulary = {
   ...PLAIN,
   income: 'Jobs',
   incomeAdd: 'Add',
-  w2: 'Employer',
-  selfEmployed: 'Gig work',
+  w2: 'Job',
+  selfEmployed: 'Gig',
   extraPayMonth: 'Extra paychecks',
   precision: 'How sure',
 
   gross: 'Before taxes',
   grossAsk: 'Pay before taxes',
-  net: 'Reached your bank',
-  netAsk: 'Reached your bank',
+  net: 'Bank deposit',
+  netAsk: 'Bank deposit',
   paidToYou: 'Paid to you',
   paidToYouAsk: 'Paid to you',
   hoursWorked: 'Hours worked',
@@ -254,8 +299,8 @@ const SPOKEN: Vocabulary = {
 
   gross: 'Before taxes',
   grossAsk: 'What did your paystub say before taxes?',
-  net: 'Into your bank',
-  netAsk: 'How much went into your bank?',
+  net: 'Bank deposit',
+  netAsk: 'Direct deposit',
   paidToYou: 'Paid to you',
   paidToYouAsk: 'How much did they pay you?',
   hoursWorked: 'How many hours did you work?',
@@ -284,7 +329,7 @@ export const NEVER: ReadonlyArray<{ word: string; say: string; because: string }
   { word: 'YTD', say: 'so far this year', because: 'An abbreviation, and it hides which months are in the total.' },
   { word: 'IRWE', say: 'work costs your disability makes you pay', because: 'Four letters for a sentence.' },
   { word: 'Gross', say: 'pay before taxes', because: 'The single most common way this kind of form is filled in wrong.' },
-  { word: 'Net', say: 'what reached your bank', because: 'Same, from the other side.' },
+  { word: 'Net', say: 'Direct deposit', because: 'Same, from the other side.' },
   { word: 'Countable', say: 'counted toward your limit', because: 'Names a calculation rather than a consequence.' },
   { word: 'Earned', say: 'paid to you, before taxes', because: 'Does not say which number, on a field that takes money.' },
   { word: 'Amount', say: 'the money word that applies', because: 'Answers none of the four questions.' },
@@ -322,11 +367,34 @@ const OVERRIDES: Partial<Record<LayoutMode, Partial<Vocabulary>>> = {
     // column of that name since it was written. Every other screen says
     // "Counted".
     countable: 'Countable',
-    extraPayMonth: 'Extra paycheck months'
+    extraPayMonth: 'Extra paycheck months',
+    /* Caps stamp beside a job name — "Guessed" ran into the name. */
+    precisionGuessed: 'Estimate',
+    precisionPredicted: 'Scheduled',
+    precisionExact: 'Confirmed',
+    askPayday: 'add payday',
+    askPaystub: 'add paystub',
+    askHours: 'add hours'
   },
   pocket: {
     // The smallest screen there is, one step shorter than its own voice.
     extraPayMonth: 'Extra pay'
+  },
+  charm: {
+    extraPayMonth: 'Extra pay'
+  },
+  calc20: {
+    /* Its precision strip is a single caps line under a headline figure, so
+       the grade has to read as a stamp rather than a sentence, and the ask
+       has to fit beside a job name on one row. "Guessed" and "Predicted"
+       are accurate but they describe the app's confidence; on this layout
+       the line is read as a status on the record itself. */
+    precisionGuessed: 'Estimate',
+    precisionPredicted: 'Scheduled',
+    precisionExact: 'Confirmed',
+    askPayday: 'needs a payday',
+    askPaystub: 'needs a paystub',
+    askHours: 'needs hours'
   }
 };
 
@@ -380,6 +448,66 @@ export function roomToTargetLine(room: number, target: number, limit: number): s
   return `${money(room)} left before the ${money(target)} we aim for. ${money(limit)} is the limit.`;
 }
 
+/**
+ * The answer in the unit the decision is actually made in — as a budget
+ * running down, never as permission to spend it.
+ *
+ * Dollars are what the rule is written in; hours are what somebody deciding
+ * whether to take a shift needs. So this is the headline and the money goes
+ * on the line beneath it — the reverse of how every layout wrote it first.
+ *
+ * It was written first as "You can work about 46 more hours this month" and
+ * that is the wrong sentence, for the same reason a progress ring that fills
+ * toward a limit is the wrong graphic: it reads as an invitation to use what
+ * is left. "46 hours left" is the identical number and the opposite
+ * instruction — a limit approaching rather than a permission slip. For a
+ * reader whose fear is losing their payments, the first framing quietly
+ * argues against them.
+ *
+ * "About" is not hedging. The figure is room ÷ hourly rate, the rate is
+ * usually worked out rather than known, and "46.3 hours" would claim a
+ * precision nobody has. "This month" stays because the limit resets monthly
+ * and a bare count invites reading it as a lifetime total.
+ */
+export function hoursLine(hours: number): string {
+  if (hours <= 0) return 'No hours left this month.';
+  return `${hours} ${hours === 1 ? 'hour' : 'hours'} left this month.`;
+}
+
+/**
+ * Past the figure we aim at, still under the limit — and the sentence has to
+ * carry both halves at once.
+ *
+ * This is the band the app exists for: nothing has gone wrong, nothing is at
+ * risk yet, and the question has quietly changed from "how much can I earn"
+ * to "how much more can I take". Said as a warning it frightens somebody who
+ * is still entirely within the rules; said too lightly it drops the one
+ * signal that matters. "And that is allowed" is the whole job of the line.
+ */
+export function pastSafeLine(target: number): string {
+  return `You are past the ${money(target)} we aim for, and that is allowed.`;
+}
+
+/**
+ * Trial work months as permission, not as a countdown.
+ *
+ * Every layout wrote this as spending — "it uses 1 of your 9". That is true
+ * and it is the wrong end of the sentence for a reader whose defining fear is
+ * losing their payments. What the rule actually grants is nine months in
+ * which earnings cannot cost them anything, so the permission is said first
+ * and the arithmetic second.
+ */
+export function trialPermissionLine(remaining: number, total: number): string {
+  if (remaining <= 0) return `You have used all ${total} of your trial work months.`;
+  /* "9 of your 9 left" is arithmetic nobody says out loud. Untouched is a
+     different fact from partly spent, and it is the reassuring one — say it
+     as a whole number the reader still has. */
+  const count = remaining === total
+    ? `You have all ${total} of your trial work months.`
+    : `You have ${remaining} of your ${total} trial work months left.`;
+  return `${count} In one of those you can earn any amount and keep your payments.`;
+}
+
 /** How many of the nine are gone. Always "of your 9", never a bare count and
  *  never "TWP". */
 export function trialMonthsLine(used: number, total: number): string {
@@ -391,7 +519,7 @@ export function trialMonthsLine(used: number, total: number): string {
  * for three different windows; this says which one.
  */
 export function periodLabel(year: number, isPartialYear: boolean): string {
-  return isPartialYear ? `So far in ${year}` : `All of ${year}`;
+  return isPartialYear ? `So far · ${year}` : `${year}`;
 }
 
 /**
@@ -427,6 +555,6 @@ export const SOURCE_CHOICE: Record<'w2' | 'ten99', { label: string; description:
  * that assumes they do.
  */
 export const SOURCE_SHORT: Record<'w2' | 'ten99', string> = {
-  w2: 'Employer',
-  ten99: 'Gig work'
+  w2: 'J',
+  ten99: 'G'
 };

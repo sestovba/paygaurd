@@ -1341,7 +1341,14 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.pl [data-sheet] [data-sheet-head] .icon-btn {
+/* The shared editors moved to .ui-btn / .ui-btn-icon (components/ui). This
+   layout's override has to name both while the migration runs, or its own
+   identity silently stops reaching the sheets — which is exactly what
+   happened the first time: the close button came out round in a layout whose
+   whole rule is that nothing is round. Drop the old name when the last
+   call site for it is gone. */
+.pl [data-sheet] [data-sheet-head] .icon-btn,
+.pl [data-sheet] [data-sheet-head] .ui-btn-icon {
   border-radius: 3px;
   background: var(--paper-2);
   color: var(--ink);
@@ -1383,6 +1390,7 @@
 
 /* And the controls are keys, with the same travel as everything else. */
 .pl [data-sheet] .btn-primary,
+.pl [data-sheet] .ui-btn,
 .pl [data-sheet] .add-job,
 .pl [data-sheet] .option-row {
   border: 0;
@@ -1434,14 +1442,14 @@
   border-radius: 3px;
 }
 
-.pl [data-sheet-body] button:not(.icon-btn):not(.seg-item):not(.swatch):not(.switch) {
+.pl [data-sheet-body] button:not(.icon-btn):not(.ui-btn-icon):not(.seg-item):not(.swatch):not(.switch) {
   border: 0;
   margin-bottom: 3px;
   background: var(--paper-2);
   box-shadow: inset 0 0 0 2px var(--px-ink), 0 3px 0 0 var(--key-edge);
   transition: transform 60ms linear, box-shadow 60ms linear;
 }
-.pl [data-sheet-body] button:not(.icon-btn):not(.seg-item):not(.swatch):not(.switch):active {
+.pl [data-sheet-body] button:not(.icon-btn):not(.ui-btn-icon):not(.seg-item):not(.swatch):not(.switch):active {
   transform: translateY(3px);
   box-shadow: inset 0 0 0 2px var(--px-ink), 0 0 0 0 var(--key-edge);
 }
