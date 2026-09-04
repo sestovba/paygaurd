@@ -3,6 +3,8 @@ import { Briefcase, LayoutGrid, ShieldCheck, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { ButtonBase } from '../design-system';
+import { useRef } from 'react';
+import { useDialogFocus } from './ui/useDialogFocus';
 export type PageId = 'overview' | 'income' | 'status';
 
 export function useNavItems(): { id: PageId; label: string; icon: LucideIcon }[] {
@@ -64,6 +66,13 @@ export function Sidebar({
    *  pages — but it does belong somewhere findable without a menu. */
   footer?: ReactNode;
 }) {
+
+  const drawerRef = useRef<HTMLElement>(null);
+
+  useDialogFocus(drawerRef, onClose, {
+    enabled: open
+  });
+
   /* h-16 and a bottom rule, so the line under the brand continues the line
      under the app bar to its right instead of stopping 12px short of it —
      one unbroken rule across the top of the page, whatever is under it. It
@@ -109,9 +118,16 @@ export function Sidebar({
       </nav>
 
       {open ? (
-        <div className="fixed inset-0 z-30 lg:hidden" role="dialog" aria-modal="true" aria-label="Primary">
+        <div className="fixed inset-0 z-30 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-          <nav className="relative flex h-full w-64 max-w-[80vw] flex-col border-r border-border bg-surface shadow-lift">
+          <nav
+            ref={drawerRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Primary navigation"
+            className="relative flex h-full w-64 max-w-[80vw] flex-col border-r border-border bg-surface shadow-lift"
+          >
             {/* The brand heads the drawer, so there is no second row saying
                 "Menu" above a close button — the drawer already closes on the
                 scrim, on Escape, and on picking a page. */}

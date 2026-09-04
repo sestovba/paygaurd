@@ -28,6 +28,8 @@ import { ToastStack } from '../ToastStack';
 import '../../styles/charm.css';
 import { ButtonBase } from '../../design-system';
 
+import { useRef } from 'react';
+import { useDialogFocus } from '../ui/useDialogFocus';
 export function TrackerCharm() {
   const {
     data, ui, setUi, resetAll, updateMonthEntry, pushToast,
@@ -48,6 +50,29 @@ export function TrackerCharm() {
   const [fromNowOn, setFromNowOn] = useState(true);
   const [targetId, setTargetId] = useState<string | null>(null);
   const [milesValue, setMilesValue] = useState('');
+
+  const sourceDialogRef = useRef<HTMLDivElement>(null);
+
+  const closeSourceDialog = () => {
+    if (addingJob) {
+      setAddingJob(false);
+
+      if (addReturn !== 'manage') {
+        setSourcesOpen(false);
+      }
+
+      return;
+    }
+
+    setSourcesOpen(false);
+  };
+
+  useDialogFocus(sourceDialogRef, closeSourceDialog, {
+    enabled: sourcesOpen || addingJob,
+    // The management view may begin with destructive row actions.
+    // Announce the dialog itself first. The add view focuses its field.
+    focusContainer: !addingJob
+  });
 
   const num = Number(payValue);
   const valid = Number.isFinite(num) && num > 0;
@@ -594,8 +619,15 @@ export function TrackerCharm() {
       <ToastStack />
 
       {(sourcesOpen || addingJob) ? (
-        <div className="ch-sheet" role="dialog" aria-modal="true" aria-label={addingJob ? 'Add a job' : 'Income sources'}>
-          <div className="ch-sheet-card">
+        <div className="ch-sheet">
+          <div
+            ref={sourceDialogRef}
+            tabIndex={-1}
+            className="ch-sheet-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={addingJob ? 'Add a job' : 'Income sources'}
+          >
             {addingJob ? (
               <>
                 <div className="ch-sheet-head">
@@ -604,10 +636,7 @@ export function TrackerCharm() {
                     type="button"
                     className="ch-plain"
                     style={{ marginTop: 0, width: 'auto' }}
-                    onClick={() => {
-                      setAddingJob(false);
-                      if (addReturn !== 'manage') setSourcesOpen(false);
-                    }}
+                    onClick={closeSourceDialog}
                   >
                     Close
                   </ButtonBase>
