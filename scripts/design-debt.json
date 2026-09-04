@@ -131,9 +131,6 @@
   "src/components/horizon/TrackerHorizon.tsx": {
     "raw-button": 3
   },
-  "src/components/ledger/LedgerAnalysis.tsx": {
-    "raw-button": 5
-  },
   "src/components/ledger/LedgerJobEditor.tsx": {
     "raw-button": 9
   },

@@ -11,6 +11,7 @@ import type { MonthStatus, TrackerData } from '../../domain/types';
 import { SafeWorkSimulator } from '../SafeWorkSimulator';
 import { copyFor } from '../../domain/copy';
 import { money0, money2 } from './ledgerFormat';
+import { ButtonBase } from '../../design-system';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
 type StatusKind = 'none' | 'review' | 'safe' | 'warn' | 'twp' | 'over';
@@ -125,7 +126,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
 
   return (
     <div className="lg-analysis" data-open={open || undefined}>
-      <button
+      <ButtonBase
         type="button"
         className="lg-band-head"
         data-open={open}
@@ -141,7 +142,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
             {closedMeta}
           </span>
         ) : null}
-      </button>
+      </ButtonBase>
 
       {open ? (
       <>
@@ -186,8 +187,8 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
           >
             <div className="lg-analysis-controls" role="toolbar" aria-label="By month view">
               <div className="lg-seg" role="group" aria-label="Layout">
-                <button type="button" data-on={mode === 'cards'} aria-pressed={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</button>
-                <button type="button" data-on={mode === 'table'} aria-pressed={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</button>
+                <ButtonBase type="button" data-on={mode === 'cards'} aria-pressed={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</ButtonBase>
+                <ButtonBase type="button" data-on={mode === 'table'} aria-pressed={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</ButtonBase>
               </div>
               <label className="lg-active-filter">
                 <input
@@ -210,9 +211,9 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
               : 'No months with income yet — enter figures in the ledger above.'}
           </p>
           {activeOnly ? (
-            <button type="button" className="lg-btn" onClick={() => setActiveOnly(false)}>
+            <ButtonBase type="button" className="lg-btn" onClick={() => setActiveOnly(false)}>
               Show every month
-            </button>
+            </ButtonBase>
           ) : null}
         </div>
       ) : view === 'cards' ? (
@@ -320,7 +321,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
       )}
 
       <div className="lg-analysis-band">
-        <button
+        <ButtonBase
           type="button"
           onClick={() => setSimulatorOpen((v) => !v)}
           className="lg-btn lg-btn-bleed flex w-full items-center justify-center gap-2"
@@ -331,7 +332,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
               maths. The tool is named by the question it answers, the way
               PayGuard already names it. */}
           {simulatorOpen ? 'Close' : words.hoursAsk}
-        </button>
+        </ButtonBase>
       </div>
 
       {simulatorOpen ? (
