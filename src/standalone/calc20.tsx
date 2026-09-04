@@ -35,7 +35,6 @@ import { TrackerCalc20 } from '../components/calc20/TrackerCalc20';
 import '../index.css';
 import '../styles/calc20.css';
 import '../styles/chrome.css';
-import '../styles/overlay.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

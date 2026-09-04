@@ -6347,3 +6347,83 @@ html.pg-calc20, .pg-calc20 body, .pg-calc20 .app-shell {
   --precision-mark-exact: var(--header-ink);
   --precision-hover: rgba(255, 255, 255, 0.06);
 }
+
+/* Shared elevation policy — Calc20 sheet */
+.pg-calc20 .sheet {
+  box-shadow: var(--pg-shadow-lg);
+}
+
+/* Calc20 sheet safe-area ownership */
+.sheet {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* ================================================================
+   Calc20 dense-control touch ownership
+   ================================================================ */
+
+@media (max-width: 640px), (pointer: coarse) {
+  .pg-calc20 {
+    --pg-h-sm: var(--t-touch-small);
+    --pg-h: var(--t-touch-target);
+    --pg-h-lg: 3rem;
+    --pg-tab-h: var(--t-touch-target);
+  }
+
+  .pg-calc20 .icon-button,
+  .pg-calc20 .icon-button--muted,
+  .pg-calc20 .avatar,
+  .pg-calc20 .month-square,
+  .pg-calc20 .month-square--pick {
+    min-width: var(--t-touch-compact);
+    min-height: var(--t-touch-compact);
+  }
+
+  .pg-calc20 .c20-layout-group__title,
+  .pg-calc20 .notice-menu__count,
+  .pg-calc20 .archived-chip__tag,
+  .pg-calc20 .archived-streams__title,
+  .pg-calc20 .carousel-nav__jump,
+  .pg-calc20 .carousel-nav__note,
+  .pg-calc20 .derived__label,
+  .pg-calc20 .entry-field__hint,
+  .pg-calc20 .entry-field__label,
+  .pg-calc20 .headline__label,
+  .pg-calc20 .hotbar__chip-month,
+  .pg-calc20 .ledger__count,
+  .pg-calc20 .ledger__extra-badge,
+  .pg-calc20 .legend__item,
+  .pg-calc20 .month-cell__label,
+  .pg-calc20 .month-cell__note,
+  .pg-calc20 .month-cell__read-meta,
+  .pg-calc20 .month-square__label,
+  .pg-calc20 .month-square__near,
+  .pg-calc20 .month-square__pay,
+  .pg-calc20 .popover-drawer__title,
+  .pg-calc20 .popover-surface__title,
+  .pg-calc20 .sheet__eyebrow,
+  .pg-calc20 .simulator__eyebrow,
+  .pg-calc20 .simulator__result-label,
+  .pg-calc20 .standing__label,
+  .pg-calc20 .stream-card__badge,
+  .pg-calc20 .stream-card__meta,
+  .pg-calc20 .stream-card__total-label,
+  .pg-calc20 .stream-card__type,
+  .pg-calc20 .toolbar__field span,
+  .pg-calc20 .toolbar__group-label,
+  .pg-calc20 .topbar__eyebrow,
+  .pg-calc20 .total-cell__label,
+  .pg-calc20 .total-cell__near,
+  .pg-calc20 .total-cell__pay,
+  .pg-calc20 .twp-meter__label,
+  .pg-calc20 .view-option__hint {
+    font-size: var(--t-text-xs);
+  }
+
+  .pg-calc20 button.stream-card__type {
+    min-height: var(--t-touch-compact);
+    padding-inline: 0.625rem;
+    display: inline-flex;
+    align-items: center;
+  }
+}

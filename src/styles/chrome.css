@@ -772,3 +772,61 @@ html.pg-calc20 {
   background: var(--chrome-hover);
   border-color: var(--chrome-ring);
 }
+
+/* ================================================================
+   Chrome touch-target ownership
+   ================================================================ */
+
+@media (max-width: 640px), (pointer: coarse) {
+  .notice-trigger {
+    min-width: var(--t-touch-target);
+    min-height: var(--t-touch-target);
+  }
+
+  .h-14 .notice-trigger,
+  .pg-topbar .notice-trigger {
+    width: auto;
+    height: var(--t-touch-compact);
+    min-width: var(--t-touch-compact);
+    min-height: var(--t-touch-compact);
+  }
+}
+
+/* ================================================================
+   Shared sticky chrome ownership
+
+   pg-topbar is used by both PayGuard and Work Record.
+   ================================================================ */
+
+.pg-topbar {
+  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  backdrop-filter: saturate(1.4) blur(10px);
+}
+
+.pg-topbar.pg-scrolled {
+  box-shadow: var(--pg-shadow-sticky);
+}
+
+/* Remaining shared chrome touch compatibility */
+@media (max-width: 640px), (pointer: coarse) {
+  [data-chrome-root] button.text-destructive {
+    min-height: var(--t-touch-target);
+  }
+
+  .pg-topbar .h-14 button.size-6,
+  .pg-topbar .h-14 button.size-7,
+  .pg-topbar .h-14 button.size-8 {
+    width: var(--t-touch-compact);
+    height: var(--t-touch-compact);
+    min-width: var(--t-touch-compact);
+    min-height: var(--t-touch-compact);
+  }
+
+  .pg-topbar .h-14 > * {
+    min-width: 0;
+  }
+
+  .notice-panel__count {
+    font-size: var(--t-text-xs);
+  }
+}

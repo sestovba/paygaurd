@@ -116,6 +116,11 @@
   --t-icon-sm: 1rem;
   --t-icon: 1.25rem;
   --t-icon-lg: 1.5rem;
+
+  /* Touch-target contract */
+  --t-touch-target: 2.75rem;
+  --t-touch-compact: 2.5rem;
+  --t-touch-small: 2.25rem;
 }
 
 /* Reduced motion is a system setting, not a preference we get to weigh. */
@@ -295,4 +300,38 @@
   --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --t-font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --t-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* ================================================================
+   Shared compatibility spacing aliases
+   ================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1 · Spacing on a 4px grid
+   The build mixed .875rem / .75rem / 1.25rem pads, which read as drift rather
+   than hierarchy. Three steps, each 8px apart, used everywhere.
+   ------------------------------------------------------------------------ */
+:root {
+  --pg-gap: 0.75rem;      /* 12 */
+  --pg-gap-lg: 1.25rem;   /* 20 */
+  --pg-pad: 1rem;         /* 16 — was 14, never lined up with anything */
+  --pg-pad-lg: 1.5rem;    /* 24 */
+}
+
+/* Global reduced-motion safeguard */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Legacy pg control-height compatibility */
+@media (max-width: 640px), (pointer: coarse) {
+  :root {
+    --pg-h-sm: var(--t-touch-small);
+    --pg-h: var(--t-touch-target);
+    --pg-h-lg: 3rem;
+    --pg-tab-h: var(--t-touch-target);
+  }
 }

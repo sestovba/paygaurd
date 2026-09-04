@@ -800,3 +800,111 @@
  * rendered inside all ten layouts, so they draw from the --chrome-* contract
  * each layout answers rather than from this file's tokens.
  */
+
+/* Shared elevation policy — base panel */
+.panel {
+  box-shadow: none;
+  border-color: var(--pg-border-strong, var(--pg-border));
+}
+
+/* Shared readable measure */
+.type-muted {
+  max-width: 66ch;
+}
+
+.field-label + p {
+  max-width: 72ch;
+}
+
+h1,
+h2,
+.display-figure {
+  text-wrap: pretty;
+}
+
+/* ================================================================
+   Shared legacy form and type polish
+
+   Used by sign-in/settings and other surfaces outside a layout root.
+   ================================================================ */
+
+.field-input,
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.label-caps {
+  font-size: var(--t-text-xs);
+  letter-spacing: 0.12em;
+}
+
+.panel {
+  border-radius: var(--pg-radius-xl);
+}
+
+.field-input {
+  border-radius: var(--pg-radius-md);
+  height: var(--t-control-h);
+  border-color: var(--pg-border-strong);
+}
+
+.field-input:focus-visible,
+.field-input:focus {
+  outline: none;
+  border-color: var(--pg-ring);
+  box-shadow: 0 0 0 2px var(--pg-focus-ring);
+}
+
+.btn-primary {
+  border-radius: var(--pg-radius-md);
+  min-height: var(--t-control-h);
+  letter-spacing: 0.005em;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  transition-duration: 0.14s;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--pg-ring);
+  outline-offset: 2px;
+}
+
+.field-label {
+  font-size: var(--t-text-base);
+}
+
+/* ================================================================
+   Legacy mobile touch compatibility
+
+   Temporary safety net for utility-sized and pre-ui-* controls.
+   ================================================================ */
+
+@media (max-width: 640px), (pointer: coarse) {
+  button.size-6,
+  button.size-7,
+  button.size-8 {
+    min-width: var(--t-touch-compact);
+    min-height: var(--t-touch-compact);
+  }
+
+  #root input.bg-transparent {
+    min-height: var(--t-touch-compact);
+  }
+
+  #root button.text-xs,
+  #root button.text-\[11px\] {
+    min-height: var(--t-touch-compact);
+  }
+
+  #root .text-\[0\.5625rem\],
+  #root .text-\[0\.625rem\] {
+    font-size: var(--t-text-xs);
+  }
+
+  .field-input,
+  input[type="text"],
+  input[type="number"],
+  input[type="date"] {
+    font-size: var(--t-text-base);
+  }
+}

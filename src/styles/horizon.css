@@ -309,3 +309,52 @@
     gap: 0.15rem;
   }
 }
+
+/* Horizon readable measure */
+.hz-runway-lede {
+  max-width: 66ch;
+}
+
+.hz-main {
+  max-width: 52rem;
+}
+
+.hz-todo li {
+  max-width: 72ch;
+}
+
+/* ================================================================
+   Horizon touch-target ownership
+
+   Horizon keeps its own visual control language while interactive
+   sizing follows metrics.css's shared accessibility contract.
+   ================================================================ */
+
+@media (max-width: 640px), (pointer: coarse) {
+  .hz .hz-icon-btn,
+  .hz .hz-top-year button {
+    width: var(--t-touch-target);
+    height: var(--t-touch-target);
+    min-width: var(--t-touch-target);
+    min-height: var(--t-touch-target);
+  }
+
+  .hz .hz-btn,
+  .hz .hz-sources > button,
+  .hz .hz-stop-btn {
+    min-height: var(--t-touch-target);
+  }
+
+  .hz .hz-top .hz-icon-btn,
+  .hz .hz-top .hz-top-year button {
+    width: var(--t-touch-compact);
+    height: var(--t-touch-compact);
+    min-width: var(--t-touch-compact);
+    min-height: var(--t-touch-compact);
+  }
+
+  .hz button.text-left.items-center.min-w-0 {
+    min-height: var(--t-touch-target);
+    align-self: stretch;
+  }
+}

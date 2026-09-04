@@ -1584,3 +1584,8 @@
   border-radius: 999px;
   vertical-align: baseline;
 }
+
+/* Plan readable measure */
+.pl-footnote {
+  max-width: 66ch;
+}

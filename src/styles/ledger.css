@@ -2075,3 +2075,83 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-btn-bleed:hover {
   background: var(--lg-surface-2);
 }
+
+/* Ledger readable measure */
+.lg-analysis-pad {
+  max-width: 72ch;
+}
+
+/* ================================================================
+   Ledger touch-target ownership
+
+   Ledger keeps its compact visual identity while interactive sizing
+   follows metrics.css's shared accessibility contract.
+   ================================================================ */
+
+@media (max-width: 640px), (pointer: coarse) {
+  .pg-ledger {
+    --pg-h-sm: var(--t-touch-small);
+    --pg-h: var(--t-touch-target);
+    --pg-h-lg: 3rem;
+    --pg-tab-h: var(--t-touch-target);
+  }
+
+  .pg-ledger .lg-lock-btn,
+  .pg-ledger .lg-chevron,
+  .pg-ledger .lg-year-stepper > button {
+    min-width: var(--t-touch-target);
+    min-height: var(--t-touch-target);
+  }
+
+  .pg-ledger .lg-btn,
+  .pg-ledger .lg-seg,
+  .pg-ledger .lg-field,
+  .pg-ledger .lg-tab,
+  .pg-ledger .lg-section-toggle,
+  .pg-ledger .lg-name-input,
+  .pg-ledger button.text-destructive {
+    min-height: var(--t-touch-target);
+  }
+
+  .pg-ledger .lg-seg-item {
+    min-height: var(--t-touch-compact);
+    font-size: var(--t-text-xs);
+  }
+
+  .pg-ledger .lg-header-bar .pg-icon-btn {
+    min-width: var(--t-touch-compact);
+    min-height: var(--t-touch-compact);
+    width: var(--t-touch-compact);
+    height: var(--t-touch-compact);
+  }
+
+  .pg-ledger .lg-ledger-input,
+  .pg-ledger .lg-ledger-cell-field {
+    min-height: var(--t-touch-compact);
+  }
+
+  .pg-ledger .lg-label,
+  .pg-ledger .lg-text-muted {
+    font-size: var(--t-text-xs);
+  }
+
+  .pg-ledger .lg-ledger-input,
+  .pg-ledger .lg-name-input {
+    font-size: var(--t-text-base);
+  }
+
+  .pg-ledger .lg-ledger-row input,
+  .pg-ledger .lg-ledger-cell input {
+    min-height: var(--t-touch-compact);
+  }
+
+  .pg-ledger button.lg-text-muted,
+  .pg-ledger .lg-text-muted[role="button"] {
+    min-height: var(--t-touch-compact);
+    padding-block: 0.375rem;
+  }
+
+  .pg-ledger .lg-axis-pay {
+    font-size: var(--t-text-xs);
+  }
+}

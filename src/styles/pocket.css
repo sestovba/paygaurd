@@ -816,3 +816,17 @@
     align-items: center;
   }
 }
+
+/* Pocket readable measure */
+.pk-answer-sub {
+  max-width: 66ch;
+}
+
+.pk-main {
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.pk-top {
+  padding-inline: max(0.75rem, calc((100% - 34rem) / 2));
+}

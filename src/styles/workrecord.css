@@ -479,3 +479,46 @@
   line-height: 1.55;
   color: var(--pg-fg-muted);
 }
+
+/* Work Record readable measure */
+.wr-note {
+  max-width: 72ch;
+}
+
+/* ================================================================
+   Work Record touch-target ownership
+
+   Work Record keeps its slab/hotbar presentation while interactive
+   sizing follows the shared metrics.css accessibility contract.
+   ================================================================ */
+
+@media (max-width: 640px), (pointer: coarse) {
+  .pg-workrecord {
+    --pg-h-sm: var(--t-touch-small);
+    --pg-h: var(--t-touch-target);
+    --pg-h-lg: 3rem;
+    --pg-tab-h: var(--t-touch-target);
+  }
+
+  .pg-workrecord .wr-slab-chevron {
+    min-width: var(--t-touch-target);
+    min-height: var(--t-touch-target);
+  }
+
+  .pg-workrecord .wr-hotbar-chip,
+  .pg-workrecord .wr-slab-head-toggle {
+    min-height: var(--t-touch-target);
+  }
+
+  .pg-workrecord .wr-row > button {
+    min-height: var(--t-touch-target);
+  }
+
+  .pg-workrecord .wr-month-note {
+    font-size: var(--t-text-xs);
+  }
+
+  .pg-workrecord .wr-row-note {
+    font-size: var(--t-text-xs);
+  }
+}

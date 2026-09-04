@@ -212,7 +212,7 @@
    then Settings — and they arrived at three different radii, because each
    reads a different rung of the ladder:
 
-     .btn-primary   --pg-radius-md   8px   (set in overlay.css)
+     .btn-primary   --pg-radius-md   8px   (shared legacy form polish in index.css)
      .nav-item      --radius-md      8px   (via the metrics bridge)
      panels around them              16px
 
@@ -239,3 +239,10 @@
 
 /* Cards read as one family. */
 .pg-overview .panel { border-color: var(--pg-border); }
+
+/* Workspace compact-tab touch ownership */
+@media (max-width: 640px), (pointer: coarse) {
+  .pg-overview button.truncate.rounded-md {
+    min-height: var(--t-touch-compact);
+  }
+}
