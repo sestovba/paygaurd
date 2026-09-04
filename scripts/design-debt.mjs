@@ -88,8 +88,14 @@ const isTrivial = (v) => /^\s*(0|auto|100%|inherit|unset|initial|1px|none)\s*$/.
  *
  * Radius and type remain intentionally global; size is selector-aware.
  */
-const CONTROL_SELECTOR =
-  /(?:\b(?:button|input|select|textarea)\b|(?:^|[.#\s>+~:[,_-])(?:btn|button|control|field|input|select|tab|toggle|switch|action|step|seg|chip|filter|close|cta|lock|scope|trigger|picker|prompt|quest|toolbar|hotbar|year-select|signin|modal-btn|source-trash|add-job|add-button|log|do)(?:$|[.#\s>+~:[,_-]))/i;
+const CONTROL_WORD =
+  /(?:^|[-_])(?:btn|button|control|field|input|select|tab|toggle|switch|action|step|seg|segmented|chip|filter|close|cta|lock|scope|trigger|picker|prompt|quest|hotbar|year-select|signin|modal-btn|source-trash|add-job|add-button|log|do)(?:$|[-_])/i;
+
+const NON_CONTROL_PART =
+  /(?:^|[-_])(?:shell|divider|dot|mark|thumb|lead|grip|swatch|count|plus|row|chest)(?:$|[-_])/i;
+
+const TEXT_ENTRY_HINT =
+  /(?:field|entry|cell|num|signin-input|year-select|textarea)/i;
 
 function selectorAt(css, index) {
   const open = css.lastIndexOf('{', index);
@@ -99,7 +105,50 @@ function selectorAt(css, index) {
   const previousOpen = css.lastIndexOf('{', open - 1);
   const boundary = Math.max(previousClose, previousOpen);
 
-  return css.slice(boundary + 1, open).trim();
+  return css
+    .slice(boundary + 1, open)
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .trim();
+}
+
+function isControlName(name) {
+  return CONTROL_WORD.test(name) && !NON_CONTROL_PART.test(name);
+}
+
+function terminalCompound(branch) {
+  const cleaned = branch
+    .replace(/::?[a-z-]+(?:\([^)]*\))?/gi, '')
+    .trim();
+
+  return cleaned.split(/\s+|>|\+|~/).filter(Boolean).at(-1) ?? '';
+}
+
+function isControlSelector(selector) {
+  const utility = selector.match(/^@utility\s+([a-z0-9_-]+)/i);
+
+  if (utility) return isControlName(utility[1]);
+
+  return selector.split(',').some((branch) => {
+    const terminal = terminalCompound(branch);
+
+    if (/\b(?:button|input|select|textarea)\b/i.test(terminal)) {
+      return true;
+    }
+
+    const classes = [
+      ...terminal.matchAll(/\.([a-z0-9_-]+)/gi),
+    ].map((m) => m[1]);
+
+    return classes.some(isControlName);
+  });
+}
+
+function literalPx(value) {
+  const m = value.trim().match(/^(-?(?:\d+(?:\.\d+)?|\.\d+))(px|rem)$/i);
+  if (!m) return null;
+
+  const n = Number(m[1]);
+  return m[2].toLowerCase() === 'rem' ? n * 16 : n;
 }
 
 function countControlSizes(css) {
@@ -111,7 +160,23 @@ function countControlSizes(css) {
     if (isTokened(value) || isTrivial(value)) continue;
 
     const selector = selectorAt(css, m.index ?? 0);
-    if (!CONTROL_SELECTOR.test(selector)) continue;
+
+    if (!isControlSelector(selector)) continue;
+
+    /*
+     * Tiny native inputs here are checkbox/radio marks, not the hit target.
+     * Text-entry controls carry a field/entry/cell/etc. semantic name.
+     */
+    const px = literalPx(value);
+
+    if (
+      px !== null &&
+      px < 28 &&
+      /\binput\b/i.test(selector) &&
+      !TEXT_ENTRY_HINT.test(selector)
+    ) {
+      continue;
+    }
 
     n++;
   }
