@@ -184,6 +184,38 @@
   --t-radius-xl: 1rem;
   --t-radius-full: 9999px;
 
+  /*
+   * Exact geometry registry.
+   * Existing layout-specific corners keep their rendered geometry.
+   * Prefer semantic radius tokens for new UI.
+   */
+  --t-radius-fixed-4-px: 4px;
+  --t-radius-fixed-1p625-rem: 1.625rem;
+  --t-radius-fixed-5-px: 5px;
+  --t-radius-circle: 50%;
+  --t-radius-fixed-7-px: 7px;
+  --t-radius-fixed-8-px: 8px;
+  --t-radius-fixed-10-px: 10px;
+  --t-radius-fixed-6-px: 6px;
+  --t-radius-fixed-4px-4px-0-0: 4px 4px 0 0;
+  --t-radius-fixed-2-px: 2px;
+  --t-radius-fixed-99-px: 99px;
+  --t-radius-fixed-20-px: 20px;
+  --t-radius-fixed-12-px: 12px;
+  --t-radius-fixed-26-px: 26px;
+  --t-radius-fixed-26px-26px-0-0: 26px 26px 0 0;
+  --t-radius-fixed-18-px: 18px;
+  --t-radius-fixed-14-px: 14px;
+  --t-radius-fixed-22-px: 22px;
+  --t-radius-fixed-16-px: 16px;
+  --t-radius-fixed-1p5-rem: 1.5rem;
+  --t-radius-fixed-22px-22px-0-0: 22px 22px 0 0;
+  --t-radius-fixed-0p5-rem: 0.5rem;
+  --t-radius-fixed-0p2-rem: 0.2rem;
+  --t-radius-fixed-1px-1px-0-0: 1px 1px 0 0;
+  --t-radius-fixed-3-px: 3px;
+  --t-radius-fixed-0p4-rem: 0.4rem;
+
   /* Type families. A theme is allowed its own voice; it is not allowed its
      own size ramp, which is why only the families are here. */
   --t-font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;

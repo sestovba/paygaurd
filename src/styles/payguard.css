@@ -482,7 +482,7 @@
   width: 0.85rem;
   height: 0.85rem;
   border: 1.5px solid currentColor;
-  border-radius: 0.2rem;
+  border-radius: var(--t-radius-fixed-0p2-rem);
   flex-shrink: 0;
 }
 
@@ -2006,7 +2006,7 @@
 .pg-tip-swatch {
   width: 0.5rem;
   height: 0.5rem;
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   flex-shrink: 0;
 }
 

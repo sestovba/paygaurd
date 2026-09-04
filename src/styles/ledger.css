@@ -515,7 +515,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   color: inherit;
   outline: none;
   padding: 0;
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   transition: box-shadow 0.12s;
 }
 
@@ -1235,7 +1235,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   text-transform: uppercase;
   padding: 0.2rem 0.45rem; /* badge chrome */
   border: 1px solid currentColor;
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
 }
 
 /* Edge to edge at every width — no floating card, no page-margin backdrop.
@@ -1487,7 +1487,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   flex: 0 0 auto;
   padding: 0.1rem 0.35rem; /* tag chrome */
   border: 1px solid var(--lg-border);
-  border-radius: 0.2rem;
+  border-radius: var(--t-radius-fixed-0p2-rem);
   background: transparent;
   font: 500 var(--lg-fs-micro)/1 var(--lg-font-mono);
   letter-spacing: 0.06em;
@@ -1911,7 +1911,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   min-width: 2px;
   background: var(--lg-muted);
   opacity: 0.45;
-  border-radius: 1px 1px 0 0;
+  border-radius: var(--t-radius-fixed-1px-1px-0-0);
 }
 .lg-chart-mini-bar[data-over] {
   background: var(--lg-fg);

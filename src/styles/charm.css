@@ -188,7 +188,7 @@
   margin: 10px auto 0;
   max-width: 22rem;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: var(--t-radius-fixed-14-px);
   background: var(--ch-surface);
   border: 1px solid var(--ch-hairline);
   text-align: left;
@@ -282,7 +282,7 @@
 
 .ch-empty {
   padding: 18px 16px;
-  border-radius: 16px;
+  border-radius: var(--t-radius-fixed-16-px);
   background: var(--ch-surface);
   border: 1px solid var(--ch-hairline);
   text-align: center;
@@ -297,7 +297,7 @@
 /* —— Logging form —— */
 .ch-answer {
   padding: 16px;
-  border-radius: 18px;
+  border-radius: var(--t-radius-fixed-18-px);
   background: var(--ch-surface);
   border: 1px solid var(--ch-hairline);
 }
@@ -359,7 +359,7 @@
   width: 100%;
   box-sizing: border-box;
   margin-top: 8px;
-  border-radius: 12px;
+  border-radius: var(--t-radius-fixed-12-px);
   text-align: left;
   font-size: var(--t-text-xl);
   font-weight: 650;
@@ -385,7 +385,7 @@
 .ch-prompt-btn {
   min-height: var(--t-touch-target);
   border: 1px solid var(--ch-edge);
-  border-radius: 12px;
+  border-radius: var(--t-radius-fixed-12-px);
   background: var(--ch-sunken);
   color: inherit;
   font: inherit;
@@ -404,7 +404,7 @@
 /* —— Trial strip —— */
 .ch-trial {
   padding: 16px;
-  border-radius: 18px;
+  border-radius: var(--t-radius-fixed-18-px);
   background: var(--ch-surface);
   border: 1px solid var(--ch-hairline);
 }
@@ -474,7 +474,7 @@
   min-height: 56px;
   padding: 12px 14px;
   border: 1px solid var(--ch-hairline);
-  border-radius: 14px;
+  border-radius: var(--t-radius-fixed-14-px);
   background: var(--ch-surface);
   color: inherit;
   font: inherit;
@@ -525,7 +525,7 @@
 .ch-detail {
   margin-top: 6px;
   padding: 12px 14px 14px;
-  border-radius: 14px;
+  border-radius: var(--t-radius-fixed-14-px);
   background: var(--ch-surface);
   border: 1px solid var(--ch-hairline);
 }
@@ -571,7 +571,7 @@
   max-height: 85vh;
   overflow: auto;
   padding: 18px 16px 20px;
-  border-radius: 20px;
+  border-radius: var(--t-radius-fixed-20-px);
   background: var(--ch-surface);
   border: 1px solid var(--ch-hairline);
   box-sizing: border-box;
@@ -606,7 +606,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 12px 12px;
-  border-radius: 12px;
+  border-radius: var(--t-radius-fixed-12-px);
   background: var(--ch-sunken);
 }
 

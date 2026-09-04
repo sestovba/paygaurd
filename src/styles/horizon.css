@@ -189,7 +189,7 @@
   padding: 0.5rem 0.55rem 0.6rem;
   border: 1px solid var(--color-border);
   border-top: 3px solid var(--color-border);
-  border-radius: 0.5rem;
+  border-radius: var(--t-radius-fixed-0p5-rem);
   background: var(--color-surface-2, var(--color-muted));
   color: inherit;
   text-align: left;

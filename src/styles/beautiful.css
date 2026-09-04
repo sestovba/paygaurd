@@ -299,7 +299,7 @@
   scroll-snap-align: start;
   padding: var(--t-space-4); /* 16px */
   border: 1px solid color-mix(in srgb, var(--t-primary) 35%, transparent);
-  border-radius: 1.625rem; /* 26px */
+  border-radius: var(--t-radius-fixed-1p625-rem); /* 26px */
   background: var(--t-surface-2);
 }
 .bb-mcard[data-now='true'] {

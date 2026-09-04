@@ -56,7 +56,7 @@
 .review-target[data-review-on='true'] {
   outline: 2px solid var(--review-blue);
   outline-offset: 3px;
-  border-radius: 0.5rem;
+  border-radius: var(--t-radius-fixed-0p5-rem);
   isolation: isolate;
 }
 
@@ -70,7 +70,7 @@
   left: 0.7rem;
   max-width: calc(100% - 6rem);
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-blue);
   padding: 0.1rem 0.4rem;
   color: #fff;
@@ -102,7 +102,7 @@
   width: 1.5rem;
   height: var(--t-size-control-dense);
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   color: var(--review-text);
   cursor: pointer;
@@ -117,7 +117,7 @@
   align-items: center;
   gap: 0.5rem;
   border: 1px dashed var(--review-line);
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--review-panel);
   padding: 0.4rem 0.6rem;
   color: var(--review-dim);
@@ -131,7 +131,7 @@
   align-items: center;
   gap: 0.25rem;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel-2);
   padding: 0.15rem 0.4rem;
   color: var(--review-text);
@@ -162,8 +162,8 @@
   20%, 60% { box-shadow: 0 0 0 4px rgb(217 164 65 / 0.8); }
 }
 
-.review-flash { animation: review-flash 1.6s ease-out; border-radius: 0.4rem; }
-.review-flash-near { animation: review-flash-near 2.6s ease-out; border-radius: 0.4rem; }
+.review-flash { animation: review-flash 1.6s ease-out; border-radius: var(--t-radius-fixed-0p4-rem); }
+.review-flash-near { animation: review-flash-near 2.6s ease-out; border-radius: var(--t-radius-fixed-0p4-rem); }
 
 [data-review-peek='exact'] { outline: 2px solid var(--review-blue); outline-offset: 2px; }
 [data-review-peek='near'] { outline: 1px dashed var(--review-amber); outline-offset: 2px; }
@@ -186,7 +186,7 @@
 .review-aim-box {
   position: fixed;
   border: 2px solid var(--review-blue);
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   background: rgb(79 142 247 / 0.08);
 }
 
@@ -201,7 +201,7 @@
   align-items: center;
   gap: 0.4rem;
   max-width: 32rem;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-ink);
   padding: 0.2rem 0.45rem;
   color: var(--review-text);
@@ -215,7 +215,7 @@
 
 .review-aim-chip kbd {
   border: 1px solid var(--review-line);
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   padding: 0 0.25rem;
   color: var(--review-dim);
   font-size: var(--t-text-xs);
@@ -223,7 +223,7 @@
 }
 
 .review-aim-depth {
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   background: var(--review-panel-2);
   padding: 0 0.25rem;
   color: var(--review-faint);
@@ -243,7 +243,7 @@
   align-items: center;
   gap: 0.4rem;
   border: 1px solid var(--review-line);
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--review-ink);
   padding: 0.35rem 0.6rem;
   color: var(--review-text);
@@ -257,7 +257,7 @@
 .review-rail-tab kbd { color: var(--review-faint); font-size: var(--t-text-xs); }
 
 .review-rail-count {
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   white-space: nowrap;
   background: var(--review-panel-2);
   padding: 0 0.3rem;
@@ -310,7 +310,7 @@
   align-items: center;
   gap: 0.15rem;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: none;
   padding: 0.2rem;
   color: var(--review-dim);
@@ -329,7 +329,7 @@
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.2rem 0.25rem;
   color: var(--review-text);
@@ -348,7 +348,7 @@
   max-height: 70vh;
   overflow-y: auto;
   border: 1px solid var(--review-line);
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--review-panel);
   padding: 0.3rem;
   box-shadow: var(--review-lift);
@@ -370,7 +370,7 @@
   align-items: center;
   gap: 0.4rem;
   border: none;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: none;
   padding: 0.3rem 0.4rem;
   color: var(--review-text);
@@ -396,7 +396,7 @@
   gap: 0.35rem;
   flex: 1;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.35rem 0.5rem;
   color: var(--review-text);
@@ -412,7 +412,7 @@
 
 .review-dock-key {
   border: 1px solid var(--review-line);
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   padding: 0 0.25rem;
   color: var(--review-faint);
   font-size: var(--t-text-xs);
@@ -435,7 +435,7 @@
 .review-rail-body::-webkit-scrollbar-track { background: transparent; }
 .review-rail-body::-webkit-scrollbar-thumb {
   border: 2px solid var(--review-ink);
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--review-line);
 }
 .review-rail-body::-webkit-scrollbar-thumb:hover { background: var(--review-faint); }
@@ -460,7 +460,7 @@
 
 .review-empty kbd {
   border: 1px solid var(--review-line);
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   padding: 0 0.25rem;
   color: var(--review-text);
 }
@@ -575,7 +575,7 @@
 
 .review-row-where em {
   flex: none;
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   background: var(--review-panel-2);
   padding: 0 0.25rem;
   font-family: inherit;
@@ -598,7 +598,7 @@
   width: 1.35rem;
   height: var(--t-size-control-dense);
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: none;
   color: var(--review-faint);
   cursor: pointer;
@@ -652,7 +652,7 @@
 .review-composer textarea {
   min-height: var(--t-size-control-textarea);
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-ink);
   padding: 0.4rem;
   color: var(--review-text);
@@ -682,7 +682,7 @@
   align-items: center;
   gap: 0.3rem;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   padding: 0.25rem 0.55rem;
   font-size: var(--t-text-xs);
   font-weight: 600;
@@ -712,7 +712,7 @@
   width: min(24rem, calc(100vw - var(--review-rail-right) - 2rem));
   transform: translateX(-50%);
   border: 1px solid var(--review-line);
-  border-radius: 5px;
+  border-radius: var(--t-radius-fixed-5-px);
   background: var(--review-ink);
   padding: 0.6rem;
   color: var(--review-text);
@@ -780,7 +780,7 @@
   width: 4.5rem;
   height: 3rem;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   object-fit: cover;
 }
 
@@ -807,7 +807,7 @@
   gap: 0.25rem;
   margin-left: auto;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.15rem 0.4rem;
   color: var(--review-dim);
@@ -820,7 +820,7 @@
 
 .review-composer-tags button {
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.15rem 0.45rem;
   color: var(--review-dim);
@@ -864,7 +864,7 @@
   z-index: 2147483200;
   transform: translateX(-50%);
   border: 1px solid var(--review-line);
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--review-ink);
   padding: 0.35rem 0.7rem;
   color: var(--review-text);
@@ -908,7 +908,7 @@
   gap: 0.3rem;
   flex: 1;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.28rem 0.4rem;
   color: var(--review-faint);
@@ -949,7 +949,7 @@
   flex: 1;
   min-width: 0;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.28rem 0.35rem;
   color: var(--review-text);
@@ -963,7 +963,7 @@
   display: inline-flex;
   gap: 0.15rem;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   padding: 0.1rem;
 }
 
@@ -971,7 +971,7 @@
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 2px;
+  border-radius: var(--t-radius-fixed-2-px);
   background: transparent;
   padding: 0.28rem 0.34rem;
   color: var(--review-faint);
@@ -1058,7 +1058,7 @@
   flex: 1;
   min-width: 0;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.25rem 0.3rem;
   color: var(--review-text);
@@ -1088,7 +1088,7 @@
   align-items: center;
   gap: 0.22rem;
   border: 1px solid var(--review-line);
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--review-panel);
   padding: 0.25rem 0.36rem;
   color: var(--review-faint);

@@ -163,7 +163,7 @@
   height: 42px;
   margin-bottom: 4px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--paper-2);
   color: var(--ink);
   cursor: pointer;
@@ -278,7 +278,7 @@
   margin-bottom: 4px;
   padding: 0 8px 0 6px;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--parch);
   color: var(--ink);
   font: inherit;
@@ -323,7 +323,7 @@
   margin-bottom: 3px;
   padding: 0 12px;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--paper-2);
   color: var(--ink);
   font: inherit;
@@ -513,7 +513,7 @@
   color: var(--ink-soft);
 }
 .pl-key-item { display: inline-flex; align-items: center; gap: 6px; }
-.pl-key .pl-chunk { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 3px; margin: 0; }
+.pl-key .pl-chunk { flex: 0 0 auto; width: 16px; height: 16px; border-radius: var(--t-radius-fixed-3-px); margin: 0; }
 .pl-key .pl-chunk::before { display: none; }
 .pl-key .pl-line-tag { display: none; }
 
@@ -611,7 +611,7 @@
   margin-bottom: 5px;
   flex: 0 0 auto;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--paper-2);
   color: var(--ink);
   cursor: pointer;
@@ -683,7 +683,7 @@
   margin-bottom: 4px;
   padding: 0 16px;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--paper-2);
   color: var(--ink);
   font: inherit;
@@ -780,7 +780,7 @@
   min-height: var(--t-size-control-target);
   margin-bottom: 3px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--paper-2);
   color: var(--ink);
   font: inherit;
@@ -813,7 +813,7 @@
   margin: 7px;
   padding: 18px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--parch);
   box-shadow:
     0 0 0 2px var(--px-ink),
@@ -1009,7 +1009,7 @@
   margin-bottom: 3px;
   padding: 9px 12px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--paper-2);
   color: inherit;
   font: inherit;
@@ -1085,7 +1085,7 @@
   margin-bottom: 3px;
   padding: 10px 12px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--parch);
   color: inherit;
   font: inherit;
@@ -1154,7 +1154,7 @@
   margin-bottom: 4px;
   padding: 0 16px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--px-ink);
   color: var(--gilt-hi);
   font: inherit;
@@ -1181,7 +1181,7 @@
   margin-bottom: 4px;
   padding: 12px;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--t-radius-fixed-4-px);
   background: var(--paper-2);
   color: inherit;
   font: inherit;
@@ -1349,7 +1349,7 @@
    call site for it is gone. */
 .pl [data-sheet] [data-sheet-head] .icon-btn,
 .pl [data-sheet] [data-sheet-head] .ui-btn-icon {
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   background: var(--paper-2);
   color: var(--ink);
   box-shadow: 0 0 0 2px var(--gilt);
@@ -1394,7 +1394,7 @@
 .pl [data-sheet] .add-job,
 .pl [data-sheet] .option-row {
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
   margin-bottom: 4px;
   box-shadow: inset 0 0 0 2px var(--px-ink), 0 4px 0 0 var(--key-edge);
   transition: transform 60ms linear, box-shadow 60ms linear;
@@ -1439,7 +1439,7 @@
 .pl [data-sheet-body] label,
 .pl [data-sheet-body] > div,
 .pl [data-sheet-body] > div > div {
-  border-radius: 3px;
+  border-radius: var(--t-radius-fixed-3-px);
 }
 
 .pl [data-sheet-body] button:not(.icon-btn):not(.ui-btn-icon):not(.seg-item):not(.swatch):not(.switch) {
