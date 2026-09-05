@@ -14,6 +14,7 @@
 export { Button, IconButton, ButtonRow } from './Button';
 export type { ButtonProps, ButtonVariant, ButtonSize, IconButtonProps } from './Button';
 export { Field, Input } from './Field';
+export { PaydayInput } from './PaydayInput';
 export type { FieldProps, InputProps } from './Field';
 export { cn } from './cn';
 

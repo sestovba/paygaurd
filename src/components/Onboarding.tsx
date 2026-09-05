@@ -3,12 +3,12 @@ import { ArrowRight, Zap } from 'lucide-react';
 import { useTracker } from '../state/TrackerProvider';
 import { money } from '../domain/format';
 import { rulesFor } from '../domain/rules';
-import { frequencyLabel, payPlan } from '../domain/paySchedule';
+import { anchorForPayday, frequencyLabel, paydayOf, payPlan } from '../domain/paySchedule';
 import { shortMonthName, monthKey } from '../domain/months';
 import type { PayFrequency, StreamType } from '../domain/types';
 import { StreamSheet } from './StreamSheet';
 import { TwpWizard } from './TwpWizard';
-import { AddJobButton, BrandMark, ButtonRow, Segmented } from './ui';
+import { AddJobButton, BrandMark, ButtonRow, PaydayInput, Segmented } from './ui';
 
 import { ButtonBase } from '../design-system';
 const FREQUENCIES: PayFrequency[] = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
@@ -179,18 +179,22 @@ function PaydayStep({ streamId, year, onDone }: {
         </div>
 
         <label className="flex flex-col gap-1.5">
-          <span className="field-label">One real payday from a paystub or your bank</span>
-          <input
+          <span className="field-label">What day of the month are you paid?</span>
+          <PaydayInput
             className="field-input"
-            type="date"
-            value={date}
-            onChange={(e) => {
-              setDate(e.target.value);
-              updateStream(stream.id, { anchorDate: e.target.value });
+            aria-label="Payday, day of the month"
+            placeholder="1-31"
+            value={paydayOf(date)}
+            onCommit={(day) => {
+              const next = day == null
+                ? undefined
+                : anchorForPayday(day, stream.activeFrom, date || undefined);
+              setDate(next ?? '');
+              updateStream(stream.id, { anchorDate: next });
             }}
           />
           <span className="type-muted">
-            Any single date you were paid on this job. Every other payday follows from it.
+            A number from 1 to 31. Every other payday follows from it.
           </span>
         </label>
 

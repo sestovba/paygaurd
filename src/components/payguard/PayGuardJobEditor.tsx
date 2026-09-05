@@ -20,13 +20,14 @@ import {
   todayMonth
 } from '../../domain/months';
 import { knownYears, rulesFor, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/rules';
-import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
+import { anchorForPayday, frequencyLabel, paycheckContextForMonth, paydayOf, payPlan } from '../../domain/paySchedule';
 import { benefitPhase } from '../../domain/trialWork';
 import { money } from '../../domain/format';
 import { copyFor, periodLabel } from '../../domain/copy';
 import type { MonthEntry, MonthKey, PayFrequency, Stream, TrackerData } from '../../domain/types';
 import { HelpSpread } from '../HelpSpread';
 import { NumericInput } from '../NumericInput';
+import { PaydayInput } from '../ui';
 import {
   PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, payPatchFor, payValueFor, usePayBasis
 } from '../PayAmount';
@@ -528,15 +529,19 @@ export function PayGuardJobEditor({
                     </FieldCell>
 
                     <FieldCell
-                      label="Anchor payday"
-                      hint={stream.anchorDate ? 'Anchor date locked in.' : 'Not set — extra-check months hidden.'}
+                      label="Payday"
+                      hint={stream.anchorDate ? 'Payday set — other paydays follow from it.' : 'The day of the month, 1 to 31. Not set — extra-check months hidden.'}
                     >
-                      <input
-                        type="date"
-                        aria-label="Anchor payday"
-                        value={stream.anchorDate ?? ''}
+                      <PaydayInput
+                        aria-label="Payday, day of the month"
+                        placeholder="1-31"
+                        value={paydayOf(stream.anchorDate)}
                         disabled={stream.locked}
-                        onChange={(e) => updateStream(stream.id, { anchorDate: e.target.value })}
+                        onCommit={(day) => updateStream(stream.id, {
+                          anchorDate: day == null
+                            ? undefined
+                            : anchorForPayday(day, stream.activeFrom, stream.anchorDate)
+                        })}
                         className="pg-input w-full"
                       />
                     </FieldCell>

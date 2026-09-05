@@ -350,7 +350,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
         </div>
       ) : null}
 
-      <p className="lg-analysis-band lg-analysis-band--copy lg-type-body leading-relaxed lg-disclaimer">
+      <p className="lg-analysis-band lg-analysis-band--copy lg-type-body leading-relaxed lg-disclaimer text-center">
         These figures are for planning. Check with Social Security before you act on one.
       </p>
       </>

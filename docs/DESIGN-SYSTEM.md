@@ -293,6 +293,17 @@ Four tests before any graphic goes on a screen:
 If a graphic passes all four it is earning its place. If it fails one, the
 sentence it was replacing was better.
 
+## 1.6.5 The letterforms and the glyphs are part of it
+
+A graphic that passes §1.6 is still drawn in a typeface and sat beside an
+icon, and neither of those is a free choice here. This reader is often
+partially sighted and always looking at money, which makes tabular figures
+and an unmistakable `0 O 1 l I` requirements rather than preferences.
+
+[`docs/TYPE-AND-ICONS.md`](TYPE-AND-ICONS.md) holds the curated open-licence
+font and icon lists, the tests a candidate has to pass, and the measured gaps
+in what we ship today.
+
 ## 1.7 If it needs explaining, it is designed wrong
 
 *"A long explanation is a symptom of bad design."* Prefer teaching by

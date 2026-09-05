@@ -161,7 +161,7 @@
         "dark": false
       },
       "reviewId": "payguard-year-chart",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:359",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:360",
       "components": "PayGuardChart › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-income-chart",
       "hooks": "pg-card",
@@ -189,7 +189,7 @@
     "anchor": {
       "layout": "payguard",
       "page": "Jobs",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:287",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:288",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "main#pg-main > section.pg-status-hero",
       "hooks": "pg-status-hero",
@@ -301,7 +301,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:128",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:147",
       "components": "PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-job-xim6tp16ktmtg4qacf > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)",
       "hooks": "pg-rule-b pg-surface-quiet",
@@ -341,7 +341,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:376",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:377",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs",
       "hooks": "pg-tabs",
@@ -373,7 +373,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:287",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:288",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "main#pg-main > section.pg-status-hero",
       "hooks": "pg-status-hero",
@@ -623,11 +623,11 @@
         "dark": false
       },
       "reviewId": "ledger-scroll-top",
-      "source": "src/components/ledger/TrackerLedger.tsx:28",
+      "source": "src/components/ledger/TrackerLedger.tsx:29",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1) > div.lg-header-actions:nth-of-type(2) > div:nth-of-type(2) > div",
       "text": "TOP Scroll-to-top button",
-      "sourceLine": "export function TrackerLedger() {"
+      "sourceLine": "id=\"ledger-scroll-top\""
     },
     "createdAt": "2026-09-01T04:41:28.742088Z",
     "updatedAt": "2026-09-01T06:32:45.871Z",
@@ -641,7 +641,7 @@
         "at": "2026-09-01T06:32:45.871Z"
       }
     ],
-    "found": "present"
+    "found": "absent"
   },
   "ledger-notice-count": {
     "id": "ledger-notice-count",
@@ -688,7 +688,7 @@
         "dark": false
       },
       "reviewId": "ledger-stat-sources",
-      "source": "src/components/ledger/TrackerLedger.tsx:28",
+      "source": "src/components/ledger/TrackerLedger.tsx:29",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(5)",
       "text": "INCOME SOURCES 1 1 W2 · 0 SE Income-source count",
@@ -896,7 +896,7 @@
     "status": "done",
     "anchor": {
       "layout": "responsive",
-      "source": "src/components/TrackerV3.tsx:928"
+      "source": "src/components/TrackerV3.tsx:994"
     },
     "createdAt": "2026-09-01T04:41:28.742088Z",
     "updatedAt": "2026-09-01T19:32:41.521Z",
@@ -950,7 +950,7 @@
       "layout": "responsive",
       "page": "Overview",
       "reviewId": "v3-overview-year-total",
-      "source": "src/components/TrackerV3.tsx:397",
+      "source": "src/components/TrackerV3.tsx:440",
       "components": "RootPane › TrackerV3 › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > div > main > section.v3-root-pane > div > div:nth-of-type(2) > div:nth-of-type(3)",
       "text": "2026 total, all sources 1 active source $4,120 28% of Trial Work Period threshold, annualized"
@@ -980,7 +980,7 @@
       "layout": "responsive",
       "page": "Overview",
       "reviewId": "v3-overview-month-grid",
-      "source": "src/components/TrackerV3.tsx:388",
+      "source": "src/components/TrackerV3.tsx:431",
       "components": "RootPane › TrackerV3 › Root › TrackerProvider",
       "domPath": "div#root > div > div > main > section.v3-root-pane > div > div:nth-of-type(2) > div:nth-of-type(2)",
       "text": "Monthly countable income Hide future SEP — AUG — JUL — JUN — MAY — APR — MAR — FEB — JAN —"
@@ -1102,7 +1102,7 @@
       "layout": "v2",
       "page": "Overview",
       "reviewId": "v2-year-history",
-      "source": "src/components/TrackerV2.tsx:184",
+      "source": "src/components/TrackerV2.tsx:192",
       "components": "TrackerV2 › Root › TrackerProvider › App",
       "domPath": "div#root > div > div > main > div > div:nth-of-type(2)",
       "text": "FULL-YEAR HISTORY Monthly countable income Hide future AUG — JUL — JUN — MAY — APR — MAR — FEB — JAN — 2026 total, all sources 1 active sour"
@@ -1130,7 +1130,7 @@
     "anchor": {
       "layout": "classic",
       "reviewId": "classic-year-total",
-      "source": "src/components/TrackerClassic.tsx:113",
+      "source": "src/components/TrackerClassic.tsx:117",
       "components": "YearTotal › TrackerClassic › Root › TrackerProvider",
       "domPath": "div#root > div > main > div > div:nth-of-type(3) > section",
       "text": "2026 total, all sources 1 active source $12,838 88% of Trial Work Period threshold, annualized"
@@ -1366,7 +1366,7 @@
         "dark": false
       },
       "reviewId": "ledger-year-chart",
-      "source": "src/components/ledger/TrackerLedger.tsx:398",
+      "source": "src/components/ledger/TrackerLedger.tsx:450",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(2)",
       "hooks": "lg-border-b",
@@ -1435,7 +1435,7 @@
       "layout": "responsive",
       "page": "Overview",
       "reviewId": "v3-journey-trail",
-      "source": "src/components/TrackerV3.tsx:170",
+      "source": "src/components/TrackerV3.tsx:205",
       "components": "TrackerV3 › Root › TrackerProvider › App",
       "domPath": "div#root > div:nth-of-type(1) > div > header > div:nth-of-type(1) > div:nth-of-type(2) > div",
       "text": "1 Overview 2 3 Numbered workspace trail"
@@ -1596,16 +1596,15 @@
       "layout": "responsive",
       "page": "Settings",
       "reviewId": "v3-overview-month-grid",
-      "source": "src/components/MonthGrid.tsx:44",
+      "source": "src/components/MonthGrid.tsx (near line 56, unverified)",
       "components": "MonthGrid › RootPane › TrackerV3 › Root",
       "domPath": "div:nth-of-type(1) > div > main > section.v3-root-pane > div > div.v3-context-grid:nth-of-type(2) > div:nth-of-type(1) > section",
-      "text": "Monthly countable income Hide future SEP —",
-      "sourceLine": "export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {"
+      "text": "Monthly countable income Hide future SEP —"
     },
     "createdAt": "2026-09-01T18:32:54.209Z",
     "updatedAt": "2026-09-01T19:33:29.232Z",
     "comment": "I need your critical thinking, this looks wrong, please make some changes for this to make sense with just one month",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -1653,7 +1652,7 @@
         "dark": false
       },
       "reviewId": "ledger-analysis-view-modes",
-      "source": "src/components/ledger/LedgerAnalysis.tsx:181",
+      "source": "src/components/ledger/LedgerAnalysis.tsx:182",
       "components": "LedgerAnalysis › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-analysis:nth-of-type(5) > div.lg-analysis-pad:nth-of-type(1) > div",
       "text": "TABLE CARDS ACTIVE ONLY Three views of one table",
@@ -1862,7 +1861,7 @@
     "anchor": {
       "layout": "v2",
       "page": "Overview",
-      "source": "src/components/SafetyHero.tsx:149",
+      "source": "src/components/SafetyHero.tsx:150",
       "components": "SafetyHero › TrackerV2 › Root › TrackerProvider",
       "domPath": "div > main > div > div:nth-of-type(1) > div > section > div:nth-of-type(2) > p",
       "text": "Substantial Gainful Activity (SGA) limit applies · 9 Trial Work months complete",
@@ -1917,7 +1916,7 @@
       "layout": "v2",
       "page": "Overview",
       "reviewId": "v2-year-history",
-      "source": "src/components/MonthGrid.tsx:76",
+      "source": "src/components/MonthGrid.tsx:77",
       "components": "MonthGrid › TrackerV2 › Root › TrackerProvider",
       "domPath": "div > main > div > div:nth-of-type(2) > div > section > div:nth-of-type(1) > label",
       "text": "Hide future",
@@ -1945,11 +1944,10 @@
       "layout": "v2",
       "page": "Overview",
       "reviewId": "v2-year-history",
-      "source": "src/components/MonthGrid.tsx:44",
+      "source": "src/components/MonthGrid.tsx (near line 56, unverified)",
       "components": "MonthGrid › TrackerV2 › Root › TrackerProvider",
       "domPath": "div > main > div > div:nth-of-type(2) > div > section > div:nth-of-type(1) > h2",
-      "text": "Monthly countable income",
-      "sourceLine": "export function MonthGrid({ onOpenMonth }: { onOpenMonth: (month: MonthKey) => void }) {"
+      "text": "Monthly countable income"
     },
     "createdAt": "2026-09-01T18:48:44.975Z",
     "updatedAt": "2026-09-01T19:33:29.232Z",
@@ -1972,7 +1970,7 @@
     "anchor": {
       "layout": "v2",
       "page": "Income",
-      "source": "src/components/StreamSheet.tsx:77",
+      "source": "src/components/StreamSheet.tsx:78",
       "components": "CollapsibleSection › TenNinetyNineIncomeSection › IncomeEntrySection › Sheet",
       "domPath": "div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(1) > div",
       "text": "How Social Security counts this 2021 2022 2023 2024 2025 2026",
@@ -2262,11 +2260,10 @@
     "anchor": {
       "layout": "v2",
       "page": "TWP / SGA",
-      "source": "src/components/SafeWorkSimulator.tsx:48",
+      "source": "src/components/SafeWorkSimulator.tsx (near line 128, unverified)",
       "components": "SafeWorkSimulator › StatusPage › TrackerV2 › Root",
       "domPath": "div#root > div:nth-of-type(1) > div > main > div > section:nth-of-type(2) > h2",
-      "text": "Stay below SGA",
-      "sourceLine": "export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {"
+      "text": "Stay below SGA"
     },
     "createdAt": "2026-09-01T19:07:42.559Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
@@ -2315,16 +2312,15 @@
     "anchor": {
       "layout": "v2",
       "page": "TWP / SGA",
-      "source": "src/components/StatusPage.tsx:10",
+      "source": "src/components/StatusPage.tsx (near line 15, unverified)",
       "components": "StatusPage › TrackerV2 › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > div > main > div > section:nth-of-type(3) > p:nth-of-type(2)",
-      "text": "This is what drives every limit warning on Overview. Change it anytime.",
-      "sourceLine": "export function StatusPage() {"
+      "text": "This is what drives every limit warning on Overview. Change it anytime."
     },
     "createdAt": "2026-09-01T19:08:45.042Z",
     "updatedAt": "2026-09-01T20:08:19.943Z",
     "comment": "nice a long explanation is a symptom of bad design",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -2394,7 +2390,7 @@
     "anchor": {
       "layout": "v2",
       "page": "TWP / SGA",
-      "source": "src/components/NotificationsBell.tsx:166",
+      "source": "src/components/NotificationsBell.tsx:167",
       "components": "NotificationsBell › TrackerV2 › Root › TrackerProvider",
       "domPath": "div#notifications-popover",
       "text": "NEEDS ATTENTION 3 ACTIONS Add a pay date from your paystub for New job to check for extra paychecks Add a pay date from your paystub for New",
@@ -2421,7 +2417,7 @@
     "status": "done",
     "anchor": {
       "layout": "classic",
-      "source": "src/components/ActionBanner.tsx:68",
+      "source": "src/components/ActionBanner.tsx:69",
       "components": "Banner › ActionBanner › TrackerClassic › Root",
       "domPath": "div#root > div:nth-of-type(1) > main > div > div:nth-of-type(1) > div > div",
       "text": "ADD PAYDAY Add a pay date from your paystub for New job to check for extra paychecks",
@@ -2498,16 +2494,15 @@
     "status": "done",
     "anchor": {
       "layout": "classic",
-      "source": "src/components/PaycheckRadar.tsx:26",
+      "source": "src/components/PaycheckRadar.tsx (near line 86, unverified)",
       "components": "PaycheckRadar › TrackerClassic › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > main > div > div:nth-of-type(1) > section:nth-of-type(2)",
-      "text": "3- & 5-paycheck months Add one known payday to find 3- and 5-paycheck months. 1 urgent — check notifications",
-      "sourceLine": "export function PaycheckRadar({"
+      "text": "3- & 5-paycheck months Add one known payday to find 3- and 5-paycheck months. 1 urgent — check notifications"
     },
     "createdAt": "2026-09-01T19:35:01.662Z",
     "updatedAt": "2026-09-01T20:09:11.217Z",
     "comment": "We really really need more intelligence, the user has no idea what 3 & 5 paychecks are, we must make them aware, then convince to provide a pay day, then simulate or show why its bad. I wonder if we can do that easily. how? This is a nice start but far from the solution we need ideas.",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -2550,7 +2545,7 @@
     "status": "done",
     "anchor": {
       "layout": "classic",
-      "source": "src/components/StreamsPanel.tsx:28",
+      "source": "src/components/StreamsPanel.tsx:29",
       "components": "StreamsPanel › TrackerClassic › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > main > div > section",
       "text": "Income sources New job W-2 $0 A job that pays me Delivery or gig work",
@@ -3095,51 +3090,6 @@
       }
     ]
   },
-  "el-1oeaejz": {
-    "id": "el-1oeaejz",
-    "kind": "stow",
-    "origin": "user",
-    "label": "Income Sources",
-    "status": "open",
-    "anchor": {
-      "layout": "ledger",
-      "theme": {
-        "sub": "paper",
-        "dark": false
-      },
-      "reviewId": "ledger-stat-sources",
-      "source": "src/components/ledger/TrackerLedger.tsx:28",
-      "components": "StatTile › TrackerLedger › Root › TrackerProvider",
-      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(5) > div.lg-stat-tile",
-      "hooks": "lg-stat-tile",
-      "text": "INCOME SOURCES 1 1 W2 · 0 SE",
-      "sourceLine": "export function TrackerLedger() {"
-    },
-    "createdAt": "2026-09-01T05:34:38.957Z",
-    "updatedAt": "2026-09-01T08:03:18.800Z",
-    "hidden": true,
-    "found": "present"
-  },
-  "el-1eggpcy": {
-    "id": "el-1eggpcy",
-    "kind": "stow",
-    "origin": "user",
-    "label": "Add or edit W-2 and 1099 income.",
-    "status": "open",
-    "anchor": {
-      "layout": "v2",
-      "page": "Income",
-      "reviewId": "v2-income-page-intro",
-      "source": "src/components/TrackerV2.tsx (near line 240, unverified)",
-      "components": "TrackerV2 › Root › TrackerProvider › App",
-      "domPath": "div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div > p",
-      "text": "Add or edit W-2 and 1099 income."
-    },
-    "createdAt": "2026-09-01T05:51:43.758Z",
-    "updatedAt": "2026-09-01T08:03:19.683Z",
-    "hidden": true,
-    "found": "unknown"
-  },
   "el-14oa3i9": {
     "id": "el-14oa3i9",
     "kind": "comment",
@@ -3181,17 +3131,17 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:274",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:275",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1) > div:nth-of-type(1) > button.pg-btn",
       "hooks": "pg-btn",
       "text": "Confirm TWP status",
-      "sourceLine": "className=\"pg-btn mt-2.5\""
+      "sourceLine": "className=\"pg-btn mt-2\""
     },
     "createdAt": "2026-09-01T20:39:27.643Z",
     "updatedAt": "2026-09-02T03:01:50.557Z",
     "comment": "Bad copy, we need content strategist mindset combined with senior product designer thinking and UX architect",
-    "found": "absent",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -3212,7 +3162,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:309",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:310",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "main#wr-main > div.wr-sheet > div.wr-phase-warning:nth-of-type(3)",
       "hooks": "wr-phase-warning",
@@ -3272,7 +3222,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:493",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:494",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2)",
       "hooks": "wr-slab-body",
@@ -3308,7 +3258,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:274",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:275",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn",
       "hooks": "pg-btn",
@@ -3339,7 +3289,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:493",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:494",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-body:nth-of-type(2)",
       "hooks": "wr-slab-body",
@@ -3405,16 +3355,15 @@
         "dark": false
       },
       "reviewId": "workrecord-safe-work-simulator",
-      "source": "src/components/SafeWorkSimulator.tsx:48",
+      "source": "src/components/SafeWorkSimulator.tsx (near line 112, unverified)",
       "components": "SafeWorkSimulator › WorkRecordStatus › Slab › TrackerWorkRecord",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div:nth-of-type(2) > section",
-      "text": "WORK PAY SIMULATOR We need your limit first Hours only mean something against a limit, and yours is not set yet. Answer the status questions",
-      "sourceLine": "export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {"
+      "text": "WORK PAY SIMULATOR We need your limit first Hours only mean something against a limit, and yours is not set yet. Answer the status questions"
     },
     "createdAt": "2026-09-01T20:50:28.177Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "How much more redundant can we be? Holy moly, bad bad bad design",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -3436,7 +3385,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:156",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:157",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(1)",
       "hooks": "pg-card",
@@ -3468,7 +3417,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:156",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:157",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2)",
       "hooks": "pg-card",
@@ -3505,7 +3454,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:465",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:470",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2) > p.pg-rule-t.pg-surface-2",
       "hooks": "pg-rule-t pg-surface-2 pg-muted",
@@ -3537,16 +3486,15 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/SafeWorkSimulator.tsx:48",
+      "source": "src/components/SafeWorkSimulator.tsx (near line 112, unverified)",
       "components": "SafeWorkSimulator › PayGuardAnalysis › TrackerPayGuard › Root",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2) > div.pg-rule-t:nth-of-type(3) > section",
-      "text": "WORK PAY SIMULATOR We need your limit first Hours only mean something against a limit, and yours is not set yet. Answer the status questions",
-      "sourceLine": "export function SafeWorkSimulator({ onOpenStatus }: { onOpenStatus?: () => void } = {}) {"
+      "text": "WORK PAY SIMULATOR We need your limit first Hours only mean something against a limit, and yours is not set yet. Answer the status questions"
     },
     "createdAt": "2026-09-01T20:53:57.192Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I dont understand at a glance what is the problem I clicked on simulator and this what the heck as a user",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -3567,7 +3515,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:358",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:379",
       "components": "PayGuardJobEditor › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-job-9sdmeowi1rjmtgsuchl",
       "hooks": "pg-card",
@@ -3628,7 +3576,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:125",
+      "source": "src/components/ledger/TrackerLedger.tsx:150",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > header.lg-border-b > div.lg-header-bar:nth-of-type(1)",
       "hooks": "lg-header-bar",
@@ -3669,17 +3617,17 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:28",
+      "source": "src/components/ledger/TrackerLedger.tsx:29",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > header.lg-border-b",
       "hooks": "lg-border-b",
       "text": "SSDI Income Tracker UNDO (4) TOP 2026 COLLAPSE ALL IMPORT EXPORT JSON",
-      "sourceLine": "export function TrackerLedger() {"
+      "sourceLine": "<span className=\"lg-header-title truncate\">SSDI Income Tracker</span>"
     },
     "createdAt": "2026-09-01T20:56:23.225Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "after making those changes we need to refactor the headers into one header",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3700,17 +3648,17 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:28",
+      "source": "src/components/ledger/TrackerLedger.tsx:29",
       "components": "StatTile › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div.lg-stat-tile:nth-of-type(2)",
       "hooks": "lg-stat-tile",
       "text": "MONTHS ≥ SGA 0 SGA $1,690 / month",
-      "sourceLine": "export function TrackerLedger() {"
+      "sourceLine": "\"TWP Months Used\" and \"Months ≥ SGA\" — which is both regimes named"
     },
     "createdAt": "2026-09-01T20:56:56.755Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I like this honestly but its taking up too much space for what it is",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3731,17 +3679,17 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:230",
+      "source": "src/components/ledger/TrackerLedger.tsx:255",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-precision.lg-border-b:nth-of-type(2)",
       "hooks": "lg-precision lg-border-b",
       "text": "ESTIMATED New job · add a payday",
-      "sourceLine": "<div className=\"lg-precision\">"
+      "sourceLine": "<div className=\"lg-precision lg-border-b\">"
     },
     "createdAt": "2026-09-01T20:57:24.608Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "wow, bad alignment also see other comments",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3762,7 +3710,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:244",
+      "source": "src/components/ledger/TrackerLedger.tsx:269",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-tabbar:nth-of-type(1)",
       "hooks": "lg-tabbar",
@@ -3794,17 +3742,17 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:286",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:313",
       "components": "LedgerJobEditor › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-job-card-header:nth-of-type(1)",
       "hooks": "lg-job-card-header",
       "text": "W-2 YTD GROSS $0.00",
-      "sourceLine": "<div className=\"lg-job-card-header\" data-open={cardOpen}>"
+      "sourceLine": "<div className=\"lg-job-card-header flex flex-wrap items-center gap-2.5 px-3.5 py-3 sm:px-4\" data-open={cardOpen}>"
     },
     "createdAt": "2026-09-01T20:59:48.743Z",
     "updatedAt": "2026-09-01T21:32:46.992Z",
     "comment": "I understand the importance of the lock icon but is it really that important to be there always?",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3825,7 +3773,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:83",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:100",
       "components": "SectionToggle › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > button.lg-section-toggle:nth-of-type(1)",
       "hooks": "lg-section-toggle",
@@ -3866,17 +3814,17 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:100",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:117",
       "components": "SettingTile › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-settings-grid:nth-of-type(3) > div.lg-bg-surface.lg-summary-tile:nth-of-type(3)",
       "hooks": "lg-bg-surface lg-summary-tile",
       "text": "PLANNING RATE $ /hr h/wk Optional — used only for paycheck estimates.",
-      "sourceLine": "<div className=\"flex flex-1 flex-col gap-2 lg-bg-surface lg-summary-tile\">"
+      "sourceLine": "<div className=\"flex flex-1 flex-col gap-2 p-2.5 sm:p-3 lg-bg-surface lg-summary-tile\">"
     },
     "createdAt": "2026-09-01T21:19:54.936Z",
     "updatedAt": "2026-09-01T22:42:43.849Z",
     "comment": "this is the most confusing feature, we ask user for input, it stays here, but we don't explain why what its for and how to use it. high level thinking needed on what is this really",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3897,17 +3845,17 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:466",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:506",
       "components": "SettingTile › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-settings-grid:nth-of-type(3) > div.lg-bg-surface.lg-summary-tile:nth-of-type(4)",
       "hooks": "lg-bg-surface lg-summary-tile",
       "text": "PAYCHECKS IN 2026 — Set an anchor payday to count checks.",
-      "sourceLine": "{plan.typicalCount + 1} paychecks in {plan.heavyMonths.length} month{plan.heavyMonths.length === 1 ? '' : 's'} this year"
+      "sourceLine": "label={'Paychecks in ' + year}"
     },
     "createdAt": "2026-09-01T21:20:38.518Z",
     "updatedAt": "2026-09-01T22:42:43.849Z",
     "comment": "isnt that already in this section? this is an explanation block about a few blocks before?",
-    "found": "unknown",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3928,7 +3876,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerAnalysis.tsx:127",
+      "source": "src/components/ledger/LedgerAnalysis.tsx:128",
       "components": "LedgerAnalysis › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-analysis:nth-of-type(5)",
       "hooks": "lg-analysis",
@@ -4009,7 +3957,7 @@
     "status": "done",
     "anchor": {
       "layout": "plan",
-      "source": "src/components/plan/TrackerPlan.tsx:742",
+      "source": "src/components/plan/TrackerPlan.tsx:743",
       "components": "LogPay › TrackerPlan › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > main > section:nth-of-type(2) > label:nth-of-type(1) > span:nth-of-type(3)",
       "text": "≈ $1,364 counted",
@@ -4063,7 +4011,7 @@
     "status": "done",
     "anchor": {
       "layout": "plan",
-      "source": "src/components/plan/TrackerPlan.tsx:288",
+      "source": "src/components/plan/TrackerPlan.tsx:289",
       "components": "Answer › TrackerPlan › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > main > section:nth-of-type(1)",
       "text": "Limit unknown Set up",
@@ -4272,15 +4220,16 @@
     "anchor": {
       "layout": "responsive",
       "page": "Your limit",
-      "source": "src/components/SettingsPanel.tsx (near line 199, unverified)",
+      "source": "src/components/SettingsPanel.tsx:31",
       "components": "LinkRow › Sheet › SettingsPanel › PaneContent",
       "domPath": "div:nth-of-type(1) > div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
-      "text": "Benefit status"
+      "text": "Benefit status",
+      "sourceLine": "function LinkRow({ icon, label, onClick }: { icon?: React.ReactNode; label: string; onClick: () => void }) {"
     },
     "createdAt": "2026-09-01T22:04:34.992Z",
     "updatedAt": "2026-09-02T01:44:23.259014Z",
     "comment": "This opens a page, nice",
-    "found": "unknown",
+    "found": "present",
     "thread": [
       {
         "from": "claude",
@@ -4298,10 +4247,11 @@
     "anchor": {
       "layout": "responsive",
       "page": "Your limit",
-      "source": "src/components/SettingsPanel.tsx (near line 199, unverified)",
+      "source": "src/components/SettingsPanel.tsx:31",
       "components": "LinkRow › Sheet › SettingsPanel › PaneContent",
       "domPath": "div:nth-of-type(1) > div > main > div.v3-workspace-pane > div > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2)",
-      "text": "How income works"
+      "text": "How income works",
+      "sourceLine": "function LinkRow({ icon, label, onClick }: { icon?: React.ReactNode; label: string; onClick: () => void }) {"
     },
     "createdAt": "2026-09-01T22:04:54.638Z",
     "updatedAt": "2026-09-02T03:10:38.758Z",
@@ -4751,7 +4701,7 @@
     "createdAt": "2026-09-01T22:18:33.063Z",
     "updatedAt": "2026-09-02T01:04:19.913528Z",
     "comment": "(From paystub preferred)",
-    "found": "present",
+    "found": "unknown",
     "thread": [
       {
         "from": "claude",
@@ -5006,7 +4956,7 @@
     "anchor": {
       "layout": "v2",
       "page": "Overview",
-      "source": "src/components/PaycheckRadar.tsx:78",
+      "source": "src/components/PaycheckRadar.tsx:79",
       "components": "PaycheckRadar › TrackerV2 › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(2)",
       "text": "Months that pay you extra You are paid every two weeks, so you get 26 paychecks a year — and 26 does not split evenly across 12 months. Most",
@@ -5218,7 +5168,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:128",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:147",
       "components": "PayGuardJobEditor › Slab › TrackerWorkRecord › Root",
       "domPath": "div#pg-job-64y68kf0n8mtey12tw > div.pg-rule-b:nth-of-type(1)",
       "hooks": "pg-rule-b",
@@ -5249,7 +5199,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/WorkRecordMonths.tsx:43",
+      "source": "src/components/workrecord/WorkRecordMonths.tsx:44",
       "components": "WorkRecordMonths › Slab › TrackerWorkRecord › Root",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-body:nth-of-type(2) > div.pg-card",
       "hooks": "pg-card",
@@ -5280,7 +5230,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/WorkRecordStatus.tsx:38",
+      "source": "src/components/workrecord/WorkRecordStatus.tsx:39",
       "components": "WorkRecordStatus › Slab › TrackerWorkRecord › Root",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div",
       "text": "TRIAL WORK Your limit $1,210 TRIAL MONTHS LEFT 9of 9 Counted pay over $1,210 uses one trial work month. Working for yourself more than 80 ho",
@@ -5340,7 +5290,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:485",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:486",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-head:nth-of-type(1)",
       "hooks": "wr-slab-head",
@@ -5528,7 +5478,7 @@
     "reason": "At a 375px viewport the Ledger layout's document is 522px wide, so every page and every modal on top of it sits partly off-screen to the right — the Settings sheet loses its left edge, headings included. Cause: .lg-header-actions in src/styles/ledger.css is flex-shrink: 0, so the row of header buttons (Collapse all, notifications, Undo, Top, Settings) refuses to shrink and sets the page width. It carries flex-wrap in the class list at src/components/ledger/TrackerLedger.tsx:129, which never gets to wrap while the container cannot narrow.\n\nRaised by: measured in the running app while verifying the settings order change. Not caused by it — nothing in that change touches this header.",
     "anchor": {
       "layout": "ledger",
-      "source": "src/styles/ledger.css:226",
+      "source": "src/styles/ledger.css:229",
       "hooks": "lg-header-actions",
       "components": "TrackerLedger",
       "sourceLine": ".lg-header-actions {"
@@ -5560,7 +5510,7 @@
     "reason": "In Calc20 the empty-state button labelled \"Import tracker JSON\" (src/components/calc20/TrackerCalc20.tsx:257) opens SettingsSheet, which always opens on its own default tab — so you press Import and land somewhere with no import on it. It was Status before and is Appearance now that the tabs are ordered settings-first; neither is the Data tab that actually holds the import. SettingsSheet needs an initial-tab prop, and that caller should pass 'data'.\n\nRaised by: seen while verifying the settings order change. Pre-existing — the button already missed its tab before that change.",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/TrackerCalc20.tsx:289",
+      "source": "src/components/calc20/TrackerCalc20.tsx:290",
       "components": "TrackerCalc20 › SettingsSheet",
       "text": "Import tracker JSON",
       "sourceLine": "Import tracker JSON"
@@ -5618,15 +5568,16 @@
     "status": "commented",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/TrackerCalc20.tsx (near line 138, unverified)",
+      "source": "src/components/calc20/TrackerCalc20.tsx:57",
       "components": "TrackerApp › Calc20Store › TrackerCalc20 › Root",
       "domPath": "div#root > div:nth-of-type(1)",
-      "text": "SSDI INCOME TRACKER 2026 work record — SEPTEMBER COUNTABLE $0 of $1,210 $1,210 of room TRIAL MONTHS LEFT 9 of 9 2026 TOTAL $0 TRIAL WORK PER"
+      "text": "SSDI INCOME TRACKER 2026 work record — SEPTEMBER COUNTABLE $0 of $1,210 $1,210 of room TRIAL MONTHS LEFT 9 of 9 2026 TOTAL $0 TRIAL WORK PER",
+      "sourceLine": "function TrackerApp({"
     },
     "createdAt": "2026-09-02T03:40:42.571Z",
     "updatedAt": "2026-09-02T03:40:42.571Z",
     "comment": "Do we need this? can we communicate whatever is being communicated here but in the very top header?",
-    "found": "unknown"
+    "found": "present"
   },
   "el-9n5k2k": {
     "id": "el-9n5k2k",
@@ -5636,7 +5587,7 @@
     "status": "done",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/StreamsSection.tsx:822",
+      "source": "src/components/calc20/StreamsSection.tsx:823",
       "components": "AddButtons › StreamsSection › Section › TrackerApp",
       "domPath": "div:nth-of-type(1) > div > div > section:nth-of-type(1) > div:nth-of-type(2) > div.stream-footer:nth-of-type(3) > div.stream-add > div.stream-add__row",
       "hooks": "stream-add__row",
@@ -5663,15 +5614,16 @@
     "status": "commented",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/Header.tsx (near line 109, unverified)",
+      "source": "src/components/calc20/Header.tsx:26",
       "components": "Header › TrackerApp › Calc20Store › TrackerCalc20",
       "domPath": "div#root > div:nth-of-type(1) > header > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
-      "text": "SEPTEMBER COUNTABLE"
+      "text": "SEPTEMBER COUNTABLE",
+      "sourceLine": "export function Header({"
     },
     "createdAt": "2026-09-02T03:41:42.479Z",
     "updatedAt": "2026-09-02T03:41:42.479Z",
     "comment": "September total?",
-    "found": "unknown"
+    "found": "present"
   },
   "el-1k4omra": {
     "id": "el-1k4omra",
@@ -5681,15 +5633,16 @@
     "status": "commented",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/StreamsSection.tsx (near line 590, unverified)",
+      "source": "src/components/calc20/StreamsSection.tsx:308",
       "components": "StreamsSection › Section › TrackerApp › Calc20Store",
       "domPath": "div#root > div:nth-of-type(1) > div > div > section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
-      "text": "Update August 2026 No entry yet for New job."
+      "text": "Update August 2026 No entry yet for New job.",
+      "sourceLine": "export function StreamsSection({"
     },
     "createdAt": "2026-09-02T03:42:37.715Z",
     "updatedAt": "2026-09-02T03:42:37.715Z",
     "comment": "should this go outside after the banner and above he active?",
-    "found": "unknown"
+    "found": "present"
   },
   "el-19yd1tw": {
     "id": "el-19yd1tw",
@@ -5724,7 +5677,7 @@
     "status": "done",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/StreamsSection.tsx:722",
+      "source": "src/components/calc20/StreamsSection.tsx:723",
       "components": "StreamCardFrame › StreamsSection › Section › TrackerApp",
       "domPath": "section:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div.stream-grid > div.stream-card.stream-card--grid:nth-of-type(1) > div.stream-card__head:nth-of-type(1) > span.stream-card__badge.stream-card__badge--warn:nth-of-type(2) > span.stream-card__badge-text",
       "hooks": "stream-card__badge-text",
@@ -5751,10 +5704,11 @@
     "status": "commented",
     "anchor": {
       "layout": "calc20",
-      "source": "src/components/calc20/TrackerCalc20.tsx (near line 400, unverified)",
+      "source": "src/components/calc20/TrackerCalc20.tsx:405",
       "components": "Section › TrackerApp › Calc20Store › TrackerCalc20",
       "domPath": "div#root > div:nth-of-type(1) > div > div > section:nth-of-type(1)",
-      "text": "Active Update August 2026 No entry yet for New job. New job W2 $0 GROSS No payday set — can't warn about extra-paycheck months New job W2 W-"
+      "text": "Active Update August 2026 No entry yet for New job. New job W2 $0 GROSS No payday set — can't warn about extra-paycheck months New job W2 W-",
+      "sourceLine": "function Section({"
     },
     "createdAt": "2026-09-02T03:54:57.082Z",
     "updatedAt": "2026-09-02T03:54:57.082Z",
@@ -5773,7 +5727,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerAnalysis.tsx:127",
+      "source": "src/components/ledger/LedgerAnalysis.tsx:128",
       "components": "LedgerAnalysis › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-analysis:nth-of-type(4)",
       "hooks": "lg-analysis",
@@ -5826,17 +5780,17 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:274",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:275",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn",
       "hooks": "pg-btn",
       "text": "Add",
-      "sourceLine": "className=\"pg-btn mt-2.5\""
+      "sourceLine": "className=\"pg-btn mt-2\""
     },
     "createdAt": "2026-09-02T04:11:39.597Z",
     "updatedAt": "2026-09-02T04:11:39.597Z",
     "comment": "This button deserves margin on left and right",
-    "found": "absent"
+    "found": "present"
   },
   "el-gok3sr": {
     "id": "el-gok3sr",
@@ -5850,7 +5804,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:169",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:170",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-payguard.pg-workrecord:nth-of-type(1)",
       "hooks": "pg-payguard pg-workrecord",
@@ -5871,10 +5825,11 @@
     "anchor": {
       "layout": "responsive",
       "page": "Overview",
-      "source": "src/components/SafetyHero.tsx (near line 181, unverified)",
+      "source": "src/components/SafetyHero.tsx:173",
       "components": "SafetyHero › RootPane › TrackerV3 › Root",
       "domPath": "div:nth-of-type(1) > div > main > section.v3-root-pane > div > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(3)",
-      "text": "0 of your 9 trial work months used"
+      "text": "0 of your 9 trial work months used",
+      "sourceLine": "export function SafetyHero({"
     },
     "createdAt": "2026-09-02T04:12:55.783Z",
     "updatedAt": "2026-09-02T04:12:55.783Z",
@@ -5893,7 +5848,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:599",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:628",
       "components": "SectionHead › PayGuardJobEditor › TrackerPayGuard › Root",
       "domPath": "div#pg-job-5ccbjkfzo3pmtjhz3bn > div.pg-section-head:nth-of-type(5) > span > button.pg-btn.pg-btn-sm",
       "hooks": "pg-btn pg-btn-sm pg-btn-ghost pg-accent",
@@ -5917,7 +5872,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:191",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:192",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-payguard.pg-page-pad:nth-of-type(1)",
       "hooks": "pg-payguard pg-page-pad",
@@ -5945,11 +5900,11 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:105",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:106",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(2) > div:nth-of-type(1)",
       "text": "How many hours could I work? Use your hourly rate to find a weekly target, including an extra-paycheck month. Close",
-      "sourceLine": "{needsTwpConfirmation ? 'Set your limit before planning hours' : 'How many hours could I work?'}"
+      "sourceLine": "export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {"
     },
     "createdAt": "2026-09-02T04:27:48.745Z",
     "updatedAt": "2026-09-02T04:27:48.745Z",
@@ -5957,7 +5912,7 @@
     "shots": [
       "review/shots/el-ez74do-mtjlhzrw.png"
     ],
-    "found": "absent"
+    "found": "present"
   },
   "el-1lie5wt": {
     "id": "el-1lie5wt",
@@ -5972,17 +5927,17 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:175",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:176",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(1) > header.pg-rule-b.pg-surface-quiet",
       "hooks": "pg-rule-b pg-surface-quiet",
       "text": "SEPTEMBER Under your limit",
-      "sourceLine": "<header className=\"pg-rule-b pg-surface-quiet px-3.5 py-3 sm:px-4\">"
+      "sourceLine": ": 'pg-rule-b pg-surface-quiet px-3.5 py-3 sm:px-4'}>"
     },
     "createdAt": "2026-09-02T04:29:02.292Z",
     "updatedAt": "2026-09-02T04:29:02.292Z",
     "comment": "no background or line and less padding bottom",
-    "found": "absent"
+    "found": "present"
   },
   "el-446101": {
     "id": "el-446101",
@@ -5997,7 +5952,7 @@
         "dark": false
       },
       "reviewId": "payguard-monthly-analysis",
-      "source": "src/components/payguard/PayGuardAnalysis.tsx:31",
+      "source": "src/components/payguard/PayGuardAnalysis.tsx:32",
       "components": "PayGuardAnalysis › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-analysis > div > div > section.pg-card:nth-of-type(1) > div.pg-surface > div > div:nth-of-type(1) > span.pg-text-safe:nth-of-type(2)",
       "hooks": "pg-text-safe",
@@ -6021,7 +5976,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:115",
+      "source": "src/components/ledger/TrackerLedger.tsx:140",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1)",
       "hooks": "pg-ledger",
@@ -6045,7 +6000,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:74",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:91",
       "components": "SectionToggle › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > button.lg-section-toggle:nth-of-type(2) > span:nth-of-type(1)",
       "text": "Month by month",
@@ -6075,7 +6030,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerAnalysis.tsx:213",
+      "source": "src/components/ledger/LedgerAnalysis.tsx:214",
       "components": "LedgerAnalysis › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-analysis:nth-of-type(5) > div.lg-analysis-pad.lg-border-t:nth-of-type(4) > button.lg-btn",
       "hooks": "lg-btn",
@@ -6093,6 +6048,51 @@
         "at": "2026-09-03T13:00:12.493Z"
       }
     ]
+  },
+  "el-1oeaejz": {
+    "id": "el-1oeaejz",
+    "kind": "stow",
+    "origin": "user",
+    "label": "Income Sources",
+    "status": "open",
+    "anchor": {
+      "layout": "ledger",
+      "theme": {
+        "sub": "paper",
+        "dark": false
+      },
+      "reviewId": "ledger-stat-sources",
+      "source": "src/components/ledger/TrackerLedger.tsx:29",
+      "components": "StatTile › TrackerLedger › Root › TrackerProvider",
+      "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(1) > div:nth-of-type(5) > div.lg-stat-tile",
+      "hooks": "lg-stat-tile",
+      "text": "INCOME SOURCES 1 1 W2 · 0 SE",
+      "sourceLine": "export function TrackerLedger() {"
+    },
+    "createdAt": "2026-09-01T05:34:38.957Z",
+    "updatedAt": "2026-09-01T08:03:18.800Z",
+    "hidden": true,
+    "found": "present"
+  },
+  "el-1eggpcy": {
+    "id": "el-1eggpcy",
+    "kind": "stow",
+    "origin": "user",
+    "label": "Add or edit W-2 and 1099 income.",
+    "status": "open",
+    "anchor": {
+      "layout": "v2",
+      "page": "Income",
+      "reviewId": "v2-income-page-intro",
+      "source": "src/components/TrackerV2.tsx (near line 240, unverified)",
+      "components": "TrackerV2 › Root › TrackerProvider › App",
+      "domPath": "div#root > div:nth-of-type(1) > div > main > div > div:nth-of-type(1) > div > p",
+      "text": "Add or edit W-2 and 1099 income."
+    },
+    "createdAt": "2026-09-01T05:51:43.758Z",
+    "updatedAt": "2026-09-01T08:03:19.683Z",
+    "hidden": true,
+    "found": "unknown"
   },
   "task-settings-one-model": {
     "kind": "comment",
@@ -6524,7 +6524,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:189",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:190",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-payguard.pg-workrecord:nth-of-type(1) > header.pg-topbar > div",
       "text": "SSDI INCOME TRACKER 2026 work record 2021 2022 2023 2024 2025 2026 1 NOTICE",
@@ -6547,7 +6547,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:277",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:278",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1) > div:nth-of-type(1) > button.pg-btn",
       "hooks": "pg-btn",
@@ -6571,12 +6571,12 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/payguard/PayGuardJobEditor.tsx:128",
+      "source": "src/components/payguard/PayGuardJobEditor.tsx:147",
       "components": "PayGuardJobEditor › Slab › TrackerWorkRecord › Root",
       "domPath": "div#pg-job-9wuhcbsxggmtkgow2q > div.pg-rule-b.pg-surface-quiet:nth-of-type(2)",
       "hooks": "pg-rule-b pg-surface-quiet",
       "text": "ONGOING PAUSED ENDED Since",
-      "sourceLine": "<div className=\"pg-rule-b px-3 py-2.5 sm:px-3.5\">"
+      "sourceLine": "<div className=\"flex flex-wrap items-center justify-between gap-x-2.5 gap-y-2 pg-rule-b px-2.5 py-2.5 sm:px-3.5 sm:py-3\">"
     },
     "createdAt": "2026-09-02T19:04:01.696Z",
     "updatedAt": "2026-09-02T19:04:01.696Z",
@@ -6595,7 +6595,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:224",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:225",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-head:nth-of-type(1) > button.pg-icon-btn.pg-icon-btn-bordered:nth-of-type(2)",
       "hooks": "pg-icon-btn pg-icon-btn-bordered",
@@ -6619,7 +6619,7 @@
         "dark": false
       },
       "reviewId": "workrecord-safe-work-simulator",
-      "source": "src/components/SafeWorkSimulator.tsx:129",
+      "source": "src/components/SafeWorkSimulator.tsx:130",
       "components": "SafeWorkSimulator › WorkRecordStatus › Slab › TrackerWorkRecord",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div:nth-of-type(2) > section > button",
       "text": "Answer a few questions",
@@ -6642,7 +6642,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/WorkRecordStatus.tsx:120",
+      "source": "src/components/workrecord/WorkRecordStatus.tsx:121",
       "components": "WorkRecordStatus › Slab › TrackerWorkRecord › Root",
       "domPath": "div.wr-sheet > section.wr-slab:nth-of-type(3) > div.wr-slab-body:nth-of-type(2) > div > div.pg-card:nth-of-type(1) > div > div:nth-of-type(1) > button.pg-btn",
       "hooks": "pg-btn",
@@ -6690,7 +6690,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:274",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:275",
       "components": "Slab › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(1) > div.wr-slab-body:nth-of-type(2) > div > button.pg-btn",
       "hooks": "pg-btn",
@@ -6714,7 +6714,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/Sheet.tsx:18",
+      "source": "src/components/Sheet.tsx:20",
       "components": "Sheet › StatusSheet › TrackerWorkRecord › Root",
       "domPath": "div#root > div.pg-payguard.pg-workrecord:nth-of-type(1) > div > div > div > div:nth-of-type(2)",
       "text": "WHERE YOU STAND RIGHT NOW Your limit",
@@ -6737,7 +6737,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/TrackerWorkRecord.tsx:252",
+      "source": "src/components/workrecord/TrackerWorkRecord.tsx:253",
       "components": "TrackerWorkRecord › Root › TrackerProvider › App",
       "domPath": "main#wr-main > div.wr-sheet > div.wr-headline:nth-of-type(1)",
       "hooks": "wr-headline",
@@ -6761,7 +6761,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/NotificationsBell.tsx:20",
+      "source": "src/components/NotificationsBell.tsx:21",
       "components": "NotificationsBell › TrackerWorkRecord › Root › TrackerProvider",
       "domPath": "button#notifications-bell-anchor",
       "text": "1 NOTICE",
@@ -6784,7 +6784,7 @@
         "sub": "calc20",
         "dark": false
       },
-      "source": "src/components/workrecord/WorkRecordMonths.tsx:52",
+      "source": "src/components/workrecord/WorkRecordMonths.tsx:53",
       "components": "WorkRecordMonths › Slab › TrackerWorkRecord › Root",
       "domPath": "main#wr-main > div.wr-sheet > section.wr-slab:nth-of-type(2) > div.wr-slab-body:nth-of-type(2) > div.pg-card > div.pg-month-grid:nth-of-type(1)",
       "hooks": "pg-month-grid",
@@ -7393,7 +7393,7 @@
     "anchor": {
       "layout": "payguard",
       "page": "Overview",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:50",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:51",
       "components": "TrackerPayGuard",
       "sourceLine": "  const showSection = (owner: MobileTab) => wide || mobileTab === owner;"
     },
@@ -7772,7 +7772,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/overview/ScrollShell.tsx:27",
+      "source": "src/components/overview/ScrollShell.tsx:28",
       "components": "ScrollShell › TrackerOverview › Root › TrackerProvider",
       "domPath": "div#root > div:nth-of-type(1)",
       "text": "PayGuard 2026 ADD PAYDAY We do not know when New job pays you, so we cannot tell you which months pay you extra ADD PAYDAY We do not know wh",
@@ -7796,14 +7796,15 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ui.tsx:36",
+      "source": "src/components/ui.tsx:5",
       "components": "BrandMark › ScrollShell › TrackerOverview › Root",
       "domPath": "div#root > div:nth-of-type(1) > header > div > button > span:nth-of-type(2) > span",
-      "text": "PayGuard"
+      "text": "PayGuard",
+      "sourceLine": "export function BrandMark({"
     },
     "createdAt": "2026-09-03T11:35:06.780Z",
     "updatedAt": "2026-09-03T11:35:06.780Z",
-    "found": "unknown"
+    "found": "present"
   },
   "task-simulator-is-the-product": {
     "id": "task-simulator-is-the-product",
@@ -8037,7 +8038,7 @@
     "kind": "comment",
     "origin": "suggested",
     "createdAt": "2026-09-03T13:11:32.445Z",
-    "updatedAt": "2026-09-03T13:11:32.445Z",
+    "updatedAt": "2026-09-04T15:10:00.000Z",
     "found": "unknown",
     "label": "index.html loads five Google Fonts families",
     "status": "open",
@@ -8051,7 +8052,13 @@
       "layout": "payguard",
       "source": "index.html (line 8-10)"
     },
-    "thread": []
+    "thread": [
+      {
+        "from": "claude",
+        "text": "The blocker on this note was that picking the stacks to replace five families is a design decision, not a cleanup. That decision is now made and written down in docs/TYPE-AND-ICONS.md, with the payload measured rather than assumed: 187.9 KB of latin woff2 plus 34.7 KB of CSS, of which 91.2 KB is Inter and Inter Tight — two families referenced only by calc20.css, ledger.css, chrome.css and payguard.css, none of them themed. The premise has also moved on: CLAUDE.md no longer bans web fonts, it budgets them, so the answer is self-host one subset variable file per family behind a real fallback stack and decline on navigator.connection.saveData, not strip them. Left open because no code has changed yet; the work is split across task-font-payload-half-is-unused-families and task-self-host-and-decline-fonts.",
+        "at": "2026-09-04T15:10:00.000Z"
+      }
+    ]
   },
   "task-handoff-2026-09-03": {
     "id": "task-handoff-2026-09-03",
@@ -9422,6 +9429,258 @@
     "updatedAt": "2026-09-04T11:53:54.188349Z",
     "reason": "Sergey: \"The copy on the site is superior but sometimes we say things better\nvery rarely we need to change our content strategy.\" And: \"How should I put\nit, content is part of design.\"\n\nWHAT THEIRS DOES. Labels are short noun phrases, never questions. The big\nnumber gets one plain sentence and nothing else touches it. Figures carry\ntheir own meaning. Instructions are five words. Explanation happens once, at\nthe bottom, in two short declaratives. Warmth appears exactly once. First\nperson only for the reader's own question, second person for facts about them.\n\nWHAT IS COSTING US. DESIGN-SYSTEM 1.4 says \"ask a question, do not name a\nfield\"; 1.2 says every label must answer four things — which number, which\nperiod, of what, so what. Each is right about the failure it prevents.\nTogether they load four answers into six words, and a label carrying four\nanswers is a sentence wearing a label's clothes. That is where \"Money they\npaid you\" came from.\n\nTHE FIX, which Sergey picked out of the drawings himself (\"i like the dual\nline\"): line one is a short noun phrase, three or four words, sentence case.\nLine two, smaller and muted, carries which number, which period and of what.\n\"So what\" leaves labels altogether and lives in one sentence per screen.\nNothing is lost — all four questions still get answered, they stop being\nanswered in the same breath.\n\nTWO RULES SURVIVE UNTOUCHED because they are about money and not tone: round\ndown always, and name only the limit that applies. Terser must never mean\nvaguer about which line you are near.\n\nSCOPE. This is the one item from the layout-nine work that touches every\nlayout rather than the new one: 1.2 and 1.4 get rewritten and copy.ts\nfollows. Not started.",
     "found": "unknown",
+    "thread": []
+  },
+  "task-type-leading-tracking-tokens": {
+    "id": "task-type-leading-tracking-tokens",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Leading and tracking have no tokens — 20 and 46 distinct values",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "large",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "metrics.css owns every size, space and shape, and is silent on the two properties that most change how a low-vision reader gets through a sentence. Measured 2026-09-04: 138 line-height declarations across 20 distinct values, and 203 letter-spacing declarations across 46 distinct values (-0.055em to 0.16em), including near-duplicate pairs like -.02em and -0.02em that differ only in how they were typed. The type ramp specifies seven sizes and no leading, which is half a ramp. Add --t-leading-* and --t-tracking-* in metrics.css section 1 and migrate. See docs/TYPE-AND-ICONS.md PART 3.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/metrics.css (near line 88, unverified)"
+    },
+    "thread": []
+  },
+  "task-font-weights-render-as-700": {
+    "id": "task-font-weights-render-as-700",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "29 font-weight declarations render as a weight they did not ask for",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "bug"
+    ],
+    "reason": "Measured in the browser 2026-09-04, DM Sans at 100px, string '$1,000 left': 400 = 491.5px, 500 = 501.5, 600 = 514.0, and 650 / 700 / 750 / 800 are all 523.391px. Google serves one variable file per family and declares it four times at discrete weights 400/500/600/700, so nothing above 700 exists and nothing between the steps interpolates. The stylesheets contain 11 uses of font-weight: 650 (charm, calc20), 7 of 750 (workrecord, charm) and 11 of 800 (horizon, payguard, pocket, plan, chrome). All 29 render at 700. Self-hosting one variable file with font-weight: 100 900 on a single @font-face makes them real and costs fewer bytes. Also: --t-weight-* stops at 600 while 700 is the most-used weight in the app at 150 declarations. See docs/TYPE-AND-ICONS.md section 1.2.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/metrics.css (near line 118, unverified)"
+    },
+    "thread": []
+  },
+  "task-font-payload-half-is-unused-families": {
+    "id": "task-font-payload-half-is-unused-families",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "49% of the font payload is two families three stylesheets reference",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "Measured 2026-09-04 by downloading the latin woff2 for each family in the index.html request: Inter 47.3 KB, Inter Tight 43.9 KB, DM Sans 36.1 KB, JetBrains Mono 30.6 KB, Instrument Serif 30.0 KB — 187.9 KB plus 34.7 KB of CSS. Inter is referenced only by calc20.css and chrome.css; Inter Tight only by ledger.css, payguard.css and chrome.css. Those are exactly the un-migrated stylesheets — no themed layout ever sees either face. Migrating them to --t-font-sans deletes 91.2 KB from the critical path and one inconsistency at the same time. See docs/TYPE-AND-ICONS.md section 1.2.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "index.html (line 8-10)"
+    },
+    "thread": []
+  },
+  "task-self-host-and-decline-fonts": {
+    "id": "task-self-host-and-decline-fonts",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Fonts are third-party, on the critical path, and never declined on saveData",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "index.html line 10 is a render-blocking stylesheet on fonts.googleapis.com that then names files on fonts.gstatic.com — two DNS and TLS handshakes before the first font byte, on the connection least able to afford them. display=swap covers the text, not the stylesheet. CLAUDE.md section 'The device is the floor, not the ceiling' names navigator.connection.saveData as the mechanism for declining the download outright and nothing consults it. Self-host one subset variable file per family, keep a real ui-sans-serif fallback stack, and decline on saveData. This also supersedes the blocker recorded on task-google-fonts-on-old-webviews. See docs/TYPE-AND-ICONS.md section 1.4.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "index.html (line 8-10)"
+    },
+    "thread": []
+  },
+  "task-atkinson-hyperlegible-option": {
+    "id": "task-atkinson-hyperlegible-option",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Add Atkinson Hyperlegible Next as a reader-chosen type option",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "feature"
+    ],
+    "reason": "THE-THREAD says this audience includes readers who are 'partially or fully blind', and the type layer does nothing about it. Atkinson Hyperlegible Next (Braille Institute, redrawn 2025, SIL OFL, variable weight, 150+ languages) is drawn specifically to pull apart the glyph pairs that get confused — 0/O, 1/l/I, b/d, p/q — which on a money screen is the difference between $10 and $1O. Atkinson Hyperlegible Mono is the matching fixed-advance face for the figure columns. Add as a UiState type choice rather than a default: the reader who needs it turns it on, and it costs nothing to anyone who does not. Highest-value single addition identified in docs/TYPE-AND-ICONS.md section 1.4.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/metrics.css (near line 218, unverified)"
+    },
+    "thread": []
+  },
+  "task-icon-registry-by-meaning": {
+    "id": "task-icon-registry-by-meaning",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Icons are imported by drawing, never by meaning",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "large",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "66 distinct lucide-react glyphs across 38 files, and nothing anywhere says what one means. Zap is imported in nine files — for an extra paycheck month, in the notifications list, in onboarding, and in two job editors — which is probably one meaning and is written down nowhere, so the tenth use is a coin flip. Build src/design-system/icons.ts mapping meanings (paycheck, limit, overLimit, locked, close, back, delete) onto Lucide glyphs and have call sites import the meaning. Changing what a paycheck looks like then costs one line, and 'which icon means over the limit' has an answer. See docs/TYPE-AND-ICONS.md section 2.5.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/design-system/index.ts (near line ?, unverified)"
+    },
+    "thread": []
+  },
+  "task-icon-sizes-and-stroke-off-token": {
+    "id": "task-icon-sizes-and-stroke-off-token",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Four ways to size an icon, and --t-icon-* loses",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "metrics.css:123 already defines --t-icon-sm/--t-icon/--t-icon-lg at 16/20/24. Measured 2026-09-04: the call sites pass 13 distinct size={n} values (11 12 13 14 15 16 17 18 19 20 22 26 30), of which only 16 and 20 land on a token, and size={17} appears 16 times. Alongside that, Tailwind size-3 / size-3.5 / size-4 / size-5 classes on the same <Zap> in five different files, plus raw width/height in the layout stylesheets. Stroke drifts the same way: 2, 2.2, 2.25, 2.4, 2.5, 2.75 — six weights for an icon set whose whole premise is a 2px stroke on a 24px grid. Three sizes from the tokens, stroke 2 everywhere. See docs/TYPE-AND-ICONS.md section 2.2.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/styles/metrics.css (near line 123, unverified)"
+    },
+    "thread": []
+  },
+  "task-calc20-icons-duplicate-lucide": {
+    "id": "task-calc20-icons-duplicate-lucide",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "calc20/Icons.tsx is 279 lines redrawing icons we already depend on",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "cut"
+    ],
+    "reason": "calc20 carries its own set of 34 hand-drawn icons across 10 files, and at least 33 of them exist in lucide-react, which is already a dependency: PlusIcon, CloseIcon, ChevronDown/Right/Left, TrashIcon, BellIcon, LockIcon, UnlockIcon, CopyIcon, PencilIcon, DownloadIcon, UploadIcon, PauseIcon, CheckIcon, CloudIcon, WarningIcon, UndoIcon, SlidersIcon, SignOutIcon, ArchiveIcon and the rest. Only the view-mode glyphs are genuinely ours — PivotIcon, CarouselIcon, MonthColumnsIcon, RoomyIcon, CompactIcon, HideFutureIcon, FutureMonthsIcon, ExpandAll/CollapseAll. Retire the file down to those, draw them on Lucide's 24/2 grid, and put them in the registry beside the rest. This is the same shape of finding as calc20's UiState shim. See docs/TYPE-AND-ICONS.md section 2.1.",
+    "anchor": {
+      "layout": "calc20",
+      "source": "src/components/calc20/Icons.tsx (near line 1, unverified)"
+    },
+    "thread": []
+  },
+  "task-icon-alias-duplicates": {
+    "id": "task-icon-alias-duplicates",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Two Lucide names for one drawing, in the same codebase",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "small",
+    "tags": [
+      "cut"
+    ],
+    "reason": "TriangleAlert (6 uses) and AlertTriangle (2) are the same glyph under Lucide's new and old names. So are CircleCheck (1) and CheckCircle2 (1). A designer sees one icon, grep sees two, and a rename touches half the sites. Collapse to one name per glyph — and once task-icon-registry-by-meaning exists this stops being possible, because the call sites will not name glyphs at all. See docs/TYPE-AND-ICONS.md section 2.3.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/components/SafetyHero.tsx (near line 1, unverified)"
+    },
+    "thread": []
+  },
+  "task-text-glyphs-used-as-icons": {
+    "id": "task-text-glyphs-used-as-icons",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Chevrons and closes drawn as text characters",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "small",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "The affordance glyphs are typed characters in several layouts — U+203A and U+2039 in horizon, U+2715 in payguard's chart, U+2192 in fifteen files, U+2212 in HelpSpread and elsewhere. They inherit font metrics, so they change shape with every theme's --t-font-sans and sit on the baseline rather than on the icon grid, and a screen reader gets punctuation rather than a button. Replace with the registry. See docs/TYPE-AND-ICONS.md section 2.5.",
+    "anchor": {
+      "layout": "horizon",
+      "source": "src/components/horizon/TrackerHorizon.tsx (near line ?, unverified)"
+    },
+    "thread": []
+  },
+  "task-debt-ratchet-covers-type-and-icons": {
+    "id": "task-debt-ratchet-covers-type-and-icons",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:10:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "Nothing fails a build on a 47th letter-spacing or a 14th icon size",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "medium",
+    "tags": [
+      "redesign"
+    ],
+    "reason": "theme:check fails on an unmapped colour or a missing shape choice, and design-debt.mjs ratchets hand-rolled controls and off-token sizes. Neither covers type or icons, which is exactly why 46 distinct letter-spacings, 20 line-heights, 13 icon sizes and 6 stroke widths accumulated without anyone deciding to. Extend the ratchet: an off-token icon size, a second stroke width, a font-family literal in a layout stylesheet, or an added leading/tracking value should fail the same way a 49th button class does. The ratchet is the mechanism that made the control layer stick; type and icons need it for the same reason. See docs/TYPE-AND-ICONS.md PART 3.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "scripts/design-debt.mjs (near line ?, unverified)"
+    },
+    "thread": []
+  },
+  "task-suggested-notes-parked-on-open": {
+    "id": "task-suggested-notes-parked-on-open",
+    "kind": "comment",
+    "origin": "suggested",
+    "createdAt": "2026-09-04T15:20:00.000Z",
+    "updatedAt": "2026-09-04T15:20:00.000Z",
+    "found": "unknown",
+    "label": "47 of Claude's own notes are invisible to both queues",
+    "status": "sent",
+    "certainty": "sure",
+    "effort": "small",
+    "tags": [
+      "bug"
+    ],
+    "reason": "state.ts:99 maps the legacy status 'open' to 'yours' — the reviewer has it. For a note the reviewer wrote that is right; for one Claude filed for itself it is exactly wrong, because 'yours' means waiting on a person who never has to reply to it. markdown.ts:231 builds both queues from stateOf(note) === 'sent', so an origin:'suggested' note on 'open' appears in neither 'Owed to Claude' nor \"Claude's own backlog\" — it exists only in its layout's body section, hundreds of lines down, which is the one part of the report the cold-start instructions say not to read. Counted 2026-09-04: 47 suggested notes are on 'open' against 15 on 'sent'. Found by filing eleven notes on 'open' and watching all eleven vanish from the backlog. Either the console should stop writing 'open' for suggested notes, or LEGACY should resolve it by origin rather than to a constant.",
+    "anchor": {
+      "layout": "payguard",
+      "source": "src/review/state.ts (near line 99, unverified)"
+    },
     "thread": []
   }
 }

@@ -4,6 +4,8 @@ import { InfoNote } from './InfoNote';
 import { Sheet } from './Sheet';
 
 import { ButtonBase } from '../design-system';
+import { PaydayInput } from './ui';
+import { anchorForPayday, paydayOf } from '../domain/paySchedule';
 /**
  * The one field a "Set a payday" notification is actually about — not the
  * full job editor. Resolving a specific, narrow problem should open a
@@ -59,18 +61,21 @@ export function QuickPaydaySheet({
       }
     >
       <label className="flex flex-col gap-1.5">
-        <span className="field-label">Pay date (from your paystub or bank deposit)</span>
-        <input
+        <span className="field-label">What day of the month are you paid?</span>
+        <PaydayInput
           className="field-input"
-          type="date"
+          aria-label="Payday, day of the month"
+          placeholder="1-31"
           autoFocus
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          value={paydayOf(date)}
+          onCommit={(day) => setDate(day == null
+            ? ''
+            : anchorForPayday(day, stream.activeFrom, date || undefined))}
         />
       </label>
 
       <InfoNote>
-        Type any one real payday from your paystub. We use this date to find every other payday on your schedule and alert you when an extra paycheck lands in a month.
+        A number from 1 to 31 — off your paystub or your bank. We work out every other payday from it, and tell you when an extra paycheck lands in a month.
       </InfoNote>
     </Sheet>
   );

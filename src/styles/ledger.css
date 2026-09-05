@@ -1580,6 +1580,13 @@ body:has([data-palette='carbon'] .pg-ledger) {
   cursor: pointer;
   transition: var(--lg-ease);
 }
+
+/* Sub-accordions use the compact row height inside a job card. */
+.lg-job-card .lg-section-toggle {
+  min-height: var(--lg-row-h);
+  height: var(--lg-row-h);
+}
+
 .lg-section-toggle:hover {
   background: var(--lg-row-head);
 }

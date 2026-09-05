@@ -244,3 +244,52 @@ export function paceWarning(stream: Stream, thresholdAmount: number, year: numbe
   if (typicalMonthly > thresholdAmount * 0.85) return { level: 'near', amount: typicalMonthly, checks: typicalCount };
   return null;
 }
+
+/*
+ * Payday as a number, 1–31.
+ *
+ * The anchor is stored as a full date because weekly and biweekly schedules
+ * need a weekday to walk from, but nobody is asked for one: a payday is "the
+ * 15th", and a calendar picker asks a person on a cheap phone to find one
+ * particular Friday in 2026 to say something they already know as a number.
+ * Every layout collects the day and this pair converts, so the stored shape
+ * and the asked question can differ without either being a lie.
+ */
+
+/** The lowest and highest day a month can have. Nothing accepts 0 or 32. */
+export const PAYDAY_MIN = 1;
+export const PAYDAY_MAX = 31;
+
+/** The day of the month an anchor falls on, or undefined if there is none. */
+export function paydayOf(anchor: DateKey | undefined): number | undefined {
+  if (!anchor) return undefined;
+  const parsed = parseDateKey(anchor);
+  return parsed ? parsed.getDate() : undefined;
+}
+
+/**
+ * The anchor date for a payday of `day`.
+ *
+ * `current` keeps an existing anchor in its own month, so correcting the
+ * number does not silently move a biweekly schedule onto a different weekday.
+ * Otherwise the job's first month is used, and a day that month is too short
+ * to have walks forward to the first month that has it — clamping instead
+ * would read the number back as a different one than was typed.
+ */
+export function anchorForPayday(
+  day: number,
+  from: MonthKey,
+  current?: DateKey
+): DateKey {
+  const clamped = Math.min(PAYDAY_MAX, Math.max(PAYDAY_MIN, Math.round(day)));
+  const base = (current && parseDateKey(current)) || parseDateKey(from + '-01');
+  let year = base ? base.getFullYear() : new Date().getFullYear();
+  let month = base ? base.getMonth() : 0;
+
+  for (let i = 0; i < 12; i += 1) {
+    if (new Date(year, month + 1, 0).getDate() >= clamped) break;
+    month += 1;
+    if (month > 11) { month = 0; year += 1; }
+  }
+  return toDateKey(new Date(year, month, clamped));
+}

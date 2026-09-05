@@ -18,7 +18,8 @@
     "review": "node scripts/review-report.mjs",
     "review:check": "node scripts/review-report.mjs --check",
     "layouts": "node scripts/layouts.mjs",
-    "words": "node scripts/words.mjs"
+    "words": "node scripts/words.mjs",
+    "capture": "node scripts/capture.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

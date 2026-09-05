@@ -45,7 +45,7 @@ Sans = names & chrome. Mono = numbers & dense UI. Same job → same family.
 **Rule:** One short noun. No help sentence here.
 
 ### 4. Section toggle — left title, right meta
-**Where:** `Pay cycle`, `Income`, `Year shape` (chart band).
+**Where:** `Pay cycle`, `Income`, `Year overview` (chart band).
 **Shape:** sans UI label left + chevron; quiet mono **meta** right (`No schedule`, `2 over`). Whole row is the control.
 **Why:** Opens/closes a block. Meta is the *answer at a glance* when collapsed.
 **Rule:** Title = what the section *is*. Meta = current state in ≤4 words. Do not put `.lg-label` caps on the toggle title — it is chrome, not a field name.
@@ -178,7 +178,7 @@ Is it grammatical glue or a footnote?
 | Trial months left / Months over | inline → value | label + figure |
 | Watch | strip title | label |
 | Hours left / precision | grade line | PrecisionLine + standing-sub |
-| Year shape | section toggle (band) | ui + meta |
+| Year overview | section toggle (band) | ui + meta |
 | Job tabs | ui chrome | ui / badge |
 | Before tax · year | trailing stack | label + title |
 | Ongoing / Paused / Ended | segment | seg-item |

@@ -5,11 +5,12 @@ import type { PayFrequency, Stream } from '../../domain/types';
 import { useTracker } from './state';
 import { money } from '../../domain/format';
 import { longMonthName, monthKey, parseMonth } from '../../domain/months';
-import { frequencyLabel, payPlan, weeksPerCheck } from '../../domain/paySchedule';
+import { anchorForPayday, frequencyLabel, paydayOf, payPlan, weeksPerCheck } from '../../domain/paySchedule';
 import { knownYears, mileageRatesForYear, rulesFor } from '../../domain/rules';
 import { benefitPhase } from '../../domain/trialWork';
 import { SheetSurface } from './SheetSurface';
 import { NumericExprInput } from './NumericExprInput';
+import { PaydayInput } from '../ui';
 import { LockIcon, UnlockIcon } from './Icons';
 
 import { ButtonBase } from '../../design-system';
@@ -153,14 +154,19 @@ export function StreamSettingsContent({ stream }: { stream: Stream }) {
               </div>
 
               <label className="field">
-                <span className="eyebrow">Last known pay date for this job</span>
-                <input
-                  type="date"
-                  value={stream.anchorDate ?? ''}
-                  onChange={(e) => updateStream(stream.id, { anchorDate: e.target.value })}
+                <span className="eyebrow">What day of the month are you paid</span>
+                <PaydayInput
+                  aria-label="Payday, day of the month"
+                  placeholder="1-31"
+                  value={paydayOf(stream.anchorDate)}
+                  onCommit={(day) => updateStream(stream.id, {
+                    anchorDate: day == null
+                      ? undefined
+                      : anchorForPayday(day, stream.activeFrom, stream.anchorDate)
+                  })}
                 />
                 <p className="help-note">
-                  One real date you were (or will be) paid for {stream.name || 'this job'}.
+                  A number from 1 to 31 for {stream.name || 'this job'}.
                   The app counts every {stream.payFrequency === 'weekly' ? 'week' : 'two weeks'}
                   {' '}forward and backward from it to find which calendar
                   months land 3 paychecks instead of 2 — the months a

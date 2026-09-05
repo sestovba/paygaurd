@@ -427,6 +427,19 @@ export function LedgerJobEditor({
 
       {stream.type === 'w2' ? (
         <>
+          <W2MonthLedger
+            stream={stream}
+            months={months}
+            locked={stream.locked}
+            onExtend={(m) => {
+              if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
+            }}
+            onUpdate={(m, patch) => updateMonthEntry(stream.id, m, patch)}
+            onClear={(m) => updateMonthEntry(stream.id, m, {
+              gross: undefined, hours: undefined, net: undefined, basis: undefined
+            })}
+          />
+
           <SectionToggle label="Pay cycle" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} />
           {settingsOpen ? (
             <div className="flex flex-wrap lg-settings-grid">
@@ -495,19 +508,6 @@ export function LedgerJobEditor({
           ) : null}
 
           {historySection}
-
-          <W2MonthLedger
-            stream={stream}
-            months={months}
-            locked={stream.locked}
-            onExtend={(m) => {
-              if (monthIndex(m) < monthIndex(stream.activeFrom)) updateStream(stream.id, { activeFrom: m });
-            }}
-            onUpdate={(m, patch) => updateMonthEntry(stream.id, m, patch)}
-            onClear={(m) => updateMonthEntry(stream.id, m, {
-              gross: undefined, hours: undefined, net: undefined, basis: undefined
-            })}
-          />
 
         </>
       ) : (

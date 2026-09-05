@@ -7,13 +7,13 @@ import { money } from '../domain/format';
 import { longMonthName, monthIndex, monthKey, monthsOfYear, parseMonth, shortMonthName, todayMonth } from '../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../domain/rules';
 import { activeMonthsInYear, evenSplit, grossFor, hoursFor } from '../domain/earnings';
-import { frequencyLabel, paceWarning, payPlan } from '../domain/paySchedule';
+import { anchorForPayday, frequencyLabel, paceWarning, paydayOf, payPlan } from '../domain/paySchedule';
 import { activeThreshold } from '../domain/trialWork';
 import { InfoNote } from './InfoNote';
 import { NumericInput } from './NumericInput';
 import { PayAmountField, PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, usePayBasis } from './PayAmount';
 import { Sheet } from './Sheet';
-import { Button, IconButton, Segmented } from './ui';
+import { Button, IconButton, PaydayInput, Segmented } from './ui';
 import { HelpSpread } from './HelpSpread';
 import type { PayFrequency, Stream } from '../domain/types';
 
@@ -430,7 +430,7 @@ export function StreamSheet({
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-base font-semibold">
                 <Calendar className="size-5 shrink-0" />
-                Any one payday — from a paystub if you have one
+                What day of the month are you paid?
               </span>
               {stream.anchorDate ? (
                 <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-good-text">
@@ -442,14 +442,19 @@ export function StreamSheet({
                 </span>
               )}
             </div>
-            <input
+            <PaydayInput
               className="field-input bg-surface"
-              type="date"
-              value={stream.anchorDate ?? ''}
-              onChange={(e) => updateStream(stream.id, { anchorDate: e.target.value })}
+              aria-label="Payday, day of the month"
+              placeholder="1-31"
+              value={paydayOf(stream.anchorDate)}
+              onCommit={(day) => updateStream(stream.id, {
+                anchorDate: day == null
+                  ? undefined
+                  : anchorForPayday(day, stream.activeFrom, stream.anchorDate)
+              })}
             />
             <p className="type-muted">
-              Enter any payday from a paystub. We calculate all other paydays to warn you before extra paycheck months.
+              A number from 1 to 31. We work out every other payday from it, to warn you before a month with an extra paycheck.
             </p>
           </div>
 

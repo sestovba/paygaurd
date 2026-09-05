@@ -11,3 +11,7 @@ android/.gradle/
 android/app/build/
 review/review-notes.backup.json
 _ref.html
+
+# Capture runs: screenshots and their reports. Regenerated on demand,
+# large, and never worth a diff.
+review/captures/

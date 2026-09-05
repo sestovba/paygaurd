@@ -494,6 +494,14 @@ and everything below that may map and override but may not choose:
 | `styles/controls.css` | the shared Button, IconButton, Field, ButtonRow. Not one literal value | `debt` |
 | `components/ui/` | the React side of the same controls | `debt` |
 
+**Two layers are not on that list yet, and both are unguarded: the
+letterforms and the glyphs.** Five font families are loaded where three are
+used, 29 `font-weight` declarations render as a weight they did not ask for,
+leading and tracking have no tokens at all (20 and 46 distinct values), and
+there are three parallel icon systems with four ways to size one.
+[`docs/TYPE-AND-ICONS.md`](docs/TYPE-AND-ICONS.md) is the measurement, the
+curated lists to pick replacements from, and what to do about it.
+
 **Spinning off a theme is two blocks.** Copy `paper`'s block in each token
 file, change what you mean, run `npm run theme:check` — it names anything you
 missed. Colour needs a light and a dark form; shape needs neither, because
