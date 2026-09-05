@@ -418,15 +418,44 @@ button{font:inherit;color:inherit}
   --b-line:#d2d2d2;--b-bg:#f2f2f2;--b-green:#1c7c3e;--b-red:#cd040b;
   font-family:'Helvetica Neue',var(--sans);color:var(--b-ink);font-size:14px;background:#fff;
 }
+.att-util{
+  display:flex;align-items:center;padding:0 20px;height:34px;background:var(--b-bg);
+  border-bottom:1px solid #e4e4e4;font-size:12px;color:#333;
+}
+.att-util-tabs{display:flex;gap:18px;height:100%}
+.att-util-tabs b{
+  font-weight:600;color:#5a5a5a;display:flex;align-items:center;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.att-util-tabs b.on{color:#191919;border-bottom-color:#191919}
+.att-util-right{margin-left:auto;display:flex;gap:20px;color:#333}
 .att-nav{
-  background:#000;color:#fff;display:flex;align-items:center;gap:14px;padding:0 18px;height:46px;font-size:13px;
+  background:#fff;color:var(--b-ink);display:flex;align-items:center;gap:11px;
+  padding:0 20px;height:58px;font-size:13px;border-bottom:1px solid #e8e8e8;
 }
 .att-globe{display:block;flex:none;line-height:0}
-.att-globe svg{display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
-.att-nav b{font-weight:600;letter-spacing:.01em}
-.att-nav .sp{margin-left:auto;color:#b9b9b9;font-size:12.5px}
-.att-body{padding:26px 20px 30px;min-height:352px;background:#fff;max-width:560px;margin:0 auto}
-.att-h{font-size:22px;font-weight:600;letter-spacing:-.015em;margin:0 0 6px}
+.att-globe svg{display:block}
+.att-nav > b{font-weight:700;letter-spacing:-.015em;font-size:17px}
+.att-navlinks{display:flex;gap:24px;margin:0 auto;color:#191919}
+.att-navlinks span{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px}
+.att-navlinks i{
+  width:6px;height:6px;border-right:1.6px solid #6a6a6a;border-bottom:1.6px solid #6a6a6a;
+  transform:rotate(45deg) translateY(-2px);font-style:normal;flex:none;
+}
+.att-navicons{display:flex;align-items:center;gap:19px;color:#191919;flex:none}
+.att-navicons svg{display:block}
+.att-cart{position:relative;display:block;line-height:0}
+.att-cart i{
+  position:absolute;top:-5px;right:-7px;background:var(--b-blue);color:#fff;font-style:normal;
+  font-size:10px;font-weight:700;min-width:15px;height:15px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;padding:0 4px;
+}
+.att-body{padding:24px 18px 28px;min-height:352px;background:var(--b-bg)}
+.att-foot{
+  background:var(--b-blue);height:52px;display:flex;align-items:center;
+  justify-content:flex-end;gap:22px;padding:0 26px;
+}
+.att-h{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0 0 7px}
 .att-sub{color:var(--b-ink2);font-size:13.5px;margin:0 0 18px;max-width:52ch}
 .att-seg{display:inline-flex;border:1px solid var(--b-line);border-radius:999px;padding:3px;margin-bottom:18px;background:var(--b-bg)}
 .att-seg button{
@@ -495,7 +524,10 @@ button{font:inherit;color:inherit}
 .att-step.off h5,.att-step.off p{color:#a3a3a3}
 .att-summary{background:var(--b-bg);border:1px solid var(--b-line);border-radius:8px;padding:14px 16px;max-width:460px}
 .att-summary h5{margin:0 0 10px;font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--b-ink2)}
-.att-view{display:none}
+.att-view{
+  display:none;background:#fff;border-radius:14px;padding:28px 26px 30px;
+  max-width:640px;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
 .att-view.show{display:block;animation:fade .32s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.att-view.show{animation:none}}
@@ -519,19 +551,19 @@ button{font:inherit;color:inherit}
 .opt-brand span{font-size:10px;color:var(--b-ink2);font-weight:500;letter-spacing:.02em}
 .opt-by{font-size:11.5px;color:var(--b-ink2);letter-spacing:.01em}
 .opt-by b{
-  color:var(--b-orange);font-weight:700;font-size:13.5px;letter-spacing:-.03em;
+  color:var(--b-orange);font-weight:800;font-size:14.5px;letter-spacing:-.038em;
   font-family:'Helvetica Neue',var(--sans);
 }
 .opt-crumb{font-size:11.5px;color:var(--b-ink2);margin:0 0 0 6px;padding-left:11px;border-left:1px solid var(--b-line)}
 .opt-crumb b{color:var(--b-ink);font-weight:600}
 .opt-reset{
   margin-left:auto;border:1px solid var(--b-line);background:#fff;color:var(--b-ink2);cursor:pointer;
-  border-radius:4px;padding:7px 13px;font-size:12px;font-weight:600;
+  border-radius:999px;padding:7px 16px;font-size:12px;font-weight:600;
 }
 .opt-reset:hover{border-color:var(--b-orange);color:var(--b-orange)}
 .opt-publish{
-  border:0;background:var(--b-orange);color:#fff;cursor:pointer;border-radius:4px;
-  padding:7px 15px;font-size:12px;font-weight:700;
+  border:0;background:var(--b-orange);color:#fff;cursor:pointer;border-radius:999px;
+  padding:7px 18px;font-size:12px;font-weight:700;
 }
 .opt-publish:hover{background:#e8501d}
 .opt-publish:disabled{background:#d8d5cf;color:#8d8a84;cursor:not-allowed}
@@ -899,9 +931,8 @@ input[type=range].n-range::-moz-range-thumb{
     <p class="eyebrow">Senior Visual Designer · Design Systems · Seattle</p>
     <h1>I build visual systems<br>that <em>hold up</em>.</h1>
     <p class="hero-lede">
-      17 years designing and shipping digital products for AWS, AT&amp;T, Optum, Capital One and Microsoft.
-      Typography, colour, hierarchy and grids that stay coherent when the product gets complex
-      and the engineering gets real.
+      17 years shipping digital products for AWS, AT&amp;T, Optum, Capital One and Microsoft. Typography, colour,
+      hierarchy and grids that stay coherent when the product gets complex.
     </p>
     <div class="hero-actions">
       <a href="#work" class="btn btn-primary">See the rebuilds</a>
@@ -915,21 +946,19 @@ input[type=range].n-range::-moz-range-thumb{
   <div class="wrap">
     <h2>These are rebuilds,<br><em>not screenshots.</em></h2>
     <p>
-      Most of this work shipped between 2016 and 2025 — behind enterprise logins, under NDA, on
-      platforms that other teams have since redesigned. <strong>I can't show you the original pixels.</strong>
-      Nobody who worked on enterprise software a decade ago can.
+      Most of this shipped between 2016 and 2025 — behind enterprise logins, under NDA, on platforms since redesigned.
+      <strong>I can't show you the original pixels.</strong> Nobody from that era can.
     </p>
     <p>
-      So I rebuilt them. Every specimen below is live code running in your browser right now,
-      reconstructed from the client's <strong>public design language</strong> and the decisions I actually made
-      on the engagement. You can click them, hover them, break them, and watch them respond.
+      So I rebuilt them. Every specimen below is live code in your browser, reconstructed from the client's
+      <strong>public design language</strong> and the decisions I actually made. Click them, hover them, break
+      them.
     </p>
     <p>
-      Even the logos are rebuilds. Anime has solved this problem for decades —
-      <strong>WcDonald's, not McDonald's</strong> — and it's the honest answer here too: close enough to
-      tell you whose product you're looking at, different enough that nobody mistakes it for the real
-      mark. So it's <strong>awz</strong>, <strong>VT&amp;T</strong>, <strong>Qptum</strong> and <strong>StepMise</strong> below.
-      No client trademark appears on this page.
+      Even the logos are rebuilds. Anime solved this decades ago — <strong>WcDonald's, not McDonald's</strong>: close
+      enough to tell you whose product you're looking at, different enough that nobody mistakes it for the real
+      mark. So it's <strong>awz</strong>, <strong>VT&amp;T</strong>, <strong>Qptum</strong> and
+      <strong>StepMise</strong> below. No client trademark appears on this page.
     </p>
     <div class="thesis-rule"></div>
     <p class="thesis-kicker">
@@ -958,16 +987,15 @@ input[type=range].n-range::-moz-range-thumb{
       </div>
       <div class="proj-body">
         <p>
-          AWS's education programs — <b>Educate</b>, <b>re/Start</b> and <b>Academy</b> — were built independently over
-          several years. Learners moving between them hit different navigation, different visual language,
-          and different levels of accessibility. It felt like three products, not one ecosystem.
+          AWS's education programs — <b>Educate</b>, <b>re/Start</b> and <b>Academy</b> — were built independently.
+          Learners moving between them hit different navigation, different visual language, different
+          accessibility. Three products, not one ecosystem.
         </p>
         <div class="decision">
           <span class="decision-label">The decision I made</span>
           <p>
-            Build <b>one shared UX foundation</b>, not three separate redesigns. Align layouts, navigation
-            and content patterns to Skill Builder standards — so each program keeps its purpose but
-            stops paying the cost of being different.
+            Build <b>one shared UX foundation</b>, not three redesigns. Align layouts, navigation and content to Skill
+            Builder standards — each program keeps its purpose, stops paying for being different.
           </p>
         </div>
         <p>
@@ -1075,9 +1103,9 @@ input[type=range].n-range::-moz-range-thumb{
       </div>
       <div class="proj-body">
         <p>
-          The moment after someone pays is where trust is most fragile. I owned the order confirmation
-          email and the order status lookup, for both <b>guest</b> and <b>signed-in</b> customers — two audiences
-          whose journeys kept diverging into different-looking screens.
+          The moment after someone pays is where trust is most fragile. I owned the confirmation email and order status
+          lookup for both <b>guest</b> and <b>signed-in</b> customers — two journeys that kept drifting into
+          different-looking screens.
         </p>
         <div class="decision">
           <span class="decision-label">The decision I made</span>
@@ -1106,6 +1134,10 @@ input[type=range].n-range::-moz-range-thumb{
           <span class="url">vtt.com/orderstatus — rebuild</span>
         </div>
         <div class="frame-body brand-att" id="attApp">
+          <div class="att-util" aria-hidden="true">
+            <span class="att-util-tabs"><b class="on">Personal</b><b>Business</b></span>
+            <span class="att-util-right"><span>Find a store</span><span>Ver en español</span></span>
+          </div>
           <div class="att-nav">
             <span class="att-globe" aria-label="VT&amp;T — parody mark">
               <svg viewBox="0 0 32 32" width="27" height="27" role="img" aria-hidden="true">
@@ -1141,7 +1173,20 @@ input[type=range].n-range::-moz-range-thumb{
               </svg>
             </span>
             <b>VT&amp;T</b>
-            <span class="sp">Order status</span>
+            <nav class="att-navlinks" aria-hidden="true">
+              <span>Shop <i></i></span>
+              <span>Deals <i></i></span>
+              <span>VT&amp;T Difference <i></i></span>
+              <span>Support <i></i></span>
+            </nav>
+            <span class="att-navicons" aria-hidden="true">
+              <svg viewBox="0 0 20 20" width="19" height="19"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12.8 12.8 17.5 17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="att-cart">
+                <svg viewBox="0 0 20 20" width="19" height="19"><path d="M4.2 6.4h11.6l-.95 10.1a1.2 1.2 0 0 1-1.2 1.1H6.35a1.2 1.2 0 0 1-1.2-1.1L4.2 6.4Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.4 8V5.6a2.6 2.6 0 0 1 5.2 0V8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <i>3</i>
+              </span>
+              <svg viewBox="0 0 20 20" width="19" height="19"><circle cx="10" cy="7.2" r="3.1" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.9 17c.7-3.3 3.2-5.1 6.1-5.1s5.4 1.8 6.1 5.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </span>
           </div>
           <div class="att-body">
 
@@ -1217,6 +1262,12 @@ input[type=range].n-range::-moz-range-thumb{
             </div>
 
           </div>
+        <div class="att-foot" aria-hidden="true">
+            <svg viewBox="0 0 20 20" width="17" height="17"><path d="M3.4 3.4 16.6 16.6M16.6 3.4 3.4 16.6" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 20 20" width="17" height="17"><text x="10" y="16.5" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="Georgia,serif">f</text></svg>
+            <svg viewBox="0 0 20 20" width="17" height="17"><rect x="2.6" y="2.6" width="14.8" height="14.8" rx="4.4" fill="none" stroke="#fff" stroke-width="1.9"/><circle cx="10" cy="10" r="3.5" fill="none" stroke="#fff" stroke-width="1.9"/><circle cx="14.5" cy="5.5" r="1.05" fill="#fff"/></svg>
+            <svg viewBox="0 0 20 20" width="17" height="17"><text x="10" y="15.4" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Helvetica,Arial,sans-serif">in</text></svg>
+          </div>
         </div>
       </div>
 
@@ -1248,18 +1299,16 @@ input[type=range].n-range::-moz-range-thumb{
       </div>
       <div class="proj-body">
         <p>
-          StepWise is a web tool with an unusual shape: the people using it are
-          <b>actuaries, underwriters, compliance and product managers</b> who think in spreadsheets — but what
-          the tool <em>produces</em> is a website. Brokers and employers land on it to work out
-          <b>what each employee actually pays</b> for health coverage.
+          StepWise has an unusual shape: the people using it are <b>actuaries, underwriters, compliance and product
+          managers</b> who think in spreadsheets — but what it <em>produces</em> is a website, where brokers and
+          employers work out <b>what each employee actually pays</b> for health coverage.
         </p>
         <div class="decision">
           <span class="decision-label">The decision I made</span>
           <p>
-            Don't take the spreadsheet away — they're fluent in it, and fighting that mental model was
-            never going to work. Instead, <b>put the output next to the input</b>: render the broker-facing
-            site live beside the grid, so every cell edit has a visible consequence in the thing the
-            customer will see.
+            Don't take the spreadsheet away — they're fluent in it, and fighting that mental model was never going to work.
+            Instead, <b>put the output next to the input</b>: render the broker-facing site live beside the
+            grid, so every cell edit has a visible consequence.
           </p>
         </div>
         <p>
@@ -1412,10 +1461,9 @@ input[type=range].n-range::-moz-range-thumb{
         <div class="decision">
           <span class="decision-label">The decision I made</span>
           <p>
-            Lead with research and <b>deliberately unbranded</b> prototypes. Testing branded screens
-            measures how people feel about the bank; testing neutral ones measures whether the
-            <b>interaction</b> works. So this specimen has no Capital One brand in it — that absence is the method,
-            not an omission.
+            Lead with research and <b>deliberately unbranded</b> prototypes. Testing branded screens measures how people
+            feel about the bank; neutral ones measure whether the <b>interaction</b> works. So this specimen
+            carries no Capital One brand — that absence is the method, not an omission.
           </p>
         </div>
         <p>
@@ -1565,9 +1613,8 @@ input[type=range].n-range::-moz-range-thumb{
         <div class="decision">
           <span class="decision-label">Why it exists</span>
           <p>
-            No inherited brand system, nobody telling me what to do. It's where I prove I can still hold
-            the fundamentals — hierarchy, typography, colour and grid — <b>from scratch</b>, not just fit a
-            design into someone else's system.
+            No inherited brand system, nobody telling me what to do. Where I prove I can still hold the fundamentals —
+            hierarchy, typography, colour, grid — <b>from scratch</b>, not just fit into someone else's system.
           </p>
         </div>
         <p>
@@ -1642,25 +1689,24 @@ input[type=range].n-range::-moz-range-thumb{
         <span class="pill-num">01</span>
         <h3>Systems, not screens</h3>
         <p>
-          I don't design pages. I design systems that happen to produce pages. The AWS specimen is the
-          whole argument in one toggle — the "after" state isn't prettier, it's <em>the same</em>, and that's the point.
+          I don't design pages. I design systems that happen to produce pages. The AWS specimen is the argument in one
+          toggle — the "after" isn't prettier, it's <em>the same</em>. That's the point.
         </p>
       </div>
       <div>
         <span class="pill-num">02</span>
         <h3>Craft survives handoff</h3>
         <p>
-          If the design can't survive engineering, it isn't finished. Figma deeply — auto layout, variants,
-          tokens — and then HTML, CSS, JavaScript and React to carry it through. This page is that claim,
-          executed rather than asserted.
+          If the design can't survive engineering, it isn't finished. Figma deeply — auto layout, variants, tokens — then
+          HTML, CSS, JavaScript and React to carry it through. This page is that claim, executed.
         </p>
       </div>
       <div>
         <span class="pill-num">03</span>
         <h3>Evidence over opinion</h3>
         <p>
-          Usability testing, journey mapping, analytics, competitive analysis. I let the numbers argue with
-          my first draft — and where they mattered, I measured them: usability, task success, satisfaction, handoff speed.
+          Usability testing, journey mapping, analytics, competitive analysis. I let the numbers argue with my first draft
+          — and measured what mattered: task success, satisfaction, handoff speed.
         </p>
       </div>
     </div>
