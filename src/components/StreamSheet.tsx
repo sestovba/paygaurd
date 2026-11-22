@@ -488,7 +488,7 @@ export function StreamSheet({
               />
             </label>
             <label className="flex w-full flex-col gap-1.5 sm:w-40">
-              <span className="field-label">Hours in a usual week</span>
+              <span className="field-label">Weekly hours</span>
               <NumericInput
                 className="num field-input w-full"
                 value={stream.plannedHoursPerWeek}

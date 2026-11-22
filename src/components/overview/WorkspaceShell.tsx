@@ -37,7 +37,7 @@ import type { DetailRequest } from './detail';
 import type { StreamType } from '../../domain/types';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
-import { ButtonBase } from '../../design-system';
+import { ButtonBase, YearStepper } from '../../design-system';
 type PageId = 'overview' | 'income' | 'status';
 
 /** The six every shell offers, plus the two only a workspace has. */
@@ -76,7 +76,6 @@ export function WorkspaceShell() {
   const [panes, setPanes] = useState<PaneRequest[]>([]);
   const activeRegionRef = useRef<HTMLElement | null>(null);
   const years = knownYears();
-  const yearIndex = years.indexOf(ui.year);
 
   /* Named for what it tells you, not for the two rules behind it. */
   const statusLabel = 'Your limit';
@@ -210,11 +209,15 @@ export function WorkspaceShell() {
               </ReviewTarget>
             </div>
 
-            <YearPicker
+            <YearStepper
               year={ui.year}
               years={years}
-              yearIndex={yearIndex}
-              onYear={(year) => setUi({ year })}
+              onYear={(next) => setUi({ year: next })}
+              className="flex shrink-0 items-center rounded-xl border border-border bg-surface p-1"
+              buttonClassName="grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
+              yearClassName="num min-w-11 px-1 text-center text-xs font-bold"
+              prevIcon={<ChevronLeft className="size-3.5" />}
+              nextIcon={<ChevronRight className="size-3.5" />}
             />
 
             <ButtonBase
@@ -706,42 +709,6 @@ function JourneyTrail({
         );
       })}
     </nav>
-  );
-}
-
-function YearPicker({
-  year,
-  years,
-  yearIndex,
-  onYear
-}: {
-  year: number;
-  years: number[];
-  yearIndex: number;
-  onYear: (year: number) => void;
-}) {
-  return (
-    <div className="flex shrink-0 items-center rounded-xl border border-border bg-surface p-1">
-      <ButtonBase
-        type="button"
-        aria-label="Previous year"
-        disabled={yearIndex <= 0}
-        onClick={() => onYear(years[yearIndex - 1])}
-        className="grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
-      >
-        <ChevronLeft className="size-3.5" />
-      </ButtonBase>
-      <span className="num min-w-11 px-1 text-center text-xs font-bold">{year}</span>
-      <ButtonBase
-        type="button"
-        aria-label="Next year"
-        disabled={yearIndex >= years.length - 1}
-        onClick={() => onYear(years[yearIndex + 1])}
-        className="grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
-      >
-        <ChevronRight className="size-3.5" />
-      </ButtonBase>
-    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { ButtonBase } from '../../design-system';
+import { ButtonBase, YearStepper } from '../../design-system';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -219,27 +219,16 @@ export function TrackerPayGuard() {
           </div>
 
           {/* Year — compact filter stepper */}
-          <div className="pg-field ml-1 gap-0.5 rounded-full px-1 py-0.5 sm:ml-2">
-            <ButtonBase
-              type="button"
-              disabled={years.indexOf(year) <= 0}
-              onClick={() => setUi({ year: years[years.indexOf(year) - 1] })}
-              className="pg-icon-btn pg-touch-target size-6 rounded-full"
-              aria-label="Previous year"
-            >
-              <ChevronLeft className="size-3.5" />
-            </ButtonBase>
-            <span className="pg-mono min-w-8 text-center text-xs font-bold pg-fg sm:min-w-10">{year}</span>
-            <ButtonBase
-              type="button"
-              disabled={years.indexOf(year) >= years.length - 1}
-              onClick={() => setUi({ year: years[years.indexOf(year) + 1] })}
-              className="pg-icon-btn pg-touch-target size-6 rounded-full"
-              aria-label="Next year"
-            >
-              <ChevronRight className="size-3.5" />
-            </ButtonBase>
-          </div>
+          <YearStepper
+            year={year}
+            years={years}
+            onYear={(next) => setUi({ year: next })}
+            className="pg-field ml-1 gap-0.5 rounded-full px-1 py-0.5 sm:ml-2"
+            buttonClassName="pg-icon-btn pg-touch-target size-6 rounded-full"
+            yearClassName="pg-mono min-w-8 text-center text-xs font-bold pg-fg sm:min-w-10"
+            prevIcon={<ChevronLeft className="size-3.5" />}
+            nextIcon={<ChevronRight className="size-3.5" />}
+          />
 
           {/* How much of the year the month lists below show. Beside the
               year stepper because it answers the same question one size
@@ -404,8 +393,8 @@ export function TrackerPayGuard() {
                         The active tab is already named by its shape and its
                         accent colour, which is how a browser does it too. */}
                     {isSelected ? null : (
-                      <span className={`pg-badge ${s.type === 'w2' ? 'pg-badge-w2' : 'pg-badge-se'}`}>
-                        {s.type === 'w2' ? 'W-2' : '1099'}
+                      <span className="pg-badge">
+                        Work
                       </span>
                     )}
                     <span className="max-w-[8.5rem] truncate font-semibold" title={s.name}>{s.name}</span>
@@ -468,7 +457,7 @@ export function TrackerPayGuard() {
             <div className="pg-card flex flex-col items-center gap-3 p-6 text-center sm:p-12">
               <span className="text-base font-bold pg-fg sm:text-lg">No income sources yet</span>
               <p className="max-w-md text-xs pg-muted sm:text-sm">
-                Add where your money comes from, and Payguard will keep track of what counts toward your monthly limit.
+                Add a job or gig, and PayGuard tracks what counts toward your limit.
               </p>
               <div className="mt-1 flex flex-wrap justify-center gap-2">
                 <ButtonBase type="button" className="pg-btn pg-btn-lg pg-btn-solid" onClick={() => addAndSelect('w2')}>

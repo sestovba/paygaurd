@@ -24,6 +24,13 @@
   --ch-warn: #8a5200;
   --ch-over: #9b2c2c;
   --ch-near: #8a5200;
+
+  /* Named once: the root rule and the --font-sans remap both read it. */
+  --ch-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Shared chrome sets font-family from --font-sans in index.css, so without
+     this it kept the global stack inside charm. */
+  --font-sans: var(--ch-font-sans);
+  --font-display: var(--ch-font-sans);
 }
 
 .ch {
@@ -32,7 +39,7 @@
   min-height: 100vh;
   background: var(--ch-ground);
   color: var(--ch-ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--ch-font-sans);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -54,6 +61,53 @@
   --ch-over: #f0a0a0;
   --ch-near: #f2c078;
 }
+
+/*
+ * Shared chrome — Settings, Sheet, InfoNote, the sign-out row — is written
+ * against the app-wide token names in index.css, not against --ch-*. Inside
+ * .ch those names still resolved to the global palette, so the settings sheet
+ * arrived in a different set of neutrals than the screen behind it. Pointing
+ * them at charm's scale re-skins that shared chrome without forking it, the
+ * same way .pg-ledger and .pg-payguard already do.
+ *
+ * The --ch-* values above flip under .dark on their own, so this block needs
+ * no dark twin.
+ */
+.ch {
+  --background: var(--ch-ground);
+  --foreground: var(--ch-ink);
+  --surface: var(--ch-surface);
+  --surface-2: var(--ch-sunken);
+  --card: var(--ch-surface);
+  --card-foreground: var(--ch-ink);
+  --popover: var(--ch-surface);
+  --popover-foreground: var(--ch-ink);
+
+  --primary: var(--ch-green);
+  --primary-foreground: var(--ch-surface);
+  --secondary: var(--ch-sunken);
+  --secondary-foreground: var(--ch-ink);
+  --muted: var(--ch-sunken);
+  --muted-foreground: var(--ch-ink-2);
+  --accent: var(--ch-green-tint);
+  --accent-foreground: var(--ch-ink);
+
+  --destructive: var(--ch-over);
+  --destructive-foreground: var(--ch-surface);
+  --warn: var(--ch-warn);
+  --warn-foreground: var(--ch-warn);
+  --warn-soft: color-mix(in oklch, var(--ch-warn) 12%, var(--ch-surface));
+  --good: var(--ch-green);
+  --good-soft: var(--ch-green-tint);
+  --info: var(--ch-link);
+  --info-foreground: var(--ch-surface);
+  --info-soft: color-mix(in oklch, var(--ch-link) 10%, var(--ch-surface));
+
+  --border: var(--ch-hairline);
+  --input: var(--ch-edge);
+  --ring: var(--ch-green);
+}
+
 
 .ch-top {
   display: flex;

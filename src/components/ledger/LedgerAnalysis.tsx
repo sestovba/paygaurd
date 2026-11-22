@@ -119,7 +119,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
   /* Worked is hours — omit the column when every visible row would be a dash. */
   const showWorked = visible.some((c) => c.hours > 0);
 
-  const title = single && visible.length === 1 ? longMonthName(visible[0].month) : 'By month';
+  const title = single && visible.length === 1 ? longMonthName(visible[0].month) : 'Months';
   const closedMeta = single
     ? (visible[0] ? money2(visible[0].status.countable) : '')
     : `${visible.length} month${visible.length === 1 ? '' : 's'}`;
@@ -185,7 +185,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
             layout="ledger"
             className="lg-analysis-tools-wrap"
           >
-            <div className="lg-analysis-controls" role="toolbar" aria-label="By month view">
+            <div className="lg-analysis-controls" role="toolbar" aria-label="Months view">
               <div className="lg-seg" role="group" aria-label="Layout">
                 <ButtonBase type="button" data-on={mode === 'cards'} aria-pressed={mode === 'cards'} className="lg-seg-item" onClick={() => setMode('cards')}>Cards</ButtonBase>
                 <ButtonBase type="button" data-on={mode === 'table'} aria-pressed={mode === 'table'} className="lg-seg-item" onClick={() => setMode('table')}>Table</ButtonBase>
@@ -329,7 +329,7 @@ export function LedgerAnalysis({ data, year, scope = 'year' }: {
         </div>
       )}
 
-      <div className="lg-analysis-band">
+      <div className="lg-analysis-band lg-analysis-band--bleed">
         <ButtonBase
           type="button"
           onClick={() => setSimulatorOpen((v) => !v)}

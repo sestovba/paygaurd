@@ -188,7 +188,7 @@ Is it grammatical glue or a footnote?
 | Direct deposit \| Gross pay | segment + under-copy (paycycle rail) | seg + body |
 | Month / Bank deposit / Hours / Clear | column header | label |
 | Paid / Miles / Hours (1099) | stacked field | label → field |
-| By month | analysis title | analysis-title (ui) |
+| Months | analysis title | analysis-title (ui) |
 | Cards \| Table / Active | segment / filter | seg / body |
 | Month on status card | card eyebrow | label |
 | countable | unit caption | caption |

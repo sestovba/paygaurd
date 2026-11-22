@@ -1,4 +1,4 @@
-import { ButtonBase } from '../../design-system';
+import { ButtonBase, YearStepper } from '../../design-system';
 /*
  * Horizon — an eighth layout, assembled from what the review found.
  *
@@ -52,6 +52,7 @@ import { money } from '../../domain/format';
 import { longMonthName, todayMonth, yearOf } from '../../domain/months';
 import { monthStatus } from '../../domain/earnings';
 import { activeThreshold } from '../../domain/trialWork';
+import { knownYears } from '../../domain/rules';
 import { precisionFor } from '../../domain/precision';
 import { actionItems } from '../../domain/notifications';
 import type { MonthKey } from '../../domain/types';
@@ -113,11 +114,14 @@ export function TrackerHorizon() {
           <h1>Horizon</h1>
           <p>{longMonthName(asOf)} {ui.year}</p>
         </div>
-        <div className="hz-top-year" role="group" aria-label="Year">
-          <ButtonBase type="button" onClick={() => setUi({ year: ui.year - 1 })} aria-label="Previous year">‹</ButtonBase>
-          <span>{ui.year}</span>
-          <ButtonBase type="button" onClick={() => setUi({ year: ui.year + 1 })} aria-label="Next year">›</ButtonBase>
-        </div>
+        <YearStepper
+          year={ui.year}
+          years={knownYears()}
+          onYear={(next) => setUi({ year: next })}
+          className="hz-top-year"
+          prevIcon="‹"
+          nextIcon="›"
+        />
         {/* Beside the year because it answers the same question one size
             down: which months am I looking at. The runway already obeys
             useMonthScope; this is the control it was missing. */}

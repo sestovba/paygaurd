@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, DollarSign, Menu, Plus, Settings } from 'lucide-react';
+import { DollarSign, Menu, Plus, Settings } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { copyFor } from '../../domain/copy';
 import { useTheme } from '../../theme';
@@ -21,7 +21,7 @@ import { Detail } from './detail';
 import type { DetailRequest } from './detail';
 import { ReviewTarget } from '../../review/ReviewTarget';
 
-import { ButtonBase } from '../../design-system';
+import { ButtonBase, YearStepper } from '../../design-system';
 function pageLabel(page: PageId): string {
   return page === 'overview' ? 'Overview' : page === 'income' ? 'Income' : 'Your limit';
 }
@@ -72,7 +72,6 @@ export function PagesShell() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const years = knownYears();
-  const yearIndex = years.indexOf(ui.year);
   const now = todayMonth();
   const thisMonth = yearOf(now) === ui.year ? now : `${ui.year}-12` as const;
   const backLabel = pageLabel(page);
@@ -198,27 +197,14 @@ export function PagesShell() {
             </div>
             <p className="hidden min-w-0 flex-1 truncate text-base font-semibold lg:block">{pageLabel(page)}</p>
             <div className="flex shrink-0 items-center gap-2">
-              <div className="flex items-center gap-1 rounded-full border border-border bg-surface px-1 py-1">
-                <ButtonBase
-                  type="button"
-                  aria-label="Previous year"
-                  disabled={yearIndex <= 0}
-                  onClick={() => setUi({ year: years[yearIndex - 1] })}
-                  className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
-                >
-                  <ChevronLeft className="size-4" />
-                </ButtonBase>
-                <span className="num px-1 text-sm font-semibold">{ui.year}</span>
-                <ButtonBase
-                  type="button"
-                  aria-label="Next year"
-                  disabled={yearIndex >= years.length - 1}
-                  onClick={() => setUi({ year: years[yearIndex + 1] })}
-                  className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
-                >
-                  <ChevronRight className="size-4" />
-                </ButtonBase>
-              </div>
+              <YearStepper
+                year={ui.year}
+                years={years}
+                onYear={(next) => setUi({ year: next })}
+                className="flex items-center gap-1 rounded-full border border-border bg-surface px-1 py-1"
+                buttonClassName="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
+                yearClassName="num px-1 text-sm font-semibold"
+              />
               <NotificationsBell
                 open={notificationsOpen}
                 onOpenChange={setNotificationsOpen}

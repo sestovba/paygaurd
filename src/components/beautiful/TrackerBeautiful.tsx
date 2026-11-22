@@ -28,6 +28,7 @@ import { Activity, ChevronLeft, ChevronRight, Settings, Sparkles } from 'lucide-
 import { useTracker } from '../../state/TrackerProvider';
 import { useTheme } from '../../theme';
 import { Button, IconButton, Input } from '../ui';
+import { YearStepper } from '../../design-system';
 import { money } from '../../domain/format';
 import {
   longMonthName, shortMonthName, todayMonth, yearOf, scopedMonths, monthsOfYear
@@ -38,7 +39,7 @@ import { capacityFor, workingRate, SAFE_MONTHLY } from '../../domain/capacity';
 import { extraPaycheckMonths } from '../../domain/paySchedule';
 import { precisionFor } from '../../domain/precision';
 import { PrecisionLine } from '../PrecisionLine';
-import { FIRST_YEAR, LAST_YEAR } from '../../domain/rules';
+import { knownYears } from '../../domain/rules';
 import type { MonthKey } from '../../domain/types';
 import { SettingsPanel } from '../SettingsPanel';
 import { MonthSheet } from '../MonthSheet';
@@ -111,13 +112,6 @@ export function TrackerBeautiful() {
     : 0;
   const aimPct = span > 0 ? Math.min(100, (cap!.safeTarget / span) * 100) : 0;
 
-  function stepYear(delta: number) {
-    const next = ui.year + delta;
-    if (next < FIRST_YEAR || next > LAST_YEAR) return;
-    setUi({ year: next });
-    setShowEarlier(false);
-  }
-
   return (
     <div className="bb">
       <header className="bb-head">
@@ -134,15 +128,16 @@ export function TrackerBeautiful() {
                 : 'Add your status to see your limit'}
             </p>
           </div>
-          <div className="bb-year">
-            <IconButton label="Previous year" size="sm" onClick={() => stepYear(-1)}>
-              <ChevronLeft size={18} />
-            </IconButton>
-            <span className="bb-year-n bb-num">{ui.year}</span>
-            <IconButton label="Next year" size="sm" onClick={() => stepYear(1)}>
-              <ChevronRight size={18} />
-            </IconButton>
-          </div>
+          <YearStepper
+            year={ui.year}
+            years={knownYears()}
+            onYear={(next) => { setUi({ year: next }); setShowEarlier(false); }}
+            className="bb-year"
+            buttonClassName="ui-btn-icon ui-btn-icon-sm"
+            yearClassName="bb-year-n bb-num"
+            prevIcon={<ChevronLeft size={18} />}
+            nextIcon={<ChevronRight size={18} />}
+          />
           <IconButton className="bb-head-set" label="Settings" onClick={() => setSettingsOpen(true)}>
             <Settings size={20} />
           </IconButton>

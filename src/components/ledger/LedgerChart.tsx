@@ -85,7 +85,7 @@ export function LedgerChart({
         <span className="lg-toggle-lead" aria-hidden="true">
           <ChevronDown className="lg-chevron" data-collapsed={!open} />
         </span>
-        <span className="lg-band-head__title">Year shape</span>
+        <span className="lg-band-head__title">Overview</span>
         {!open ? (
           <span className="lg-band-head__meta flex min-w-0 items-center gap-2">
             <span className="lg-chart-mini" aria-hidden="true">

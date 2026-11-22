@@ -1,7 +1,7 @@
-import { ButtonBase } from '../../design-system';
+import { ButtonBase, LayoutRoot, YearStepper } from '../../design-system';
 import { useEffect, useState, useRef } from 'react';
 import {
-  ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, Plus, Settings, Undo2, X
+  ChevronsDown, ChevronsUp, Plus, Sliders, Undo2, X
 } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import { countableFor, streamYearGross } from '../../domain/earnings';
@@ -137,7 +137,7 @@ export function TrackerLedger() {
   }
 
   return (
-    <div className="pg-ledger flex min-h-dvh flex-col" data-chrome-root>
+    <LayoutRoot layout="ledger" className="pg-ledger flex min-h-dvh flex-col">
 
       <div className="lg-app-card flex min-h-0 w-full flex-1 flex-col">
       {/* Review note: "after making those changes we need to refactor the
@@ -154,25 +154,13 @@ export function TrackerLedger() {
           <div className="lg-header-identity">
             <span className="lg-header-title truncate">SSDI Tracker</span>
             <MonthScopePicker scope={scope} onChange={setScope} className="lg-scope lg-scope-inline" />
-            <div className="lg-year-stepper">
-              <ButtonBase
-                type="button"
-                disabled={years.indexOf(year) <= 0}
-                onClick={() => setUi({ year: years[years.indexOf(year) - 1] })}
-                aria-label="Previous year"
-              >
-                <ChevronLeft className="size-4" />
-              </ButtonBase>
-              <span className="min-w-10 lg-pad-micro-x text-center lg-type-body font-bold">{year}</span>
-              <ButtonBase
-                type="button"
-                disabled={years.indexOf(year) >= years.length - 1}
-                onClick={() => setUi({ year: years[years.indexOf(year) + 1] })}
-                aria-label="Next year"
-              >
-                <ChevronRight className="size-4" />
-              </ButtonBase>
-            </div>
+            <YearStepper
+              year={year}
+              years={years}
+              onYear={(next) => setUi({ year: next })}
+              className="lg-year-stepper"
+              yearClassName="min-w-10 lg-pad-micro-x text-center lg-type-body font-bold"
+            />
           </div>
 
           <div className="lg-header-actions">
@@ -207,7 +195,7 @@ export function TrackerLedger() {
               aria-label="Settings"
               title="Settings"
             >
-              <Settings className="size-4" />
+              <Sliders className="size-4" />
             </ButtonBase>
           </div>
         </div>
@@ -472,7 +460,7 @@ export function TrackerLedger() {
           onLayoutChange={(layout) => setUi({ layout })}
         />
       ) : null}
-    </div>
+    </LayoutRoot>
   );
 }
 

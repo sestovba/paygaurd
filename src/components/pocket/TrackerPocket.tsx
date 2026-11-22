@@ -53,6 +53,23 @@ import { PocketSourcesModals, type SourcesView } from './PocketSources';
 import '../../styles/pocket.css';
 
 import { ButtonBase } from '../../design-system';
+
+/*
+ * These fields are type="text" on purpose: a number input reports an empty
+ * value for what the user can plainly see, and still accepts "2e2", "+" and
+ * "-" as valid scientific notation. Pocket keeps the raw string as a draft,
+ * so without a guard the letters simply stayed on screen.
+ *
+ * Digits and one decimal point survive; everything else is dropped as it is
+ * typed. The point is kept rather than forced to an integer because money,
+ * hours and miles are all legitimately fractional here.
+ */
+function numericOnly(raw: string): string {
+  const cleaned = raw.replace(/[^\d.]/g, '');
+  const first = cleaned.indexOf('.');
+  if (first === -1) return cleaned;
+  return cleaned.slice(0, first + 1) + cleaned.slice(first + 1).replace(/\./g, '');
+}
 export function TrackerPocket() {
   const {
     data, ui, setUi, resetAll, updateMonthEntry, pushToast,
@@ -323,7 +340,7 @@ export function TrackerPocket() {
         className="pk-btn pk-edit-field"
         style={{ marginTop: 6 }}
         value={milesValue}
-        onChange={(event) => setMilesValue(event.currentTarget.value)}
+        onChange={(event) => setMilesValue(numericOnly(event.currentTarget.value))}
       />
       {milesOff > 0 ? (
         /* Not data-warn. That styling is amber and reads as caution, which is
@@ -468,7 +485,7 @@ export function TrackerPocket() {
                     className="pk-btn pk-edit-field"
                     style={{ marginTop: 6 }}
                     value={payValue}
-                    onChange={(event) => setPayValue(event.currentTarget.value)}
+                    onChange={(event) => setPayValue(numericOnly(event.currentTarget.value))}
                   />
                   {estimate ? (
                     <p className="pk-edit-note" data-warn>
@@ -534,7 +551,7 @@ export function TrackerPocket() {
                     className="pk-btn pk-edit-field"
                     style={{ marginTop: 6 }}
                     value={payValue}
-                    onChange={(event) => setPayValue(event.currentTarget.value)}
+                    onChange={(event) => setPayValue(numericOnly(event.currentTarget.value))}
                   />
                   {ui.payBasis !== 'paystub' ? (
                     <div className="pk-prompt">
@@ -835,7 +852,7 @@ function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
         type="text"
         value={amountDraft ?? String(gross)}
         onFocus={(event) => event.currentTarget.select()}
-        onChange={(event) => setAmountDraft(event.currentTarget.value)}
+        onChange={(event) => setAmountDraft(numericOnly(event.currentTarget.value))}
         onBlur={saveAmount}
         onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }}
       />
@@ -856,7 +873,7 @@ function MonthAmount({ stream, month }: { stream: Stream; month: MonthKey }) {
             type="text"
             value={hoursDraft ?? String(hours)}
             onFocus={(event) => event.currentTarget.select()}
-            onChange={(event) => setHoursDraft(event.currentTarget.value)}
+            onChange={(event) => setHoursDraft(numericOnly(event.currentTarget.value))}
             onBlur={saveHours}
             onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }}
           />

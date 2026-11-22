@@ -161,7 +161,7 @@
         "dark": false
       },
       "reviewId": "payguard-year-chart",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:360",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:349",
       "components": "PayGuardChart › TrackerPayGuard › Root › TrackerProvider",
       "domPath": "div#pg-income-chart",
       "hooks": "pg-card",
@@ -189,7 +189,7 @@
     "anchor": {
       "layout": "payguard",
       "page": "Jobs",
-      "source": "src/components/payguard/TrackerPayGuard.tsx:288",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:277",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "main#pg-main > section.pg-status-hero",
       "hooks": "pg-status-hero",
@@ -341,7 +341,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:377",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:366",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "div#pg-jobs > div > div.pg-tabbar:nth-of-type(1) > div.pg-tabs",
       "hooks": "pg-tabs",
@@ -373,7 +373,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/payguard/TrackerPayGuard.tsx:288",
+      "source": "src/components/payguard/TrackerPayGuard.tsx:277",
       "components": "TrackerPayGuard › Root › TrackerProvider › App",
       "domPath": "main#pg-main > section.pg-status-hero",
       "hooks": "pg-status-hero",
@@ -1366,7 +1366,7 @@
         "dark": false
       },
       "reviewId": "ledger-year-chart",
-      "source": "src/components/ledger/TrackerLedger.tsx:450",
+      "source": "src/components/ledger/TrackerLedger.tsx:438",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger > div.lg-app-card > div.lg-border-b:nth-of-type(2)",
       "hooks": "lg-border-b",
@@ -3679,7 +3679,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:255",
+      "source": "src/components/ledger/TrackerLedger.tsx:243",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-precision.lg-border-b:nth-of-type(2)",
       "hooks": "lg-precision lg-border-b",
@@ -3710,7 +3710,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/TrackerLedger.tsx:269",
+      "source": "src/components/ledger/TrackerLedger.tsx:257",
       "components": "TrackerLedger › Root › TrackerProvider › App",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-tabbar:nth-of-type(1)",
       "hooks": "lg-tabbar",
@@ -3742,7 +3742,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:313",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:316",
       "components": "LedgerJobEditor › TrackerLedger › Root › TrackerProvider",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-job-card-header:nth-of-type(1)",
       "hooks": "lg-job-card-header",
@@ -3773,7 +3773,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:100",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:101",
       "components": "SectionToggle › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > button.lg-section-toggle:nth-of-type(1)",
       "hooks": "lg-section-toggle",
@@ -3783,7 +3783,7 @@
     "createdAt": "2026-09-01T21:00:30.601Z",
     "updatedAt": "2026-09-02T02:08:40.191190Z",
     "comment": "You know how I love one word labels, also for the entire layout we should attempt more global labels where possible",
-    "found": "present",
+    "found": "absent",
     "thread": [
       {
         "from": "claude",
@@ -3814,7 +3814,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:117",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:118",
       "components": "SettingTile › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-settings-grid:nth-of-type(3) > div.lg-bg-surface.lg-summary-tile:nth-of-type(3)",
       "hooks": "lg-bg-surface lg-summary-tile",
@@ -3845,7 +3845,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:506",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:530",
       "components": "SettingTile › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > div.lg-settings-grid:nth-of-type(3) > div.lg-bg-surface.lg-summary-tile:nth-of-type(4)",
       "hooks": "lg-bg-surface lg-summary-tile",
@@ -5478,7 +5478,7 @@
     "reason": "At a 375px viewport the Ledger layout's document is 522px wide, so every page and every modal on top of it sits partly off-screen to the right — the Settings sheet loses its left edge, headings included. Cause: .lg-header-actions in src/styles/ledger.css is flex-shrink: 0, so the row of header buttons (Collapse all, notifications, Undo, Top, Settings) refuses to shrink and sets the page width. It carries flex-wrap in the class list at src/components/ledger/TrackerLedger.tsx:129, which never gets to wrap while the container cannot narrow.\n\nRaised by: measured in the running app while verifying the settings order change. Not caused by it — nothing in that change touches this header.",
     "anchor": {
       "layout": "ledger",
-      "source": "src/styles/ledger.css:229",
+      "source": "src/styles/ledger.css:232",
       "hooks": "lg-header-actions",
       "components": "TrackerLedger",
       "sourceLine": ".lg-header-actions {"
@@ -6000,7 +6000,7 @@
         "sub": "paper",
         "dark": false
       },
-      "source": "src/components/ledger/LedgerJobEditor.tsx:91",
+      "source": "src/components/ledger/LedgerJobEditor.tsx:92",
       "components": "SectionToggle › LedgerJobEditor › TrackerLedger › Root",
       "domPath": "div#root > div.pg-ledger:nth-of-type(1) > div.lg-app-card > div.lg-border-b:nth-of-type(4) > div.lg-job-card:nth-of-type(2) > button.lg-section-toggle:nth-of-type(2) > span:nth-of-type(1)",
       "text": "Month by month",

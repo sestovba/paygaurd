@@ -178,7 +178,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
             + (focused ? 'sm:items-end' : 'sm:items-center')}>
             <div className="flex min-w-0 flex-col gap-1.5">
               <h2 className="pg-section-title pg-fg sm:text-[0.8125rem]">
-                {focused ? longMonthName(focused.month) : 'By month'}
+                {focused ? longMonthName(focused.month) : 'Months'}
               </h2>
 
               {focused ? (
@@ -217,7 +217,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
                 {focused.label}
               </span>
             ) : null) : (
-              <div className="pg-view-tools justify-self-start sm:justify-self-end" role="toolbar" aria-label="By month view">
+              <div className="pg-view-tools justify-self-start sm:justify-self-end" role="toolbar" aria-label="Months view">
                 <div className="pg-seg w-fit" role="group" aria-label="Layout">
                   {MODES.map((m) => (
                     <ButtonBase
@@ -439,8 +439,8 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
 
       {/* ---------------- Work planning ---------------- */}
       <section className="pg-card overflow-hidden">
-        <div className="grid gap-3 px-3.5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5 sm:py-4">
-          <div className="min-w-0">
+        <div className="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:py-4">
+          <div className="min-w-0 px-3.5 sm:px-5">
             <h2 className="text-sm font-bold pg-fg">
               {needsTwpConfirmation ? 'Set your limit before planning hours' : words.hoursAsk}
             </h2>
@@ -457,7 +457,7 @@ export function PayGuardAnalysis({ data, year, scope = 'year', onOpenStatus }: {
               else setSimulatorOpen((v) => !v);
             }}
             aria-expanded={simulatorOpen}
-            className="pg-btn"
+            className="pg-btn-lg"
           >
             <ShieldCheck className="size-3.5 pg-accent" />
             {needsTwpConfirmation && onOpenStatus

@@ -359,7 +359,7 @@ something. Kept here so they are not lost.
 - right tray · 2 items — "Both of these are year-level summaries. Nothing here should be annual — the month is what matters."
 
 325 note(s) · 32 owed to Claude · 23 in Claude's backlog · 247 settled · 21 cut(s)
-Updated 2026-09-05 00:57
+Updated 2026-09-05 03:46
 
 ## The whole product
 
@@ -1168,7 +1168,7 @@ Closed on the evidence, not on my say-so: grep for "outline" or "ring" in horizo
 - [x] **COMMENT — Annual income chart**
   - Needs: "Do what you think is best I trust your judgement"
   - I propose cutting it: Twelve bars against two threshold lines; the monthly analysis below states the same thing in words.
-  - Source: src/components/ledger/TrackerLedger.tsx:450
+  - Source: src/components/ledger/TrackerLedger.tsx:438
   - Line was: `id="ledger-year-chart"`
   - Section id: ledger-year-chart
   - Component: TrackerLedger › Root › TrackerProvider › App
@@ -1251,7 +1251,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Done, and you caught more than spacing. It was two tall tiles side by side — "TWP Months Used" and "Months ≥ SGA" — which is both regimes named at once, in abbreviations, in the two largest figures on the page. This layout was supposed to have had the one-limit rule already; it had not. It is one line now, and it says whichever limit is actually yours: the trial months while they are being spent, with the nine-month meter at the weight of a rule rather than a chart; the count over your limit once they are not; and nothing at all until you have said where you stand. The chart above it had the same fault — "SGA $1,690" and "TWP $1,210" drawn as two rules — and now draws one, labelled "Your limit"."
 - [x] **COMMENT — ESTIMATED New job · add a payday**
   - Needs: "wow, bad alignment also see other comments"
-  - Source: src/components/ledger/TrackerLedger.tsx:255
+  - Source: src/components/ledger/TrackerLedger.tsx:243
   - Line was: `<div className="lg-precision lg-border-b">`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "ESTIMATED New job · add a payday"
@@ -1261,7 +1261,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Fixed, and it was the same root as your other note on this element. The precision line had four stylesheets — index.css, ledger.css, payguard.css, calc20.css — and the base one aligned its parts on the text baseline. The pips are a drawn glyph, not text, so they sat a pixel or two low against the label. One rule now, centred. See el-14oa3i9 for the rest of it."
 - [x] **COMMENT — W-2 New job $0 Continuous**
   - Needs: "I love this very much"
-  - Source: src/components/ledger/TrackerLedger.tsx:269
+  - Source: src/components/ledger/TrackerLedger.tsx:257
   - Line was: `<div className="lg-tabbar flex items-center">`
   - Component: TrackerLedger › Root › TrackerProvider › App
   - Text: "W-2 New job $0 Continuous"
@@ -1271,7 +1271,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "Noted, and left alone. Recorded here so the next pass over this layout knows the job card header is not up for redesign."
 - [x] **COMMENT — YTD Gross**
   - Needs: "I understand the importance of the lock icon but is it really that important to be there always?"
-  - Source: src/components/ledger/LedgerJobEditor.tsx:313
+  - Source: src/components/ledger/LedgerJobEditor.tsx:316
   - Line was: `<div className="lg-job-card-header flex flex-wrap items-center gap-2.5 px-3.5 py-3 sm:px-4" data-open={cardOpen}>`
   - Component: LedgerJobEditor › TrackerLedger › Root › TrackerProvider
   - Text: "W-2 YTD GROSS $0.00"
@@ -1281,7 +1281,7 @@ Raised by: ledger ledger-analysis-view-modes ("now that we have only september, 
   - Claude replied: "No, it is not. It keeps its bordered box only when the card is locked, where it is not a control at all but the reason every field below is disabled; unlocked it is a quiet glyph that comes up on hover and focus. I did not hide it outright: on a touch screen there is no hover to reveal it, and a lock you cannot find is how somebody loses an edit they meant to make."
 - [x] **COMMENT — Settings & date range Every two weeks · Active a**
   - Needs: "You know how I love one word labels, also for the entire layout we should attempt more global labels where possible"
-  - Source: src/components/ledger/LedgerJobEditor.tsx:100
+  - Source: src/components/ledger/LedgerJobEditor.tsx:101
   - Line was: `className="lg-section-toggle"`
   - Component: SectionToggle › LedgerJobEditor › TrackerLedger › Root
   - Text: "Settings & date range Every two weeks · Active all year"
@@ -1301,7 +1301,7 @@ Two more in the same layout that were worse than anything in your note. The card
 One structural change behind it. SettingTile required a `help` string, so a tile whose label already said everything had to invent a sentence to satisfy the type. It is optional now and the row is simply not drawn when there is nothing to add — which is why "How often" has no caption under it."
 - [x] **COMMENT — Planning Rate**
   - Needs: "this is the most confusing feature, we ask user for input, it stays here, but we don't explain why what its for and how to use it. high level thinking needed on what is this really"
-  - Source: src/components/ledger/LedgerJobEditor.tsx:117
+  - Source: src/components/ledger/LedgerJobEditor.tsx:118
   - Line was: `<div className="flex flex-1 flex-col gap-2 p-2.5 sm:p-3 lg-bg-surface lg-summary-tile">`
   - Component: SettingTile › LedgerJobEditor › TrackerLedger › Root
   - Text: "PLANNING RATE $ /hr h/wk Optional — used only for paycheck estimates."
@@ -1311,7 +1311,7 @@ One structural change behind it. SettingTile required a `help` string, so a tile
   - Claude replied: "Renamed to "Estimated Wage & Hours" with clear explanation of how it forecasts 3-paycheck months."
 - [x] **COMMENT — Paychecks in 2026**
   - Needs: "isnt that already in this section? this is an explanation block about a few blocks before?"
-  - Source: src/components/ledger/LedgerJobEditor.tsx:506
+  - Source: src/components/ledger/LedgerJobEditor.tsx:530
   - Line was: `label={'Paychecks in ' + year}`
   - Component: SettingTile › LedgerJobEditor › TrackerLedger › Root
   - Text: "PAYCHECKS IN 2026 — Set an anchor payday to count checks."
@@ -1335,7 +1335,7 @@ In focus mode the heading beside it is already one month, so it was a second lab
   - Raised by: At a 375px viewport the Ledger layout's document is 522px wide, so every page and every modal on top of it sits partly off-screen to the right — the Settings sheet loses its left edge, headings included. Cause: .lg-header-actions in src/styles/ledger.css is flex-shrink: 0, so the row of header buttons (Collapse all, notifications, Undo, Top, Settings) refuses to shrink and sets the page width. It carries flex-wrap in the class list at src/components/ledger/TrackerLedger.tsx:129, which never gets to wrap while the container cannot narrow.
 
 Raised by: measured in the running app while verifying the settings order change. Not caused by it — nothing in that change touches this header.
-  - Source: src/styles/ledger.css:229
+  - Source: src/styles/ledger.css:232
   - Line was: `.lg-header-actions {`
   - Component: TrackerLedger
   - Origin: AI suggestion, answered by the user
@@ -1376,7 +1376,7 @@ Files: src/styles/chrome.css. Verified on the ledger in paper light and carbon d
   - Noted: 2026-09-02 04:31
 - [x] **COMMENT — 1 of 12 months · Month by month**
   - Needs: "makes no sense in focus mode we need variables for global labels in such a case"
-  - Source: src/components/ledger/LedgerJobEditor.tsx:91
+  - Source: src/components/ledger/LedgerJobEditor.tsx:92
   - Line was: `/* "Month by month" is what the analysis panel already calls this`
   - Component: SectionToggle › LedgerJobEditor › TrackerLedger › Root
   - Text: "Month by month"
@@ -1761,7 +1761,7 @@ npm run typecheck, npm run theme:check and npm run words were all clean at the e
 
 - [x] **COMMENT — August countable earnings**
   - Needs: "This whole hero says three things where one would do — show the month, the limit, and the room left."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:288
+  - Source: src/components/payguard/TrackerPayGuard.tsx:277
   - Line was: `<section className="pg-status-hero" aria-labelledby="pg-current-status-title">`
   - Component: TrackerPayGuard › Root › TrackerProvider › App
   - Page: Jobs
@@ -1794,7 +1794,7 @@ npm run typecheck, npm run theme:check and npm run words were all clean at the e
   - Claude replied: "Moved Import/Export actions to Settings Panel and removed from header."
 - [x] **COMMENT — Annual income chart**
   - Needs: "Keep it, but it is currently a picture of income. It earns its height when the SGA and TWP lines are what you read first, the bars over them are marked, and the 3- and 5-paycheck months are called out on the axis. Right now the threshold lines are decoration on a chart rather than the point of it."
-  - Source: src/components/payguard/TrackerPayGuard.tsx:360
+  - Source: src/components/payguard/TrackerPayGuard.tsx:349
   - Line was: `id="payguard-year-chart"`
   - Section id: payguard-year-chart
   - Component: PayGuardChart › TrackerPayGuard › Root › TrackerProvider

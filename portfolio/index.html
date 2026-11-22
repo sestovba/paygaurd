@@ -410,6 +410,112 @@ button{font:inherit;color:inherit}
 .aws-flag.ok{background:#f0f8f1;border-color:#c9e3cc;color:#1a5c21}
 .aws-flag b{font-weight:700}
 
+
+/* ============================================================
+   SPECIMEN 1b · EDUCATE ROUTING MAP
+   The entry-point decision, drawn before any UI exists.
+   Static on purpose — the whole point is that it holds still.
+   ============================================================ */
+.route{
+  --r-line:#e8e5df;
+  --r-ink:#1b1a15;
+  --r-ink-2:#4d4a42;
+  --r-ink-3:#8b8780;
+  --r-wire:#c9c5bd;
+  background:#fdfdfc;font-family:var(--sans);
+}
+.route-accent{height:3px;background:#ff9900}
+.route-in{padding:30px 32px 25px}
+@media(max-width:620px){.route-in{padding:18px 16px 16px}}
+
+.route-rail{
+  display:flex;justify-content:space-between;align-items:baseline;gap:18px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--r-ink-3);
+}
+.route-rail span:last-child{text-align:right}
+.route-rail-foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--r-line)}
+@media(max-width:620px){
+  .route-rail{flex-direction:column;gap:6px}
+  .route-rail span:last-child{text-align:left}
+}
+
+.route-lede{
+  margin:16px 0 26px;font-size:14.5px;line-height:1.55;color:var(--r-ink-2);max-width:38ch;
+}
+
+.route-map{
+  display:grid;grid-template-columns:minmax(0,1fr) 116px minmax(0,1.62fr);align-items:center;
+}
+@media(max-width:760px){.route-map{grid-template-columns:1fr;gap:16px}}
+
+/* --- the single entry point --- */
+.route-srcwrap{position:relative;align-self:stretch}
+.route-src{
+  position:absolute;left:0;right:0;top:42.56%;transform:translateY(-50%);
+  border:1px solid var(--r-line);border-radius:10px;background:#f5f4f1;
+  padding:34px 24px;text-align:center;
+}
+.route-name{
+  margin:16px 0 7px;font-size:27px;font-weight:500;letter-spacing:-.018em;
+  line-height:1.1;color:var(--r-ink);
+}
+.route-kick{
+  margin:0 0 18px;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--r-ink-3);
+}
+.route-copy{margin:0;font-size:14px;line-height:1.5;color:var(--r-ink-2)}
+
+/* --- icons --- */
+.route-ico{
+  width:52px;height:52px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:var(--tint,#edebe6);color:var(--tint-ink,#5f5b53);
+}
+.route-ico svg{width:23px;height:23px;display:block}
+.route-ico-lg{width:60px;height:60px;margin:0 auto;background:#e9e7e2}
+.route-ico-lg svg{width:27px;height:27px}
+
+/* --- the wires --- */
+.route-wires{position:relative;align-self:stretch}
+.route-wires svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.route-wires path{
+  fill:none;stroke:var(--r-wire);stroke-width:1.15;stroke-dasharray:2 3.4;
+  stroke-linecap:round;vector-effect:non-scaling-stroke;
+}
+.route-wires::before,.route-dest::before{
+  content:"";position:absolute;width:7px;height:7px;border-radius:50%;
+  background:#fff;border:1px solid var(--r-wire);
+}
+.route-wires::before{left:-4px;top:42.6%;transform:translateY(-50%)}
+.route-dest::before{left:-4px;top:46px;transform:translateY(-50%)}
+@media(max-width:760px){.route-wires{display:none}.route-dest::before{display:none}}
+
+/* --- the three destinations --- */
+.route-dests{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+.route-dest{
+  position:relative;border:1px solid var(--r-line);border-radius:10px;background:#fff;
+  padding:20px 22px;display:grid;grid-template-columns:auto 1fr auto;
+  column-gap:17px;row-gap:14px;align-items:start;
+}
+.route-d-txt{min-width:0;padding-top:4px}
+.route-d-txt h4{
+  margin:0 0 3px;font-size:17px;font-weight:500;letter-spacing:-.012em;
+  line-height:1.2;color:var(--r-ink);
+}
+.route-d-txt p{margin:0;font-size:13px;line-height:1.4;color:var(--r-ink-3)}
+.route-go{align-self:center;font-size:15px;line-height:1;color:var(--r-ink-3)}
+.route-steps{
+  grid-column:2/-1;margin:0;padding-left:16px;list-style:disc;
+  font-size:12.5px;line-height:1.75;color:var(--r-ink-2);
+}
+.route-steps li::marker{color:#c4c0b8}
+@media(max-width:760px){
+  .route-src{position:static;transform:none}
+}
+@media(max-width:620px){
+  .route-dest{padding:16px;column-gap:13px}
+  .route-name{font-size:24px}
+}
 /* ============================================================
    SPECIMEN 2 · AT&T  (order lookup → status)
    ============================================================ */
@@ -1007,80 +1113,133 @@ input[type=range].n-range::-moz-range-thumb{
     <div class="stage">
       <div class="stage-top">
         <span class="live-dot"></span>
-        <span class="stage-label">Live specimen · <b>Learner console</b></span>
-        <span class="stage-hint">Switch programs, then flip Before / After</span>
-      </div>
-
-      <div class="stage-controls">
-        <div class="seg" role="group" aria-label="Before or after the unification">
-          <button type="button" data-aws-mode="before" aria-pressed="true">Before</button>
-          <button type="button" data-aws-mode="after" aria-pressed="false">After</button>
-        </div>
-        <p class="stage-note" id="awsNote"><b>Before:</b> three programs, three design languages. Click the tabs — the whole shell changes under you.</p>
+        <span class="stage-label">Specimen · <b>Where do I go?</b></span>
+        <span class="stage-hint">One entry point · three destinations</span>
       </div>
 
       <div class="frame">
         <div class="frame-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-          <span class="url">awz.amason.com/training — rebuild</span>
+          <span class="url">awz.amason.com/educate — rebuild</span>
         </div>
-        <div class="frame-body brand-aws is-split" id="awsApp" data-prog="educate">
-          <div class="aws-nav">
-            <span class="aws-logo" aria-label="awz — parody mark">
-              <svg viewBox="0 0 54 30" width="42" height="23" role="img" aria-hidden="true">
-                <text x="0" y="16" font-family="Helvetica Neue,Helvetica,Arial" font-size="16.5"
-                      font-weight="700" letter-spacing="-.6" fill="currentColor">awz</text>
-                <path d="M1.5 23.5 Q 19 30.5 38 22.5" stroke="#ff9900" stroke-width="2.5"
-                      fill="none" stroke-linecap="round"/>
-                <path d="M34.5 19.6 L41 22.2 L34.8 25.4 Z" fill="#ff9900"/>
-              </svg>
-            </span>
-            <span>Training and Certification</span>
-            <span class="sp"></span>
-            <span class="aws-av">SS</span>
-          </div>
-          <div class="aws-progs" role="tablist" aria-label="AWS education programs">
-            <button class="aws-prog" role="tab" data-prog="educate" aria-selected="true">AWS Educate</button>
-            <button class="aws-prog" role="tab" data-prog="restart" aria-selected="false">AWS re/Start</button>
-            <button class="aws-prog" role="tab" data-prog="academy" aria-selected="false">AWS Academy</button>
-          </div>
-          <div class="aws-main">
-            <div class="aws-flag" id="awsFlag"></div>
+        <div class="frame-body route">
+          <div class="route-accent"></div>
+          <div class="route-in">
 
-            <div class="aws-unified">
-              <div class="aws-resume">
-                <span class="aws-resume-ic">▶</span>
-                <span class="aws-resume-txt">
-                  <em>Continue where you left off</em>
-                  <b id="awsResumeT">Networking and Security</b>
-                  <span id="awsResumeM">AWS re/Start · Week 4 of 12</span>
-                </span>
-                <span class="aws-resume-pct" id="awsResumeP">41%</span>
-                <button type="button" class="aws-btn" id="awsResumeBtn">Resume</button>
-              </div>
-
-              <div class="aws-path">
-                <div class="aws-path-hd">
-                  <b>Your cloud path</b>
-                  <span id="awsPathPct">3 programs · 47% complete</span>
-                </div>
-                <div class="aws-path-track" id="awsPath"></div>
-              </div>
+            <div class="route-rail">
+              <span>Finding the right place</span>
+              <span>A simplified view</span>
             </div>
 
-            <h3 class="aws-h" id="awsH"></h3>
-            <p class="aws-sub" id="awsSub"></p>
-            <div class="aws-facets" id="awsFacets" role="group" aria-label="Filter by level"></div>
-            <div class="aws-grid" id="awsGrid"></div>
+            <p class="route-lede">Different learners. Different programs.<br>A clearer path forward.</p>
+
+            <div class="route-map">
+
+              <div class="route-srcwrap">
+                <div class="route-src">
+                <span class="route-ico route-ico-lg">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8.2" r="3.5"/>
+                    <path d="M4.9 20.2a7.1 7.1 0 0 1 14.2 0"/>
+                  </svg>
+                </span>
+                <h3 class="route-name">Educate</h3>
+                <p class="route-kick">Learner portal</p>
+                  <p class="route-copy">A single entry point with guidance to the right destination.</p>
+                </div>
+              </div>
+
+              <div class="route-wires" aria-hidden="true">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <path d="M0 42.6 C 36 42.6, 55 8.3, 100 8.3"/>
+                  <path d="M0 42.6 L 100 42.6"/>
+                  <path d="M0 42.6 C 36 42.6, 55 77 , 100 77"/>
+                </svg>
+              </div>
+
+              <ul class="route-dests">
+
+                <li class="route-dest" style="--tint:#fae2cd;--tint-ink:#a05f30">
+                  <span class="route-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="9.4" cy="8.6" r="3"/>
+                      <path d="M3.6 19.6a5.9 5.9 0 0 1 11.7 0"/>
+                      <path d="M16.3 6.3a3 3 0 0 1 0 5.8"/>
+                      <path d="M17.5 14.4a5.5 5.5 0 0 1 3.4 5.2"/>
+                    </svg>
+                  </span>
+                  <div class="route-d-txt">
+                    <h4>Cohort</h4>
+                    <p>For re/Start learners</p>
+                  </div>
+                  <span class="route-go" aria-hidden="true">&rarr;</span>
+                  <ul class="route-steps">
+                    <li>View cohort information</li>
+                    <li>Connect with your group</li>
+                    <li>Get next steps</li>
+                  </ul>
+                </li>
+
+                <li class="route-dest" style="--tint:#d9ecd8;--tint-ink:#3f7042">
+                  <span class="route-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 6.8C10.3 5.4 8.1 4.8 4.5 5v12.6c3.6-.2 5.8.4 7.5 1.8 1.7-1.4 3.9-2 7.5-1.8V5c-3.6-.2-5.8.4-7.5 1.8Z"/>
+                      <path d="M12 6.8v12.6"/>
+                    </svg>
+                  </span>
+                  <div class="route-d-txt">
+                    <h4>Canvas course</h4>
+                    <p>Coursework and assignments</p>
+                  </div>
+                  <span class="route-go" aria-hidden="true">&rarr;</span>
+                  <ul class="route-steps">
+                    <li>Go to your Canvas course</li>
+                    <li>View assignments</li>
+                    <li>Track your progress</li>
+                  </ul>
+                </li>
+
+                <li class="route-dest" style="--tint:#d7e4f4;--tint-ink:#3c618c">
+                  <span class="route-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M14 3.4H7.4a1.9 1.9 0 0 0-1.9 1.9v13.4a1.9 1.9 0 0 0 1.9 1.9h9.2a1.9 1.9 0 0 0 1.9-1.9V7.6Z"/>
+                      <path d="M14 3.4v4.2h4.5"/>
+                      <path d="M8.8 12.6h6.4M8.8 16.2h6.4"/>
+                    </svg>
+                  </span>
+                  <div class="route-d-txt">
+                    <h4>Learning module</h4>
+                    <p>Self-paced learning</p>
+                  </div>
+                  <span class="route-go" aria-hidden="true">&rarr;</span>
+                  <ul class="route-steps">
+                    <li>Browse learning modules</li>
+                    <li>Pick up where you left off</li>
+                    <li>Explore recommended content</li>
+                  </ul>
+                </li>
+
+              </ul>
+            </div>
+
+            <div class="route-rail route-rail-foot">
+              <span>Same learners. Different paths.</span>
+              <span>Clearer experiences lead to brighter futures.</span>
+            </div>
+
           </div>
         </div>
       </div>
 
       <div class="stage-foot">
         <p class="stage-src">
-          <b>Rebuilt from:</b> the Cloudscape Design System (AWS's public open-source design system) and public
-          AWS Skill Builder patterns. Course titles are representative, not real catalogue data.
-          The <b>awz</b> mark is a deliberate parody, not the AWS logo. Not affiliated with or endorsed by Amazon Web Services.
+          <b>Rebuilt from:</b> the routing decision itself — one portal that reads the learner's enrolment and
+          sends them on, instead of three programs each guessing. Destination names are representative.
+          The <b>awz</b> domain is a deliberate parody. Not affiliated with or endorsed by Amazon Web Services.
         </p>
       </div>
     </div>

@@ -67,11 +67,23 @@
   /* Every figure on the screen. A readout face, not a headline face. */
   --figures: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 
+  /* Plan's own stack, named once so the remap below and the root rule
+     cannot drift apart. */
+  --pl-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Shared chrome — Settings, Sheet, StreamSheet — sets font-family from
+     --font-sans in index.css. Without these three lines it kept the global
+     stack while everything around it wore plan's, which is why the settings
+     sheet read in the overview typeface. */
+  --font-sans: var(--pl-font-sans);
+  --font-display: var(--pl-font-sans);
+  --font-mono: var(--figures);
+
   min-height: 100%;
   padding-bottom: 48px;
   background: var(--paper);
   color: var(--ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--pl-font-sans);
   font-size: var(--t-text-base);
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;

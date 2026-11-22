@@ -66,6 +66,13 @@
   --pk-link: #14497e;
   --pk-warn: #8a5200;
 
+  /* Named once: the root rule below and the --font-sans remap both read it. */
+  --pk-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Shared chrome sets font-family from --font-sans in index.css, so without
+     this it kept the global stack inside pocket. */
+  --font-sans: var(--pk-font-sans);
+  --font-display: var(--pk-font-sans);
+
   display: flex;
   flex-direction: column;
   /* 100vh, not 100%. A percentage height only resolves when every ancestor
@@ -78,7 +85,7 @@
   background: var(--pk-ground);
   color: var(--pk-ink);
   /* System stack: no download, no FOIT, no layout shift. */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--pk-font-sans);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -98,6 +105,54 @@
   --pk-link: #9dc4f2;
   --pk-warn: #f2c078;
 }
+
+/*
+ * Shared chrome — Settings, Sheet, InfoNote, the sign-out row — is written
+ * against the app-wide token names in index.css, not against --pk-*. Inside
+ * .pk those names still resolved to the global palette, so the settings sheet
+ * arrived in a different set of neutrals than the screen behind it. Pointing
+ * them at pocket's scale re-skins that shared chrome without forking it, the
+ * same way .pg-ledger and .pg-payguard already do.
+ *
+ * The --pk-* values above flip under .dark on their own, so this block needs
+ * no dark twin.
+ */
+.pk {
+  --background: var(--pk-ground);
+  --foreground: var(--pk-ink);
+  --surface: var(--pk-surface);
+  --surface-2: var(--pk-sunken);
+  --card: var(--pk-surface);
+  --card-foreground: var(--pk-ink);
+  --popover: var(--pk-surface);
+  --popover-foreground: var(--pk-ink);
+
+  --primary: var(--pk-green);
+  --primary-foreground: var(--pk-surface);
+  --secondary: var(--pk-sunken);
+  --secondary-foreground: var(--pk-ink);
+  --muted: var(--pk-sunken);
+  --muted-foreground: var(--pk-ink-2);
+  --accent: var(--pk-green-tint);
+  --accent-foreground: var(--pk-ink);
+
+  --warn: var(--pk-warn);
+  --warn-foreground: var(--pk-warn);
+  --warn-soft: color-mix(in oklch, var(--pk-warn) 12%, var(--pk-surface));
+  --good: var(--pk-green);
+  --good-soft: var(--pk-green-tint);
+  --info: var(--pk-link);
+  --info-foreground: var(--pk-surface);
+  --info-soft: color-mix(in oklch, var(--pk-link) 10%, var(--pk-surface));
+
+  /* Pocket has no "over" colour of its own — --destructive stays global
+     rather than being mapped to something that only looks like a warning. */
+
+  --border: var(--pk-hairline);
+  --input: var(--pk-edge);
+  --ring: var(--pk-green);
+}
+
 
 /* One visible focus treatment for every control on the screen. */
 .pk :focus-visible {

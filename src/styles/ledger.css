@@ -114,6 +114,9 @@ body:has(.pg-ledger) {
   --lg-pad-section: 0.65rem;       /* cell × φ */
   --lg-card-gutter: 0.75rem;       /* between section and page */
   --lg-page-gutter: 1.214rem;      /* card × φ — outer frame breathes more */
+  /* --lg-edge: table head / tab strip / analysis-band inner flush edge —
+   * 0 = flush left with the page. Tweak here, not per-class. */
+  --lg-edge: 0;
 
   background: var(--lg-bg);
   color: var(--lg-fg);
@@ -415,7 +418,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem 1rem;
-  padding: var(--lg-pad-cell) calc(var(--lg-card-gutter) + 1px);
+  padding: var(--lg-pad-cell) var(--lg-edge);
   border-bottom: 1px solid var(--lg-border-soft);
 }
 
@@ -427,8 +430,8 @@ body:has([data-palette='carbon'] .pg-ledger) {
   gap: 0.4rem;
   min-width: 0;
   flex: 1 1 auto;
-  /* Align legend with band-head title (after chevron lead). */
-  padding-left: calc(2rem + 0.5rem);
+  /* Align legend with band-head title (after chevron lead, flush left). */
+  padding-left: 0;
 }
 
 .lg-analysis-tools-wrap {
@@ -534,6 +537,8 @@ body:has([data-palette='carbon'] .pg-ledger) {
   padding: var(--lg-pad-cell);
   font: 500 var(--lg-fs-body)/1.2 var(--lg-font-mono);
   min-height: var(--t-touch-compact);
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 /* Affixed $ / unit fields: the shell IS the input. Prefix and suffix sit in
@@ -665,7 +670,9 @@ body:has([data-palette='carbon'] .pg-ledger) {
   place-items: center;
 }
 
-/* One header row for job card / Year shape / By month — columns don't wrap apart. */
+/* One header row for job card / Year shape / By month — columns don't wrap apart.
+   Cheveron column (2rem) is the ruler: it must start at the same L edge as the
+   tab strip so the whole header row reads on one vertical. */
 .lg-band-head,
 .lg-job-card-header {
   display: grid;
@@ -676,7 +683,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   box-sizing: border-box;
   min-height: var(--lg-tab-h);
   height: var(--lg-tab-h);
-  padding: 0 var(--lg-card-gutter);
+  padding: 0 var(--lg-edge);
   background: var(--lg-surface);
   border-bottom: 1px solid var(--lg-border);
   overflow: hidden;
@@ -729,7 +736,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.65rem;
-  padding: var(--lg-pad-cell) var(--lg-card-gutter);
+  padding: var(--lg-pad-cell) var(--lg-pad-cell);
   border-bottom: 1px solid var(--lg-border-soft);
 }
 .lg-job-status-lock {
@@ -741,7 +748,59 @@ body:has([data-palette='carbon'] .pg-ledger) {
   flex-shrink: 0;
 }
 
-/* Quiet cell action (Clear) — same register as .lg-label, not a second button. */
+/* Recommended-hours pill inside the job-status row — ten99 only, beside the lock. */
+.lg-rec-hours {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.4rem 0.15rem 0.3rem;
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+  background: var(--lg-surface);
+  font: 500 var(--lg-fs-caption)/1.2 var(--lg-font-mono);
+  color: var(--lg-fg);
+  white-space: nowrap;
+}
+.lg-rec-hours-icon {
+  display: grid;
+  width: 0.95rem;
+  height: 0.95rem;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--lg-muted);
+}
+.lg-rec-hours-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--lg-safe);
+}
+.lg-rec-hours-label {
+  color: var(--lg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.lg-rec-hours--over {
+  border-color: var(--lg-over);
+  background: var(--lg-over-soft);
+}
+.lg-rec-hours--over .lg-rec-hours-count {
+  color: var(--lg-over);
+}
+.lg-rec-hours--careful {
+  border-color: var(--lg-warn);
+  background: var(--lg-warn-soft);
+}
+.lg-rec-hours--careful .lg-rec-hours-count {
+  color: var(--lg-warn);
+}
+@media (max-width: 480px) {
+  .lg-rec-hours-label {
+    display: none;
+  }
+  .lg-rec-hours {
+    padding: 0.15rem 0.35rem;
+  }
+}
 /* One quiet text control — Clear in a cell, and the pay-basis "add hours"
    rail. Size/padding differ; voice does not. */
 .lg-quiet-action,
@@ -765,7 +824,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-add-hours {
   flex: 0 0 auto;
   align-self: stretch;
-  padding: 0 var(--lg-card-gutter);
+  padding: 0 var(--lg-pad-cell);
   border-left: 1px solid var(--lg-border-soft);
   font-size: var(--lg-fs-caption);
   letter-spacing: 0.06em;
@@ -820,7 +879,11 @@ body:has([data-palette='carbon'] .pg-ledger) {
 }
 
 .lg-chart-bar-w2 { background: var(--lg-w2); }
-.lg-chart-bar-se { background: color-mix(in oklch, var(--lg-se) 88%, var(--lg-surface)); }
+.lg-chart-bar-se {
+  background: color-mix(in oklch, var(--lg-se) 88%, var(--lg-surface));
+  align-self: flex-end;
+  width: 55%;
+}
 
 .lg-swatch-w2 { background: var(--lg-w2-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-w2) 45%, transparent); }
 .lg-swatch-se { background: var(--lg-se-soft); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--lg-se) 45%, transparent); }
@@ -1281,6 +1344,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   align-items: center;
   overflow-x: auto;
   margin-bottom: -1px;
+  padding: 0 var(--lg-edge) 1px;
   padding-bottom: 1px;
 }
 
@@ -1386,8 +1450,8 @@ body:has([data-palette='carbon'] .pg-ledger) {
 .lg-tab {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0 var(--lg-card-gutter);
+  gap: 0.5rem;
+  padding: 0 var(--lg-pad-cell);
   min-height: var(--lg-tab-h);
   height: var(--lg-tab-h);
   border-right: 1px solid var(--lg-border-soft);
@@ -1549,7 +1613,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.15rem;
+  margin-left: -0.15rem;
   padding: 0.15rem; /* icon hit */
   border: 0;
   background: transparent;
@@ -1571,7 +1635,7 @@ body:has([data-palette='carbon'] .pg-ledger) {
   gap: 0.5rem;
   min-height: var(--lg-tab-h);
   height: var(--lg-tab-h);
-  padding: 0 var(--lg-card-gutter);
+  padding: 0 var(--lg-edge);
   text-align: left;
   font: 700 var(--lg-fs-ui)/1.2 var(--lg-font-sans);
   color: var(--lg-fg);
@@ -1579,6 +1643,13 @@ body:has([data-palette='carbon'] .pg-ledger) {
   border-bottom: 1px solid var(--lg-border);
   cursor: pointer;
   transition: var(--lg-ease);
+}
+
+/* Secondary section toggles (Pay cycle, History) — quieter, smaller. */
+.lg-section-toggle--compact {
+  font: 500 var(--lg-fs-caption)/1.2 var(--lg-font-mono);
+  letter-spacing: 0.04em;
+  color: var(--lg-muted);
 }
 
 /* Sub-accordions use the compact row height inside a job card. */
@@ -2086,6 +2157,15 @@ body:has([data-palette='carbon'] .pg-ledger) {
   background: var(--lg-surface-2);
 }
 
+/* Bleed variant: parent band padding removed so the button reaches the card edges. */
+.lg-analysis-band--bleed {
+  padding: 0;
+}
+.lg-analysis-band--bleed .lg-btn-bleed {
+  min-height: var(--lg-tab-h);
+  align-self: stretch;
+}
+
 /* Ledger readable measure */
 .lg-analysis-pad {
   max-width: 72ch;
@@ -2173,4 +2253,99 @@ body:has([data-palette='carbon'] .pg-ledger) {
  */
 .pg-ledger [data-current-month] {
   box-shadow: inset 3px 0 0 var(--lg-fg);
+}
+
+
+/* ===== Flush-left density pass (Sergey) =====
+ * Everything content-bearing aligns to the page edge (0 L/R inset) except
+ * card/interior wells which keep their own --lg-card-gutter. The green
+ * rule on the left stays as the page edge.
+ */
+@media (min-width: 640px) {
+  .pg-ledger {
+    --lg-page-gutter: var(--lg-edge);
+  }
+}
+.pg-ledger .lg-status-row,
+.pg-ledger .lg-standing,
+.pg-ledger .lg-precision,
+.pg-ledger .lg-attention {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+/* Header identity + actions inherit page-gutter; the header bar keeps its
+   section pad top/bottom so it stays a hairline band. */
+.pg-ledger .lg-header-identity {
+  padding-left: 0;
+  padding-right: 0;
+}
+/* Tab strip flush left with the page; each tab keeps its own cell inset. */
+.pg-ledger .lg-tabbar-scroller {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+.pg-ledger .lg-tab {
+  padding-left: var(--lg-pad-cell);
+  padding-right: var(--lg-pad-cell);
+}
+.pg-ledger .lg-section-toggle {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+/* Job card interior wells keep --lg-card-gutter; only the card shell
+   and the archived "Not ongoing" band collapse to the edge. */
+.pg-ledger .lg-archived {
+  padding-left: var(--lg-card-gutter);
+  padding-right: var(--lg-card-gutter);
+}
+.pg-ledger .lg-archived-chips {
+  padding-left: 0;
+  padding-right: 0;
+}
+/* Chart band: full bleed plot + axis; legend strip keeps its own inset
+   so the W2/SE swatches don't run off the edge. */
+.pg-ledger .lg-chart-full {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pg-ledger .lg-chart-band .lg-chart-plot,
+.pg-ledger .lg-chart-band .lg-chart-axis {
+  padding-left: 0;
+  padding-right: 0;
+}
+/* By month: cards/table share the toolbar's flush left edge. Interior
+   card padding still comes from --lg-card-gutter (via .lg-analysis-pad),
+   but the grid itself sits at the edge. */
+.pg-ledger .lg-analysis-pad {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+.pg-ledger .lg-analysis-grid {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+.pg-ledger .lg-analysis-table th:first-child,
+.pg-ledger .lg-analysis-table td:first-child {
+  padding-left: var(--lg-edge);
+}
+/* Footer bands under By month — full bleed. */
+.pg-ledger .lg-analysis-band {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+.pg-ledger .lg-analysis-band--copy,
+.pg-ledger .lg-analysis-band--panel {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+/* Empty shell + chart legend footnote strip. */
+.pg-ledger .lg-empty-shell,
+.pg-ledger .lg-page-inset {
+  padding-left: var(--lg-edge);
+  padding-right: var(--lg-edge);
+}
+/* SSDI Track title cluster: "Trial months" tag + gear sit flush too. */
+.pg-ledger .lg-header-title {
+  padding-left: 0;
+  padding-right: 0;
 }

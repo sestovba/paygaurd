@@ -2308,6 +2308,12 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--pg-fg-muted);
+  cursor: pointer;
+}
+
+.pg-payguard .field-input:hover {
+  border-color: var(--pg-border-strong);
+  background: var(--pg-surface-2);
 }
 
 .pg-payguard .type-muted,

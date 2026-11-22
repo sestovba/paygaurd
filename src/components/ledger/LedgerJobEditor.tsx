@@ -1,11 +1,11 @@
 import { useEffect, useState, type ReactNode, useRef } from 'react';
-import { ChevronDown, Lock, LockOpen, TriangleAlert, Zap } from 'lucide-react';
+import { ChevronDown, Clock, Lock, LockOpen, TriangleAlert, Zap } from 'lucide-react';
 import { useMonthScope, useTracker } from '../../state/TrackerProvider';
 import {
   activeMonthsInYear, countableFor, evenSplit, grossFor, hoursFor, mileageDeduction
 } from '../../domain/earnings';
 import {
-  longMonthName, monthIndex, monthKey, parseMonth, shortMonthName, todayMonth
+  longMonthName, monthIndex, monthKey, parseMonth, shortMonthName, todayMonth, yearOf
 } from '../../domain/months';
 import { knownYears, TWP_SELF_EMPLOYMENT_HOURS } from '../../domain/rules';
 import { frequencyLabel, paycheckContextForMonth, payPlan } from '../../domain/paySchedule';
@@ -14,6 +14,7 @@ import { HelpSpread } from '../HelpSpread';
 import {
   PayBasisProvider, PayBasisSwitch, PAY_BASIS_WORDS, payPatchFor, payValueFor, usePayBasis
 } from '../PayAmount';
+import { capacityFor } from '../../domain/capacity';
 import { miles0, money2 } from './ledgerFormat';
 import { ButtonBase } from '../../design-system';
 import { periodLabel } from '../../domain/copy';
@@ -88,8 +89,8 @@ function LedgerNumberInput({
   );
 }
 
-function SectionToggle({ label, meta, open, onToggle }: {
-  label: string; meta?: string; open: boolean; onToggle: () => void;
+function SectionToggle({ label, meta, open, onToggle, className = '' }: {
+  label: string; meta?: string; open: boolean; onToggle: () => void; className?: string;
 }) {
   return (
     <ButtonBase
@@ -97,7 +98,7 @@ function SectionToggle({ label, meta, open, onToggle }: {
       onClick={onToggle}
       aria-expanded={open}
       data-open={open}
-      className="lg-section-toggle"
+      className={'lg-section-toggle' + (className ? ' ' + className : '')}
     >
       <span className="lg-toggle-lead" aria-hidden="true">
         <ChevronDown className="lg-chevron" data-collapsed={!open} />
@@ -276,7 +277,7 @@ export function LedgerJobEditor({
   /** Not ongoing chips — sit inside the card after the Income table. */
   afterIncome?: ReactNode;
 }) {
-  const { updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
+  const { data, updateStream, updateMonthEntry, updateMonthEntries } = useTracker();
   const settingsOpen = sectionOpen('settings');
   const historyOpen = sectionOpen('history');
   const [helpOpen, setHelpOpen] = useState(false);
@@ -296,12 +297,14 @@ export function LedgerJobEditor({
   const ytdCountable = eligibleMonths.reduce((sum, month) => sum + countableFor(stream, month), 0);
 
   const plan = stream.payFrequency && stream.anchorDate ? payPlan(year, stream.payFrequency, stream.anchorDate) : null;
+  const gradedMonth: MonthKey = yearOf(now) === year ? now : `${year}-12`;
+  const cap = capacityFor(data, gradedMonth);
   const scheduleSummary = stream.payFrequency
     ? frequencyLabel(stream.payFrequency) + ' · ' + (stream.lifecycle === 'active' && !stream.activeTo ? 'Active all year' : 'Date range set')
     : 'No schedule';
   const historySection = afterIncome ? (
     <>
-      <SectionToggle label="History" open={historyOpen} onToggle={() => onToggleSection('history')} />
+      <SectionToggle label="History" open={historyOpen} onToggle={() => onToggleSection('history')} className="lg-section-toggle--compact" />
       {historyOpen ? afterIncome : null}
     </>
   ) : null;
@@ -413,6 +416,14 @@ export function LedgerJobEditor({
             <TriangleAlert className="size-4" /> History stays — Return to ongoing under Not ongoing
           </span>
         ) : null}
+        {/* Recommended hours for this stream, scoped to the card's year/month scope. */}
+        {stream.type === 'ten99' && cap?.hours != null ? (
+          <span className={`flex items-center gap-1.5 lg-rec-hours${cap.stage === 'over' ? ' lg-rec-hours--over' : cap.stage === 'careful' ? ' lg-rec-hours--careful' : ''}`}>
+            <Clock className="lg-rec-hours-icon" />
+            <span className="lg-rec-hours-count">{cap.hours}</span>
+            <span className="lg-rec-hours-label">hours left</span>
+          </span>
+        ) : null}
         <ButtonBase
           type="button"
           onClick={() => updateStream(stream.id, { locked: !stream.locked })}
@@ -440,7 +451,7 @@ export function LedgerJobEditor({
             })}
           />
 
-          <SectionToggle label="Pay cycle" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} />
+          <SectionToggle label="Pay cycle" meta={scheduleSummary} open={settingsOpen} onToggle={() => onToggleSection('settings')} className="lg-section-toggle--compact" />
           {settingsOpen ? (
             <div className="flex flex-wrap lg-settings-grid">
               <SettingTile label="Frequency">
@@ -458,10 +469,23 @@ export function LedgerJobEditor({
                 help={stream.anchorDate ? 'Other paydays follow from this.' : 'Any real payday — finds months with an extra check.'}
               >
                 <input
-                  type="date"
-                  value={stream.anchorDate ?? ''}
+                  type="number"
+                  min="1"
+                  max="31"
+                  inputMode="numeric"
+                  value={stream.anchorDate ? parseInt(stream.anchorDate.split('-')[2], 10) : ''}
                   disabled={stream.locked}
-                  onChange={(e) => updateStream(stream.id, { anchorDate: e.target.value })}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      updateStream(stream.id, { anchorDate: undefined });
+                      return;
+                    }
+                    const day = Math.min(31, Math.max(1, Math.round(Number(raw)) || 0));
+                    if (day < 1 || day > 31) return;
+                    const padded = String(day).padStart(2, '0');
+                    updateStream(stream.id, { anchorDate: `2000-01-${padded}` });
+                  }}
                   className="lg-field"
                 />
               </SettingTile>
